@@ -1,0 +1,7 @@
+a := 1
+b := 2
+if a > 0 or b < 1
+  println('or')
+
+if a > 0 and b < 1
+  println('and')

@@ -1,0 +1,10 @@
+.DS_Store
+.classpath
+.project
+.settings/
+bin/
+target/
+got/
+langServ.in.txt
+langServ.out.txt
+demo.c

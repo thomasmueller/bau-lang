@@ -1,0 +1,21 @@
+{
+     "name": "bau",
+     "version": "0.0.1",
+     "engines": {
+         "vscode": ">=1.0.0"
+     },
+     "publisher": "me",
+     "contributes": {
+         "languages": [{
+             "id": "bau",
+             "aliases": ["Bau", "bau"],
+             "extensions": [".bau",".bau"],
+             "configuration": "./language-configuration.json"
+         }],
+         "grammars": [{
+             "language": "bau",
+             "scopeName": "source.bau",
+             "path": "./syntaxes/bau.tmLanguage.json"
+         }]
+     }
+ }

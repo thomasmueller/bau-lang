@@ -1,0 +1,12 @@
+fun readI32Le(d i8[], pos i32) i32
+    return d[pos] | (d[pos + 1] << 8) | (d[pos + 2] << 16) | (d[pos + 3] << 24)
+
+fun test()
+  x : new(i8[], 4)
+  x[0]! = 0x12
+  x[1]! = 0x34
+  x[2]! = 0x56
+  x[3]! = 0x78
+  println(readI32Le(x, 0))
+
+test()

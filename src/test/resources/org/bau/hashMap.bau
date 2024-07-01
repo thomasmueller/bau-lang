@@ -1,0 +1,132 @@
+#module org.bau.HashMap
+
+type HashMap(K, V)
+  size int
+  keys K[]
+  values V[]
+  hashes int[]
+
+fun newHashMap(K type, V type) HashMap(K, V)
+  result : HashMap(K, V)
+  result.size = 0
+  result.keys = K[4]
+  result.values = V[4]
+  result.hashes = int[4]
+  return result          
+
+fun HashMap(K, V) put(hash int, key K, value V)
+  if size * 2 >= keys.len
+    println('grow')
+    kn : K[keys.len * 2]
+    vn : V[keys.len * 2]
+    hn : int[keys.len * 2]
+    ok : keys
+    oh : hashes
+    ov : values
+    keys = kn
+    values = vn
+    hashes = hn
+    for i:= until(ok.len)
+      if oh[i] != 0
+        this.put(oh[i], ok[i], ov[i])
+  p := hash & (keys.len - 1)
+  while 1
+    if hashes[p] = hash and keys[p] = key
+      values[p] = value
+      return
+    elif hashes[p] = 0
+      size += 1
+      keys[p] = key
+      hashes[p] = hash
+      values[p] = value
+      return
+    p = (p + 1) & (keys.len - 1)
+
+fun HashMap(K, V) get(hash int, key K) V
+  p := hash & (keys.len - 1)
+  while 1
+    if hashes[p] = 0
+      return values[p]
+    elif hashes[p] = hash and keys[p] = key
+      return values[p]
+    p = (p + 1) & (keys.len - 1)
+
+fun HashMap(K, V) remove(hash int, key K) int
+  p := hash & (keys.len - 1)
+  while 1
+    if hashes[p] = 0
+      # not found
+      return 0
+    elif hashes[p] = hash and keys[p] = key
+      keys[p] = 0
+      hashes[p] = 0
+      values[p] = 0
+      size -= 1
+      break
+    p = (p + 1) & (keys.len - 1)
+  p2 := (p + 1) & (keys.len - 1)
+  while 1
+    h2 := hashes[p2]
+    break h2 = 0
+    pb := h2 & (keys.len - 1)
+    canMove := 0
+    if pb <= p2
+      # normal case (no wrap)
+      # pb.....p2
+      canMove = (pb <= p) and (p2 >= p)
+    else
+      # wrapped around
+      # ....p2       pb.....
+      canMove = pb <= p or p2 > p
+    if canMove
+      keys[p] = keys[p2]
+      hashes[p] = hashes[p2]
+      values[p] = values[p2]
+      keys[p2] = 0
+      hashes[p2] = 0
+      values[p2] = 0
+      p = p2
+    p2 = (p2 + 1) & (keys.len - 1)
+  return 1
+
+# calculate the hash of a byte array
+# 4 bytes at a time if possible
+fun hashCode(data i8[]) int
+  if data.len <= 0
+    return 0
+  h := data.len << 32
+  i := 0..data.len
+  if i < data.len - 3
+    while 1
+      x := (data[i!] & 0xff) |
+           ((data[i + 1!] & 0xff) << 8) |
+           ((data[i + 2!] & 0xff) << 16) |
+           ((data[i + 3!] & 0xff) << 24)
+      h = (h + x) * 0x9e3779b185ebca87
+      n : i + 4
+      break n >= data.len
+      i = n
+  if i < data.len and i != data.len - 4
+    x := 0
+    s := 0
+    while 1
+      x ^= (data[i!] & 0xff) << s
+      s += 8
+      n : i + 1
+      break n >= data.len
+      i = n
+    h = (h + x) * 0x9e3779b185ebca87
+  return h ^ (h >> 32)
+
+fun mix(z int) int
+  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
+  z = (z ^ (z >> 27)) * 0x94d049bb133111eb
+  return z ^ (z >> 31)
+
+println(hashCode('hello'))
+map := newHashMap(int, int)
+for i := until(1000)
+  map.put(mix(i), i, 10 * i)
+  if i > 100
+    map.remove(mix(i - 100), i - 100)
+  println(i ': ' map.get(mix(i), i))

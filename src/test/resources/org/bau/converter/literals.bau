@@ -1,0 +1,10 @@
+a : 1_000_000
+b : 3.1415
+c : 0xcafe
+d : 'String literal'
+e : `Raw string`
+f : ``
+    Two-line
+    raw string with `
+    ``
+g : -1.23e-45

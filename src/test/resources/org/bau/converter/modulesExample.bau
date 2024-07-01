@@ -1,0 +1,4 @@
+import org.bau.Utils    
+import org.bau.Math as M
+println(Utils.random())
+println(M.PI)

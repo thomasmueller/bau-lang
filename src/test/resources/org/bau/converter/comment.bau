@@ -1,0 +1,35 @@
+# Line comment
+
+## 
+Block comment
+##
+
+##
+A list of entries
+##
+type List(T)
+  array T[]
+  size int                
+
+##
+Add an entry to the list
+##
+fun List(T) add(x T)
+  if size >= array.len
+    n : new(T[], array.len * 2)
+    for i := until(size)
+      n[i] = array[i]
+    array = n
+  array[size] = x
+  size += 1
+
+# Test function
+fun test()
+  list := new(List(int))
+  list.array = new(int[], 1)
+  for i := range(0 10)
+    list.add(i)
+  for i := until(list.size)
+    println(list.array[i])
+
+test()

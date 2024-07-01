@@ -1,0 +1,9 @@
+module org.bau.Math
+
+PI : 3.14159265358979323846
+
+fun sqrt(x f64) f64
+  native(```
+    #include <math.h>
+    return sqrt(x);
+    ```)

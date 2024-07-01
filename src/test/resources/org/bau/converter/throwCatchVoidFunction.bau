@@ -1,0 +1,14 @@
+import org.bau.Exception
+  exception
+
+fun print(x int) throws exception
+  if x > 5
+    throw exception('Value too large')
+  println('x = ' x);
+
+i := 0
+while i <= 10
+  print(i)
+  catch e
+    println('Error: ' e.message)
+  i += 1

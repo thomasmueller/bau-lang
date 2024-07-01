@@ -1,0 +1,16 @@
+type Value
+    data int
+
+fun get(key int) Value?
+    if key <= 0
+        return null
+    result : new(Value)
+    result.data = key * 10
+    return result
+
+fun test()
+    a : get(0)
+    if a
+      println(a.data)
+
+test()

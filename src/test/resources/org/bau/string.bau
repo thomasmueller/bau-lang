@@ -1,0 +1,41 @@
+type String
+  data i8[]
+  pos int
+ 
+fun newString() String
+  s : String
+  nd : i8[16]
+  nd[0] = 65
+  nd[1] = 0
+  s.data = nd
+  s.pos = 0 
+  return s
+
+fun String print()
+  println(data)
+
+fun String resize()
+  old : data
+  nd : i8[old.len * 2]
+  if (old.len > 0) and (nd.len > 0) 
+    i := 0..old.len
+    j := 0..nd.len
+    while 1
+      nd[j] = old[i]
+      break i + 1 > old.len
+      break j + 1 > nd.len
+      i += 1
+      j += 1
+  this.data = nd
+    
+fun String append(x i8) 
+  if pos >= data.len - 1
+    this.resize()
+  d : this.data
+  d[pos?] = x
+  this.pos += 1
+
+s := newString()
+s.append(72)
+s.append(105)
+s.print()

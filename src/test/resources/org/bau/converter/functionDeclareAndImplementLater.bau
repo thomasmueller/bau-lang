@@ -1,0 +1,17 @@
+# declare function, but do not implement
+fun even(x int) int
+
+fun odd(x int) int
+  if x = 0
+    return 0
+  return even(x - 1)
+
+fun even(x int) int
+  if x = 0
+    return 1
+  return odd(x - 1)
+
+println('odd(10)=' odd(10))
+println('even(10)=' even(10))
+println('odd(11)=' odd(11))
+println('even(11)=' even(11))

@@ -1,0 +1,13 @@
+import org.bau.Utils
+import org.bau.Math
+
+a := Utils.getNanoTime()
+println(a)
+b := Utils.getNanoTime()
+println(a)
+c := Utils.getDateTime()
+println(c.year '-' c.month '-' c.day ' ' c.hour ':' c.minute ':' c.second '.' c.millis)
+Utils.setRandomSeed(Utils.getNanoTime())
+println(Utils.random())
+println(Math.PI)
+println(Math.sqrt(2))

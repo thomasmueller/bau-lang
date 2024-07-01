@@ -1,0 +1,22 @@
+type File
+    fp int
+
+fun openFile(fp int) File
+    f := new(File)
+    f.fp = fp
+    println('opening ' f.fp)
+    return f
+
+fun File close()
+    println('closing ' fp)
+
+  fun File use()
+      println('use ' fp)
+
+i := 0
+while i < 10
+    f := openFile(i)
+    println('opened ' i)
+    break i = 5
+    f.use()
+    i += 1

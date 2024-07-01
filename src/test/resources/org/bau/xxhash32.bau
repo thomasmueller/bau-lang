@@ -1,0 +1,116 @@
+fun ord(s i8[]) int
+  if s.len <= 0
+    return 0
+  return s[0]
+
+fun hex(x int, len int) i8[]
+  l := len
+  if l < 0
+    l = 0
+  elif l > 8
+    l = 8
+  data : i8[l]
+  y := x
+  i := l - 1
+  while i >= 0
+    c := ord('0') + (y & 0xf)
+    if (y & 0xf) > 9
+      c = ord('a') + (y & 0xf) - 10
+    data[i] = c
+    y >>= 4
+    i -= 1
+  return data
+
+import org.bau.File;
+
+PRIME1 : 2_654_435_761
+PRIME2 : 2_246_822_519
+PRIME3 : 3_266_489_917
+PRIME4 :   668_265_263
+PRIME5 :   374_761_393
+
+fun File readFully(buffer i8[], len i32) i32
+    count := 0
+    while 1
+        l := this.read(buffer, count, len - count)
+        if l = 0
+            return count
+        else
+            count += l
+
+type XXHash32
+    v1 i32
+    v2 i32
+    v3 i32
+    v4 i32
+    total int
+
+fun buildXXHash32(seed i32) XXHash32
+    x := XXHash32
+    x.v1 = seed + PRIME1 + PRIME2
+    x.v2 = seed + PRIME2
+    x.v3 = seed
+    x.v4 = seed - PRIME1
+    x.total = 0
+    return x
+
+fun rotLefti32(x i32, n i32) i32
+    return (x << n) | (x >> (32 - n))
+
+fun readi32Le(d i8[], pos 0 .. d.len-4) i32
+    return (d[pos!] & 0xff) | 
+           ((d[pos + 1!] & 0xff) << 8) | 
+           ((d[pos + 2!] & 0xff) << 16) | 
+           ((d[pos + 3!] & 0xff) << 24)
+
+fun XXHash32 update(buf i8[], start 0..buf.len, len i32) i32
+    end := i32(start + len)
+    pos := start
+    h32 := i32(0)
+    if len >= 16
+        limit := end - 16
+        while 1
+            this.v1 = rotLefti32(readi32Le(buf, pos + 0) * PRIME2 + v1, 13) * PRIME1
+            this.v2 = rotLefti32(readi32Le(buf, pos + 4) * PRIME2 + v2, 13) * PRIME1
+            this.v3 = rotLefti32(readi32Le(buf, pos + 8) * PRIME2 + v3, 13) * PRIME1
+            this.v4 = rotLefti32(readi32Le(buf, pos + 12) * PRIME2 + v4, 13) * PRIME1
+            next : pos + 16
+            break next >= buf.len
+            pos = next
+            break next > limit
+    this.total += len
+    if this.total >= 16
+        h32 = rotLefti32(this.v1, 1) + rotLefti32(this.v2, 7) + 
+              rotLefti32(this.v3, 12) + rotLefti32(this.v4, 18)
+    else
+        h32 = this.v3 + PRIME5
+    h32 += this.total
+    while pos + 4 <= end
+        h32 = rotLefti32(readi32Le(buf, pos) * PRIME3 + h32, 17) * PRIME4
+        next : pos + 4
+        break next >= buf.len
+        pos = next
+    while pos < end
+        h32 = rotLefti32((buf[pos] & 0xff) * PRIME5 + h32, 11) * PRIME1
+        next : pos + 1
+        break next >= buf.len
+        pos = next
+    h32 = (h32 ^ (h32 >> 15)) * PRIME2
+    h32 = (h32 ^ (h32 >> 13)) * PRIME3
+    return h32 ^ (h32 >> 16)
+
+fun test()
+    f := openFile('test.bin', 'r')
+    y := buildXXHash32(0)
+    blockLen := 4 * 1024 * 1024
+    buffer : i8[blockLen]
+    hash := 0
+    while 1
+        len := f.readFully(buffer, blockLen)
+        if len = 0
+            println('hash ', hex(hash, 8), ' size ', y.total)
+            break
+        hash = y.update(buffer, 0, len)
+
+test()
+

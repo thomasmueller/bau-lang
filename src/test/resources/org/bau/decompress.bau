@@ -1,0 +1,257 @@
+fun ord(s i8[]) int
+  if s.len <= 0
+    return 0
+  return s[0]
+
+fun hex(x int, len int) i8[]
+  l := len
+  if l < 0
+    l = 0
+  elif l > 8
+    l = 8
+  data : i8[l]
+  y := x
+  i := l - 1
+  while i >= 0
+    c := ord('0') + (y & 0xf)
+    if (y & 0xf) > 9
+      c = ord('a') + (y & 0xf) - 10
+    data[i] = c
+    y >>= 4
+    i -= 1
+  return data
+
+import org.bau.File
+
+PRIME1 : 2_654_435_761
+PRIME2 : 2_246_822_519
+PRIME3 : 3_266_489_917
+PRIME4 :   668_265_263
+PRIME5 :   374_761_393
+
+fun File readFully(buffer i8[], len i32) i32
+    count := 0
+    while 1
+        l := this.read(buffer, count, len - count)
+        if l = 0
+            return count
+        else
+            count += l
+
+type XXHash32
+    v1 i32
+    v2 i32
+    v3 i32
+    v4 i32
+    total int
+
+fun buildXXHash32(seed i32) XXHash32
+    x := XXHash32
+    x.v1 = seed + PRIME1 + PRIME2
+    x.v2 = seed + PRIME2
+    x.v3 = seed
+    x.v4 = seed - PRIME1
+    x.total = 0
+    return x
+
+fun rotLefti32(x i32, n i32) i32
+    return (x << n) | (x >> (32 - n))
+
+fun readi32Le(d i8[], pos 0 .. d.len-4) i32
+    return (d[pos!] & 0xff) | 
+           ((d[pos + 1!] & 0xff) << 8) | 
+           ((d[pos + 2!] & 0xff) << 16) | 
+           ((d[pos + 3!] & 0xff) << 24)
+
+fun XXHash32 update(buf i8[], start 0..buf.len, len i32) i32
+    end := i32(start + len)
+    pos := start
+    h32 := i32(0)
+    if len >= 16
+        limit := end - 16
+        while 1
+            this.v1 = rotLefti32(readi32Le(buf, pos + 0) * PRIME2 + v1, 13) * PRIME1
+            this.v2 = rotLefti32(readi32Le(buf, pos + 4) * PRIME2 + v2, 13) * PRIME1
+            this.v3 = rotLefti32(readi32Le(buf, pos + 8) * PRIME2 + v3, 13) * PRIME1
+            this.v4 = rotLefti32(readi32Le(buf, pos + 12) * PRIME2 + v4, 13) * PRIME1
+            next : pos + 16
+            break next >= buf.len
+            pos = next
+            break next > limit
+    this.total += len
+    if this.total >= 16
+        h32 = rotLefti32(this.v1, 1) + rotLefti32(this.v2, 7) + 
+              rotLefti32(this.v3, 12) + rotLefti32(this.v4, 18)
+    else
+        h32 = this.v3 + PRIME5
+    h32 += this.total
+    while pos + 4 <= end
+        h32 = rotLefti32(readi32Le(buf, pos) * PRIME3 + h32, 17) * PRIME4
+        next : pos + 4
+        break next >= buf.len
+        pos = next
+    while pos < end
+        h32 = rotLefti32((buf[pos] & 0xff) * PRIME5 + h32, 11) * PRIME1
+        next : pos + 1
+        break next >= buf.len
+        pos = next
+    h32 = (h32 ^ (h32 >> 15)) * PRIME2
+    h32 = (h32 ^ (h32 >> 13)) * PRIME3
+    return h32 ^ (h32 >> 16)
+
+fun decompressBlock(inData i8[], inLen int, outData i8[], o int) int
+    # if inLen > inData.len
+    #   return error("Input buffer too small");
+    
+    # println('decompressBlock ' inLen ' ' o)
+    
+    outPos := o
+    p := 0
+    while 1
+        tag := inData[p] & 0xff
+        p += 1
+        literalLen := tag >> 4
+        # println('literalLen ' literalLen)
+        
+        if literalLen = 0xf
+            while 1
+                x := inData[p] & 0xff
+                p += 1
+                literalLen += x
+                break x != 0xff
+        for i := range(0, literalLen)
+            outData[outPos + i] = inData[p + i]
+        outPos += literalLen
+        # println('    out_pos=' outPos ' literal_len=' literalLen)
+        p += literalLen
+        if p + 1 >= inLen
+            # println('end out_pos=' outPos ' p=' p ' literal_len=' literalLen)
+            break
+        offset := (inData[p] & 0xff) | ((inData[p + 1] & 0xff) << 8)
+        # println('    offset = ' offset)
+        if offset = 0
+            # println('Offset 0')
+            return -1
+        if offset > outPos
+            # println('Offset too large')
+            return -1
+        p += 2
+        if p >= inLen - 1
+            # println!("end2 out_pos={out_pos} p={p} literal_len={literal_len}");
+            break
+        runLen := tag & 0xf
+        if runLen = 0xf
+            while 1
+                x := inData[p] & 0xff
+                p += 1
+                runLen += x
+                break x != 0xff
+        runLen += 4
+        for i := range(0, runLen)
+            outData[outPos + i] = outData[outPos + i - offset]
+        outPos += runLen
+    # println!("    p={p} out_pos={out_pos} run_len={run_len} offset={offset}");
+    return outPos
+
+fun decompress(read File, write File) int
+    header : i8[7];
+    len := read.readFully(header, 7)
+    if len < 7
+        println('End of file')
+        return -1
+    magic := readi32Le(header, 0)
+    if magic != 0x184D2204
+        println('Incorrect magic ' magic)
+        return -1
+    flags := header[4]
+    version := flags >> 6
+    if version != 1
+        println('Unsupported version ' version)
+        return -1
+    block_independance_flag := ((flags >> 5) & 1) = 1
+    if not block_independance_flag
+        println('Unsupported block dependence')
+        return -1
+    block_checksum_flag := ((flags >> 4) & 1) = 1
+    if block_checksum_flag
+        println('Unsupported block checksum flag')
+        return -1
+    content_size_flag := ((flags >> 3) & 1) = 1
+    if content_size_flag
+        println('Unsupported content size flag')
+        return -1
+    content_checksum_flag := ((flags >> 2) & 1) = 1
+    if content_checksum_flag
+        # TODO currently, the content checksum flag is ignored
+        # return error("Unsupported content checksum flag");
+    if (flags >> 1) & 1 != 0
+        println('Unsupported reserved')
+        return -1
+    if (flags & 1) = 1
+        println('Unsupported dict flag')
+        return -1
+    bd := header[5]
+    block_max_size := (bd >> 4) & 0x7
+    if block_max_size < 4 or block_max_size > 7
+        println('Unsupported block max size ' block_max_size)
+        return -1
+    header_checksum := header[6]
+    hash := buildXXHash32(0)
+    xxhash := (hash.update(header, 4, 2) >> 8) & 0xff
+    if i8(xxhash) != header_checksum
+        println('Header checksum mismatch')
+        return -1
+    blockLen := 4 * 1024 * 1024
+    block : i8[blockLen]
+    out_block : i8[blockLen]
+    output_file_size := 0
+    while 1
+        len = read.readFully(header, 4)
+        if len = 0
+            break
+        block_size := readi32Le(header, 0)
+        if block_size = 0
+            break
+        uncompressed := ((block_size >> 31) & 1) = 1
+        block_size &= 0x7fffffff
+        if block_size > 4 * 1024 * 1024
+            println('Unsupported block size ' block_size)
+            return -1
+        len = read.readFully(block, block_size)
+        if len != block_size
+            println('End of file')
+            return -1
+        if uncompressed
+            # println('Write uncompressed ' block_size)
+            write.write(block, 0, block_size)
+            output_file_size += block_size
+        else
+            size := decompressBlock(block, block_size, out_block, 0)
+            # println('Write compressed ' size)
+            written := write.write(out_block, 0, size)
+            # println('written ' written)
+            output_file_size += size
+    return output_file_size
+
+fun test()
+    read := openFile('test.lz4', 'r')
+    write := openFile('test2.txt', 'w')
+    len := decompress(read, write)
+    println('Result: ' len)
+
+test()
+
+
+##
+
+pub fn decompress_file(input_file_name: &str, output_file_name: &str) -> Result<usize, Error> {
+    let in_file = File::open(input_file_name)?;
+    let out_file = File::create(output_file_name)?;
+    return decompress(in_file, out_file);
+}
+
+##
+
+
+
+ 

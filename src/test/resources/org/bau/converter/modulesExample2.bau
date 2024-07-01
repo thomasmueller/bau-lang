@@ -1,0 +1,7 @@
+import org.bau.Utils
+  random
+import org.bau.Math
+  PI
+
+println(random())
+println(PI)

@@ -1,0 +1,30 @@
+fun square(x int) int
+  return x * x
+
+fun square(a int, b int) int
+  return a * a + b * b
+  
+fun sum(a int, b int..) int
+  sum := a
+  for i := until(b.len)
+    sum += b[i]
+  return sum
+  
+println(square(2) ' ' square(2 3))
+println(sum(1 2))
+println(sum(1 2 3))
+println(sum(1 2 3 4))
+
+import org.bau.Utils
+
+println('ascii of "0" is ' ord('0'))
+
+fun int rotateRight(n int) int
+    return (this >> n) | (this << (64 - n))
+
+println(1.rotateRight(1) ' = ' 0x1.rotateRight(1))
+
+fun f64 double() f64
+    return this + this
+
+println(1.0.double() ' = ' 1.0e0.double())

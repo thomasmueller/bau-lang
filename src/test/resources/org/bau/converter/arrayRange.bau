@@ -1,0 +1,20 @@
+fun test()
+    data : new(i8[], 10)
+    if data.len <= 0
+        return
+    i := 0 .. data.len
+    while 1 = 1
+        data[i]! = i
+        next : i + 1
+        break next >= data.len
+        i = next
+    sum := 0
+    i = 0
+    while 1 = 1
+        sum += data[i]!
+        next : i + 1
+        break next >= data.len
+        i = next
+    println(sum)
+    
+test()
