@@ -26,12 +26,12 @@
 for i:= range(0 20)
     println(factorial(i))
 </textarea>
-            <button id="run" tabindex="2">Run (Ctrl+Enter)</button>
+            <button id="run" tabindex="2">Run & Compile (Ctrl+Enter)</button>
             <div class="result">&nbsp;</div>  
             <div class="result"><b>Output:</b></div>  
-            <div class="result"><pre id="result">&lt;/pre&gt; hello<br></pre></div>  
+            <div class="result"><pre id="result"></pre></div>  
             <div class="result"><b>Generated C Source Code:</b></div>  
-            <div class="result"><pre id="csource">#include &lt;stdio.h&gt;<br>#include &lt;stdlib.h&gt;<br>#include &lt;stdarg.h&gt;<br>#include &lt;stdint.h&gt;<br>#define _incUse(a) if(a){(a)-&gt;_refCount++;}<br>#define _decUse(a, type) if(a){if(--((a)-&gt;_refCount) == 0) type##_free(a);}<br>#define _malloc(a) malloc(a)<br>#define _traceMalloc(a) ;<br>#define _free(a) free(a)<br>#define _end() ;<br>typedef struct i8_array i8_array;<br>struct i8_array {<br>    int32_t len;<br>    char* data;<br>    int32_t _refCount;<br>};<br>i8_array* i8_array_new(uint32_t len) {<br>    i8_array* result = _malloc(sizeof(i8_array));<br>    _traceMalloc(result);<br>    result-&gt;len = len;<br>    result-&gt;data = _malloc(sizeof(char) * len);<br>    _traceMalloc(result-&gt;data);<br>    result-&gt;_refCount = 1;<br>    return result;<br>}<br>void i8_array_free(i8_array* x) {<br>    _free(x-&gt;data);<br>    _free(x);<br>}<br>typedef struct int_array int_array;<br>struct int_array {<br>    int32_t len;<br>    int64_t* data;<br>    int32_t _refCount;<br>};<br>int_array* int_array_new(uint32_t len) {<br>    int_array* result = _malloc(sizeof(int_array));<br>    _traceMalloc(result);<br>    result-&gt;len = len;<br>    result-&gt;data = _malloc(sizeof(int64_t) * len);<br>    _traceMalloc(result-&gt;data);<br>    result-&gt;_refCount = 1;<br>    return result;<br>}<br>void int_array_free(int_array* x) {<br>    _free(x-&gt;data);<br>    _free(x);<br>}<br>i8_array* str_const(char* data, uint32_t len) {<br>    i8_array* result = _malloc(sizeof(i8_array));<br>    result-&gt;len = len;<br>    result-&gt;_refCount = 1;<br>    result-&gt;data = data;<br>    return result;<br>}<br>i8_array* string_1000;<br>int main() {<br>    string_1000 = str_const("&lt;/pre&gt; hello", 12);<br>    printf("&lt;/pre&gt; hello\n");<br>    _end();<br>    return 0;<br>}<br></pre></div>  
+            <div class="result"><pre id="csource"><br></pre></div>  
         </div>
     
 </body></html>
