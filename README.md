@@ -6,6 +6,8 @@ Bau is a simple, concise, safe, powerful and fast programming language. Features
 * Memory-safe. Statically typed.
 * Fast compilation and execution (transpiles to C).
 
+<a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
+
 It addresses other languages' issues:
 
 * Memory safety (C, C++)
@@ -32,6 +34,7 @@ It addresses other languages' issues:
 Control flow
 * `if` `elif` `else` `for` `while` 
 * `break` `return` `throw` `catch`
+* `switch` `case`
 
 Assignment, comparison, operations
 * `:` constant, `:=`  variable
@@ -43,7 +46,7 @@ Assignment, comparison, operations
 Data types and miscellaneous
 * `int` `i32` `i16` `i8`, `f64` `f32`
 * `#` comment, `##` block comment
-* `fun` `type` function, type definition
+* `fun` `type` `enum` definitions
 * `()` `[]` `.` `..` `,` `'` `` ` `` `?`
 * `import` `module` `null` `const`
 
@@ -356,7 +359,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 
 ##### If Else
 
-    for i := range(1, 100)
+    for i := range(1, 10)
         if i < 5
             println(i)
         else
@@ -373,6 +376,67 @@ The name needs to match the file path, here `org/bau/Math.bau`:
             println('two')
         else
             println('many')
+
+##### Switch
+
+    import org.bau.Utils
+
+    for i := range(1, 10)
+        switch Utils.random() & 3
+        case 0
+            println('zero')
+        case 1
+            println('one')
+        else  
+            println('other') 
+
+##### Types
+
+    type point
+        x int
+        y int
+    
+    p := new(point)
+    p.x = 10
+    p.y = 20
+    
+##### Arrays
+
+    array : new(i8[], 10)
+    for i := until(array.len)
+        array[i] = i
+
+##### List
+
+    import org.bau.List
+        List
+        newList
+    
+    list := newList(int)
+    list.add(100)
+    list.add(80)
+    println(list.size)
+    println(list.array[0])
+
+##### Enum
+
+    enum weekday
+        sunday
+        monday
+        tuesday
+        wednesday
+        thursday
+        friday
+        saturday
+
+    for a := until(weekday.saturday + 1)
+        switch a
+        case weekday.sunday
+            println('sunday')
+        case weekday.monday
+            println('monday')
+        else
+            println('some other day: #' a)
 
 ### Comparison
 
@@ -422,6 +486,8 @@ The name needs to match the file path, here `org/bau/Math.bau`:
   This also makes 'print' statements more readable (without string interpolation).
 * There is no `boolean` data type to simplify the syntax. 
   Instead, `true` is `1` and `false` is `0`.
+  The common pitfalls, e.g. comparing the result of a comparison,
+  requires parenthesis (eg. `a > b < c` is not allowed).
 * Constants and variables are defined in a different way (`:` vs `:=`)
   so that it's easier to see for a reader if it may change later.
   But there is no keyword like "var", "val", "const", or "final" to shorten the code.
@@ -457,7 +523,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 * Array bounds are check, except if array access is guaranteed to be 
   inside the bounds. This is implemented using dependent types.
   
-### Memory Management
+### Memory Management
 * Reference counting is used for reference types.
 * Mark-and-sweep garbage collection is not used to avoid pauses.
 * Borrow checking is not used to simplify writing code.
