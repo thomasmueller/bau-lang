@@ -1,6 +1,7 @@
 <html><head>
         <title>Bau Programming Language</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link rel="stylesheet" href="styles.css">
         <link rel="stylesheet" href="codemirror/lib/codemirror.css">
         <script type="text/javascript" charset="utf-8" src="teavm/classes.js"></script>
@@ -18,8 +19,8 @@
     <body onload="main()">
         <div class="top">
             <h1>Bau Playground</h1>
-            <p>Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">Bau Program</a> in the browser.</p>
-            <textarea id="source">fun factorial(x int) int
+            <p>Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">Bau program</a> in the browser.</p>
+            <textarea id="source" cols="80">fun factorial(x int) int
     if x &lt;= 1
         return 1
     return x * factorial(x - 1)

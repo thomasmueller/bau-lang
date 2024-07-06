@@ -1,12 +1,12 @@
 .top {
-    margin: 0;
+    margin: 32px;
     width: 100%;
     font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
 }
 
 .top textarea {
     box-sizing: border-box;
-    width: 100%;
     height: 50vh;
     resize: vertical;
 }
