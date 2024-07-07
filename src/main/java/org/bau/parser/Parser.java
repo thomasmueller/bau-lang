@@ -3,10 +3,14 @@ package org.bau.parser;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValueInt;
+import org.bau.runtime.Value.ValuePanic;
 import org.bau.std.Std;
 
 public class Parser {
@@ -49,8 +53,12 @@ public class Parser {
     private FunctionDefinition currentFunctionDefinition;
     private While currentLoop;
 
+    public Parser(String text, HashMap<String, String> modules) {
+        this(new Program(modules), null, text);
+    }
+
     public Parser(String text) {
-        this(new Program(), null, text);
+        this(new Program(Collections.emptyMap()), null, text);
     }
 
     public Parser(Program program, String module, String text) {
@@ -111,6 +119,8 @@ public class Parser {
             } else if (parseImport()) {
                 // ok
             } else if (parseModule()) {
+                // ok
+            } else if (parseEnumDefinition()) {
                 // ok
             } else {
                 isGlobalScope = true;
@@ -254,6 +264,55 @@ public class Parser {
         program.addComment("type " + type.toString(), comment);
         lastComment = null;
         program.addType(type);
+    }
+    
+    private boolean parseEnumDefinition() {
+        if (!match("enum")) {
+            return false;
+        }
+        String comment = lastComment;
+        int defIndent = indent;
+        String id = readIdentifier();
+        readEndOfStatement();
+        LinkedHashMap<String, Long> entries = new LinkedHashMap<>();
+        HashMap<Long, String> map = new HashMap<>();
+        long nextValue = 0;
+        while (indent > defIndent) {
+            if (!matchOp("\n")) {
+                String name = readIdentifier();
+                if (matchOp(":")) {
+                    Expression expr = parseExpression();
+                    if (expr.type().isFloatingPoint || expr.type().isNullable() || !expr.type().isSystem()) {
+                        throw syntaxError("Only integer types are supported");
+                    }
+                    Value v = eval(expr, false);
+                    long x = v.longValue();
+                    if (map.containsKey(x)) {
+                        throw syntaxError("This value is already used by '" + map.get(x) + "'");
+                    }
+                    if (entries.containsKey(name)) {
+                        throw syntaxError("Duplicate name '" + name + "'");
+                    }
+                    nextValue = x;
+                } else {
+                    while (map.containsKey(nextValue)) {
+                        nextValue++;
+                    }
+                }
+                System.out.println(name + " = " + nextValue);
+                map.put(nextValue, name);
+                entries.put(name, nextValue);
+                nextValue++;
+                readEndOfStatement();
+            }
+        }
+        
+        DataType type = new DataType(module, id, 8, false, Collections.emptyList());
+        type.enumValues = entries;
+        program.addType(type);        
+        program.addComment("enum " + type.toString(), comment);
+        lastComment = null;
+        return true;
     }
     
     private boolean parseFunctionDefinition() {
@@ -417,6 +476,8 @@ public class Parser {
         if (old != null) {
             if (old.list.isEmpty()) {
                 program.removeFunction(old);
+                // this ensures it is not called
+                old.list = null;
             } else {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
@@ -660,6 +721,9 @@ public class Parser {
             } else if (match("for")) {
                 parseFor(target);
                 return;
+            } else if (match("switch")) {
+                parseSwitch(target);
+                return;
             } else if (match("break")) {
                 parseBreak(target);
                 return;
@@ -701,7 +765,7 @@ public class Parser {
                 s.value = parseExpression(target);
                 Variable v = new Variable(identifier, s.value.type());
                 v.isConstant = true;
-                v.constantValue = s.value.eval(null);
+                v.constantValue = eval(s.value, true);
                 if (s.value.type().isArray() && s.value instanceof New) {
                     New n = (New) s.value;
                     v.addLenBoundCondition(null, "=", n.arrayLength);
@@ -748,6 +812,7 @@ public class Parser {
                 }
                 program.addVariable(v);
                 if (isGlobalScope && isImport) {
+                    v.global = true;
                     program.addGlobalVariable(identifier, v);
                 }
                 verifyBounds(s);
@@ -1311,7 +1376,79 @@ public class Parser {
         }
         return expr;
     }
-    
+
+    private void parseSwitch(ArrayList<Statement> target) {
+        int switchIndent = indent;
+        If ifStatement = new If();
+        Expression switchExpr = assignTempVariable(target, parseExpression());
+        
+        boolean elsePart = false;
+        int stackPos = program.getStackPos();
+        boolean first = true;
+        if (!matchOp("\n")) {
+            throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+        }
+        while (true) {
+            if (match("case")) {
+                Expression condition = null;
+                while (true) {
+                    Expression caseExpr = parseExpression();
+                    Expression cond = new Operation(switchExpr, "=", caseExpr);
+                    if (condition == null) {
+                        condition = cond;
+                    } else {
+                        condition = new Operation(condition, "or", cond);
+                    }
+                    if (!matchOp(",")) {
+                        break;
+                    }
+                    // optional new line
+                    matchOp("\n");
+                }
+                if (!matchOp("\n")) {
+                    throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+                }
+                condition.applyBoundCondition(getScope(0), false);
+                if (!first) {
+                    blockConditions.remove(blockConditions.size() - 1);
+                }
+                blockConditions.add(condition);  
+                first = false;
+                ifStatement.conditions.add(condition);
+            } else if (match("else")) {
+                if (!matchOp("\n")) {
+                    throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+                }                
+                if (!first) {
+                    blockConditions.remove(blockConditions.size() - 1);
+                }
+                blockConditions.add(null);   
+                first = false;
+                elsePart = true;
+            } else {
+                break;
+            }
+            ArrayList<Statement> list = new ArrayList<>();
+            while (true) {
+                if (indent <= switchIndent) {
+                    break;
+                }
+                parseStatements(list);
+            }
+            if (!list.isEmpty()) {
+                ifStatement.listList.add(list);
+                ifStatement.autoClose(autoClose(stackPos, null));
+                program.rewindStack(stackPos);
+            }
+            if (elsePart) {
+                break;
+            }
+            switchIndent = indent;
+        }
+        blockConditions.remove(blockConditions.size() - 1);        
+        target.add(ifStatement);
+    }
+
     private void parseIf(ArrayList<Statement> target) {
         int ifIndent = indent;
         boolean sameLine;
@@ -1421,7 +1558,7 @@ public class Parser {
                 "=",
                 new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
                 );
-        comp.operation = "=";
+        comp.operator = "=";
         Variable var = new Variable(variableName, call.type());
         program.addVariable(var);
         While loop = new While();
@@ -1524,12 +1661,23 @@ public class Parser {
 
     private void parseWhile(ArrayList<Statement> target) {
         int loopIndent = indent;
-        While loop = new While();
         While oldLoop = currentLoop;
+        While loop = new While();
         currentLoop = loop;
-        loop.condition = parseCondition(target);
+        loop.condition = parseCondition(loop.list);
         loop.condition.applyBoundCondition(getScope(0), false);
         blockConditions.add(loop.condition);        
+        if (!loop.list.isEmpty()) {
+            // we need to make it a "while true" loop with a break condition
+            Break b = new Break();
+            b.condition = new Operation(null, "not", loop.condition);
+            loop.list.add(b);
+            loop.condition = new Operation(
+                    new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false),
+                    "=",
+                    new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
+                    );
+        }
         boolean sameLine;
         if (matchOp("\n")) {
             sameLine = false;
@@ -1641,7 +1789,7 @@ public class Parser {
         } else if (type == TokenType.HEX_INTEGER) {
             String n = token;
             read();
-            long v = Long.parseUnsignedLong(n.substring(2), 16);
+            long v = NumberValue.parseUnsignedHexLong(n.substring(2));
             Expression expr = new NumberValue(new Value.ValueInt(v), program.getType(null, DataType.INT), true);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
@@ -1715,11 +1863,25 @@ public class Parser {
                 }
                 Call call = new Call();
                 call = parseCall(null, m, n, call, true);
-                Value val = call.eval(null);
+                Value val = eval(call, true);
                 if (val != null) {
                     return new NumberValue(val, call.type(), false);
                 }
                 return call;
+            }
+            DataType enumType = program.getType(m, n);
+            if (enumType != null && enumType.enumValues != null) {
+                read();
+                if (matchOp(".")) {
+                    throw syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
+                }
+                String val = readIdentifier();
+                Long value = enumType.enumValues.get(val);
+                if (value == null) {
+                    throw syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
+                }
+                Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
+                return expr;
             }
             Expression v = program.getVariable(n);
             if (v == null) {
@@ -1845,6 +2007,9 @@ public class Parser {
             } else if (">>".equals(op)) {
                 program.getFunction(null, null, "shiftRight_" + expr.type().name(), 2).used = true;
             }
+            if (Operation.isComparison(op) && (expr.isComparison() || right.isComparison())) {
+                throw syntaxError("Comparing a result of a comparison requires parenthesis");
+            }
             Operation operation = new Operation(expr, op, right);
             expr = operation;
         }
@@ -1878,11 +2043,11 @@ public class Parser {
     private void read() {
         token = null;
         lastPos = pos;
-        if (pos >= text.length()) {
-            type = TokenType.END;
-            return;
-        }
         while (true) {
+            if (pos >= text.length()) {
+                type = TokenType.END;
+                return;
+            }
             char c = text.charAt(pos);
             if (c == ' ') {
                 pos++;
@@ -2141,6 +2306,23 @@ public class Parser {
         target.add(assign);
         program.addVariable(var);
         return var;
+    }
+
+    private Value eval(Expression expr, boolean mayFail) {
+        Value v = program.evalConstants(expr);
+        if (v == null) {
+            if (mayFail) {
+                return null;
+            }
+            throw syntaxError("Can not evaluate the value");
+        } else if (v instanceof ValueException) {
+            ValueException ex = (ValueException) v;
+            throw syntaxError("Evaluating the value threw an exception: " + ex.message);
+        } else if (v instanceof ValuePanic) {
+            ValuePanic ex = (ValuePanic) v;
+            throw syntaxError("Evaluating the value failed: " + ex.message);
+        }
+        return v;
     }
 
 }

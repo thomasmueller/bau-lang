@@ -2,6 +2,8 @@ package org.bau.parser;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueException;
+import org.bau.runtime.Value.ValuePanic;
 
 public class Assignment implements Statement {
     LeftValue leftValue;
@@ -39,17 +41,31 @@ public class Assignment implements Statement {
     }
     
     @Override
-    public boolean run(Memory m) {
+    public StatementResult run(Memory m) {
         Value val = value.eval(m);
         if (val != null) {
-            if (leftValue instanceof Variable) {
-                Variable var = (Variable) leftValue;
-                m.set(var.name, null, modify, val);
+            if (val instanceof ValuePanic) {
+                return StatementResult.PANIC;
+            } else if (val instanceof ValueException) {
+                return StatementResult.THROW;
+            }
+            Value panic;
+            if (modify != null) {
+                Value old = leftValue.eval(m);
+                if (old == null) {
+                    throw new IllegalStateException();
+                }
+                Value v2 = Operation.eval(leftValue.type(), old, modify, val);
+                panic = leftValue.setValue(m, v2);
+            } else {
+                panic = leftValue.setValue(m, val);
+            }
+            if (panic != null) {
+                m.setGlobal(Memory.PANIC, val);
+                return StatementResult.PANIC;
             }
         }
-        // TODO support field access
-        // m.set(variable.identifier, arrayIndex, modify, value);
-        return false;
+        return StatementResult.OK;
     }
     
     public String toC(ProgramContext context) {

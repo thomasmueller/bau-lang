@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueInt;
+import org.bau.runtime.Value.ValueStruct;
 
 public class New implements Expression {
     
@@ -17,7 +19,30 @@ public class New implements Expression {
 
     @Override
     public Value eval(Memory memory) {
-        return null;
+        if (type.isArray()) {
+            Value len = arrayLength.eval(memory);
+            if (len == null) {
+                return null;
+            }
+            int l = len.intValue();
+            if (type.baseType().isSystem()) {
+                switch (type.baseType().name()) {
+                case DataType.I32:
+                    return new Value.ValueI32Array(l);
+                case DataType.I8:
+                    return new Value.ValueI8Array(new byte[l]);
+                default:
+                    return new Value.ValueArray(l, ValueInt.ZERO);
+                }
+            } else {
+                return new Value.ValueArray(l, new Value.ValueStruct());
+            }
+        }
+        ValueStruct struct = new Value.ValueStruct();
+        for (Variable f : type.fields) {
+            struct.set(f.name, f.type.getZeroValue());
+        }
+        return struct;
     }
 
     @Override

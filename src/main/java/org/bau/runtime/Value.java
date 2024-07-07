@@ -1,5 +1,7 @@
 package org.bau.runtime;
 
+import java.util.HashMap;
+
 public class Value {
 
     public Value get(int index) {
@@ -17,18 +19,27 @@ public class Value {
         return get().longValue();
     }
     
+    public double doubleValue() {
+        return get().doubleValue();
+    }
+    
     public Value len() {
         return null;
     }
     
-    public void set(int index, Number v) {
+    public void set(int index, Value val) {
         throw new IllegalStateException("Not an array");
     }      
-    public void set(Number v) {
-        throw new IllegalStateException("Not a value");
+    
+    public boolean isArray() {
+        return false;
     }
+    
+    public String print() {
+        return toString();
+    }    
 
-    public class ValueI8 extends Value {
+    public static class ValueI8 extends Value {
         private byte value;
         public ValueI8(byte value) {
             this.value = value;
@@ -61,7 +72,55 @@ public class Value {
             return String.valueOf(value);
         }
         
-    }      
+    }     
+    
+    public static class ValueI16 extends Value {
+        private short value;
+        
+        public ValueI16(short value) {
+            this.value = value;
+        }
+        
+        public Number get() {
+            return value;
+        }
+        public void set(Number v) {
+            this.value = v.shortValue();
+        }  
+        public String toString() {
+            return String.valueOf(value);
+        }
+        
+    }   
+    
+    public static class ValueNull extends Value {
+        public final static ValueNull INSTANCE = new ValueNull();
+        private ValueNull() {
+        }
+        public Number get() {
+            return 0;
+        }        
+    }    
+    
+    public static class ValueException extends Value {
+        public String message;
+        public ValueException(String message) {
+            this.message = message;
+        }
+        public String toString() {
+            return "Exception: " + message;
+        }        
+    }
+    
+    public static class ValuePanic extends Value {
+        public String message;
+        public ValuePanic(String message) {
+            this.message = message;
+        }
+        public String toString() {
+            return "Panic: " + message;
+        }        
+    }    
     
     public static class ValueInt extends Value {
         private long value;
@@ -77,14 +136,16 @@ public class Value {
         }
         public void set(Number v) {
             this.value = v.longValue();
-        }  
+        }
+        public String print() {
+            return String.valueOf(value);
+        }
         public String toString() {
             if (value >= Integer.MAX_VALUE || value <= Long.MIN_VALUE) {
                 return String.valueOf(value) + "L";
             }
             return String.valueOf(value);
         }
-        
     }   
 
     public static class ValueFloat extends Value {
@@ -97,13 +158,39 @@ public class Value {
             return value;
         }
         public void set(Number v) {
-            this.value = v.longValue();
+            this.value = v.floatValue();
         }  
         public String toString() {
             return String.valueOf(value);
         }
+        public double doubleValue() {
+            return value;
+        }
+    }    
+    
+    public static class ValueArray extends Value {
+        final Value[] array;
+        public ValueArray(int len, Value init) {
+            this.array = new Value[len];
+            for(int i=0; i<len; i++) {
+                array[i] = init;
+            }
+        }
+        public Value get(int index) {
+            return array[index];
+        }
+        public void set(int index, Value x) {
+            array[index] = x;
+        }
+        public Value len() {
+            return new ValueI32(array.length);
+        }
         
-    }      
+        public boolean isArray() {
+            return true;
+        }        
+        
+    }
 
     public static class ValueI8Array extends Value {
         final byte[] array;
@@ -113,13 +200,14 @@ public class Value {
         public Value get(int index) {
             return new ValueI8(array[index]);
         }
-        public void set(int index, Number b) {
-            array[index] = b.byteValue();
+        public void set(int index, Value b) {
+            array[index] = (byte) b.intValue();
         }
+
         public String toString() {
             StringBuilder buff = new StringBuilder();
-            for(int i=0; i<array.length; i++) {
-                if(array[i] == 0) {
+            for (int i = 0; i < array.length; i++) {
+                if (array[i] == 0) {
                     break;
                 }
                 buff.append((char) array[i]);
@@ -135,17 +223,28 @@ public class Value {
         }
         
     }
+    
+    public static class ValueStruct extends Value {
+        private final HashMap<String, Value> map = new HashMap<>();
+
+        public Value get(String fieldName) {
+            return map.get(fieldName);
+        }
+        public void set(String fieldName, Value v) {
+            map.put(fieldName, v);
+        }  
+    }
 
     public static class ValueI32Array extends Value {
         final int[] array;
-        ValueI32Array(int size) {
+        public ValueI32Array(int size) {
             array = new int[size];
         }
         public Value get(int index) {
             return new ValueI32(array[index]);
         }
-        public void set(int index, int v) {
-            array[index] = v;
+        public void set(int index, Value v) {
+            array[index] = v.intValue();
         }  
         public Value len() {
             return new ValueI32(array.length);
@@ -154,10 +253,6 @@ public class Value {
             return true;
         }
         
-    }
-
-    public boolean isArray() {
-        return false;
     }
 
 }

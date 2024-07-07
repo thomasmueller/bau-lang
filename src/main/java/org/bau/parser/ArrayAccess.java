@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValuePanic;
 
 public class ArrayAccess implements Expression, LeftValue {
 
@@ -24,7 +25,18 @@ public class ArrayAccess implements Expression, LeftValue {
         Value idx = arrayIndex.eval(memory);
         if (val != null && idx != null) {
             if (val.isArray()) {
-                return val.get(idx.intValue());
+                int index = idx.intValue();
+                long len = val.len().longValue();
+                if (index < 0 || index >= len) {
+                    String message = "Array index " + index 
+                            + " is out of bounds for the array length " + len;
+                    Value v = new ValuePanic(message);
+                    memory.print(v);
+                    memory.println();
+                    memory.setGlobal(Memory.PANIC, v);
+                    return v;
+                }
+                return val.get(index);
             }
         }
         return null;
@@ -153,6 +165,31 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
+    }
+
+    @Override
+    public Value setValue(Memory memory, Value val) {
+        Value indexValue = arrayIndex.eval(memory);
+        if (indexValue == null) {
+            throw new IllegalStateException();
+        }
+        Value baseVal = base.eval(memory);
+        if (baseVal == null) {
+            throw new IllegalStateException();
+        }
+        int index = indexValue.intValue();
+        long len = baseVal.len().longValue();
+        if (index < 0 || index >= len) {
+            String message = "Array index " + index + 
+                    " is out of bounds for the array length " + len;
+            ValuePanic v = new ValuePanic(message);
+            memory.print(v);
+            memory.println();
+            memory.setGlobal(Memory.PANIC, v);
+            return v;
+        }
+        baseVal.set(index, val);
+        return null;
     }
 
 }

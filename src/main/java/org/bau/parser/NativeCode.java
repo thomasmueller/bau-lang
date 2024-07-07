@@ -16,8 +16,11 @@ public class NativeCode implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
-        return false;
+    public StatementResult run(Memory m) {
+        // m.print(new Value.ValueI8Array("native ".getBytes(StandardCharsets.UTF_8)));
+        // m.print(new Value.ValueI8Array(nativeCode.getBytes(StandardCharsets.UTF_8)));
+        // m.println();
+        return StatementResult.OK;
     }
 
     @Override

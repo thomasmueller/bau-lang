@@ -2,10 +2,23 @@ package org.bau;
 
 /**
 
+TODO only call close when the ref count falls to 0, and then check again after calling close because it might have been re-added
+
+TODO some examples don't work, eg sqrt, in browser
+
+work on playground
+https://go.dev/play/
+
+https://codemirror.net/
+
+https://thomasmueller.github.io/bau-lang/
+
+https://rosettacode.org/wiki/Rosetta_Code
+
 https://langdev.stackexchange.com/
 
-enum
-switch
+https://github.com/google/j2cl
+https://www.teavm.org/docs/intro/getting-started.html
 
 Memory management
 Arena Allocator
@@ -15,11 +28,6 @@ Lobster
 https://strlen.com/lobster/
 
 https://github.com/bazelbuild/starlark/blob/master/design.md#booleans-are-not-integers
-
-exception handling: 
-throw Exception
-catch e (no filtering needed if there is only one exception type thrown)
-
 
 better document, test, implement constant expression functions
 - warning if it takes long to compile
@@ -43,7 +51,6 @@ https://github.com/bazelbuild/starlark
 - randomize the iteration order of a dictionary: optional?
 - No mutation during iteration
 - x < y > z (no chained operators)
-
 
 C++
 https://en.cppreference.com/w/cpp/language/constant_expression%23Core_constant_expressions
@@ -1046,7 +1053,7 @@ grep -E -R --include="*.java" " \(int\) " .
 58    " >> "
 50    " >>> "
 45    " ^ "
-55    " ~"
+55    " ~" / 34:  grep -R --include="*.java" "~" . | grep -v "//" | grep -v "lucene" | grep -v "/test/" | wc -l
 200   " \(int\) "
 
 886   "//.*\-\-" (comments)

@@ -34,8 +34,9 @@ public class If implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
+    public StatementResult run(Memory m) {
         ArrayList<Statement> list = null;
+        List<Statement> ac = null;
         for (int i = 0; i < conditions.size(); i++) {
             Expression cond = conditions.get(i);
             Value value = cond.eval(m);
@@ -45,22 +46,22 @@ public class If implements Statement {
             long v = value.longValue();
             if (v != 0) {
                 list = listList.get(i);
+                ac = autoClose.get(i);
                 break;
             }
         }
         if (list == null && listList.size() > conditions.size()) {
             // else
             list = listList.get(listList.size() - 1);
+            ac = autoClose.get(listList.size() - 1);
         }
         if (list == null) {
-            return false;
+            return StatementResult.OK;
         }
-        for (Statement s : list) {
-            if (s.run(m)) {
-                return true;
-            }
-        }
-        return false;
+        ArrayList<Statement> l2 = new ArrayList<>();
+        l2.addAll(list);
+        l2.addAll(ac);
+        return Program.runSequence(m, l2);
     }
     
     public String toC(ProgramContext context) {

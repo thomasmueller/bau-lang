@@ -20,6 +20,10 @@ public interface Expression {
     String toC();
     
     boolean isEasyToRead();
+    
+    default boolean isComparison() {
+        return false;
+    }
 
     Bounds getBounds();
     

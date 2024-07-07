@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
+#include <limits.h>
 #include <math.h>
 #include <time.h>
 #define _incUse(a) if(a){(a)->_refCount++;}
@@ -9,6 +11,25 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+typedef struct int_array int_array;
+struct int_array {
+    int32_t len;
+    int64_t* data;
+    int32_t _refCount;
+};
+int_array* int_array_new(uint32_t len) {
+    int_array* result = _malloc(sizeof(int_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int64_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
 struct org_bau_Utils_dateTime {
     int32_t year;
@@ -31,10 +52,16 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     result.millis = 0;
     return result;
 }
+int64_t idiv_2(int64_t a, int64_t b);
 int64_t org_bau_Utils_random_0();
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 const double PI = 3.141592653589793;
 int64_t randomSeed;
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;
     int64_t z = randomSeed;

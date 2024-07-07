@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdint.h>
 #define _incUse(a) if(a){(a)->_refCount++;}
 #define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
@@ -466,7 +467,7 @@ str str_1(i8_array* x) {
     return result;
 }
 int64_t str_equals_2(str this, str other) {
-    int32_t _r3 = this.value->len == other.value->len;
+    int64_t _r3 = this.value->len == other.value->len;
     return _r3;
 }
 int64_t str_hashCode_1(str this) {

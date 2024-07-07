@@ -38,3 +38,7 @@ fun File close()
     fclose(fp);
     ```)
  
+fun putchar(x i8)
+    native(```
+    putchar(x & 0xff);
+    ```)

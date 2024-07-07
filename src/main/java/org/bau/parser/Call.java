@@ -1,9 +1,14 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueException;
+import org.bau.runtime.Value.ValuePanic;
+import org.bau.std.Std;
 
 public class Call implements Statement, Expression {
     boolean statement;
@@ -11,40 +16,74 @@ public class Call implements Statement, Expression {
     FunctionDefinition def;
 
     @Override
-    public Value eval(Memory memory) {
-        if (!def.constExpr) {
+    public Value eval(Memory m) {
+        if (def.list == null) {
+            // it was replaced, for example declared with just a name,
+            // and then later a concrete implementation was set
+            def = m.getFunction(def.getFunctionId());
+        }
+        if (m == null || m.evaluateOnlyConstExpr() && !def.constExpr) {
             return null;
         }
-        Memory m = new Memory();
+        if (m.tick()) {
+            return null;
+        }
+        HashMap<String, Value> params = new HashMap<>();
         ArrayList<Value> list = new ArrayList<>(args.size());
+        Value varArgsValue = null;
         for (int i = 0; i < args.size(); i++) {
             Expression a = args.get(i);
-            Value v = a.eval(null);
+            Value v = a.eval(m);
             if (v == null) {
                 return null;
             }
-            m.set(def.parameters.get(i).name, null, null, v);
-            list.add(v);
-        }
-        for(Statement stat : def.list) {
-            boolean brk = stat.run(m);
-            if (brk) {
-                break;
+            if (def.varArgs && i >= def.parameters.size() - 1) {
+                if (i == def.parameters.size() - 1) {
+                    int len = args.size() - i;
+                    varArgsValue = new Value.ValueArray(len, new Value.ValueInt(0));
+                    params.put(def.parameters.get(i).name, varArgsValue);
+                    list.add(v);
+                }
+                varArgsValue.set(i - def.parameters.size() + 1, v);
+            } else {
+                params.put(def.parameters.get(i).name, v);
+                list.add(v);
             }
         }
-        Value val = m.get(Memory.RESULT);
+        m.saveLocal();
+        for (Entry<String, Value> e : params.entrySet()) {
+            m.setLocal(e.getKey(), e.getValue());
+        }
+        StatementResult r = Program.runSequence(m, def.list);
+        if (def.cCode != null) {
+            Value result = Std.eval(def.name, m);
+            m.setGlobal(Memory.RESULT, result);
+        }        
+        m.restoreLocal();
+        if (r == StatementResult.THROW) {
+            return new ValueException(m.getGlobal(Memory.EXCEPTION).toString());
+        } else if (r == StatementResult.PANIC) {
+            return new ValuePanic(m.getGlobal(Memory.PANIC).toString());
+        }
+        Value val = m.getGlobal(Memory.RESULT);
         return val;
     }
 
     @Override
-    public boolean run(Memory m) {
+    public StatementResult run(Memory m) {
         if ("println".equals(def.name)) {
             for (Expression e : args) {
                 Value v = e.eval(m);
                 m.print(v);
             }
+            m.println();
+        } else {
+            Value v = eval(m);
+            if (v instanceof ValueException) {
+                return StatementResult.THROW;
+            }
         }
-        return false;
+        return StatementResult.OK;
     }
     
     public Call replace(Variable old, Expression with) {
@@ -157,7 +196,10 @@ public class Call implements Statement, Expression {
                     b2.append("%.*s");
                     break;
                 default:
-                    if (a.type().name().startsWith("0..")) {
+                    if (a.type().enumValues != null) {
+                        b2.append("%lld");
+                        break;
+                    } else if (a.type().name().startsWith("0..")) {
                         b2.append("%lld");
                         break;
                     } else {

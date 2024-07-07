@@ -4,6 +4,16 @@ import org.bau.runtime.Memory;
 
 public interface Statement {
     
+    enum StatementResult {
+        OK,
+        BREAK,
+        RETURN,
+        CONTINUE,
+        THROW,
+        PANIC,
+        TIMEOUT
+    }
+    
     public static String indent(String s) {
         if (s.isEmpty()) {
             return s;
@@ -18,10 +28,7 @@ public interface Statement {
 
     Statement replace(Variable old, Expression with);
     
-    /**
-     * @return whether to break
-     */
-    boolean run(Memory m);
+    StatementResult run(Memory m);
 
     String toC(ProgramContext context);
 

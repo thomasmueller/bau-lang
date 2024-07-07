@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
 
 public class Catch implements Statement {
     ArrayList<Statement> list = new ArrayList<>();
@@ -27,10 +28,16 @@ public class Catch implements Statement {
     }
     
     @Override
-    public boolean run(Memory m) {
-        // TODO Auto-generated method stub
-        return false;
+    public StatementResult run(Memory m) {
+        Value val = m.getGlobal(Memory.EXCEPTION);
+        if (val == null) {
+            return StatementResult.OK;
+        }
+        m.setLocal(var.name, val);
+        m.setGlobal(Memory.EXCEPTION, null);
+        return Program.runSequence(m, list);
     }
+    
     @Override
     public String toC(ProgramContext context) {
         StringBuilder buff = new StringBuilder();

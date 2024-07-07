@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueStruct;
 
 public class FieldAccess implements Expression, LeftValue {
     
@@ -21,16 +22,24 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public Value eval(Memory memory) {
+        if (base.type().isArray()) {
+            if ("len".equals(fieldName)) {
+                Value v = base.eval(memory);
+                if (v == null) {
+                    return null;
+                }
+                return v.len();
+            }
+        }
         Value v = base.eval(memory);
         if (v == null) {
             return null;
         }
-        if (base.type().isArray()) {
-            if ("len".equals(fieldName)) {
-                return v.len();
-            }
+        if (!(v instanceof ValueStruct)) {
+            throw new IllegalStateException("Expected a struct, got " + v);
         }
-        return null;
+        ValueStruct vs = (ValueStruct) v;
+        return vs.get(fieldName);
     }
 
     @Override
@@ -167,5 +176,19 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
+    }
+
+    @Override
+    public Value setValue(Memory memory, Value val) {
+        Value baseVal = base.eval(memory);
+        if (baseVal == null) {
+            throw new IllegalStateException();
+        }
+        if (!(baseVal instanceof ValueStruct)) {
+            throw new IllegalStateException();
+        }
+        ValueStruct v = (ValueStruct) baseVal;
+        v.set(fieldName, val);
+        return null;
     }
 }

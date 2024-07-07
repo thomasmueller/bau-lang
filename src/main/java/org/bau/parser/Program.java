@@ -1,19 +1,19 @@
 package org.bau.parser;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.std.Std;
@@ -70,6 +70,12 @@ public class Program {
         Std.register(this);
     }
     
+    private Map<String, String> modules = new HashMap<>();
+    
+    public Program(Map<String, String> modules) {
+        this.modules = modules;
+    }
+
     /**
      * Get the stack position (for identifiers etc)
      */
@@ -278,6 +284,7 @@ public class Program {
         buff.append("#include <stdio.h>\n");
         buff.append("#include <stdlib.h>\n");
         buff.append("#include <stdarg.h>\n");
+        buff.append("#include <stdint.h>\n");
 
         for(FunctionDefinition def : functions.values()) {
             if (def.used && def.includes != null) {
@@ -528,14 +535,21 @@ Testing.
     
     public String run() {
         Memory m = new Memory();
+        for (Entry<String, FunctionDefinition> e : functions.entrySet()) {
+            m.addFunction(e.getKey(), e.getValue());
+        }
         for (Entry<Long, String> e : stringConstantsMap.entrySet()) {
             byte[] bytes = e.getValue().getBytes(StandardCharsets.UTF_8);
             Value v = new Value.ValueI8Array(bytes);
             m.setConstant(e.getKey(), v);
         }
-        for (Statement s : list) {
-            s.run(m);
+        for (Entry<String, Variable> e : globalVariables.entrySet()) {
+            m.setGlobal(e.getValue().name, e.getValue().type().getZeroValue());
         }
+        ArrayList<Statement> l2 = new ArrayList<>();
+        l2.addAll(list);
+        l2.addAll(autoClose);
+        runSequence(m, l2);
         return m.getOutput();
     }
     
@@ -579,23 +593,79 @@ Testing.
     }
 
     public String readModule(String name) {
+        String m = modules.get(name);
+        if (m != null) {
+            return m;
+        }
         String fileName = name.replace('.', '/');
         InputStream in = getClass().getResourceAsStream("/" + fileName + ".bau");
-        if (in == null) {
-            return null;
+        if (in != null) {
+            return readFromInputStream(in);
         }
-        BufferedReader b = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-        String result = b.lines().collect(Collectors.joining("\n"));
+        return null;
+    }
+    
+    public static String readFromInputStream(InputStream in) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] data = new byte[1024];
         try {
-			b.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-        return result;
+            while (true) {
+                int n = in.read(data);
+                if (n < 0) {
+                    break;
+                }
+                buffer.write(data, 0, n);
+            }
+            in.close();
+            return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed reading from input stream: " + e);
+        }
     }
 
     public int nextTempVariableId() {
         return nextTempVariableId++;
+    }
+
+    public static StatementResult runSequence(Memory m, List<Statement> list) {
+        for (int i = 0; i < list.size(); i++) {
+            Statement s = list.get(i);
+            StatementResult n = s.run(m);
+            if (m.tick()) {
+                return StatementResult.TIMEOUT;
+            }
+            if (n == StatementResult.OK) {
+                // ok
+            } else if (n == StatementResult.BREAK) {
+                return n;
+            } else if (n == StatementResult.CONTINUE) {
+                return n;
+            } else if (n == StatementResult.RETURN) {
+                return n;
+            } else if (n == StatementResult.THROW) {
+                i++;
+                for (; i < list.size(); i++) {
+                    s = list.get(i);
+                    if (s instanceof Catch) {
+                        i--;
+                        break;
+                    }
+                }
+                if (i == list.size()) {
+                    return StatementResult.THROW;
+                }
+            } else if (n == StatementResult.PANIC) {
+                return n;
+            }
+        }
+        return StatementResult.OK;
+    }
+    
+    Value evalConstants(Expression expr) {
+        Memory memory = new Memory();
+        memory.addFunction(null, null);
+        memory.evaluateOnlyConstExpr(true, 1_000_000);
+        return expr.eval(memory);
     }
 
 }

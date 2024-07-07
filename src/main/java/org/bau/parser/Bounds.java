@@ -26,9 +26,9 @@ public class Bounds {
             Operation op = (Operation) expr;
             v = op.right.eval(null);
             if (v != null) {
-                if (op.operation.equals("-")) {
+                if (op.operator.equals("-")) {
                     var = op.left.toString();
-                } else if (op.operation.equals("+")) {
+                } else if (op.operator.equals("+")) {
                     var = op.left.toString();
                 } else {
                     var = "?";
@@ -48,9 +48,9 @@ public class Bounds {
             Operation op = (Operation) expr;
             v = op.right.eval(null);
             if (v != null) {
-                if (op.operation.equals("-")) {
+                if (op.operator.equals("-")) {
                     return -v.longValue();
-                } else if (op.operation.equals("+")) {
+                } else if (op.operator.equals("+")) {
                     return v.longValue();
                 }
             }

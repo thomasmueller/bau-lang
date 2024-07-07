@@ -5,27 +5,38 @@ import java.util.Collections;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueFloat;
 import org.bau.runtime.Value.ValueInt;
+import org.bau.runtime.Value.ValueNull;
+import org.bau.runtime.Value.ValuePanic;
 
 public class Operation implements Expression {
     
     Expression left;
-    String operation;
+    String operator;
     Expression right;
     
-    Operation(Expression left, String operation, Expression right) {
+    Operation(Expression left, String operator, Expression right) {
         if (left != null) {
             Value l = left.eval(null);
             if (l != null) {
-                left = new NumberValue(l, left.type(), false);
+                if (l == ValueNull.INSTANCE) {
+                    left = new NullValue();
+                } else {
+                    left = new NumberValue(l, left.type(), false);
+                }
             }
         }
         Value r = right.eval(null);
         if (r != null) {
-            right = new NumberValue(r, right.type(), false);
+            if (r == ValueNull.INSTANCE) {
+                right = new NullValue();
+            } else {
+                right = new NumberValue(r, right.type(), false);
+            }
         }
         this.left = left;
-        this.operation = operation;
+        this.operator = operator;
         this.right = right;
     }
     
@@ -74,56 +85,206 @@ public class Operation implements Expression {
     public Value eval(Memory memory) {
         Value r = right.eval(memory);
         if (left == null) {
-            if ("-".equals(operation)) {
-                if (r != null) {
-                    return new Value.ValueInt(- r.longValue());
-                }
+            if (r == null) {
+                return null;
+            }
+            if ("-".equals(operator)) {
+                return new Value.ValueInt(- r.longValue());
+            } else if ("not".equals(operator)){
+                return new Value.ValueInt(r.longValue() == 0 ? 1 : 0);
             } else {
-                throw new IllegalStateException("operation " + operation);                
+                throw new IllegalStateException("operation " + operator);                
             }
         }
         Value l = left.eval(memory);
         if (l == null || r == null) {
             return null;
         }
-        switch (operation) {
-        case "+":
-            return new Value.ValueInt(l.longValue() + r.longValue());
-        case "*":
-            return new Value.ValueInt(l.longValue() * r.longValue());
-        case "-":
-            return new Value.ValueInt(l.longValue() - r.longValue());
-        case ">":
-            return l.longValue() > r.longValue() ? ValueInt.ONE : ValueInt.ZERO;
-        case "<":
-            return l.longValue() < r.longValue() ? ValueInt.ONE : ValueInt.ZERO;
-        case "=":
-            return l.longValue() == r.longValue() ? ValueInt.ONE : ValueInt.ZERO;
-        case "!=":
-            return l.longValue() != r.longValue() ? ValueInt.ONE : ValueInt.ZERO;
-        case "&":
-            return new Value.ValueInt(l.longValue() & r.longValue());
-        case "|":
-            return new Value.ValueInt(l.longValue() | r.longValue());
-        case "^":
-            return new Value.ValueInt(l.longValue() ^ r.longValue());
-        default:
-            throw new IllegalStateException("operation " + operation);
+        if (l instanceof ValuePanic) {
+            return l;
+        } else if (r instanceof ValuePanic) {
+            return r;
         }
+        // need to use the type of the left, so that right shift
+        // is truncated correctly
+        return eval(left.type(), l, operator, r);
     }
+    
+    public static Value eval(DataType type, Value l, String operator, Value r) {
+        if (type.isFloatingPoint) {
+            return evalFloat(type, l, operator, r);
+        }
+        long result;
+        switch (operator) {
+        case "+":
+            result = l.longValue() + r.longValue();
+            break;
+        case "*":
+            result = l.longValue() * r.longValue();
+            break;
+        case "/":
+            result = l.longValue() / r.longValue();
+            break;
+        case "%":
+            result = l.longValue() % r.longValue();
+            break;
+        case "-":
+            result = l.longValue() - r.longValue();
+            break;
+        case ">":
+            result = l.longValue() > r.longValue() ? 1 : 0;
+            break;
+        case ">=":
+            result = l.longValue() >= r.longValue() ? 1 : 0;
+            break;
+        case "<":
+            result = l.longValue() < r.longValue() ? 1 : 0;
+            break;
+        case "<=":
+            result = l.longValue() <= r.longValue() ? 1 : 0;
+            break;
+        case "=":
+            if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
+                result = l == r ? 1 : 0;
+            } else {
+                result = l.longValue() == r.longValue() ? 1 : 0;
+            }
+            break;
+        case "!=":
+            if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
+                result = l != r ? 1 : 0;
+            } else {
+                result = l.longValue() != r.longValue() ? 1 : 0;
+            }
+            break;
+        case "&":
+            result = l.longValue() & r.longValue();
+            break;
+        case "|":
+            result = l.longValue() | r.longValue();
+            break;
+        case "^":
+            result = l.longValue() ^ r.longValue();
+            break;
+        case ">>":
+            // need to truncate negative number before shifting
+            if (type.name().equals(DataType.I32)) {
+                result = ((int) l.longValue()) >>> r.intValue();
+            } else if (type.name().equals(DataType.I16)) {
+                result = ((short) l.longValue()) >>> r.intValue();
+            } else if (type.name().equals(DataType.I8)) {
+                result = ((byte) l.longValue()) >>> r.intValue();
+            } else {
+                result = l.longValue() >>> r.intValue();
+            }
+            break;
+        case "<<":
+            result = l.longValue() << r.longValue();
+            break;
+        case "and":
+            result = (l.longValue() != 0 && r.longValue() != 0) ? 1 : 0;
+            break;
+        case "or":
+            result = (l.longValue() != 0 || r.longValue() != 0) ? 1 : 0;
+            break;
+        default:
+            throw new IllegalStateException("operation " + operator);
+        }
+        return new ValueInt(result);
+    }
+    
+    public static Value evalFloat(DataType type, Value l, String operator, Value r) {
+        double result;
+        switch (operator) {
+        case "+":
+            result = l.doubleValue() + r.doubleValue();
+            break;
+        case "*":
+            result = l.doubleValue() * r.doubleValue();
+            break;
+        case "/":
+            result = l.doubleValue() / r.doubleValue();
+            break;
+        case "%":
+            result = l.doubleValue() % r.doubleValue();
+            break;
+        case "-":
+            result = l.doubleValue() - r.doubleValue();
+            break;
+        case ">":
+            result = l.doubleValue() > r.doubleValue() ? 1 : 0;
+            break;
+        case ">=":
+            result = l.doubleValue() >= r.doubleValue() ? 1 : 0;
+            break;
+        case "<":
+            result = l.doubleValue() < r.doubleValue() ? 1 : 0;
+            break;
+        case "<=":
+            result = l.doubleValue() <= r.doubleValue() ? 1 : 0;
+            break;
+        case "=":
+            if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
+                result = l == r ? 1 : 0;
+            } else {
+                result = l.doubleValue() == r.doubleValue() ? 1 : 0;
+            }
+            break;
+        case "!=":
+            if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
+                result = l != r ? 1 : 0;
+            } else {
+                result = l.doubleValue() != r.doubleValue() ? 1 : 0;
+            }
+            break;
+        case "&":
+            result = l.longValue() & r.longValue();
+            break;
+        case "|":
+            result = l.longValue() | r.longValue();
+            break;
+        case "^":
+            result = l.longValue() ^ r.longValue();
+            break;
+        case ">>":
+            result = l.longValue() >>> r.longValue();
+            break;
+        case "<<":
+            result = l.longValue() << r.longValue();
+            break;
+        case "and":
+            result = (l.longValue() != 0 && r.longValue() != 0) ? 1 : 0;
+            break;
+        case "or":
+            result = (l.longValue() != 0 || r.longValue() != 0) ? 1 : 0;
+            break;
+        default:
+            throw new IllegalStateException("operation " + operator);
+        }
+        return new ValueFloat(result);
+    }    
     
     @Override
     public DataType type() {
+        if (isComparison()) {
+            return DataType.INT_TYPE;
+        }
+        switch (operator) {
+        case "and":
+        case "or":
+        case "not":
+            return DataType.INT_TYPE;
+        }
         if (left == null) {
-            return right.type();
+            return right.type().resolveEnumType();
         }
-        DataType l = left.type();
+        DataType l = left.type().resolveEnumType();
         if (!l.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + l + " for operation " + operation);
+            throw new IllegalStateException("Not a built-in type: " + l + " for operation " + operator);
         }
-        DataType r = right.type();
+        DataType r = right.type().resolveEnumType();
         if (!r.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + r + " for operation " + operation);
+            throw new IllegalStateException("Not a built-in type: " + r + " for operation " + operator);
         }
         if (l.equals(r)) {
             return l;
@@ -154,12 +315,12 @@ public class Operation implements Expression {
     }
     
     public Expression replace(Variable old, Expression with) {
-        Operation c = new Operation(left.replace(old, with), operation, right.replace(old, with));
+        Operation c = new Operation(left == null ? null : left.replace(old, with), operator, right.replace(old, with));
         return c;
     }
     
     public String toC() {
-        String op = operation;
+        String op = operator;
         if (left == null) {
             if ("not".equals(op)) {
                 return "!(" + addBracketsIfNeededToC(right) + ")";
@@ -171,7 +332,11 @@ public class Operation implements Expression {
         } else if ("<<".equals(op)) {
             return "shiftLeft_2(" + left.toC() + ", " + right.toC() + ")";
         } else if ("/".equals(op)) {
-            return "idiv_2(" + left.toC() + ", " + right.toC() + ")";
+            if (type().isFloatingPoint) {
+                return left.toC() + " / " + right.toC();
+            } else {
+                return "idiv_2(" + left.toC() + ", " + right.toC() + ")";
+            }
         } else if ("%".equals(op)) {
             return "imod_2(" + left.toC() + ", " + right.toC() + ")";
         } else if ("and".equals(op)) {
@@ -187,9 +352,9 @@ public class Operation implements Expression {
     
     public String toString() {
         if (left == null) {
-            return operation + " " + addBracketsIfNeeded(right);
+            return operator + " " + addBracketsIfNeeded(right);
         }
-        return addBracketsIfNeeded(left) + " " + operation + " " + addBracketsIfNeeded(right);
+        return addBracketsIfNeeded(left) + " " + operator + " " + addBracketsIfNeeded(right);
     }
     
     @Override
@@ -198,11 +363,11 @@ public class Operation implements Expression {
     }
 
     public void applyBoundCondition(Expression scope, boolean reversed) {
-        if ("and".equals(operation) && !reversed) {
+        if ("and".equals(operator) && !reversed) {
             left.applyBoundCondition(scope, false);
             right.applyBoundCondition(scope, false);
             return;
-        } else if ("or".equals(operation) && reversed) {
+        } else if ("or".equals(operator) && reversed) {
             left.applyBoundCondition(scope, true);
             right.applyBoundCondition(scope, true);
         }
@@ -210,9 +375,9 @@ public class Operation implements Expression {
             return;
         }
         LeftValue var = (LeftValue) left;
-        String op = operation;
+        String op = operator;
         if (reversed) {
-            switch(operation) {
+            switch(operator) {
             case ">":
                 op = "<=";
                 break;
@@ -248,7 +413,7 @@ public class Operation implements Expression {
 
     @Override
     public Bounds getBounds() {
-        if ("+".equals(operation)) {
+        if ("+".equals(operator)) {
             Value v = right.eval(null);
             if (v != null) {
                 Bounds b = left.getBounds();
@@ -257,7 +422,7 @@ public class Operation implements Expression {
                     return b;
                 }
             }
-        } else if ("-".equals(operation)) {
+        } else if ("-".equals(operator)) {
             Value v = right.eval(null);
             if (v != null) {
                 Bounds b = left.getBounds();
@@ -279,10 +444,10 @@ public class Operation implements Expression {
         if (left != null) {
             left = left.writeStatements(parser, target);
         }
-        if ("or".equals(operation) || "and".equals(operation)) {
+        if ("or".equals(operator) || "and".equals(operator)) {
             Variable var = parser.assignTempVariable(target, left);
             If ifStatement = new If();
-            if ("or".equals(operation)) {
+            if ("or".equals(operator)) {
                 Expression not = new Operation(null, "not", var);
                 ifStatement.conditions.add(not);
             } else {
@@ -299,7 +464,6 @@ public class Operation implements Expression {
             assign.type = v2.type;
             assign.value = v2;
             list.add(assign);
-            
             target.add(ifStatement);
             return var;
         } else {
@@ -311,10 +475,28 @@ public class Operation implements Expression {
         if (left != null) {
             Variable varLeft = parser.assignTempVariable(target, left);
             Variable varRight = parser.assignTempVariable(target, right);
-            return new Operation(varLeft, operation, varRight);
+            return new Operation(varLeft, operator, varRight);
         }
         Variable varRight = parser.assignTempVariable(target, right);
-        return new Operation(null, operation, varRight);
+        return new Operation(null, operator, varRight);
+    }
+
+    @Override
+    public boolean isComparison() {
+        return isComparison(operator);
+    }
+    
+    public static boolean isComparison(String operator) {
+        switch(operator) {
+        case "=":
+        case "!=":
+        case "<=":
+        case ">=":
+        case "<":
+        case ">":
+            return true;
+        }
+        return false;
     }
 
     static int getPrecedence(String operator) {

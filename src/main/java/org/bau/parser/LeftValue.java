@@ -1,5 +1,8 @@
 package org.bau.parser;
 
+import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
+
 /**
  * An assignment target
  */
@@ -18,5 +21,7 @@ public interface LeftValue extends Expression {
 
     boolean needToDecrementRefCountOnFree();
     void needToDecrementRefCountOnFree(boolean value);
+
+    Value setValue(Memory memory, Value val);
 
 }

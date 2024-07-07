@@ -17,15 +17,22 @@ public class Continue implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
-        if (condition == null) {
-            return true;
+    public StatementResult run(Memory m) {
+        if (condition != null) {
+            long v = condition.eval(m).longValue();
+            if (v != 1) {
+                return StatementResult.OK;
+            }
         }
-        long v = condition.eval(m).longValue();
-        if (v != 1) {
-            return true;
-        }
-        return false;
+        if (autoClose != null) {
+            StatementResult result = Program.runSequence(m, autoClose);
+            if (result == StatementResult.OK) {
+                return StatementResult.CONTINUE;
+            } else {
+                return result;
+            }
+        }                
+        return StatementResult.CONTINUE;
     }
 
     public String toC(ProgramContext context) {

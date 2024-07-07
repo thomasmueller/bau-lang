@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
 
 public class Throw implements Statement {
     
@@ -28,8 +29,10 @@ public class Throw implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
-        return false;
+    public StatementResult run(Memory m) {
+        Value v = expr.eval(m);
+        m.setGlobal(Memory.EXCEPTION, v);
+        return StatementResult.THROW;
     }
 
 }

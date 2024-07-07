@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueException;
+import org.bau.runtime.Value.ValuePanic;
 
 public class Return implements Statement {
     Expression expr;
@@ -17,16 +19,20 @@ public class Return implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
+    public StatementResult run(Memory m) {
         if (expr == null) {
-            return true;
+            return StatementResult.RETURN;
         }
         Value val = expr.eval(m);
         if (val != null) {
-            m.set(Memory.RESULT, null, null, val);
-            return true;
+            if (val instanceof ValueException) {
+                return StatementResult.THROW;
+            } else if (val instanceof ValuePanic) {
+                return StatementResult.PANIC;
+            }
+            m.setGlobal(Memory.RESULT, val);
         }
-        return false;
+        return StatementResult.RETURN;
     }
 
     public String toC(ProgramContext context) {

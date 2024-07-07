@@ -28,7 +28,7 @@
   "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
   "onEnterRules": [
 		{
-			"beforeText": "^\\s*(?:if|elif|else|for|while|catch|fun|type|import|and|or|not|\\.|\\(|\\,).*?\\s*$",
+			"beforeText": "^\\s*(?:if|elif|else|for|while|case|catch|fun|type|enum|import|and|or|not|\\.|\\(|\\,).*?\\s*$",
 			"action": { "indent": "indent" }
 		},
 		{

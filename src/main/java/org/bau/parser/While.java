@@ -24,20 +24,52 @@ public class While implements Statement {
     }
     
     @Override
-    public boolean run(Memory m) {
+    public StatementResult run(Memory m) {
+        // TODO this is likely quite slow
+        ArrayList<Statement> l2 = new ArrayList<>();
+        l2.addAll(list);
+        int continuePoint = l2.size();
+        l2.addAll(listContinue);
+        if (autoClose != null) {
+            l2.addAll(autoClose);
+        }
+        outer:
         while (true) {
             long v = condition.eval(m).longValue();
             if (v != 1) {
                 break;
             }
-            for (Statement s : list) {
-                boolean br = s.run(m);
-                if (br) {
-                    return false;
+            for (int i = 0; i < l2.size(); i++) {
+                Statement s = l2.get(i);
+                StatementResult n = s.run(m);
+                if (m.tick()) {
+                    return StatementResult.TIMEOUT;
+                }
+                if (n == StatementResult.OK) {
+                    // ok
+                } else if (n == StatementResult.BREAK) {
+                    break outer;
+                } else if (n == StatementResult.CONTINUE) {
+                    i = continuePoint - 1;
+                } else if (n == StatementResult.RETURN) {
+                    return n;
+                } else if (n == StatementResult.THROW) {
+                    for (; i < list.size(); i++) {
+                        s = list.get(i);
+                        if (s instanceof Catch) {
+                            i--;
+                            break;
+                        }
+                    }
+                    if (i == list.size()) {
+                        return n;
+                    }
+                } else if (n == StatementResult.PANIC) {
+                    return n;
                 }
             }
         }
-        return false;
+        return StatementResult.OK;
     }
 
     public String toC(ProgramContext context) {
@@ -55,7 +87,7 @@ public class While implements Statement {
                 buffContinue.append(Statement.indent(s.toC(context)));
             }
         }
-        if (!buffContinue.isEmpty()) {
+        if (buffContinue.length() > 0) {
             buff.append(Statement.indent("continue" + continueId + ":;\n"));
             buff.append(buffContinue);
         }

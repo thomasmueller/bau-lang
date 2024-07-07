@@ -4,12 +4,13 @@ import java.util.ArrayList;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueNull;
 
 public class NullValue implements Expression {
 
     @Override
     public Value eval(Memory memory) {
-        return null;
+        return ValueNull.INSTANCE;
     }
 
     @Override

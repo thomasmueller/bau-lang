@@ -27,11 +27,11 @@
 			"include": "#string"
 		},
 		{
-			"match": "\\b(if|elif|else|for|while|break|return|throw|catch)\\b",
+			"match": "\\b(if|elif|else|for|while|switch|case|break|return|throw|catch)\\b",
 			"name": "keyword.control.flow.bau"
 		},		
 		{
-			"match": "\\b(type|fun|import|module|const|throws)\\b",
+			"match": "\\b(type|enum|fun|import|module|const|throws)\\b",
 			"name": "keyword.other.bau"
 		},
 		{

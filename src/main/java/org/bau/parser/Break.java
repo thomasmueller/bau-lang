@@ -3,6 +3,7 @@ package org.bau.parser;
 import java.util.List;
 
 import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
 
 public class Break implements Statement {
     Expression condition;
@@ -16,15 +17,26 @@ public class Break implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
-        if (condition == null) {
-            return true;
+    public StatementResult run(Memory m) {
+        if (condition != null) {
+            Value val = condition.eval(m);
+            if (val == null) {
+                return null;
+            }
+            long v = val.longValue();
+            if (v != 1) {
+                return StatementResult.OK;
+            }
         }
-        long v = condition.eval(m).longValue();
-        if (v != 1) {
-            return true;
-        }
-        return false;
+        if (autoClose != null) {
+            StatementResult result = Program.runSequence(m, autoClose);
+            if (result == StatementResult.OK) {
+                return StatementResult.BREAK;
+            } else {
+                return result;
+            }
+        }          
+        return StatementResult.BREAK;
     }
 
     public String toC(ProgramContext context) {

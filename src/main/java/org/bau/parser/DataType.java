@@ -1,7 +1,12 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+
+import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueNull;
 
 public class DataType {
     
@@ -13,6 +18,15 @@ public class DataType {
     public static final String F64 = "f64";
     public static final String TYPE = "type";
 
+    // we only define INT_TYPE because the types have a "used" flag -
+    // and we don't want to set it if not needed
+    // TODO this means for int array, this is always set
+    public static final DataType INT_TYPE = new DataType(null, DataType.INT, 8, true, Collections.emptyList());
+    static {
+        INT_TYPE.used();
+        INT_TYPE.arrayType.used();
+    }
+            
     final String module;
     private final String name;
     private final int sizeOf;
@@ -22,6 +36,7 @@ public class DataType {
     private final DataType arrayType;
     private final DataType nullableType;
     public final List<Variable> fields;
+    public LinkedHashMap<String, Long> enumValues;
     private DataType baseType;
     boolean autoClose;
     final boolean valueType;
@@ -133,6 +148,8 @@ public class DataType {
             s = "double";
         } else if (name.startsWith("0..")) {
             s = "int64_t";
+        } else if (enumValues != null) {
+            s = "int64_t";
         } else {
             if (module != null) {
                 s = module.replace(".", "_") + "_" + name;
@@ -197,6 +214,31 @@ public class DataType {
             return name;
         }
         return module + "." + name;
+    }
+    
+    public DataType resolveEnumType() {
+        if (enumValues != null) {
+            return DataType.INT_TYPE;
+        }
+        return this;
+    }
+    
+    public Value getZeroValue() {
+        switch(name) {
+        case I8:
+            return new Value.ValueI8((byte) 0);
+        case I16:
+            return new Value.ValueI16((short) 0);
+        case I32:
+            return new Value.ValueI32(0);
+        case INT:
+            return new Value.ValueInt(0);
+        case F32:
+            return new Value.ValueFloat(0);
+        case F64:
+            return new Value.ValueFloat(0);
+        }
+        return ValueNull.INSTANCE;
     }
 
 }

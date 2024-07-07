@@ -76,6 +76,11 @@ public class TestCompare {
     }
 
     @Test
+    public void enumTest() throws IOException {
+        test("enum");
+    }
+
+    @Test
     public void factorial() throws IOException {
         test("factorial");
     }
@@ -222,6 +227,12 @@ public class TestCompare {
         assertEquals(file, expected, c);
         if (!expectedMarkdown.isEmpty()) {
             assertEquals(file, expectedMarkdown, md);
+        }
+        int expectedOutputStart = source.indexOf("## Expected");
+        if (expectedOutputStart >= 0) {
+            String result = p.run();
+            String expectedOutput = source.substring(expectedOutputStart);
+            assertEquals(expectedOutput, "## Expected\n" + result);
         }
     }
     

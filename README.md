@@ -32,8 +32,8 @@ It addresses other languages' issues:
 ## Keywords
 
 Control flow
-* `if` `elif` `else` `for` `while` 
-* `break` `return` `throw` `catch`
+* `if` `elif` `else` `for` `while` `break` 
+* `continue` `return` `throw` `catch`
 * `switch` `case`
 
 Assignment, comparison, operations
@@ -306,7 +306,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
     import org.bau.Math
 
     println('Pi: ' Math.PI)
-    println(sqrt(2))
+    println(Math.sqrt(2))
 
 ##### Functions
 
@@ -382,11 +382,13 @@ The name needs to match the file path, here `org/bau/Math.bau`:
     import org.bau.Utils
 
     for i := range(1, 10)
-        switch Utils.random() & 3
+        switch Utils.random() & 7
         case 0
             println('zero')
         case 1
             println('one')
+        case 2, 3
+            println('2 or 3')
         else  
             println('other') 
 
@@ -497,8 +499,8 @@ The name needs to match the file path, here `org/bau/Math.bau`:
   Removing it simplifies the language.
 * `break` and `continue` can have a condition, to avoid a separate line with `if`.
 * Labels for `break` and `continue` are not supported to simplify the language.
-  If needed, the function can return from inside the loop; 
-  exception handling could also be used.
+  If needed, the function can return from inside the loop, or throw an exception
+  (such exceptions are very fast).
 * Comments are only a single character (`#`) to save some typing.
   Block comments (`##`) are useful if the editor doesn't support commenting a block.
   To support eg. Markdown inside of block comments, the delimiters can be variable length.

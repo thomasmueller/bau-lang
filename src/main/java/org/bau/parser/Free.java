@@ -19,9 +19,9 @@ public class Free implements Statement {
     }
 
     @Override
-    public boolean run(Memory m) {
-        // TODO Auto-generated method stub
-        return false;
+    public StatementResult run(Memory m) {
+        // TODO free up memory
+        return StatementResult.OK;
     }
 
     @Override

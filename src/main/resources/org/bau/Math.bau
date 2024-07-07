@@ -2,8 +2,17 @@ module org.bau.Math
 
 PI : 3.14159265358979323846
 
+fun abs(x f64) f64
+    if x >= 0
+        return x
+    return -x
+
 fun sqrt(x f64) f64
-  native(```
-    #include <math.h>
-    return sqrt(x);
-    ```)
+    native(```
+        #include <math.h>
+        return sqrt(x);
+        ```)
+    guess := x / 2.0
+    for i := until(10)
+        guess = 0.5 * (guess + x / guess)
+    return guess

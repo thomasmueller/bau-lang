@@ -1,5 +1,7 @@
 package org.bau.perf;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class ExceptionPerformanceTest {
@@ -37,8 +39,8 @@ public class ExceptionPerformanceTest {
             
     @Test
     public void test() {
-        for(int test=0; test < 10; test++) 
-        testPerf();
+        for (int test = 0; test < 10; test++)
+            testPerf();
     }
     
     void testPerf() {
@@ -58,7 +60,7 @@ public class ExceptionPerformanceTest {
         long time = System.nanoTime();
         randomSeed = 0;
         // int count = 1_000_000_000;
-        int count = 1_000_000;
+        int count = 1_000;
         long sum = 0;
         for (int i = 0; i < count; i++) {
             try {
@@ -68,7 +70,8 @@ public class ExceptionPerformanceTest {
             }
         }
         time = System.nanoTime() - time;
-        System.out.println((time / count) + " ns/call");
-        System.out.println(sum + " dummy");
+        // System.out.println((time / count) + " ns/call");
+        // System.out.println(sum + " dummy");
+        assertTrue(sum != 0);
     }
 }

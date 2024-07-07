@@ -82,6 +82,7 @@ public class HashTest {
             int s = 0;
             while (true) {
                 x ^= (data[i] & 0xff) << s;
+System.out.println("x " + Long.toHexString(x));                
                 int n = i + 1;
                 if (n >= data.length)
                     break;
@@ -92,13 +93,20 @@ public class HashTest {
             x = Integer.rotateLeft(x, 15);
             x *= c2;
             h ^= x;
+System.out.println("h " + Long.toHexString(h));                
         }
         h ^= data.length;
+System.out.println("h2 " + Long.toHexString(h));                
         h ^= h >>> 16;
+System.out.println("h3 " + Long.toHexString(h));                
         h *= 0x85ebca6b;
+System.out.println("h4 " + Long.toHexString(h));                
         h ^= h >>> 13;
+System.out.println("h5 " + Long.toHexString(h));                
         h *= 0xc2b2ae35;
+System.out.println("h6 " + Long.toHexString(h));                
         h ^= h >>> 16;
+System.out.println("h8 " + Long.toHexString(h));                
         return h;
     }
     
@@ -187,6 +195,7 @@ public class HashTest {
     public void murmurTest() {
         assertEquals(0, murmur3_32("".getBytes(StandardCharsets.UTF_8)));
         assertEquals(1009084850, murmur3_32("a".getBytes(StandardCharsets.UTF_8)));
+        assertEquals(0x3c2569b2, murmur3_32("a".getBytes(StandardCharsets.UTF_8)));
         assertEquals(0xba6bd213, murmur3_32("test".getBytes(StandardCharsets.UTF_8)));
         assertEquals(0xc0363e43, murmur3_32("Hello, world!".getBytes(StandardCharsets.UTF_8)));
     }

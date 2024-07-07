@@ -70,4 +70,14 @@ public class NumberValue implements Expression {
         return this;
     }
 
+    public static long parseUnsignedHexLong(String hex) {
+        if (hex.length() < 16) {
+            return Long.parseLong(hex, 16);
+        } else if (hex.length() > 16) {
+            throw new IllegalArgumentException(hex);
+        }
+        return Long.parseLong(hex.substring(0, 8), 16) << 32 |
+                Long.parseLong(hex.substring(8), 16);
+    }
+
 }

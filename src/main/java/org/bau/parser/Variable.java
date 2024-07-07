@@ -13,6 +13,7 @@ public class Variable implements Expression, LeftValue {
     boolean isConstant;
     Value constantValue;
     private boolean needToDecrementRefCountOnFree = true;
+    public boolean global;
     
     public Variable(String id, DataType type) {
         this.name = id;
@@ -24,7 +25,13 @@ public class Variable implements Expression, LeftValue {
         if (isConstant && constantValue != null) {
             return constantValue;
         }
-        return memory == null ? null : memory.get(name);
+        if (memory == null) {
+            return null;
+        }
+        if (global) {
+            return memory.getGlobal(name);
+        }
+        return memory.getLocal(name);
     }
     
     public DataType canThrowException() {
@@ -148,6 +155,15 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
+    }
+
+    @Override
+    public Value setValue(Memory memory, Value val) {
+        if (global) {
+            memory.setGlobal(name, val);
+        }
+        memory.setLocal(name, val);
+        return null;
     }
     
 }
