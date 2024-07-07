@@ -11,6 +11,8 @@
                     var run = document.getElementById("run");
                     if (typeof run.click === 'function') {
                         run.click.apply(run);
+                        if (e.preventDefault) e.preventDefault();
+                        return false;
                     }
                 }
             });
@@ -20,7 +22,7 @@
         <div class="top">
             <h1>Bau Playground</h1>
             <p>Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">Bau program</a> in the browser.</p>
-            <textarea id="source" cols="80">fun factorial(x int) int
+            <textarea id="source" cols="80" class="notranslate">fun factorial(x int) int
     if x &lt;= 1
         return 1
     return x * factorial(x - 1)
@@ -32,9 +34,9 @@ for i:= range(0 20)
             <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
             <div class="result">&nbsp;</div>  
             <div class="result"><b>Output:</b></div>  
-            <div class="result"><pre id="result"></pre></div>  
+            <div class="result notranslate"><pre id="result"></pre></div>
             <div class="result"><b>Generated C Source Code:</b></div>  
-            <div class="result"><pre id="csource"><br></pre></div>  
+            <div class="result notranslate"><pre id="csource"><br></pre></div>
         </div>
 
 <script src="codemirror/lib/codemirror.js"></script>
