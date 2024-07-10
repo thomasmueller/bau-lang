@@ -27,48 +27,7 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-typedef struct Value Value;
-struct Value {
-    int64_t data;
-    int32_t _refCount;
-};
-Value* Value_new() {
-    Value* result = _malloc(sizeof(Value));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    result->data = 0;
-    return result;
-}
-void Value_free(Value* x) {
-    _free(x);
-}
-Value* get_1(int64_t key);
-void test_0();
-Value* get_1(int64_t key) {
-    if (key <= 0) {
-        return NULL;
-    }
-    Value* result = Value_new();
-    result->data = key * 10;
-    return result;
-    _decUse(result, Value);
-}
-void test_0() {
-    Value* _t0 = get_1(0);
-    Value* a = _t0;
-    if (a != NULL) {
-        printf("%lld\n", a->data);
-    }
-    Value* _t1 = get_1(1);
-    Value* b = _t1;
-    if (b != NULL) {
-        printf("%lld\n", b->data);
-    }
-    _decUse(a, Value);
-    _decUse(b, Value);
-}
 int main() {
-    test_0();
     _end();
     return 0;
 }

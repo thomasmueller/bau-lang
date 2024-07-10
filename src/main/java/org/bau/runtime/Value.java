@@ -2,6 +2,8 @@ package org.bau.runtime;
 
 import java.util.HashMap;
 
+import org.bau.parser.NumberValue;
+
 public class Value {
 
     public Value get(int index) {
@@ -141,10 +143,7 @@ public class Value {
             return String.valueOf(value);
         }
         public String toString() {
-            if (value >= Integer.MAX_VALUE || value <= Long.MIN_VALUE) {
-                return String.valueOf(value) + "L";
-            }
-            return String.valueOf(value);
+            return NumberValue.toC(value);
         }
     }   
 
@@ -161,7 +160,7 @@ public class Value {
             this.value = v.floatValue();
         }  
         public String toString() {
-            return String.valueOf(value);
+            return NumberValue.toC(value);
         }
         public double doubleValue() {
             return value;

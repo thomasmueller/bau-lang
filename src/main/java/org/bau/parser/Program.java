@@ -238,7 +238,11 @@ public class Program {
             return fd;
         }
         id = FunctionDefinition.getFunctionId(type, module, name, Integer.MAX_VALUE);
-        return functions.get(id);
+        FunctionDefinition result = functions.get(id);
+        if (result == null && module != null) {
+            result = getFunctionIfExists(type, null, name, parameterCount);
+        }
+        return result;
     }
 
     public void addTemporaryType(DataType type) {

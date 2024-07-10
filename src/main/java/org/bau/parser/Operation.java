@@ -89,6 +89,9 @@ public class Operation implements Expression {
                 return null;
             }
             if ("-".equals(operator)) {
+                if (right.type().isFloatingPoint) {
+                    return new Value.ValueFloat(- r.doubleValue());
+                }
                 return new Value.ValueInt(- r.longValue());
             } else if ("not".equals(operator)){
                 return new Value.ValueInt(r.longValue() == 0 ? 1 : 0);
@@ -105,9 +108,67 @@ public class Operation implements Expression {
         } else if (r instanceof ValuePanic) {
             return r;
         }
-        // need to use the type of the left, so that right shift
-        // is truncated correctly
-        return eval(left.type(), l, operator, r);
+        switch (operator) {
+        case "<<":
+        case ">>":
+            // need to use the type of the left, so that right shift
+            // is truncated correctly
+            return eval(left.type(), l, operator, r);
+        }
+        // need to use the wider type, so that multiplication etc
+        // by float work correctly
+        return eval(widerType(), l, operator, r);
+    }
+    
+    private DataType widerType() {
+        switch (operator) {
+        case "and":
+        case "or":
+        case "not":
+            return DataType.INT_TYPE;
+        case "=":
+        case "!=":
+            if (left instanceof NullValue || right instanceof NullValue) {
+                return DataType.INT_TYPE;
+            }
+        }
+        if (left == null) {
+            return right.type().resolveEnumType();
+        }
+        DataType l = left.type().resolveEnumType();
+        if (!l.isSystem()) {
+            throw new IllegalStateException("Not a built-in type: " + l + " for operation " + operator);
+        }
+        DataType r = right.type().resolveEnumType();
+        if (!r.isSystem()) {
+            throw new IllegalStateException("Not a built-in type: " + r + " for operation " + operator);
+        }
+        if (l.equals(r)) {
+            return l;
+        }
+        if (l.isSystem() && r.isSystem()) {
+            DataType higher = null;
+            if (l.isFloatingPoint != r.isFloatingPoint) {
+                // only on is floating point: take that
+                if (l.isFloatingPoint) {
+                    higher = l;
+                } else {
+                    higher = r;
+                }
+            }
+            if (higher == null) {
+                // take the one with more bits
+                if (l.sizeOf() > r.sizeOf()) {
+                    higher = l;
+                } else {
+                    higher = r;
+                }
+            }
+            if (higher != null) {
+                return higher;
+            }
+        }            
+        throw new IllegalStateException("Operands needs to be of the same type: " + l + " <-> " + r);
     }
     
     public static Value eval(DataType type, Value l, String operator, Value r) {
@@ -122,9 +183,20 @@ public class Operation implements Expression {
         case "*":
             result = l.longValue() * r.longValue();
             break;
-        case "/":
-            result = l.longValue() / r.longValue();
+        case "/": {
+            if (r.longValue() == 0) {
+                if (l.longValue() == 0) {
+                    result = 0;
+                } else if (l.longValue() > 0) {
+                    result = Long.MAX_VALUE;
+                } else {
+                    result = Long.MIN_VALUE;
+                }
+            } else {
+                result = l.longValue() / r.longValue();
+            }
             break;
+        }
         case "%":
             result = l.longValue() % r.longValue();
             break;
@@ -269,49 +341,7 @@ public class Operation implements Expression {
         if (isComparison()) {
             return DataType.INT_TYPE;
         }
-        switch (operator) {
-        case "and":
-        case "or":
-        case "not":
-            return DataType.INT_TYPE;
-        }
-        if (left == null) {
-            return right.type().resolveEnumType();
-        }
-        DataType l = left.type().resolveEnumType();
-        if (!l.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + l + " for operation " + operator);
-        }
-        DataType r = right.type().resolveEnumType();
-        if (!r.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + r + " for operation " + operator);
-        }
-        if (l.equals(r)) {
-            return l;
-        }
-        if (l.isSystem() && r.isSystem()) {
-            DataType higher = null;
-            if (l.isFloatingPoint != r.isFloatingPoint) {
-                // only on is floating point: take that
-                if (l.isFloatingPoint) {
-                    higher = l;
-                } else {
-                    higher = r;
-                }
-            }
-            if (higher == null) {
-                // take the one with more bits
-                if (l.sizeOf() > r.sizeOf()) {
-                    higher = l;
-                } else {
-                    higher = r;
-                }
-            }
-            if (higher != null) {
-                return higher;
-            }
-        }            
-        throw new IllegalStateException("Operands needs to be of the same type: " + l + " <-> " + r);
+        return widerType();
     }
     
     public Expression replace(Variable old, Expression with) {
@@ -332,7 +362,7 @@ public class Operation implements Expression {
         } else if ("<<".equals(op)) {
             return "shiftLeft_2(" + left.toC() + ", " + right.toC() + ")";
         } else if ("/".equals(op)) {
-            if (type().isFloatingPoint) {
+            if (widerType().isFloatingPoint) {
                 return left.toC() + " / " + right.toC();
             } else {
                 return "idiv_2(" + left.toC() + ", " + right.toC() + ")";

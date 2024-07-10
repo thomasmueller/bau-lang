@@ -35,7 +35,32 @@ public class NumberValue implements Expression {
     }
 
     public String toC() {
+        if (type.isFloatingPoint) {
+            toC(value.doubleValue());
+        } else {
+            toC(value.longValue());
+        }
         return toString();
+    }
+
+    public static String toC(double x) {
+        if (x == Double.POSITIVE_INFINITY) {
+            return "(1.0 / 0.0)";
+        } else if (x == Double.NEGATIVE_INFINITY) {
+            return "(-1.0 / 0.0)";
+        } else if (Double.isNaN(x)) {
+            return "(0.0 / 0.0)";
+        } else if (Double.compare(x, -0.0) == 0) {
+            return "-0.0";
+        }
+        return Double.toString(x);
+    }
+
+    public static String toC(long x) {
+        if (x == Long.MIN_VALUE) {
+            return "(-9223372036854775807LL-1LL)";
+        }
+        return Long.toString(x);
     }
     
     public String toString() {

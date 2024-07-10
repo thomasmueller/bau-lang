@@ -30,15 +30,15 @@ fun getDateTime() dateTime
         result.millis = time.tv_nsec / 1000000;
         return result;
         ```)
-    result := new(dateTime)
-    result.year = 2000
-    result.month = 1
-    result.day = 1
-    result.hour = 0
-    result.minute = 0
-    result.second = 0
-    result.millis = 0
-    return result
+    alternative := new(dateTime)
+    alternative.year = 2000
+    alternative.month = 1
+    alternative.day = 1
+    alternative.hour = 0
+    alternative.minute = 0
+    alternative.second = 0
+    alternative.millis = 0
+    return alternative
   
 
 # Nanosecons since some undefined point in the past. Never jumps backwards.

@@ -24,7 +24,7 @@ cd ..
 cp got/*.c src/test/resources/org/bau/converter/
 
 find src/test -name "*.c" -delete
-find src/test -name "*.c.out" -delete 
+find src/test -name "*.c.out" -delete
 
 
 */
@@ -44,7 +44,7 @@ public class TestCompare {
     public void arrayLen() throws IOException {
         test("arrayLen");
     }
-    
+
     @Test
     public void arrayMurmur() throws IOException {
         test("arrayMurmur");
@@ -99,12 +99,12 @@ public class TestCompare {
     public void functionDeclareAndImplementLater() throws IOException {
         test("functionDeclareAndImplementLater");
     }
-    
+
     @Test
     public void functions() throws IOException {
         test("functions");
     }
-    
+
     @Test
     public void functionsBubbleSort() throws IOException {
         test("functionsBubbleSort");
@@ -114,7 +114,7 @@ public class TestCompare {
     public void helloWorld() throws IOException {
         test("helloWorld");
     }
-    
+
     @Test
     public void hexOrd() throws IOException {
         test("hexOrd");
@@ -124,12 +124,17 @@ public class TestCompare {
     public void literals() throws IOException {
         test("literals");
     }
-    
+
     @Test
     public void map() throws IOException {
         test("map");
-    }    
-    
+    }
+
+    @Test
+    public void math() throws IOException {
+        test("math");
+    }
+
     @Test
     public void modulesList() throws IOException {
         test("modulesList");
@@ -169,7 +174,7 @@ public class TestCompare {
     public void throwCatch() throws IOException {
         test("throwCatch");
     }
-    
+
     @Test
     public void throwCatchDemo() throws IOException {
         test("throwCatchDemo");
@@ -211,7 +216,7 @@ public class TestCompare {
         }
         return buff.toString();
     }
-    
+
     private void test(String file) throws IOException {
         String source = readResource(file + ".bau");
         String expected = readResource(file + ".c");
@@ -235,7 +240,7 @@ public class TestCompare {
             assertEquals(expectedOutput, "## Expected\n" + result);
         }
     }
-    
+
     private void writeFile(String fileName, String s) throws IOException {
         RandomAccessFile f = new RandomAccessFile(fileName, "rw");
         byte[] data = s.getBytes(StandardCharsets.UTF_8);

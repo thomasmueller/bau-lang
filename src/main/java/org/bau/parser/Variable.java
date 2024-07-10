@@ -60,7 +60,14 @@ public class Variable implements Expression, LeftValue {
     
     public String toC() {
         if (constantValue != null && type.isSystem() && !type.isArray()) {
-            return constantValue.toString() + " /* " + name + " */";
+            StringBuilder buff = new StringBuilder();
+            if (type.isFloatingPoint) {
+                buff.append(NumberValue.toC(constantValue.doubleValue()));
+            } else {
+                buff.append(NumberValue.toC(constantValue.longValue()));
+            }
+            buff.append(" /* " + name + " */");
+            return buff.toString();
         }
         return name;
     }

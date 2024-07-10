@@ -1,18 +1,287 @@
 module org.bau.Math
 
-PI : 3.14159265358979323846
+POS_INFINITY : 1.0 / 0.0
+NEG_INFINITY : -1.0 / 0.0
+NOT_A_NUMBER : 0.0 / 0.0
+PI           : 3.14159265358979323846
+E            : 2.71828182845904523536
+LOG10        : 2.30258509299404568402
+LOG2         : 0.69314718055994530942
+MIN_INT      : 0x8000000000000000
+MAX_INT      : 0x7fffffffffffffff
 
 fun abs(x f64) f64
+    native(```
+        #include <math.h>
+        return fabs(x);
+        ```)
     if x >= 0
         return x
     return -x
 
+fun isNotANumber(x f64) int
+    native('return isnan(x);')
+    return x != x
+
+fun isNegativeZero(x f64) int
+    return (x = 0.0) and (1.0 / x = NEG_INFINITY)
+
+fun min(a f64, b f64) f64
+    native('return fmin(a, b);')    
+    if isNotANumber(a)
+        return a
+    if a = b and a = 0 and isNegativeZero(b)
+        return b
+    if a <= b
+        return a
+    return b
+
+fun max(a f64, b f64) f64
+    native('return fmax(a, b);')    
+    if isNotANumber(a)
+        return a
+    if a = b and a = 0 and isNegativeZero(a)
+        return b
+    if a >= b
+        return a
+    return b
+
+fun floor(x f64) f64
+    native('return floor(x);')    
+    if x <= MIN_INT or x >= MAX_INT or isNotANumber(x) or x = 0
+        return x
+    i : int(x)
+    d : f64(i)
+    if d = x or x >= 0
+        return d
+    return d - 1
+
+fun ceil(x f64) f64
+    native('return ceil(x);')    
+    return -floor(-x)
+
+fun round(x f64) f64
+    native('return floor(x + 0.5);')    
+    if isNotANumber(x)
+        return 0
+    if x <= MIN_INT
+        return MIN_INT
+    if x >= MAX_INT
+        return MAX_INT
+    return int(floor(x + 0.5))
+
+fun signum(x f64) f64  
+    if x = 0.0 or isNotANumber(x)
+        return x
+    if x >= 0
+        return 1
+    return -1
+    
+fun exp(x f64) f64
+    native('return exp(x);')
+    if isNotANumber(x) or x = POS_INFINITY
+        return x
+    elif x < 0
+        return 1 / exp(-x)
+    if x > 2
+        r : exp(x / 2)
+        return r * r
+    approx := 1.0
+    term := 1.0
+    for i := range(1, 22)
+        term *= x / i
+        approx += term
+    return approx
+
+fun log(x f64) f64
+    native('return log(x);')
+    if x = 0
+        return NEG_INFINITY
+    elif x = POS_INFINITY
+        return x
+    elif x <= 0 or isNotANumber(x)
+        return NOT_A_NUMBER
+    if x < 0.7
+        return log(2 * x) - LOG2
+    if x >= 1.5
+        return log(x / 2) + LOG2
+    base := x - 1
+    sign := 1
+    term := base
+    result := term
+    for i := range(2, 30)
+        sign = -sign
+        term *= base
+        result += sign * term / i
+    return result
+
 fun sqrt(x f64) f64
+    native('return sqrt(x);')
+    return exp(log(x) / 2)
+    
+fun log10(x f64) f64
+    native('return log10(x);')    
+    return log(x) / LOG10
+
+fun pow(x f64, y f64) f64
+    native('return pow(x, y);')
+    if x > 0 and y > 0
+        return exp(y * log(x))
+    if y = 0.0
+        return 1.0
+    if isNotANumber(x) or isNotANumber(y)
+        return NOT_A_NUMBER
+    absX := abs(x)
+    if y = NEG_INFINITY
+        if absX > 1.0
+            return 0.0
+        if absX = 1.0
+            return NOT_A_NUMBER
+        return POS_INFINITY
+    yy := int(y)
+    odd := (yy = y) and ((yy & 1) = 1)
+    if isNegativeZero(x) and yy = y
+        if odd
+            return -pow(-x, y)
+        return pow(-x, y)
+    if x >= 0
+        return exp(y * log(x))
+    if odd
+        return -pow(-x, y)
+    if x = NEG_INFINITY
+        if y < 0
+            return 0.0
+        return POS_INFINITY
+    if yy = y
+        return pow(-x, y)
+    if abs(y) > 1e19
+        if y > 0
+            return pow(-x, y)
+        if x = -1
+            return 1
+        if absX > 1
+            return 0
+        return POS_INFINITY
+    return NOT_A_NUMBER
+
+fun sin(x f64) f64
+    native('return sin(x);')    
+    if x = POS_INFINITY
+        return NOT_A_NUMBER
+    if abs(x) < 1e-8
+        return x
+    if x < 0
+        return -sin(-x)
+    if x > PI * 2
+        x -= floor(x / (PI * 2)) * (PI * 2)
+    if x > PI
+        return -sin(x - PI)
+    if x > PI / 2
+        x = PI - x
+    approx := 0.0
+    sign := 1
+    p := x
+    for n := range(2, 24)
+        approx += sign * p
+        p *= x * x / (n * (n + 1))
+        sign = -sign
+        n += 1
+    return approx
+
+fun atan(x f64) f64
+    native('return atan(x);')     
+    x = min(max(-1e16, x), 1e16)
+    if abs(x) >= 0.4
+        return 2 * atan(x / (1 + sqrt(1 + x * x)))
+    approx := x
+    sign := -1
+    p := x
+    for n := range(3, 32)
+        p *= x * x
+        approx += sign * p / n
+        sign = -sign
+        n += 1
+    return approx
+
+fun cos(x f64) f64
+    native('return cos(x);')     
+    return sin(x + PI / 2)
+
+fun tan(x f64) f64
+    native('return tan(x);')
+    return sin(x) / cos(x)
+
+fun asin(x f64) f64
+    native('return asin(x);')  
+    return atan(x / sqrt(1 - x * x))
+
+fun acos(x f64) f64
+    native('return acos(x);')  
+    return PI / 2 - asin(x)
+
+fun convertLongBitsToDouble(x int) f64
     native(```
-        #include <math.h>
-        return sqrt(x);
+        #include <string.h>
+        double y;
+        memcpy(&y, &x, sizeof y);
+        return y;
         ```)
-    guess := x / 2.0
-    for i := until(10)
-        guess = 0.5 * (guess + x / guess)
-    return guess
+    sign := x >> 63
+    exp := (x >> 52) & 0x7ff
+    if x = 0
+        return 0.0
+    elif x = 1 << 63
+        return -0.0
+    fraction := x << 12 >> 12
+    if exp = 0x7ff
+        if fraction != 0
+            return NOT_A_NUMBER
+        elif sign = 0
+            return POS_INFINITY
+        return NEG_INFINITY
+    result := 0.0
+    for i := range(0, 52)
+        if (fraction & 1) = 1
+            result += 1
+        result /= 2
+        fraction >>= 1
+    if exp = 0
+        result *= 2
+    else
+        result += 1
+    exp -= 1023
+    while exp < 0
+        result /= 2
+        exp += 1
+    while exp > 0
+        result += result
+        exp =- 1
+    if sign = 0
+        return result
+    return -result
+
+fun convertDoubleToLongBits(x f64) int
+    native(```
+        uint64_t y;
+        memcpy(&y, &x, sizeof y);
+        return y;
+        ```)
+    if x = 0
+        if isNegativeZero(x)
+            return 1 << 63
+        return 0
+    if x < 0
+        return convertDoubleToLongBits(-x) | (1 << 63)
+    if x = POS_INFINITY
+        return 0x7ff << 52
+    if isNotANumber(x)
+        return (0x7ff << 52) + (1 << 51)
+    exp := 0
+    while x >= 2
+        exp += 1
+        x /= 2
+    while x < 1 and exp > -1022
+        exp -= 1
+        x += x
+    fraction := int(x * (1 << 52)) << 11 >> 11
+    return ((exp + 1022) << 52) + fraction
