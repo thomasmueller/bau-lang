@@ -518,8 +518,7 @@ function start_vm(user, pwd)
             net_state = new Ethernet(net_url);
         }
 
-        Module.ccall("vm_start", null, ["string", "number", "string", "string", "number", "number", "number", "string"], 
-            [url, mem_size, cmdline, pwd, width, height, (net_state != null) | 0, drive_url]);
+        Module.ccall("vm_start", null, ["string", "number", "string", "string", "number", "number", "number", "string"], [url, mem_size, cmdline, pwd, width, height, (net_state != null) | 0, drive_url]);
         pwd = null;
     }
 
@@ -537,29 +536,11 @@ function start_vm(user, pwd)
     }
 
     /* read the parameters */
-    
-    // vm.html?url=alpine-x86.cfg&mem=192
-    
-    /*
-    
-    
-    */
 
-    params = {url: "alpine-x86.cfg", mem: 192}; // get_params();
+    params = get_params();
     cpu = params["cpu"] || "x86";
     url = params["url"];
-    url = // get_absolute_url(url);
-    {
-        version: 1,
-        machine: "pc",
-        memory_size: 256,
-        kernel: "kernel-x86.bin",
-        cmdline: "loglevel=3 console=hvc0 root=root rootfstype=9p rootflags=trans=virtio ro TZ=${TZ}",
-        fs0: { file: "https://vfsync.org/u/os/alpine-x86" },
-        eth0: { driver: "user" },
-    };
-
-    
+    url = get_absolute_url(url);
     mem_size = (params["mem"] | 0) || 128; /* in mb */
     cmdline = params["cmdline"] || "";
     cols = (params["cols"] | 0) || 80;
@@ -600,7 +581,7 @@ function start_vm(user, pwd)
         term.write("Loading...\r\n");
     }
 
-    console.log("cpu=" + cpu + " url=" + url + " mem=" + mem_size);
+//    console.log("cpu=" + cpu + " url=" + url + " mem=" + mem_size);
 
     switch(cpu) {
     case "x86":
@@ -636,8 +617,6 @@ function start_vm(user, pwd)
         vm_url = vm_file + ".js";
     }
     Module.preRun = start;
-
-    console.log("vm_url=" + vm_url);
 
     loadScript(vm_url, null);
 }
