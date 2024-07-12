@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <title>JSLinux</title>
+    <link href="style.css" type="text/css" rel="stylesheet"/>
+</head>
+<body>
+<div id="term_wrap">
+    <div id="term_container">
+    </div>
+    <div id="term_bar">
+      <label>
+       <img title="Upload files" src="images/upload-icon.png"><input type="file" id="files" multiple onchange="on_update_files(this.files)">
+      </label>
+      <progress id="net_progress">
+      </progress>
+    </div>
+</div>
+<script type="text/javascript" src="term.js"></script>
+<script type="text/javascript" src="jslinux.js"></script>
+<div id="copyright">&copy; 2011-2021 Fabrice Bellard - <a href="news.html">News</a> - <a href="index.html">VM list</a> - <a href="faq.html">FAQ</a> - <a href="tech.html">Technical notes</a></div>
