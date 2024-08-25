@@ -50,7 +50,7 @@ Data types and miscellaneous
 * `()` `[]` `.` `..` `,` `'` `` ` `` `?`
 * `import` `module` `null` `const`
 
-### Contants, Variables
+### Constants, Variables
 
 Identifiers contain letters, digits, and `_`.
 `:` defines a constant.
