@@ -81,6 +81,11 @@ Existing regular expression syntax do not have this ability:
 
     timestampV2 = "^ dddd'-'dd'-'dd 'T' dd':'dd':'dd $";
 
+## Related Work
+
+Many regular expression implementations already support a way to quote a literal, by enclosing the literal between `\Q` and `\E`. 
+This mechanism increases the length of the expression. Also, there are special rules if the terms `\Q` or `\E` are quoted:
+
 ## Migration
 
 Switching to the version 2 syntax is very easy, because
