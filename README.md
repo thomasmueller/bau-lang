@@ -164,25 +164,25 @@ shift right, and logical shift right: the leftmost bits become `0`.
 if the arguments are constants.
 Functions can share a name if the number of arguments is different.
 They can be declared first and implemented later.
-Types can be passed as parameters 
-(internally, for each type a new function is used - like C++ templates).
+Types can be passed as parameters or implicitly
+(internally, this functions are templates).
 
     fun square(x int) int
       return x * x
 
     fun sum(x int..) const int
     
-    fun sort(T type, T[] data)
-
+    fun newList(T type) List(T)
+    fun sort(data T[])
 
 ### Types
 
 Types can have fields and functions:
 
     type Square
-      length int
+        length int
     fun Square area() int
-      return length * length
+        return length * length
     s : new(Square)
       
 If a type has a `close` function, then it is called
@@ -192,16 +192,16 @@ uppercase types are referenced.
 Functions on built-in types are allowed:
 
     fun int square() int
-      return this * this
+        return this * this
     println(12.square())
 
 Types can have parameters:
 
     type List(T)
-      array T[]
-      size int
+        array T[]
+        size int
     fun newList(T type) List(T)
-      ...
+        ...
     list := newList(Circle)
 
 ### Null
@@ -211,11 +211,11 @@ An explicit check is required before using the value.
 There are no null pointer errors at runtime.
 
     fun get(key int) Circle?
-      # may return null
+        # may return null
 
     v : get(key) 
     if v
-      print(v.area())
+        print(v.area())
 
 Value types (eg. `int`) can't be `null`.
 
@@ -234,11 +234,12 @@ no runtime checks are done.
 The conditional `break` guarantees that `i` is within the bounds.
 
     if data.len
-      i := 0..data.len
-      while 1
-        data[i]! = i
-        break i >= data.len - 1
-        i += 1
+        i := 0..data.len
+        while 1
+            data[i]! = i
+            next : i + 1
+            break next >= data.len
+            i = next
 
 ### Exceptions
 
@@ -247,17 +248,17 @@ or the method needs `throws`.
 Custom exception types are allowed.
 
     import org.bau.Exception
-      exception
+        exception
 
     fun square(x int) int throws exception
-      if x > 3_000_000_000
-        throw exception('Too big')
-      return x * x
+        if x > 3_000_000_000
+            throw exception('Too big')
+        return x * x
     
     x := square(3_000_000_001)
     println(x)
     catch e
-      println(e.message)
+        println(e.message)
 
 ### Modules and Import
 
