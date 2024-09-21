@@ -5,3 +5,7 @@ import org.bau.Math
 
 println(random())
 println(PI)
+
+## Expected
+-2152535657050944081
+3.141592653589793

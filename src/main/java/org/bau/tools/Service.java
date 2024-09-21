@@ -14,8 +14,8 @@ public class Service {
     public static void main(String... args) throws Exception {
         System.out.println("Waiting for changes to the file 'demo.bau'");
         File f = new File("demo.bau");
-        File fc = new File("demo.c");        
-        File md = new File("demo.md");        
+        File fc = new File("demo.c");
+        File md = new File("demo.md");
         f.createNewFile();
         System.out.println("Waiting =======================================");
         long lastModified = f.lastModified();
@@ -48,7 +48,7 @@ public class Service {
                 System.out.println("Waiting =====================================");
                 continue;
             }
-            
+
             RandomAccessFile rf2 = new RandomAccessFile(fc, "rw");
             data = c.getBytes(StandardCharsets.UTF_8);
             rf2.write(data);
@@ -63,8 +63,11 @@ public class Service {
             }
             System.out.println("Interpreting ====================================");
             try {
-                String result = new Parser(s).parse().run();
+                Program prog = new Parser(s).parse();
+                String result = prog.run();
                 System.out.println(result);
+                long ticksExecuted = prog.getTicksExecuted();
+                System.out.println("Ticks: " + ticksExecuted);
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
@@ -79,8 +82,8 @@ public class Service {
             System.out.println("Waiting =========================================");
         }
     }
-    
-    
+
+
     public static int runProcess(String... command) throws Exception {
         Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
         Thread outThread = new Thread(() -> {

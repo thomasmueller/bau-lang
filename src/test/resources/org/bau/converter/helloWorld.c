@@ -8,6 +8,25 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+typedef struct i8_array i8_array;
+struct i8_array {
+    int32_t len;
+    char* data;
+    int32_t _refCount;
+};
+i8_array* i8_array_new(uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(char) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
 typedef struct int_array int_array;
 struct int_array {
     int32_t len;
@@ -27,7 +46,17 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+i8_array* str_const(char* data, uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    result->len = len;
+    result->_refCount = 1;
+    result->data = data;
+    return result;
+}
+i8_array* string_1000;
 int main() {
+    string_1000 = str_const("Hello World", 11);
+    printf("Hello World\n");
     _end();
     return 0;
 }

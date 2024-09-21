@@ -18,3 +18,7 @@ fun test()
   println(intList.array[1])
 
 test()
+
+## Expected
+10
+20

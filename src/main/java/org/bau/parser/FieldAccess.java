@@ -2,18 +2,19 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 
+import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueStruct;
 
 public class FieldAccess implements Expression, LeftValue {
-    
+
     final Expression base;
     final String fieldName;
     private Bounds lenBounds;
     final DataType type;
     private boolean needToDecrementRefCountOnFree = false;
-    
+
     FieldAccess(Expression base, String fieldName, DataType type) {
         this.base = base;
         this.fieldName = fieldName;
@@ -24,16 +25,39 @@ public class FieldAccess implements Expression, LeftValue {
     public Value eval(Memory memory) {
         if (base.type().isArray()) {
             if ("len".equals(fieldName)) {
+                if (base instanceof Variable) {
+                    Variable var = (Variable) base;
+                    Bounds lenBounds = var.getLenBounds();
+                    if (lenBounds != null) {
+                        Value v = lenBounds.eval();
+                        if (v != null) {
+                            return v;
+                        }
+                    }
+                }
                 Value v = base.eval(memory);
                 if (v == null) {
                     return null;
                 }
-                return v.len();
+                if (memory == null) {
+                    Bounds b = getBounds();
+                    if (b != null) {
+                        Value val = b.eval();
+                        if (val != null) {
+                            return val;
+                        }
+                    }
+                }
+                Value array = memory.getHeap(v.longValue());
+                return array.len();
             }
         }
         Value v = base.eval(memory);
         if (v == null) {
             return null;
+        }
+        if (base.type().isPointer()) {
+            v = memory.getHeap(v.longValue());
         }
         if (!(v instanceof ValueStruct)) {
             throw new IllegalStateException("Expected a struct, got " + v);
@@ -75,7 +99,7 @@ public class FieldAccess implements Expression, LeftValue {
             return base.toC() + "." + fieldName;
         }
     }
-    
+
     public String assignmentC() {
         StringBuilder buff = new StringBuilder();
         buff.append(base.toC());
@@ -91,7 +115,7 @@ public class FieldAccess implements Expression, LeftValue {
             return base.toC() + "." + fieldName;
         }
     }
-    
+
     @Override
     public String decrementRefCountC() {
         if (type().isPointer() || type().isArray()) {
@@ -116,7 +140,7 @@ public class FieldAccess implements Expression, LeftValue {
     public String toString() {
         return base + "." + fieldName;
     }
-    
+
     @Override
     public Expression simplify() {
         return this;
@@ -124,7 +148,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public void setBoundValue(Expression scope, String modify, Expression value) {
-        
+
     }
 
     @Override
@@ -139,30 +163,30 @@ public class FieldAccess implements Expression, LeftValue {
         }
         return null;
     }
-    
+
     public void addLenBoundCondition(Expression scope, String operation, Expression expr) {
         if (lenBounds == null) {
             lenBounds = new Bounds();
         }
         lenBounds.addCondition(scope, operation, expr);
     }
-    
+
     public Bounds getLenBounds() {
         return lenBounds;
     }
-    
+
     @Override
     public void addBoundCondition(Expression scope, String operation, Expression right) {
         if (base.type().isArray() && fieldName.equals("len") && base instanceof Variable) {
             ((Variable) base).addLenBoundCondition(scope, operation, right);
         }
     }
-    
+
     @Override
     public boolean isSimple() {
         return false;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;
@@ -172,23 +196,40 @@ public class FieldAccess implements Expression, LeftValue {
     public boolean needToDecrementRefCountOnFree() {
         return needToDecrementRefCountOnFree;
     }
-    
+
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
     }
 
     @Override
-    public Value setValue(Memory memory, Value val) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount) {
         Value baseVal = base.eval(memory);
         if (baseVal == null) {
             throw new IllegalStateException();
+        }
+        if (base.type().isPointer()) {
+            baseVal = memory.getHeap(baseVal.longValue());
         }
         if (!(baseVal instanceof ValueStruct)) {
             throw new IllegalStateException();
         }
         ValueStruct v = (ValueStruct) baseVal;
-        v.set(fieldName, val);
+        if (type().isArray() || type.isPointer()) {
+            Value old = v.get(fieldName);
+            if (old != null) {
+                StatementResult result = Free.decRefCount(old, type, memory);
+                if (result == StatementResult.PANIC) {
+                    return memory.getGlobal(Memory.PANIC);
+                }
+            }
+            v.set(fieldName, val);
+            if (incRefCount) {
+                memory.incHeap(val.longValue());
+            }
+        } else {
+            v.set(fieldName, val);
+        }
         return null;
     }
 }

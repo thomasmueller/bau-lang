@@ -5,10 +5,10 @@ import java.util.List;
 
 public class FunctionDefinition {
     public ArrayList<Statement> list = new ArrayList<>();
-    List<Statement> autoClose;    
+    List<Statement> autoClose;
     public ArrayList<Variable> parameters = new ArrayList<>();
     boolean builtIn;
-    
+
     // functions with a type have a "this" parameter
     public DataType callType;
     public String module;
@@ -27,19 +27,21 @@ public class FunctionDefinition {
         int parameterCount = varArgs ? Integer.MAX_VALUE : parameters.size();
         return getFunctionId(callType, module, name, parameterCount);
     }
-    
+
     public static String getFunctionId(DataType type, String module, String name, int parameterCount) {
+        if (module != null && type != null && type.getModule() != null && !type.getModule().equals(module)) {
+            throw new IllegalStateException("Module does not match type module");
+        }
         StringBuilder buff = new StringBuilder();
         if (type != null) {
             buff.append(type.fullName()).append(' ');
-        }
-        if (module != null) {
-            buff.append(module).append(".");
+        } else if (module != null) {
+            buff.append(module).append(' ');
         }
         buff.append(name).append(' ').append(parameterCount);
         return buff.toString();
     }
-    
+
     public String headerToC() {
         StringBuilder buff = new StringBuilder();
         if (builtIn) {
@@ -53,11 +55,11 @@ public class FunctionDefinition {
             buff.append(returnType.toC());
         }
         buff.append(' ');
-        if (callType != null) {
-            buff.append(callType.name()).append('_');
-        }
         if (module != null) {
             buff.append(module.replace(".", "_") + "_");
+        }
+        if (callType != null) {
+            buff.append(callType.name()).append('_');
         }
         buff.append(name + "_");
         if (varArgs) {
@@ -134,7 +136,7 @@ public class FunctionDefinition {
             for(Statement s : autoClose) {
                 buff.append(Statement.indent(s.toC(context)));
             }
-        }        
+        }
         buff.append("}\n");
         return buff.toString();
     }
@@ -153,7 +155,7 @@ public class FunctionDefinition {
     public void autoClose(List<Statement> autoClose) {
         this.autoClose = autoClose;
     }
-    
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append("fun ");
@@ -186,7 +188,7 @@ public class FunctionDefinition {
             buff.append(" throws");
             buff.append(exceptionType);
         }
-        return buff.toString();        
+        return buff.toString();
     }
 
 }

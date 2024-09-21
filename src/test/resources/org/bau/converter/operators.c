@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <limits.h>
 #define _incUse(a) if(a){(a)->_refCount++;}
 #define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
@@ -27,7 +28,61 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+float f32_1(float x);
+double f64_1(double x);
+int16_t i16_1(int16_t x);
+int32_t i32_1(int32_t x);
+char i8_1(char x);
+int64_t idiv_2(int64_t a, int64_t b);
+int64_t imod_2(int64_t a, int64_t b);
+int64_t int_1(int64_t x);
+int64_t shiftLeft_2(int64_t a, int64_t b);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
+float f32_1(float x) {
+    return x;
+}
+double f64_1(double x) {
+    return x;
+}
+int16_t i16_1(int16_t x) {
+    return x;
+}
+int32_t i32_1(int32_t x) {
+    return x;
+}
+char i8_1(char x) {
+    return x;
+}
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+int64_t imod_2(int64_t a, int64_t b) {
+    if (b != 0) return a % b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+int64_t int_1(int64_t x) {
+    return x;
+}
+int64_t shiftLeft_2(int64_t a, int64_t b) {
+    return a << b;
+}
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
+}
 int main() {
+    int64_t i64v = int_1(1);
+    int32_t i32v = i32_1(1);
+    int16_t i16v = i16_1(1);
+    char i8v = i8_1(1);
+    double f64v = f64_1(1);
+    float f32v = f32_1(1);
+    int64_t a = 6172;
+    int64_t b = 24690;
+    int64_t c = idiv_2(a, b);
+    int64_t d = imod_2(a, b);
     _end();
     return 0;
 }

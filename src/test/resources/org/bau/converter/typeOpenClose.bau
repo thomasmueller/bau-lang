@@ -2,7 +2,7 @@ type File
     fp int
 
 fun openFile(fp int) File
-    f := new(File)
+    f : new(File)
     f.fp = fp
     println('opening ' f.fp)
     return f
@@ -10,13 +10,38 @@ fun openFile(fp int) File
 fun File close()
     println('closing ' fp)
 
-  fun File use()
-      println('use ' fp)
+fun File use()
+    println('use ' fp)
 
 i := 0
 while i < 10
-    f := openFile(i)
+    f : openFile(i)
     println('opened ' i)
     break i = 5
     f.use()
     i += 1
+
+## Expected
+opening 0
+opened 0
+use 0
+closing 0
+opening 1
+opened 1
+use 1
+closing 1
+opening 2
+opened 2
+use 2
+closing 2
+opening 3
+opened 3
+use 3
+closing 3
+opening 4
+opened 4
+use 4
+closing 4
+opening 5
+opened 5
+closing 5

@@ -1,0 +1,30 @@
+import org.bau.String
+    indexOf
+    replaceAll
+    substring
+    split
+
+import org.bau.List
+    List
+
+fun test()
+    x : 'hello world'
+    println('indexOf ll: ' indexOf(x, 'll'))
+    println('l ->L : ' replaceAll('hello world', 'l', 'L'))
+    println('l ->LL: ' replaceAll('hello world', 'l', 'LL'))
+    println('ll->L : ' replaceAll('hello world', 'll', 'L'))
+    list : split('hello,world,!', ',')
+    for i := until(list.size)
+        s : list.get(i)
+        println('#' i ': ' s.data)
+
+test()
+
+## Expected
+indexOf ll: 2
+l ->L : heLLo worLd
+l ->LL: heLLLLo worLLd
+ll->L : heLo world
+#0: hello
+#1: world
+#2: !

@@ -2,14 +2,59 @@ package org.bau;
 
 /**
 
-TODO only call close when the ref count falls to 0, and then check again after calling close because it might have been re-added
+TODO variable already defined for
+fun sort(T type, a T[])
+    from : 0
+    to : a.len
+    h := 16
+    gap := 1
+    while to - from > h / 16
+        h = h + h + h / 4 + 16
+    while 1
+        h = (h - 16) * 4 / 9
+        gap = (h + 15) / 16
+        for i := range(gap + from, to)
+            T t = a[i]
+            j := i
+            while j >= gap + from and a[j - gap] > t
+                a[j] = a[j - gap]
+                j -= gap
+            a[j] = t
+        break gap <= 1
+fun test()
+    a : new(int[], 10)
+    a[0] = 10
+    a[1] = 30
+    a[3] = 20
+    sort(int, a)
 
-TODO some examples don't work, eg sqrt, in browser
+TODO do not modify state then calling toC in Assignment (see TODO toC method should not modify state)
+
+org.bau.Memory
+  copy
+  offset (of field)
+  location (pointer)
+
+more string formatting (and move all code there from Math)
+
+datetime library (see rust)
+
+cache implementation
+
+alias: for global variables only? to void inc/dec of reference counting gc
+
+disallow widening conversation sometimes?
+x := <some int>
+x += i32 * i32 (if i32 * i32 results in a i32, then it's a problem)
+
+ARM neon intrisics like c# ?
 
 work on playground
 https://go.dev/play/
 
-https://codemirror.net/
+https://news.ycombinator.com/item?id=40940225
+WebVM is a server-less virtual Linux environment running client-side
+
 
 https://thomasmueller.github.io/bau-lang/
 
@@ -48,7 +93,7 @@ pthread.h
 ---------------------------------
 
 https://github.com/bazelbuild/starlark
-- randomize the iteration order of a dictionary: optional?
+- randomize the iteration order of a dictionary: optional? to simplify unit tests
 - No mutation during iteration
 - x < y > z (no chained operators)
 
@@ -60,7 +105,7 @@ constexpr int n = std::numeric_limits<int>::max(); // OK: max() is constexpr
 function needs to be defined, not just declared:
 a function call to a constexpr function which is declared, but not defined
 
-throwing exceptions or executing the assembly is 
+throwing exceptions or executing the assembly is
 disallowed in a constant expression.
 
 no observable side-effect is permitted.
@@ -134,8 +179,6 @@ https://ryjo.codes/tour-of-clips.html
 
 # This
 
-Get rid of "this" as a keyword?
-
 A) ensure that fields can not be hidden by parameters and variables?
 B) use ".": .radius * .radius; parameters setColor(color int) { .color = color }
 
@@ -201,11 +244,11 @@ type Address
 
 a : int        -- value type, 64 bit
 a : address    -- value type, user defined
-a : Address    -- unique_ptr (the memory is released once the loop repeats, 
-                              the loop exits, or the method returns; 
+a : Address    -- unique_ptr (the memory is released once the loop repeats,
+                              the loop exits, or the method returns;
                               unless it is assigned to another pointer)
-                              The drop function in Rust is a special function 
-                              that is automatically called when an 
+                              The drop function in Rust is a special function
+                              that is automatically called when an
                               owned value goes out of scope.
 a : Address?   -- reference to a value that might might not exist or was deleted
 
@@ -228,8 +271,8 @@ call deconstructor
 If a type has new/delete methods, then the object is automatically
 deleted.
 The new() method is called after initialization, and delete() when
-it is no longer assigned (e.g. goes out of scope). 
-It can only be assigned to one variable. 
+it is no longer assigned (e.g. goes out of scope).
+It can only be assigned to one variable.
 
 type File
   fp i64
@@ -270,7 +313,7 @@ example: sort(list, compare)
 
 # Private vs Public
 
-(isn't the question actually: final or not final? why can't final properties be public? 
+(isn't the question actually: final or not final? why can't final properties be public?
 C# supports readonly. could we make properties read-only public?)
 Java: yes
 C++: yes (friend)
@@ -281,10 +324,10 @@ Ruby: yes but not fully (just more complicated)
 Javascript: yes (public by default)
 Rust: yes (private by default, public; within module)
 Go: public if uppercase, private if lowercase
-“Private” instance variables that cannot be accessed except from inside an object, 
-don’t exist in Python. However, there is a convention that is followed by most Python code: 
-a name prefixed with an underscore (e.g. _spam) should be treated 
-as a non-public part of the API (whether it is a function, a method or a data member). 
+“Private” instance variables that cannot be accessed except from inside an object,
+don’t exist in Python. However, there is a convention that is followed by most Python code:
+a name prefixed with an underscore (e.g. _spam) should be treated
+as a non-public part of the API (whether it is a function, a method or a data member).
 It should be considered an implementation detail and subject to change without notice.
 
 # Annotations
@@ -337,11 +380,11 @@ Do we also want conditional return? return 123 if ... ?
     while exp do block end
     repeat block until exp
     if exp then block {elseif exp then block} [else block] end
-    
+
     goto Name
     break
     return [explist] [‘;’]
-    
+
     for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
     for namelist in explist do block end
     functioncall
@@ -365,10 +408,10 @@ List<int> fibNumbers = [0, 1, 1, 2, 3, 5, 8, 13];
 foreach (int element in fibNumbers) {
     Console.Write($"{element} ");
 }
-A type has the public parameterless GetEnumerator method. 
+A type has the public parameterless GetEnumerator method.
   The GetEnumerator method can be a type's extension method.
-The return type of the GetEnumerator method has the public 
-  Current property and the public parameterless 
+The return type of the GetEnumerator method has the public
+  Current property and the public parameterless
   MoveNext method whose return type is bool.
 
 # Keywords
@@ -389,16 +432,16 @@ continue     for          import       return       var
 
 MyLang
 if           elif         else         while        break
-not          and          or           return       
-catch        throw 
-continue?   
+not          and          or           return
+catch        throw
+continue?
 
 
 # Functions
 
 annotations
 - side effect free functions? (also for the reader)
-- ensure that return value is consumed? seems we don't need, as we have exceptions. 
+- ensure that return value is consumed? seems we don't need, as we have exceptions.
   but e.g. read(file) returns an integer... we could use "tryRead" and "readFully"
 
 # Null
@@ -455,9 +498,9 @@ what if:
 # Value Types
 
 pass an out-of-range int
-https://openjdk.org/jeps/8316779 
-  "It's easy to, say, interpret a double with the wrong units, 
-  pass an out-of-range int to a library method, 
+https://openjdk.org/jeps/8316779
+  "It's easy to, say, interpret a double with the wrong units,
+  pass an out-of-range int to a library method,
   or fail to keep two boolean flags together in the right order."
 
 # Operators
@@ -502,7 +545,7 @@ We could do operator overloading for the following?
 =, !=, >=, >, <=
 
 but not
-+ - * 
++ - *
 
 precedence
 
@@ -521,7 +564,7 @@ if not empty()
 
 fun u1(x u8) u1
   return x
-  
+
 let eFloat: Float = 2.71828
 eFloat: f8(2.71828)
 
@@ -576,7 +619,7 @@ exception class could be a map?
 
 Swift: func processFile(filename: String) throws { ...
 
-Go:    
+Go:
 
 body, err := iotuil.ReadFile("file.txt")
 if err != nil {
@@ -613,7 +656,7 @@ read() : i32, throws
     break feof(fp)
     print(c)
   fclose(fp)
-  
+
   catch e
     log(e)
     throw e
@@ -641,11 +684,11 @@ fp = fopen('file.txt', 'r') or throw
 
 int main () {
    FILE *fp;
-   int c; 
+   int c;
    fp = fopen("file.txt","r");
    while(1) {
       c = fgetc(fp);
-      if( feof(fp) ) { 
+      if( feof(fp) ) {
          break ;
       }
       printf("%c", c);
@@ -671,7 +714,7 @@ false
 compile-time evaluation of user-defined functions
 
 # Enum
-- just constants? define? data types? 
+- just constants? define? data types?
 - user defined ranges, or conditions?
 Pascal:
   type
@@ -720,7 +763,7 @@ Objects that are shared a lot.
 Only possible for value objects, like string,
 that do not have pointers to other objects.
 Ref-countered pointer (like std::shared_ptr).
-Constant (e.g. string constant) could be implemented 
+Constant (e.g. string constant) could be implemented
 with a special counter value (integer.max, or 0).
 
 ## Value Type
@@ -730,11 +773,11 @@ b : StringShort
 ## String
 
 - string constants (any constants) don't need ref counters
-- string could be be ref counted 
+- string could be be ref counted
   because they don't have pointers
   *and* they are immutable
 - we _could_ support interned strings (stored in hash table)
-  but (unless if we always do that, and that would be slow), 
+  but (unless if we always do that, and that would be slow),
   this would require a "s = s.intern()" call (like in Java)
   but this would still be ref counted
 
@@ -761,7 +804,7 @@ f() {
 g() {
   delete a  // must not be allowed
 }
-... each access(!) must check the generation, 
+... each access(!) must check the generation,
     _except_ if the generation may not have been was changed
 
 preference of value-based datatypes allocated on the stack
@@ -773,7 +816,7 @@ https://verdagon.dev/grimoire/grimoire
 
 The Stack
 
-special memory management code using arrays and generations and check if generation matches: 
+special memory management code using arrays and generations and check if generation matches:
 is it complicated? is it worth it?
 
 - index into global array
@@ -800,7 +843,7 @@ drop / delete
 how often is assert used in practise? answer: not often
 
 assert as a statement?
-assert 
+assert
 assert(...)
 if it's a function call, then the expression is always evaluated, but we do not want this
 if assertTrue <statement>
@@ -854,7 +897,7 @@ fun sort(a u8[], compare fun(a u8, b u8))
 fun sort(a u8[8], compare fun(a u8, b u8))
 fun sort(a [u8], compare fun(a u8, b u8))
 fun sort(a [type], compare fun(a type, b type))
-  
+
 if x = 1
   print('one')
 else x = 2
@@ -885,7 +928,7 @@ x, y = y, x
 Logical Operators
 
     and, or, and not
-    
+
 Precedence
 
 
@@ -906,7 +949,7 @@ Visibility Rules
        print(x)            --> 11
      end
      print(x)              --> 10  (the global one)
-     
+
      a = {}
      local x = 20
      for i = 1, 10 do
@@ -923,10 +966,10 @@ def factorial(x):
     if x <= 1:
         return 1
     return x * factorial(x - 1)
-    
+
 def factorial(x):
     return 1 if x <= 1 else x * factorial(x - 1)
-    
+
 Rust:
 let x: Typ = Wert;
 let mut v: Typ;
@@ -939,10 +982,10 @@ fn fakultaet(i: u64) -> u64 {
     }
     acc
 }
-  
+
 https://en.wikipedia.org/wiki/Foreach_loop
 Lua:    for index, value in pairs(array) do
-Python: for i, item in enumerate(seq):  
+Python: for i, item in enumerate(seq):
 
 
 for a, :1, <10, +:1
@@ -955,7 +998,7 @@ elif x = 2
 
 macro for A, B, C
   D
-  
+
 
 
 
@@ -994,7 +1037,7 @@ int main() {
                 printf("z too large \n");
                 exit(1);
             }
-            
+
             sum += buffer[z];
         }
     }
@@ -1005,7 +1048,7 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &end);
     unsigned long long elapsed_ns = (end.tv_sec - start.tv_sec) * 1000000000 + (end.tv_nsec - start.tv_nsec);
     printf("Elapsed time: %llu nanoseconds Sum of %zu bytes: %llu\n", elapsed_ns, num_bytes, sum);
-    
+
     }
     free(buffer);
     return 0;
@@ -1016,7 +1059,7 @@ int main() {
 
 
 grep -R --include="*.java" "<<" . | wc -l
-grep -E -R --include="*.java" " \(int\) " . 
+grep -E -R --include="*.java" " \(int\) " .
 
 
 56138 "^ + [A-Za-z<>]+ [a-zA-Z0-9]+ = " (initial assignment)
@@ -1037,9 +1080,9 @@ grep -E -R --include="*.java" " \(int\) " .
 2197  "'.'"
 268   "'\\\\.'"
 
-      
+
 5708  " == "
-5073  " != " 
+5073  " != "
 2869  " < "
 1679  " > "
 575   " >= "
@@ -1069,7 +1112,7 @@ grep -E -R --include="*.java" " \(int\) " .
 
 7313  "  for ?\("
 5114  "  for ?\(.*:"
-2188  "  for ?\(.*;.*;" 
+2188  "  for ?\(.*;.*;"
 2019  "  for ?\(.*;.*;.*\+\+"
 
 2005  "  for ?\( ?String.*:"
@@ -1131,7 +1174,7 @@ grep -E -R --include="*.java" " \(int\) " .
 2613  '\\"'   ( \" )
  345  '\\\\'  ( \\ )
  150  "\\\\'" ( \' )
-1543  '\\n'  
+1543  '\\n'
  161  '\\t'
   83  '\\u'
   43  '\\r'

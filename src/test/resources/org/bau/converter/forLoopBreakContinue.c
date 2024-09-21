@@ -28,6 +28,21 @@ void int_array_free(int_array* x) {
     _free(x);
 }
 int main() {
+    while (1 == 1) {
+        int64_t a = 0;
+        while (a < 10) {
+            if (a == 5) {
+                break;
+            }
+            if (a == 2) {
+                goto continue2;
+            }
+            printf("%lld\n", a);
+            continue2:;
+            a += 1;
+        }
+        break;
+    }
     _end();
     return 0;
 }

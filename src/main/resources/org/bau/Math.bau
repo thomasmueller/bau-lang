@@ -250,9 +250,15 @@ fun convertLongBitsToDouble(x int) f64
     else
         result += 1
     exp -= 1023
+    while exp <= -32
+        result /= 1 << 32
+        exp += 32
     while exp < 0
         result /= 2
         exp += 1
+    while exp >= 32
+        result = result * (1 << 32)
+        exp -= 32
     while exp > 0
         result += result
         exp =- 1
@@ -277,11 +283,101 @@ fun convertDoubleToLongBits(x f64) int
     if isNotANumber(x)
         return (0x7ff << 52) + (1 << 51)
     exp := 0
+    while x >= (1 << 32)
+        exp += 32
+        x /= 1 << 32
     while x >= 2
         exp += 1
         x /= 2
+    while x < (1.0 / (1 << 32)) and exp > -1022 + 32
+        exp -= 32
+        x *= 1 << 32
     while x < 1 and exp > -1022
         exp -= 1
         x += x
     fraction := int(x * (1 << 52)) << 11 >> 11
     return ((exp + 1022) << 52) + fraction
+
+fun appendInt(n int, buff i8[], pos int) int
+    if n < 0
+        buff[pos] = ord('-')
+        pos += 1
+    else
+        n = -n
+    start := pos
+    while 1
+        buff[pos] = ord('0') - (n % 10)
+        pos += 1
+        n /= 10
+        break n = 0
+    end : pos
+    while pos > start
+        pos -= 1
+        temp : buff[pos]
+        buff[pos] = buff[start]
+        buff[start] = temp
+        start += 1
+    return end
+
+fun intToString(n int) i8[]
+    buff : new(i8[], 20)
+    pos := appendInt(n, buff, 0)
+    result : new(i8[], pos)
+    for j := until(pos)
+        result[j] = buff[j]
+    return result
+
+fun appendF64(n f64, buff i8[], pos int) int
+    e := 0
+    if n >= 1e8 or n <= 1e-3
+        while n > 1e20
+            n /= 1e20
+            e += 20
+        while n < 1e-20
+            n *= 1e20
+            e -= 20
+        while n >= 10
+            n /= 10
+            e += 1
+        while n < 1
+            n *= 10
+            e -= 1
+        pos = appendF64(n, buff, pos)
+        buff[pos] = ord('E')
+        pos += 1
+        pos = appendInt(e, buff, pos)
+        return pos
+    pos = appendInt(int(n), buff, pos)
+    buff[pos] = ord('.')
+    pos += 1
+    n = (n - int(n)) * 10
+    y := int(n * 100_000_000_000_000_000)
+    for i := until(19)
+        break y <= 0
+        x := y / 100_000_000_000_000_000
+        buff[pos] = ord('0') + (x % 10)
+        pos += 1
+        y -= x * 100_000_000_000_000_000
+        y *= 10
+    return pos
+
+fun f64ToString(n f64) i8[]
+    if isNotANumber(n)
+        return 'NaN'
+    if n = POS_INFINITY
+        return 'Infinity'
+    if n = NEG_INFINITY
+        return '-Infinity'
+    buff : new(i8[], 30)
+    pos := 0
+    if n < 0
+        buff[pos] = ord('-')
+        pos += 1
+        n = -n
+    else
+    end : appendF64(n, buff, pos)
+    result : new(i8[], end)
+    for j := until(end)
+        result[j] = buff[j]
+    return result
+

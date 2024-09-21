@@ -1,0 +1,40 @@
+enum weekday
+    sunday:    0
+    monday
+    tuesday
+    wednesday: 3
+    thursday
+    friday
+    saturday
+
+fun get(a int) int
+    println('day ' a)
+    return a
+
+for a := until(weekday.saturday + 1)
+    switch get(a)
+    case weekday.sunday
+        println('...is sunday')
+    case weekday.monday
+        println('...is monday')
+    case weekday.tuesday,
+        weekday.wednesday
+        println('...is tuesday or wednesday')
+    else
+        println('...is some other day')
+
+## Expected
+day 0
+...is sunday
+day 1
+...is monday
+day 2
+...is tuesday or wednesday
+day 3
+...is tuesday or wednesday
+day 4
+...is some other day
+day 5
+...is some other day
+day 6
+...is some other day

@@ -13,7 +13,7 @@ public class StringLiteral implements Expression {
     ValueI8Array array;
     DataType type;
     long reference;
-    
+
     public StringLiteral(String value, DataType type, long reference) {
         this.value = value;
         this.type = type;
@@ -21,17 +21,18 @@ public class StringLiteral implements Expression {
         byte[] data = value.getBytes(StandardCharsets.UTF_8);
         this.array = new ValueI8Array(data);
     }
-    
+
     @Override
     public Value eval(Memory memory) {
-        return array;
+        long heapId = memory.putHeap(array);
+        return new Value.ValueRef(heapId);
     }
 
     @Override
     public DataType type() {
         return type;
     }
-    
+
     public DataType canThrowException() {
         return null;
     }
@@ -39,11 +40,11 @@ public class StringLiteral implements Expression {
     public String toC() {
         return "string_" + reference;
     }
-    
+
     public Expression replace(Variable old, Expression with) {
         return this;
     }
-    
+
     public static String escape(String s) {
         byte[] utf8 = s.getBytes(StandardCharsets.UTF_8);
         StringBuilder buff = new StringBuilder();
@@ -69,7 +70,7 @@ public class StringLiteral implements Expression {
         }
         return buff.toString();
     }
-    
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append('\'');
@@ -77,27 +78,27 @@ public class StringLiteral implements Expression {
         buff.append('\'');
         return buff.toString();
     }
-    
+
     @Override
     public boolean isEasyToRead() {
         return true;
     }
-    
+
     @Override
     public Bounds getBounds() {
         return null;
     }
-    
+
     @Override
     public Expression simplify() {
         return this;
     }
-    
+
     @Override
     public boolean isSimple() {
         return true;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;

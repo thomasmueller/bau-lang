@@ -15,3 +15,9 @@ println('odd(10)=' odd(10))
 println('even(10)=' even(10))
 println('odd(11)=' odd(11))
 println('even(11)=' even(11))
+
+## Expected
+odd(10)=0
+even(10)=1
+odd(11)=1
+even(11)=0

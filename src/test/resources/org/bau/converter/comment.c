@@ -27,7 +27,98 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+typedef struct List_int List_int;
+struct List_int {
+    int_array* array;
+    int64_t size;
+    int32_t _refCount;
+};
+List_int* List_int_new() {
+    List_int* result = _malloc(sizeof(List_int));
+    _traceMalloc(result);
+    result->_refCount = 1;
+    result->array = 0;
+    result->size = 0;
+    return result;
+}
+void List_int_add_2(List_int* this, int64_t x);
+int64_t idx_2(int64_t x, int64_t len);
+void test_0();
+void List_int_free(List_int* x) {
+    _decUse(x->array, int_array);
+    _free(x);
+}
+void List_int_add_2(List_int* this, int64_t x) {
+    if (this->size >= this->array->len) {
+        int_array* n = int_array_new(this->array->len * 2);
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                n->data[idx_2(i, n->len)] = this->array->data[idx_2(i, this->array->len)];
+                continue1:;
+                int64_t _next = i + 1;
+                if (_next >= this->size) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+        _decUse(this->array, int_array);
+        this->array = n;
+    }
+    this->array->data[idx_2(this->size, this->array->len)] = x;
+    this->size += 1;
+}
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
+void test_0() {
+    List_int* list = List_int_new();
+    _decUse(list->array, int_array);
+    list->array = int_array_new(1);
+    while (1 == 1) {
+        int64_t i = 0;
+        while (i < 10) {
+            List_int_add_2(list, i);
+            continue1:;
+            i += 1;
+        }
+        break;
+    }
+    while (1 == 1) {
+        int64_t i = 0;
+        while (1) {
+            printf("%lld\n", list->array->data[idx_2(i, list->array->len)]);
+            continue3:;
+            int64_t _next = i + 1;
+            if (_next >= list->size) {
+                break;
+            }
+            i = _next;
+        }
+        break;
+    }
+    _decUse(list, List_int);
+}
 int main() {
+    test_0();
     _end();
     return 0;
 }
+/*
+
+type List(T)
+A list of entries
+##
+
+fun List(T) add(x T)
+Add an entry to the list
+##
+
+fun test()
+Test function
+
+*/

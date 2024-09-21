@@ -17,3 +17,6 @@ fun test()
       println(b.data)
 
 test()
+
+## Expected
+10

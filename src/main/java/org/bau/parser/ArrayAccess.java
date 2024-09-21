@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 
+import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValuePanic;
@@ -24,11 +25,12 @@ public class ArrayAccess implements Expression, LeftValue {
         Value val = base.eval(memory);
         Value idx = arrayIndex.eval(memory);
         if (val != null && idx != null) {
-            if (val.isArray()) {
+            Value array = memory.getHeap(val.longValue());
+            if (array.isArray()) {
                 int index = idx.intValue();
-                long len = val.len().longValue();
+                long len = array.len().longValue();
                 if (index < 0 || index >= len) {
-                    String message = "Array index " + index 
+                    String message = "Array index " + index
                             + " is out of bounds for the array length " + len;
                     Value v = new ValuePanic(message);
                     memory.print(v);
@@ -36,12 +38,12 @@ public class ArrayAccess implements Expression, LeftValue {
                     memory.setGlobal(Memory.PANIC, v);
                     return v;
                 }
-                return val.get(index);
+                return array.get(index);
             }
         }
         return null;
     }
-    
+
     public String assignmentC() {
         StringBuilder buff = new StringBuilder();
         buff.append(base.toC());
@@ -61,7 +63,7 @@ public class ArrayAccess implements Expression, LeftValue {
         }
         return buff.toString();
     }
-    
+
     @Override
     public String decrementRefCountC() {
         if (base.type().isPointer()) {
@@ -97,7 +99,7 @@ public class ArrayAccess implements Expression, LeftValue {
         }
         return new ArrayAccess(b2, i2, checkBounds);
     }
-    
+
     public String toString() {
         return base + "[" + arrayIndex + "]";
     }
@@ -131,7 +133,7 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public Bounds getBounds() {
         return null;
-    }  
+    }
 
     @Override
     public Expression simplify() {
@@ -143,44 +145,45 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void addBoundCondition(Expression scope, String operation, Expression right) {        
+    public void addBoundCondition(Expression scope, String operation, Expression right) {
     }
-    
+
     @Override
     public boolean isSimple() {
         return false;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         arrayIndex = arrayIndex.writeStatements(parser, target);
         return this;
     }
-    
+
     @Override
     public boolean needToDecrementRefCountOnFree() {
         return needToDecrementRefCountOnFree;
     }
-    
+
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
     }
 
     @Override
-    public Value setValue(Memory memory, Value val) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount) {
         Value indexValue = arrayIndex.eval(memory);
         if (indexValue == null) {
             throw new IllegalStateException();
         }
+        int index = indexValue.intValue();
         Value baseVal = base.eval(memory);
         if (baseVal == null) {
             throw new IllegalStateException();
         }
-        int index = indexValue.intValue();
-        long len = baseVal.len().longValue();
+        Value array = memory.getHeap(baseVal.longValue());
+        long len = array.len().longValue();
         if (index < 0 || index >= len) {
-            String message = "Array index " + index + 
+            String message = "Array index " + index +
                     " is out of bounds for the array length " + len;
             ValuePanic v = new ValuePanic(message);
             memory.print(v);
@@ -188,7 +191,21 @@ public class ArrayAccess implements Expression, LeftValue {
             memory.setGlobal(Memory.PANIC, v);
             return v;
         }
-        baseVal.set(index, val);
+        if (type().isPointer() || type().isArray()) {
+            Value old = baseVal.get(index);
+            if (old != null) {
+                StatementResult result = Free.decRefCount(old, type(), memory);
+                if (result == StatementResult.PANIC) {
+                    return memory.getGlobal(Memory.PANIC);
+                }
+            }
+            array.set(index, val);
+            if (incRefCount) {
+                memory.incHeap(val.longValue());
+            }
+        } else {
+            array.set(index, val);
+        }
         return null;
     }
 

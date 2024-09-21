@@ -18,10 +18,10 @@ public class TestParser {
             // ok
         }
     }
-    
+
     @Test
     public void longLines() {
-        assertEquals("a : 1 + 1\n"
+        assertEquals("a : 2\n"
                 + "println('Hello ', 'world')\n"
                 + "",
                 new Parser("""
@@ -34,14 +34,14 @@ public class TestParser {
 
     @Test
     public void test() {
-        
+
         assertEquals("""
 a := 1
 while 1
     break a > 10
     println('hello ', a)
 println('end')
-                """, 
+                """,
                 new Parser("a:=1; while 1 { break a>10; println('hello ', a); } println('end');").parse().toString());
         assertEquals("""
 a := 1
@@ -51,13 +51,13 @@ while 1
     println(a)
     a += 1
 println('end')
-                """, 
-                new Parser("a:=1\n" + 
-                        "while 1\n" + 
-                        "  break a>10\n" + 
+                """,
+                new Parser("a:=1\n" +
+                        "while 1\n" +
+                        "  break a>10\n" +
                         "  continue a<10\n" +
-                        "  println(a)\n" + 
-                        "  a+=1\n" + 
+                        "  println(a)\n" +
+                        "  a+=1\n" +
                         "println('end')\n").parse().toString());
         assertEquals("""
 a := 1
@@ -68,19 +68,19 @@ elif a = 1
 else
     println('other')
 println('done')
-                """, 
-                new Parser("a:= 1\n" + 
+                """,
+                new Parser("a:= 1\n" +
                         "if a=0\n" +
-                        "  println('zero')\n" + 
-                        "elif a=1\n" + 
-                        "  println('one')\n" + 
-                        "else\n" + 
-                        "  println('other')\n" + 
+                        "  println('zero')\n" +
+                        "elif a=1\n" +
+                        "  println('one')\n" +
+                        "else\n" +
+                        "  println('other')\n" +
                         "println('done')").parse().toString());
-        assertEquals("a : 7 & 5\n",
+        assertEquals("a : 5\n",
                 new Parser("a : 1 + 2 * 3 & 5").parse().toString());
     }
-    
+
     @Test
     public void function() {
         assertEquals("""
@@ -90,12 +90,12 @@ while 1
     println(a)
     a += 1
 println('end')
-                """, 
-                new Parser("a:=1\n" + 
-                        "while 1\n" + 
-                        "  break a>10\n" + 
-                        "  println(a)\n" + 
-                        "  a+=1\n" + 
+                """,
+                new Parser("a:=1\n" +
+                        "while 1\n" +
+                        "  break a>10\n" +
+                        "  println(a)\n" +
+                        "  a+=1\n" +
                         "println('end')\n").parse().toString());
     }
 }

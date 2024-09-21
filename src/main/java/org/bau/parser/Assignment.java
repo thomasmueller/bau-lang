@@ -13,7 +13,7 @@ public class Assignment implements Statement {
     String modify;
     Expression value;
     boolean isGlobalScope;
-    
+
     @Override
     public Assignment replace(Variable old, Expression with) {
         LeftValue l2 = (LeftValue) leftValue.replace(old, with);
@@ -30,18 +30,23 @@ public class Assignment implements Statement {
         c.value = v2;
         return c;
     }
-    
+
     @Override
     public void setBounds(Expression scope) {
-        if (initial) { 
-            leftValue.setBoundValue(scope, "=", leftValue);
+        if (initial) {
+            leftValue.setBoundValue(scope, "=", value);
         } else {
+            // TODO update bounds
             //leftValue.setBoundValue(scope, modify, value);
         }
     }
-    
+
     @Override
     public StatementResult run(Memory m) {
+        boolean incRefCount = true;
+        if (value instanceof Call) {
+            incRefCount = false;
+        }
         Value val = value.eval(m);
         if (val != null) {
             if (val instanceof ValuePanic) {
@@ -56,9 +61,9 @@ public class Assignment implements Statement {
                     throw new IllegalStateException();
                 }
                 Value v2 = Operation.eval(leftValue.type(), old, modify, val);
-                panic = leftValue.setValue(m, v2);
+                panic = leftValue.setValue(m, v2, incRefCount);
             } else {
-                panic = leftValue.setValue(m, val);
+                panic = leftValue.setValue(m, val, incRefCount);
             }
             if (panic != null) {
                 m.setGlobal(Memory.PANIC, val);
@@ -67,7 +72,7 @@ public class Assignment implements Statement {
         }
         return StatementResult.OK;
     }
-    
+
     public String toC(ProgramContext context) {
         StringBuilder buff = new StringBuilder();
         if (!initial) {
@@ -108,11 +113,13 @@ public class Assignment implements Statement {
         }
         buff.append(";\n");
         if (value instanceof Call || value instanceof New) {
+            // TODO toC method should not modify state
             leftValue.needToDecrementRefCountOnFree(true);
         } else {
             boolean needInc = true;
             if (value instanceof LeftValue) {
                 LeftValue var = (LeftValue) value;
+                // TODO toC method should not modify state
                 if (var.needToDecrementRefCountOnFree()) {
                     var.needToDecrementRefCountOnFree(false);
                     needInc = false;
@@ -124,8 +131,8 @@ public class Assignment implements Statement {
             }
         }
         return buff.toString();
-    }    
-    
+    }
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append(leftValue);
@@ -144,5 +151,5 @@ public class Assignment implements Statement {
         buff.append("\n");
         return buff.toString();
     }
-    
+
 }

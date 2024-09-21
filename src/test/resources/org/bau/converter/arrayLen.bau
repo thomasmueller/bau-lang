@@ -7,3 +7,7 @@ fun test()
   printLen(data)
 
 test()
+
+## Expected
+10
+10

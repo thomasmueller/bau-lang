@@ -171,6 +171,21 @@ public class TestCompare {
     }
 
     @Test
+    public void sort() throws IOException {
+        test("sort");
+    }
+
+    @Test
+    public void string() throws IOException {
+        test("string");
+    }
+
+    @Test
+    public void string2() throws IOException {
+        test("string2");
+    }
+
+    @Test
     public void throwCatch() throws IOException {
         test("throwCatch");
     }

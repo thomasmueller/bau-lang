@@ -8,3 +8,6 @@ fun test()
   println(sum)
 
 test()
+
+## Expected
+Panic: Array index 10 is out of bounds for the array length 10

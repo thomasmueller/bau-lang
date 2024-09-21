@@ -12,3 +12,16 @@ while i <= 10
   catch e
     println('Error: ' e.message)
   i += 1
+
+## Expected
+x = 0
+x = 1
+x = 2
+x = 3
+x = 4
+x = 5
+Error: Value too large
+Error: Value too large
+Error: Value too large
+Error: Value too large
+Error: Value too large

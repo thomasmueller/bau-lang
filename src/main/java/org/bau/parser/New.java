@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueInt;
+import org.bau.runtime.Value.ValueRef;
 import org.bau.runtime.Value.ValueStruct;
 
 public class New implements Expression {
-    
+
 	final DataType type;
 	Expression arrayLength;
-    
+
     New(DataType type, Expression arrayLength) {
     	this.type = type;
     	this.arrayLength = arrayLength;
@@ -19,6 +20,7 @@ public class New implements Expression {
 
     @Override
     public Value eval(Memory memory) {
+        Value result;
         if (type.isArray()) {
             Value len = arrayLength.eval(memory);
             if (len == null) {
@@ -28,33 +30,45 @@ public class New implements Expression {
             if (type.baseType().isSystem()) {
                 switch (type.baseType().name()) {
                 case DataType.I32:
-                    return new Value.ValueI32Array(l);
+                    result = new Value.ValueI32Array(l);
+                    break;
                 case DataType.I8:
-                    return new Value.ValueI8Array(new byte[l]);
+                    result = new Value.ValueI8Array(new byte[l]);
+                    break;
                 default:
-                    return new Value.ValueArray(l, ValueInt.ZERO);
+                    result = new Value.ValueArray(l, ValueInt.ZERO);
+                    break;
                 }
             } else {
-                return new Value.ValueArray(l, new Value.ValueStruct());
+                result = new Value.ValueArray(l, new Value.ValueStruct());
             }
+            long heapId = memory.putHeap(result);
+            return new ValueRef(heapId);
+        } else {
+            ValueStruct struct = new Value.ValueStruct();
+            for (Variable f : type.fields) {
+                struct.set(f.name, f.type.getZeroValue());
+            }
+            result = struct;
         }
-        ValueStruct struct = new Value.ValueStruct();
-        for (Variable f : type.fields) {
-            struct.set(f.name, f.type.getZeroValue());
+        if (type.isArray() || type.isPointer()) {
+            long heapId = memory.putHeap(result);
+            return new ValueRef(heapId);
+        } else {
+            return result;
         }
-        return struct;
     }
 
     @Override
     public DataType type() {
         return type;
     }
-    
+
     public Expression replace(Variable old, Expression with) {
         New c = new New(type, arrayLength.replace(old, with));
         return c;
     }
-    
+
     public DataType canThrowException() {
         return null;
     }
@@ -78,34 +92,34 @@ public class New implements Expression {
         }
         return type.nameC() + "_new()";
     }
-    
+
     public String toString() {
         if (arrayLength != null) {
             return "new " + type.baseType().name() + "[" + arrayLength + "]";
         }
         return "new " + type.name();
     }
-    
+
     @Override
     public boolean isEasyToRead() {
         return false;
     }
-    
+
     @Override
     public Bounds getBounds() {
         return null;
     }
-    
+
     @Override
     public Expression simplify() {
         return this;
     }
-    
+
     @Override
     public boolean isSimple() {
         return false;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         if (arrayLength != null) {

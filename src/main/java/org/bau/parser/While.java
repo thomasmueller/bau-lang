@@ -11,7 +11,7 @@ public class While implements Statement {
     ArrayList<Statement> listContinue = new ArrayList<>();
     List<Statement> autoClose;
     Expression condition;
-    
+
     @Override
     public Statement replace(Variable old, Expression with) {
         While c = new While();
@@ -22,7 +22,7 @@ public class While implements Statement {
         }
         return c;
     }
-    
+
     @Override
     public StatementResult run(Memory m) {
         // TODO this is likely quite slow
@@ -104,7 +104,7 @@ public class While implements Statement {
         }
         for(Statement s : listContinue) {
             buff.append(Statement.indent(s.toString()));
-        }        
+        }
         return buff.toString();
     }
 

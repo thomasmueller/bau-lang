@@ -10,3 +10,6 @@ fun test()
   println(readI32Le(x, 0))
 
 test()
+
+## Expected
+2018915346

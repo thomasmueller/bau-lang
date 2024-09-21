@@ -9,7 +9,7 @@ import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueNull;
 
 public class DataType {
-    
+
     public static final String I8 = "i8";
     public static final String I16 = "i16";
     public static final String I32 = "i32";
@@ -26,7 +26,7 @@ public class DataType {
         INT_TYPE.used();
         INT_TYPE.arrayType.used();
     }
-            
+
     final String module;
     private final String name;
     private final int sizeOf;
@@ -38,7 +38,7 @@ public class DataType {
     public final List<Variable> fields;
     public LinkedHashMap<String, Long> enumValues;
     private DataType baseType;
-    boolean autoClose;
+    FunctionDefinition autoClose;
     final boolean valueType;
     private boolean used;
     Expression maxValue;
@@ -49,11 +49,17 @@ public class DataType {
     public DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields) {
         this(module, name, sizeOf, isSystem, false, fields, false);
     }
-    
+
+    public static boolean isGenericTypeName(String token) {
+        return token != null && !token.isEmpty() &&
+                token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
+                token.toUpperCase().equals(token);
+    }
+
     void used() {
         this.used = true;
     }
-    
+
     public DataType(String module, String name, int sizeOf, boolean isSystem, boolean isArray, List<Variable> fields, boolean isNullable) {
         this.isNullable = isNullable;
         this.module = module;
@@ -79,30 +85,29 @@ public class DataType {
             isFloatingPoint = false;
         }
         baseType = this;
-        this.autoClose = isArray;
         if (!isArray && !valueType && !isSystem && !isNullable) {
             nullableType = new DataType(module, name, sizeOf, false, false, fields, true);
         } else {
             nullableType = null;
         }
     }
-    
+
     public boolean isSystem() {
         return isSystem;
     }
-    
+
     public String fullName() {
         return fullName(module, name);
     }
-    
+
     public String name() {
         return name;
     }
-    
+
     public int sizeOf() {
         return sizeOf;
     }
-    
+
     public DataType baseType() {
         return baseType;
     }
@@ -113,7 +118,7 @@ public class DataType {
         }
         return arrayType;
     }
-    
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append(name);
@@ -131,7 +136,7 @@ public class DataType {
         }
         return buff.toString();
     }
-    
+
     public String nameC() {
         String s;
         if ("i8".equals(name)) {
@@ -194,35 +199,41 @@ public class DataType {
     public DataType orNull() {
         return nullableType;
     }
-    
+
     public boolean isNullable() {
         return isNullable;
     }
-    
+
+    public String getModule() {
+        return module;
+    }
+
     public static String getId(String name, ArrayList<DataType> params) {
         StringBuilder buff = new StringBuilder();
         buff.append(name);
         for (DataType t : params) {
             buff.append('_');
-            buff.append(t.name.replace("[]", "_array"));
+            String fullName = t.fullName();
+            buff.append(fullName.replace('.', '_').replace("[]", "_array"));
+//            buff.append(t.name.replace("[]", "_array"));
         }
         return buff.toString();
     }
-    
+
     public static String fullName(String module, String name) {
-        if (module == null) {
+        if (module == null || name.indexOf('.') > 0) {
             return name;
         }
         return module + "." + name;
     }
-    
+
     public DataType resolveEnumType() {
         if (enumValues != null) {
             return DataType.INT_TYPE;
         }
         return this;
     }
-    
+
     public Value getZeroValue() {
         switch(name) {
         case I8:

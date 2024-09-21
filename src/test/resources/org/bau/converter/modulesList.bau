@@ -7,3 +7,7 @@ list.add(100)
 list.add(80)
 println(list.size)
 println(list.array[0])
+
+## Expected
+2
+100

@@ -1,5 +1,14 @@
-.top {
+/* 
+* { 
+  border: 1px solid black; 
+}
+*/
+
+body {
     margin: 32px;
+}
+
+.top {
     width: 100%;
     font-family: 'Montserrat', sans-serif;
     font-size: 1em;

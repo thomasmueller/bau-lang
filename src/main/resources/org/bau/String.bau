@@ -1,0 +1,128 @@
+module org.bau.String
+
+import org.bau.List
+    List
+    newList
+
+type string
+    data i8[]
+
+fun indexOf(s i8[], find i8[], start int) int
+    if find.len <= 0
+        return -1
+    if s.len <= 0
+        return -1
+    i := 0..s.len
+    if start < 0
+        return -1
+    if start >= s.len
+        return -1
+    i = start
+    while 1
+        j := 0..find.len
+        x := i
+        while 1
+            break s[x]! != find[j]!
+            nj : j + 1
+            if nj >= find.len
+                return i
+            j = nj
+            nx := x + 1
+            break nx >= s.len
+            x = nx
+        ni : i + 1
+        break ni >= s.len
+        i = ni
+    return -1
+
+## 
+fun indexOf1(s i8[], find i8[]) int
+    for i := until(s.len - find.len + 1)
+        j := 0
+        while 1
+            if j = find.len
+                return i
+            break s[i + j] != find[j]
+            j += 1
+    return -1
+##
+
+fun indexOf(s i8[], find i8[]) int
+    return indexOf(s, find, 0)
+
+type StringBuilder
+    data i8[]
+    len int
+
+fun StringBuilder append(b i8[], start int, end int)
+    add : end - start
+    if start >= b.len or end < start or end > b.len
+        return
+    while len + add > data.len
+        n : new(i8[], data.len * 2)
+        for i := until(data.len)
+            n[i] = data[i]
+        data = n
+    for i := until(add)
+        data[len + i] = b[start + i]
+    len += add
+
+fun substring(s i8[], start int, end int) i8[]
+    len : end - start
+    if len < 0 or start < 0 or end > s.len
+        return ''
+    if s.len <= 0
+        return ''
+    i := 0..s.len
+    if start >= s.len
+        return ''
+    i = start
+    result : new(i8[], len)
+    for j := until(len)
+        result[j] = s[i]
+        next := i + 1
+        break next >= s.len
+        i = next
+    return result
+
+fun substring(s i8[], start int) i8[]
+    return substring(s, start, s.len)
+
+fun replaceAll(s i8[], before i8[], after i8[]) i8[]
+    next := indexOf(s, before)
+    if before.len <= 0 or next < 0
+        return s
+    buff := new(StringBuilder)
+    buff.data = new(i8[], s.len)
+    index := 0
+    while 1
+        buff.append(s, index, next)
+        buff.append(after, 0, after.len)
+        index = next + before.len
+        next = indexOf(s, before, index)
+        break next < 0
+    buff.append(s, index, s.len)
+    return buff.data
+
+fun str(s i8[]) string
+    x := new(string)
+    x.data = s
+    return x
+
+fun split(s i8[], delimiter i8[]) List(string)
+    list := newList(string)
+    next := indexOf(s, delimiter)
+    if delimiter.len = 0 or next < 0
+        list.add(str(s))
+        return list
+    index := 0
+    while 1
+        p : substring(s, index, next)
+        list.add(str(p))
+        index = next + delimiter.len
+        next = indexOf(s, delimiter, index)
+        break next < 0
+    p : substring(s, index)
+    list.add(str(p))
+    return list
+

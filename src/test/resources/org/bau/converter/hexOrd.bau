@@ -1,7 +1,9 @@
+##
 fun ord(s i8[]) int
   if s.len <= 0
     return 0
   return s[0]
+##
 
 fun hex(x int, len int) i8[]
   l := len
@@ -22,3 +24,6 @@ fun hex(x int, len int) i8[]
   return data
 
 println(hex(0x12fea234, 8))
+
+## Expected
+12fea234

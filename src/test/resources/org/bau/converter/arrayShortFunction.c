@@ -27,7 +27,30 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+void fill_1(int_array* data);
+void test_0();
+void fill_1(int_array* data) {
+    if (data->len <= 0) {
+        return;
+    }
+    int64_t i = 0;
+    while (1) {
+        data->data[i] = i;
+        int64_t next = i + 1;
+        if (next >= data->len) {
+            break;
+        }
+        i = next;
+    }
+}
+void test_0() {
+    int_array* data = int_array_new(16);
+    fill_1(data);
+    printf("%d\n", 16);
+    _decUse(data, int_array);
+}
 int main() {
+    test_0();
     _end();
     return 0;
 }

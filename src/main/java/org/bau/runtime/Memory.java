@@ -14,12 +14,19 @@ public class Memory {
     private StringBuilder output = new StringBuilder();
     private HashMap<Long, Value> constants = new HashMap<>();
     private HashMap<String, Value> globalVariables = new HashMap<>();
+    private HashMap<Long, HeapEntry> heap = new HashMap<>();
     private ArrayList<HashMap<String, Value>> stack = new ArrayList<>();
     private HashMap<String, Value> localVariables = new HashMap<>();
     private HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
+    private long nextHeapId;
     private boolean evaluateOnlyConstExpr;
     private long ticksRemaining;
+    private long ticksExecuted;
+
+    public Memory() {
+
+    }
 
     public void addFunction(String name, FunctionDefinition function) {
         functions.put(name, function);
@@ -27,6 +34,41 @@ public class Memory {
 
     public FunctionDefinition getFunction(String name) {
         return functions.get(name);
+    }
+
+    public long nextHeapId() {
+        return ++nextHeapId;
+    }
+
+    public Value getHeap(long heapId) {
+        return heap.get(heapId).value;
+    }
+
+    public long putHeap(Value value) {
+        HeapEntry e = new HeapEntry();
+        e.value = value;
+        e.refCount = 0;
+        long heapId = nextHeapId();
+        heap.put(heapId, e);
+        return heapId;
+    }
+
+    public void removeHeap(long heapId) {
+        heap.remove(heapId);
+    }
+
+    public boolean decHeap(long heapId) {
+        if (heapId == 0) {
+            return false;
+        }
+        return --heap.get(heapId).refCount == 0;
+    }
+
+    public void incHeap(long heapId) {
+        if (heapId == 0) {
+            return;
+        }
+        heap.get(heapId).refCount++;
     }
 
     public Value getGlobal(String variable) {
@@ -94,7 +136,12 @@ public class Memory {
         this.ticksRemaining = ticksRemaining;
     }
 
+    public long getTicksExecuted() {
+        return ticksExecuted;
+    }
+
     public boolean tick() {
+        ticksExecuted++;
         if (ticksRemaining == 0) {
             return false;
         }
@@ -103,6 +150,14 @@ public class Memory {
         }
         ticksRemaining--;
         return false;
+    }
+
+    static class HeapEntry {
+        long refCount;
+        Value value;
+        public String toString() {
+            return "(refCount:" + refCount + ", " + value + ")";
+        }
     }
 
 }

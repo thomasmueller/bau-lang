@@ -28,3 +28,12 @@ fun f64 double() f64
     return this + this
 
 println(1.0.double() ' = ' 1.0e0.double())
+
+## Expected
+4 13
+3
+6
+10
+ascii of "0" is 48
+-9223372036854775808 = -9223372036854775808
+2.0 = 2.0

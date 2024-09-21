@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 
+import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -14,12 +15,17 @@ public class Variable implements Expression, LeftValue {
     Value constantValue;
     private boolean needToDecrementRefCountOnFree = true;
     public boolean global;
-    
+
     public Variable(String id, DataType type) {
         this.name = id;
         this.type = type;
+        Expression max = type.maxValue;
+        if (max != null) {
+            bounds = new Bounds();
+            bounds.addCondition(null, "<", max);
+        }
     }
-    
+
     @Override
     public Value eval(Memory memory) {
         if (isConstant && constantValue != null) {
@@ -33,23 +39,23 @@ public class Variable implements Expression, LeftValue {
         }
         return memory.getLocal(name);
     }
-    
+
     public DataType canThrowException() {
         return null;
     }
-    
+
     @Override
     public DataType type() {
         return type;
     }
-    
+
     public Expression replace(Variable old, Expression with) {
         if (name.equals(old.name)) {
             return with;
         }
         return this;
-    }    
-    
+    }
+
     public String toString() {
         return name;
     }
@@ -57,7 +63,7 @@ public class Variable implements Expression, LeftValue {
     public String assignmentC() {
         return name;
     }
-    
+
     public String toC() {
         if (constantValue != null && type.isSystem() && !type.isArray()) {
             StringBuilder buff = new StringBuilder();
@@ -71,7 +77,7 @@ public class Variable implements Expression, LeftValue {
         }
         return name;
     }
-    
+
     @Override
     public String decrementRefCountC() {
         if (type().isPointer() || type().isArray()) {
@@ -89,28 +95,28 @@ public class Variable implements Expression, LeftValue {
         }
         return "";
     }
-    
+
     @Override
     public boolean isEasyToRead() {
         return true;
     }
-    
+
     @Override
     public Bounds getBounds() {
-        if (bounds == null) {
-            Expression max = type.maxValue;
-            if (max != null) {
-                bounds = new Bounds();
-                bounds.addCondition(null, "<", max);
-            }
-        }
+//        if (bounds == null) {
+//            Expression max = type.maxValue;
+//            if (max != null) {
+//                bounds = new Bounds();
+//                bounds.addCondition(null, "<", max);
+//            }
+//        }
         return bounds;
     }
-    
+
     public Bounds getLenBounds() {
         return lenBounds;
     }
-    
+
     @Override
     public Expression simplify() {
         if (isConstant && constantValue != null) {
@@ -118,14 +124,14 @@ public class Variable implements Expression, LeftValue {
         }
         return this;
     }
-    
+
     public void addLenBoundCondition(Expression scope, String operation, Expression expr) {
         if (lenBounds == null) {
             lenBounds = new Bounds();
         }
         lenBounds.addCondition(scope, operation, expr);
     }
-    
+
     public void addBoundCondition(Expression scope, String operation, Expression expr) {
         if (bounds == null) {
             bounds = new Bounds();
@@ -143,12 +149,12 @@ public class Variable implements Expression, LeftValue {
         }
         bounds.setBoundValue(scope, modify, value);
     }
-    
+
     @Override
     public boolean isSimple() {
         return true;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;
@@ -158,19 +164,48 @@ public class Variable implements Expression, LeftValue {
     public boolean needToDecrementRefCountOnFree() {
         return needToDecrementRefCountOnFree;
     }
-    
+
     @Override
     public void needToDecrementRefCountOnFree(boolean value) {
         needToDecrementRefCountOnFree = value;
     }
 
     @Override
-    public Value setValue(Memory memory, Value val) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount) {
         if (global) {
-            memory.setGlobal(name, val);
+            if (type.isPointer() || type.isArray()) {
+                Value old = memory.getGlobal(name);
+                if (old != null) {
+                    StatementResult result = Free.decRefCount(old, type, memory);
+                    if (result == StatementResult.PANIC) {
+                        return memory.getGlobal(Memory.PANIC);
+                    }
+                }
+                memory.setGlobal(name, val);
+                if (incRefCount) {
+                    memory.incHeap(val.longValue());
+                }
+            } else {
+                memory.setGlobal(name, val);
+            }
+        } else {
+            if (type.isPointer() || type.isArray()) {
+                Value old = memory.getLocal(name);
+                if (old != null) {
+                    StatementResult result = Free.decRefCount(old, type, memory);
+                    if (result == StatementResult.PANIC) {
+                        return memory.getGlobal(Memory.PANIC);
+                    }
+                }
+                memory.setLocal(name, val);
+                if (incRefCount) {
+                    memory.incHeap(val.longValue());
+                }
+            } else {
+                memory.setLocal(name, val);
+            }
         }
-        memory.setLocal(name, val);
         return null;
     }
-    
+
 }

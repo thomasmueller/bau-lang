@@ -20,7 +20,7 @@ public class Std {
         DataType f32 = prog.addType(new DataType(null, DataType.F32, 4, true, Collections.emptyList()));
         DataType f64 = prog.addType(new DataType(null, DataType.F64, 8, true, Collections.emptyList()));
         prog.addType(new DataType(null, DataType.TYPE, 8, true, Collections.emptyList()));
-        
+
         FunctionDefinition f = new FunctionDefinition();
         f.name = DataType.INT;
         f.parameters.add(new Variable("x", i64));
@@ -74,7 +74,7 @@ public class Std {
                 + "if (a == 0) return 0;\n"
                 + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
         prog.addFunction(f);
-        
+
         f = new FunctionDefinition();
         f.name = "imod";
         f.parameters.add(new Variable("a", i64));
@@ -86,7 +86,7 @@ public class Std {
                 + "if (a == 0) return 0;\n"
                 + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
         prog.addFunction(f);
-        
+
         f = new FunctionDefinition();
         f.name = "shiftLeft";
         f.parameters.add(new Variable("a", i64));
@@ -95,7 +95,7 @@ public class Std {
         f.returnType = i64;
         f.cCode = "return a << b;\n";
         prog.addFunction(f);
-        
+
         f = new FunctionDefinition();
         f.name = "shiftRight_int";
         f.parameters.add(new Variable("a", i64));
@@ -113,7 +113,7 @@ public class Std {
         f.returnType = i32;
         f.cCode = "return ((uint32_t) a) >> b;\n";
         prog.addFunction(f);
-        
+
         f = new FunctionDefinition();
         f.name = "shiftRight_i16";
         f.parameters.add(new Variable("a", i16));
@@ -143,7 +143,7 @@ public class Std {
                 + "fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
                 + "exit(1);\n";
         prog.addFunction(f);
-        
+
     }
 
     public static void registerRange(Program program) {
@@ -159,7 +159,7 @@ public class Std {
         Program p = parser.parse();
         program.addFunction(p.getFunction(null, null, "range", 2));
     }
-    
+
     public static void registerUntil(Program program) {
         if (program.getFunctionIfExists(null, null, "until", 1) != null) {
             return;
@@ -169,14 +169,14 @@ public class Std {
                 + "    _ := 0 .. lessThan\n"
                 + "    while 1 = 1\n"
                 + "      return _\n"
-                + "      next : _ + 1\n"
-                + "      break next >= lessThan\n"
-                + "      _ = next";
+                + "      _next : _ + 1\n"
+                + "      break _next >= lessThan\n"
+                + "      _ = _next";
         Parser parser = new Parser(type);
         Program p = parser.parse();
         program.addFunction(p.getFunction(null, null, "until", 1));
     }
-    
+
     public static void registerStd(Program program) {
         if (program.getImport("Std") != null) {
             return;
@@ -206,6 +206,6 @@ public class Std {
             return new Value.ValueFloat(m.getLocal("x").get().doubleValue());
         }
         throw new IllegalStateException();
-    }    
+    }
 
 }

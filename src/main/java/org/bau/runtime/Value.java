@@ -12,7 +12,7 @@ public class Value {
     public Number get() {
         throw new IllegalStateException("Not a value");
     }
-    
+
     public int intValue() {
         return get().intValue();
     }
@@ -20,26 +20,26 @@ public class Value {
     public long longValue() {
         return get().longValue();
     }
-    
+
     public double doubleValue() {
         return get().doubleValue();
     }
-    
+
     public Value len() {
         return null;
     }
-    
+
     public void set(int index, Value val) {
         throw new IllegalStateException("Not an array");
-    }      
-    
+    }
+
     public boolean isArray() {
         return false;
     }
-    
+
     public String print() {
         return toString();
-    }    
+    }
 
     public static class ValueI8 extends Value {
         private byte value;
@@ -51,59 +51,59 @@ public class Value {
         }
         public void set(Number v) {
             this.value = v.byteValue();
-        }    
+        }
         public String toString() {
             return String.valueOf(value);
         }
     }
-    
+
     public static class ValueI32 extends Value {
         private int value;
-        
+
         public ValueI32(int value) {
             this.value = value;
         }
-        
+
         public Number get() {
             return value;
         }
         public void set(Number v) {
             this.value = v.intValue();
-        }  
+        }
         public String toString() {
             return String.valueOf(value);
         }
-        
-    }     
-    
+
+    }
+
     public static class ValueI16 extends Value {
         private short value;
-        
+
         public ValueI16(short value) {
             this.value = value;
         }
-        
+
         public Number get() {
             return value;
         }
         public void set(Number v) {
             this.value = v.shortValue();
-        }  
+        }
         public String toString() {
             return String.valueOf(value);
         }
-        
-    }   
-    
+
+    }
+
     public static class ValueNull extends Value {
         public final static ValueNull INSTANCE = new ValueNull();
         private ValueNull() {
         }
         public Number get() {
             return 0;
-        }        
-    }    
-    
+        }
+    }
+
     public static class ValueException extends Value {
         public String message;
         public ValueException(String message) {
@@ -111,9 +111,9 @@ public class Value {
         }
         public String toString() {
             return "Exception: " + message;
-        }        
+        }
     }
-    
+
     public static class ValuePanic extends Value {
         public String message;
         public ValuePanic(String message) {
@@ -121,15 +121,37 @@ public class Value {
         }
         public String toString() {
             return "Panic: " + message;
-        }        
-    }    
-    
+        }
+    }
+
+    public static class ValueRef extends Value {
+        private long heapId;
+
+        public static final ValueRef NULL = new ValueRef(0);
+
+        public ValueRef(long heapId) {
+            this.heapId = heapId;
+        }
+        public Number get() {
+            return heapId;
+        }
+        public void set(Number v) {
+            this.heapId = v.longValue();
+        }
+        public String print() {
+            return String.valueOf("*" + heapId);
+        }
+        public String toString() {
+            return String.valueOf("*" + heapId);
+        }
+    }
+
     public static class ValueInt extends Value {
         private long value;
-        
+
         public static final ValueInt ZERO = new ValueInt(0);
         public static final ValueInt ONE = new ValueInt(1);
-        
+
         public ValueInt(long value) {
             this.value = value;
         }
@@ -145,28 +167,49 @@ public class Value {
         public String toString() {
             return NumberValue.toC(value);
         }
-    }   
+    }
 
     public static class ValueFloat extends Value {
         private double value;
-        
+
         public ValueFloat(double value) {
             this.value = value;
         }
         public Number get() {
             return value;
         }
+        public int intValue() {
+            if (Double.isNaN(value)) {
+                return 0;
+            } else if (value == Double.POSITIVE_INFINITY) {
+                return Integer.MAX_VALUE;
+            } else if (value == Double.NEGATIVE_INFINITY) {
+                return Integer.MIN_VALUE;
+            }
+            return get().intValue();
+        }
+
+        public long longValue() {
+            if (Double.isNaN(value)) {
+                return 0;
+            } else if (value == Double.POSITIVE_INFINITY) {
+                return Long.MAX_VALUE;
+            } else if (value == Double.NEGATIVE_INFINITY) {
+                return Long.MIN_VALUE;
+            }
+            return get().longValue();
+        }
         public void set(Number v) {
             this.value = v.floatValue();
-        }  
+        }
         public String toString() {
             return NumberValue.toC(value);
         }
         public double doubleValue() {
             return value;
         }
-    }    
-    
+    }
+
     public static class ValueArray extends Value {
         final Value[] array;
         public ValueArray(int len, Value init) {
@@ -184,11 +227,11 @@ public class Value {
         public Value len() {
             return new ValueI32(array.length);
         }
-        
+
         public boolean isArray() {
             return true;
-        }        
-        
+        }
+
     }
 
     public static class ValueI8Array extends Value {
@@ -213,16 +256,16 @@ public class Value {
             }
             return buff.toString();
         }
-        
+
         public Value len() {
             return new ValueI32(array.length);
         }
         public boolean isArray() {
             return true;
         }
-        
+
     }
-    
+
     public static class ValueStruct extends Value {
         private final HashMap<String, Value> map = new HashMap<>();
 
@@ -231,7 +274,10 @@ public class Value {
         }
         public void set(String fieldName, Value v) {
             map.put(fieldName, v);
-        }  
+        }
+        public String toString() {
+            return map.toString();
+        }
     }
 
     public static class ValueI32Array extends Value {
@@ -244,14 +290,14 @@ public class Value {
         }
         public void set(int index, Value v) {
             array[index] = v.intValue();
-        }  
+        }
         public Value len() {
             return new ValueI32(array.length);
         }
         public boolean isArray() {
             return true;
         }
-        
+
     }
 
 }

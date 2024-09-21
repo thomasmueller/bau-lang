@@ -22,3 +22,5 @@ fun List(T) add(x T)
     array[size] = x
     size += 1
 
+fun List(T) get(x int) T
+    return array[x]

@@ -19,6 +19,54 @@ fun hex(x int, len int) i8[]
 fun rotLefti32(x i32, n i32) i32
   return (x << n) | (x >> (32 - n))
 
+fun murmur3_32_old(data i8[]) i32
+  # https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
+  # https://murmurhash.shorelabs.com/
+  # MurmurHash3_x86_32
+  if data.len <= 0
+    return 0
+  c1 : i32(0xcc9e2d51)
+  c2 : i32(0x1b873593)
+  h := i32(0)
+  i := 0..data.len
+  if i < data.len - 3
+    while 1
+      x := i32(((data[i]! & 0xff)) |
+          ((data[i + 1]! & 0xff) << 8) |
+          ((data[i + 2]! & 0xff) << 16) |
+          ((data[i + 3]! & 0xff) << 24))
+      x *= c1
+      x = rotLefti32(x, 15)
+      x *= c2
+      h ^= x
+      h = rotLefti32(h, 13)
+      h = h * 5 + 0xe6546b64
+      n : i + 4
+      break n > data.len - 4
+      i = n
+  x := i32(0)
+  if i < data.len - 4
+    i += 4
+  if i < data.len and i != data.len - 4
+    s := 0
+    while 1
+      x ^= (data[i]! & 0xff) << s
+      n : i + 1
+      break n >= data.len
+      i = n
+      s += 8
+    x *= c1
+    x = rotLefti32(x, 15)
+    x *= c2
+    h ^= x
+  h ^= data.len
+  h ^= h >> 16
+  h *= 0x85ebca6b
+  h ^= h >> 13
+  h *= 0xc2b2ae35
+  h ^= h >> 16
+  return h
+
 fun murmur3_32(data i8[]) i32
   # https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
   # https://murmurhash.shorelabs.com/
@@ -67,4 +115,16 @@ fun murmur3_32(data i8[]) i32
   h ^= h >> 16
   return h
 
+
+println(hex(murmur3_32(''), 8))
+println(hex(murmur3_32('a'), 8))
 println(hex(murmur3_32('test'), 8))
+println(hex(murmur3_32('Hello, world!'), 8))
+println(hex(murmur3_32('The quick brown fox jumps over the lazy dog'), 8))
+
+## Expected
+00000000
+3c2569b2
+ba6bd213
+c0363e43
+2e4ff723

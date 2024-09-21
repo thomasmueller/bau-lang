@@ -9,7 +9,7 @@ import org.bau.runtime.Value;
 public interface LeftValue extends Expression {
 
     String assignmentC();
-    
+
     Expression replace(Variable old, Expression with);
 
     void setBoundValue(Expression scope, String modify, Expression value);
@@ -22,6 +22,6 @@ public interface LeftValue extends Expression {
     boolean needToDecrementRefCountOnFree();
     void needToDecrementRefCountOnFree(boolean value);
 
-    Value setValue(Memory memory, Value val);
+    Value setValue(Memory memory, Value val, boolean incRefCount);
 
 }

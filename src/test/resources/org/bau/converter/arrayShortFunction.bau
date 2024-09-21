@@ -11,5 +11,9 @@ fun fill(data int[])
 fun test()
   data : new(int[], 16)
   fill(data)
+  println(data.len)
 
 test()
+
+## Expected
+16

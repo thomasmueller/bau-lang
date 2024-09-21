@@ -16,12 +16,198 @@
                     }
                 }
             });
+            function example(obj) {
+                var text = '';
+                if (obj.value == 'factorial') {
+                    text = 
+`fun factorial(x int) int
+    if x <= 1
+        return 1
+    return x * factorial(x - 1)
+
+for i:= range(0 20)
+    println(factorial(i))
+`;
+                } else if (obj.value == 'conditionsLoops') {
+                    text = 
+`a := 1
+if a = 0
+    println('zero')
+elif a = 1
+    println('one')
+else
+    println('many')
+    
+# prints 1 to 4
+for i := range(0 10)
+    break i = 5
+    println(i)
+`;
+                } else if (obj.value == 'switch') {
+                    text = 
+`import org.bau.Utils
+
+for i := range(1, 10)
+    switch Utils.random() & 7
+    case 0
+        println('zero')
+    case 1
+        println('one')
+    case 2, 3
+        println('2 or 3')
+    else  
+        println('other') 
+`;
+                } else if (obj.value == 'typesAndConstants') {
+                    text = 
+`PI : 3.1415
+println('Pi: ' PI)
+
+a := 10_000_000
+b := 3
+println('integer a/b: ', a / b)
+println('float   a/b: ', f64(a) / b)
+`;
+                } else if (obj.value == 'functionsOnTypes') {
+                    text = 
+`fun int square() int
+    return this * this
+
+println(12.square())
+`;
+                } else if (obj.value == 'types') {
+                    text = 
+`type point
+    x int
+    y int
+
+p := new(point)
+p.x = 10
+p.y = 20
+println('x=' p.x ' y=' p.y)
+`;
+                } else if (obj.value == 'arrays') {
+                    text = 
+`data : new(i8[], 10)
+if data.len
+    i := 0..data.len
+    while 1
+        data[i]! = i * i
+        next : i + 1
+        break next >= data.len
+        i = next
+ for j := until(data.len)
+    println('#' j ' = ' data[j])
+`;
+                } else if (obj.value == 'list') {
+                    text = 
+`import org.bau.List
+    List
+    newList
+
+list := newList(int)
+list.add(100)
+list.add(80)
+println('size: ' list.size)
+println('[0]:  ' list.array[0])
+`;
+                } else if (obj.value == 'enum') {
+                    text = 
+`enum weekday
+    sunday
+    monday
+    tuesday
+    wednesday
+    thursday
+    friday
+    saturday
+
+for a := until(weekday.saturday + 1)
+    switch a
+    case weekday.sunday
+        println('sunday')
+    case weekday.monday
+        println('monday')
+    else
+        println('some other day: #' a)
+`;
+                } else if (obj.value == 'exceptions') {
+                    text = 
+`import org.bau.Exception
+    exception
+
+fun square(x int) int throws exception
+    if x > 3_000_000_000
+        throw exception('Too big')
+    return x * x
+    
+for i := range(2_999_999_999, 3_000_000_002)
+  x := square(i)
+  println(i '^2 = ' x)
+  catch e
+    println(i '^2 = ' e.message)
+`;
+                } else if (obj.value == 'sort') {
+                    text = 
+`fun insertionSort(a T[])
+    for i := range(1, a.len)
+        t := a[i]
+        j := i - 1
+        while j >= 0 and a[j] > t
+            a[j + 1] = a[j]
+            j -= 1
+        a[j + 1] = t
+
+import org.bau.Utils
+x : new(int[], 10)
+for i := until(x.len)
+    x[i] = Utils.random()
+insertionSort(x)
+for i := until(x.len)
+    println('x[' i '] = ' x[i])
+
+y : new(f64[], 10)
+for i := until(y.len)
+    y[i] = f64(Utils.random()) / 1_000_000_000_000
+insertionSort(y)
+for i := until(y.len)
+    println('y[' i '] = ' y[i])
+`;
+                }
+                var source = document.getElementById("source");
+                source.value = text;
+                var width = (window.innerWidth > 0) ? window.innerWidth : document.documentElement.clientWidth;
+                if (width > 900) {
+                    document.querySelector('.CodeMirror').CodeMirror.setValue(text);
+                }
+            }
     </script>
     </head>
     <body onload="main()">
         <div class="top">
             <h1>Bau Playground</h1>
-            <p>Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">Bau program</a> in the browser.</p>
+            <div style="width: 100%">
+                <p style="display: inline-block;">
+                    Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">
+                    Bau program</a> in the browser.
+                </p>
+                &nbsp;&nbsp;&nbsp;&nbsp;Example:
+                <span style="display: inline-block;">
+                    <select name="example" id="example" onchange="example(this);">
+                        <option value="factorial"          >Factorial             </option>
+                        <option value="conditionsLoops"    >Conditions and Loops  </option>
+                        <option value="switch"             >Switch                </option>
+                        <option value="typesAndConstants"  >Types and Constants   </option>
+                        <option value="functionsOnTypes"   >Functions on Types    </option>
+                        <option value="types"              >Types                 </option>
+                        <option value="arrays"             >Arrays                </option>
+                        <option value="list"               >List                  </option>
+                        <option value="enum"               >Enums                 </option>
+                        <option value="exceptions"         >Exceptions            </option>
+                        <option value="sort"               >Sort with Templates   </option>
+                    </select>
+                </span>
+            </div>
             <textarea id="source" cols="80"
             autocorrect="off" autocomplete="off" autocapitalize="off"
             spellcheck="false" aria-label="Try Bau" wrap="off" translate="no">fun factorial(x int) int
@@ -32,7 +218,7 @@
 for i:= range(0 20)
     println(factorial(i))
 </textarea>
-            <div class="result">&nbsp;</div>  
+            <div class="result">&nbsp;</div>
             <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
             <div class="result">&nbsp;</div>  
             <div class="result"><b>Output:</b></div>  

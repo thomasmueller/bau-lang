@@ -2,7 +2,7 @@ module org.bau.File
 
 type File
   filePointer int
-  
+
 fun openFile(name i8[], mode i8[]) File
   native(```
     // TODO verify strings
@@ -21,6 +21,15 @@ fun File read(data i8[], pos int, len int) int
       return fread(data->data + pos, 1, len, fp);
     }
     ```)
+
+fun File readFully(buffer i8[], len i32) i32
+    count := 0
+    while 1
+        l := this.read(buffer, count, len - count)
+        if l = 0
+            return count
+        else
+            count += l
 
 fun File write(data i8[], pos int, len int) int
   native(```

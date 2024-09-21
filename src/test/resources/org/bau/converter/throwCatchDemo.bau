@@ -10,3 +10,6 @@ x := square(3_000_000_001);
 println(x)
 catch e
   println(e.message)
+
+## Expected
+Too large

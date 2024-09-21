@@ -9,3 +9,6 @@ fun test()
     println(readInt(data, 0))
 
 test()
+
+## Expected
+0

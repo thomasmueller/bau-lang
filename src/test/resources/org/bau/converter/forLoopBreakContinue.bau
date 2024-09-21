@@ -8,3 +8,9 @@ for a := range(0, 10)
   break a = 5
   continue a = 2
   println(a)
+
+## Expected
+0
+1
+3
+4

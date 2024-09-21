@@ -11,3 +11,11 @@ Utils.setRandomSeed(Utils.getNanoTime())
 println(Utils.random())
 println(Math.PI)
 println(Math.sqrt(2))
+
+## Expected
+0
+0
+2000-1-1 0:0:0.0
+-2152535657050944081
+3.141592653589793
+1.4142135623730954

@@ -106,7 +106,7 @@ fun hashCode(data i8[]) int
            ((data[i + 3]! & 0xff) << 24)
       h = (h + x) * 0x9e3779b185ebca87
       n : i + 4
-      break n >= data.len
+      break n >= data.len - 3
       i = n
   if i < data.len and i != data.len - 4
     x := 0
@@ -164,3 +164,27 @@ fun test()
     println('str map[' a.value ']=' c.value)
 
 test()
+
+## Expected
+hash of hello: -4214531659405503735
+int map[0]=0
+int map[1]=10
+int map[2]=20
+int map[3]=30
+int map[4]=40
+int map[5]=50
+int map[6]=60
+int map[7]=70
+int map[8]=80
+int map[9]=90
+int map[10]=100
+int map[11]=110
+int map[12]=120
+int map[13]=130
+int map[14]=140
+int map[15]=150
+int map[16]=160
+int map[17]=170
+int map[18]=180
+int map[19]=190
+str map[h]=hello

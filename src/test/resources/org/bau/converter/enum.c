@@ -8,6 +8,25 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+typedef struct i8_array i8_array;
+struct i8_array {
+    int32_t len;
+    char* data;
+    int32_t _refCount;
+};
+i8_array* i8_array_new(uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(char) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
 typedef struct int_array int_array;
 struct int_array {
     int32_t len;
@@ -27,7 +46,51 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+int64_t get_1(int64_t a);
+i8_array* str_const(char* data, uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    result->len = len;
+    result->_refCount = 1;
+    result->data = data;
+    return result;
+}
+i8_array* string_1000;
+i8_array* string_1001;
+i8_array* string_1002;
+i8_array* string_1003;
+i8_array* string_1004;
+int64_t get_1(int64_t a) {
+    printf("day %lld\n", a);
+    return a;
+}
 int main() {
+    string_1000 = str_const("day ", 4);
+    string_1001 = str_const("...is sunday", 12);
+    string_1002 = str_const("...is monday", 12);
+    string_1003 = str_const("...is tuesday or wednesday", 26);
+    string_1004 = str_const("...is some other day", 20);
+    while (1 == 1) {
+        int64_t a = 0;
+        while (1) {
+            int64_t _t0 = get_1(a);
+            if (_t0 == 0) {
+                printf("...is sunday\n");
+            } else if (_t0 == 1) {
+                printf("...is monday\n");
+            } else if ((_t0 == 2) || (_t0 == 3)) {
+                printf("...is tuesday or wednesday\n");
+            } else {
+                printf("...is some other day\n");
+            }
+            continue1:;
+            int64_t _next = a + 1;
+            if (_next >= 7) {
+                break;
+            }
+            a = _next;
+        }
+        break;
+    }
     _end();
     return 0;
 }

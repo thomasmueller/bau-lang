@@ -41,7 +41,8 @@ public class Call implements Statement, Expression {
                 if (i == def.parameters.size() - 1) {
                     int len = args.size() - i;
                     varArgsValue = new Value.ValueArray(len, new Value.ValueInt(0));
-                    params.put(def.parameters.get(i).name, varArgsValue);
+                    Value varArgsRef = new Value.ValueRef(m.putHeap(varArgsValue));
+                    params.put(def.parameters.get(i).name, varArgsRef);
                     list.add(v);
                 }
                 varArgsValue.set(i - def.parameters.size() + 1, v);
@@ -58,7 +59,7 @@ public class Call implements Statement, Expression {
         if (def.cCode != null) {
             Value result = Std.eval(def.name, m);
             m.setGlobal(Memory.RESULT, result);
-        }        
+        }
         m.restoreLocal();
         if (r == StatementResult.THROW) {
             return new ValueException(m.getGlobal(Memory.EXCEPTION).toString());
@@ -74,6 +75,9 @@ public class Call implements Statement, Expression {
         if ("println".equals(def.name)) {
             for (Expression e : args) {
                 Value v = e.eval(m);
+                if (v instanceof Value.ValueRef) {
+                    v = m.getHeap(v.longValue());
+                }
                 m.print(v);
             }
             m.println();
@@ -85,7 +89,7 @@ public class Call implements Statement, Expression {
         }
         return StatementResult.OK;
     }
-    
+
     public Call replace(Variable old, Expression with) {
         Call c = new Call();
         c.args = new ArrayList<Expression>();
@@ -105,14 +109,14 @@ public class Call implements Statement, Expression {
     public String toC() {
         return toC(null);
     }
-    
+
     public DataType exceptionType() {
         return def.exceptionType;
     }
-    
+
     public DataType canThrowException() {
         return def.exceptionType;
-    }    
+    }
 
     @Override
     public String toC(ProgramContext context) {
@@ -135,11 +139,11 @@ public class Call implements Statement, Expression {
 
     public String callToC() {
         StringBuilder buff = new StringBuilder();
-        if (def.callType != null) {
-            buff.append(def.callType.name()).append('_');
-        }
         if (def.module != null) {
             buff.append(def.module.replace('.', '_') + "_");
+        }
+        if (def.callType != null) {
+            buff.append(def.callType.name()).append('_');
         }
         buff.append(def.name + "_");
         if (def.varArgs) {
@@ -206,7 +210,7 @@ public class Call implements Statement, Expression {
                         throw new IllegalArgumentException(a.type().name());
                     }
                 }
-                
+
             }
         }
         b2.append("\\n\"");
@@ -263,12 +267,12 @@ public class Call implements Statement, Expression {
     public Expression simplify() {
         return this;
     }
-    
+
     @Override
     public boolean isSimple() {
         return false;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         for (int i = 0; i < args.size(); i++) {
@@ -281,6 +285,6 @@ public class Call implements Statement, Expression {
         }
         Variable var = parser.assignTempVariable(target, this);
         return var;
-    }    
-    
+    }
+
 }

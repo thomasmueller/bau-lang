@@ -18,3 +18,6 @@ fun test()
     println(sum)
     
 test()
+
+## Expected
+45

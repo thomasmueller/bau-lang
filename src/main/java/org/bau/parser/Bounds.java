@@ -7,16 +7,16 @@ import org.bau.runtime.Value;
 public class Bounds {
     ArrayList<Entry> list = new ArrayList<>();
     long offset;
-    
+
     public Bounds() {
-        
+
     }
-    
+
     public Bounds(NumberValue value) {
         Entry e = newEntry("=", value);
         list.add(e);
     }
-    
+
     private static String getVariable(Expression expr) {
         String var = expr == null ? "" : expr.toString();
         Value v = expr.eval(null);
@@ -109,10 +109,10 @@ public class Bounds {
         }
         Entry e = newEntry(operation, expr);
         e.condition = true;
-        e.scope = scope;        
+        e.scope = scope;
         list.add(e);
     }
-    
+
     public void setBoundValue(Expression scope, String modify, Expression value) {
         if (!list.isEmpty() && list.get(list.size() - 1).scope == scope) {
             list.remove(list.size() - 1);
@@ -124,13 +124,16 @@ public class Bounds {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
+        if (offset != 0) {
+            buff.append("offset " + offset);
+        }
         buff.append("\n");
         for(Entry v : list) {
             buff.append(v).append("\n");
         }
         return buff.toString();
     }
-    
+
     private boolean inScope(ArrayList<Expression> list, Expression scope) {
         if (scope == null) {
             return true;
@@ -164,12 +167,29 @@ public class Bounds {
         }
         return 0;
     }
-    
+
+    /**
+     * If the exact bounds are known (for example for a constant array), get the value.
+     *
+     * @return the exact, or null
+     */
+    public Value eval() {
+        for (Entry e : list) {
+            if (e.scope == null
+                    && e.minVariable.equals("")
+                    && e.maxVariable.equals("")
+                    && e.minOffset == e.maxOffset) {
+                return new Value.ValueInt(e.minOffset);
+            }
+        }
+        return null;
+    }
+
     public boolean largerThan(long value) {
         for (Entry e : list) {
-            if (e.scope == null 
-                    && e.minVariable.equals("") 
-                    && e.maxVariable.equals("") 
+            if (e.scope == null
+                    && e.minVariable.equals("")
+                    && e.maxVariable.equals("")
                     && e.minOffset > value) {
                 return true;
             }
@@ -187,7 +207,7 @@ public class Bounds {
         }
         return false;
     }
-    
+
     public Bounds plus(long offset) {
         Bounds b = new Bounds();
         b.list = list;
@@ -196,8 +216,11 @@ public class Bounds {
     }
 
     static class Entry {
-        public boolean condition;
+        // in which part of the code this condition is valid
         Expression scope;
+
+        public boolean condition;
+
         String operation;
         Expression expr;
 
@@ -206,45 +229,54 @@ public class Bounds {
         String maxVariable;
         long maxOffset;
         boolean notNull;
-        
+
         public String toString() {
             StringBuilder buff = new StringBuilder();
             buff.append("scope " + scope);
             if (condition) {
-                buff.append(" condition");
+                buff.append(", condition");
             } else {
-                buff.append(" update");
+                buff.append(", update");
             }
-            buff.append(" " );
             if (notNull) {
-                buff.append(" isNotNull ");
+                buff.append(", isNotNull");
             }
-            if (!minVariable.isEmpty()) {
+            buff.append(", bounds");
+            if (minVariable.isEmpty()) {
+                if (minOffset != Long.MIN_VALUE) {
+                    buff.append(" " + minOffset);
+                }
+            } else {
                 buff.append(" " + minVariable);
+                if (minOffset == 0) {
+                    // just the variable
+                } else if (minOffset != Long.MIN_VALUE) {
+                } else if (minOffset < 0) {
+                    buff.append(minOffset);
+                } else {
+                    buff.append("+" + minOffset);
+                }
             }
-            if (minOffset == Long.MIN_VALUE) {
-                // no start
-            } else if (minOffset < 0) {
-                buff.append(minOffset);
-            } else if (minOffset == 0) {
+            buff.append(" ..");
+            if (maxVariable.isEmpty()) {
+                if (maxOffset != Long.MAX_VALUE) {
+                    buff.append(" " + maxOffset);
+                }
             } else {
-                buff.append("+" + minOffset);
-            }
-            buff.append("..");
-            if (!maxVariable.isEmpty()) {
-                buff.append(maxVariable);
-            }
-            if (maxOffset == Long.MAX_VALUE) {
-                // no start
-            } else if (maxOffset < 0) {
-                buff.append(maxOffset);
-            } else if (maxOffset == 0) {
-            } else {
-                buff.append("+" + maxOffset);
+                buff.append(" " + maxVariable);
+                if (maxOffset == 0) {
+                    // just the variable
+                } else if (maxOffset == Long.MAX_VALUE) {
+                    // no start
+                } else if (maxOffset < 0) {
+                    buff.append(maxOffset);
+                } else {
+                    buff.append("+" + maxOffset);
+                }
             }
             buff.append(" (" );
-            buff.append(" operation " + operation);
-            buff.append(" expr " + expr + ")");
+            buff.append("operation '" + operation);
+            buff.append("', expr '" + expr + "')");
             return buff.toString();
         }
     }

@@ -9,7 +9,7 @@ public class NumberValue implements Expression {
     boolean hex;
     Value value;
     DataType type;
-    
+
     public NumberValue(Value value, DataType type, boolean hex) {
         this.value = value;
         this.type = type;
@@ -20,15 +20,15 @@ public class NumberValue implements Expression {
     public Value eval(Memory memory) {
         return value;
     }
-    
+
     public DataType canThrowException() {
         return null;
     }
-    
+
     public Expression replace(Variable old, Expression with) {
         return this;
     }
-    
+
     @Override
     public DataType type() {
         return type;
@@ -62,34 +62,34 @@ public class NumberValue implements Expression {
         }
         return Long.toString(x);
     }
-    
+
     public String toString() {
         if (hex) {
             return "0x" + Long.toHexString(value.longValue());
         }
         return value.toString();
     }
-    
+
     @Override
     public boolean isEasyToRead() {
         return true;
     }
-    
+
     @Override
     public Bounds getBounds() {
         return new Bounds(this);
     }
-    
+
     @Override
     public Expression simplify() {
         return this;
     }
-    
+
     @Override
     public boolean isSimple() {
         return true;
     }
-    
+
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;

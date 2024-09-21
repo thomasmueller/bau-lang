@@ -1,7 +1,86 @@
+fun call(name i8[], x int) int
+    println('  called ' name '=' x)
+    return x
+
 a := 1
 b := 2
-if a > 0 or b < 1
-  println('or')
+println('testing or: call first')
+if call('a', a) > 0 or call('b', b) < 1
+    println('  true')
+else
+    println('  false')
+println('testing or: call both')
+if call('a', a) > 1 or call('b', b) < 1
+    println('  true')
+else
+    println('  false')
 
-if a > 0 and b < 1
-  println('and')
+println('testing and: call first')
+if call('a', a) > 1 and call('b', b) < 1
+    println('  true')
+else
+    println('  false')
+println('testing and: call both')
+if call('a', a) > 0 and call('b', b) < 1
+    println('  true')
+else
+    println('  false')
+
+a = 1
+b = 1
+println('testing and loop')
+while call('a', a) > 0 and call('b', b) > 0
+    println('  dec a')
+    a -= 1
+a = 1
+b = 1
+println('testing and loop')
+while call('a', a) > 0 and call('b', b) > 0
+    println('  dec b')
+    b -= 1
+
+a = 1
+b = 1
+println('testing or loop')
+while call('a', a) > 0 or call('b', b) > 0
+    if a > 0
+        println('  dec a')
+        a -= 1
+    else
+        println('  dec b')
+        b -= 1
+
+## Expected
+testing or: call first
+  called a=1
+  true
+testing or: call both
+  called a=1
+  called b=2
+  false
+testing and: call first
+  called a=1
+  false
+testing and: call both
+  called a=1
+  called b=2
+  false
+testing and loop
+  called a=1
+  called b=1
+  dec a
+  called a=0
+testing and loop
+  called a=1
+  called b=1
+  dec b
+  called a=1
+  called b=0
+testing or loop
+  called a=1
+  dec a
+  called a=0
+  called b=1
+  dec b
+  called a=0
+  called b=0
