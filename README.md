@@ -7,6 +7,7 @@ Bau is a simple, concise, safe, powerful and fast programming language. Features
 * Fast compilation and execution (transpiles to C).
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
+<a href="https://thomasmueller.github.io/bau-lang/wasm.html">And try out the WASM C compiler (soon to be integrated).</a>
 
 It addresses other languages' issues:
 
