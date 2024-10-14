@@ -1,0 +1,408 @@
+<html><head>
+    <title>C Playground</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <style>
+body {
+    margin: 32px;
+}
+
+.top {
+    width: 100%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+}
+
+.top textarea {
+    box-sizing: border-box;
+    height: 50vh;
+    resize: vertical;
+}
+
+.top button {
+    top: 10px;
+    left: 10px;
+    padding: 5px;
+}
+    </style>   
+</head>
+<body>
+    <div class="top">
+        <h1>C Playground</h1>
+        <textarea id="source" cols="40" rows="8" style="width: 99%">
+#include <stdio.h>
+int main() {
+    printf("Hello World\n");
+}
+</textarea>
+<div class="result">&nbsp;</div>
+<button id="run" tabindex="2" onclick="compileAndRun()">Compile & Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
+<div class="result">&nbsp;</div>
+<div class="result"><b>Output:</b></div>  
+<div class="result"><pre id="output" translate="no"></pre></div>
+
+</textarea>
+    </div>
+      <script src="wasm1.js" type="text/javascript"></script>
+      <script src="wasm3.js" type="text/javascript"></script>
+      <script>
+
+document.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' && e.shiftKey) {
+				var run = document.getElementById("run");
+				if ((typeof run.click) === 'function') {
+						run.click.apply(run);
+						if (e.preventDefault) e.preventDefault();
+						return false;
+				}
+		}
+});
+
+var wasmBase64 = wasmFileBase64;
+
+var THIS = {
+    memory: 0,
+    encodedArgs: 0,
+    totalArgsBytes: 0,
+    fs: 0,
+    cwd: "/",
+    getAbsPath: (e) => {
+        // alert('getAbsPath ' + e);
+        return e.length > 0 && "/" === e[0] ? e : `${THIS.cwd}${"/"===THIS.cwd?"":"/"}${e}`
+    },
+}
+var output = '';
+var Util = {
+	  clamp: (e, t, n) => {
+				return n < t || e < t ? t : e > n ? n : e
+		},
+		decodeString: (e, t, n) => {
+				const r = new Uint8Array(e, t, n);
+				let s;
+				for (s = 0; s < r.length && 0 !== r[s]; ++s);
+				const o = new Uint8Array(e, t, s);
+				// console.log('decodeString=' + new TextDecoder("utf-8").decode(o));
+				return new TextDecoder("utf-8").decode(o)
+		},
+		/*
+		loadFromServer : (e, t = null) => {
+				const n = await fetch(e, {
+						method: "GET"
+				});
+				return n.ok ? null != t && t.binary ? await n.arrayBuffer() : await n.text() : Promise.reject(n)
+		},
+		*/
+		encode: (e) => {
+				return (new TextEncoder).encode(e)
+		},
+		setTerminal: (e) => {
+				n = e
+		},
+		putTerminal: (e) => {
+		    console.log('putTerminal ' + e.toString());
+		    output += e.toString();
+				// n.session.insert(n.getCursorPosition(), e.toString())
+		},
+		putTerminalError: (e) => {
+				console.error(e), r.putTerminal(e)
+		},
+		clearTerminal: () => {
+				n.setValue("", -1)
+		}
+}
+// WASM imports: callbacks to Javascript functions
+var wasmImports = {
+		c: {
+				args_sizes_get: (e, t) => {
+            console.log('args_sizes_get ' + e + ' ' + t);
+						new Uint32Array(THIS.memory.buffer, e, 1)[0] = THIS.encodedArgs.length, new Uint32Array(THIS.memory.buffer, t, 1)[0] = THIS.totalArgsBytes
+				},
+				args_get: (e, t) => {
+            console.log('args_get');
+						const n = new Uint32Array(THIS.memory.buffer, e, THIS.encodedArgs.length),
+								r = new Uint8Array(THIS.memory.buffer, t, THIS.totalArgsBytes);
+						let s = 0;
+						for (let e = 0; e < THIS.encodedArgs.length; ++e) {
+								n[e] = t + s;
+								const o = THIS.encodedArgs[e],
+										i = o.length;
+								for (let e = 0; e < i; ++e) r[e + s] = o[e];
+								r[i + s] = 0, s += i + 1
+						}
+				},
+				read: (e, t, n) => {
+            // console.log('read');
+						const r = new Uint8Array(THIS.memory.buffer, t, n);
+						return THIS.fs.read(e, r)
+				},
+				write: (e, t, n) => {
+            // console.log('write');
+						const r = new Uint8Array(THIS.memory.buffer, t, n);
+						return THIS.fs.write(e, r)
+				},
+				open: (e, t, n) => {
+            // console.log('open');
+						if (0 === e) return -1;
+						const r = Util.decodeString(THIS.memory.buffer, e);
+						if (null == r || "" === r) return -1;
+						const o = THIS.getAbsPath(r);
+						return THIS.fs.open(o, t, n)
+				},
+				close: e => THIS.fs.close(e),
+				lseek: (e, t, n) => THIS.fs.lseek(e, t, n),
+				unlink: e => {
+            console.log('unlink');
+						const t = Util.decodeString(THIS.memory.buffer, e);
+						if (null == t || "" === t) return -1;
+						const n = THIS.getAbsPath(t);
+						return THIS.fs.delete(n), 0
+				},
+				_tmpfile: () => THIS.fs.tmpfile(),
+				_getcwd: (e, t) => {
+            // console.log('_getcwd');
+						const n = Util.encode(THIS.cwd),
+								r = n.length;
+						if (r + 1 > t) return -34;
+						const o = new Uint8Array(THIS.memory.buffer, e, r + 1);
+						for (let e = 0; e < r; ++e) o[e] = n[e];
+            // console.log('_getcwd=' + o);
+						return o[r] = 0, r + 1
+				},
+				sin: Math.sin,
+				cos: Math.cos,
+				tan: Math.tan,
+				atan: Math.atan,
+				sqrt: Math.sqrt,
+				log: Math.log,
+				exp: Math.exp,
+				pow: Math.pow,
+				fabs: Math.abs,
+				floor: Math.floor,
+				ceil: Math.ceil,
+				fmod: (e, t) => e % t,
+				drand48: Math.random,
+				erand48: Math.random,
+				putstr: e => {
+            console.log('putstr');
+						const t = Util.decodeString(THIS.memory.buffer, e);
+						Util.putTerminal(t)
+				},
+				puti: e => {
+            console.log('puti');
+						Util.putTerminal(e)
+				},
+				exit: e => {
+            console.log('exit ' + e);
+            throw Error(`Exit code: ${e}`);
+				},
+				_memcpy: (e, t, n) => {
+            // console.log('_memcpy');
+						new Uint8Array(THIS.memory.buffer).copyWithin(e, t, t + n)
+				},
+				_memset: (e, t, n) => {
+            // console.log('_memset');
+						const r = new Uint8Array(THIS.memory.buffer);
+						for (let s = 0; s < n; ++s) r[e++] = t
+				}
+		},
+		env: {
+				memory: THIS.memory
+		}
+};
+WaStorage = class {
+			constructor() {
+					this.files = {}
+			}
+			putFile(e, t) {
+					"string" == typeof t && (t = Util.encode(t)), console.assert(t.constructor === Uint8Array, t), this.files[e] = t
+			}
+			getFile(e) {
+					return this.files[e]
+			}
+			contains(e) {
+					return e in this.files
+			}
+			delete(e) {
+					delete this.files[e]
+			}
+};
+FileSystem = class {
+		constructor(e) {
+				this.storage = e, this.fileDescs = ["stdin", "stdout", "stderr"]
+		}
+		saveFile(e, t) {
+		    console.log('saveFile');
+				this.storage.putFile(e, t)
+		}
+		loadFile(e) {
+		    console.log('loadFile');
+				return this.storage.getFile(e)
+		}
+		open(e, t, n) {
+		    // console.log('open ' + e + ' ' + t + ' ' + n);
+				if (null == e || 0 === e.length) return -1;
+				if (0 == (3 & t) && !this.storage.contains(e)) return -1;
+				// null == s[t] && (console.error(`Unsupported open flag: ${t}`), process.exit(1));
+				const r = this.allocFd(),
+						o = {
+								absPath: e,
+								rp: 0
+						};
+				return 0 != (3 & t) && (o.write = [], o.writeTotal = 0), this.fileDescs[r] = o, r
+		}
+		close(e) {
+		    console.log('close');
+				return null == this.fileDescs[e] ? -1 : (this.commitDesc(e), this.fileDescs[e] = null, 0)
+		}
+		read(e, t) {
+		    // console.log('read');
+				if (e < 0 || e >= this.fileDescs.length) return 0;
+				const n = this.fileDescs[e];
+				if (null == n) return 0;
+				const r = null != n.absPath ? this.storage.getFile(n.absPath) : n.written;
+				if (null == r || n.rp >= r.length) return 0;
+				const s = Math.min(r.length, n.rp + t.length);
+				t.set(r.subarray(n.rp, s));
+				const o = s - n.rp;
+				return n.rp = s, o
+		}
+		write(e, t) {
+		    // console.log('write ' + e + ', ' + t);
+				if (e < 0 || e >= this.fileDescs.length) return 0;
+				if (e < 3) {
+						// console.log('decodeString ' + t + ' len ' + t.length);
+						const n = Util.decodeString(t, 0, t.length);
+						// console.log(n);
+						return 1 !== e && 2 !== e || Util.putTerminal(n), t.length
+				}
+				const n = this.fileDescs[e];
+				return null == n ? 0 : (n.write.push(t.slice(0)), n.writeTotal += t.byteLength, t.length)
+		}
+		lseek(e, t, n) {
+		    console.log('lseek');
+				const r = this.fileDescs[e];
+				if (null == r) return -1;
+				let s;
+				switch (this.commitDesc(e), n) {
+						default:
+						case 0:
+								s = t;
+								break;
+						case 1:
+								s = this.fileDescs[e].position + t;
+								break;
+						case 2:
+								console.assert(!1, "TODO: Implement")
+				}
+				return r.rp = s, s
+		}
+		delete(e) {
+		    console.log('delete');
+				this.storage.delete(e)
+		}
+		tmpfile() {
+		    console.log('tmpfile');
+				const e = this.allocFd();
+		    console.log('tmpfile=' + e);
+				return this.fileDescs[e] = {
+						absPath: null,
+						rp: 0,
+						write: [],
+						writeTotal: 0
+				}, e
+		}
+		allocFd() {
+		    console.log('allocFd');
+				const e = this.fileDescs.length;
+				for (let t = 0; t < e; ++t)
+						if (null == this.fileDescs[t]) return t;
+				return this.fileDescs.push(null), e
+		}
+		commitDesc(e) {
+		    console.log('commitDesc');
+				if (0 <= e && e < this.fileDescs.length) {
+						const t = this.fileDescs[e];
+						if (null != t && null != t.write && t.write.length > 0) {
+								const e = new Uint8Array(t.writeTotal);
+								let n = 0;
+								for (let r = 0; r < t.write.length; ++r) {
+										const s = t.write[r];
+										new Uint8Array(e.buffer, n, s.byteLength).set(s), n += s.byteLength
+								}
+								null != t.absPath ? this.saveFile(t.absPath, e) : t.written = e, t.write.length = 0
+						}
+				}
+		}
+};
+function storeFiles(fileMap, path, storage) {
+    for (const [key, value] of Object.entries(fileMap)) {
+        if (value instanceof Object) {
+            storeFiles(fileMap[key], path + '/' + key, storage);
+        } else {
+            storage.putFile(`${path}/${key}`, value);
+            //console.log(`${path}/${key}: ${value}`);
+        }
+    }
+}
+
+function compileAndRun() {
+    fetch(wasmBase64).then((response) => {
+				return response.arrayBuffer();
+		}).then((response) => {
+		    var imports = wasmImports;
+        // create the WASM object
+				return WebAssembly.instantiate(new Uint8Array(response), imports);
+		}).then((result) => {
+				instance = result['instance'];
+				// wire the memory
+				THIS.memory = instance.exports['memory'];
+				THIS.cwd = "/";
+				THIS.encodedArgs = new Array;
+				THIS.totalArgsBytes = 0;
+				var e = new WaStorage();
+				storeFiles(fileContent, '', e);
+				var source = document.getElementById('source').value;
+				e.putFile('/hello.c', source);
+				THIS.fs = new FileSystem(e);
+				// call the main method
+        var args = ["cc", "-I/usr/include", "-L/usr/lib", "hello.c"];
+        THIS.encodedArgs = args.map((e => Util.encode(e)));
+        THIS.totalArgsBytes = THIS.encodedArgs.reduce(((e, t) => e + t.length + 1), 0); 
+        output = '';
+        try {
+    				instance.exports['_start']();
+    		} catch (e) {
+    		}
+		    document.getElementById('output').innerHTML = output;
+				var x = THIS.fs.loadFile("/a.wasm");
+				if (!(x instanceof Uint8Array)) {
+				    throw new Error();
+				}
+				return x;
+		}).then((response) => {
+		    var imports = wasmImports;
+        // create the WASM object
+				return WebAssembly.instantiate(response, imports);
+		}).then((result) => {
+				instance = result['instance'];
+				// wire the memory
+				THIS.memory = instance.exports['memory'];
+				THIS.cwd = "/";
+				THIS.encodedArgs = new Array;
+				THIS.totalArgsBytes = 0;
+				var e = new WaStorage();
+				storeFiles(fileContent, '', e);
+				THIS.fs = new FileSystem(e);
+				// call the main method
+        var args = ["cc", "-I/usr/include", "-L/usr/lib", "hello.c"];
+        THIS.encodedArgs = args.map((e => Util.encode(e)));
+        THIS.totalArgsBytes = THIS.encodedArgs.reduce(((e, t) => e + t.length + 1), 0); 
+        output = '';
+				instance.exports['_start']();
+				console.log('output=' + output);
+		    document.getElementById('output').innerHTML = output;
+		});
+}
+      </script>
+   </body>
+</html>
