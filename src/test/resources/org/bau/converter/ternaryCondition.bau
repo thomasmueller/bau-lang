@@ -1,0 +1,21 @@
+fun if(condition int, a T, b T) T
+    if condition
+        return a
+    return b
+
+fun int then(a T, b T) const T
+    if this
+        return a
+    return b
+
+for i := range(-1, 2)
+    println('abs(' i ')= ' if(i < 0, -i, i))
+    println('abs(' i ')= ' (i < 0).then(-i, i))
+
+## Expected
+abs(-1)= 1
+abs(-1)= 1
+abs(0)= 0
+abs(0)= 0
+abs(1)= 1
+abs(1)= 1

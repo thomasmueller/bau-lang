@@ -13,7 +13,7 @@ public class Bounds {
     }
 
     public Bounds(NumberValue value) {
-        Entry e = newEntry("=", value);
+        Entry e = newEntry(null, "=", value);
         list.add(e);
     }
 
@@ -58,9 +58,10 @@ public class Bounds {
         return 0;
     }
 
-    public static Entry newEntry(String operation, Expression expr) {
+    public static Entry newEntry(Expression scope, String operation, Expression expr) {
         Entry e = new Entry();
 
+        e.scope = scope;
         e.operation = operation;
         e.expr = expr;
 
@@ -107,9 +108,12 @@ public class Bounds {
         if (!list.isEmpty() && list.get(list.size() - 1).scope == scope) {
             list.remove(list.size() - 1);
         }
-        Entry e = newEntry(operation, expr);
+        if (operation == null && expr == null) {
+            // this means type is "undo"
+            return;
+        }
+        Entry e = newEntry(scope, operation, expr);
         e.condition = true;
-        e.scope = scope;
         list.add(e);
     }
 
@@ -117,8 +121,7 @@ public class Bounds {
         if (!list.isEmpty() && list.get(list.size() - 1).scope == scope) {
             list.remove(list.size() - 1);
         }
-        Entry e = newEntry(modify, value);
-        e.scope = scope;
+        Entry e = newEntry(scope, modify, value);
         list.add(e);
     }
 
@@ -150,7 +153,8 @@ public class Bounds {
      * @return -1 smaller than max, 0 equal or unknown, 1 larger than max
      */
     public int compareTo(Parser p, Expression max) {
-        for (Entry e : list) {
+        for (int i = list.size() - 1; i >= 0; i--) {
+            Entry e = list.get(i);
             if (inScope(p.getBlockConditions(), e.scope)) {
                 String maxVar = getVariable(max);
                 long maxOffset = getOffset(max) - offset;
@@ -216,7 +220,8 @@ public class Bounds {
     }
 
     static class Entry {
-        // in which part of the code this condition is valid
+        // in which part of the code this condition is valid,
+        // null = always; or the condition of the if / elif / while statement
         Expression scope;
 
         public boolean condition;
@@ -279,6 +284,15 @@ public class Bounds {
             buff.append("', expr '" + expr + "')");
             return buff.toString();
         }
+    }
+
+    enum ApplyType {
+        // positive condition, e.g. "if d.len > 0"
+        POSITIVE,
+        // negative condition, e.g. "else" of the above
+        NEGATIVE,
+        // undo a condition, e.g. after the "if" or "else" ended
+        UNDO
     }
 
 }

@@ -12,7 +12,13 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
+struct org_bau_Utils_dateTime;
 struct i8_array {
     int32_t len;
     char* data;
@@ -27,11 +33,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -46,11 +47,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
 struct org_bau_Utils_dateTime {
     int32_t year;
     int64_t month;
@@ -72,6 +68,8 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     result.millis = 0;
     return result;
 }
+/* exception types */
+/* functions */
 double f64_1(double x);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
@@ -101,19 +99,18 @@ int64_t org_bau_Utils_random_0();
 void org_bau_Utils_setRandomSeed_1(int64_t seed);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
-const double POS_INFINITY = (1.0 / 0.0);
-const double NEG_INFINITY = (-1.0 / 0.0);
-const double NOT_A_NUMBER = (0.0 / 0.0);
-const double PI = 3.141592653589793;
-const double E = 2.718281828459045;
-const double LOG10 = 2.302585092994046;
-const double LOG2 = 0.6931471805599453;
-const int64_t MIN_INT = 0x8000000000000000;
-const int64_t MAX_INT = 0x7fffffffffffffff;
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -127,6 +124,15 @@ i8_array* string_1005;
 i8_array* string_1006;
 i8_array* string_1007;
 int64_t randomSeed;
+double POS_INFINITY;
+double NEG_INFINITY;
+double NOT_A_NUMBER;
+double PI;
+double E;
+double LOG10;
+double LOG2;
+int64_t MIN_INT;
+int64_t MAX_INT;
 double f64_1(double x) {
     return x;
 }
@@ -718,18 +724,18 @@ int main() {
     int64_t MIN_INT = 0x8000000000000000;
     int64_t MAX_INT = 0x7fffffffffffffff;
     int64_t a = org_bau_Utils_getNanoTime_0();
-    printf("%lld\n", a);
+    printf("%lld\n", (long long)a);
     int64_t b = org_bau_Utils_getNanoTime_0();
-    printf("%lld\n", a);
+    printf("%lld\n", (long long)a);
     org_bau_Utils_dateTime c = org_bau_Utils_getDateTime_0();
     printf("%d-%lld-%lld %lld:%lld:%lld.%lld\n", c.year, c.month, c.day, c.hour, c.minute, c.second, c.millis);
-    int64_t _t77 = org_bau_Utils_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t77);
-    int64_t _t78 = org_bau_Utils_random_0();
-    printf("%lld\n", _t78);
+    int64_t _t0 = org_bau_Utils_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t0);
+    int64_t _t1 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t1);
     printf("%.9f\n", 3.141592653589793);
-    double _t79 = org_bau_Math_sqrt_1(2);
-    printf("%.9f\n", _t79);
+    double _t2 = org_bau_Math_sqrt_1(2);
+    printf("%.9f\n", _t2);
     _end();
     return 0;
 }
@@ -756,7 +762,7 @@ Get the random seed.
 fun random() int
 Pseudo-random number generated using the Splitmix64 algorithm.
 
-fun ord(s i8[]) int const
+fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
 
 */

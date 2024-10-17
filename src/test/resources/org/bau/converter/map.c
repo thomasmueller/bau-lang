@@ -8,7 +8,21 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct HashMap HashMap;
+struct HashMap;
+typedef struct str str;
+struct str;
+typedef struct str_array str_array;
+struct str_array;
+typedef struct HashMap_int_int HashMap_int_int;
+struct HashMap_int_int;
+typedef struct HashMap_str_str HashMap_str_str;
+struct HashMap_str_str;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +37,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,11 +51,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct HashMap HashMap;
 struct HashMap {
     int32_t _refCount;
 };
@@ -56,7 +60,6 @@ HashMap* HashMap_new() {
     result->_refCount = 1;
     return result;
 }
-typedef struct str str;
 struct str {
     i8_array* value;
     int32_t _refCount;
@@ -66,7 +69,6 @@ str str_new() {
     result.value = 0;
     return result;
 }
-typedef struct str_array str_array;
 struct str_array {
     int32_t len;
     str* data;
@@ -81,11 +83,6 @@ str_array* str_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void str_array_free(str_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct HashMap_int_int HashMap_int_int;
 struct HashMap_int_int {
     int64_t size;
     int_array* keys;
@@ -103,7 +100,6 @@ HashMap_int_int* HashMap_int_int_new() {
     result->hashes = 0;
     return result;
 }
-typedef struct HashMap_str_str HashMap_str_str;
 struct HashMap_str_str {
     int64_t size;
     str_array* keys;
@@ -121,6 +117,8 @@ HashMap_str_str* HashMap_str_str_new() {
     result->hashes = 0;
     return result;
 }
+/* exception types */
+/* functions */
 int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key);
 void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value);
 int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key);
@@ -139,7 +137,22 @@ str str_1(i8_array* x);
 int64_t str_equals_2(str this, str other);
 int64_t str_hashCode_1(str this);
 void test_0();
+void HashMap_free(HashMap* x);
+void HashMap_int_int_free(HashMap_int_int* x);
+void HashMap_str_str_free(HashMap_str_str* x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void HashMap_free(HashMap* x) {
+    _free(x);
+}
+void str_array_free(str_array* x) {
+    _free(x->data);
     _free(x);
 }
 void HashMap_int_int_free(HashMap_int_int* x) {
@@ -157,7 +170,7 @@ void HashMap_str_str_free(HashMap_str_str* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -171,15 +184,15 @@ int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
     while (1) {
-        int64_t _t8 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
-        if (_t8) {
-            int64_t _t9 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
-            _t8 = _t9;
+        int64_t _t2 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
+        if (_t2) {
+            int64_t _t3 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
+            _t2 = _t3;
         }
         if (this->hashes->data[idx_2(p, this->hashes->len)] == 0) {
             int64_t _r0 = this->values->data[idx_2(p, this->values->len)];
             return _r0;
-        } else if (_t8) {
+        } else if (_t2) {
             int64_t _r1 = this->values->data[idx_2(p, this->values->len)];
             return _r1;
         }
@@ -199,10 +212,13 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
         _incUse(ov);
         _decUse(this->keys, int_array);
         this->keys = kn;
+        _incUse(this->keys);
         _decUse(this->values, int_array);
         this->values = vn;
+        _incUse(this->values);
         _decUse(this->hashes, int_array);
         this->hashes = hn;
+        _incUse(this->hashes);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
@@ -218,6 +234,9 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
             }
             break;
         }
+        _decUse(kn, int_array);
+        _decUse(vn, int_array);
+        _decUse(hn, int_array);
         _decUse(ok, int_array);
         _decUse(oh, int_array);
         _decUse(ov, int_array);
@@ -225,12 +244,12 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
     while (1) {
-        int64_t _t6 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
-        if (_t6) {
-            int64_t _t7 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
-            _t6 = _t7;
+        int64_t _t0 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
+        if (_t0) {
+            int64_t _t1 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
+            _t0 = _t1;
         }
-        if (_t6) {
+        if (_t0) {
             this->values->data[idx_2(p, this->values->len)] = value;
             return;
         } else if (this->hashes->data[idx_2(p, this->hashes->len)] == 0) {
@@ -247,14 +266,14 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
     while (1) {
-        int64_t _t10 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
-        if (_t10) {
-            int64_t _t11 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
-            _t10 = _t11;
+        int64_t _t4 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
+        if (_t4) {
+            int64_t _t5 = int_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
+            _t4 = _t5;
         }
         if (this->hashes->data[idx_2(p, this->hashes->len)] == 0) {
             return 0;
-        } else if (_t10) {
+        } else if (_t4) {
             this->keys->data[idx_2(p, this->keys->len)] = 0;
             this->hashes->data[idx_2(p, this->hashes->len)] = 0;
             this->values->data[idx_2(p, this->values->len)] = 0;
@@ -293,15 +312,15 @@ str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     int64_t hash = str_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
     while (1) {
-        int64_t _t15 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
-        if (_t15) {
-            int64_t _t16 = str_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
-            _t15 = _t16;
+        int64_t _t2 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
+        if (_t2) {
+            int64_t _t3 = str_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
+            _t2 = _t3;
         }
         if (this->hashes->data[idx_2(p, this->hashes->len)] == 0) {
             str _r0 = this->values->data[idx_2(p, this->values->len)];
             return _r0;
-        } else if (_t15) {
+        } else if (_t2) {
             str _r1 = this->values->data[idx_2(p, this->values->len)];
             return _r1;
         }
@@ -321,10 +340,13 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
         _incUse(ov);
         _decUse(this->keys, str_array);
         this->keys = kn;
+        _incUse(this->keys);
         _decUse(this->values, str_array);
         this->values = vn;
+        _incUse(this->values);
         _decUse(this->hashes, int_array);
         this->hashes = hn;
+        _incUse(this->hashes);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
@@ -340,6 +362,9 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
             }
             break;
         }
+        _decUse(kn, str_array);
+        _decUse(vn, str_array);
+        _decUse(hn, int_array);
         _decUse(ok, str_array);
         _decUse(oh, int_array);
         _decUse(ov, str_array);
@@ -347,12 +372,12 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
     int64_t hash = str_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
     while (1) {
-        int64_t _t13 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
-        if (_t13) {
-            int64_t _t14 = str_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
-            _t13 = _t14;
+        int64_t _t0 = this->hashes->data[idx_2(p, this->hashes->len)] == hash;
+        if (_t0) {
+            int64_t _t1 = str_equals_2(key, this->keys->data[idx_2(p, this->keys->len)]);
+            _t0 = _t1;
         }
-        if (_t13) {
+        if (_t0) {
             this->values->data[idx_2(p, this->values->len)] = value;
             return;
         } else if (this->hashes->data[idx_2(p, this->hashes->len)] == 0) {
@@ -470,7 +495,7 @@ int64_t str_hashCode_1(str this) {
 }
 void test_0() {
     int64_t _t5 = hashCode_1(string_1001);
-    printf("hash of hello: %lld\n", _t5);
+    printf("hash of hello: %lld\n", (long long)_t5);
     HashMap_int_int* map = newHashMap_int_int_2(0, 0);
     while (1 == 1) {
         int64_t i = 0;
@@ -479,8 +504,8 @@ void test_0() {
             if (i > 10) {
                 HashMap_int_int_remove_2(map, i - 10);
             }
-            int64_t _t12 = HashMap_int_int_get_2(map, i);
-            printf("int map[%lld]=%lld\n", i, _t12);
+            int64_t _t6 = HashMap_int_int_get_2(map, i);
+            printf("int map[%lld]=%lld\n", i, (long long)_t6);
             continue3:;
             int64_t _next = i + 1;
             if (_next >= 20) {

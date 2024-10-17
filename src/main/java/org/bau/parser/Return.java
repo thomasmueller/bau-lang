@@ -11,10 +11,15 @@ public class Return implements Statement {
     Expression expr;
     List<Statement> autoClose;
 
+    private String exceptionStruct;
+
+    public Return(Expression expr) {
+        this.expr = expr;
+    }
+
     @Override
     public Statement replace(Variable old, Expression with) {
-        Return c = new Return();
-        c.expr = expr.replace(old, with);
+        Return c = new Return(expr.replace(old, with));
         return c;
     }
 
@@ -35,15 +40,20 @@ public class Return implements Statement {
         return StatementResult.RETURN;
     }
 
-    public String toC(ProgramContext context) {
+    public void optimize(ProgramContext context) {
+        if (context.function.exceptionType != null) {
+            exceptionStruct = context.function.getExceptionStruct();
+        }
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         if (autoClose != null) {
             for (Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
-        if (context.function.exceptionType != null) {
-            String exceptionStruct = context.function.getExceptionStruct();
+        if (exceptionStruct != null) {
             buff.append("return ok" + exceptionStruct + "(");
             if (expr != null) {
                 buff.append(expr.toC());

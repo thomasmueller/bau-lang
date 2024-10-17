@@ -8,7 +8,9 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -23,12 +25,14 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+/* exception types */
+/* functions */
+void bubbleSort_int_var(int64_t _T, int _vaCount,...);
+int64_t idx_2(int64_t x, int64_t len);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-void bubbleSort_int_var(int64_t _T, int _vaCount,...);
-int64_t idx_2(int64_t x, int64_t len);
 void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     int_array* array = int_array_new(_vaCount);
@@ -66,7 +70,7 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
-            printf("%lld\n", array->data[i]);
+            printf("%lld\n", (long long)array->data[i]);
             continue4:;
             int64_t _next = i + 1;
             if (_next >= array->len) {

@@ -10,14 +10,17 @@ public class Catch implements Statement {
     ArrayList<Statement> list = new ArrayList<>();
     Variable var;
     List<Statement> autoClose;
-    
+
+    private String nextSkipLabel;
+    private String catchLabel;
+
     @Override
     public Statement replace(Variable old, Expression with) {
         Catch c = new Catch();
         c.var = (Variable) var.replace(old, with);
         return c;
     }
-    
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append("catch " + var + "\n");
@@ -26,7 +29,7 @@ public class Catch implements Statement {
         }
         return buff.toString();
     }
-    
+
     @Override
     public StatementResult run(Memory m) {
         Value val = m.getGlobal(Memory.EXCEPTION);
@@ -37,24 +40,27 @@ public class Catch implements Statement {
         m.setGlobal(Memory.EXCEPTION, null);
         return Program.runSequence(m, list);
     }
-    
+
+    public void optimize(ProgramContext context) {
+        nextSkipLabel = "skip" + context.nextSkipLabel++;
+        catchLabel = "catch" + context.nextCatchLabel++;
+        context.needToCatch = null;
+    }
+
     @Override
-    public String toC(ProgramContext context) {
+    public String toC() {
         StringBuilder buff = new StringBuilder();
-        String nextSkipLabel = "skip" + context.nextSkipLabel++;
-        String catchLabel = "catch" + context.nextCatchLabel++;
         buff.append("goto " + nextSkipLabel + ";\n");
         buff.append(catchLabel + ":;\n");
-        buff.append(var.type.toC() + " " + var.name + " = _x.exception;\n");
+        buff.append(var.type.toC() + " " + var.name + " = _lastException;\n");
         for(Statement s : list) {
-            buff.append(Statement.indent(s.toC(context)));
+            buff.append(Statement.indent(s.toC()));
         }
         if (autoClose != null) {
             for(Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
-        }        
-        context.needToCatch = null;
+        }
         buff.append(nextSkipLabel + ":;\n");
         return buff.toString();
     }

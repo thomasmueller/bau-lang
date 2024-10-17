@@ -10,7 +10,11 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
+typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
+struct org_bau_Utils_dateTime;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -25,11 +29,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
 struct org_bau_Utils_dateTime {
     int32_t year;
     int64_t month;
@@ -51,13 +50,19 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     result.millis = 0;
     return result;
 }
+/* exception types */
+/* functions */
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
-void insertionSort_int_1(int_array* a);
+void insertionSort_int_array_int_1(int_array* a);
 int64_t org_bau_Utils_random_0();
-void shellSort_int_1(int_array* a);
+void shellSort_int_array_int_1(int_array* a);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void test_0();
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 int64_t randomSeed;
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
@@ -69,7 +74,7 @@ int64_t idx_2(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
 }
-void insertionSort_int_1(int_array* a) {
+void insertionSort_int_array_int_1(int_array* a) {
     while (1 == 1) {
         int64_t i = 1;
         while (i < a->len) {
@@ -102,7 +107,7 @@ int64_t org_bau_Utils_random_0() {
     int64_t _r0 = z ^ (shiftRight_int_2(z, 31));
     return _r0;
 }
-void shellSort_int_1(int_array* a) {
+void shellSort_int_array_int_1(int_array* a) {
     int64_t h = 16;
     while (a->len > ( idiv_2(h, 16) )) {
         h = ( h + h ) + ( idiv_2(h, 4) ) + 16;
@@ -116,12 +121,12 @@ void shellSort_int_1(int_array* a) {
                 int64_t t = a->data[i];
                 int64_t j = i - g;
                 while (1 == 1) {
-                    int64_t _t2 = j >= 0;
-                    if (_t2) {
-                        int64_t _t3 = a->data[idx_2(j, a->len)] > t;
-                        _t2 = _t3;
+                    int64_t _t0 = j >= 0;
+                    if (_t0) {
+                        int64_t _t1 = a->data[idx_2(j, a->len)] > t;
+                        _t0 = _t1;
                     }
-                    if (!(_t2)) {
+                    if (!(_t0)) {
                         break;
                     }
                     a->data[idx_2(j + g, a->len)] = a->data[idx_2(j, a->len)];
@@ -153,11 +158,11 @@ void test_0() {
         }
         break;
     }
-    insertionSort_int_1(x);
+    insertionSort_int_array_int_1(x);
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
-            printf("%lld\n", x->data[i]);
+            printf("%lld\n", (long long)x->data[i]);
             continue3:;
             int64_t _next = i + 1;
             if (_next >= 5) {
@@ -180,11 +185,11 @@ void test_0() {
         }
         break;
     }
-    shellSort_int_1(x);
+    shellSort_int_array_int_1(x);
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
-            printf("%lld\n", x->data[i]);
+            printf("%lld\n", (long long)x->data[i]);
             continue7:;
             int64_t _next = i + 1;
             if (_next >= 5) {

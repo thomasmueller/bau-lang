@@ -4,9 +4,13 @@ import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
 public class Throw implements Statement {
-    
+
     Expression expr;
-    
+
+    private String exceptionVar;
+    private String catchLabel;
+    private String exceptionStruct;
+
     @Override
     public Throw replace(Variable old, Expression with) {
         Throw c = new Throw();
@@ -15,15 +19,22 @@ public class Throw implements Statement {
     }
 
     @Override
-    public String toC(ProgramContext context) {
-        StringBuilder buff = new StringBuilder();
-        context.delareList.add(context.function.getExceptionStruct() + " _x;");
+    public void optimize(ProgramContext context) {
+        exceptionVar = "_x" + context.nextExceptionVariableId++;
+        context.delareList.add(context.function.exceptionType.nameC() + " _lastException;");
+        context.delareList.add(context.function.getExceptionStruct() + " " + exceptionVar + ";");
         context.needToCatch = context.function.exceptionType;
-        String catchLabel = "catch" + context.nextCatchLabel;
-        buff.append("_x = exception" + context.function.getExceptionStruct() + "(" + expr.toC() + "); goto " + catchLabel + ";\n");
+        catchLabel = "catch" + context.nextCatchLabel;
+        exceptionStruct = context.function.getExceptionStruct();
+    }
+
+    @Override
+    public String toC() {
+        StringBuilder buff = new StringBuilder();
+        buff.append(exceptionVar + " = exception" + exceptionStruct + "(" + expr.toC() + "); _lastException = " + exceptionVar + ".exception; goto " + catchLabel + ";\n");
         return buff.toString();
     }
-    
+
     public String toString() {
         return "throw " + expr;
     }

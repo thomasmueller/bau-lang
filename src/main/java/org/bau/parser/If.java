@@ -63,8 +63,20 @@ public class If implements Statement {
         l2.addAll(ac);
         return Program.runSequence(m, l2);
     }
-    
-    public String toC(ProgramContext context) {
+
+    @Override
+    public void optimize(ProgramContext context) {
+        for (int i = 0; i < listList.size(); i++) {
+            for (Statement s : listList.get(i)) {
+                s.optimize(context);
+            }
+            for (Statement s : autoClose.get(i)) {
+                s.optimize(context);
+            }
+        }
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("if (");
         buff.append(conditions.get(0).toC()).append(") {\n");
@@ -75,22 +87,22 @@ public class If implements Statement {
             }
             ArrayList<Statement> list = listList.get(i);
             for(Statement s : list) {
-                buff.append(Statement.indent(s.toC(context)));
-            }            
+                buff.append(Statement.indent(s.toC()));
+            }
             List<Statement> autoCloseList = autoClose.get(i);
             for (Statement s : autoCloseList) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
         if (listList.size() > conditions.size()) {
             buff.append("} else {\n");
             ArrayList<Statement> list = listList.get(listList.size() - 1);
             for (Statement s : list) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
             List<Statement> autoCloseList = autoClose.get(listList.size() - 1);
             for (Statement s : autoCloseList) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
         buff.append("}\n");
@@ -109,7 +121,7 @@ public class If implements Statement {
             ArrayList<Statement> list = listList.get(i);
             for(Statement s : list) {
                 buff.append(Statement.indent(s.toString()));
-            }            
+            }
         }
         if (listList.size() > conditions.size()) {
             buff.append("else\n");

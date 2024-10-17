@@ -12,7 +12,6 @@ public class ArrayAccess implements Expression, LeftValue {
     final Expression base;
     Expression arrayIndex;
     final boolean checkBounds;
-    private boolean needToDecrementRefCountOnFree;
 
     ArrayAccess(Expression base, Expression arrayIndex, boolean checkBounds) {
         this.base = base;
@@ -66,16 +65,16 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public String decrementRefCountC() {
-        if (base.type().isPointer()) {
-            throw new IllegalStateException("Refcounts not yet supported on arrays of pointers");
+        if (type().isPointer() || type().isArray()) {
+            return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
         }
         return "";
     }
 
     @Override
     public String incrementRefCountC() {
-        if (base.type().isPointer()) {
-            throw new IllegalStateException("Refcounts not yet supported on arrays of pointers");
+        if (type().isPointer() || type().isArray()) {
+            return Free.INC_USE + "(" + toC() + ");\n";
         }
         return "";
     }
@@ -160,16 +159,6 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public boolean needToDecrementRefCountOnFree() {
-        return needToDecrementRefCountOnFree;
-    }
-
-    @Override
-    public void needToDecrementRefCountOnFree(boolean value) {
-        needToDecrementRefCountOnFree = value;
-    }
-
-    @Override
     public Value setValue(Memory memory, Value val, boolean incRefCount) {
         Value indexValue = arrayIndex.eval(memory);
         if (indexValue == null) {
@@ -192,7 +181,7 @@ public class ArrayAccess implements Expression, LeftValue {
             return v;
         }
         if (type().isPointer() || type().isArray()) {
-            Value old = baseVal.get(index);
+            Value old = array.get(index);
             if (old != null) {
                 StatementResult result = Free.decRefCount(old, type(), memory);
                 if (result == StatementResult.PANIC) {

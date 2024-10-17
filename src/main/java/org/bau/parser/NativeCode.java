@@ -3,9 +3,9 @@ package org.bau.parser;
 import org.bau.runtime.Memory;
 
 public class NativeCode implements Statement {
-    
+
     private final String nativeCode;
-    
+
     NativeCode(String nativeCode) {
         this.nativeCode = nativeCode;
     }
@@ -23,11 +23,14 @@ public class NativeCode implements Statement {
         return StatementResult.OK;
     }
 
+    public void optimize(ProgramContext context) {
+    }
+
     @Override
-    public String toC(ProgramContext context) {
+    public String toC() {
         return nativeCode;
     }
-    
+
     public String toString() {
         return "native(" + StringLiteral.escape(nativeCode) + ")";
     }

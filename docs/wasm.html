@@ -116,8 +116,11 @@ var Util = {
 }
 // WASM imports: callbacks to Javascript functions
 var wasmImports = {
-		c: {
-				args_sizes_get: (e, t) => {
+		env: {
+				memory: THIS.memory
+		},
+		wasi_snapshot_preview1: {
+		    args_sizes_get: (e, t) => {
             console.log('args_sizes_get ' + e + ' ' + t);
 						new Uint32Array(THIS.memory.buffer, e, 1)[0] = THIS.encodedArgs.length, new Uint32Array(THIS.memory.buffer, t, 1)[0] = THIS.totalArgsBytes
 				},
@@ -207,10 +210,13 @@ var wasmImports = {
             // console.log('_memset');
 						const r = new Uint8Array(THIS.memory.buffer);
 						for (let s = 0; s < n; ++s) r[e++] = t
-				}
-		},
-		env: {
-				memory: THIS.memory
+				},
+				fd_prestat_get: () => {
+				},
+				fd_close: () => {
+				},
+				random_get: () => {
+				},
 		}
 };
 WaStorage = class {

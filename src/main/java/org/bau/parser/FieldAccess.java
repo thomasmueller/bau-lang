@@ -13,7 +13,6 @@ public class FieldAccess implements Expression, LeftValue {
     final String fieldName;
     private Bounds lenBounds;
     final DataType type;
-    private boolean needToDecrementRefCountOnFree = false;
 
     FieldAccess(Expression base, String fieldName, DataType type) {
         this.base = base;
@@ -164,13 +163,6 @@ public class FieldAccess implements Expression, LeftValue {
         return null;
     }
 
-    public void addLenBoundCondition(Expression scope, String operation, Expression expr) {
-        if (lenBounds == null) {
-            lenBounds = new Bounds();
-        }
-        lenBounds.addCondition(scope, operation, expr);
-    }
-
     public Bounds getLenBounds() {
         return lenBounds;
     }
@@ -190,16 +182,6 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;
-    }
-
-    @Override
-    public boolean needToDecrementRefCountOnFree() {
-        return needToDecrementRefCountOnFree;
-    }
-
-    @Override
-    public void needToDecrementRefCountOnFree(boolean value) {
-        needToDecrementRefCountOnFree = value;
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.bau.parser;
 import org.bau.runtime.Memory;
 
 public interface Statement {
-    
+
     enum StatementResult {
         OK,
         BREAK,
@@ -13,7 +13,7 @@ public interface Statement {
         PANIC,
         TIMEOUT
     }
-    
+
     public static String indent(String s) {
         if (s.isEmpty()) {
             return s;
@@ -27,13 +27,15 @@ public interface Statement {
     }
 
     Statement replace(Variable old, Expression with);
-    
+
     StatementResult run(Memory m);
 
-    String toC(ProgramContext context);
+    void optimize(ProgramContext context);
+
+    String toC();
 
     default void setBounds(Expression scope) {
-        
+
     }
 
 }

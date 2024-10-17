@@ -71,6 +71,11 @@ public class TestCompare {
     }
 
     @Test
+    public void constFunction() throws IOException {
+        test("constFunction");
+    }
+
+    @Test
     public void comment() throws IOException {
         test("comment");
     }
@@ -171,6 +176,11 @@ public class TestCompare {
     }
 
     @Test
+    public void regexSimple() throws IOException {
+        test("regexSimple");
+    }
+
+    @Test
     public void sort() throws IOException {
         test("sort");
     }
@@ -183,6 +193,11 @@ public class TestCompare {
     @Test
     public void string2() throws IOException {
         test("string2");
+    }
+
+    @Test
+    public void ternaryCondition() throws IOException {
+        test("ternaryCondition");
     }
 
     @Test

@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 
+import org.bau.parser.Bounds.ApplyType;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -28,14 +29,16 @@ public interface Expression {
     Bounds getBounds();
 
     /**
+     * Apply the bounds to all the variables in the expression.
+     *
      * while i<n     -> applyBounds(i<n)
      *   i+=1        -> i.setBounds(+1)
      *
-     * @param step the condition applies within the same step
+     * @param scope the condition applies within this scope
+     * @param type whether the condition should be reversed, or undone
      * @param condition
      */
-    // apply bounds to all the variables
-    default void applyBoundCondition(Expression scope, boolean reversed) {
+    default void applyBoundCondition(Expression scope, ApplyType type) {
 
     }
 

@@ -8,6 +8,7 @@ import org.bau.runtime.Value;
 
 public class Variable implements Expression, LeftValue {
     String name;
+    String module;
     DataType type;
     private Bounds bounds;
     private Bounds lenBounds;
@@ -16,14 +17,24 @@ public class Variable implements Expression, LeftValue {
     private boolean needToDecrementRefCountOnFree = true;
     public boolean global;
 
-    public Variable(String id, DataType type) {
-        this.name = id;
+    public Variable(String name, DataType type) {
+        this(null, name, false, type);
+    }
+
+    public Variable(String module, String name, boolean global, DataType type) {
+        this.module = module;
+        this.name = name;
+        this.global = global;
         this.type = type;
         Expression max = type.maxValue;
         if (max != null) {
             bounds = new Bounds();
             bounds.addCondition(null, "<", max);
         }
+    }
+
+    public static String getGlobalVariableId(String module, String name) {
+        return module + "." + name;
     }
 
     @Override
@@ -103,13 +114,6 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public Bounds getBounds() {
-//        if (bounds == null) {
-//            Expression max = type.maxValue;
-//            if (max != null) {
-//                bounds = new Bounds();
-//                bounds.addCondition(null, "<", max);
-//            }
-//        }
         return bounds;
     }
 
@@ -158,16 +162,6 @@ public class Variable implements Expression, LeftValue {
     @Override
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         return this;
-    }
-
-    @Override
-    public boolean needToDecrementRefCountOnFree() {
-        return needToDecrementRefCountOnFree;
-    }
-
-    @Override
-    public void needToDecrementRefCountOnFree(boolean value) {
-        needToDecrementRefCountOnFree = value;
     }
 
     @Override

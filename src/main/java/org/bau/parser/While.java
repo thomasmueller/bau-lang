@@ -72,19 +72,34 @@ public class While implements Statement {
         return StatementResult.OK;
     }
 
-    public String toC(ProgramContext context) {
+    @Override
+    public void optimize(ProgramContext context) {
+        for (Statement s : list) {
+            s.optimize(context);
+        }
+        for (Statement s : listContinue) {
+            s.optimize(context);
+        }
+        if (autoClose != null) {
+            for (Statement s : autoClose) {
+                s.optimize(context);
+            }
+        }
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("while (" + condition.toC() + ") {\n");
         for(Statement s : list) {
-            buff.append(Statement.indent(s.toC(context)));
+            buff.append(Statement.indent(s.toC()));
         }
         StringBuilder buffContinue = new StringBuilder();
         for(Statement s : listContinue) {
-            buffContinue.append(Statement.indent(s.toC(context)));
+            buffContinue.append(Statement.indent(s.toC()));
         }
         if (autoClose != null) {
             for(Statement s : autoClose) {
-                buffContinue.append(Statement.indent(s.toC(context)));
+                buffContinue.append(Statement.indent(s.toC()));
             }
         }
         if (buffContinue.length() > 0) {

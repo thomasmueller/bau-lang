@@ -8,7 +8,13 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct File File;
+struct File;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +29,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,11 +43,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct File File;
 struct File {
     int64_t fp;
     int32_t _refCount;
@@ -58,9 +54,20 @@ File* File_new() {
     result->fp = 0;
     return result;
 }
+/* exception types */
+/* functions */
 void File_close_1(File* this);
 void File_use_1(File* this);
 File* openFile_1(int64_t fp);
+void File_free(File* x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void File_free(File* x) {
     File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
@@ -69,7 +76,7 @@ void File_free(File* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -78,15 +85,15 @@ i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 void File_close_1(File* this) {
-    printf("closing %lld\n", this->fp);
+    printf("closing %lld\n", (long long)this->fp);
 }
 void File_use_1(File* this) {
-    printf("use %lld\n", this->fp);
+    printf("use %lld\n", (long long)this->fp);
 }
 File* openFile_1(int64_t fp) {
     File* f = File_new();
     f->fp = fp;
-    printf("opening %lld\n", f->fp);
+    printf("opening %lld\n", (long long)f->fp);
     return f;
     _decUse(f, File);
 }
@@ -98,7 +105,7 @@ int main() {
     int64_t i = 0;
     while (i < 10) {
         File* f = openFile_1(i);
-        printf("opened %lld\n", i);
+        printf("opened %lld\n", (long long)i);
         if (i == 5) {
             _decUse(f, File);
             break;

@@ -8,7 +8,11 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
+typedef struct List_int List_int;
+struct List_int;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -23,11 +27,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct List_int List_int;
 struct List_int {
     int_array* array;
     int64_t size;
@@ -41,9 +40,16 @@ List_int* List_int_new() {
     result->size = 0;
     return result;
 }
+/* exception types */
+/* functions */
 void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
+void List_int_free(List_int* x);
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void List_int_free(List_int* x) {
     _decUse(x->array, int_array);
     _free(x);
@@ -53,6 +59,8 @@ void List_int_add_2(List_int* this, int64_t x) {
         int_array* n = int_array_new(this->array->len * 2);
         _decUse(this->array, int_array);
         this->array = n;
+        _incUse(this->array);
+        _decUse(n, int_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -68,8 +76,8 @@ void test_0() {
     intList->array = int_array_new(4);
     List_int_add_2(intList, 10);
     List_int_add_2(intList, 20);
-    printf("%lld\n", intList->array->data[idx_2(0, intList->array->len)]);
-    printf("%lld\n", intList->array->data[idx_2(1, intList->array->len)]);
+    printf("%lld\n", (long long)intList->array->data[idx_2(0, intList->array->len)]);
+    printf("%lld\n", (long long)intList->array->data[idx_2(1, intList->array->len)]);
     _decUse(intList, List_int);
 }
 int main() {

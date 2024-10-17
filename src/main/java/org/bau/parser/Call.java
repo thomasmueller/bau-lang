@@ -15,6 +15,9 @@ public class Call implements Statement, Expression {
     ArrayList<Expression> args = new ArrayList<>();
     FunctionDefinition def;
 
+    private String exceptionVar;
+    private String catchLabel;
+
     @Override
     public Value eval(Memory m) {
         if (def.list == null) {
@@ -40,14 +43,18 @@ public class Call implements Statement, Expression {
             if (def.varArgs && i >= def.parameters.size() - 1) {
                 if (i == def.parameters.size() - 1) {
                     int len = args.size() - i;
+                    Variable var = def.parameters.get(i);
                     varArgsValue = new Value.ValueArray(len, new Value.ValueInt(0));
                     Value varArgsRef = new Value.ValueRef(m.putHeap(varArgsValue));
-                    params.put(def.parameters.get(i).name, varArgsRef);
+                    params.put(var.name, varArgsRef);
+                    v = Operation.convertToType(v, var.type().baseType());
                     list.add(v);
                 }
                 varArgsValue.set(i - def.parameters.size() + 1, v);
             } else {
-                params.put(def.parameters.get(i).name, v);
+                Variable var = def.parameters.get(i);
+                v = Operation.convertToType(v, var.type());
+                params.put(var.name, v);
                 list.add(v);
             }
         }
@@ -105,11 +112,6 @@ public class Call implements Statement, Expression {
         return def.returnType;
     }
 
-    @Override
-    public String toC() {
-        return toC(null);
-    }
-
     public DataType exceptionType() {
         return def.exceptionType;
     }
@@ -118,20 +120,27 @@ public class Call implements Statement, Expression {
         return def.exceptionType;
     }
 
+    public void optimize(ProgramContext context) {
+        if (statement && def.exceptionType != null) {
+            String s = def.getExceptionStruct();
+            exceptionVar = "_x" + context.nextExceptionVariableId++;
+            context.delareList.add(def.exceptionType.nameC() + " _lastException;");
+            context.delareList.add(s + " " + exceptionVar + ";");
+            catchLabel = "catch" + context.nextCatchLabel;
+            context.needToCatch = def.exceptionType;
+        }
+    }
+
     @Override
-    public String toC(ProgramContext context) {
+    public String toC() {
         if (def.callType == null && "println".equals(def.name)) {
             return printlnToC();
         }
         if (statement && def.exceptionType != null) {
             StringBuilder buff = new StringBuilder();
-            String s = def.getExceptionStruct();
-            context.delareList.add(s + " _x;");
-            buff.append("_x = ");
+            buff.append(exceptionVar + " = ");
             buff.append(callToC());
-            String catchLabel = "catch" + context.nextCatchLabel;
-            buff.append("if (_x.exception.exceptionType != -1) goto " + catchLabel + ";\n");
-            context.needToCatch = def.exceptionType;
+            buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
             return buff.toString();
         }
         return callToC();
@@ -226,6 +235,9 @@ public class Call implements Statement, Expression {
                 buff.append(a.toC()).append("->data");
             } else  {
                 buff.append(", ");
+                if ("int".equals(a.type().name())) {
+                    buff.append("(long long)");
+                }
                 buff.append(a.toC());
             }
         }

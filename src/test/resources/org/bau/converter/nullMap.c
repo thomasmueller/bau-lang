@@ -8,7 +8,11 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
+typedef struct Value Value;
+struct Value;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -23,11 +27,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct Value Value;
 struct Value {
     int64_t data;
     int32_t _refCount;
@@ -39,8 +38,15 @@ Value* Value_new() {
     result->data = 0;
     return result;
 }
+/* exception types */
+/* functions */
 Value* get_1(int64_t key);
 void test_0();
+void Value_free(Value* x);
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void Value_free(Value* x) {
     _free(x);
 }
@@ -56,11 +62,11 @@ Value* get_1(int64_t key) {
 void test_0() {
     Value* a = get_1(0);
     if (a != NULL) {
-        printf("%lld\n", a->data);
+        printf("%lld\n", (long long)a->data);
     }
     Value* b = get_1(1);
     if (b != NULL) {
-        printf("%lld\n", b->data);
+        printf("%lld\n", (long long)b->data);
     }
     _decUse(a, Value);
     _decUse(b, Value);

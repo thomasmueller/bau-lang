@@ -8,7 +8,7 @@ public class Continue implements Statement {
     Expression condition;
     int continuedId;
     List<Statement> autoClose;
-    
+
     @Override
     public Statement replace(Variable old, Expression with) {
         Continue c = new Continue();
@@ -31,18 +31,21 @@ public class Continue implements Statement {
             } else {
                 return result;
             }
-        }                
+        }
         return StatementResult.CONTINUE;
     }
 
-    public String toC(ProgramContext context) {
+    public void optimize(ProgramContext context) {
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         if (condition != null) {
             buff.append("if (" + condition.toC() + ") {\n");
         }
         if (autoClose != null) {
             for(Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
         if (condition != null) {

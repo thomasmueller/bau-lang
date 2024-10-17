@@ -8,7 +8,13 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct org_bau_Exception_exception org_bau_Exception_exception;
+struct org_bau_Exception_exception;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +29,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,11 +43,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct org_bau_Exception_exception org_bau_Exception_exception;
 struct org_bau_Exception_exception {
     int64_t exceptionType;
     i8_array* message;
@@ -58,26 +54,36 @@ org_bau_Exception_exception org_bau_Exception_exception_new() {
     result.message = 0;
     return result;
 }
-typedef struct _null_or_exception _null_or_exception;
-struct _null_or_exception {
+/* exception types */
+typedef struct _or_exception _or_exception;
+struct _or_exception {
     org_bau_Exception_exception exception;
 };
-_null_or_exception ok_null_or_exception() {
-    _null_or_exception x;
+_or_exception ok_or_exception() {
+    _or_exception x;
     x.exception.exceptionType = -1;
     return x;
 }
-_null_or_exception exception_null_or_exception(org_bau_Exception_exception exception) {
-    _null_or_exception x;
+_or_exception exception_or_exception(org_bau_Exception_exception exception) {
+    _or_exception x;
     x.exception = exception;
     return x;
 }
+/* functions */
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
-_null_or_exception print_1(int64_t x);
+_or_exception print_1(int64_t x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -92,29 +98,31 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     _incUse(result.message);
     return result;
 }
-_null_or_exception print_1(int64_t x) {
-    _null_or_exception _x;
+_or_exception print_1(int64_t x) {
+    org_bau_Exception_exception _lastException;
+    _or_exception _x0;
     if (x > 5) {
         org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1000);
-        _x = exception_null_or_exception(_t0); goto catch0;
+        _x0 = exception_or_exception(_t0); _lastException = _x0.exception; goto catch0;
     }
-    printf("x = %lld\n", x);
-    return ok_null_or_exception();
+    printf("x = %lld\n", (long long)x);
+    return ok_or_exception();
     catch0:
-    return exception_null_or_exception(_x.exception);
+    return exception_or_exception(_lastException);
 }
 int main() {
     string_1000 = str_const("Value too large", 15);
     string_1001 = str_const("x = ", 4);
     string_1002 = str_const("Error: ", 7);
-    _null_or_exception _x;
+    org_bau_Exception_exception _lastException;
+    _or_exception _x0;
     int64_t i = 0;
     while (i <= 10) {
-        _x = print_1(i);
-        if (_x.exception.exceptionType != -1) goto catch0;
+        _x0 = print_1(i);
+        if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
         goto skip0;
         catch0:;
-        org_bau_Exception_exception e = _x.exception;
+        org_bau_Exception_exception e = _lastException;
             printf("Error: %.*s\n", e.message->len, e.message->data);
         skip0:;
         i += 1;

@@ -8,7 +8,21 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct org_bau_List_List org_bau_List_List;
+struct org_bau_List_List;
+typedef struct org_bau_String_string org_bau_String_string;
+struct org_bau_String_string;
+typedef struct org_bau_String_string_array org_bau_String_string_array;
+struct org_bau_String_string_array;
+typedef struct org_bau_String_StringBuilder org_bau_String_StringBuilder;
+struct org_bau_String_StringBuilder;
+typedef struct org_bau_List_List_org_bau_String_string org_bau_List_List_org_bau_String_string;
+struct org_bau_List_List_org_bau_String_string;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +37,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,11 +51,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct org_bau_List_List org_bau_List_List;
 struct org_bau_List_List {
     int32_t _refCount;
 };
@@ -56,7 +60,6 @@ org_bau_List_List* org_bau_List_List_new() {
     result->_refCount = 1;
     return result;
 }
-typedef struct org_bau_String_string org_bau_String_string;
 struct org_bau_String_string {
     i8_array* data;
     int32_t _refCount;
@@ -66,7 +69,6 @@ org_bau_String_string org_bau_String_string_new() {
     result.data = 0;
     return result;
 }
-typedef struct org_bau_String_string_array org_bau_String_string_array;
 struct org_bau_String_string_array {
     int32_t len;
     org_bau_String_string* data;
@@ -81,11 +83,6 @@ org_bau_String_string_array* org_bau_String_string_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void org_bau_String_string_array_free(org_bau_String_string_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct org_bau_String_StringBuilder org_bau_String_StringBuilder;
 struct org_bau_String_StringBuilder {
     i8_array* data;
     int64_t len;
@@ -99,7 +96,6 @@ org_bau_String_StringBuilder* org_bau_String_StringBuilder_new() {
     result->len = 0;
     return result;
 }
-typedef struct org_bau_List_List_org_bau_String_string org_bau_List_List_org_bau_String_string;
 struct org_bau_List_List_org_bau_String_string {
     org_bau_String_string_array* array;
     int64_t size;
@@ -113,6 +109,8 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     result->size = 0;
     return result;
 }
+/* exception types */
+/* functions */
 int64_t idx_2(int64_t x, int64_t len);
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T);
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x);
@@ -126,7 +124,22 @@ i8_array* org_bau_String_substring_2(i8_array* s, int64_t start);
 i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end);
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end);
 void test_0();
+void org_bau_List_List_free(org_bau_List_List* x);
+void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x);
+void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_String_string* x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void org_bau_List_List_free(org_bau_List_List* x) {
+    _free(x);
+}
+void org_bau_String_string_array_free(org_bau_String_string_array* x) {
+    _free(x->data);
     _free(x);
 }
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x) {
@@ -140,7 +153,7 @@ void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_Stri
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -189,6 +202,8 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         }
         _decUse(this->array, org_bau_String_string_array);
         this->array = n;
+        _incUse(this->array);
+        _decUse(n, org_bau_String_string_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -393,6 +408,9 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
         }
         _decUse(this->data, i8_array);
         this->data = n;
+        _incUse(this->data);
+        continue2:;
+        _decUse(n, i8_array);
     }
     while (1 == 1) {
         int64_t i = 0;
@@ -412,14 +430,14 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
 void test_0() {
     i8_array* x = string_1001;
     _incUse(x);
-    int64_t _t14 = org_bau_String_indexOf_2(x, string_1003);
-    printf("indexOf ll: %lld\n", _t14);
-    i8_array* _t15 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1006);
-    printf("l ->L : %.*s\n", _t15->len, _t15->data);
-    i8_array* _t16 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1008);
-    printf("l ->LL: %.*s\n", _t16->len, _t16->data);
-    i8_array* _t17 = org_bau_String_replaceAll_3(string_1001, string_1003, string_1006);
-    printf("ll->L : %.*s\n", _t17->len, _t17->data);
+    int64_t _t0 = org_bau_String_indexOf_2(x, string_1003);
+    printf("indexOf ll: %lld\n", (long long)_t0);
+    i8_array* _t1 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1006);
+    printf("l ->L : %.*s\n", _t1->len, _t1->data);
+    i8_array* _t2 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1008);
+    printf("l ->LL: %.*s\n", _t2->len, _t2->data);
+    i8_array* _t3 = org_bau_String_replaceAll_3(string_1001, string_1003, string_1006);
+    printf("ll->L : %.*s\n", _t3->len, _t3->data);
     org_bau_List_List_org_bau_String_string* list = org_bau_String_split_2(string_1010, string_1011);
     while (1 == 1) {
         int64_t i = 0;
@@ -436,9 +454,9 @@ void test_0() {
         break;
     }
     _decUse(x, i8_array);
-    _decUse(_t15, i8_array);
-    _decUse(_t16, i8_array);
-    _decUse(_t17, i8_array);
+    _decUse(_t1, i8_array);
+    _decUse(_t2, i8_array);
+    _decUse(_t3, i8_array);
     _decUse(list, org_bau_List_List_org_bau_String_string);
 }
 int main() {

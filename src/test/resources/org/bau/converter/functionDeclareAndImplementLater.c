@@ -8,7 +8,11 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +27,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,16 +41,22 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+/* exception types */
+/* functions */
+int64_t even_1(int64_t x);
+int64_t odd_1(int64_t x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-int64_t even_1(int64_t x);
-int64_t odd_1(int64_t x);
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -79,13 +84,13 @@ int main() {
     string_1002 = str_const("odd(11)=", 8);
     string_1003 = str_const("even(11)=", 9);
     int64_t _t2 = odd_1(10);
-    printf("odd(10)=%lld\n", _t2);
+    printf("odd(10)=%lld\n", (long long)_t2);
     int64_t _t3 = even_1(10);
-    printf("even(10)=%lld\n", _t3);
+    printf("even(10)=%lld\n", (long long)_t3);
     int64_t _t4 = odd_1(11);
-    printf("odd(11)=%lld\n", _t4);
+    printf("odd(11)=%lld\n", (long long)_t4);
     int64_t _t5 = even_1(11);
-    printf("even(11)=%lld\n", _t5);
+    printf("even(11)=%lld\n", (long long)_t5);
     _end();
     return 0;
 }

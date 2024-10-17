@@ -20,7 +20,6 @@ public class RegexSimple {
         TokenType type;
         boolean escaped;
         String data;
-        ArrayList<Token> list;
         int min;
         int max;
 

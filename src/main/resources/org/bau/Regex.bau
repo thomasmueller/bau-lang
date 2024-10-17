@@ -1,0 +1,195 @@
+module org.bau.Regex
+
+import org.bau.List
+    List
+    newList
+import org.bau.Exception
+    exception
+    
+enum tokenType
+    START
+    END
+    MATCH
+    LIST
+    NOT_LIST
+    ANY
+
+type Token
+    type tokenType
+    data List(i8)
+    list List(Token)
+    min int
+    max int
+
+type match
+    start int
+    end int
+
+fun match(start int, end int)
+    m := new(match)
+    m.start = start
+    m.end = end
+
+fun matchChar(text i8[], pos int) int throw exception
+    if pos >= text.len
+        return 0
+    c := text[pos]
+    switch type
+    case tokenType.START, tokenType.END
+        throw exception('Start or end in wrong location')
+    case tokenType.MATCH
+        return c = data[0]
+    case tokenType.LIST
+        for i := range(0, data.len, 2)
+            min : data[i]
+            max : data[i + 1]
+            if c >= min and c <= max
+                return 1
+        return 0
+    case tokenType.NOT_LIST
+        for i := range(0, data.len, 2)
+            min : data[i]
+            max : data[i + 1]
+            if c >= min and c <= max
+                return 0
+        return 1
+    case tokenType.ANY
+        return 1
+    else
+        throw exception('Unknown token type')
+  
+fun parse(regex i8[]) List(Token)
+    result := newList(Token)
+    for i := until(regex.len)
+        c := regex[i]
+        t := new(Token)
+        t.min = 1
+        t.max = 1
+        if c = ord('^')
+            t.type = tokenType.START
+            result.add(t)
+            continue
+        if c = ord('$')
+            t.type = tokenType.END
+            result.add(t)
+            continue;
+        if c = ord('.')
+            t.type = tokenType.ANY
+        elif c = ord('\\')
+            t.type = tokenType.MATCH
+            t.data = newList()
+            i += 1
+            t.data.add(regex[i])
+        elif c = ord('[')
+            i += 1
+            c = regex[i]
+            if c = ord('^')
+                t.type = tokenType.NOT_LIST
+                i += 1
+                c = regex[i]
+            else
+                t.type = tokenType.LIST
+            t.data.add(c)
+            t.data.add(c)
+            while 1
+                i += 1
+                c = regex[i]
+                break c = ord(']')
+                if c = ord('-')
+                    i += 1
+                    c = regex[i]
+                    t.data.add(c)
+                else 
+                    t.data.add(c)
+                    t.data.add(c)
+        else
+            t.type = TokenType.MATCH
+            t.data.add(c)
+        result.add(t)
+        break i + 1 >= regex.len
+        i += 1
+        c = regex[i];
+        if c = ord('+')
+            t.max = Integer.MAX_VALUE;
+        elif c = ord('*')
+            t.min = 0
+            t.max = Integer.MAX_VALUE
+        elif c = ord('?')
+            t.min = 0
+            t.max = 1
+        elif c = ord('{')
+            i += 1
+            start := i
+            result := 0
+            while i < regex.len
+                c = regex[i]
+                break c < ord('0') or c > ord('9')
+                result = result * 10 + c - ord('0')
+                break result > 9999
+                i += 1
+            t.min = result
+            t.max = t.min
+            if c = ord(',')
+                i += 1
+                start = i
+                result := 0
+                while i < regex.len
+                    c = regex[i]
+                    break c < ord('0') or c > ord('9')
+                    result = result * 10 + c - ord('0')
+                    break result > 9999
+                    i += 1
+                t.max = result
+            if c != ord('}')
+                throw exception('Expected }')
+        else
+            i -= 1
+    return result;
+
+fun matches(text i8[], regex i8[]) int
+    result = find(text, regex);
+    return result != null && result[0] == 0 && result[1] == text.length();
+}
+
+fun find(text i8[], regex i8[]) int[]
+    list = parse(regex)
+    if list.size > 0 and list.data[0].type = tokenType.START
+        end = matchHere(list, 1, text, 0)
+        if end >= 0
+            return match(0, end)
+        return match(-1, -1)
+    }
+    tp := 0
+    while 1
+        end := matchHere(list, 0, text, tp)
+        if end >= 0
+            return match(tp, end)
+        break tp++ < text.len
+    return match(-1, -1)
+
+fun matchHere(list List(Token), rp int, text i8[], tp int) int
+    if rp >= list.size
+        return tp
+    t := list.data[rp]
+    if t.type == tokenType.END
+        if tp = text.len
+            return tp
+        return -1
+    for i := until(t.min)
+        if not t.matchChar(text, tp)
+            return -1
+        tp += 1
+    return matchStar(t, list, rp + 1, text, tp, t.max - t.min)
+
+fun matchStar(t Token, list List(Token), rp int, text i8[], tp int, max int) int
+    result = -1
+    while 1
+        end := matchHere(list, rp, text, tp)
+        if end >= 0
+            result = end
+        r := t.matchChar(text, tp)
+        tp += 1
+        break r = 0
+        break max <= 0
+        max -= 1
+    return result

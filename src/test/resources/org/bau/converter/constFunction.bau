@@ -1,0 +1,12 @@
+fun sum(x T..) const T
+    result := T(0)
+    for i := until(x.len)
+        result += x[i]!
+    return result
+
+println(sum(1, 2, 3))
+println(sum(1.1, 2.2, 3.3))
+
+## Expected
+6
+6.6

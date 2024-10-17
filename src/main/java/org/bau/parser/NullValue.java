@@ -32,7 +32,7 @@ public class NullValue implements Expression {
     public Expression simplify() {
         return this;
     }
-    
+
     @Override
     public String toString() {
         return "null";

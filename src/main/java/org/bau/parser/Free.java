@@ -69,13 +69,12 @@ public class Free implements Statement {
         return decRefCount(var, m);
     }
 
+    public void optimize(ProgramContext context) {
+    }
+
     @Override
-    public String toC(ProgramContext context) {
-        if (var.needToDecrementRefCountOnFree()) {
-            return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +");\n";
-        } else {
-            return "";
-        }
+    public String toC() {
+        return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +");\n";
     }
 
     @Override

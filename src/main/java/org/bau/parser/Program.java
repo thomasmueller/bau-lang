@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,19 +35,14 @@ public class Program {
 
     HashMap<String, Variable> variables = new HashMap<>();
 
-    // global variables in modules (only in modules, and not constant)
+    // global variables (or constants) in modules
     LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
 
     TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
 
-    LinkedHashMap<String, Expression> constantMap = new LinkedHashMap<>();
-
     TreeSet<String> includes = new TreeSet<>();
 
     HashMap<String, FunctionDefinition> functionTemplates = new HashMap<>();
-
-    ArrayList<String> identifierStack = new ArrayList<>();
-    ArrayList<Integer> identifierCloseCount = new ArrayList<>();
 
     ArrayList<String> comments = new ArrayList<>();
 
@@ -57,8 +53,6 @@ public class Program {
     HashMap<String, String> importEntries = new HashMap<>();
 
     List<Statement> autoClose;
-
-    private int nextTempVariableId;
 
     {
         FunctionDefinition f = new FunctionDefinition();
@@ -78,69 +72,6 @@ public class Program {
         this.modules = modules;
     }
 
-    /**
-     * Get the stack position (for identifiers etc)
-     */
-    public int getStackPos() {
-        return identifierStack.size();
-    }
-
-    public Variable getVariable(String name) {
-        return variables.get(name);
-    }
-
-    /**
-     * Get the number of auto-close identifiers between the current stack and the old stack position
-     */
-    public int getStackCloseDifference(int oldStack) {
-        if (oldStack >= identifierCloseCount.size()) {
-            return 0;
-        }
-        int oldCount = oldStack == 0 ? 0 : identifierCloseCount.get(oldStack - 1);
-        int newCount = identifierCloseCount.get(identifierCloseCount.size() - 1);
-        return newCount - oldCount;
-    }
-
-    /**
-     * Get the list of variables that are new since the given stack position
-     */
-    public ArrayList<String> newVariablesList(int stackPos) {
-        ArrayList<String> list = new ArrayList<>();
-        for (int i = stackPos; i < identifierStack.size(); i++) {
-            String id = identifierStack.get(i);
-            if (variables.containsKey(id)) {
-                list.add(id);
-            } else if (constantMap.containsKey(id)) {
-                // ignore (constants are not freed - but we can)
-            } else if (dataTypeMap.containsKey(id)) {
-                // types don't need to be freed
-            } else {
-                throw new IllegalStateException("Id not found: " + id);
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Rewind the stack to the target position
-     */
-    public void rewindStack(int stackPos) {
-        while (identifierStack.size() > stackPos) {
-            String id = identifierStack.remove(identifierStack.size() - 1);
-            identifierCloseCount.remove(identifierCloseCount.size() - 1);
-            if (variables.containsKey(id)) {
-                variables.remove(id);
-            } else if (dataTypeMap.containsKey(id)) {
-                dataTypeMap.remove(id);
-            } else {
-                throw new IllegalStateException("Id not found: " + id);
-            }
-            if (constantMap.containsKey(id)) {
-                constantMap.remove(id);
-            }
-        }
-    }
-
     public FunctionDefinition getFunctionTemplate(DataType type, String module, String name) {
         String id = FunctionDefinition.getFunctionId(type, module, name, 0);
         return functionTemplates.get(id);
@@ -151,8 +82,19 @@ public class Program {
         functionTemplates.put(id, def);
     }
 
-    public void addGlobalVariable(String id, Variable var) {
+    /**
+     * Add a global variable or constant.
+     *
+     * @param var the variable
+     */
+    public void addGlobalVariable(Variable var) {
+        String id = Variable.getGlobalVariableId(var.module, var.name);
         globalVariables.put(id, var);
+    }
+
+    public Variable getGlobalVariable(String module, String name) {
+        String id = Variable.getGlobalVariableId(module, name);
+        return globalVariables.get(id);
     }
 
     public long addStringConstant(String n) {
@@ -163,34 +105,6 @@ public class Program {
             stringConstantsMap.put(reference, n);
         }
         return reference;
-    }
-
-    public void addConstant(Variable var, Expression value) {
-        addVariable(var);
-        if (constantMap.containsKey(var.name)) {
-            throw new IllegalStateException("Constant already exists: " + var.name);
-        }
-        constantMap.put(var.name, value);
-    }
-
-    public void addVariable(Variable var) {
-        String name = var.name;
-        if (variables.containsKey(name)) {
-            throw new IllegalStateException("Variable already exists: " + name);
-        }
-        variables.put(name, var);
-        addIdentifier(name, var.type);
-    }
-
-    public void addIdentifier(String name, DataType type) {
-        // TODO this is an assertion
-        if (identifierStack.contains(name)) {
-            throw new IllegalStateException();
-        }
-        identifierStack.add(name);
-        int offset = (type.isPointer() || type.isArray()) ? 1 : 0;
-        int now = identifierCloseCount.isEmpty() ? 0 : identifierCloseCount.get(identifierCloseCount.size() - 1);
-        identifierCloseCount.add(now + offset);
     }
 
     public void removeFunction(FunctionDefinition old) {
@@ -208,18 +122,6 @@ public class Program {
             def.callType.autoClose = def;
             def.used = true;
         }
-    }
-
-    public DataType getVariableDataType(String name) {
-        Variable var = variables.get(name);
-        if (var != null) {
-            return var.type;
-        }
-        Expression expr = constantMap.get(name);
-        if (expr != null) {
-            return expr.type();
-        }
-        return null;
     }
 
     public FunctionDefinition getFunction(DataType type, String module, String name, int parameterCount) {
@@ -249,15 +151,6 @@ public class Program {
         return result;
     }
 
-    public void addTemporaryType(DataType type) {
-        addType(type);
-        addIdentifier(type.fullName(), type);
-        if (type.maxValue == null) {
-        	// no need for range types
-	        addIdentifier(type.arrayType().fullName(), type.arrayType());
-        }
-    }
-
     public DataType addType(DataType type) {
         if (dataTypeMap.containsKey(type.fullName())) {
             throw new IllegalStateException("Type already exists: " + type.fullName());
@@ -269,7 +162,7 @@ public class Program {
         return type;
     }
 
-    public DataType getType(String module, String name) {
+    public DataType getType2(String module, String name) {
         String fullName = DataType.fullName(module, name);
         DataType t = dataTypeMap.get(fullName);
         if (t == null && module != null) {
@@ -318,9 +211,21 @@ public class Program {
             buff.append("#define _free(a) free(a)\n");
             buff.append("#define _end() ;\n");
         }
+        buff.append("/* types */\n");
         for(DataType t : dataTypeMap.values()) {
+            if (t.enumValues != null) {
+                continue;
+            }
             if (!t.isSystem() && t.isUsed()) {
                 buff.append("typedef struct " + t.nameC() + " " + t.nameC() + ";\n");
+                buff.append("struct ").append(t.nameC()).append(";\n");
+            }
+        }
+        for(DataType t : dataTypeMap.values()) {
+            if (t.enumValues != null) {
+                continue;
+            }
+            if (!t.isSystem() && t.isUsed()) {
                 buff.append("struct ").append(t.nameC()).append(" {\n");
                 if (t.isArray()) {
                     buff.append(Statement.indent("int32_t len;\n"));
@@ -342,12 +247,7 @@ public class Program {
                     buff.append(Statement.indent("result->_refCount = 1;\n"));
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
-                    buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
-                    buff.append(Statement.indent("_free(x->data);\n"));
-                    buff.append(Statement.indent("_free(x);\n"));
-                    buff.append("}\n");
-                }
-                if (t.isPointer()) {
+                } else if (t.isPointer()) {
                     buff.append(t.nameC() + "* " + t.nameC() + "_new() {\n");
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
@@ -368,10 +268,11 @@ public class Program {
                 }
             }
         }
-        ArrayList<String> exceptionStructs = new ArrayList<>();
+        buff.append("/* exception types */\n");
+        HashSet<String> exceptionStructs = new HashSet<>();
         for (FunctionDefinition def : functions.values()) {
             String s = def.getExceptionStruct();
-            if (def.used && s != null) {
+            if (def.used && s != null && !exceptionStructs.contains(s)) {
                 exceptionStructs.add(s);
                 buff.append("typedef struct " + s + " " + s + ";\n");
                 buff.append("struct ").append(s).append(" {\n");
@@ -398,15 +299,16 @@ public class Program {
                 buff.append(Statement.indent(s + " x;\n"));
                 buff.append(Statement.indent("x.exception = exception;\n"));
                 if (def.returnType != null) {
-                    buff.append(Statement.indent("x.result = -1;\n"));
+                    // no need
+                    // buff.append(Statement.indent("x.result = 0;\n"));
                 }
                 buff.append(Statement.indent("return x;\n"));
                 buff.append("}\n");
             }
         }
-        for(FunctionDefinition def : functions.values()) {
+        buff.append("/* functions */\n");
+        for (FunctionDefinition def : functions.values()) {
             if (def.used) {
-                context.nextFunction();
                 context.function = def;
                 if (def.comment != null) {
                     buff.append("/*\n");
@@ -417,13 +319,28 @@ public class Program {
             }
         }
         // _free needs be after close
-        for(DataType t : dataTypeMap.values()) {
+        for (DataType t : dataTypeMap.values()) {
             if (!t.isSystem() && t.isUsed()) {
                 if (t.isPointer()) {
+                    buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x);\n");
+                }
+            }
+        }
+        for (DataType t : dataTypeMap.values()) {
+            if (!t.isSystem() && t.isUsed()) {
+                if (t.isArray()) {
+                    buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
+                    if (t.baseType().isPointer()) {
+                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) _decUse(x->data[i], " + t.baseType().nameC() + ");\n"));
+                    }
+                    buff.append(Statement.indent("_free(x->data);\n"));
+                    buff.append(Statement.indent("_free(x);\n"));
+                    buff.append("}\n");
+                } else if (t.isPointer()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
                     for(Variable f : t.fields) {
                         if (f.type.isPointer() || f.type.isArray()) {
-                            buff.append(Statement.indent("_decUse(x->" + f.name + ", " + f.type().nameC() +");\n"));
+                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() +");\n"));
                         }
                     }
                     if (t.autoClose != null) {
@@ -435,20 +352,12 @@ public class Program {
                 }
             }
         }
-        for (String name : constantMap.keySet()) {
-            Expression expr = constantMap.get(name);
-            DataType type = expr.type();
-            if (type.isArray()) {
-                buff.append(type.toC() + " " + name + ";\n");
-            } else {
-                buff.append("const "+ type.toC() + " " + name + " = " + expr.toC() + ";\n");
-            }
-        }
         if (!stringConstantsMap.isEmpty()) {
             buff.append("i8_array* str_const(char* data, uint32_t len) {\n");
             buff.append(Statement.indent("i8_array* result = _malloc(sizeof(i8_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
-            buff.append(Statement.indent("result->_refCount = 1;\n"));
+            // -1 means do not free the memory (TODO this is a hack)
+            buff.append(Statement.indent("result->_refCount = -1;\n"));
             buff.append(Statement.indent("result->data = data;\n"));
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
@@ -459,10 +368,11 @@ public class Program {
         for (Variable var : globalVariables.values()) {
             buff.append(var.type.toC() + " " + var.name + ";\n");
         }
-        for(FunctionDefinition def : functions.values()) {
+        for (FunctionDefinition def : functions.values()) {
             if (def.used) {
                 context.nextFunction();
                 context.function = def;
+                def.optimize(context);
                 buff.append(def.toC(context));
             }
         }
@@ -472,16 +382,13 @@ public class Program {
             byte[] data = s.getBytes(StandardCharsets.UTF_8);
             buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
         }
-        for (String name : constantMap.keySet()) {
-            Expression expr = constantMap.get(name);
-            DataType type = expr.type();
-            if (type.isArray()) {
-                buff.append(Statement.indent(name + " = " + expr.toC() + ";\n"));
-            }
-        }
+        context.nextFunction();
         StringBuilder buff2 = new StringBuilder();
         for(Statement s : list) {
-            buff2.append(Statement.indent(s.toC(context)));
+            s.optimize(context);
+        }
+        for(Statement s : list) {
+            buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
             for (String s : context.delareList) {
@@ -490,14 +397,17 @@ public class Program {
         }
         buff.append(buff2.toString());
         if (autoClose != null) {
-            for(Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+            for (Statement s : autoClose) {
+                s.optimize(context);
+            }
+            for (Statement s : autoClose) {
+                buff.append(Statement.indent(s.toC()));
             }
         }
         buff.append(Statement.indent("_end();\n"));
         buff.append(Statement.indent("return 0;\n"));
         if (context.needToCatch != null) {
-            throw new IllegalStateException("Possible exception is not caught");
+            throw new IllegalStateException("Possible exception is not caught at " + buff.toString());
         }
         buff.append("}\n");
         if (!comments.isEmpty()) {
@@ -646,10 +556,6 @@ Testing.
         } catch (IOException e) {
             throw new RuntimeException("Failed reading from input stream: " + e);
         }
-    }
-
-    public int nextTempVariableId() {
-        return nextTempVariableId++;
     }
 
     public static StatementResult runSequence(Memory m, List<Statement> list) {

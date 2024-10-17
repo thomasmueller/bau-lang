@@ -41,7 +41,14 @@ public class Memory {
     }
 
     public Value getHeap(long heapId) {
-        return heap.get(heapId).value;
+        if (heapId == 0) {
+            throw new IllegalStateException("Null pointer access");
+        }
+        HeapEntry e = heap.get(heapId);
+        if (e == null) {
+            throw new IllegalStateException("Heap entry not found: " + heapId);
+        }
+        return e.value;
     }
 
     public long putHeap(Value value) {

@@ -9,6 +9,7 @@ public class Value {
     public Value get(int index) {
         throw new IllegalStateException("Not an array");
     }
+
     public Number get() {
         throw new IllegalStateException("Not a value");
     }

@@ -14,6 +14,9 @@ public class Assignment implements Statement {
     Expression value;
     boolean isGlobalScope;
 
+    private String exceptionVar;
+    private String catchLabel;
+
     @Override
     public Assignment replace(Variable old, Expression with) {
         LeftValue l2 = (LeftValue) leftValue.replace(old, with);
@@ -73,7 +76,21 @@ public class Assignment implements Statement {
         return StatementResult.OK;
     }
 
-    public String toC(ProgramContext context) {
+    public void optimize(ProgramContext context) {
+        if (value instanceof Call) {
+            Call c = (Call) value;
+            if (c.def.exceptionType != null) {
+                context.needToCatch = c.def.exceptionType;
+                String s = c.def.getExceptionStruct();
+                exceptionVar = "_x" + context.nextExceptionVariableId++;
+                context.delareList.add(c.def.exceptionType.nameC() + " _lastException;");
+                context.delareList.add(s + " " + exceptionVar + ";");
+                catchLabel = "catch" + context.nextCatchLabel;
+            }
+        }
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         if (!initial) {
             buff.append(leftValue.decrementRefCountC());
@@ -82,14 +99,9 @@ public class Assignment implements Statement {
         if (value instanceof Call) {
             Call c = (Call) value;
             if (c.def.exceptionType != null) {
-                context.needToCatch = c.def.exceptionType;
-                String s = c.def.getExceptionStruct();
-                context.delareList.add(s + " _x;");
-                buff.append("_x = " + value.toC() + ";\n");
-                String catchLabel = "catch" + context.nextCatchLabel;
-                buff.append("if (_x.exception.exceptionType != -1) goto " + catchLabel + ";\n");
-                buff.append(type.toC() + " result = _x.result;\n");
-                result = "result";
+                buff.append(exceptionVar + " = " + value.toC() + ";\n");
+                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
+                result = exceptionVar + ".result";
             } else {
                 result = value.toC();
             }
@@ -113,22 +125,8 @@ public class Assignment implements Statement {
         }
         buff.append(";\n");
         if (value instanceof Call || value instanceof New) {
-            // TODO toC method should not modify state
-            leftValue.needToDecrementRefCountOnFree(true);
         } else {
-            boolean needInc = true;
-            if (value instanceof LeftValue) {
-                LeftValue var = (LeftValue) value;
-                // TODO toC method should not modify state
-                if (var.needToDecrementRefCountOnFree()) {
-                    var.needToDecrementRefCountOnFree(false);
-                    needInc = false;
-                }
-            }
-            if (needInc) {
-                // the function call has already incremented
-                buff.append(leftValue.incrementRefCountC());
-            }
+            buff.append(leftValue.incrementRefCountC());
         }
         return buff.toString();
     }

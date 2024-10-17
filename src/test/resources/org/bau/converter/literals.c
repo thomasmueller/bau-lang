@@ -8,7 +8,11 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct int_array int_array;
+struct int_array;
 struct i8_array {
     int32_t len;
     char* data;
@@ -23,11 +27,6 @@ i8_array* i8_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
-}
-typedef struct int_array int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -42,21 +41,20 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+/* exception types */
+/* functions */
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-const int64_t a = 1000000;
-const double b = 3.1415;
-const int64_t c = 0xcafe;
-i8_array* d;
-i8_array* e;
-i8_array* f;
-const double g = -1.23E-45;
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = 1;
+    result->_refCount = -1;
     result->data = data;
     return result;
 }
@@ -67,9 +65,6 @@ int main() {
     string_1000 = str_const("String literal", 14);
     string_1001 = str_const("Raw string", 10);
     string_1002 = str_const("Two-line\nraw string with `", 26);
-    d = string_1000;
-    e = string_1001;
-    f = string_1002;
     int64_t a = 1000000;
     double b = 3.1415;
     int64_t c = 0xcafe;

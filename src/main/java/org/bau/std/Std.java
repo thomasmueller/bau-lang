@@ -7,11 +7,15 @@ import org.bau.parser.DataType;
 import org.bau.parser.FunctionDefinition;
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
+import org.bau.parser.Return;
 import org.bau.parser.Variable;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
 public class Std {
+
+    private final static boolean ARRAY_BOUND_CHECK = true;
+
     public static void register(Program prog) {
         DataType i8 = prog.addType(new DataType(null, DataType.I8, 1, true, Collections.emptyList()));
         DataType i16 = prog.addType(new DataType(null, DataType.I16, 2, true, Collections.emptyList()));
@@ -23,44 +27,56 @@ public class Std {
 
         FunctionDefinition f = new FunctionDefinition();
         f.name = DataType.INT;
-        f.parameters.add(new Variable("x", i64));
+        Variable var = new Variable("x", i64);
+        f.parameters.add(var);
         f.returnType = i64;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
         f.name = DataType.I32;
-        f.parameters.add(new Variable("x", i32));
+        var = new Variable("x", i32);
+        f.parameters.add(var);
         f.returnType = i32;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
         f.name = DataType.I16;
-        f.parameters.add(new Variable("x", i16));
+        var = new Variable("x", i16);
+        f.parameters.add(var);
         f.returnType = i16;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
         f.name = DataType.I8;
-        f.parameters.add(new Variable("x", i8));
+        var = new Variable("x", i8);
+        f.parameters.add(var);
         f.returnType = i8;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
         f.name = DataType.F64;
-        f.parameters.add(new Variable("x", f64));
+        var = new Variable("x", f64);
+        f.parameters.add(var);
         f.returnType = f64;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
         f.name = DataType.F32;
-        f.parameters.add(new Variable("x", f32));
+        var = new Variable("x", f32);
+        f.parameters.add(var);
         f.returnType = f32;
-        f.cCode = "return x;\n";
+        f.constExpr = true;
+        f.list.add(new Return(var));
         prog.addFunction(f);
 
         f = new FunctionDefinition();
@@ -138,10 +154,14 @@ public class Std {
         f.parameters.add(new Variable("len", i64));
         f.includes = new ArrayList<>();
         f.returnType = i64;
-        // when printing to stderr, it's harder to find where it happens
-        f.cCode = "if (x >= 0 && x < len) return x;\n"
-                + "fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
-                + "exit(1);\n";
+        if (ARRAY_BOUND_CHECK) {
+            // when printing to stderr, it's harder to find where it happens
+            f.cCode = "if (x >= 0 && x < len) return x;\n"
+                    + "fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
+                    + "exit(1);\n";
+        } else {
+            f.cCode = "return x;\n";
+        }
         prog.addFunction(f);
 
     }

@@ -8,7 +8,9 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -23,12 +25,14 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+/* exception types */
+/* functions */
+void fill_1(int_array* data);
+void test_0();
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-void fill_1(int_array* data);
-void test_0();
 void fill_1(int_array* data) {
     if (data->len <= 0) {
         return;

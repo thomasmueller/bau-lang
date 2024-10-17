@@ -77,7 +77,10 @@ public class Service {
             File f2 = new File("a.out");
             if (exitCode == 0) {
                 System.out.println("Running =========================================");
+                long start = System.currentTimeMillis();
                 runProcess(f2.getAbsolutePath());
+                long time = System.currentTimeMillis() - start;
+                System.out.println("(" + time + " ms)");
             }
             System.out.println("Waiting =========================================");
         }

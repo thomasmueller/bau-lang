@@ -9,7 +9,9 @@
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
 #define _end() ;
+/* types */
 typedef struct int_array int_array;
+struct int_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -24,10 +26,8 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
+/* exception types */
+/* functions */
 float f32_1(float x);
 double f64_1(double x);
 int16_t i16_1(int16_t x);
@@ -38,6 +38,10 @@ int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
+void int_array_free(int_array* x) {
+    _free(x->data);
+    _free(x);
+}
 float f32_1(float x) {
     return x;
 }
@@ -73,12 +77,12 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
 int main() {
-    int64_t i64v = int_1(1);
-    int32_t i32v = i32_1(1);
-    int16_t i16v = i16_1(1);
-    char i8v = i8_1(1);
-    double f64v = f64_1(1);
-    float f32v = f32_1(1);
+    int64_t i64v = 1;
+    int32_t i32v = 1;
+    int16_t i16v = 1;
+    char i8v = 1;
+    double f64v = 1.0;
+    float f32v = 1.0;
     int64_t a = 6172;
     int64_t b = 24690;
     int64_t c = idiv_2(a, b);

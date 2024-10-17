@@ -2,42 +2,53 @@ package org.bau;
 
 /**
 
-TODO variable already defined for
-fun sort(T type, a T[])
-    from : 0
-    to : a.len
-    h := 16
-    gap := 1
-    while to - from > h / 16
-        h = h + h + h / 4 + 16
-    while 1
-        h = (h - 16) * 4 / 9
-        gap = (h + 15) / 16
-        for i := range(gap + from, to)
-            T t = a[i]
-            j := i
-            while j >= gap + from and a[j - gap] > t
-                a[j] = a[j - gap]
-                j -= gap
-            a[j] = t
-        break gap <= 1
-fun test()
-    a : new(int[], 10)
-    a[0] = 10
-    a[1] = 30
-    a[3] = 20
-    sort(int, a)
+TODO escape analysis: if not s return <s can not be null here>
 
-TODO do not modify state then calling toC in Assignment (see TODO toC method should not modify state)
+TODO import: maybe support fully specified names everywhere (org.bau.Math.PI, etc) and remove support for renaming
+
+TODO f64 -> float
+
+TODO support undeclared functions by using a two stage compiler
+
+TODO support C equivalent of "typeof": x._type or type(x).
+
+TODO declaration of variables without initialization, because of a List, if x a = call() else a = call()
+
+TODO (a > b).then(A, B)
+     (a > b) ? A : B
+
+TODO compare number of keywords and number of syntactic forms with other languages;
+     see https://norvig.com/lispy.html
+     language     keywords syntactic forms
+     Scheme              5               8
+     Lua                21
+     Python             33             110
+     Rust               38
+     C                  45
+     C++                97
+     Java               50             133
+     Bau                12
+     MiniBau             7
+
+TODO don't use printf when converting to C; use string conversion and concat
+
+TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
+     cd /Users/mueller/Downloads/xcc
+     npm run build-assets && gulp
+     open http://192.168.45.88:3000/
+
+TODO switch back to data[i!] because of data[i]! = x is very similar to data[i]!=x
+
+TODO maybe use == for comparison: a = b = c might not be clear... would 'a = (b = c)' be an option? anyway we have 'a = b < c'
 
 org.bau.Memory
   copy
   offset (of field)
   location (pointer)
 
-more string formatting (and move all code there from Math)
+more string formatting (and move code there from Math)
 
-datetime library (see rust)
+datetime library (see Rust)
 
 cache implementation
 
@@ -128,10 +139,7 @@ Swift
 
 Go and C#: do not have it
 
-
-
 ord('a') function
-
 
 main function with array of strings
 

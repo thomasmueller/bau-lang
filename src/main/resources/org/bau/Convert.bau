@@ -1,0 +1,18 @@
+module org.bau.Convert
+
+import org.bau.Exception
+    exception
+
+# parse an integer
+# overflow is ignored
+# throws an exception if the string does not match [0-9]+
+fun parsePositiveInt(s i8[]) int throws exception
+    result := 0
+    if s.len = 0
+        throw exception(s)
+    for i := until(s.len)
+        c : s[i]
+        if c <= ord('0') or c >= ord('9')
+            throw exception(s)
+        result = result * 10 + c - ord('0')
+    return result

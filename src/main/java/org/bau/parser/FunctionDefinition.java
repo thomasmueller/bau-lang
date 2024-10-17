@@ -23,6 +23,8 @@ public class FunctionDefinition {
     public String template;
     public String comment;
 
+    private String catchLabel;
+
     public String getFunctionId() {
         int parameterCount = varArgs ? Integer.MAX_VALUE : parameters.size();
         return getFunctionId(callType, module, name, parameterCount);
@@ -94,6 +96,26 @@ public class FunctionDefinition {
         return header + ";\n";
     }
 
+    public void optimize(ProgramContext context) {
+        if (builtIn) {
+            return;
+        }
+        for (Statement s : list) {
+            s.optimize(context);
+        }
+        if (context.needToCatch != null) {
+            if (exceptionType != context.needToCatch) {
+                throw new IllegalStateException("Possible exception is not caught in " + toString());
+            }
+            catchLabel = "catch" + context.nextCatchLabel;
+        }
+        if (autoClose != null) {
+            for(Statement s : autoClose) {
+                s.optimize(context);
+            }
+        }
+    }
+
     public String toC(ProgramContext context) {
         if (builtIn) {
             return "";
@@ -116,7 +138,7 @@ public class FunctionDefinition {
         }
         StringBuilder buff2 = new StringBuilder();
         for (Statement s : list) {
-            buff2.append(Statement.indent(s.toC(context)));
+            buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
             for (String s : context.delareList) {
@@ -124,17 +146,13 @@ public class FunctionDefinition {
             }
         }
         if (context.needToCatch != null) {
-            if (exceptionType != context.needToCatch) {
-                throw new IllegalStateException("Possible exception is not caught");
-            }
-            String catchLabel = "catch" + context.nextCatchLabel;
             buff2.append(Statement.indent(catchLabel + ":\n"));
-            buff2.append(Statement.indent("return exception" + context.function.getExceptionStruct() + "(_x.exception);\n"));
+            buff2.append(Statement.indent("return exception" + context.function.getExceptionStruct() + "(_lastException);\n"));
         }
         buff.append(buff2.toString());
         if (autoClose != null) {
             for(Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
         buff.append("}\n");
@@ -146,7 +164,9 @@ public class FunctionDefinition {
             return null;
         }
         StringBuilder buff = new StringBuilder();
-        buff.append("_" + returnType);
+        if (returnType != null) {
+            buff.append("_" + returnType.nameC());
+        }
         buff.append("_or_");
         buff.append(exceptionType);
         return buff.toString();
@@ -159,11 +179,15 @@ public class FunctionDefinition {
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append("fun ");
+        if (callType != null) {
+            buff.append(callType).append(' ');
+        }
         buff.append(name);
         buff.append('(');
-        int i = 0;
-        for (Variable v : parameters) {
-            if (i > 0) {
+        int first = callType == null ? 0 : 1;
+        for (int i = first; i < parameters.size(); i++) {
+            Variable v = parameters.get(i);
+            if (i > first) {
                 buff.append(", ");
             }
             buff.append(v.name);
@@ -174,15 +198,14 @@ public class FunctionDefinition {
             } else {
                 buff.append(v.type);
             }
-            i++;
         }
         buff.append(")");
+        if (constExpr) {
+            buff.append(" const");
+        }
         if (returnType != null) {
             buff.append(' ');
             buff.append(returnType);
-        }
-        if (constExpr) {
-            buff.append(" const");
         }
         if (exceptionType != null) {
             buff.append(" throws");

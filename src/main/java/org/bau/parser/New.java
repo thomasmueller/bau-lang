@@ -39,6 +39,8 @@ public class New implements Expression {
                     result = new Value.ValueArray(l, ValueInt.ZERO);
                     break;
                 }
+            } else if (type.baseType().isArray() || type.baseType().isPointer()) {
+                result = new Value.ValueArray(l, new Value.ValueRef(0));
             } else {
                 result = new Value.ValueArray(l, new Value.ValueStruct());
             }

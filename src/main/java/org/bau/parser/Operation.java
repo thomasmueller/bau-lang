@@ -3,19 +3,25 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.bau.parser.Bounds.ApplyType;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueFloat;
+import org.bau.runtime.Value.ValueI16;
+import org.bau.runtime.Value.ValueI32;
+import org.bau.runtime.Value.ValueI8;
 import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValueNull;
 import org.bau.runtime.Value.ValuePanic;
+import org.bau.runtime.Value.ValueRef;
+import org.bau.runtime.Value.ValueStruct;
 
 public class Operation implements Expression {
-    
+
     Expression left;
     String operator;
     Expression right;
-    
+
     Operation(Expression left, String operator, Expression right) {
         if (left != null) {
             Value l = left.eval(null);
@@ -39,12 +45,12 @@ public class Operation implements Expression {
         this.operator = operator;
         this.right = right;
     }
-    
+
     @Override
     public Expression simplify() {
         return this;
     }
-    
+
     private static String addBracketsIfNeeded(Expression expr) {
         String s = expr.toString();
         // TODO this is a hack
@@ -55,21 +61,7 @@ public class Operation implements Expression {
         }
         return s;
     }
-    
-    public DataType canThrowException() {
-        DataType fails = null;
-        if (left != null && left.canThrowException() != null) {
-            fails = left.canThrowException();
-        }
-        if (right != null && right.canThrowException() != null) {
-            fails = right.canThrowException();
-        }
-        if (fails != null) {
-            throw new IllegalStateException("Method calls that can throw an exception must be in a separate line");  
-        }
-        return null;
-    }
-    
+
     private static String addBracketsIfNeededToC(Expression expr) {
         String s = expr.toC();
         // TODO this is a hack
@@ -79,6 +71,20 @@ public class Operation implements Expression {
             }
         }
         return s;
+    }
+
+    public DataType canThrowException() {
+        DataType fails = null;
+        if (left != null && left.canThrowException() != null) {
+            fails = left.canThrowException();
+        }
+        if (right != null && right.canThrowException() != null) {
+            fails = right.canThrowException();
+        }
+        if (fails != null) {
+            throw new IllegalStateException("Method calls that can throw an exception must be in a separate line");
+        }
+        return null;
     }
 
     @Override
@@ -96,7 +102,7 @@ public class Operation implements Expression {
             } else if ("not".equals(operator)){
                 return new Value.ValueInt(r.longValue() == 0 ? 1 : 0);
             } else {
-                throw new IllegalStateException("operation " + operator);                
+                throw new IllegalStateException("operation " + operator);
             }
         }
         Value l = left.eval(memory);
@@ -119,7 +125,7 @@ public class Operation implements Expression {
         // by float work correctly
         return eval(widerType(), l, operator, r);
     }
-    
+
     private DataType widerType() {
         switch (operator) {
         case "and":
@@ -167,10 +173,10 @@ public class Operation implements Expression {
             if (higher != null) {
                 return higher;
             }
-        }            
+        }
         throw new IllegalStateException("Operands needs to be of the same type: " + l + " <-> " + r);
     }
-    
+
     public static Value eval(DataType type, Value l, String operator, Value r) {
         if (type.isFloatingPoint) {
             return evalFloat(type, l, operator, r);
@@ -264,7 +270,7 @@ public class Operation implements Expression {
         }
         return new ValueInt(result);
     }
-    
+
     public static Value evalFloat(DataType type, Value l, String operator, Value r) {
         double result;
         switch (operator) {
@@ -334,8 +340,8 @@ public class Operation implements Expression {
             throw new IllegalStateException("operation " + operator);
         }
         return new ValueFloat(result);
-    }    
-    
+    }
+
     @Override
     public DataType type() {
         if (isComparison()) {
@@ -343,12 +349,12 @@ public class Operation implements Expression {
         }
         return widerType();
     }
-    
+
     public Expression replace(Variable old, Expression with) {
         Operation c = new Operation(left == null ? null : left.replace(old, with), operator, right.replace(old, with));
         return c;
     }
-    
+
     public String toC() {
         String op = operator;
         if (left == null) {
@@ -358,17 +364,21 @@ public class Operation implements Expression {
             return op + " " + addBracketsIfNeededToC(right);
         }
         if (">>".equals(op)) {
-            return "shiftRight_" + left.type().name() + "_2(" + left.toC() + ", " + right.toC() + ")";
+            return "shiftRight_" + left.type().name() + "_2(" +
+                    left.toC() + ", " + right.toC() + ")";
         } else if ("<<".equals(op)) {
-            return "shiftLeft_2(" + left.toC() + ", " + right.toC() + ")";
+            return "shiftLeft_2(" +
+                    left.toC() + ", " + right.toC() + ")";
         } else if ("/".equals(op)) {
             if (widerType().isFloatingPoint) {
                 return left.toC() + " / " + right.toC();
             } else {
-                return "idiv_2(" + left.toC() + ", " + right.toC() + ")";
+                return "idiv_2(" +
+                        left.toC() + ", " + right.toC() + ")";
             }
         } else if ("%".equals(op)) {
-            return "imod_2(" + left.toC() + ", " + right.toC() + ")";
+            return "imod_2(" +
+                    left.toC() + ", " + right.toC() + ")";
         } else if ("and".equals(op)) {
             return "(" + left.toC() + ") && (" + right.toC() + ")";
         } else if ("or".equals(op)) {
@@ -379,34 +389,39 @@ public class Operation implements Expression {
         }
         return addBracketsIfNeededToC(left) + " " + op + " " + addBracketsIfNeededToC(right);
     }
-    
+
     public String toString() {
         if (left == null) {
             return operator + " " + addBracketsIfNeeded(right);
         }
         return addBracketsIfNeeded(left) + " " + operator + " " + addBracketsIfNeeded(right);
     }
-    
+
     @Override
     public boolean isEasyToRead() {
         return false;
     }
 
-    public void applyBoundCondition(Expression scope, boolean reversed) {
-        if ("and".equals(operator) && !reversed) {
-            left.applyBoundCondition(scope, false);
-            right.applyBoundCondition(scope, false);
+    public void applyBoundCondition(Expression scope, ApplyType type) {
+        if (type == ApplyType.UNDO && ("and".equals(operator) || "or".equals(operator))) {
+            left.applyBoundCondition(scope, type);
+            right.applyBoundCondition(scope, type);
             return;
-        } else if ("or".equals(operator) && reversed) {
-            left.applyBoundCondition(scope, true);
-            right.applyBoundCondition(scope, true);
+        }
+        if ("and".equals(operator) && type == ApplyType.POSITIVE) {
+            left.applyBoundCondition(scope, type);
+            right.applyBoundCondition(scope, type);
+            return;
+        } else if ("or".equals(operator) && type == ApplyType.NEGATIVE) {
+            left.applyBoundCondition(scope, type);
+            right.applyBoundCondition(scope, type);
         }
         if (!(left instanceof LeftValue)) {
             return;
         }
         LeftValue var = (LeftValue) left;
         String op = operator;
-        if (reversed) {
+        if (type == ApplyType.NEGATIVE) {
             switch(operator) {
             case ">":
                 op = "<=";
@@ -426,7 +441,7 @@ public class Operation implements Expression {
             case "<=":
                 op = ">";
                 break;
-            default: 
+            default:
                 op = null;
             }
         }
@@ -437,7 +452,11 @@ public class Operation implements Expression {
         case "<":
         case "<=":
         case "!=":
-            var.addBoundCondition(scope, op, right);
+            if (type == ApplyType.UNDO) {
+                var.addBoundCondition(scope, null, null);
+            } else {
+                var.addBoundCondition(scope, op, right);
+            }
         }
     }
 
@@ -464,12 +483,12 @@ public class Operation implements Expression {
         }
         return null;
     }
-    
+
     @Override
     public boolean isSimple() {
         return false;
     }
-    
+
     public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
         if (left != null) {
             left = left.writeStatements(parser, target);
@@ -515,7 +534,7 @@ public class Operation implements Expression {
     public boolean isComparison() {
         return isComparison(operator);
     }
-    
+
     public static boolean isComparison(String operator) {
         switch(operator) {
         case "=":
@@ -562,6 +581,38 @@ public class Operation implements Expression {
             return 10;
         }
         return 0;
-    }    
+    }
+
+    public static Value convertToType(Value val, DataType targetType) {
+        if (val == null) {
+            throw new IllegalStateException("Cannot convert null to " + targetType);
+        }
+        if (val instanceof ValueStruct || val instanceof ValueRef) {
+            return val;
+        }
+        switch (targetType.name()) {
+        case DataType.F32:
+            return new ValueFloat((float) val.doubleValue());
+        case DataType.F64:
+            return new ValueFloat(val.doubleValue());
+        case DataType.I8:
+            return new ValueI8((byte) val.intValue());
+        case DataType.I16:
+            return new ValueI16((short) val.intValue());
+        case DataType.I32:
+            return new ValueI32(val.intValue());
+        case DataType.INT:
+            return new ValueInt(val.longValue());
+        }
+        if (targetType.maxValue != null) {
+            return new ValueInt(val.longValue());
+        }
+        if (targetType.isArray() || targetType.isPointer()) {
+            if (val instanceof ValueNull) {
+                return val;
+            }
+        }
+        throw new IllegalStateException("Unsupported target type " + targetType + " for " + val);
+    }
 
 }

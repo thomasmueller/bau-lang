@@ -8,7 +8,7 @@ import org.bau.runtime.Value;
 public class Break implements Statement {
     Expression condition;
     List<Statement> autoClose;
-    
+
     @Override
     public Statement replace(Variable old, Expression with) {
         Break c = new Break();
@@ -35,18 +35,21 @@ public class Break implements Statement {
             } else {
                 return result;
             }
-        }          
+        }
         return StatementResult.BREAK;
     }
 
-    public String toC(ProgramContext context) {
+    public void optimize(ProgramContext context) {
+    }
+
+    public String toC() {
         StringBuilder buff = new StringBuilder();
         if (condition != null) {
             buff.append("if (" + condition.toC() + ") {\n");
         }
         if (autoClose != null) {
             for(Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC(context)));
+                buff.append(Statement.indent(s.toC()));
             }
         }
         if (condition != null) {
