@@ -61,6 +61,13 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
+int64_t a;
+double b;
+int64_t c;
+i8_array* d;
+i8_array* e;
+i8_array* f;
+double g;
 int main() {
     string_1000 = str_const("String literal", 14);
     string_1001 = str_const("Raw string", 10);

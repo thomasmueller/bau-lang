@@ -228,7 +228,7 @@ public class MiniBauAst {
         case ">>":
             return 50;
         case "=":
-        case "!=":
+        case "<>":
         case "<=":
         case ">=":
         case "<":
@@ -525,7 +525,7 @@ public class MiniBauAst {
                 return new Value(lv < rv ? 1 : 0);
             case "<=":
                 return new Value(lv <= rv ? 1 : 0);
-            case "!=":
+            case "<>":
                 return new Value(lv != rv ? 1 : 0);
             case "+":
                 return new Value(lv + rv);

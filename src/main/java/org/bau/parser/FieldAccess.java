@@ -180,7 +180,7 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         return this;
     }
 

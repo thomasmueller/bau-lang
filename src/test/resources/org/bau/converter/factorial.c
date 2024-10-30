@@ -74,8 +74,8 @@ int main() {
     string_1001 = str_const(" = ", 3);
     int64_t i = 0;
     while (i <= 10) {
-        int64_t _t1 = factorial_1(i);
-        printf("Factorial of %lld = %lld\n", (long long)i, (long long)_t1);
+        int64_t _t0 = factorial_1(i);
+        printf("Factorial of %lld = %lld\n", (long long)i, (long long)_t0);
         i += 1;
     }
     _end();

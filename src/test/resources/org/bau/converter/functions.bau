@@ -1,3 +1,5 @@
+import org.bau.Utils
+
 fun square(x int) int
   return x * x
 
@@ -9,25 +11,21 @@ fun sum(a int, b int..) int
   for i := until(b.len)
     sum += b[i]
   return sum
-  
-println(square(2) ' ' square(2 3))
-println(sum(1 2))
-println(sum(1 2 3))
-println(sum(1 2 3 4))
-
-import org.bau.Utils
-
-println('ascii of "0" is ' ord('0'))
 
 fun int rotateRight(n int) int
     return (this >> n) | (this << (64 - n))
 
-println(1.rotateRight(1) ' = ' 0x1.rotateRight(1))
-
-fun f64 double() f64
+fun float twice() float
     return this + this
 
-println(1.0.double() ' = ' 1.0e0.double())
+println(square(2) ' ' square(2 3))
+println(sum(1 2))
+println(sum(1 2 3))
+println(sum(1 2 3 4))
+println('ascii of "0" is ' ord('0'))
+println(1.rotateRight(1) ' = ' 0x1.rotateRight(1))
+
+println(1.0.twice() ' = ' 1.0e0.twice())
 
 ## Expected
 4 13

@@ -133,7 +133,7 @@ public class Operation implements Expression {
         case "not":
             return DataType.INT_TYPE;
         case "=":
-        case "!=":
+        case "<>":
             if (left instanceof NullValue || right instanceof NullValue) {
                 return DataType.INT_TYPE;
             }
@@ -228,7 +228,7 @@ public class Operation implements Expression {
                 result = l.longValue() == r.longValue() ? 1 : 0;
             }
             break;
-        case "!=":
+        case "<>":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
                 result = l != r ? 1 : 0;
             } else {
@@ -308,7 +308,7 @@ public class Operation implements Expression {
                 result = l.doubleValue() == r.doubleValue() ? 1 : 0;
             }
             break;
-        case "!=":
+        case "<>":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
                 result = l != r ? 1 : 0;
             } else {
@@ -386,6 +386,8 @@ public class Operation implements Expression {
         }
         if ("=".equals(op)) {
             op = "==";
+        } else if ("<>".equals(op)) {
+            op = "!=";
         }
         return addBracketsIfNeededToC(left) + " " + op + " " + addBracketsIfNeededToC(right);
     }
@@ -416,13 +418,21 @@ public class Operation implements Expression {
             left.applyBoundCondition(scope, type);
             right.applyBoundCondition(scope, type);
         }
-        if (!(left instanceof LeftValue)) {
-            return;
-        }
-        LeftValue var = (LeftValue) left;
         String op = operator;
+        LeftValue var = null;
+        if (left instanceof LeftValue) {
+            var = (LeftValue) left;
+        }
+        Expression compare = right;
         if (type == ApplyType.NEGATIVE) {
             switch(operator) {
+            case "not":
+                if (right instanceof LeftValue) {
+                    op = "<>";
+                    var = (LeftValue) right;
+                    compare = new NullValue();
+                }
+                break;
             case ">":
                 op = "<=";
                 break;
@@ -430,9 +440,9 @@ public class Operation implements Expression {
                 op = "<";
                 break;
             case "=":
-                op = "!=";
+                op = "<>";
                 break;
-            case "!=":
+            case "<>":
                 op = "=";
                 break;
             case "<":
@@ -445,17 +455,20 @@ public class Operation implements Expression {
                 op = null;
             }
         }
+        if (var == null) {
+            return;
+        }
         switch (op) {
         case ">":
         case ">=":
         case "=":
         case "<":
         case "<=":
-        case "!=":
+        case "<>":
             if (type == ApplyType.UNDO) {
                 var.addBoundCondition(scope, null, null);
             } else {
-                var.addBoundCondition(scope, op, right);
+                var.addBoundCondition(scope, op, compare);
             }
         }
     }
@@ -489,9 +502,9 @@ public class Operation implements Expression {
         return false;
     }
 
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         if (left != null) {
-            left = left.writeStatements(parser, target);
+            left = left.writeStatements(parser, false, target);
         }
         if ("or".equals(operator) || "and".equals(operator)) {
             Variable var = parser.assignTempVariable(target, left);
@@ -516,7 +529,7 @@ public class Operation implements Expression {
             target.add(ifStatement);
             return var;
         } else {
-            right = right.writeStatements(parser, target);
+            right = right.writeStatements(parser, false, target);
         }
         if (canThrowException() == null) {
             return this;
@@ -538,7 +551,7 @@ public class Operation implements Expression {
     public static boolean isComparison(String operator) {
         switch(operator) {
         case "=":
-        case "!=":
+        case "<>":
         case "<=":
         case ">=":
         case "<":
@@ -564,7 +577,7 @@ public class Operation implements Expression {
         case ">>":
             return 50;
         case "=":
-        case "!=":
+        case "<>":
         case "<=":
         case ">=":
         case "<":
@@ -593,7 +606,7 @@ public class Operation implements Expression {
         switch (targetType.name()) {
         case DataType.F32:
             return new ValueFloat((float) val.doubleValue());
-        case DataType.F64:
+        case DataType.FLOAT:
             return new ValueFloat(val.doubleValue());
         case DataType.I8:
             return new ValueI8((byte) val.intValue());

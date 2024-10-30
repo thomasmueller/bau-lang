@@ -98,9 +98,9 @@ File* openFile_1(int64_t fp) {
     _decUse(f, File);
 }
 int main() {
-    string_1000 = str_const("opening ", 8);
-    string_1001 = str_const("closing ", 8);
-    string_1002 = str_const("use ", 4);
+    string_1000 = str_const("closing ", 8);
+    string_1001 = str_const("use ", 4);
+    string_1002 = str_const("opening ", 8);
     string_1003 = str_const("opened ", 7);
     int64_t i = 0;
     while (i < 10) {

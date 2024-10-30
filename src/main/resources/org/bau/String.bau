@@ -22,7 +22,7 @@ fun indexOf(s i8[], find i8[], start int) int
         j := 0..find.len
         x := i
         while 1
-            break s[x]! != find[j]!
+            break s[x]! <> find[j]!
             nj : j + 1
             if nj >= find.len
                 return i
@@ -42,7 +42,7 @@ fun indexOf1(s i8[], find i8[]) int
         while 1
             if j = find.len
                 return i
-            break s[i + j] != find[j]
+            break s[i + j] <> find[j]
             j += 1
     return -1
 ##

@@ -2,44 +2,49 @@ package org.bau;
 
 /**
 
-TODO escape analysis: if not s return <s can not be null here>
-
-TODO import: maybe support fully specified names everywhere (org.bau.Math.PI, etc) and remove support for renaming
-
-TODO f64 -> float
-
-TODO support undeclared functions by using a two stage compiler
-
-TODO support C equivalent of "typeof": x._type or type(x).
-
-TODO declaration of variables without initialization, because of a List, if x a = call() else a = call()
-
-TODO (a > b).then(A, B)
-     (a > b) ? A : B
-
 TODO compare number of keywords and number of syntactic forms with other languages;
      see https://norvig.com/lispy.html
      language     keywords syntactic forms
      Scheme              5               8
+     MiniBau             7
+     Bau                12
      Lua                21
      Python             33             110
      Rust               38
      C                  45
-     C++                97
      Java               50             133
-     Bau                12
-     MiniBau             7
+     C++                97
+     Swift
 
 TODO don't use printf when converting to C; use string conversion and concat
+     (so we have no differences between interpreted and compiled output)
 
 TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
      cd /Users/mueller/Downloads/xcc
      npm run build-assets && gulp
      open http://192.168.45.88:3000/
 
-TODO switch back to data[i!] because of data[i]! = x is very similar to data[i]!=x
+TODO maybe buy the book about Lox https://craftinginterpreters.com/contents.html
 
-TODO maybe use == for comparison: a = b = c might not be clear... would 'a = (b = c)' be an option? anyway we have 'a = b < c'
+TODO document that "hello world" is simple and no main function is needed
+     (but is allowed)
+     main      : go, c, c++, rust, visual basic, kotlin (now)
+     class+main: c#, java
+     no need   : swift (but define before use),
+                 python (but define before use),
+                 lua (but define before use),
+                 javascript
+
+TODO fix fully qualified package access (types,...)
+     possibly switch from "." to "::"
+
+TODO converter from Java or C or Rust to Bau
+
+TODO 100% code coverage, for parser at least
+
+TODO tagged union support
+
+TODO improved memory management
 
 org.bau.Memory
   copy
@@ -65,7 +70,6 @@ https://go.dev/play/
 
 https://news.ycombinator.com/item?id=40940225
 WebVM is a server-less virtual Linux environment running client-side
-
 
 https://thomasmueller.github.io/bau-lang/
 

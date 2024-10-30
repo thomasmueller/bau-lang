@@ -27,7 +27,7 @@ fun HashMap(K, V) put(hash int, key K, value V)
     values = vn
     hashes = hn
     for i:= until(ok.len)
-      if oh[i] != 0
+      if oh[i] <> 0
         this.put(oh[i], ok[i], ov[i])
   p := hash & (keys.len - 1)
   while 1
@@ -106,7 +106,7 @@ fun hashCode(data i8[]) int
       n : i + 4
       break n >= data.len
       i = n
-  if i < data.len and i != data.len - 4
+  if i < data.len and i <> data.len - 4
     x := 0
     s := 0
     while 1

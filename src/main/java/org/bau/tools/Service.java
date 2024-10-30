@@ -63,11 +63,13 @@ public class Service {
             }
             System.out.println("Interpreting ====================================");
             try {
+                long start = System.currentTimeMillis();
                 Program prog = new Parser(s).parse();
                 String result = prog.run();
                 System.out.println(result);
                 long ticksExecuted = prog.getTicksExecuted();
-                System.out.println("Ticks: " + ticksExecuted);
+                long time = System.currentTimeMillis() - start;
+                System.out.println("Ticks: " + ticksExecuted + " (" + time + " ms)");
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }

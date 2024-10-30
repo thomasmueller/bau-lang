@@ -34,7 +34,10 @@ public class Variable implements Expression, LeftValue {
     }
 
     public static String getGlobalVariableId(String module, String name) {
-        return module + "." + name;
+        if (module != null) {
+            return module + "." + name;
+        }
+        return name;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class Variable implements Expression, LeftValue {
     public String decrementRefCountC() {
         if (type().isPointer() || type().isArray()) {
             if (needToDecrementRefCountOnFree) {
-                return Free.DEC_USE + "(" + name + ");\n";
+                return Free.DEC_USE + "(" + name + ", " + type().nameC() + ");\n";
             }
         }
         return "";
@@ -160,7 +163,7 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         return this;
     }
 

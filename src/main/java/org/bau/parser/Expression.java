@@ -52,8 +52,9 @@ public interface Expression {
      * Write (assignment) functions for sub-expressions and return the variable.
      *
      * @param target the list of statements
+     * @param assignment if the result is assigned to a variable
      * @return the variable
      */
-    Expression writeStatements(Parser parser, ArrayList<Statement> target);
+    Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target);
 
 }

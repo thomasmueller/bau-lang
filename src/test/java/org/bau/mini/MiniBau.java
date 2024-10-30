@@ -4,27 +4,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MiniBau {
-    private final HashMap<String, Value> variables = new HashMap<>();
+    // compile time
+    private final HashMap<String, Variable> variables = new HashMap<>();
     private final HashMap<String, Integer> functionPos = new HashMap<>();
-    private StringBuilder output;
+    private final ArrayList<Long> memoryInit = new ArrayList<>();
     private String text;
     private String token;
     private int indent;
     private int pos;
+    private int memoryPos;
     private int lastPos;
     private Statement currentLoopStatement;
     private ArrayList<Statement> currentLoopBreakStatements = new ArrayList<>();
 
+    // runtime
+    private long[] memory;
     private ArrayList<Statement> statements = new ArrayList<>();
+    private StringBuilder output;
 
     public void parse(String text) {
         this.text = text;
         read();
+        Statement gotoInit = new Statement();
+        gotoInit.type = StatementType.GOTO;
+        statements.add(gotoInit);
+        Statement gotoMain = new Statement();
+        gotoMain.type = StatementType.GOTO;
         while (token != null) {
             while (match("\n"));
             if (match("fun")) {
                 String name = token;
-                functionPos.put(name, statements.size());
+                int pos = statements.size();
+                functionPos.put(name, pos);
+                if (name.equals("main")) {
+                    gotoMain.position = pos;
+                }
                 read();
                 expect("(");
                 expect(")");
@@ -38,25 +52,48 @@ public class MiniBau {
                 read();
                 if (match(":=")) {
                     Expression expr = parseExpressionPrimary();
-                    Value value = expr.get(this);
-                    variables.put(name, value);
+                    Variable variable = new Variable();
+                    variable.pos = memoryPos++;
+                    memoryInit.add((long) variable.pos);
+                    memoryInit.add(expr.calculate(memory));
+                    variables.put(name, variable);
                 } else if (match(":")) {
                     if (match("array")) {
                         expect("(");
                         Expression expr = parseExpressionPrimary();
-                        long len = expr.get(this).value;
-                        Value value = new Value(0);
-                        value.array = new long[(int) len];
-                        variables.put(name, value);
+                        Variable variable = new Variable();
+                        variable.pos = memoryPos++;
+                        variable.array = true;
+                        int len = (int) expr.calculate(memory);
+                        memoryInit.add((long) variable.pos);
+                        memoryInit.add((long) len);
+                        memoryPos += len;
+                        variables.put(name, variable);
                         expect(")");
                     } else {
                         Expression expr = parseExpressionPrimary();
-                        variables.put(name, expr.get(this));
+                        Variable variable = new Variable();
+                        variable.pos = memoryPos++;
+                        long value = expr.calculate(memory);
+                        memoryInit.add((long) variable.pos);
+                        memoryInit.add(value);
+                        variables.put(name, variable);
                     }
                 }
                 expect("\n");
             }
         }
+        gotoInit.position = statements.size();
+        for (int i = 0; i < memoryInit.size(); i += 2) {
+            Statement s = new Statement();
+            s.type = StatementType.ASSIGN;
+            s.position = (int) (long) memoryInit.get(i);
+            s.expr = new Expression();
+            s.expr.type = ExpressionType.LITERAL_INT;
+            s.expr.value = memoryInit.get(i + 1);
+            statements.add(s);
+        }
+        statements.add(gotoMain);
     }
 
     private void parseBlock(int oldIndent) {
@@ -66,7 +103,7 @@ public class MiniBau {
             }
             parseStatement();
         }
-        for(Statement s : statements) {
+        for (Statement s : statements) {
             if (s.type == StatementType.CALL) {
                 s.position = functionPos.get(s.name);
             }
@@ -138,7 +175,7 @@ public class MiniBau {
             statements.add(go);
             go.position = loopStart;
             int loopEnd = statements.size();
-            for(Statement g : breaks) {
+            for (Statement g : breaks) {
                 g.position = loopEnd;
             }
             return statement;
@@ -157,13 +194,26 @@ public class MiniBau {
             expect("(");
             Statement statement = new Statement();
             statements.add(statement);
-            if (!match(")")) {
-                statement.expr = parseExpression();
-                statement.type = StatementType.PRINT;
-                expect(")");
-            } else {
-                statement.type = StatementType.PRINT_NEWLINE;
-            }
+            statement.expr = parseExpression();
+            statement.type = StatementType.PRINT;
+            expect(")");
+            expect("\n");
+            return statement;
+        } else if (match("printText")) {
+            expect("(");
+            Statement statement = new Statement();
+            statements.add(statement);
+            statement.expr = parseExpression();
+            statement.type = StatementType.PRINT_TEXT;
+            expect(")");
+            expect("\n");
+            return statement;
+        } else if (match("printEnd")) {
+            expect("(");
+            Statement statement = new Statement();
+            statements.add(statement);
+            statement.type = StatementType.PRINT_END;
+            expect(")");
             expect("\n");
             return statement;
         } else {
@@ -174,7 +224,11 @@ public class MiniBau {
                 s.type = StatementType.ASSIGN;
                 s.name = identifier;
                 statements.add(s);
-                s.variable = variables.get(identifier);
+                Variable variable = variables.get(identifier);
+                s.position = variable.pos;
+                if (variable.array) {
+                    throw syntaxError("Can not re-assign an array");
+                }
                 s.expr = parseExpression();
                 expect("\n");
                 return s;
@@ -191,7 +245,10 @@ public class MiniBau {
                 s.type = StatementType.ASSIGN_ARRAY;
                 s.name = identifier;
                 statements.add(s);
-                s.variable = variables.get(identifier);
+                Variable variable = variables.get(identifier);
+                if (!variable.array) {
+                    throw syntaxError("Not an array");
+                }
                 s.index = parseExpression();
                 expect("]");
                 expect("=");
@@ -207,33 +264,42 @@ public class MiniBau {
         Expression expr = new Expression();
         if (token.charAt(0) >= '0' && token.charAt(0) <= '9') {
             expr.type = ExpressionType.LITERAL_INT;
-            expr.value = new Value(Long.parseLong(token));
+            expr.value = Long.parseLong(token);
             read();
             return expr;
         } else if (token.startsWith("'")) {
-            expr.type = ExpressionType.LITERAL_ARRAY;
+            expr.type = ExpressionType.LITERAL_INT;
             token = token.substring(1);
-            expr.value = new Value(0);
-            expr.value.array = new long[token.length() + 1];
-            expr.value.array[0] = token.length();
-            for (int i = 0; i < token.length(); i++) {
-                expr.value.array[i + 1] = token.charAt(i);
+            expr.value = memoryPos;
+            int len = token.length();
+            memoryInit.add((long) memoryPos++);
+            memoryInit.add((long) len);
+            for (int i = 0; i < len; i++) {
+                memoryInit.add((long) memoryPos++);
+                memoryInit.add((long) token.charAt(i));
             }
             read();
             return expr;
         } else {
             String identifier = token;
             read();
+            Variable variable = variables.get(identifier);
             if (match("[")) {
                 expr.type = ExpressionType.ARRAY_LOOKUP;
-                expr.value = variables.get(identifier);
+                expr.value = variable.pos;
+                if (!variable.array) {
+                    throw syntaxError("Not an array");
+                }
                 expr.variableName = identifier;
                 expr.left = parseExpressionPrimary();
                 expect("]");
                 return expr;
             } else {
                 expr.type = ExpressionType.VARIABLE;
-                expr.value = variables.get(identifier);
+                expr.value = variable.pos;
+                if (variable.array) {
+                    throw syntaxError("Can not assign an array");
+                }
                 expr.variableName = identifier;
                 return expr;
             }
@@ -287,7 +353,7 @@ public class MiniBau {
         case ">>":
             return 50;
         case "=":
-        case "!=":
+        case "<>":
         case "<=":
         case ">=":
         case "<":
@@ -427,23 +493,23 @@ public class MiniBau {
         ASSIGN,
         ASSIGN_ARRAY,
         IF,
-        ELSE,
         LOOP,
         GOTO,
         BREAK,
         CALL,
         PRINT,
-        PRINT_NEWLINE,
+        PRINT_TEXT,
+        PRINT_END,
         RETURN;
     }
 
     static class Statement {
         StatementType type;
-        Value variable;
         Expression expr;
         Expression index;
         int position;
-        // only for toString
+
+        // method name (during compilation)
         String name;
 
         public String toString() {
@@ -461,9 +527,11 @@ public class MiniBau {
             case CALL:
                 return name + "()";
             case PRINT:
-                return "print()";
-            case PRINT_NEWLINE:
-                return "print()";
+                return "print(" + expr + ")";
+            case PRINT_TEXT:
+                return "printText(" + expr + ")";
+            case PRINT_END:
+                return "printEnd()";
             case RETURN:
                 return "return";
             default:
@@ -474,55 +542,60 @@ public class MiniBau {
 
     static enum ExpressionType {
         LITERAL_INT,
-        LITERAL_ARRAY,
         VARIABLE,
         ARRAY_LOOKUP,
         OPERATION
     }
 
     static class Expression {
+        // compile time
+        String variableName;
+
         ExpressionType type;
         // operation
         String op;
-        // literal_int, literal_array, variable, array_lookup
-        Value value;
+        // literal_int, literal_array
+        long value;
         // operation (index is left for array)
         Expression left, right;
-        String variableName;
 
-        Value get(MiniBau memory) {
+        long calculate(long[] memory) {
             switch (type) {
             case LITERAL_INT:
-            case LITERAL_ARRAY:
-            case VARIABLE:
                 return value;
+            case VARIABLE:
+                return memory[(int) value];
             case ARRAY_LOOKUP:
-                long x = value.get((int) left.get(memory).value);
-                return new Value(x);
+                int index = (int) left.calculate(memory);
+                int len = (int) memory[(int) value];
+                if (index < 0 || index > len) {
+                    throw new ArrayIndexOutOfBoundsException("index " + index + " max " + len);
+                }
+                return memory[(int) value + 1 + index];
             case OPERATION:
-                long lv = left.get(memory).value;
-                long rv = right.get(memory).value;
+                long lv = left.calculate(memory);
+                long rv = right.calculate(memory);
                 switch(op) {
                 case "=":
-                    return new Value(lv == rv ? 1 : 0);
+                    return lv == rv ? 1 : 0;
                 case ">":
-                    return new Value(lv > rv ? 1 : 0);
+                    return lv > rv ? 1 : 0;
                 case ">=":
-                    return new Value(lv >= rv ? 1 : 0);
+                    return lv >= rv ? 1 : 0;
                 case "<":
-                    return new Value(lv < rv ? 1 : 0);
+                    return lv < rv ? 1 : 0;
                 case "<=":
-                    return new Value(lv <= rv ? 1 : 0);
-                case "!=":
-                    return new Value(lv != rv ? 1 : 0);
+                    return lv <= rv ? 1 : 0;
+                case "<>":
+                    return lv != rv ? 1 : 0;
                 case "+":
-                    return new Value(lv + rv);
+                    return lv + rv;
                 case "-":
-                    return new Value(lv - rv);
+                    return lv - rv;
                 case "*":
-                    return new Value(lv * rv);
+                    return lv * rv;
                 case "/":
-                    return new Value(lv / rv);
+                    return lv / rv;
                 }
             }
             throw new UnsupportedOperationException("type: "+ type);
@@ -531,12 +604,11 @@ public class MiniBau {
         public String toString() {
             switch (type) {
             case LITERAL_INT:
-            case LITERAL_ARRAY:
-                return value.toString();
+                return "" + value;
             case VARIABLE:
-                return variableName;
+                return "[" + value + "] (" + variableName + ")";
             case ARRAY_LOOKUP:
-                return variableName + "[" + left + "]";
+                return "[" + value + "+" + left + "] (" + variableName + ")";
             case OPERATION:
                 return left + " " + op + " " + right;
             }
@@ -544,62 +616,40 @@ public class MiniBau {
         }
     }
 
-    static class Value {
-        long value;
-        long[] array;
-
-        Value(long value) {
-            this.value = value;
-        }
-        long get() {
-            return value;
-        }
-        void set(long value) {
-            this.value = value;
-        }
-        long get(long index) {
-            return array[(int) index];
-        }
-        void set(long index, long value) {
-            array[(int) index] = value;
-        }
-        public String toString() {
-            if (array != null) {
-                StringBuilder buff = new StringBuilder();
-                int len = (int) array[0];
-                for (int i = 0; i < len; i++) {
-                    buff.append((char) array[i + 1]);
-                }
-                return buff.toString();
-            }
-            return "" + value;
-        }
+    static class Variable {
+        int pos;
+        boolean array;
     }
 
     public String run() {
         output = new StringBuilder();
-        ArrayList<Integer> stack = new ArrayList<>();
-        int pc = functionPos.get("main");
+        memory = new long[16 * 1024];
+        int[] stack = new int[1024];
+        int stackPos = 0;
+        int pc = 0;
         while(pc >= 0) {
             Statement s = statements.get(pc);
             switch (s.type) {
             case ASSIGN: {
-                long value = s.expr.get(this).value;
-                Value v = s.variable;
-                v.set(value);
+                long value = s.expr.calculate(memory);
+                memory[s.position] = value;
                 pc++;
                 break;
             }
             case ASSIGN_ARRAY: {
-                long value = s.expr.get(this).value;
-                Value v = s.variable;
-                v.set(s.index.get(this).value, value);
+                long value = s.expr.calculate(memory);
+                int index = (int) s.index.calculate(memory);
+                int len = (int) memory[(int) s.position];
+                if (index < 0 || index > len) {
+                    throw new ArrayIndexOutOfBoundsException("index " + index + " max " + len);
+                }
+                memory[s.position + 1 + index] = value;
                 pc++;
                 break;
             }
             case IF: {
-                Value value = s.expr.get(this);
-                if(value.get() == 0) {
+                long value = s.expr.calculate(memory);
+                if(value == 0) {
                     pc = s.position;
                 } else {
                     pc++;
@@ -610,8 +660,8 @@ public class MiniBau {
                 pc = s.position;
                 break;
             case BREAK: {
-                Value value = s.expr.get(this);
-                if(value.get() != 0) {
+                long value = s.expr.calculate(memory);
+                if(value != 0) {
                     pc = s.position;
                 } else {
                     pc++;
@@ -619,25 +669,35 @@ public class MiniBau {
                 break;
             }
             case CALL: {
-                stack.add(pc + 1);
+                stack[stackPos++] = pc + 1;
                 pc = s.position;
                 break;
             }
             case PRINT: {
-                output.append(s.expr.get(this));
+                output.append(s.expr.calculate(memory));
                 pc++;
                 break;
             }
-            case PRINT_NEWLINE: {
+            case PRINT_TEXT: {
+                int pos = (int) s.expr.calculate(memory);
+                int len = (int) memory[pos];
+                for (int i = 0; i < len; i++) {
+                    int x = (int) memory[pos + 1 + i];
+                    output.append((char) x);
+                }
+                pc++;
+                break;
+            }
+            case PRINT_END: {
                 output.append("\n");
                 pc++;
                 break;
             }
             case RETURN: {
-                if (stack.size() == 0) {
+                if (stackPos == 0) {
                     pc = -1;
                 } else {
-                    pc = stack.remove(stack.size() - 1);
+                    pc = stack[--stackPos];
                 }
                 break;
             }

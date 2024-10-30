@@ -27,12 +27,12 @@ public class Parser {
         OPERATOR;
     }
 
-    private String text;
-    private TokenType type;
-    private String token;
+    String text;
+    TokenType type;
+    String token;
     private String lastComment;
     private int lastPos;
-    private int pos;
+    int pos;
     private int indent;
     private DataType exceptionType;
 
@@ -41,7 +41,7 @@ public class Parser {
     private ArrayList<Expression> blockConditions = new ArrayList<>();
     // the block id is is incremented for each if / elif / else block
     private Program program;
-    private FunctionContext function;
+    private FunctionContext functionContext;
     private boolean isGlobalScope;
     public boolean isImport;
     private int nextContinueId;
@@ -55,10 +55,7 @@ public class Parser {
     private int stackPosFunction;
     private FunctionDefinition currentFunctionDefinition;
     private While currentLoop;
-
-    public Parser(String text, HashMap<String, String> modules) {
-        this(new Program(modules), null, text);
-    }
+    private boolean scanPhase = true;
 
     public Parser(String text) {
         this(new Program(Collections.emptyMap()), null, text);
@@ -66,15 +63,65 @@ public class Parser {
 
     public Parser(Program program, String module, String text) {
         this.program = program;
-        this.function = new FunctionContext(program);
+        this.functionContext = new FunctionContext(program);
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
     }
 
+    public void setScanPhase(boolean scanPhase) {
+        this.scanPhase = scanPhase;
+    }
+
     public Program parse() {
         readSpaces();
-        return parseProgram();
+        Program program = parseProgram();
+        if (scanPhase) {
+            functionContext.rewindStack(0);
+            ArrayList<FunctionDefinition> functions = new ArrayList<>();
+            functions.addAll(program.getFunctions());
+            if (module == null) {
+                FunctionDefinition main = program.getFunctionIfExists(null, null, "main", 0);
+                if (main != null) {
+                    // move "main" to the end, so a range function is parsed first
+                    // (this is only needed if we support custom range functions)
+                    functions.remove(main);
+                    functions.add(main);
+                }
+            }
+            for (FunctionDefinition def : functions) {
+                if (def.code != null) {
+                    String f = def.toString();
+                    Parser p = new Parser(program, def.module, f);
+                    functionContext.reset();
+                    p.functionContext = functionContext;
+                    p.scanPhase = false;
+                    p.parse();
+                }
+            }
+            // there might be more functions now: templates might be expanded
+            functions.clear();
+            functions.addAll(program.getFunctions());
+            for (FunctionDefinition def : functions) {
+                if (def.code != null) {
+                    String f = def.toString();
+                    Parser p = new Parser(program, def.module, f);
+                    functionContext.reset();
+                    p.functionContext = functionContext;
+                    p.scanPhase = false;
+                    p.parse();
+                }
+            }
+            if (module == null) {
+                FunctionDefinition main = program.getFunctionIfExists(null, null, "main", 0);
+                if (main != null) {
+                    program.removeFunction(main);
+                    program.list.addAll(main.list);
+                    program.autoClose = main.autoClose;
+                }
+            }
+        }
+        return program;
     }
 
     public ArrayList<Expression> getBlockConditions() {
@@ -113,6 +160,7 @@ public class Parser {
     }
 
     private Program parseProgram() {
+        boolean mainStatements = false;
         while (true) {
             while (matchOp(";") || matchOp("\n")) {
                 // ok
@@ -121,18 +169,36 @@ public class Parser {
                 break;
             }
             if (parseFunctionDefinition(module)) {
+                mainStatements = true;
                 // ok
             } else if (parseTypeDefinition(module)) {
+                mainStatements = true;
                 // ok
             } else if (parseImport()) {
+                mainStatements = true;
                 // ok
             } else if (parseModule()) {
+                mainStatements = true;
                 // ok
             } else if (parseEnumDefinition()) {
+                mainStatements = true;
                 // ok
             } else {
-                isGlobalScope = true;
-                parseStatements(program.list);
+                if (mainStatements && module == null) {
+                    FunctionDefinition old = program.getFunctionIfExists(null, null, "main", 0);
+                    if (old != null) {
+                        throw syntaxError("Function 'main' already exists");
+                    }
+                    pos = lastPos;
+                    String mainCode = parseBlock(-1);
+                    FunctionDefinition def = new FunctionDefinition();
+                    def.name = "main";
+                    def.code = Statement.indent(mainCode);
+                    program.addFunction(def);
+                } else {
+                    isGlobalScope = true;
+                    parseStatements(program.list);
+                }
             }
         }
         program.autoClose = autoClose(0, null);
@@ -165,16 +231,11 @@ public class Parser {
             id = readIdentifier();
             name += "." + id;
         }
-        String as = id;
-        if (match("as")) {
-            as = readIdentifier();
-        }
-        String old = program.getImport(as);
+        String old = program.getImport(id);
         boolean alreadyImported = false;
         if (old != null) {
-            alreadyImported = true;
-            if (!old.equals(name)) {
-                throw syntaxError("A module named '" + as + "' was already imported: " + old);
+            if (old.equals(name)) {
+                alreadyImported = true;
             }
         }
         int oldIndent = indent;
@@ -187,7 +248,7 @@ public class Parser {
                 entries.add(entry);
             }
         }
-        program.addImport(name, as, entries);
+        program.addImport(name, id, entries);
         if (!alreadyImported) {
             String moduleSource = program.readModule(name);
             if (moduleSource == null) {
@@ -198,7 +259,7 @@ public class Parser {
                 parser.isImport = true;
                 parser.parse();
             } catch (IllegalStateException e) {
-                throw syntaxError("Error parsing template: " + e.getMessage(), e);
+                throw syntaxError("Error parsing module: " + e.getMessage(), e);
             }
         }
         return true;
@@ -214,11 +275,11 @@ public class Parser {
         if (!match("type")) {
             return false;
         }
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         int defIndent = indent;
         String comment = lastComment;
         String name = readIdentifier();
-        if (function.getType(targetModule, name) != null) {
+        if (functionContext.getType(targetModule, name) != null) {
             throw syntaxError("Type '" + name + "' was already defined");
         }
         boolean template = false;
@@ -228,7 +289,7 @@ public class Parser {
                 String t = readIdentifier();
                 parameters.add(t);
                 DataType type = new DataType(targetModule, t, 0, false, Collections.emptyList());
-                function.addTemporaryType(type);
+                functionContext.addTemporaryType(type);
                 template = true;
                 if (matchOp(")")) {
                     break;
@@ -240,7 +301,7 @@ public class Parser {
         }
         int sizeOf = 0;
         readEndOfStatement();
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         if (template) {
             parseTypeTemplate(defIndent, name, parameters, comment);
             return true;
@@ -263,11 +324,22 @@ public class Parser {
         if (!parameters.isEmpty()) {
             type.parameters = parameters;
         }
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         return true;
     }
 
     private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment) {
+        String code = parseBlock(defIndent);
+        DataType type = new DataType(module, name, 0, false, Collections.emptyList());
+        type.parameters = parameters;
+        type.template = code;
+        lastComment = null;
+        program.addComment("type " + type.toString(), comment);
+        lastComment = null;
+        program.addType(type);
+    }
+
+    private String parseBlock(int defIndent) {
         int pos = lastPos;
         while (text.charAt(pos) != '\n') {
             pos--;
@@ -282,13 +354,7 @@ public class Parser {
             }
             read();
         }
-        DataType type = new DataType(module, name, 0, false, Collections.emptyList());
-        type.parameters = parameters;
-        type.template = text.substring(pos, lastPos);
-        lastComment = null;
-        program.addComment("type " + type.toString(), comment);
-        lastComment = null;
-        program.addType(type);
+        return text.substring(pos, lastPos);
     }
 
     private boolean parseEnumDefinition() {
@@ -340,10 +406,11 @@ public class Parser {
     }
 
     private boolean parseFunctionDefinition(String targetModule) {
+        int startParse = lastPos;
         if (!match("fun")) {
             return false;
         }
-        if (function.getStackPos() != 0) {
+        if (functionContext.getStackPos() != 0) {
             // TODO currently we do parse functions while parsing functions...
             // throw new IllegalStateException();
         }
@@ -352,7 +419,7 @@ public class Parser {
         int defIndent = indent;
         isGlobalScope = false;
         String id = readIdentifier();
-        DataType t1 = function.getType(targetModule, id);
+        DataType t1 = functionContext.getType(targetModule, id);
         if (t1 != null) {
         	if (matchOp("[")) {
                 if (!matchOp("]")) {
@@ -380,7 +447,7 @@ public class Parser {
             parseTypeFunctionTemplate(defIndent, t1);
             return true;
         }
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         FunctionDefinition def = new FunctionDefinition();
         if (currentFunctionDefinition != null) {
             throw new IllegalStateException();
@@ -390,12 +457,12 @@ public class Parser {
         if (matchOp("(")) {
             def.name = id;
         } else {
-            def.callType = function.getType(targetModule, id);
+            def.callType = functionContext.getType(targetModule, id);
             def.name = readIdentifier();
             if (!matchOp("(")) {
                 throw syntaxError("Expected '(', got '" + token + "' when reading a function definition");
             }
-            DataType type = function.getType(targetModule, id);
+            DataType type = functionContext.getType(targetModule, id);
             if (type == null) {
                 throw syntaxError("Type '" + id + "' not found when reading a function definition");
             }
@@ -403,7 +470,7 @@ public class Parser {
             Variable var = new Variable("this", type);
             var.isConstant = true;
             def.parameters.add(var);
-            function.addVariable(var);
+            functionContext.addVariable(var);
         }
         boolean varArgs = false;
         boolean template = false;
@@ -414,7 +481,7 @@ public class Parser {
                 if (DataType.isGenericTypeName(token) && !template) {
                     template = true;
                     type = new DataType(targetModule, token, 0, false, Collections.emptyList());
-                    function.addTemporaryType(type);
+                    functionContext.addTemporaryType(type);
                     type = readType(template);
                     if (matchOp("..")) {
                         varArgs = true;
@@ -424,17 +491,17 @@ public class Parser {
                     Variable var = new Variable(name, type);
                     var.isConstant = true;
                     def.parameters.add(var);
-                    function.addVariable(var);
+                    functionContext.addVariable(var);
                 } else if (match("type")) {
                     template = true;
                     type = program.getType2(null, DataType.TYPE);
                     DataType t = new DataType(targetModule, name, 0, false, Collections.emptyList());
-                    function.addTemporaryType(t);
+                    functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
                     var.isConstant = true;
                     def.parameters.add(var);
-                    function.addVariable(var);
+                    functionContext.addVariable(var);
                 } else {
                     type = readType(template);
                     if (matchOp("..")) {
@@ -445,7 +512,7 @@ public class Parser {
                     Variable var = new Variable(name, type);
                     var.isConstant = true;
                     def.parameters.add(var);
-                    function.addVariable(var);
+                    functionContext.addVariable(var);
                 }
                 if (varArgs) {
                     if (!matchOp(")")) {
@@ -467,6 +534,9 @@ public class Parser {
         def.varArgs = varArgs;
         if (match("const")) {
             def.constExpr = true;
+        }
+        if (match("macro")) {
+            def.macro = true;
         }
         if (matchOp("\n")) {
             // void
@@ -498,13 +568,33 @@ public class Parser {
             }
             readEndOfStatement();
         }
-        stackPosFunction = function.getStackPos();
+        stackPosFunction = functionContext.getStackPos();
         if (def.varArgs) {
             // for varargs, we have an array that needs to be freed
             stackPosFunction--;
         }
-
         FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
+        if (scanPhase && !def.macro) {
+            if (old != null) {
+                throw syntaxError("Function '" + def.name + "' already exists");
+            }
+            if (template) {
+                parseFunctionTemplate(defIndent, def);
+                functionContext.rewindStack(stackPos);
+                currentFunctionDefinition = null;
+                return true;
+            }
+            int startCode = lastPos;
+            String s = parseBlock(defIndent);
+            String header = text.substring(startParse, startCode).trim() + "\n";
+            def.header = header;
+            def.code = s;
+            def.comment = comment;
+            program.addFunction(def);
+            functionContext.rewindStack(stackPos);
+            currentFunctionDefinition = null;
+            return true;
+        }
         if (old != null) {
             if (old.list.isEmpty()) {
                 program.removeFunction(old);
@@ -516,12 +606,6 @@ public class Parser {
             } else {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
-        }
-        if (template) {
-            parseFunctionTemplate(defIndent, def);
-            function.rewindStack(stackPos);
-            currentFunctionDefinition = null;
-            return true;
         }
         program.addComment(def.toString(), comment);
         program.addFunction(def);
@@ -537,20 +621,24 @@ public class Parser {
         }
         List<Statement> autoClose = autoClose(stackPosFunction, null);
         def.autoClose(autoClose);
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         currentLoop = null;
         undoLastBlockCondition();
         if (!blockConditions.isEmpty()) {
             throw new IllegalStateException();
         }
         currentFunctionDefinition = null;
+        if (def.macro) {
+            Templates.checkMacroFunction(def);
+            program.addFunctionTemplate(null, module, def.name, def);
+        }
         return true;
     }
 
     private void parseTypeFunctionTemplate(int defIndent, DataType t) {
         String comment = lastComment;
         int start = lastPos;
-        // read to end of first line
+        // read to end of the line
         while (true) {
             if ("\n".equals(token)) {
                 readSpaces();
@@ -558,22 +646,15 @@ public class Parser {
             }
             read();
         }
-        String functionName = text.substring(start, lastPos);
-        while (true) {
-            if ("\n".equals(token)) {
-                readSpaces();
-            }
-            if (type == TokenType.END || indent <= defIndent) {
-                break;
-            }
-            read();
-        }
+        String functionName = text.substring(start, lastPos).trim();
+        String code = parseBlock(defIndent);
         StringBuilder buff = new StringBuilder();
         buff.append("fun ").append(t.name());
         for (String p : t.parameters) {
             buff.append("_@@").append(p + "_").append("@@");
         }
-        buff.append(text.substring(start, lastPos));
+        buff.append(" " + functionName + "\n");
+        buff.append(code);
         t.template += "\n" + buff.toString();
         if (comment != null) {
             program.addComment("fun " + t.toString() + " " + functionName.trim(), comment);
@@ -581,67 +662,12 @@ public class Parser {
     }
 
     private void parseFunctionTemplate(int defIndent, FunctionDefinition def) {
-        int pos = lastPos;
-        while (text.charAt(pos) != '\n') {
-            pos--;
-        }
-        pos++;
-        while (true) {
-            if ("\n".equals(token)) {
-                readSpaces();
-            }
-            if (type == TokenType.END || indent <= defIndent) {
-                break;
-            }
-            read();
-        }
+        String s = parseBlock(defIndent);
         if (program.getFunctionTemplate(def.callType, def.module, def.name) != null) {
             throw syntaxError("Function template '" + def.name + "' was already defined");
         }
-        def.template = text.substring(pos, lastPos);
+        def.template = s;
         program.addFunctionTemplate(def.callType, def.module, def.name, def);
-    }
-
-    private static String convertTemplate(String template, String find, String replace) {
-        return convertTemplate(template, Collections.singletonList(find), Collections.singletonList(replace));
-    }
-
-    private static String convertTemplate(String template, List<String> find, List<String> replace) {
-        StringBuilder buff = new StringBuilder();
-        Parser p = new Parser(template);
-        int pos = 0;
-        p.read();
-        while(true) {
-            if (p.type == TokenType.END) {
-                break;
-            }
-            int p2 = p.pos;
-            String raw = p.text.substring(pos, p2);
-            pos = p2;
-            boolean replaced = false;
-            for (int i = 0; i < find.size(); i++) {
-                String f = find.get(i);
-                String r = replace.get(i);
-                if (p.token.equals(f)) {
-                    buff.append(raw.replace(f, r));
-                    replaced = true;
-                    break;
-                } else if (p.token.endsWith(f + "_")) {
-                    buff.append(raw.replace(f + "_", r.replace('.', '_').replace("[]", "_array")));
-                    replaced = true;
-                    break;
-                }
-            }
-            if (!replaced) {
-                if (p.token.equals("@@")) {
-                    // ignore
-                } else {
-                    buff.append(raw);
-                }
-            }
-            p.read();
-        }
-        return buff.toString();
     }
 
     /**
@@ -665,7 +691,7 @@ public class Parser {
                 String rangeTypeName = "0.." + upperBound.toString();
                 DataType newType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false);
                 newType.maxValue = upperBound;
-                function.addTemporaryType(newType);
+                functionContext.addTemporaryType(newType);
                 return newType;
             }
         }
@@ -678,7 +704,7 @@ public class Parser {
         if (m == null) {
             m = module;
         }
-        DataType t = function.getType(m, name);
+        DataType t = functionContext.getType(m, name);
         if (t == null) {
             throw syntaxError("Type '" + name + "' not found when reading a type");
         }
@@ -699,7 +725,7 @@ public class Parser {
             // we must not replace the types
             if (!templatesOk) {
                 String typeId = DataType.getId(name, params);
-                DataType t2 = function.getType(t.module, typeId);
+                DataType t2 = functionContext.getType(t.module, typeId);
                 if (t2 != null) {
                     t = t2;
                 } else {
@@ -708,17 +734,16 @@ public class Parser {
                     for (int i = 0; i < t.parameters.size(); i++) {
                         with.add(params.get(i).fullName());
                     }
-                    code = convertTemplate(code, t.parameters, with);
+                    code = Templates.convertTemplate(code, t.parameters, with);
                     code = "type " + typeId + "\n" + code;
                     try {
                         Parser p = new Parser(program, module, code);
                         p.read();
                         p.parseTypeDefinition(t.module);
                         while (p.type != TokenType.END) {
-                            p.readSpaces();
                             p.parseFunctionDefinition(t.module);
                         }
-                        t = function.getType(t.module, typeId);
+                        t = functionContext.getType(t.module, typeId);
                     } catch (IllegalStateException e) {
                         throw syntaxError("Error parsing template: " + e.getMessage(), e);
                     }
@@ -778,26 +803,37 @@ public class Parser {
                 parseCatch(target);
                 return;
             }
-            String identifier = token;
-            String m = program.getImport(identifier);
-            if (m == null) {
-                m = module;
-            } else {
-                read();
-                if (!matchOp(".")) {
-                    throw syntaxError("Expected '.' after module name");
+            String m = module;
+            String identifier = readIdentifier();
+            // if there is no variable with this name,
+            // TODO it could be a this.field name too?
+            // then it could be a fully qualified module name
+            if (functionContext.getVariable(null, identifier) == null) {
+                while (matchOp(".")) {
+                    m = m == module ? identifier : m + "." + identifier;
+                    identifier = readIdentifier();
                 }
-                identifier = token;
+                String m2 = program.getImport(m);
+                if (m2 != null) {
+                    m = m2;
+                }
             }
-            read();
+            DataType targetType = null;
+            if (type == TokenType.IDENTIFIER) {
+                targetType = readType(true);
+            }
             if (matchOp(":")) {
+                if (m != module && !m.equals(module)) {
+                    throw syntaxError("Can not define a constant in a different module");
+                }
                 Assignment s = new Assignment();
                 s.isConstant = true;
                 s.isGlobalScope = isGlobalScope;
                 s.initial = true;
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
-                boolean global = isGlobalScope && isImport;
+                s.value = s.value.writeStatements(this, true, target);
+                boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, s.value.type());
                 v.isConstant = true;
                 v.constantValue = eval(s.value, true);
@@ -813,7 +849,7 @@ public class Parser {
                 v.setBoundValue(null, "=", s.value);
                 s.leftValue = v;
                 s.type = s.value.type();
-                function.addVariable(v);
+                functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
                 }
@@ -823,10 +859,14 @@ public class Parser {
                 target.add(s);
                 return;
             } else if (matchOp(":=")) {
+                if (m != module && !m.equals(module)) {
+                    throw syntaxError("Can not create a new variable in a different module");
+                }
                 Assignment s = new Assignment();
                 s.initial = true;
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
+                s.value = s.value.writeStatements(this, true, target);
                 DataType type = s.value.type();
                 if (type.isArray()) {
                     throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
@@ -840,22 +880,22 @@ public class Parser {
                         throw syntaxError("May not throw an exception here");
                     }
                     String rangeTypeName = "0.." + upperBound.toString();
-                    DataType rangeType = function.getType(null, rangeTypeName);
+                    DataType rangeType = functionContext.getType(null, rangeTypeName);
                     if (rangeType == null) {
                         rangeType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false);
                         rangeType.maxValue = upperBound;
-                        function.addTemporaryType(rangeType);
+                        functionContext.addTemporaryType(rangeType);
                     }
                     type = rangeType;
                 }
-                boolean global = isGlobalScope && isImport;
+                boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, type);
                 s.leftValue = v;
                 s.type = s.value.type();
-                if (function.getVariable(module, v.name) != null) {
+                if (functionContext.getVariable(module, v.name) != null) {
                     throw syntaxError("Variable '" + v.name + "' already exists");
                 }
-                function.addVariable(v);
+                functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
                 }
@@ -886,17 +926,44 @@ public class Parser {
                 }
                 Call call = new Call();
                 call.statement = true;
-                parseCall(null, m, identifier, call, true);
+                Expression expr = parseCall(null, m, identifier, call, true);
                 readEndOfStatement();
-                Expression expr = call.writeStatements(this, target);
+                expr = expr.writeStatements(this, false, target);
                 if (expr instanceof Call) {
                     target.add((Call) expr);
                 }
                 return;
+            } else if (matchOp("\n") && targetType != null) {
+                // TODO assign null or zero
+                Assignment s = new Assignment();
+                s.initial = true;
+                Expression value;
+                if (targetType.isSystem()) {
+                    value = new NumberValue(Value.ValueInt.ZERO, targetType, false);
+                } else {
+                    value = new NullValue();
+                }
+                s.value = value;
+                boolean global = isGlobalScope;
+                Variable v = new Variable(module, identifier, global, targetType);
+                s.leftValue = v;
+                s.type = targetType;
+                if (functionContext.getVariable(module, v.name) != null) {
+                    throw syntaxError("Variable '" + v.name + "' already exists");
+                }
+                functionContext.addVariable(v);
+                if (global) {
+                    program.addGlobalVariable(v);
+                }
+                verifyBounds(s);
+                // already read
+                // readEndOfStatement();
+                target.add(s);
+                return;
             }
-            LeftValue left = function.getVariable(null, identifier);
+            LeftValue left = functionContext.getVariable(module, identifier);
             if (left == null) {
-                left = function.getVariable(null, "this");
+                left = functionContext.getVariable(null, "this");
                 if (left == null) {
                     throw syntaxError("Variable not found: '"+identifier+"' \n"+
                             "(constants are declared with ':', " +
@@ -1148,13 +1215,124 @@ public class Parser {
         }
     }
 
-    private Call parseCall(DataType type, String module, String identifier, Call call, boolean use) {
+    private Expression parseMacro(FunctionDefinition def) {
+        boolean lastWasComma = false;
+        int pi = 0;
+        ArrayList<Variable> params = new ArrayList<>();
+        ArrayList<Expression> args = new ArrayList<>();
+        DataType type = def.returnType;
+        boolean isGeneric = type != null && DataType.isGenericTypeName(type.name());
+        while (true) {
+            if (matchOp(")")) {
+                break;
+            }
+            boolean checkComma = !lastWasComma && pi > 0;
+            if (checkComma) {
+                Expression last = args.get(args.size() - 1);
+                if (!last.isEasyToRead()) {
+                    throw syntaxError("Expected ',' after '" + last
+                            + "' or parentheses around the expression, to make it easier to read");
+                }
+            }
+            Expression p = parseExpression();
+            if (checkComma) {
+                if (!p.isEasyToRead()) {
+                    throw syntaxError("Expected ',' before '" + p
+                            + "' or parentheses around the expression, to make it easier to read");
+                }
+            }
+            Variable var = def.parameters.get(pi);
+            // replace generic types
+            if (isGeneric) {
+                def.parameters.get(pi);
+                if (var.type.name().equals(type.name())) {
+                    type = p.type();
+                }
+            }
+            params.add(var);
+            args.add(p);
+            // dangling ',' is supported
+            lastWasComma = matchOp(",");
+            // new line after operation
+            matchOp("\n");
+            pi++;
+        }
+        TernaryExpression ternary = new TernaryExpression();
+        ternary.type = type;
+        for (Statement s : def.list) {
+            if (s instanceof If) {
+                If ifStatement = (If) s;
+                Expression condition = ifStatement.conditions.get(0);
+                ternary.condition = replaceAll(condition, params, args);
+                ArrayList<Statement> ifTrue = ifStatement.listList.get(0);
+                for (int i = 0; i < ifTrue.size(); i++) {
+                    Statement s2 = ifTrue.get(i);
+                    if (s2 instanceof Return) {
+                        Return r = (Return) s2;
+                        ternary.ifTrue = replaceAll(r.expr, params, args);
+                        break;
+                    }
+                    s2 = replaceAll(s2, params, args);
+                    ternary.ifTrueStatements.add(s2);
+                }
+                if (ifStatement.listList.size() > 1) {
+                    ArrayList<Statement> ifFalse = ifStatement.listList.get(1);
+                    for (int i = 0; i < ifFalse.size(); i++) {
+                        Statement s2 = ifFalse.get(i);
+                        if (s2 instanceof Return) {
+                            Return r = (Return) s2;
+                            ternary.ifFalse = replaceAll(r.expr, params, args);
+                            break;
+                        }
+                        s2 = replaceAll(s2, params, args);
+                        ternary.ifFalseStatements.add(s2);
+                    }
+                }
+            }
+        }
+        return ternary;
+    }
+
+    private static Expression replaceAll(Expression expr, ArrayList<Variable> params, ArrayList<Expression> args) {
+        ArrayList<Variable> newParams = new ArrayList<>();
+        for (Variable p : params) {
+            Variable v2 = new Variable("_" + p.name, p.type);
+            newParams.add(v2);
+        }
+        for (int i = 0; i < params.size(); i++) {
+            expr = expr.replace(params.get(i), newParams.get(i));
+        }
+        for (int i = 0; i < newParams.size(); i++) {
+            expr = expr.replace(newParams.get(i), args.get(i));
+        }
+        return expr;
+    }
+
+    private static Statement replaceAll(Statement stat, ArrayList<Variable> params, ArrayList<Expression> args) {
+        ArrayList<Variable> newParams = new ArrayList<>();
+        for (Variable p : params) {
+            Variable v2 = new Variable("_" + p.name, p.type);
+            newParams.add(v2);
+        }
+        for (int i = 0; i < params.size(); i++) {
+            stat = stat.replace(params.get(i), newParams.get(i));
+        }
+        for (int i = 0; i < newParams.size(); i++) {
+            stat = stat.replace(newParams.get(i), args.get(i));
+        }
+        return stat;
+    }
+
+    private Expression parseCall(DataType type, String module, String identifier, Call call, boolean use) {
         if (type != null && type.module != null) {
             module = type.module;
         }
         FunctionDefinition template = program.getFunctionTemplate(type, module, identifier);
         if (template == null) {
             template = program.getFunctionTemplate(type, null, identifier);
+        }
+        if (template != null && template.macro) {
+            return parseMacro(template);
         }
         ArrayList<String> templateNames = new ArrayList<>();
         ArrayList<String> templateParams = new ArrayList<>();
@@ -1176,9 +1354,9 @@ public class Parser {
                     throw syntaxError("Type '" + token + "' may not be used here");
                 }
                 String name = readIdentifier();
-                DataType t = function.getType(module, name);
+                DataType t = functionContext.getType(module, name);
                 if (t == null) {
-                    t = function.getType(this.module, name);
+                    t = functionContext.getType(this.module, name);
                 }
                 if (t == null) {
                     throw syntaxError("Type '" + name + "' not found when reading a type");
@@ -1249,11 +1427,11 @@ public class Parser {
             call.def = program.getFunctionIfExists(type, module, fullName, call.args.size());
             if (call.def == null) {
                 String code = template.template;
-                code = convertTemplate(code, templateNames, templateParams);
+                code = Templates.convertTemplate(code, templateNames, templateParams);
                 String header = template.toString();
-                header = convertTemplate(header, template.name, fullName);
-                header = convertTemplate(header, "type", "int");
-                header = convertTemplate(header, templateNames, templateParams);
+                header = Templates.convertTemplate(header, template.name, fullName);
+                header = Templates.convertTemplate(header, "type", "int");
+                header = Templates.convertTemplate(header, templateNames, templateParams);
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code);
@@ -1344,11 +1522,11 @@ public class Parser {
 
     private void parseCatch(ArrayList<Statement> target) {
         int catchIndent = indent;
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         Catch catchStat = new Catch();
         String id = readIdentifier();
         Variable var = new Variable(id, exceptionType);
-        function.addVariable(var);
+        functionContext.addVariable(var);
         catchStat.var = var;
         boolean sameLine;
         if (matchOp("\n")) {
@@ -1371,7 +1549,7 @@ public class Parser {
             parseStatements(catchStat.list);
         }
         catchStat.autoClose(autoClose(stackPos, null));
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         target.add(catchStat);
     }
 
@@ -1430,7 +1608,7 @@ public class Parser {
         }
         c.continuedId = currentLoop.continueId;
         c.condition = parseCondition(target);
-        c.condition.applyBoundCondition(getScope(-1), ApplyType.UNDO);
+        c.condition.applyBoundCondition(getScope(0), ApplyType.NEGATIVE);
         c.autoClose = autoClose(stackPosLoop, null);
         if (matchOp("\n") || matchOp(";")) {
             target.add(c);
@@ -1462,7 +1640,7 @@ public class Parser {
     private Expression parseCondition(ArrayList<Statement> target) {
         Expression expr = parseExpression(target);
         if (expr.type().isNullable()) {
-            return new Operation(expr, "!=", new NullValue());
+            return new Operation(expr, "<>", new NullValue());
         }
         return expr;
     }
@@ -1473,7 +1651,7 @@ public class Parser {
         Expression switchExpr = assignTempVariable(target, parseExpression());
 
         boolean elsePart = false;
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         boolean first = true;
         if (!matchOp("\n")) {
             throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
@@ -1525,7 +1703,7 @@ public class Parser {
             if (!list.isEmpty()) {
                 ifStatement.listList.add(list);
                 ifStatement.autoClose(autoClose(stackPos, null));
-                function.rewindStack(stackPos);
+                functionContext.rewindStack(stackPos);
             }
             if (elsePart) {
                 break;
@@ -1544,7 +1722,7 @@ public class Parser {
         addBlockCondition(condition);
         ifStatement.conditions.add(condition);
         boolean elsePart = false;
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         while (true) {
             if (matchOp("\n")) {
                 sameLine = false;
@@ -1568,7 +1746,7 @@ public class Parser {
                 parseStatements(list);
             }
             ifStatement.autoClose(autoClose(stackPos, null));
-            function.rewindStack(stackPos);
+            functionContext.rewindStack(stackPos);
             if (elsePart) {
                 break;
             }
@@ -1609,12 +1787,16 @@ public class Parser {
             Std.registerUntil(program);
         }
         Call call = new Call();
-        call = parseCall(null, null, method, call, false);
+        Expression expr = parseCall(null, null, method, call, false);
+        if (!(expr instanceof Call)) {
+            throw syntaxError("Only range functions are supported");
+        }
+        call = (Call) expr;
         FunctionDefinition functionDef = call.def;
         if (functionDef.exceptionType != null) {
             throw syntaxError("The function in the 'for' statement may not throw an exception sorry");
         }
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         stackPosLoop = stackPos;
         While outerLoop = new While();
         outerLoop.continueId = nextContinueId++;
@@ -1639,7 +1821,7 @@ public class Parser {
                 );
         comp.operator = "=";
         Variable var = new Variable(variableName, call.type());
-        function.addVariable(var);
+        functionContext.addVariable(var);
         While loop = new While();
         loop.continueId = nextContinueId++;
         int i = 0;
@@ -1731,7 +1913,7 @@ public class Parser {
         }
         outerLoop.list.add(new Break());
         loop.autoClose(autoClose(stackPos, null));
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         undoLastBlockCondition();
         stackPosLoop = stackPos;
         currentLoop = oldLoop;
@@ -1778,7 +1960,7 @@ public class Parser {
         } else {
             throw syntaxError("Expected end of statement, got '"+token+"' in 'while' statement");
         }
-        int stackPos = function.getStackPos();
+        int stackPos = functionContext.getStackPos();
         stackPosLoop = stackPos;
         loop.continueId = nextContinueId++;
         while (true) {
@@ -1794,7 +1976,7 @@ public class Parser {
             parseStatements(loop.list);
         }
         loop.autoClose(autoClose(stackPos, null));
-        function.rewindStack(stackPos);
+        functionContext.rewindStack(stackPos);
         stackPosLoop = stackPos;
         undoLastBlockCondition();
         currentLoop = oldLoop;
@@ -1803,15 +1985,15 @@ public class Parser {
 
     private List<Statement> autoClose(int stackPos, Expression except) {
         ArrayList<Statement> autoClose = new ArrayList<Statement>();
-        if (function.getStackCloseDifference(stackPos) == 0) {
+        if (functionContext.getStackCloseDifference(stackPos) == 0) {
             return autoClose;
         }
-        ArrayList<String> list = function.newVariablesList(stackPos);
+        ArrayList<String> list = functionContext.newVariablesList(stackPos);
         String exceptString = except == null ? "" : except.toString();
         for(String name : list) {
             // do not close if we return it
             if (!name.equals(exceptString)) {
-                Variable var = function.getVariable(null, name);
+                Variable var = functionContext.getVariable(null, name);
                 if (var == null) {
                     throw syntaxError("Variable not found: '" + name + "'");
                 }
@@ -1825,7 +2007,7 @@ public class Parser {
     }
 
     private Expression parseExpression(ArrayList<Statement> target) {
-        return parseExpression().writeStatements(this, target);
+        return parseExpression().writeStatements(this, false, target);
     }
 
     private Expression parseExpression() {
@@ -1852,9 +2034,8 @@ public class Parser {
         if (isImport) {
             m = module;
         }
-        parseCall(expr.type(), m, f, call, true);
         // TODO support chained calls?
-        return call;
+        return parseCall(expr.type(), m, f, call, true);
     }
 
     private Expression parseExpressionPrimary() {
@@ -1891,7 +2072,7 @@ public class Parser {
             String n = token;
             read();
             double v = Double.parseDouble(n);
-            Expression expr = new NumberValue(new Value.ValueFloat(v), program.getType2(null, DataType.F64), false);
+            Expression expr = new NumberValue(new Value.ValueFloat(v), program.getType2(null, DataType.FLOAT), false);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -1913,26 +2094,35 @@ public class Parser {
                 read();
                 return new NullValue();
             }
+            Variable thisVar = functionContext.getVariable(null, "this");
             String m = null;
             if ("ord".equals(n)) {
                 Std.registerStd(program);
                 m = "org.bau.Std";
+                read();
             } else {
+                read();
                 m = program.getImportEntry(n);
                 if (m == null) {
-                    m = program.getImport(n);
-                    if (m == null) {
-                        m = module;
-                    } else {
-                        read();
-                        if (!matchOp(".")) {
-                            throw syntaxError("Expected '.' after module name");
+                    m = module;
+                    // if there is no variable with this name, and
+                    // no function with this name, and
+                    // no this.field with this name,
+                    // then it could be a fully qualified module name
+                    if (functionContext.getVariable(null, n) == null &&
+                            functionContext.getType(m, n) == null &&
+                            (thisVar == null || thisVar.type().getFieldDataType(n) == null)) {
+                        while (matchOp(".")) {
+                            m = m == module ? n : m + "." + n;
+                            n = readIdentifier();
                         }
-                        n = token;
+                        String m2 = program.getImport(m);
+                        if (m2 != null) {
+                            m = m2;
+                        }
                     }
                 }
             }
-            read();
             if (matchOp("(")) {
                 if ("new".equals(n) || "new".equals(n)) {
                     DataType type = readType(false);
@@ -1953,8 +2143,30 @@ public class Parser {
                     return newExpr;
                 }
                 Call call = new Call();
-                call = parseCall(null, m, n, call, true);
-                Value val = eval(call, true);
+                Expression expr = parseCall(null, m, n, call, true);
+                Value val = eval(expr, true);
+                ArrayList<FunctionDefinition> toCompileFirst = new ArrayList<>(program.uncompiledFunctions.values());
+                if (!toCompileFirst.isEmpty()) {
+                    // could not yet evaluate, because a function was not yet compiled
+                    // we compile those functions first, but only once
+                    program.uncompiledFunctions.clear();
+                    for (FunctionDefinition def : toCompileFirst) {
+                        if (def.code != null) {
+                            try {
+                                Parser p = new Parser(program, def.module, def.toString());
+                                p.scanPhase = false;
+                                p.read();
+                                p.parseFunctionDefinition(def.module);
+                            } catch (IllegalStateException e) {
+                                throw syntaxError("Error parsing function: " + e.getMessage(), e);
+                            }
+                        }
+                    }
+                    // replace the definition
+                    call.def = program.functions.get(call.def.getFunctionId());
+                    // try again (but only once)
+                    val = eval(call, true);
+                }
                 if (val != null) {
                     if (val instanceof ValueI8Array) {
                         ValueI8Array str = (ValueI8Array) val;
@@ -1962,14 +2174,14 @@ public class Parser {
                         long reference = program.addStringConstant(s);
                         DataType type = program.getType2(null, DataType.I8).arrayType();
                         type.used();
-                        Expression expr = new StringLiteral(s, type, reference);
+                        expr = new StringLiteral(s, type, reference);
                         return expr;
                     }
-                    return new NumberValue(val, call.type(), false);
+                    return new NumberValue(val, expr.type(), false);
                 }
-                return call;
+                return expr;
             }
-            DataType enumType = function.getType(m, n);
+            DataType enumType = functionContext.getType(m, n);
             if (enumType != null && enumType.enumValues != null) {
                 read();
                 if (matchOp(".")) {
@@ -1983,72 +2195,23 @@ public class Parser {
                 Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
                 return expr;
             }
-            Expression v = function.getVariable(m, n);
-            if (v == null) {
-                Variable thisVar = function.getVariable(null, "this");
+            Expression var = functionContext.getVariable(m, n);
+            if (var == null) {
                 if (thisVar != null) {
                     verifyNullAccess(thisVar);
                     DataType thisType = thisVar.type();
                     if (!thisType.isSystem()) {
                         DataType type = thisType.getFieldDataType(n);
                         if (type != null) {
-                            v = new FieldAccess(thisVar, n, type);
+                            var = new FieldAccess(thisVar, n, type);
                         }
                     }
                 }
-                if (v == null) {
+                if (var == null) {
                     throw syntaxError("Variable or constant not found: '" + n + "'");
                 }
             }
-            return parsePossibleDot(v);
-            /*
-            DataType vt = v.type();
-            while (true) {
-                if (matchOp(".")) {
-                    if (vt.isPointer()) {
-                        verifyNullAccess(v);
-                    }
-                    String f = readIdentifier();
-                    if (matchOp("(")) {
-                        Call call = new Call();
-                        call.args.add(v);
-                        parseCall(vt, m, f, call, true);
-                        // TODO support chained calls?
-                        return call;
-                    } else {
-                        DataType type;
-                        if ("len".equals(f) && vt.isArray()) {
-                            type = program.getType2(null, DataType.I32);
-                        } else {
-                            type = vt.getFieldDataType(f);
-                        }
-                        if (type == null) {
-                            throw syntaxError("Field '" + f + "' not found in type '" + vt + "'");
-                        }
-                        v = new FieldAccess(v, f, type);
-                        vt = v.type();
-                    }
-                } else if (matchOp("[")) {
-                    Expression arrayIndex = parseExpression();
-                    boolean checkBounds = needBoundsCheck(v, arrayIndex);
-                    if (matchOp("]!")) {
-                        if (checkBounds) {
-                            throw syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
-                        }
-                    } else if (!matchOp("]")) {
-                        throw syntaxError("Expected ']', got '" + token + "' in array access");
-                    }
-                    if (checkBounds) {
-                        program.getFunction(null, null, "idx", 2).used = true;
-                    }
-                    v = new ArrayAccess(v, arrayIndex, checkBounds);
-                    vt = v.type();
-                } else {
-                    break;
-                }
-            }
-            return v;
-            */
+            return parsePossibleDot(var);
         } else if (matchOp("(")) {
             Expression expr = parseExpression();
             if (!matchOp(")")) {
@@ -2071,9 +2234,8 @@ public class Parser {
                 if (matchOp("(")) {
                     Call call = new Call();
                     call.args.add(v);
-                    parseCall(vt, module, f, call, true);
                     // TODO support chained calls?
-                    return call;
+                    return parseCall(vt, module, f, call, true);
                 } else {
                     DataType type;
                     if ("len".equals(f) && vt.isArray()) {
@@ -2181,18 +2343,26 @@ public class Parser {
         token = null;
         lastPos = pos;
         indent = 0;
-        if (pos >= text.length()) {
-            type = TokenType.END;
-            return;
-        }
-        while(text.charAt(pos) == ' ') {
-            pos++;
-            indent++;
+        while (true) {
+            if (pos >= text.length()) {
+                type = TokenType.END;
+                return;
+            }
+            char c = text.charAt(pos);
+            if (c == ' ') {
+                pos++;
+                indent++;
+            } else if (c == '\n') {
+                indent = 0;
+                pos++;
+            } else {
+                break;
+            }
         }
         read();
     }
 
-    private void read() {
+    void read() {
         token = null;
         lastPos = pos;
         while (true) {
@@ -2229,7 +2399,7 @@ public class Parser {
                             break;
                         }
                     }
-                    lastComment = text.substring(start, pos).trim();
+                    lastComment = text.substring(start, pos - 2).trim();
                 } else {
                     int start = pos;
                     while (true) {
@@ -2422,6 +2592,8 @@ public class Parser {
                 pos++;
             } else if (first == '.' && c == '.') {
                 pos++;
+            } else if (first == '<' && c == '>') {
+                pos++;
             } else if (first == '>' && c == '>') {
                 pos++;
                 c = text.charAt(pos);
@@ -2448,15 +2620,19 @@ public class Parser {
     }
 
     public Variable assignTempVariable(ArrayList<Statement> target, Expression expr) {
+        return assignTempVariable(target, expr, expr.type());
+    }
+
+    public Variable assignTempVariable(ArrayList<Statement> target, Expression expr, DataType type) {
         Assignment assign = new Assignment();
         assign.initial = true;
         assign.isConstant = false;
-        Variable var = new Variable("_t" + function.nextTempVariableId(), expr.type());
-        assign.type = expr.type();
+        Variable var = new Variable("_t" + functionContext.nextTempVariableId(), type);
+        assign.type = type;
         assign.leftValue = var;
         assign.value = expr;
         target.add(assign);
-        function.addVariable(var);
+        functionContext.addVariable(var);
         return var;
     }
 

@@ -130,12 +130,12 @@ int32_t murmur3_32_1(i8_array* data) {
     if (i < ( data->len - 4 )) {
         i += 4;
     }
-    int64_t _t2 = i < data->len;
-    if (_t2) {
-        int64_t _t3 = i != ( data->len - 4 );
-        _t2 = _t3;
+    int64_t _t0 = i < data->len;
+    if (_t0) {
+        int64_t _t1 = i != ( data->len - 4 );
+        _t0 = _t1;
     }
-    if (_t2) {
+    if (_t0) {
         int64_t s = 0;
         while (1) {
             x ^= shiftLeft_2((data->data[i] & 255), s);
@@ -183,26 +183,26 @@ int main() {
     string_1003 = str_const("test", 4);
     string_1004 = str_const("Hello, world!", 13);
     string_1005 = str_const("The quick brown fox jumps over the lazy dog", 43);
-    int32_t _t4 = murmur3_32_1(string_1002);
+    int32_t _t0 = murmur3_32_1(string_1002);
+    i8_array* _t1 = hex_2(_t0, 8);
+    printf("%.*s\n", _t1->len, _t1->data);
+    int32_t _t2 = murmur3_32_1(string_1001);
+    i8_array* _t3 = hex_2(_t2, 8);
+    printf("%.*s\n", _t3->len, _t3->data);
+    int32_t _t4 = murmur3_32_1(string_1003);
     i8_array* _t5 = hex_2(_t4, 8);
     printf("%.*s\n", _t5->len, _t5->data);
-    int32_t _t6 = murmur3_32_1(string_1001);
+    int32_t _t6 = murmur3_32_1(string_1004);
     i8_array* _t7 = hex_2(_t6, 8);
     printf("%.*s\n", _t7->len, _t7->data);
-    int32_t _t8 = murmur3_32_1(string_1003);
+    int32_t _t8 = murmur3_32_1(string_1005);
     i8_array* _t9 = hex_2(_t8, 8);
     printf("%.*s\n", _t9->len, _t9->data);
-    int32_t _t10 = murmur3_32_1(string_1004);
-    i8_array* _t11 = hex_2(_t10, 8);
-    printf("%.*s\n", _t11->len, _t11->data);
-    int32_t _t12 = murmur3_32_1(string_1005);
-    i8_array* _t13 = hex_2(_t12, 8);
-    printf("%.*s\n", _t13->len, _t13->data);
+    _decUse(_t1, i8_array);
+    _decUse(_t3, i8_array);
     _decUse(_t5, i8_array);
     _decUse(_t7, i8_array);
     _decUse(_t9, i8_array);
-    _decUse(_t11, i8_array);
-    _decUse(_t13, i8_array);
     _end();
     return 0;
 }

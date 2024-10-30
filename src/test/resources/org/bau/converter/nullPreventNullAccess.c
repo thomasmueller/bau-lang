@@ -9,10 +9,26 @@
 #define _free(a) free(a)
 #define _end() ;
 /* types */
+typedef struct i8_array i8_array;
+struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
 typedef struct Value Value;
 struct Value;
+struct i8_array {
+    int32_t len;
+    char* data;
+    int32_t _refCount;
+};
+i8_array* i8_array_new(uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(char) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -41,8 +57,15 @@ Value* Value_new() {
 /* exception types */
 /* functions */
 Value* get_1(int64_t key);
-void test_0();
+void testBreak_0();
+void testContinue_0();
+void testIf_0();
+void testReturn_0();
 void Value_free(Value* x);
+void i8_array_free(i8_array* x) {
+    _free(x->data);
+    _free(x);
+}
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
@@ -50,6 +73,20 @@ void int_array_free(int_array* x) {
 void Value_free(Value* x) {
     _free(x);
 }
+i8_array* str_const(char* data, uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    result->len = len;
+    result->_refCount = -1;
+    result->data = data;
+    return result;
+}
+i8_array* string_1000;
+i8_array* string_1001;
+i8_array* string_1002;
+i8_array* string_1003;
+i8_array* string_1004;
+i8_array* string_1005;
+i8_array* string_1006;
 Value* get_1(int64_t key) {
     if (key <= 0) {
         return NULL;
@@ -59,15 +96,105 @@ Value* get_1(int64_t key) {
     return result;
     _decUse(result, Value);
 }
-void test_0() {
-    Value* a = get_1(0);
-    if (a != NULL) {
-        printf("%lld\n", (long long)a->data);
+void testBreak_0() {
+    printf("testBreak\n");
+    while (1 == 1) {
+        int64_t i = 0;
+        while (1) {
+            Value* a = get_1(i);
+            if (!(a)) {
+                _decUse(a, Value);
+                break;
+            }
+            printf("  get(%lld) = %lld\n", i, (long long)a->data);
+            continue1:;
+            int64_t _next = i + 1;
+            if (_next >= 3) {
+                break;
+            }
+            i = _next;
+            _decUse(a, Value);
+        }
+        break;
     }
-    _decUse(a, Value);
+}
+void testContinue_0() {
+    printf("testContinue\n");
+    while (1 == 1) {
+        int64_t i = 0;
+        while (1) {
+            Value* a = get_1(i);
+            if (!(a)) {
+                _decUse(a, Value);
+                goto continue1;
+            }
+            printf("  get(%lld) = %lld\n", i, (long long)a->data);
+            continue1:;
+            int64_t _next = i + 1;
+            if (_next >= 3) {
+                break;
+            }
+            i = _next;
+            _decUse(a, Value);
+        }
+        break;
+    }
+}
+void testIf_0() {
+    printf("testIf\n");
+    while (1 == 1) {
+        int64_t i = 0;
+        while (1) {
+            Value* a = get_1(i);
+            if (a != NULL) {
+                printf("  get(%lld) = %lld\n", i, (long long)a->data);
+            } else {
+                printf("  get(%lld) = null\n", i);
+            }
+            continue1:;
+            int64_t _next = i + 1;
+            if (_next >= 3) {
+                break;
+            }
+            i = _next;
+            _decUse(a, Value);
+        }
+        break;
+    }
+}
+void testReturn_0() {
+    printf("testReturn\n");
+    while (1 == 1) {
+        int64_t i = 0;
+        while (1) {
+            Value* a = get_1(i);
+            if (!(a)) {
+                return;
+            }
+            printf("  get(%lld) = %lld\n", i, (long long)a->data);
+            continue1:;
+            int64_t _next = i + 1;
+            if (_next >= 3) {
+                break;
+            }
+            i = _next;
+            _decUse(a, Value);
+        }
+        break;
+    }
 }
 int main() {
-    test_0();
+    string_1000 = str_const("testBreak", 9);
+    string_1001 = str_const("  get(", 6);
+    string_1002 = str_const(") = ", 4);
+    string_1003 = str_const("testContinue", 12);
+    string_1004 = str_const("testIf", 6);
+    string_1005 = str_const(") = null", 8);
+    string_1006 = str_const("testReturn", 10);
+    testIf_0();
+    testReturn_0();
+    testContinue_0();
+    testBreak_0();
     _end();
     return 0;
 }

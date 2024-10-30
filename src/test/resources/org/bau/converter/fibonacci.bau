@@ -1,0 +1,41 @@
+ticks := 0
+
+fun fibonacciRecursive(n int) int
+    ticks += 1
+    if n < 2 
+        return n
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2)
+
+fun fibonacciIterative(n int) int
+    r0 := 0
+    r1 := 0
+    r := 1
+    for i := range(1, n)
+        r1 = r0
+        r0 = r
+        r = r1 + r0
+        ticks += 1
+    return r
+
+fun fibonacciConst(n int) const int
+    r0 := 0
+    r1 := 0
+    r := 1
+    for i := range(1, n)
+        r1 = r0
+        r0 = r
+        r = r1 + r0
+    return r
+
+ticks = 0
+println('fibonacci(20) recursive: ' fibonacciRecursive(20) ', ticks: ' ticks)
+ticks = 0
+println('fibonacci(20) iterative: ' fibonacciIterative(20) ', ticks: ' ticks)
+ticks = 0
+println('fibonacci(20) const:     ' fibonacciConst(20)     ', ticks: ' ticks)
+
+
+## Expected
+fibonacci(20) recursive: 6765, ticks: 21891
+fibonacci(20) iterative: 6765, ticks: 19
+fibonacci(20) const:     6765, ticks: 0

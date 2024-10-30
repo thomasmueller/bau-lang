@@ -142,7 +142,7 @@ fun parse(regex i8[]) List(Token) throws exception
                     break value > 9999
                     i += 1
                 t.max = value
-            if c != ord('}')
+            if c <> ord('}')
                 throw exception('Expected }')
         else
             i -= 1

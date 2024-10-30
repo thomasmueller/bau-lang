@@ -259,12 +259,12 @@ int64_t org_bau_String_indexOf_3(i8_array* s, i8_array* find, int64_t start) {
 }
 i8_array* org_bau_String_replaceAll_3(i8_array* s, i8_array* before, i8_array* after) {
     int64_t next = org_bau_String_indexOf_2(s, before);
-    int64_t _t10 = before->len <= 0;
-    if (!(_t10)) {
-        int64_t _t11 = next < 0;
-        _t10 = _t11;
+    int64_t _t0 = before->len <= 0;
+    if (!(_t0)) {
+        int64_t _t1 = next < 0;
+        _t0 = _t1;
     }
-    if (_t10) {
+    if (_t0) {
         return s;
     }
     org_bau_String_StringBuilder* buff = org_bau_String_StringBuilder_new();
@@ -290,12 +290,12 @@ i8_array* org_bau_String_replaceAll_3(i8_array* s, i8_array* before, i8_array* a
 org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_array* delimiter) {
     org_bau_List_List_org_bau_String_string* list = org_bau_List_newList_org_bau_String_string_1(0);
     int64_t next = org_bau_String_indexOf_2(s, delimiter);
-    int64_t _t12 = delimiter->len == 0;
-    if (!(_t12)) {
-        int64_t _t13 = next < 0;
-        _t12 = _t13;
+    int64_t _t0 = delimiter->len == 0;
+    if (!(_t0)) {
+        int64_t _t1 = next < 0;
+        _t0 = _t1;
     }
-    if (_t12) {
+    if (_t0) {
         org_bau_List_List_org_bau_String_string_add_2(list, org_bau_String_str_1(s));
         return list;
     }
@@ -309,7 +309,7 @@ org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_
             _decUse(p, i8_array);
             break;
         }
-        continue10:;
+        continue0:;
         _decUse(p, i8_array);
     }
     i8_array* p = org_bau_String_substring_2(s, index);
@@ -327,23 +327,23 @@ org_bau_String_string org_bau_String_str_1(i8_array* s) {
     return x;
 }
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start) {
-    i8_array* _t9 = org_bau_String_substring_3(s, start, s->len);
-    return _t9;
-    _decUse(_t9, i8_array);
+    i8_array* _t0 = org_bau_String_substring_3(s, start, s->len);
+    return _t0;
+    _decUse(_t0, i8_array);
 }
 i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     int64_t len = end - start;
-    int64_t _t5 = len < 0;
-    if (!(_t5)) {
-        int64_t _t6 = start < 0;
-        _t5 = _t6;
+    int64_t _t0 = len < 0;
+    if (!(_t0)) {
+        int64_t _t1 = start < 0;
+        _t0 = _t1;
     }
-    int64_t _t7 = _t5;
-    if (!(_t7)) {
-        int64_t _t8 = end > s->len;
-        _t7 = _t8;
+    int64_t _t2 = _t0;
+    if (!(_t2)) {
+        int64_t _t3 = end > s->len;
+        _t2 = _t3;
     }
-    if (_t7) {
+    if (_t2) {
         return string_1000;
     }
     if (s->len <= 0) {
@@ -364,7 +364,7 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
                 break;
             }
             i = next;
-            continue8:;
+            continue1:;
             int64_t _next = j + 1;
             if (_next >= len) {
                 break;
@@ -378,17 +378,17 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
 }
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end) {
     int64_t add = end - start;
-    int64_t _t1 = start >= b->len;
-    if (!(_t1)) {
-        int64_t _t2 = end < start;
-        _t1 = _t2;
+    int64_t _t0 = start >= b->len;
+    if (!(_t0)) {
+        int64_t _t1 = end < start;
+        _t0 = _t1;
     }
-    int64_t _t3 = _t1;
-    if (!(_t3)) {
-        int64_t _t4 = end > b->len;
-        _t3 = _t4;
+    int64_t _t2 = _t0;
+    if (!(_t2)) {
+        int64_t _t3 = end > b->len;
+        _t2 = _t3;
     }
-    if (_t3) {
+    if (_t2) {
         return;
     }
     while (( this->len + add ) > this->data->len) {
@@ -397,7 +397,7 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
             int64_t i = 0;
             while (1) {
                 n->data[idx_2(i, n->len)] = this->data->data[i];
-                continue4:;
+                continue2:;
                 int64_t _next = i + 1;
                 if (_next >= this->data->len) {
                     break;
@@ -409,14 +409,14 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
         _decUse(this->data, i8_array);
         this->data = n;
         _incUse(this->data);
-        continue2:;
+        continue0:;
         _decUse(n, i8_array);
     }
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
             this->data->data[idx_2(this->len + i, this->data->len)] = b->data[idx_2(start + i, b->len)];
-            continue6:;
+            continue4:;
             int64_t _next = i + 1;
             if (_next >= add) {
                 break;
@@ -488,17 +488,5 @@ Add an entry to the list
 
 fun List(T) get(x int) T
 Add an entry to the list
-
-fun indexOf(s i8[], find i8[]) int
-fun indexOf1(s i8[], find i8[]) int
-    for i := until(s.len - find.len + 1)
-        j := 0
-        while 1
-            if j = find.len
-                return i
-            break s[i + j] != find[j]
-            j += 1
-    return -1
-##
 
 */

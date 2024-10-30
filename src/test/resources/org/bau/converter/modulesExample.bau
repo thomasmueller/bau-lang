@@ -1,8 +1,12 @@
 import org.bau.Utils    
-import org.bau.Math as M
+import org.bau.Math
 println(Utils.random())
-println(M.PI)
+println(Math.PI)
+println(org.bau.Utils.random())
+println(org.bau.Math.PI)
 
 ## Expected
 -2152535657050944081
+3.141592653589793
+7960286522194355700
 3.141592653589793

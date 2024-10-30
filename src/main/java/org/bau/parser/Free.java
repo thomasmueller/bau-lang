@@ -31,6 +31,9 @@ public class Free implements Statement {
             val = m.getLocal(var.name);
             m.setLocal(var.name, null);
         }
+        if (val == null) {
+            return StatementResult.OK;
+        }
         return decRefCount(val, var.type, m);
     }
 

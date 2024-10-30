@@ -108,13 +108,6 @@ int main() {
 }
 /*
 
-fun hex(x int, len int) i8[]
-fun ord(s i8[]) int
-  if s.len <= 0
-    return 0
-  return s[0]
-##
-
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
 

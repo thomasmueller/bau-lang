@@ -47,7 +47,7 @@ fun murmur3_32_old(data i8[]) i32
   x := i32(0)
   if i < data.len - 4
     i += 4
-  if i < data.len and i != data.len - 4
+  if i < data.len and i <> data.len - 4
     s := 0
     while 1
       x ^= (data[i]! & 0xff) << s
@@ -95,7 +95,7 @@ fun murmur3_32(data i8[]) i32
   x := i32(0)
   if i < data.len - 4
     i += 4
-  if i < data.len and i != data.len - 4
+  if i < data.len and i <> data.len - 4
     s := 0
     while 1
       x ^= (data[i]! & 0xff) << s

@@ -118,7 +118,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], o int) int
                 x := inData[p] & 0xff
                 p += 1
                 literalLen += x
-                break x != 0xff
+                break x <> 0xff
         for i := range(0, literalLen)
             outData[outPos + i] = inData[p + i]
         outPos += literalLen
@@ -145,7 +145,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], o int) int
                 x := inData[p] & 0xff
                 p += 1
                 runLen += x
-                break x != 0xff
+                break x <> 0xff
         runLen += 4
         for i := range(0, runLen)
             outData[outPos + i] = outData[outPos + i - offset]
@@ -160,12 +160,12 @@ fun decompress(read File, write File) int
         println('End of file')
         return -1
     magic := readi32Le(header, 0)
-    if magic != 0x184D2204
+    if magic <> 0x184D2204
         println('Incorrect magic ' magic)
         return -1
     flags := header[4]
     version := flags >> 6
-    if version != 1
+    if version <> 1
         println('Unsupported version ' version)
         return -1
     block_independance_flag := ((flags >> 5) & 1) = 1
@@ -184,7 +184,7 @@ fun decompress(read File, write File) int
     if content_checksum_flag
         # TODO currently, the content checksum flag is ignored
         # return error("Unsupported content checksum flag");
-    if (flags >> 1) & 1 != 0
+    if (flags >> 1) & 1 <> 0
         println('Unsupported reserved')
         return -1
     if (flags & 1) = 1
@@ -198,7 +198,7 @@ fun decompress(read File, write File) int
     header_checksum := header[6]
     hash := buildXXHash32(0)
     xxhash := (hash.update(header, 4, 2) >> 8) & 0xff
-    if i8(xxhash) != header_checksum
+    if i8(xxhash) <> header_checksum
         println('Header checksum mismatch')
         return -1
     blockLen := 4 * 1024 * 1024
@@ -218,7 +218,7 @@ fun decompress(read File, write File) int
             println('Unsupported block size ' block_size)
             return -1
         len = read.readFully(block, block_size)
-        if len != block_size
+        if len <> block_size
             println('End of file')
             return -1
         if uncompressed

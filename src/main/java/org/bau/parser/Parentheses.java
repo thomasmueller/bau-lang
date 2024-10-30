@@ -69,8 +69,8 @@ public class Parentheses implements Expression {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
-        base = base.writeStatements(parser, target);
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
+        base = base.writeStatements(parser, assignment, target);
         return this;
     }
 

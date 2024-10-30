@@ -10,7 +10,7 @@ LOG2         : 0.69314718055994530942
 MIN_INT      : 0x8000000000000000
 MAX_INT      : 0x7fffffffffffffff
 
-fun abs(x f64) f64
+fun abs(x float) float
     native(```
         #include <math.h>
         return fabs(x);
@@ -19,14 +19,14 @@ fun abs(x f64) f64
         return x
     return -x
 
-fun isNotANumber(x f64) int
+fun isNotANumber(x float) int
     native('return isnan(x);')
-    return x != x
+    return x <> x
 
-fun isNegativeZero(x f64) int
+fun isNegativeZero(x float) int
     return (x = 0.0) and (1.0 / x = NEG_INFINITY)
 
-fun min(a f64, b f64) f64
+fun min(a float, b float) float
     native('return fmin(a, b);')    
     if isNotANumber(a)
         return a
@@ -36,7 +36,7 @@ fun min(a f64, b f64) f64
         return a
     return b
 
-fun max(a f64, b f64) f64
+fun max(a float, b float) float
     native('return fmax(a, b);')    
     if isNotANumber(a)
         return a
@@ -46,21 +46,21 @@ fun max(a f64, b f64) f64
         return a
     return b
 
-fun floor(x f64) f64
+fun floor(x float) float
     native('return floor(x);')    
     if x <= MIN_INT or x >= MAX_INT or isNotANumber(x) or x = 0
         return x
     i : int(x)
-    d : f64(i)
+    d : float(i)
     if d = x or x >= 0
         return d
     return d - 1
 
-fun ceil(x f64) f64
+fun ceil(x float) float
     native('return ceil(x);')    
     return -floor(-x)
 
-fun round(x f64) f64
+fun round(x float) float
     native('return floor(x + 0.5);')    
     if isNotANumber(x)
         return 0
@@ -70,14 +70,14 @@ fun round(x f64) f64
         return MAX_INT
     return int(floor(x + 0.5))
 
-fun signum(x f64) f64  
+fun signum(x float) float  
     if x = 0.0 or isNotANumber(x)
         return x
     if x >= 0
         return 1
     return -1
     
-fun exp(x f64) f64
+fun exp(x float) float
     native('return exp(x);')
     if isNotANumber(x) or x = POS_INFINITY
         return x
@@ -93,7 +93,7 @@ fun exp(x f64) f64
         approx += term
     return approx
 
-fun log(x f64) f64
+fun log(x float) float
     native('return log(x);')
     if x = 0
         return NEG_INFINITY
@@ -115,15 +115,15 @@ fun log(x f64) f64
         result += sign * term / i
     return result
 
-fun sqrt(x f64) f64
+fun sqrt(x float) float
     native('return sqrt(x);')
     return exp(log(x) / 2)
     
-fun log10(x f64) f64
+fun log10(x float) float
     native('return log10(x);')    
     return log(x) / LOG10
 
-fun pow(x f64, y f64) f64
+fun pow(x float, y float) float
     native('return pow(x, y);')
     if x > 0 and y > 0
         return exp(y * log(x))
@@ -164,7 +164,7 @@ fun pow(x f64, y f64) f64
         return POS_INFINITY
     return NOT_A_NUMBER
 
-fun sin(x f64) f64
+fun sin(x float) float
     native('return sin(x);')    
     if x = POS_INFINITY
         return NOT_A_NUMBER
@@ -188,7 +188,7 @@ fun sin(x f64) f64
         n += 1
     return approx
 
-fun atan(x f64) f64
+fun atan(x float) float
     native('return atan(x);')     
     x = min(max(-1e16, x), 1e16)
     if abs(x) >= 0.4
@@ -203,23 +203,23 @@ fun atan(x f64) f64
         n += 1
     return approx
 
-fun cos(x f64) f64
+fun cos(x float) float
     native('return cos(x);')     
     return sin(x + PI / 2)
 
-fun tan(x f64) f64
+fun tan(x float) float
     native('return tan(x);')
     return sin(x) / cos(x)
 
-fun asin(x f64) f64
+fun asin(x float) float
     native('return asin(x);')  
     return atan(x / sqrt(1 - x * x))
 
-fun acos(x f64) f64
+fun acos(x float) float
     native('return acos(x);')  
     return PI / 2 - asin(x)
 
-fun convertLongBitsToDouble(x int) f64
+fun convertLongBitsToDouble(x int) float
     native(```
         #include <string.h>
         double y;
@@ -234,7 +234,7 @@ fun convertLongBitsToDouble(x int) f64
         return -0.0
     fraction := x << 12 >> 12
     if exp = 0x7ff
-        if fraction != 0
+        if fraction <> 0
             return NOT_A_NUMBER
         elif sign = 0
             return POS_INFINITY
@@ -266,7 +266,7 @@ fun convertLongBitsToDouble(x int) f64
         return result
     return -result
 
-fun convertDoubleToLongBits(x f64) int
+fun convertDoubleToLongBits(x float) int
     native(```
         uint64_t y;
         memcpy(&y, &x, sizeof y);
@@ -327,7 +327,7 @@ fun intToString(n int) i8[]
         result[j] = buff[j]
     return result
 
-fun appendF64(n f64, buff i8[], pos int) int
+fun appendfloat(n float, buff i8[], pos int) int
     e := 0
     if n >= 1e8 or n <= 1e-3
         while n > 1e20
@@ -342,7 +342,7 @@ fun appendF64(n f64, buff i8[], pos int) int
         while n < 1
             n *= 10
             e -= 1
-        pos = appendF64(n, buff, pos)
+        pos = appendfloat(n, buff, pos)
         buff[pos] = ord('E')
         pos += 1
         pos = appendInt(e, buff, pos)
@@ -361,7 +361,7 @@ fun appendF64(n f64, buff i8[], pos int) int
         y *= 10
     return pos
 
-fun f64ToString(n f64) i8[]
+fun floatToString(n float) i8[]
     if isNotANumber(n)
         return 'NaN'
     if n = POS_INFINITY
@@ -375,7 +375,7 @@ fun f64ToString(n f64) i8[]
         pos += 1
         n = -n
     else
-    end : appendF64(n, buff, pos)
+    end : appendfloat(n, buff, pos)
     result : new(i8[], end)
     for j := until(end)
         result[j] = buff[j]

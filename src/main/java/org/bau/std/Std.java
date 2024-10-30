@@ -22,7 +22,7 @@ public class Std {
         DataType i32 = prog.addType(new DataType(null, DataType.I32, 4, true, Collections.emptyList()));
         DataType i64 = prog.addType(DataType.INT_TYPE);
         DataType f32 = prog.addType(new DataType(null, DataType.F32, 4, true, Collections.emptyList()));
-        DataType f64 = prog.addType(new DataType(null, DataType.F64, 8, true, Collections.emptyList()));
+        DataType f64 = prog.addType(new DataType(null, DataType.FLOAT, 8, true, Collections.emptyList()));
         prog.addType(new DataType(null, DataType.TYPE, 8, true, Collections.emptyList()));
 
         FunctionDefinition f = new FunctionDefinition();
@@ -62,7 +62,7 @@ public class Std {
         prog.addFunction(f);
 
         f = new FunctionDefinition();
-        f.name = DataType.F64;
+        f.name = DataType.FLOAT;
         var = new Variable("x", f64);
         f.parameters.add(var);
         f.returnType = f64;
@@ -204,6 +204,8 @@ public class Std {
         String stdModule = "org.bau.Std";
         String moduleSource = program.readModule(stdModule);
         Parser p = new Parser(program, stdModule, moduleSource);
+        // disable the scan phase -- otherwise we would register recursively
+        p.setScanPhase(false);
         p.parse();
         p.isImport = true;
         ArrayList<String> list = new ArrayList<>();
@@ -221,7 +223,7 @@ public class Std {
             return new Value.ValueI16((short) m.getLocal("x").intValue());
         case DataType.I8:
             return new Value.ValueI8((byte) m.getLocal("x").intValue());
-        case DataType.F64:
+        case DataType.FLOAT:
         case DataType.F32:
             return new Value.ValueFloat(m.getLocal("x").get().doubleValue());
         }

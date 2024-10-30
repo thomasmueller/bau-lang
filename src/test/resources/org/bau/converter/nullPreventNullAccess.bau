@@ -8,11 +8,49 @@ fun get(key int) Value?
     result.data = key * 10
     return result
 
-fun test()
-    a : get(0)
-    if a
-      println(a.data)
+fun testIf()
+    println('testIf')
+    for i := until(3)
+        a : get(i)
+        if a
+            println('  get(' i ') = ' a.data)
+        else
+            println('  get(' i ') = null')
 
-test()
+fun testReturn()
+    println('testReturn')
+    for i := until(3)
+        a : get(i)
+        if not a
+            return
+        println('  get(' i ') = ' a.data)
+
+fun testContinue()
+    println('testContinue')
+    for i := until(3)
+        a : get(i)
+        continue not a
+        println('  get(' i ') = ' a.data)
+
+fun testBreak()
+    println('testBreak')
+    for i := until(3)
+        a : get(i)
+        break not a
+        println('  get(' i ') = ' a.data)
+
+testIf()
+testReturn()
+testContinue()
+testBreak()
 
 ## Expected
+testIf
+  get(0) = null
+  get(1) = 10
+  get(2) = 20
+testReturn
+testContinue
+  get(1) = 10
+  get(2) = 20
+testBreak

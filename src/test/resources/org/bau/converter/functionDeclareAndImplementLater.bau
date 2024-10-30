@@ -1,6 +1,3 @@
-# declare function, but do not implement
-fun even(x int) int
-
 fun odd(x int) int
   if x = 0
     return 0

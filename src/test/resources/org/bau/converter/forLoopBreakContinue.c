@@ -39,10 +39,10 @@ int main() {
                 break;
             }
             if (a == 2) {
-                goto continue2;
+                goto continue1;
             }
             printf("%lld\n", (long long)a);
-            continue2:;
+            continue1:;
             a += 1;
         }
         break;

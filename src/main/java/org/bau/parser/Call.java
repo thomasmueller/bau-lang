@@ -28,6 +28,10 @@ public class Call implements Statement, Expression {
         if (m == null || m.evaluateOnlyConstExpr() && !def.constExpr) {
             return null;
         }
+        if (def.list.isEmpty() && def.code != null) {
+            // const function that is not yet compiled
+            m.addUncompiledFunction(def.getFunctionId(), def);
+        }
         if (m.tick()) {
             return null;
         }
@@ -89,9 +93,21 @@ public class Call implements Statement, Expression {
             }
             m.println();
         } else {
-            Value v = eval(m);
-            if (v instanceof ValueException) {
-                return StatementResult.THROW;
+            try {
+                Value v = eval(m);
+                if (v instanceof ValueException) {
+                    return StatementResult.THROW;
+                }
+                if (v instanceof ValuePanic) {
+                    return StatementResult.PANIC;
+                }
+            } catch (StackOverflowError e) {
+                String message = "Stack overflow";
+                ValuePanic v = new ValuePanic(message);
+                m.print(v);
+                m.println();
+                m.setGlobal(Memory.PANIC, v);
+                return StatementResult.PANIC;
             }
         }
         return StatementResult.OK;
@@ -99,6 +115,7 @@ public class Call implements Statement, Expression {
 
     public Call replace(Variable old, Expression with) {
         Call c = new Call();
+        c.statement = statement;
         c.args = new ArrayList<Expression>();
         c.def = def;
         for (int i = 0; i < args.size(); i++) {
@@ -202,7 +219,7 @@ public class Call implements Statement, Expression {
                 case "f32":
                     b2.append("%f");
                     break;
-                case "f64":
+                case "float":
                     b2.append("%.9f");
                     break;
                 case "i8[]":
@@ -286,13 +303,16 @@ public class Call implements Statement, Expression {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         for (int i = 0; i < args.size(); i++) {
             Expression a = args.get(i);
-            a = a.writeStatements(parser, target);
+            a = a.writeStatements(parser, false, target);
             args.set(i, a);
         }
         if (def.returnType == null) {
+            return this;
+        }
+        if (assignment) {
             return this;
         }
         Variable var = parser.assignTempVariable(target, this);

@@ -67,7 +67,7 @@ fun poly4(data i8[]) int
       n : i + 4
       break n >= data.len
       i = n
-  if i < data.len and i != data.len - 4
+  if i < data.len and i <> data.len - 4
     x := 0
     s := 0
     while 1
@@ -98,7 +98,7 @@ fun poly8(data i8[]) int
       n : i + 8
       break n >= data.len
       i = n
-  if i < data.len and i != data.len - 8
+  if i < data.len and i <> data.len - 8
     x := 0
     s := 0
     while 1
@@ -139,7 +139,7 @@ fun murmur3_32(data i8[]) i32
   x := i32(0)
   if i < data.len - 4
     i += 4
-  if i < data.len and i != data.len - 4
+  if i < data.len and i <> data.len - 4
     s := 0
     while 1
       x ^= (data[i!] & 0xff) << s

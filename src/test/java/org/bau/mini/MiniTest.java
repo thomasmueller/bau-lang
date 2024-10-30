@@ -6,11 +6,83 @@ import org.junit.Test;
 
 public class MiniTest {
 
+
+    public static int fibonacciLoop(int n) {
+        int r1, r0 = 0, r = 1;
+        int i = 0;
+        while(true) {
+            if (i >= n) break;
+            r1 = r0;
+            r0 = r;
+            r = r1 + r0;
+            i++;
+        }
+        return r;
+    }
+
+    @Test
+    public void fibonacci() {
+        String s = """
+                n := 1000000
+                r0 := 0
+                r1 := 0
+                r := 0
+                i := 0
+                fun fibonacci()
+                    r0 = 0
+                    r1 = 0
+                    r = 1
+                    loop
+                        break i >= n
+                        r1 = r0
+                        r0 = r
+                        r = r1 + r0
+                        i = i + 1
+
+                fun main()
+                    printText('fibonacci(')
+                    print(n)
+                    printText(') = ')
+                    fibonacci()
+                    print(r)
+                """;
+        MiniBau p = new MiniBau();
+        p.parse(s);
+        long time = System.currentTimeMillis();
+        assertEquals("fibonacci(1000000) = 2756670985995446685", p.run());
+        System.out.println("time: " + (System.currentTimeMillis() - time));
+
+/*
+
+n := 0
+p2 := 0
+p1 := 0
+
+public static int fibonacciLoop(int nthNumber) {
+        //use loop
+        int previouspreviousNumber, previousNumber = 0, currentNumber = 1;
+
+        for (int i = 1; i < nthNumber ; i++) {
+
+            previouspreviousNumber = previousNumber;
+
+            previousNumber = currentNumber;
+
+            currentNumber = previouspreviousNumber + previousNumber;
+
+        }
+        return currentNumber;
+    }
+
+ */
+
+    }
+
     @Test
     public void hello() {
         String s = """
                 fun main()
-                    print('hello')
+                    printText('hello')
                 """;
         MiniBau p = new MiniBau();
         p.parse(s);
@@ -24,10 +96,10 @@ public class MiniTest {
                 fun main()
                     loop
                         print(a)
-                        print(':')
+                        printText(':')
                         if a = 1
-                            print('one')
-                        print()
+                            printText('one')
+                        printEnd()
                         a = a + 1
                         break a > 3
                 """;
@@ -47,12 +119,12 @@ public class MiniTest {
                 fun main()
                     loop
                         print(a)
-                        print(':')
+                        printText(':')
                         if a = 1
-                            print('one')
+                            printText('one')
                         else
-                            print('not one')
-                        print()
+                            printText('not one')
+                        printEnd()
                         a = a + 1
                         break a > 5
                 """;
@@ -74,14 +146,14 @@ public class MiniTest {
                 fun main()
                     loop
                         print(a)
-                        print(':')
+                        printText(':')
                         if a = 1
-                            print('one')
+                            printText('one')
                         elif a = 2
-                            print('two')
+                            printText('two')
                         else
-                            print('something else')
-                        print()
+                            printText('something else')
+                        printEnd()
                         a = a + 1
                         break a > 5
                 """;
@@ -148,7 +220,7 @@ public class MiniTest {
                 fun main()
 
                     # another comment
-                    print('hello')
+                    printText('hello')
 
                 """;
         MiniBau p = new MiniBau();

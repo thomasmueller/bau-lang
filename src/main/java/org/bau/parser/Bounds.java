@@ -92,7 +92,7 @@ public class Bounds {
             e.minOffset = Long.MIN_VALUE;
             e.maxVariable = var;
             e.maxOffset = offset;
-        } else if ("!=".equals(operation)) {
+        } else if ("<>".equals(operation)) {
             e.minVariable = "";
             e.maxVariable = "";
             if (expr instanceof NullValue) {

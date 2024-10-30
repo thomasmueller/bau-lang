@@ -123,9 +123,9 @@ public class New implements Expression {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         if (arrayLength != null) {
-            arrayLength = arrayLength.writeStatements(parser, target);
+            arrayLength = arrayLength.writeStatements(parser, false, target);
         }
         return this;
     }

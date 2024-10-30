@@ -19,7 +19,7 @@ fun fannkuch(n int) int
         # Count flips and update max and checksum
         f = 0
         k = perm[0]
-        while k != 0
+        while k <> 0
             for i := until(perm.len)
                 break (2*i) >= k
                 t := perm[i]

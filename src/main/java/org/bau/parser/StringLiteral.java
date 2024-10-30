@@ -24,7 +24,7 @@ public class StringLiteral implements Expression {
 
     @Override
     public Value eval(Memory memory) {
-        long heapId = memory.putHeap(array);
+        long heapId = memory.putHeap(array, true);
         return new Value.ValueRef(heapId);
     }
 
@@ -100,7 +100,7 @@ public class StringLiteral implements Expression {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         return this;
     }
 

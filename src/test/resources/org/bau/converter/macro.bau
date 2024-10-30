@@ -1,0 +1,38 @@
+fun exit(code int)
+    native(```
+    #include <stdlib.h>
+    exit(code);
+    ```)
+    # recursive call causes stack overflow
+    exit(code)
+
+fun assert(condition int, message i8[]) macro
+    if not condition
+        println(message)
+        exit(1)
+
+fun if(cond int, a T, b T) macro T
+    if cond
+        return a
+    else
+        return b
+
+fun expensiveCalc(a i8[]) i8[]
+    println('expensive calculation with param: ' a)
+    return a
+
+for i := until(2)
+    x : if(i, expensiveCalc('not zero'), expensiveCalc('zero'))
+    println(i ': ' x)
+    assert(i < 1, 'assertion failed')
+    println('next')
+println('end')
+
+## Expected
+expensive calculation with param: zero
+0: zero
+next
+expensive calculation with param: not zero
+1: not zero
+assertion failed
+Panic: Stack overflow

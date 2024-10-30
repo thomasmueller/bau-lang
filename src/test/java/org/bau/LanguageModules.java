@@ -27,7 +27,6 @@ package org.bau;
 - Go "import "github.com/google/uuid""
 - Go "import ("math/rand" crand "crypto/rand")
 
-
  */
 public class LanguageModules {
 

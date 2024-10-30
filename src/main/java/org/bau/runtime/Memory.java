@@ -19,6 +19,8 @@ public class Memory {
     private HashMap<String, Value> localVariables = new HashMap<>();
     private HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
+    private HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
+
     private long nextHeapId;
     private boolean evaluateOnlyConstExpr;
     private long ticksRemaining;
@@ -51,13 +53,17 @@ public class Memory {
         return e.value;
     }
 
-    public long putHeap(Value value) {
+    public long putHeap(Value value, boolean constant) {
         HeapEntry e = new HeapEntry();
         e.value = value;
-        e.refCount = 0;
+        e.refCount = constant ? Integer.MAX_VALUE : 0;
         long heapId = nextHeapId();
         heap.put(heapId, e);
         return heapId;
+    }
+
+    public long putHeap(Value value) {
+        return putHeap(value, false);
     }
 
     public void removeHeap(long heapId) {
@@ -68,14 +74,17 @@ public class Memory {
         if (heapId == 0) {
             return false;
         }
-        return --heap.get(heapId).refCount == 0;
+        HeapEntry e = heap.get(heapId);
+        --e.refCount;
+        return e.refCount == 0;
     }
 
     public void incHeap(long heapId) {
         if (heapId == 0) {
             return;
         }
-        heap.get(heapId).refCount++;
+        HeapEntry e = heap.get(heapId);
+        e.refCount++;
     }
 
     public Value getGlobal(String variable) {
@@ -165,6 +174,14 @@ public class Memory {
         public String toString() {
             return "(refCount:" + refCount + ", " + value + ")";
         }
+    }
+
+    public void addUncompiledFunction(String functionId, FunctionDefinition def) {
+        this.uncompiledFunctions.put(functionId, def);
+    }
+
+    public HashMap<String, FunctionDefinition> getUncompiledFunctions() {
+        return uncompiledFunctions;
     }
 
 }

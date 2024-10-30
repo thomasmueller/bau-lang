@@ -21,6 +21,10 @@ public class FunctionContext {
         return nextTempVariableId++;
     }
 
+    public void reset() {
+        nextTempVariableId = 0;
+    }
+
     /**
      * Get the stack position (for identifiers etc)
      */
@@ -107,7 +111,7 @@ public class FunctionContext {
     public Variable getVariable(String module, String name) {
         Variable var = null;
         var = variables.get(name);
-        if (var == null && module != null) {
+        if (var == null) {
             var = program.getGlobalVariable(module, name);
         }
         return var;

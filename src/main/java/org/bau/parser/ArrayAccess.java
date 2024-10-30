@@ -153,8 +153,8 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public Expression writeStatements(Parser parser, ArrayList<Statement> target) {
-        arrayIndex = arrayIndex.writeStatements(parser, target);
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
+        arrayIndex = arrayIndex.writeStatements(parser, false, target);
         return this;
     }
 

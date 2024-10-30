@@ -29,7 +29,7 @@ int_array* int_array_new(uint32_t len) {
 /* exception types */
 /* functions */
 float f32_1(float x);
-double f64_1(double x);
+double float_1(double x);
 int16_t i16_1(int16_t x);
 int32_t i32_1(int32_t x);
 char i8_1(char x);
@@ -42,10 +42,20 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+int64_t i64v;
+int32_t i32v;
+int16_t i16v;
+char i8v;
+double f64v;
+float f32v;
+int64_t a;
+int64_t b;
+int64_t c;
+int64_t d;
 float f32_1(float x) {
     return x;
 }
-double f64_1(double x) {
+double float_1(double x) {
     return x;
 }
 int16_t i16_1(int16_t x) {

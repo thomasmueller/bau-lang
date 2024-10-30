@@ -131,8 +131,8 @@ int main() {
     while (i <= 30) {
         _x0 = factorial_1(i);
         if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
-        int64_t _t1 = _x0.result;
-        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t1);
+        int64_t _t0 = _x0.result;
+        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t0);
         goto skip0;
         catch0:;
         org_bau_Exception_exception e = _lastException;

@@ -20,7 +20,10 @@ public class FunctionDefinition {
     public String cCode;
     public boolean varArgs;
     public boolean constExpr;
+    public boolean macro;
     public String template;
+    public String header;
+    public String code;
     public String comment;
 
     private String catchLabel;
@@ -177,7 +180,15 @@ public class FunctionDefinition {
     }
 
     public String toString() {
+        if (header != null && code != null) {
+            return header + code;
+        }
         StringBuilder buff = new StringBuilder();
+        if (comment != null) {
+            buff.append("##\n");
+            buff.append(comment);
+            buff.append("\n##\n");
+        }
         buff.append("fun ");
         if (callType != null) {
             buff.append(callType).append(' ');
@@ -208,8 +219,12 @@ public class FunctionDefinition {
             buff.append(returnType);
         }
         if (exceptionType != null) {
-            buff.append(" throws");
+            buff.append(" throws ");
             buff.append(exceptionType);
+        }
+        if (code != null) {
+            buff.append("\n");
+            buff.append(code);
         }
         return buff.toString();
     }

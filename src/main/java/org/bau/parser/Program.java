@@ -54,6 +54,8 @@ public class Program {
 
     List<Statement> autoClose;
 
+    HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
+
     {
         FunctionDefinition f = new FunctionDefinition();
         // TODO move println to std
@@ -596,7 +598,13 @@ Testing.
         Memory memory = new Memory();
         memory.addFunction(null, null);
         memory.evaluateOnlyConstExpr(true, 1_000_000);
-        return expr.eval(memory);
+        Value result = expr.eval(memory);
+        uncompiledFunctions.putAll(memory.getUncompiledFunctions());
+        return result;
+    }
+
+    public List<FunctionDefinition> getFunctions() {
+        return new ArrayList<>(functions.values());
     }
 
 }

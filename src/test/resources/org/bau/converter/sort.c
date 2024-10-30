@@ -221,13 +221,13 @@ Nanosecons since some undefined point in the past. Never jumps backwards.
 fun getNanoTimeUTC() int
 Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
-fun setRandomSeed(seed int)
-Set the random seed.
-
 fun getRandomSeed() int
 Get the random seed.
 
 fun random() int
 Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun setRandomSeed(seed int)
+Set the random seed.
 
 */

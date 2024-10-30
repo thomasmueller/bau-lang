@@ -140,7 +140,7 @@ fun parse(regex i8[]) List(Token)
                     break result > 9999
                     i += 1
                 t.max = result
-            if c != ord('}')
+            if c <> ord('}')
                 throw exception('Expected }')
         else
             i -= 1
@@ -148,7 +148,7 @@ fun parse(regex i8[]) List(Token)
 
 fun matches(text i8[], regex i8[]) int
     result = find(text, regex);
-    return result != null && result[0] == 0 && result[1] == text.length();
+    return result <> null && result[0] == 0 && result[1] == text.length();
 }
 
 fun find(text i8[], regex i8[]) int[]

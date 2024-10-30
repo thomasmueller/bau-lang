@@ -11,8 +11,8 @@
 /* types */
 typedef struct int_array int_array;
 struct int_array;
-typedef struct f64_array f64_array;
-struct f64_array;
+typedef struct float_array float_array;
+struct float_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -27,13 +27,13 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct f64_array {
+struct float_array {
     int32_t len;
     double* data;
     int32_t _refCount;
 };
-f64_array* f64_array_new(uint32_t len) {
-    f64_array* result = _malloc(sizeof(f64_array));
+float_array* float_array_new(uint32_t len) {
+    float_array* result = _malloc(sizeof(float_array));
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(double) * len);
@@ -43,27 +43,27 @@ f64_array* f64_array_new(uint32_t len) {
 }
 /* exception types */
 /* functions */
-double f64_1(double x);
+double float_1(double x);
 int64_t int_1(int64_t x);
-double sum_f64_var(int _vaCount,...);
+double sum_float_var(int _vaCount,...);
 int64_t sum_int_var(int _vaCount,...);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-void f64_array_free(f64_array* x) {
+void float_array_free(float_array* x) {
     _free(x->data);
     _free(x);
 }
-double f64_1(double x) {
+double float_1(double x) {
     return x;
 }
 int64_t int_1(int64_t x) {
     return x;
 }
-double sum_f64_var(int _vaCount,...) {
+double sum_float_var(int _vaCount,...) {
     va_list _vaList;
-    f64_array* x = f64_array_new(_vaCount);
+    float_array* x = float_array_new(_vaCount);
     va_start(_vaList, _vaCount);
     for (int _vaI = 0; _vaI < _vaCount; _vaI++) {
         x->data[_vaI] = va_arg(_vaList, double);
@@ -83,9 +83,9 @@ double sum_f64_var(int _vaCount,...) {
         }
         break;
     }
-    _decUse(x, f64_array);
+    _decUse(x, float_array);
     return result;
-    _decUse(x, f64_array);
+    _decUse(x, float_array);
 }
 int64_t sum_int_var(int _vaCount,...) {
     va_list _vaList;

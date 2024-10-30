@@ -91,6 +91,11 @@ public class TestCompare {
     }
 
     @Test
+    public void fibonacci() throws IOException {
+        test("fibonacci");
+    }
+
+    @Test
     public void fileRead() throws IOException {
         test("fileRead");
     }
@@ -128,6 +133,11 @@ public class TestCompare {
     @Test
     public void literals() throws IOException {
         test("literals");
+    }
+
+    @Test
+    public void macro() throws IOException {
+        test("macro");
     }
 
     @Test

@@ -15,7 +15,7 @@ public class DataType {
     public static final String I32 = "i32";
     public static final String INT = "int";
     public static final String F32 = "f32";
-    public static final String F64 = "f64";
+    public static final String FLOAT = "float";
     public static final String TYPE = "type";
 
     // we only define INT_TYPE because the types have a "used" flag -
@@ -134,6 +134,9 @@ public class DataType {
             }
             buff.append(')');
         }
+        if (isNullable) {
+            buff.append("?");
+        }
         return buff.toString();
     }
 
@@ -149,7 +152,7 @@ public class DataType {
             s = "int64_t";
         } else if ("f32".equals(name)) {
             s = "float";
-        } else if ("f64".equals(name)) {
+        } else if ("float".equals(name)) {
             s = "double";
         } else if (name.startsWith("0..")) {
             s = "int64_t";
@@ -215,7 +218,6 @@ public class DataType {
             buff.append('_');
             String fullName = t.fullName();
             buff.append(fullName.replace('.', '_').replace("[]", "_array"));
-//            buff.append(t.name.replace("[]", "_array"));
         }
         return buff.toString();
     }
@@ -246,7 +248,7 @@ public class DataType {
             return new Value.ValueInt(0);
         case F32:
             return new Value.ValueFloat(0);
-        case F64:
+        case FLOAT:
             return new Value.ValueFloat(0);
         }
         return ValueNull.INSTANCE;

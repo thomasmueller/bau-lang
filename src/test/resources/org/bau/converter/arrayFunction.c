@@ -54,7 +54,7 @@ void test_0() {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)data->data[i]);
-            continue2:;
+            continue1:;
             int64_t _next = i + 1;
             if (_next >= 16) {
                 break;
