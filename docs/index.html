@@ -66,7 +66,7 @@ println('Pi: ' PI)
 a := 10_000_000
 b := 3
 println('integer a/b: ', a / b)
-println('float   a/b: ', f64(a) / b)
+println('float   a/b: ', float(a) / b)
 `;
                 } else if (obj.value == 'functionsOnTypes') {
                     text = 
@@ -147,6 +147,22 @@ for i := range(2_999_999_999, 3_000_000_002)
   catch e
     println(i '^2 = ' e.message)
 `;
+                } else if (obj.value == 'macros') {
+                    text = 
+`fun if(cond int, a T, b T) macro T
+    if cond
+        return a
+    else
+        return b
+
+fun processMessage(a i8[]) i8[]
+    println('process message: ' a)
+    return a
+
+for i := until(2)
+    x : if(i, processMessage('not zero'), processMessage('zero'))
+    println(i ': ' x)
+`;
                 } else if (obj.value == 'sort') {
                     text = 
 `fun insertionSort(a T[])
@@ -166,9 +182,9 @@ insertionSort(x)
 for i := until(x.len)
     println('x[' i '] = ' x[i])
 
-y : new(f64[], 10)
+y : new(float[], 10)
 for i := until(y.len)
-    y[i] = f64(Utils.random()) / 1_000_000_000_000
+    y[i] = float(Utils.random()) / 1_000_000_000_000
 insertionSort(y)
 for i := until(y.len)
     println('y[' i '] = ' y[i])
@@ -204,6 +220,7 @@ for i := until(y.len)
                         <option value="list"               >List                  </option>
                         <option value="enum"               >Enums                 </option>
                         <option value="exceptions"         >Exceptions            </option>
+                        <option value="macros"             >Macros                </option>
                         <option value="sort"               >Sort with Templates   </option>
                     </select>
                 </span>
