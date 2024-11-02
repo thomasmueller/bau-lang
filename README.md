@@ -7,14 +7,13 @@ Bau is a simple, concise, safe, powerful and fast programming language. Features
 * Fast compilation and execution (transpiles to C).
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
-<a href="https://thomasmueller.github.io/bau-lang/wasm.html">And try out the WASM C compiler (soon to be integrated).</a>
 
 It addresses other languages' issues:
 
 * Memory safety (C, C++)
 * Hard to use and master (C++, Rust)
 * Vendor lock-in (Java, Swift, C#)
-* GC pauses (Python, Java,...)
+* GC pauses (Python, Java, C#,...)
 * Verbose syntax (C, Go, Java,...)
 * Slow execution (Python)
 * Null pointer errors (Java, C,...)
@@ -23,33 +22,33 @@ It addresses other languages' issues:
 ## Example
 
     fun fact(x int) int
-      if x <= 1
-        return 1
-      return x * fact(x - 1)
+        if x <= 1
+            return 1
+        return x * fact(x - 1)
 
     for i:= range(0 20)
-      println(fact(i))
+        println(fact(i))
 
 ## Keywords
 
 Control flow
-* `if` `elif` `else` `for` `while` `break` 
-* `continue` `return` `throw` `catch`
-* `switch` `case`
+* `if` `elif` `else` `for` `while`
+* `break` `continue` `return`
+* `throw` `catch` `switch` `case`
 
 Assignment, comparison, operations
 * `:` constant, `:=`  variable
 * `=` `+=` `-=` `*=` `/=` etc. update
-* `=` `<` `>` `<=` `>=` `!=`
+* `=` `<` `>` `<=` `>=` `<>`
 * `and` `or` `not` `+` `-` `*` `/` `%`
 * `&` `|` `^` `~` `<<` `>>` bitwise
 
 Data types and miscellaneous
-* `int` `i32` `i16` `i8`, `f64` `f32`
+* `int` `i32` `i16` `i8`, `float` `f32`
 * `#` comment, `##` block comment
-* `fun` `type` `enum` definitions
+* `fun` `type` `enum` `const` `macro`
+* `import` `module` `null`
 * `()` `[]` `.` `..` `,` `'` `` ` `` `?`
-* `import` `module` `null` `const`
 
 ### Constants, Variables
 
@@ -63,12 +62,16 @@ Identifiers contain letters, digits, and `_`.
     x = x + 1
     x += 1      # shortcut
 
+A variable without value requires a type:
+
+    x int
+
 ### Built-In Types
 
 The built-in types are `int` `i32` `i16` `i8` (signed integer),
-and `f64` `f32` (floating point).
+and `float` `f32` (floating point).
 `int` can be restricted to a range using `0..`.
-Defaults are `int` and `f64`; both are 64 bit.
+Defaults are `int` and `float`; both are 64 bit.
 Conversion functions change the type, and may truncate.
 
     c := i8(10)
@@ -77,7 +80,7 @@ Conversion functions change the type, and may truncate.
 
 `if` starts a condition.
 Spaces group statements into blocks.
-`elif` ("else if") and `else` are optional.
+`elif` (else if) and `else` are optional.
 
     if a = 0
         println('zero')
@@ -105,7 +108,7 @@ There are `for` and `while` loops.
 `break` exits a loop. It may have a condition:
 
     # prints 1 to 4
-    for i := range(0 10)
+    for i := range(1 10)
         break i = 5
         println(i)
 
@@ -143,15 +146,15 @@ and may be indented.
     d : 'String literal'
     e : `Raw string`
     f : ``
-      Two-line
-      raw string with `
-      ``
+        Two-line
+        raw string with `
+        ``
 
 ### Operators
 
-`=` `<` `>` `<=` `>=` `!=` compare two values and return `1` or `0`.
-`and` `or` `not` combine comparisons. 
-`and` `or` only evaluate the right side when needed.
+`=` `<` `>` `<=` `>=` `<>` compare two values and return `1` or `0`.
+`not` inverses a comparison. `and` `or` combines comparisons;
+the right side is only evaluated when needed.
 Integer `+` `-` `*` wrap around on over- / underflow.
 `/` `%`: integer division by 0 returns max, min, or 0.
 `&` `|` `^` `~` `<<` `>>` are bitwise and, or, xor, not, 
@@ -161,20 +164,34 @@ shift right, and logical shift right: the leftmost bits become `0`.
 
 `fun` starts a function. It may `return` a value.
 `..` means variable number of arguments.
-`const` functions are executed at compile time
-if the arguments are constants.
 Functions can share a name if the number of arguments is different.
 They can be declared first and implemented later.
+`const` functions are executed at compile time
+if the arguments are constants.
+`macro` function calls are replaced at compile time
+with the implementation.
 Types can be passed as parameters or implicitly
 (internally, this functions are templates).
 
     fun square(x int) int
-      return x * x
+        return x * x
 
     fun sum(x int..) const int
+        sum := 0
+        for i := until(x.len)
+            sum += x[i]
+        return sum
+
+    fun if(cond int, true T, false T) macro T
+        if cond
+            return true
+        else
+            return false
     
-    fun newList(T type) List(T)
-    fun sort(data T[])
+    println('sum: ' sum(1 2 3))
+    for i := until(5)
+        println(square(i))
+        println(if(i % 2, 'odd', 'even'))
 
 ### Types
 
@@ -224,7 +241,7 @@ Value types (eg. `int`) can't be `null`.
 
 To create and access arrays, use:
 
-    data : new(i8[], 1)
+    data : new(i8[], 3)
     data[0] = 10
 
 Bounds are checked where needed.
@@ -264,17 +281,18 @@ Custom exception types are allowed.
 ### Modules and Import
 
 `import` allows using types and functions from a module.
-The last part of the module name is the identifier,
-unless it is renamed using `as`.
+The last part of the module name is the identifier.
 The module identifier can be omitted
-if the type, function, or constant is listed after `import`:
+if the type, function, or constant is listed after `import`.
+The full module name can be used as well.
 
     import org.bau.Utils
-      random
-    import org.bau.Math as M
+        random
+    import org.bau.Math
     println(random())
     println(Utils.getNanoTime())
-    println(M.PI)
+    println(Math.PI)
+    println(org.bau.Math.PI)
 
 `module` defines a module. 
 The name needs to match the file path, here `org/bau/Math.bau`:
@@ -287,6 +305,9 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 #### Hello World
 
     println('Hello World')
+
+#### Assignment
+
 
 #### Import, Functions
 
@@ -313,16 +334,16 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 ##### Functions
 
     fun add(x int, y int) int
-      return x + y
+        return x + y
 
     println(add(42 1))
 
 ##### Data Types
 
     a := 10_000_000
-    b := u8(110)
-    c := u16(65000)
-    d := 'text'
+    b := i8(110)
+    c := i16(65000)
+    d : 'text'
     e := 3.1416
     f := 0..10
     println(a ' ' b)
@@ -332,7 +353,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
     a := 10_000_000
     b := 3
     println(a / b)
-    println(f64(a) / b)
+    println(float(a) / b)
     
 ##### Constants
 
@@ -442,6 +463,17 @@ The name needs to match the file path, here `org/bau/Math.bau`:
         else
             println('some other day: #' a)
 
+##### Macros and Ternary Condition
+
+    fun if(cond int, a T, b T) macro T
+        if cond
+            return a
+        else
+            return b
+
+    for i := until(3)
+        println(i ':', if(i, '>0', 'zero'))
+
 ### Comparison
 
 |Feature               |Bau    |Python |C      |C++    |Java   |C#     |Go     |Rust   |Swift  |
@@ -455,6 +487,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 |No GC Pauses          |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
 |Runs Everywhere       |&check;|       |&check;|       |       |       |       |       |       |
 |Generics / Templates  |&check;|       |       |&check;|&check;|&check;|&check;|&check;|&check;|
+|Macros                |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
 |Exception Handling    |&check;|&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
 |Null Safety           |&check;|       |       |       |       |&check;|       |&check;|&check;|
 |Array Bounds Checks   |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
@@ -473,9 +506,6 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 * Multi-threading support is limited to what C supports.
 * Coroutines are not supported.
 * `goto` and labels are not supported.
-* `continue` is not currently supported (it is implemented, but might be removed later).
-* `switch` is not supported, to simplify the language. The compiler is supposed to 
-  internally uses the same performance optimisations as if there was a switch statement.
 * String interpolation is not supported to simplify the language. 
   Instead, use an arrays of strings. As commas are optional, this is short.
 * Dynamic dispatch is not supported.
@@ -497,8 +527,6 @@ The name needs to match the file path, here `org/bau/Math.bau`:
   But there is no keyword like "var", "val", "const", or "final" to shorten the code.
 * Definition of a variables is distinct from updating it (`:=` vs `=`) to quickly
   detect if a variable was already defined, and to detect typos.
-* `continue` is implemented but it may not be needed, so let's not use it for now.
-  Removing it simplifies the language.
 * `break` and `continue` can have a condition, to avoid a separate line with `if`.
 * Labels for `break` and `continue` are not supported to simplify the language.
   If needed, the function can return from inside the loop, or throw an exception
