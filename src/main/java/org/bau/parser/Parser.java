@@ -13,6 +13,7 @@ import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValueI8Array;
 import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValuePanic;
+import org.bau.runtime.Value.ValueRef;
 import org.bau.std.Std;
 
 public class Parser {
@@ -2176,8 +2177,9 @@ public class Parser {
                         type.used();
                         expr = new StringLiteral(s, type, reference);
                         return expr;
+                    } else if (!(val instanceof ValueRef)) {
+                        return new NumberValue(val, expr.type(), false);
                     }
-                    return new NumberValue(val, expr.type(), false);
                 }
                 return expr;
             }
