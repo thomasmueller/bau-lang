@@ -2,19 +2,13 @@ package org.bau;
 
 /**
 
-TODO compare number of keywords and number of syntactic forms with other languages;
-     see https://norvig.com/lispy.html
-     language     keywords syntactic forms
-     Scheme              5               8
-     MiniBau             7
-     Bau                12
-     Lua                21
-     Python             33             110
-     Rust               38
-     C                  45
-     Java               50             133
-     C++                97
-     Swift
+TODO fix memory leak of structs with arrays or pointer
+     also fix arrays of such types
+
+TODO memory management
+
+TODO auto-convert to the requested type if there is a conversion function,
+     for println.
 
 TODO don't use printf when converting to C; use string conversion and concat
      (so we have no differences between interpreted and compiled output)
@@ -26,17 +20,7 @@ TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
 
 TODO maybe buy the book about Lox https://craftinginterpreters.com/contents.html
 
-TODO document that "hello world" is simple and no main function is needed
-     (but is allowed)
-     main      : go, c, c++, rust, visual basic, kotlin (now)
-     class+main: c#, java
-     no need   : swift (but define before use),
-                 python (but define before use),
-                 lua (but define before use),
-                 javascript
-
-TODO fix fully qualified package access (types,...)
-     possibly switch from "." to "::"
+TODO test fully qualified package access (types,...)
 
 TODO converter from Java or C or Rust to Bau
 
@@ -45,6 +29,8 @@ TODO 100% code coverage, for parser at least
 TODO tagged union support
 
 TODO improved memory management
+     maybe avoid reference counting for local variables,
+     and use a separate stack for references
 
 org.bau.Memory
   copy

@@ -38,6 +38,7 @@ int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
+void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

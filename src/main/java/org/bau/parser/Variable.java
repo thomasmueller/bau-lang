@@ -94,7 +94,7 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public String decrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             if (needToDecrementRefCountOnFree) {
                 return Free.DEC_USE + "(" + name + ", " + type().nameC() + ");\n";
             }
@@ -104,7 +104,7 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public String incrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             return Free.INC_USE + "(" + name + ");\n";
         }
         return "";
@@ -170,7 +170,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public Value setValue(Memory memory, Value val, boolean incRefCount) {
         if (global) {
-            if (type.isPointer() || type.isArray()) {
+            if (type.needIncDec()) {
                 Value old = memory.getGlobal(name);
                 if (old != null) {
                     StatementResult result = Free.decRefCount(old, type, memory);
@@ -186,7 +186,7 @@ public class Variable implements Expression, LeftValue {
                 memory.setGlobal(name, val);
             }
         } else {
-            if (type.isPointer() || type.isArray()) {
+            if (type.needIncDec()) {
                 Value old = memory.getLocal(name);
                 if (old != null) {
                     StatementResult result = Free.decRefCount(old, type, memory);

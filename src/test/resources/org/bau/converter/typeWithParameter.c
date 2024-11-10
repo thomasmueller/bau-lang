@@ -45,6 +45,7 @@ List_int* List_int_new() {
 void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
+void int_array_free(int_array* x);
 void List_int_free(List_int* x);
 void int_array_free(int_array* x) {
     _free(x->data);

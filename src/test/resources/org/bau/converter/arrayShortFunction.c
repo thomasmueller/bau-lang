@@ -29,6 +29,7 @@ int_array* int_array_new(uint32_t len) {
 /* functions */
 void fill_1(int_array* data);
 void test_0();
+void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

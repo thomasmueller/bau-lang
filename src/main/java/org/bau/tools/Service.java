@@ -74,15 +74,15 @@ public class Service {
                 e.printStackTrace(System.out);
             }
             System.out.println("Compiling =======================================");
-            int exitCode = runProcess("gcc", "-O3", fc.toString());
-            // int exitCode = runProcess("gcc", fc.toString());
+            // int exitCode = runProcess("gcc", "-O3", fc.toString());
+            int exitCode = runProcess("gcc", fc.toString());
             File f2 = new File("a.out");
             if (exitCode == 0) {
                 System.out.println("Running =========================================");
                 long start = System.currentTimeMillis();
-                runProcess(f2.getAbsolutePath());
+                exitCode = runProcess(f2.getAbsolutePath());
                 long time = System.currentTimeMillis() - start;
-                System.out.println("(" + time + " ms)");
+                System.out.println("(" + time + " ms, exitCode " + exitCode + ")");
             }
             System.out.println("Waiting =========================================");
         }
@@ -90,7 +90,7 @@ public class Service {
 
 
     public static int runProcess(String... command) throws Exception {
-        Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+        Process process = new ProcessBuilder(command).start();
         Thread outThread = new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
@@ -102,8 +102,20 @@ public class Service {
             }
         });
         outThread.start();
+        Thread outThread2 = new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        outThread2.start();
         int exitCode = process.waitFor();
         outThread.join();
+        outThread2.join();
         return exitCode;
     }
 

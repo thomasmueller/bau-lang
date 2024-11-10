@@ -45,6 +45,8 @@ int_array* int_array_new(uint32_t len) {
 /* functions */
 void printLen_1(i8_array* data);
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);

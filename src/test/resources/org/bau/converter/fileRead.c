@@ -60,6 +60,8 @@ org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode);
 void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void org_bau_File_File_free(org_bau_File_File* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -77,7 +79,7 @@ void org_bau_File_File_free(org_bau_File_File* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }

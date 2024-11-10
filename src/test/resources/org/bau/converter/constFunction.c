@@ -47,6 +47,8 @@ double float_1(double x);
 int64_t int_1(int64_t x);
 double sum_float_var(int _vaCount,...);
 int64_t sum_int_var(int _vaCount,...);
+void int_array_free(int_array* x);
+void float_array_free(float_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

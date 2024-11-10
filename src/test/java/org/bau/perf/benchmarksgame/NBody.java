@@ -5,6 +5,11 @@ https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 Naive transliteration from Michael Ferguson's Chapel program
 contributed by Isaac Gouy
+
+Output:
+-0.169075164
+-0.169059907
+
 */
 
 public final class NBody {

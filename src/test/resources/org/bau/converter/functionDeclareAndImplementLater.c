@@ -45,6 +45,8 @@ int_array* int_array_new(uint32_t len) {
 /* functions */
 int64_t even_1(int64_t x);
 int64_t odd_1(int64_t x);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -56,7 +58,7 @@ void int_array_free(int_array* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }

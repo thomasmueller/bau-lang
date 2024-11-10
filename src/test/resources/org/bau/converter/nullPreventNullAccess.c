@@ -61,6 +61,8 @@ void testBreak_0();
 void testContinue_0();
 void testIf_0();
 void testReturn_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void Value_free(Value* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -76,7 +78,7 @@ void Value_free(Value* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }
@@ -110,6 +112,7 @@ void testBreak_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
+                _decUse(a, Value);
                 break;
             }
             i = _next;
@@ -132,6 +135,7 @@ void testContinue_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
+                _decUse(a, Value);
                 break;
             }
             i = _next;
@@ -154,6 +158,7 @@ void testIf_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
+                _decUse(a, Value);
                 break;
             }
             i = _next;
@@ -175,6 +180,7 @@ void testReturn_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
+                _decUse(a, Value);
                 break;
             }
             i = _next;

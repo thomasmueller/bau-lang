@@ -45,6 +45,7 @@ public class DataType {
     private boolean isNullable;
     public ArrayList<String> parameters;
     public String template;
+    private final boolean needsFree;
 
     public DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields) {
         this(module, name, sizeOf, isSystem, false, fields, false);
@@ -89,6 +90,20 @@ public class DataType {
             nullableType = new DataType(module, name, sizeOf, false, false, fields, true);
         } else {
             nullableType = null;
+        }
+        if (isArray || isPointer()) {
+            needsFree = true;
+        } else if (isSystem) {
+            needsFree = false;
+        } else {
+            boolean free = false;
+            for (Variable f : fields) {
+                if (f.type().needsFree) {
+                    free = true;
+                    break;
+                }
+            }
+            needsFree = free;
         }
     }
 
@@ -185,6 +200,14 @@ public class DataType {
             }
         }
         return null;
+    }
+
+    public boolean needFree() {
+        return needsFree;
+    }
+
+    public boolean needIncDec() {
+        return isPointer() | isArray();
     }
 
     public boolean isPointer() {

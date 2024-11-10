@@ -65,7 +65,7 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public String decrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
         }
         return "";
@@ -73,7 +73,7 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public String incrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             return Free.INC_USE + "(" + toC() + ");\n";
         }
         return "";
@@ -180,7 +180,7 @@ public class ArrayAccess implements Expression, LeftValue {
             memory.setGlobal(Memory.PANIC, v);
             return v;
         }
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             Value old = array.get(index);
             if (old != null) {
                 StatementResult result = Free.decRefCount(old, type(), memory);

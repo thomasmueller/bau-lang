@@ -56,6 +56,7 @@ org_bau_List_List_int* org_bau_List_List_int_new() {
 int64_t idx_2(int64_t x, int64_t len);
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T);
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x);
+void int_array_free(int_array* x);
 void org_bau_List_List_free(org_bau_List_List* x);
 void org_bau_List_List_int_free(org_bau_List_List_int* x);
 void int_array_free(int_array* x) {

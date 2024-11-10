@@ -42,6 +42,7 @@ Value* Value_new() {
 /* functions */
 Value* get_1(int64_t key);
 void test_0();
+void int_array_free(int_array* x);
 void Value_free(Value* x);
 void int_array_free(int_array* x) {
     _free(x->data);

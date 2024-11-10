@@ -46,6 +46,8 @@ int_array* int_array_new(uint32_t len) {
 /* functions */
 void exit_1(int64_t code);
 i8_array* expensiveCalc_1(i8_array* a);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -57,7 +59,7 @@ void int_array_free(int_array* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }
@@ -108,6 +110,8 @@ int main() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 2) {
+                _decUse(_t0, i8_array);
+                _decUse(x, i8_array);
                 break;
             }
             i = _next;

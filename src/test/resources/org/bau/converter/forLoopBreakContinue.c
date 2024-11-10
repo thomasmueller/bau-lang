@@ -27,6 +27,7 @@ int_array* int_array_new(uint32_t len) {
 }
 /* exception types */
 /* functions */
+void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

@@ -9,7 +9,7 @@ package org.bau.perf.benchmarksgame;
 
 // https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-java-8.html
 
-public final class Fannkuchredux {
+public final class FannkuchRedux {
 
 
     public static void main(String[] args){

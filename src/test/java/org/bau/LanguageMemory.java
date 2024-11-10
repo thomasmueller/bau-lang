@@ -2,7 +2,92 @@ package org.bau;
 
 /*
 
-Idea: refcount by default (slow & flexible); preventing that and use (mutable) borrow as option.
+https://www.reddit.com/r/ProgrammingLanguages/comments/1gkn7aw/what_else_is_there_besides_borrow_checking_and_gc/
+
+https://verdagon.dev/grimoire/grimoire
+
+https://play.rust-lang.org/?version=stable&mode=debug&edition=2021
+
+- do not increment (and so, also do not decrement) on local variables
+- keep references from local variables on a special stack, or use stack walking
+- at some point, apply increment for local variables...
+  ... but then we also need to decrement later! how?
+
+if a type or object never has a reference, then we don't need ref counting.
+
+"hard" problems:
+- hash table
+- get a ref
+- while holding the ref, delete the entry
+
+------------
+use std::collections::HashMap;
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(String::from("key1"), String::from("value1"));
+    if let Some(value) = map.get_mut("key1") {
+        *value += "x";
+        println!("Updated value: {}", value);
+    } else {
+        println!("Key not found");
+    }
+    let val = map.get("key1").unwrap();
+    println!("val: {}", val);
+    map.remove("key1");
+    let val2 = map.get("key1").unwrap(); // panic
+    println!("val: {}", val2);
+}
+------------
+struct SimpleHashMap {
+    key: Option<String>,
+    value: Option<String>,
+}
+impl SimpleHashMap {
+    fn new() -> Self {
+        SimpleHashMap {
+            key: None,
+            value: None,
+        }
+    }
+    fn put(&mut self, key: String, value: String) {
+        self.key = Some(key);
+        self.value = Some(value);
+    }
+    fn get(&self, key: &str) -> Option<&String> {
+        if let Some(ref k) = self.key {
+            if k == key {
+                return self.value.as_ref();
+            }
+        }
+        None
+    }
+}
+fn main() {
+    let mut map = SimpleHashMap::new();
+    map.put(String::from("key1"), String::from("value1"));
+    if let Some(value) = map.get("key1") {
+        println!("Value: {}", value);
+    } else {
+        println!("Key not found");
+    }
+}
+
+
+Data Structure Aware Garbage Collector
+you can "hint" that an object can be reclaimed
+(speedup for tracing GC)
+
+to avoid the memory and ref-counting overhead,
+declare max number of (non-stack) references?
+- 1 means single ownership (as in Rust) and means we don't need a counter
+- many means ref counted
+
+Paper: A Unified Theory of Garbage Collection
+Data Structure Aware Garbage Collector
+https://eschew.wordpress.com/2016/09/02/summarizing-gc/
+
+Idea: refcount by default (slow & flexible)
+- but option to prevent it, and use (mutable) borrow as option.
 Rust:
 fn immutable(x: &i64) {
     println!("x: {}", x);

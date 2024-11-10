@@ -59,6 +59,7 @@ int64_t org_bau_Utils_random_0();
 void shellSort_int_array_int_1(int_array* a);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void test_0();
+void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

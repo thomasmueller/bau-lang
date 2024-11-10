@@ -74,6 +74,9 @@ _int64_t_or_exception exception_int64_t_or_exception(org_bau_Exception_exception
 /* functions */
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
 _int64_t_or_exception square_1(int64_t x);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
+void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -82,10 +85,13 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
+void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
+    _decUse(x->message, i8_array);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }
@@ -97,6 +103,7 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     result.message = message;
     _incUse(result.message);
     return result;
+    org_bau_Exception_exception_free(&result);
 }
 _int64_t_or_exception square_1(int64_t x) {
     org_bau_Exception_exception _lastException;
@@ -104,6 +111,7 @@ _int64_t_or_exception square_1(int64_t x) {
     if (x > 3000000000) {
         org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1000);
         _x0 = exception_int64_t_or_exception(_t0); _lastException = _x0.exception; goto catch0;
+        org_bau_Exception_exception_free(&_t0);
     }
     int64_t _r0 = x * x;
     return ok_int64_t_or_exception(_r0);
@@ -122,6 +130,7 @@ int main() {
     catch0:;
     org_bau_Exception_exception e = _lastException;
         printf("%.*s\n", e.message->len, e.message->data);
+        org_bau_Exception_exception_free(&e);
     skip0:;
     _end();
     return 0;

@@ -67,9 +67,49 @@ public class Free implements Statement {
         return result;
     }
 
+    public static StatementResult free(Variable var, Memory m) {
+        Value val;
+        if (var.global) {
+            val = m.getGlobal(var.name);
+            m.setGlobal(var.name, null);
+        } else {
+            val = m.getLocal(var.name);
+            m.setLocal(var.name, null);
+        }
+        if (val == null) {
+            return StatementResult.OK;
+        }
+        return free(val, var.type, m);
+    }
+
+    public static StatementResult free(Value val, DataType type, Memory m) {
+        Value.ValueStruct struct = (Value.ValueStruct) val;
+        for(Variable f : type.fields) {
+            Value v = struct.get(f.name);
+            if (f.type.needIncDec()) {
+                StatementResult result = decRefCount(v, f.type, m);
+                if (result == StatementResult.PANIC) {
+                    return result;
+                }
+            } else if (f.type.needFree()) {
+                StatementResult result = free(v, f.type, m);
+                if (result == StatementResult.PANIC) {
+                    return result;
+                }
+            }
+        }
+        return StatementResult.OK;
+    }
+
     @Override
     public StatementResult run(Memory m) {
-        return decRefCount(var, m);
+        if (var.type().needIncDec()) {
+            return decRefCount(var, m);
+        } else if (var.type().needFree()) {
+            return free(var, m);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     public void optimize(ProgramContext context) {
@@ -77,7 +117,13 @@ public class Free implements Statement {
 
     @Override
     public String toC() {
-        return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +");\n";
+        if (var.type().needIncDec()) {
+            return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +");\n";
+        } else if (var.type().needFree()) {
+            return var.type().nameC() + "_free(&" + var.toC() + ");\n";
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

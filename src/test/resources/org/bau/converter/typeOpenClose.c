@@ -59,6 +59,8 @@ File* File_new() {
 void File_close_1(File* this);
 void File_use_1(File* this);
 File* openFile_1(int64_t fp);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void File_free(File* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -76,7 +78,7 @@ void File_free(File* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }

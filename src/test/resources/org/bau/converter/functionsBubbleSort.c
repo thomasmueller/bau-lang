@@ -29,6 +29,7 @@ int_array* int_array_new(uint32_t len) {
 /* functions */
 void bubbleSort_int_var(int64_t _T, int _vaCount,...);
 int64_t idx_2(int64_t x, int64_t len);
+void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);

@@ -124,7 +124,11 @@ i8_array* org_bau_String_substring_2(i8_array* s, int64_t start);
 i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end);
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end);
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void org_bau_List_List_free(org_bau_List_List* x);
+void org_bau_String_string_free(org_bau_String_string* x);
+void org_bau_String_string_array_free(org_bau_String_string_array* x);
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x);
 void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_String_string* x);
 void i8_array_free(i8_array* x) {
@@ -138,7 +142,11 @@ void int_array_free(int_array* x) {
 void org_bau_List_List_free(org_bau_List_List* x) {
     _free(x);
 }
+void org_bau_String_string_free(org_bau_String_string* x) {
+    _decUse(x->data, i8_array);
+}
 void org_bau_String_string_array_free(org_bau_String_string_array* x) {
+    for (int i = 0; i < x->len; i++) org_bau_String_string_free(&(x->data[i]));
     _free(x->data);
     _free(x);
 }
@@ -153,7 +161,7 @@ void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_Stri
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }
@@ -325,6 +333,7 @@ org_bau_String_string org_bau_String_str_1(i8_array* s) {
     x.data = s;
     _incUse(x.data);
     return x;
+    org_bau_String_string_free(&x);
 }
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start) {
     i8_array* _t0 = org_bau_String_substring_3(s, start, s->len);
@@ -447,9 +456,11 @@ void test_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= list->size) {
+                org_bau_String_string_free(&s);
                 break;
             }
             i = _next;
+            org_bau_String_string_free(&s);
         }
         break;
     }

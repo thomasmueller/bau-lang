@@ -117,7 +117,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public String decrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
         }
         return "";
@@ -125,7 +125,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public String incrementRefCountC() {
-        if (type().isPointer() || type().isArray()) {
+        if (type().needIncDec()) {
             return Free.INC_USE + "(" + toC() + ");\n";
         }
         return "";
@@ -197,7 +197,7 @@ public class FieldAccess implements Expression, LeftValue {
             throw new IllegalStateException();
         }
         ValueStruct v = (ValueStruct) baseVal;
-        if (type().isArray() || type.isPointer()) {
+        if (type().needIncDec()) {
             Value old = v.get(fieldName);
             if (old != null) {
                 StatementResult result = Free.decRefCount(old, type, memory);

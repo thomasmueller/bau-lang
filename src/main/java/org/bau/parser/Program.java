@@ -199,12 +199,13 @@ public class Program {
         }
         if (TRACE_REF_COUNTS) {
             buff.append("int __globalObjects = 0;\n");
-            buff.append("#define _incUse(a) {printf(\"++  %p line %d\\n\", a, __LINE__);if(a){(a)->_refCount++;}}\n");
-            buff.append("#define _decUse(a, type) {if(a){printf(\"--  %p line %d\\n\", a, __LINE__);if(--((a)->_refCount) == 0) type##_free(a);}}\n");
+            buff.append("int __refCountUpdates = 0;\n");
+            buff.append("#define _incUse(a) {__refCountUpdates++; printf(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(a && (a)->_refCount < INT32_MAX){(a)->_refCount++;}}\n");
+            buff.append("#define _decUse(a, type) {__refCountUpdates++; if(a && (a)->_refCount < INT32_MAX){printf(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0) type##_free(a);}}\n");
             buff.append("#define _malloc(a) malloc(a)\n");
             buff.append("#define _traceMalloc(a) printf(\"new %p line %d (%d)\\n\", a, __LINE__, ++__globalObjects);\n");
             buff.append("#define _free(a) {printf(\"del %p line %d (%d)\\n\", a, __LINE__, --__globalObjects);free(a);}\n");
-            buff.append("#define _end() if(__globalObjects!=0)printf(\"################ MEMORY LEAK: %d ################\\n\", __globalObjects);\n");
+            buff.append("#define _end() {printf(\"refCountUpdates: %d\\n\", __refCountUpdates); if(__globalObjects!=0)printf(\"################ MEMORY LEAK: %d ################\\n\", __globalObjects);}\n");
         } else {
             buff.append("#define _incUse(a) if(a){(a)->_refCount++;}\n");
             buff.append("#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}\n");
@@ -323,7 +324,7 @@ public class Program {
         // _free needs be after close
         for (DataType t : dataTypeMap.values()) {
             if (!t.isSystem() && t.isUsed()) {
-                if (t.isPointer()) {
+                if (t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x);\n");
                 }
             }
@@ -332,24 +333,31 @@ public class Program {
             if (!t.isSystem() && t.isUsed()) {
                 if (t.isArray()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
-                    if (t.baseType().isPointer()) {
+                    if (t.baseType().needIncDec()) {
                         buff.append(Statement.indent("for (int i = 0; i < x->len; i++) _decUse(x->data[i], " + t.baseType().nameC() + ");\n"));
+                    } else if (t.baseType().needFree()) {
+                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + t.baseType().nameC() + "_free(&(x->data[i]));\n"));
                     }
                     buff.append(Statement.indent("_free(x->data);\n"));
                     buff.append(Statement.indent("_free(x);\n"));
                     buff.append("}\n");
-                } else if (t.isPointer()) {
+                } else if (t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
-                    for(Variable f : t.fields) {
-                        if (f.type.isPointer() || f.type.isArray()) {
-                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() +");\n"));
+                    for (Variable f : t.fields) {
+                        if (f.type.needIncDec()) {
+                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
+                        } else if (f.type.needFree()) {
+                            buff.append(Statement.indent(f.type.nameC() + "_free(x->" + f.name + ");\n"));
                         }
                     }
                     if (t.autoClose != null) {
                         buff.append(Statement.indent(t.nameC() + "_close_1(x);\n"));
                         buff.append(Statement.indent("if (x->_refCount) { fprintf(stdout, \"Object re-referenced in the close method\"); exit(1); }\n"));
                     }
-                    buff.append(Statement.indent("_free(x);\n"));
+                    if (t.needIncDec()) {
+                        // structs don't need free
+                        buff.append(Statement.indent("_free(x);\n"));
+                    }
                     buff.append("}\n");
                 }
             }
@@ -358,8 +366,8 @@ public class Program {
             buff.append("i8_array* str_const(char* data, uint32_t len) {\n");
             buff.append(Statement.indent("i8_array* result = _malloc(sizeof(i8_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
-            // -1 means do not free the memory (TODO this is a hack)
-            buff.append(Statement.indent("result->_refCount = -1;\n"));
+            // 0 means do not free the memory (it looks like it's already free)
+            buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
             buff.append(Statement.indent("result->data = data;\n"));
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");

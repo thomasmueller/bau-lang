@@ -76,6 +76,8 @@ int64_t shiftRight_int_2(int64_t a, int64_t b);
 int64_t square_1(int64_t x);
 int64_t square_2(int64_t a, int64_t b);
 int64_t sum_var(int64_t a, int _vaCount,...);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -87,7 +89,7 @@ void int_array_free(int_array* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }

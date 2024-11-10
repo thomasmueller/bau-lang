@@ -137,7 +137,11 @@ str str_1(i8_array* x);
 int64_t str_equals_2(str this, str other);
 int64_t str_hashCode_1(str this);
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void HashMap_free(HashMap* x);
+void str_free(str* x);
+void str_array_free(str_array* x);
 void HashMap_int_int_free(HashMap_int_int* x);
 void HashMap_str_str_free(HashMap_str_str* x);
 void i8_array_free(i8_array* x) {
@@ -151,7 +155,11 @@ void int_array_free(int_array* x) {
 void HashMap_free(HashMap* x) {
     _free(x);
 }
+void str_free(str* x) {
+    _decUse(x->value, i8_array);
+}
 void str_array_free(str_array* x) {
+    for (int i = 0; i < x->len; i++) str_free(&(x->data[i]));
     _free(x->data);
     _free(x);
 }
@@ -170,7 +178,7 @@ void HashMap_str_str_free(HashMap_str_str* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }
@@ -484,6 +492,7 @@ str str_1(i8_array* x) {
     result.value = x;
     _incUse(result.value);
     return result;
+    str_free(&result);
 }
 int64_t str_equals_2(str this, str other) {
     int64_t _r0 = this.value->len == other.value->len;
@@ -523,6 +532,9 @@ void test_0() {
     printf("str map[%.*s]=%.*s\n", a.value->len, a.value->data, c.value->len, c.value->data);
     _decUse(map, HashMap_int_int);
     _decUse(map2, HashMap_str_str);
+    str_free(&a);
+    str_free(&b);
+    str_free(&c);
 }
 int main() {
     string_1000 = str_const("hash of hello: ", 15);

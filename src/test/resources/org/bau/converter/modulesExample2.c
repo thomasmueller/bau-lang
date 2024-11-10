@@ -96,6 +96,8 @@ int64_t org_bau_Std_ord_1(i8_array* s);
 int64_t org_bau_Utils_random_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -107,7 +109,7 @@ void int_array_free(int_array* x) {
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
-    result->_refCount = -1;
+    result->_refCount = INT32_MAX;
     result->data = data;
     return result;
 }

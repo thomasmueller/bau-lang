@@ -50,7 +50,7 @@ public class FunctionContext {
             throw new IllegalStateException();
         }
         identifierStack.add(name);
-        int offset = (type.isPointer() || type.isArray()) ? 1 : 0;
+        int offset = (type.needFree()) ? 1 : 0;
         int now = identifierCloseCount.isEmpty() ? 0 : identifierCloseCount.get(identifierCloseCount.size() - 1);
         identifierCloseCount.add(now + offset);
     }

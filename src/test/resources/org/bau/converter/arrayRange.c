@@ -44,6 +44,8 @@ int_array* int_array_new(uint32_t len) {
 /* exception types */
 /* functions */
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);

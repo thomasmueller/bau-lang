@@ -308,18 +308,18 @@ public class Parser {
             return true;
         }
         ArrayList<Variable> fields = new ArrayList<>();
-        DataType type = new DataType(targetModule, name, sizeOf, false, fields);
-        program.addType(type);
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 String fieldName = readIdentifier();
                 DataType fieldType = readType(false);
                 readEndOfStatement();
-                sizeOf += type.sizeOf();
+                sizeOf += fieldType.sizeOf();
                 Variable var = new Variable(fieldName, fieldType);
                 fields.add(var);
             }
         }
+        DataType type = new DataType(targetModule, name, sizeOf, false, fields);
+        program.addType(type);
         program.addComment("type " + type.toString(), comment);
         lastComment = null;
         if (!parameters.isEmpty()) {
@@ -551,7 +551,7 @@ public class Parser {
                 }
             }
             if (def.exceptionType != null) {
-                if (def.exceptionType.isArray() || def.exceptionType.isPointer()) {
+                if (def.exceptionType.needIncDec()) {
                     throw syntaxError("May only throw value types");
                 }
                 boolean found = false;
@@ -1798,6 +1798,7 @@ public class Parser {
             throw syntaxError("The function in the 'for' statement may not throw an exception sorry");
         }
         int stackPos = functionContext.getStackPos();
+        int oldStackPosLoop = stackPosLoop;
         stackPosLoop = stackPos;
         While outerLoop = new While();
         outerLoop.continueId = nextContinueId++;
@@ -1903,6 +1904,11 @@ public class Parser {
             for(int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
             }
+            if (s instanceof Break) {
+                ((Break) s).autoClose = autoClose(stackPosLoop, null);
+            } else if (s instanceof Continue) {
+                ((Continue) s).autoClose = autoClose(stackPosLoop, null);
+            }
             s.setBounds(getScope(0));
             loop.listContinue.add(s);
         }
@@ -1916,7 +1922,7 @@ public class Parser {
         loop.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
         undoLastBlockCondition();
-        stackPosLoop = stackPos;
+        stackPosLoop = oldStackPosLoop;
         currentLoop = oldLoop;
         target.add(outerLoop);
     }
@@ -1962,6 +1968,7 @@ public class Parser {
             throw syntaxError("Expected end of statement, got '"+token+"' in 'while' statement");
         }
         int stackPos = functionContext.getStackPos();
+        int oldStackPosLoop = stackPosLoop;
         stackPosLoop = stackPos;
         loop.continueId = nextContinueId++;
         while (true) {
@@ -1978,7 +1985,7 @@ public class Parser {
         }
         loop.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
-        stackPosLoop = stackPos;
+        stackPosLoop = oldStackPosLoop;
         undoLastBlockCondition();
         currentLoop = oldLoop;
         target.add(loop);
@@ -1998,7 +2005,7 @@ public class Parser {
                 if (var == null) {
                     throw syntaxError("Variable not found: '" + name + "'");
                 }
-                if (var.type.isPointer() || var.type.isArray()) {
+                if (var.type.needFree()) {
                     Free free = new Free(var);
                     autoClose.add(free);
                 }

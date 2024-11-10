@@ -480,18 +480,18 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 |----------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
 |Memory Safety         |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
 |Easy to Learn and Use |&check;|&check;|&check;|       |&check;|&check;|&check;|       |&check;|
-|Concise Syntax        |&check;|&check;|       |       |       |       |       |       |       |
+|Concise Syntax        |&check;|&check;|       |       |       |       |&check;|       |&check;|
 |Vendor Independent    |&check;|&check;|&check;|&check;|       |       |       |&check;|       |
 |Strongly Typed        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Fast Execution        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |No GC Pauses          |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
 |Runs Everywhere       |&check;|       |&check;|       |       |       |       |       |       |
 |Generics / Templates  |&check;|       |       |&check;|&check;|&check;|&check;|&check;|&check;|
-|Macros                |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
+|Macros                |&check;|       |&check;|&check;|       |       |       |&check;|       |
 |Exception Handling    |&check;|&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
 |Null Safety           |&check;|       |       |       |       |&check;|       |&check;|&check;|
 |Array Bounds Checks   |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
-|Compile-Time Execution|&check;|       |       |&check;|       |       |       |       |       |
+|Compile-Time Execution|&check;|       |       |&check;|       |       |       |&check;|       |
 
 ### Non-Features
 
@@ -583,3 +583,8 @@ The name needs to match the file path, here `org/bau/Math.bau`:
   to avoid panic for cases were it was used for "unimportant" operations
   such as calculating the number of instructions per second, for zero seconds.
   The same goes for modulo operations.
+* Where array bound checks are needed, and the index is out of bounds,
+  the program panics.
+* If a type has a  `close()` function, it is called when the memory
+  is freed. If this function re-adds a reference to the object,
+  then the program panics.

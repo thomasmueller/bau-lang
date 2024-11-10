@@ -47,6 +47,8 @@ int64_t idx_2(int64_t x, int64_t len);
 int32_t readI32Le_2(i8_array* d, int32_t pos);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 void test_0();
+void i8_array_free(i8_array* x);
+void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
