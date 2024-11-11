@@ -308,6 +308,12 @@ public class Parser {
             return true;
         }
         ArrayList<Variable> fields = new ArrayList<>();
+        DataType type = new DataType(targetModule, name, sizeOf, false, fields);
+        // need to add it first, because one of the fields could be of this type
+        program.addType(type);
+        program.addComment("type " + type.toString(), comment);
+        lastComment = null;
+        fields = new ArrayList<>();
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 String fieldName = readIdentifier();
@@ -318,10 +324,7 @@ public class Parser {
                 fields.add(var);
             }
         }
-        DataType type = new DataType(targetModule, name, sizeOf, false, fields);
-        program.addType(type);
-        program.addComment("type " + type.toString(), comment);
-        lastComment = null;
+        type.addFields(fields);
         if (!parameters.isEmpty()) {
             type.parameters = parameters;
         }
@@ -806,10 +809,15 @@ public class Parser {
             }
             String m = module;
             String identifier = readIdentifier();
-            // if there is no variable with this name,
-            // TODO it could be a this.field name too?
+            // TODO this is duplicate source code
+            // if there is no variable with this name, and
+            // no function with this name, and
+            // no this.field with this name,
             // then it could be a fully qualified module name
-            if (functionContext.getVariable(null, identifier) == null) {
+            Variable thisVar = functionContext.getVariable(null, "this");
+            if (functionContext.getVariable(null, identifier) == null &&
+                    functionContext.getType(m, identifier) == null &&
+                    (thisVar == null || thisVar.type().getFieldDataType(identifier) == null)) {
                 while (matchOp(".")) {
                     m = m == module ? identifier : m + "." + identifier;
                     identifier = readIdentifier();
@@ -1152,7 +1160,8 @@ public class Parser {
 
     private void verifyBounds(Assignment s) {
         if (!s.leftValue.type().isFloatingPoint) {
-            if (s.value.type().isFloatingPoint) {
+            DataType valueType = s.value.type();
+            if (valueType != null && valueType.isFloatingPoint) {
                 // TODO there are many more cases that are not allowed
                 throw syntaxError("The expression is floating point, but the variable is not.");
             }

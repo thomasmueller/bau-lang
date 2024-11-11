@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -86,7 +86,7 @@ void int_array_free(int_array* x) {
     _free(x);
 }
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
-    _decUse(x->message, i8_array);
+    _decUse(x->message, i8_array, 0);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -122,11 +122,10 @@ _int64_t_or_exception factorial_1(int64_t x) {
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     org_bau_Exception_exception result = org_bau_Exception_exception_new();
     result.exceptionType = 0;
-    _decUse(result.message, i8_array);
+    _decUse(result.message, i8_array, 1);
     result.message = message;
-    _incUse(result.message);
+    _incUse(result.message, 1);
     return result;
-    org_bau_Exception_exception_free(&result);
 }
 int main() {
     string_1000 = str_const("Value too large", 15);

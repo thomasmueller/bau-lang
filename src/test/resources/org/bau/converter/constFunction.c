@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -85,9 +85,8 @@ double sum_float_var(int _vaCount,...) {
         }
         break;
     }
-    _decUse(x, float_array);
+    _decUse(x, float_array, 0);
     return result;
-    _decUse(x, float_array);
 }
 int64_t sum_int_var(int _vaCount,...) {
     va_list _vaList;
@@ -111,9 +110,8 @@ int64_t sum_int_var(int _vaCount,...) {
         }
         break;
     }
-    _decUse(x, int_array);
+    _decUse(x, int_array, 0);
     return result;
-    _decUse(x, int_array);
 }
 int main() {
     printf("%lld\n", (long long)6);

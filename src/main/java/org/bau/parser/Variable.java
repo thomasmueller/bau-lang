@@ -96,7 +96,7 @@ public class Variable implements Expression, LeftValue {
     public String decrementRefCountC() {
         if (type().needIncDec()) {
             if (needToDecrementRefCountOnFree) {
-                return Free.DEC_USE + "(" + name + ", " + type().nameC() + ");\n";
+                return Free.DEC_USE + "(" + name + ", " + type().nameC() + ", 0);\n";
             }
         }
         return "";
@@ -105,7 +105,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE + "(" + name + ");\n";
+            return Free.INC_USE + "(" + name + ", 0);\n";
         }
         return "";
     }

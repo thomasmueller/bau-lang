@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -97,7 +97,6 @@ File* openFile_1(int64_t fp) {
     f->fp = fp;
     printf("opening %lld\n", (long long)f->fp);
     return f;
-    _decUse(f, File);
 }
 int main() {
     string_1000 = str_const("closing ", 8);
@@ -109,13 +108,13 @@ int main() {
         File* f = openFile_1(i);
         printf("opened %lld\n", (long long)i);
         if (i == 5) {
-            _decUse(f, File);
+            _decUse(f, File, 0);
             break;
         }
         File_use_1(f);
         i += 1;
         continue0:;
-        _decUse(f, File);
+        _decUse(f, File, 0);
     }
     _end();
     return 0;

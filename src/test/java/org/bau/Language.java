@@ -2,9 +2,6 @@ package org.bau;
 
 /**
 
-TODO fix memory leak of structs with arrays or pointer
-     also fix arrays of such types
-
 TODO memory management
 
 TODO auto-convert to the requested type if there is a conversion function,
@@ -26,11 +23,13 @@ TODO converter from Java or C or Rust to Bau
 
 TODO 100% code coverage, for parser at least
 
-TODO tagged union support
+TODO tagged union support, or interfaces like in Go?
 
 TODO improved memory management
      maybe avoid reference counting for local variables,
      and use a separate stack for references
+
+TODO struct assignment (eg. str) also needs decRef/incRef -- via a function?
 
 org.bau.Memory
   copy

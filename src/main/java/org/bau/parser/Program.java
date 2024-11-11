@@ -200,15 +200,15 @@ public class Program {
         if (TRACE_REF_COUNTS) {
             buff.append("int __globalObjects = 0;\n");
             buff.append("int __refCountUpdates = 0;\n");
-            buff.append("#define _incUse(a) {__refCountUpdates++; printf(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(a && (a)->_refCount < INT32_MAX){(a)->_refCount++;}}\n");
-            buff.append("#define _decUse(a, type) {__refCountUpdates++; if(a && (a)->_refCount < INT32_MAX){printf(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0) type##_free(a);}}\n");
+            buff.append("#define _incUse(a, g) {__refCountUpdates += 1; printf(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0);if(a && (a)->_refCount < INT32_MAX){(a)->_refCount++;}}\n");
+            buff.append("#define _decUse(a, type, g) {__refCountUpdates += 1; if(a && (a)->_refCount < INT32_MAX){printf(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0) type##_free(a);}}\n");
             buff.append("#define _malloc(a) malloc(a)\n");
             buff.append("#define _traceMalloc(a) printf(\"new %p line %d (%d)\\n\", a, __LINE__, ++__globalObjects);\n");
             buff.append("#define _free(a) {printf(\"del %p line %d (%d)\\n\", a, __LINE__, --__globalObjects);free(a);}\n");
             buff.append("#define _end() {printf(\"refCountUpdates: %d\\n\", __refCountUpdates); if(__globalObjects!=0)printf(\"################ MEMORY LEAK: %d ################\\n\", __globalObjects);}\n");
         } else {
-            buff.append("#define _incUse(a) if(a){(a)->_refCount++;}\n");
-            buff.append("#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}\n");
+            buff.append("#define _incUse(a, g) if(a){(a)->_refCount++;}\n");
+            buff.append("#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}\n");
             buff.append("#define _malloc(a) malloc(a)\n");
             buff.append("#define _traceMalloc(a) ;\n");
             buff.append("#define _free(a) free(a)\n");
@@ -334,7 +334,7 @@ public class Program {
                 if (t.isArray()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
                     if (t.baseType().needIncDec()) {
-                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) _decUse(x->data[i], " + t.baseType().nameC() + ");\n"));
+                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + Free.DEC_USE + "(x->data[i], " + t.baseType().nameC() + ", 1);\n"));
                     } else if (t.baseType().needFree()) {
                         buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + t.baseType().nameC() + "_free(&(x->data[i]));\n"));
                     }
@@ -345,7 +345,7 @@ public class Program {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
                     for (Variable f : t.fields) {
                         if (f.type.needIncDec()) {
-                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
+                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ", 0);\n"));
                         } else if (f.type.needFree()) {
                             buff.append(Statement.indent(f.type.nameC() + "_free(x->" + f.name + ");\n"));
                         }

@@ -90,15 +90,19 @@ public class While implements Statement {
     public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("while (" + condition.toC() + ") {\n");
-        for(Statement s : list) {
+        boolean hasReturn = false;
+        for (Statement s : list) {
+            if (s instanceof Return) {
+                hasReturn = true;
+            }
             buff.append(Statement.indent(s.toC()));
         }
         StringBuilder buffContinue = new StringBuilder();
-        for(Statement s : listContinue) {
+        for (Statement s : listContinue) {
             buffContinue.append(Statement.indent(s.toC()));
         }
-        if (autoClose != null) {
-            for(Statement s : autoClose) {
+        if (!hasReturn && autoClose != null) {
+            for (Statement s : autoClose) {
                 buffContinue.append(Statement.indent(s.toC()));
             }
         }

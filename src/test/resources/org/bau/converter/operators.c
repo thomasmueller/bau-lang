@@ -3,8 +3,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <limits.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)

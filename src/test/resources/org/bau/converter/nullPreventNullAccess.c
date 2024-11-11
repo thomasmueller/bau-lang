@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -96,7 +96,6 @@ Value* get_1(int64_t key) {
     Value* result = Value_new();
     result->data = key * 10;
     return result;
-    _decUse(result, Value);
 }
 void testBreak_0() {
     printf("testBreak\n");
@@ -105,18 +104,18 @@ void testBreak_0() {
         while (1) {
             Value* a = get_1(i);
             if (!(a)) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 break;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 break;
             }
             i = _next;
-            _decUse(a, Value);
+            _decUse(a, Value, 0);
         }
         break;
     }
@@ -128,18 +127,18 @@ void testContinue_0() {
         while (1) {
             Value* a = get_1(i);
             if (!(a)) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 goto continue1;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 break;
             }
             i = _next;
-            _decUse(a, Value);
+            _decUse(a, Value, 0);
         }
         break;
     }
@@ -158,11 +157,11 @@ void testIf_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 break;
             }
             i = _next;
-            _decUse(a, Value);
+            _decUse(a, Value, 0);
         }
         break;
     }
@@ -180,11 +179,11 @@ void testReturn_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value);
+                _decUse(a, Value, 0);
                 break;
             }
             i = _next;
-            _decUse(a, Value);
+            _decUse(a, Value, 0);
         }
         break;
     }

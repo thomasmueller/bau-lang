@@ -24,6 +24,9 @@ public class StringLiteral implements Expression {
 
     @Override
     public Value eval(Memory memory) {
+        if (memory == null) {
+            return null;
+        }
         long heapId = memory.putHeap(array, true);
         return new Value.ValueRef(heapId);
     }

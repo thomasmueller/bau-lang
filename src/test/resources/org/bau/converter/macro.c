@@ -3,8 +3,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -90,16 +90,16 @@ int main() {
         int64_t i = 0;
         while (1) {
             i8_array* _t0 = NULL;
-            _incUse(_t0);
+            _incUse(_t0, 0);
             if (i) {
-                _decUse(_t0, i8_array);
+                _decUse(_t0, i8_array, 0);
                 _t0 = expensiveCalc_1(string_1001);
             } else {
-                _decUse(_t0, i8_array);
+                _decUse(_t0, i8_array, 0);
                 _t0 = expensiveCalc_1(string_1002);
             }
             i8_array* x = _t0;
-            _incUse(x);
+            _incUse(x, 0);
             printf("%lld: %.*s\n", i, x->len, x->data);
             if (!(( i < 1 ))) {
                 printf("assertion failed\n");
@@ -110,13 +110,13 @@ int main() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 2) {
-                _decUse(_t0, i8_array);
-                _decUse(x, i8_array);
+                _decUse(_t0, i8_array, 0);
+                _decUse(x, i8_array, 0);
                 break;
             }
             i = _next;
-            _decUse(_t0, i8_array);
-            _decUse(x, i8_array);
+            _decUse(_t0, i8_array, 0);
+            _decUse(x, i8_array, 0);
         }
         break;
     }

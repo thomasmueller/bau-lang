@@ -50,7 +50,7 @@ public class Return implements Statement {
         StringBuilder buff = new StringBuilder();
         if (autoClose != null) {
             for (Statement s : autoClose) {
-                buff.append(Statement.indent(s.toC()));
+                buff.append(s.toC());
             }
         }
         if (exceptionStruct != null) {

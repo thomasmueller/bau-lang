@@ -66,6 +66,11 @@ public class TestCompare {
     }
 
     @Test
+    public void binaryTree() throws IOException {
+        test("binaryTree");
+    }
+
+    @Test
     public void byteArray() throws IOException {
         test("byteArray");
     }

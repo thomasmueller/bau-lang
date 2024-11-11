@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -85,7 +85,6 @@ i8_array* hex_2(int64_t x, int64_t len) {
         i -= 1;
     }
     return data;
-    _decUse(data, i8_array);
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
@@ -104,7 +103,7 @@ int main() {
     string_1001 = str_const("a", 1);
     i8_array* _t0 = hex_2(0x12fea234, 8);
     printf("%.*s\n", _t0->len, _t0->data);
-    _decUse(_t0, i8_array);
+    _decUse(_t0, i8_array, 0);
     _end();
     return 0;
 }

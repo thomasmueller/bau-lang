@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -110,8 +110,8 @@ void test_0() {
     org_bau_File_File_read_4(file, data, 0, 15);
     data->data[5] = 0;
     printf("%.*s\n", data->len, data->data);
-    _decUse(file, org_bau_File_File);
-    _decUse(data, i8_array);
+    _decUse(file, org_bau_File_File, 0);
+    _decUse(data, i8_array, 0);
 }
 int main() {
     string_1000 = str_const("hello.txt", 9);

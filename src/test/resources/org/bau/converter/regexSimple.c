@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -17,12 +17,12 @@ typedef struct org_bau_List_List org_bau_List_List;
 struct org_bau_List_List;
 typedef struct org_bau_Exception_exception org_bau_Exception_exception;
 struct org_bau_Exception_exception;
-typedef struct org_bau_List_List_i8 org_bau_List_List_i8;
-struct org_bau_List_List_i8;
 typedef struct Token Token;
 struct Token;
 typedef struct Token_array Token_array;
 struct Token_array;
+typedef struct org_bau_List_List_i8 org_bau_List_List_i8;
+struct org_bau_List_List_i8;
 typedef struct match match;
 struct match;
 typedef struct org_bau_List_List_Token org_bau_List_List_Token;
@@ -75,19 +75,6 @@ org_bau_Exception_exception org_bau_Exception_exception_new() {
     result.message = 0;
     return result;
 }
-struct org_bau_List_List_i8 {
-    i8_array* array;
-    int64_t size;
-    int32_t _refCount;
-};
-org_bau_List_List_i8* org_bau_List_List_i8_new() {
-    org_bau_List_List_i8* result = _malloc(sizeof(org_bau_List_List_i8));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
-    return result;
-}
 struct Token {
     int64_t type;
     org_bau_List_List_i8* data;
@@ -117,6 +104,19 @@ Token_array* Token_array_new(uint32_t len) {
     result->data = _malloc(sizeof(Token*) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
+    return result;
+}
+struct org_bau_List_List_i8 {
+    i8_array* array;
+    int64_t size;
+    int32_t _refCount;
+};
+org_bau_List_List_i8* org_bau_List_List_i8_new() {
+    org_bau_List_List_i8* result = _malloc(sizeof(org_bau_List_List_i8));
+    _traceMalloc(result);
+    result->_refCount = 1;
+    result->array = 0;
+    result->size = 0;
     return result;
 }
 struct match {
@@ -212,9 +212,9 @@ void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_List_List_free(org_bau_List_List* x);
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
-void org_bau_List_List_i8_free(org_bau_List_List_i8* x);
 void Token_free(Token* x);
 void Token_array_free(Token_array* x);
+void org_bau_List_List_i8_free(org_bau_List_List_i8* x);
 void org_bau_List_List_Token_free(org_bau_List_List_Token* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -228,23 +228,23 @@ void org_bau_List_List_free(org_bau_List_List* x) {
     _free(x);
 }
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
-    _decUse(x->message, i8_array);
-}
-void org_bau_List_List_i8_free(org_bau_List_List_i8* x) {
-    _decUse(x->array, i8_array);
-    _free(x);
+    _decUse(x->message, i8_array, 0);
 }
 void Token_free(Token* x) {
-    _decUse(x->data, org_bau_List_List_i8);
+    _decUse(x->data, org_bau_List_List_i8, 0);
     _free(x);
 }
 void Token_array_free(Token_array* x) {
-    for (int i = 0; i < x->len; i++) _decUse(x->data[i], Token);
+    for (int i = 0; i < x->len; i++) _decUse(x->data[i], Token, 1);
     _free(x->data);
     _free(x);
 }
+void org_bau_List_List_i8_free(org_bau_List_List_i8* x) {
+    _decUse(x->array, i8_array, 0);
+    _free(x);
+}
 void org_bau_List_List_Token_free(org_bau_List_List_Token* x) {
-    _decUse(x->array, Token_array);
+    _decUse(x->array, Token_array, 0);
     _free(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
@@ -364,11 +364,11 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         int64_t end = _x1.result;
         if (end >= 0) {
             match _t2 = match_2(0, end);
-            _decUse(list, org_bau_List_List_Token);
+            _decUse(list, org_bau_List_List_Token, 0);
             return ok_match_or_exception(_t2);
         }
         match _t3 = match_2(-1, -1);
-        _decUse(list, org_bau_List_List_Token);
+        _decUse(list, org_bau_List_List_Token, 0);
         return ok_match_or_exception(_t3);
     }
     int64_t tp = 0;
@@ -378,7 +378,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         int64_t end = _x2.result;
         if (end >= 0) {
             match _t4 = match_2(tp, end);
-            _decUse(list, org_bau_List_List_Token);
+            _decUse(list, org_bau_List_List_Token, 0);
             return ok_match_or_exception(_t4);
         }
         if (tp < text->len) {
@@ -387,11 +387,10 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         tp += 1;
     }
     match _t5 = match_2(-1, -1);
-    _decUse(list, org_bau_List_List_Token);
+    _decUse(list, org_bau_List_List_Token, 0);
     return ok_match_or_exception(_t5);
     catch0:
     return exception_match_or_exception(_lastException);
-    _decUse(list, org_bau_List_List_Token);
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
@@ -412,13 +411,13 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
         return ok_int64_t_or_exception(tp);
     }
     Token* t = list->array->data[idx_2(rp, list->array->len)];
-    _incUse(t);
+    _incUse(t, 0);
     if (t->type == 1) {
         if (tp == text->len) {
-            _decUse(t, Token);
+            _decUse(t, Token, 0);
             return ok_int64_t_or_exception(tp);
         }
-        _decUse(t, Token);
+        _decUse(t, Token, 0);
         return ok_int64_t_or_exception(-1);
     }
     while (1 == 1) {
@@ -428,7 +427,7 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
             if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
             int64_t _t0 = _x0.result;
             if (!(_t0)) {
-                _decUse(t, Token);
+                _decUse(t, Token, 0);
                 return ok_int64_t_or_exception(-1);
             }
             tp += 1;
@@ -444,11 +443,10 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
     _x1 = matchStar_6(t, list, rp + 1, text, tp, t->max - t->min);
     if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
     int64_t _t1 = _x1.result;
-    _decUse(t, Token);
+    _decUse(t, Token, 0);
     return ok_int64_t_or_exception(_t1);
     catch0:
     return exception_int64_t_or_exception(_lastException);
-    _decUse(t, Token);
 }
 _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp, int64_t max) {
     org_bau_Exception_exception _lastException;
@@ -496,27 +494,24 @@ _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     org_bau_Exception_exception result = org_bau_Exception_exception_new();
     result.exceptionType = 0;
-    _decUse(result.message, i8_array);
+    _decUse(result.message, i8_array, 1);
     result.message = message;
-    _incUse(result.message);
+    _incUse(result.message, 1);
     return result;
-    org_bau_Exception_exception_free(&result);
 }
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T) {
     org_bau_List_List_Token* result = org_bau_List_List_Token_new();
-    _decUse(result->array, Token_array);
+    _decUse(result->array, Token_array, 1);
     result->array = Token_array_new(4);
     result->size = 0;
     return result;
-    _decUse(result, org_bau_List_List_Token);
 }
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T) {
     org_bau_List_List_i8* result = org_bau_List_List_i8_new();
-    _decUse(result->array, i8_array);
+    _decUse(result->array, i8_array, 1);
     result->array = i8_array_new(4);
     result->size = 0;
     return result;
-    _decUse(result, org_bau_List_List_i8);
 }
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     if (this->size >= this->array->len) {
@@ -524,9 +519,9 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                _decUse(n->data[idx_2(i, n->len)], Token);
+                _decUse(n->data[idx_2(i, n->len)], Token, 1);
                 n->data[idx_2(i, n->len)] = this->array->data[i];
-                _incUse(n->data[idx_2(i, n->len)]);
+                _incUse(n->data[idx_2(i, n->len)], 1);
                 continue1:;
                 int64_t _next = i + 1;
                 if (_next >= this->array->len) {
@@ -536,14 +531,14 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
             }
             break;
         }
-        _decUse(this->array, Token_array);
+        _decUse(this->array, Token_array, 1);
         this->array = n;
-        _incUse(this->array);
-        _decUse(n, Token_array);
+        _incUse(this->array, 1);
+        _decUse(n, Token_array, 0);
     }
-    _decUse(this->array->data[idx_2(this->size, this->array->len)], Token);
+    _decUse(this->array->data[idx_2(this->size, this->array->len)], Token, 1);
     this->array->data[idx_2(this->size, this->array->len)] = x;
-    _incUse(this->array->data[idx_2(this->size, this->array->len)]);
+    _incUse(this->array->data[idx_2(this->size, this->array->len)], 1);
     this->size += 1;
 }
 void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, char x) {
@@ -562,10 +557,10 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, char x) {
             }
             break;
         }
-        _decUse(this->array, i8_array);
+        _decUse(this->array, i8_array, 1);
         this->array = n;
-        _incUse(this->array);
-        _decUse(n, i8_array);
+        _incUse(this->array, 1);
+        _decUse(n, i8_array, 0);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -585,7 +580,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
     while (i < regex->len) {
         char c = regex->data[i];
         Token* t = Token_new();
-        _decUse(t->data, org_bau_List_List_i8);
+        _decUse(t->data, org_bau_List_List_i8, 1);
         t->data = org_bau_List_newList_i8_1(0);
         t->min = 1;
         t->max = 1;
@@ -640,7 +635,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         }
         org_bau_List_List_Token_add_2(result, t);
         if (( i + 1 ) >= regex->len) {
-            _decUse(t, Token);
+            _decUse(t, Token, 0);
             break;
         }
         i += 1;
@@ -707,12 +702,11 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         }
         i += 1;
         continue0:;
-        _decUse(t, Token);
+        _decUse(t, Token, 0);
     }
     return ok_org_bau_List_List_Token_or_exception(result);
     catch0:
     return exception_org_bau_List_List_Token_or_exception(_lastException);
-    _decUse(result, org_bau_List_List_Token);
 }
 void test_0() {
     org_bau_Exception_exception _lastException;

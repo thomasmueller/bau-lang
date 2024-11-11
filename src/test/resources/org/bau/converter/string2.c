@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -143,7 +143,7 @@ void org_bau_List_List_free(org_bau_List_List* x) {
     _free(x);
 }
 void org_bau_String_string_free(org_bau_String_string* x) {
-    _decUse(x->data, i8_array);
+    _decUse(x->data, i8_array, 0);
 }
 void org_bau_String_string_array_free(org_bau_String_string_array* x) {
     for (int i = 0; i < x->len; i++) org_bau_String_string_free(&(x->data[i]));
@@ -151,11 +151,11 @@ void org_bau_String_string_array_free(org_bau_String_string_array* x) {
     _free(x);
 }
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x) {
-    _decUse(x->data, i8_array);
+    _decUse(x->data, i8_array, 0);
     _free(x);
 }
 void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_String_string* x) {
-    _decUse(x->array, org_bau_String_string_array);
+    _decUse(x->array, org_bau_String_string_array, 0);
     _free(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
@@ -186,11 +186,10 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
     org_bau_List_List_org_bau_String_string* result = org_bau_List_List_org_bau_String_string_new();
-    _decUse(result->array, org_bau_String_string_array);
+    _decUse(result->array, org_bau_String_string_array, 1);
     result->array = org_bau_String_string_array_new(4);
     result->size = 0;
     return result;
-    _decUse(result, org_bau_List_List_org_bau_String_string);
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     if (this->size >= this->array->len) {
@@ -208,10 +207,10 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
             }
             break;
         }
-        _decUse(this->array, org_bau_String_string_array);
+        _decUse(this->array, org_bau_String_string_array, 1);
         this->array = n;
-        _incUse(this->array);
-        _decUse(n, org_bau_String_string_array);
+        _incUse(this->array, 1);
+        _decUse(n, org_bau_String_string_array, 0);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -276,7 +275,7 @@ i8_array* org_bau_String_replaceAll_3(i8_array* s, i8_array* before, i8_array* a
         return s;
     }
     org_bau_String_StringBuilder* buff = org_bau_String_StringBuilder_new();
-    _decUse(buff->data, i8_array);
+    _decUse(buff->data, i8_array, 1);
     buff->data = i8_array_new(s->len);
     int64_t index = 0;
     while (1) {
@@ -290,10 +289,9 @@ i8_array* org_bau_String_replaceAll_3(i8_array* s, i8_array* before, i8_array* a
     }
     org_bau_String_StringBuilder_append_4(buff, s, index, s->len);
     i8_array* _r0 = buff->data;
-    _incUse(_r0);
-    _decUse(buff, org_bau_String_StringBuilder);
+    _incUse(_r0, 0);
+    _decUse(buff, org_bau_String_StringBuilder, 0);
     return _r0;
-    _decUse(buff, org_bau_String_StringBuilder);
 }
 org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_array* delimiter) {
     org_bau_List_List_org_bau_String_string* list = org_bau_List_newList_org_bau_String_string_1(0);
@@ -314,31 +312,27 @@ org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_
         index = next + delimiter->len;
         next = org_bau_String_indexOf_3(s, delimiter, index);
         if (next < 0) {
-            _decUse(p, i8_array);
+            _decUse(p, i8_array, 0);
             break;
         }
         continue0:;
-        _decUse(p, i8_array);
+        _decUse(p, i8_array, 0);
     }
     i8_array* p = org_bau_String_substring_2(s, index);
     org_bau_List_List_org_bau_String_string_add_2(list, org_bau_String_str_1(p));
-    _decUse(p, i8_array);
+    _decUse(p, i8_array, 0);
     return list;
-    _decUse(list, org_bau_List_List_org_bau_String_string);
-    _decUse(p, i8_array);
 }
 org_bau_String_string org_bau_String_str_1(i8_array* s) {
     org_bau_String_string x = org_bau_String_string_new();
-    _decUse(x.data, i8_array);
+    _decUse(x.data, i8_array, 1);
     x.data = s;
-    _incUse(x.data);
+    _incUse(x.data, 1);
     return x;
-    org_bau_String_string_free(&x);
 }
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start) {
     i8_array* _t0 = org_bau_String_substring_3(s, start, s->len);
     return _t0;
-    _decUse(_t0, i8_array);
 }
 i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     int64_t len = end - start;
@@ -383,7 +377,6 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         break;
     }
     return result;
-    _decUse(result, i8_array);
 }
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end) {
     int64_t add = end - start;
@@ -415,11 +408,11 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
             }
             break;
         }
-        _decUse(this->data, i8_array);
+        _decUse(this->data, i8_array, 1);
         this->data = n;
-        _incUse(this->data);
+        _incUse(this->data, 1);
         continue0:;
-        _decUse(n, i8_array);
+        _decUse(n, i8_array, 0);
     }
     while (1 == 1) {
         int64_t i = 0;
@@ -438,7 +431,7 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
 }
 void test_0() {
     i8_array* x = string_1001;
-    _incUse(x);
+    _incUse(x, 0);
     int64_t _t0 = org_bau_String_indexOf_2(x, string_1003);
     printf("indexOf ll: %lld\n", (long long)_t0);
     i8_array* _t1 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1006);
@@ -464,11 +457,11 @@ void test_0() {
         }
         break;
     }
-    _decUse(x, i8_array);
-    _decUse(_t1, i8_array);
-    _decUse(_t2, i8_array);
-    _decUse(_t3, i8_array);
-    _decUse(list, org_bau_List_List_org_bau_String_string);
+    _decUse(x, i8_array, 0);
+    _decUse(_t1, i8_array, 0);
+    _decUse(_t2, i8_array, 0);
+    _decUse(_t3, i8_array, 0);
+    _decUse(list, org_bau_List_List_org_bau_String_string, 0);
 }
 int main() {
     string_1000 = str_const("", 0);

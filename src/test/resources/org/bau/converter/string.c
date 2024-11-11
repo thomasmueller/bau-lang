@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -84,7 +84,7 @@ void int_array_free(int_array* x) {
     _free(x);
 }
 void string_free(string* x) {
-    _decUse(x->data, i8_array);
+    _decUse(x->data, i8_array, 0);
 }
 void string_array_free(string_array* x) {
     for (int i = 0; i < x->len; i++) string_free(&(x->data[i]));
@@ -104,11 +104,10 @@ i8_array* string_1002;
 i8_array* string_1003;
 string str_1(i8_array* s) {
     string x = string_new();
-    _decUse(x.data, i8_array);
+    _decUse(x.data, i8_array, 1);
     x.data = s;
-    _incUse(x.data);
+    _incUse(x.data, 1);
     return x;
-    string_free(&x);
 }
 int main() {
     string_1000 = str_const("hello", 5);
@@ -120,7 +119,7 @@ int main() {
     x->data[1] = str_1(string_1001);
     x->data[2] = str_1(string_1002);
     printf("%.*s %.*s %.*s\n", x->data[0].data->len, x->data[0].data->data, x->data[1].data->len, x->data[1].data->data, x->data[2].data->len, x->data[2].data->data);
-    _decUse(x, string_array);
+    _decUse(x, string_array, 0);
     _end();
     return 0;
 }

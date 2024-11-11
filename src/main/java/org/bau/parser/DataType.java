@@ -45,7 +45,7 @@ public class DataType {
     private boolean isNullable;
     public ArrayList<String> parameters;
     public String template;
-    private final boolean needsFree;
+    private boolean needsFree;
 
     public DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields) {
         this(module, name, sizeOf, isSystem, false, fields, false);
@@ -55,6 +55,16 @@ public class DataType {
         return token != null && !token.isEmpty() &&
                 token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
                 token.toUpperCase().equals(token);
+    }
+
+    void addFields(List<Variable> fields) {
+        this.fields.addAll(fields);
+        for (Variable f : fields) {
+            if (f.type().needsFree) {
+                needsFree = true;
+                break;
+            }
+        }
     }
 
     void used() {
@@ -93,18 +103,8 @@ public class DataType {
         }
         if (isArray || isPointer()) {
             needsFree = true;
-        } else if (isSystem) {
-            needsFree = false;
-        } else {
-            boolean free = false;
-            for (Variable f : fields) {
-                if (f.type().needsFree) {
-                    free = true;
-                    break;
-                }
-            }
-            needsFree = free;
         }
+        addFields(fields);
     }
 
     public boolean isSystem() {

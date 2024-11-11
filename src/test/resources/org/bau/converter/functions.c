@@ -3,8 +3,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <time.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -154,9 +154,8 @@ int64_t sum_var(int64_t a, int _vaCount,...) {
         }
         break;
     }
-    _decUse(b, int_array);
+    _decUse(b, int_array, 0);
     return sum;
-    _decUse(b, int_array);
 }
 int main() {
     string_1000 = str_const(" ", 1);

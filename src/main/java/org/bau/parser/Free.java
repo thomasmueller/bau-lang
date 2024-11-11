@@ -118,7 +118,7 @@ public class Free implements Statement {
     @Override
     public String toC() {
         if (var.type().needIncDec()) {
-            return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +");\n";
+            return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +", 0);\n";
         } else if (var.type().needFree()) {
             return var.type().nameC() + "_free(&" + var.toC() + ");\n";
         } else {

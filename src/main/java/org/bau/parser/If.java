@@ -86,23 +86,35 @@ public class If implements Statement {
                 buff.append(conditions.get(i).toC()).append(") {\n");
             }
             ArrayList<Statement> list = listList.get(i);
-            for(Statement s : list) {
+            boolean hasReturn = false;
+            for (Statement s : list) {
+                if (s instanceof Return) {
+                    hasReturn = true;
+                }
                 buff.append(Statement.indent(s.toC()));
             }
-            List<Statement> autoCloseList = autoClose.get(i);
-            for (Statement s : autoCloseList) {
-                buff.append(Statement.indent(s.toC()));
+            if (!hasReturn) {
+                List<Statement> autoCloseList = autoClose.get(i);
+                for (Statement s : autoCloseList) {
+                    buff.append(Statement.indent(s.toC()));
+                }
             }
         }
         if (listList.size() > conditions.size()) {
             buff.append("} else {\n");
             ArrayList<Statement> list = listList.get(listList.size() - 1);
+            boolean hasReturn = false;
             for (Statement s : list) {
+                if (s instanceof Return) {
+                    hasReturn = true;
+                }
                 buff.append(Statement.indent(s.toC()));
             }
-            List<Statement> autoCloseList = autoClose.get(listList.size() - 1);
-            for (Statement s : autoCloseList) {
-                buff.append(Statement.indent(s.toC()));
+            if (!hasReturn) {
+                List<Statement> autoCloseList = autoClose.get(listList.size() - 1);
+                for (Statement s : autoCloseList) {
+                    buff.append(Statement.indent(s.toC()));
+                }
             }
         }
         buff.append("}\n");

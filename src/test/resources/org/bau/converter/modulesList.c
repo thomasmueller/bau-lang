@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -67,7 +67,7 @@ void org_bau_List_List_free(org_bau_List_List* x) {
     _free(x);
 }
 void org_bau_List_List_int_free(org_bau_List_List_int* x) {
-    _decUse(x->array, int_array);
+    _decUse(x->array, int_array, 0);
     _free(x);
 }
 int64_t idx_2(int64_t x, int64_t len) {
@@ -77,11 +77,10 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
     org_bau_List_List_int* result = org_bau_List_List_int_new();
-    _decUse(result->array, int_array);
+    _decUse(result->array, int_array, 1);
     result->array = int_array_new(4);
     result->size = 0;
     return result;
-    _decUse(result, org_bau_List_List_int);
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= this->array->len) {
@@ -99,10 +98,10 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
             }
             break;
         }
-        _decUse(this->array, int_array);
+        _decUse(this->array, int_array, 1);
         this->array = n;
-        _incUse(this->array);
-        _decUse(n, int_array);
+        _incUse(this->array, 1);
+        _decUse(n, int_array, 0);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -113,7 +112,7 @@ int main() {
     org_bau_List_List_int_add_2(list, 80);
     printf("%lld\n", (long long)list->size);
     printf("%lld\n", (long long)list->array->data[idx_2(0, list->array->len)]);
-    _decUse(list, org_bau_List_List_int);
+    _decUse(list, org_bau_List_List_int, 0);
     _end();
     return 0;
 }

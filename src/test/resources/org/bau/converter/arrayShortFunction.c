@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -52,7 +52,7 @@ void test_0() {
     int_array* data = int_array_new(16);
     fill_1(data);
     printf("%d\n", 16);
-    _decUse(data, int_array);
+    _decUse(data, int_array, 0);
 }
 int main() {
     test_0();

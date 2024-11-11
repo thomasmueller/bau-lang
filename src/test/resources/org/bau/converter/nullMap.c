@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -58,7 +58,6 @@ Value* get_1(int64_t key) {
     Value* result = Value_new();
     result->data = key * 10;
     return result;
-    _decUse(result, Value);
 }
 void test_0() {
     Value* a = get_1(0);
@@ -69,8 +68,8 @@ void test_0() {
     if (b != NULL) {
         printf("%lld\n", (long long)b->data);
     }
-    _decUse(a, Value);
-    _decUse(b, Value);
+    _decUse(a, Value, 0);
+    _decUse(b, Value, 0);
 }
 int main() {
     test_0();

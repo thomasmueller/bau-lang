@@ -140,7 +140,11 @@ public class FunctionDefinition {
             buff.append(Statement.indent("va_end(_vaList);\n"));
         }
         StringBuilder buff2 = new StringBuilder();
+        boolean hasReturn = false;
         for (Statement s : list) {
+            if (s instanceof Return) {
+                hasReturn = true;
+            }
             buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
@@ -153,7 +157,7 @@ public class FunctionDefinition {
             buff2.append(Statement.indent("return exception" + context.function.getExceptionStruct() + "(_lastException);\n"));
         }
         buff.append(buff2.toString());
-        if (autoClose != null) {
+        if (!hasReturn && autoClose != null) {
             for(Statement s : autoClose) {
                 buff.append(Statement.indent(s.toC()));
             }

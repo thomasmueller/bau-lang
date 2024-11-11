@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a) if(a){(a)->_refCount++;}
-#define _decUse(a, type) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
+#define _incUse(a, g) if(a){(a)->_refCount++;}
+#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
 #define _malloc(a) malloc(a)
 #define _traceMalloc(a) ;
 #define _free(a) free(a)
@@ -156,7 +156,7 @@ void HashMap_free(HashMap* x) {
     _free(x);
 }
 void str_free(str* x) {
-    _decUse(x->value, i8_array);
+    _decUse(x->value, i8_array, 0);
 }
 void str_array_free(str_array* x) {
     for (int i = 0; i < x->len; i++) str_free(&(x->data[i]));
@@ -164,15 +164,15 @@ void str_array_free(str_array* x) {
     _free(x);
 }
 void HashMap_int_int_free(HashMap_int_int* x) {
-    _decUse(x->keys, int_array);
-    _decUse(x->values, int_array);
-    _decUse(x->hashes, int_array);
+    _decUse(x->keys, int_array, 0);
+    _decUse(x->values, int_array, 0);
+    _decUse(x->hashes, int_array, 0);
     _free(x);
 }
 void HashMap_str_str_free(HashMap_str_str* x) {
-    _decUse(x->keys, str_array);
-    _decUse(x->values, str_array);
-    _decUse(x->hashes, int_array);
+    _decUse(x->keys, str_array, 0);
+    _decUse(x->values, str_array, 0);
+    _decUse(x->hashes, int_array, 0);
     _free(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
@@ -213,20 +213,20 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
         int_array* vn = int_array_new(this->keys->len * 2);
         int_array* hn = int_array_new(this->keys->len * 2);
         int_array* ok = this->keys;
-        _incUse(ok);
+        _incUse(ok, 0);
         int_array* oh = this->hashes;
-        _incUse(oh);
+        _incUse(oh, 0);
         int_array* ov = this->values;
-        _incUse(ov);
-        _decUse(this->keys, int_array);
+        _incUse(ov, 0);
+        _decUse(this->keys, int_array, 1);
         this->keys = kn;
-        _incUse(this->keys);
-        _decUse(this->values, int_array);
+        _incUse(this->keys, 1);
+        _decUse(this->values, int_array, 1);
         this->values = vn;
-        _incUse(this->values);
-        _decUse(this->hashes, int_array);
+        _incUse(this->values, 1);
+        _decUse(this->hashes, int_array, 1);
         this->hashes = hn;
-        _incUse(this->hashes);
+        _incUse(this->hashes, 1);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
@@ -242,12 +242,12 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
             }
             break;
         }
-        _decUse(kn, int_array);
-        _decUse(vn, int_array);
-        _decUse(hn, int_array);
-        _decUse(ok, int_array);
-        _decUse(oh, int_array);
-        _decUse(ov, int_array);
+        _decUse(kn, int_array, 0);
+        _decUse(vn, int_array, 0);
+        _decUse(hn, int_array, 0);
+        _decUse(ok, int_array, 0);
+        _decUse(oh, int_array, 0);
+        _decUse(ov, int_array, 0);
     }
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
@@ -341,20 +341,20 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
         str_array* vn = str_array_new(this->keys->len * 2);
         int_array* hn = int_array_new(this->keys->len * 2);
         str_array* ok = this->keys;
-        _incUse(ok);
+        _incUse(ok, 0);
         int_array* oh = this->hashes;
-        _incUse(oh);
+        _incUse(oh, 0);
         str_array* ov = this->values;
-        _incUse(ov);
-        _decUse(this->keys, str_array);
+        _incUse(ov, 0);
+        _decUse(this->keys, str_array, 1);
         this->keys = kn;
-        _incUse(this->keys);
-        _decUse(this->values, str_array);
+        _incUse(this->keys, 1);
+        _decUse(this->values, str_array, 1);
         this->values = vn;
-        _incUse(this->values);
-        _decUse(this->hashes, int_array);
+        _incUse(this->values, 1);
+        _decUse(this->hashes, int_array, 1);
         this->hashes = hn;
-        _incUse(this->hashes);
+        _incUse(this->hashes, 1);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
@@ -370,12 +370,12 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
             }
             break;
         }
-        _decUse(kn, str_array);
-        _decUse(vn, str_array);
-        _decUse(hn, int_array);
-        _decUse(ok, str_array);
-        _decUse(oh, int_array);
-        _decUse(ov, str_array);
+        _decUse(kn, str_array, 0);
+        _decUse(vn, str_array, 0);
+        _decUse(hn, int_array, 0);
+        _decUse(ok, str_array, 0);
+        _decUse(oh, int_array, 0);
+        _decUse(ov, str_array, 0);
     }
     int64_t hash = str_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
@@ -459,26 +459,24 @@ int64_t mix_1(int64_t z) {
 HashMap_int_int* newHashMap_int_int_2(int64_t _K, int64_t _V) {
     HashMap_int_int* result = HashMap_int_int_new();
     result->size = 0;
-    _decUse(result->keys, int_array);
+    _decUse(result->keys, int_array, 1);
     result->keys = int_array_new(4);
-    _decUse(result->values, int_array);
+    _decUse(result->values, int_array, 1);
     result->values = int_array_new(4);
-    _decUse(result->hashes, int_array);
+    _decUse(result->hashes, int_array, 1);
     result->hashes = int_array_new(4);
     return result;
-    _decUse(result, HashMap_int_int);
 }
 HashMap_str_str* newHashMap_str_str_2(int64_t _K, int64_t _V) {
     HashMap_str_str* result = HashMap_str_str_new();
     result->size = 0;
-    _decUse(result->keys, str_array);
+    _decUse(result->keys, str_array, 1);
     result->keys = str_array_new(4);
-    _decUse(result->values, str_array);
+    _decUse(result->values, str_array, 1);
     result->values = str_array_new(4);
-    _decUse(result->hashes, int_array);
+    _decUse(result->hashes, int_array, 1);
     result->hashes = int_array_new(4);
     return result;
-    _decUse(result, HashMap_str_str);
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -488,11 +486,10 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 }
 str str_1(i8_array* x) {
     str result = str_new();
-    _decUse(result.value, i8_array);
+    _decUse(result.value, i8_array, 1);
     result.value = x;
-    _incUse(result.value);
+    _incUse(result.value, 1);
     return result;
-    str_free(&result);
 }
 int64_t str_equals_2(str this, str other) {
     int64_t _r0 = this.value->len == other.value->len;
@@ -530,8 +527,8 @@ void test_0() {
     HashMap_str_str_put_3(map2, a, b);
     str c = HashMap_str_str_get_2(map2, a);
     printf("str map[%.*s]=%.*s\n", a.value->len, a.value->data, c.value->len, c.value->data);
-    _decUse(map, HashMap_int_int);
-    _decUse(map2, HashMap_str_str);
+    _decUse(map, HashMap_int_int, 0);
+    _decUse(map2, HashMap_str_str, 0);
     str_free(&a);
     str_free(&b);
     str_free(&c);
