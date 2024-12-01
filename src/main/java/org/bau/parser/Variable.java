@@ -14,7 +14,6 @@ public class Variable implements Expression, LeftValue {
     private Bounds lenBounds;
     boolean isConstant;
     Value constantValue;
-    private boolean needToDecrementRefCountOnFree = true;
     public boolean global;
 
     public Variable(String name, DataType type) {
@@ -95,9 +94,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
-            if (needToDecrementRefCountOnFree) {
-                return Free.DEC_USE + "(" + name + ", " + type().nameC() + ", 0);\n";
-            }
+            return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() + ");\n";
         }
         return "";
     }
@@ -105,7 +102,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE + "(" + name + ", 0);\n";
+            return Free.INC_USE_STACK + "(" + name + ");\n";
         }
         return "";
     }

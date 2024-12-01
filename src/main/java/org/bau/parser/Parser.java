@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.bau.parser.Bounds.ApplyType;
+import org.bau.parser.SpecialOperation.SpecialOperationType;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValueI8Array;
@@ -2007,18 +2008,36 @@ public class Parser {
         }
         ArrayList<String> list = functionContext.newVariablesList(stackPos);
         String exceptString = except == null ? "" : except.toString();
-        for(String name : list) {
+        Variable lastFreedVar = null;
+        for (String name : list) {
             // do not close if we return it
-            if (!name.equals(exceptString)) {
-                Variable var = functionContext.getVariable(null, name);
-                if (var == null) {
-                    throw syntaxError("Variable not found: '" + name + "'");
-                }
-                if (var.type.needFree()) {
-                    Free free = new Free(var);
-                    autoClose.add(free);
+            if (Program.SIMPLE_REF_COUNTING && name.equals(exceptString)) {
+                continue;
+            }
+            Variable var = functionContext.getVariable(null, name);
+            if (var == null) {
+                throw syntaxError("Variable not found: '" + name + "'");
+            }
+            if (var.type.needFree()) {
+                lastFreedVar = var;
+                Free free = new Free(var);
+                autoClose.add(free);
+            }
+        }
+        Collections.reverse(autoClose);
+        if (!Program.SIMPLE_REF_COUNTING && except != null) {
+            // we need to assign so that we get a _incUseStack
+            assignTempVariable(autoClose, except);
+            if (autoClose.size() == 2) {
+                // ignore pair of decStack & incStack of the same variable
+                if (except == lastFreedVar) {
+                    autoClose.clear();
                 }
             }
+        }
+        if (!Program.SIMPLE_REF_COUNTING && autoClose.size() > 0) {
+            SpecialOperation op = new SpecialOperation(SpecialOperationType.ZERO_COUNT_TABLE_GC);
+            autoClose.add(op);
         }
         return autoClose;
     }

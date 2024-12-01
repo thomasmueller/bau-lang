@@ -1,4 +1,5 @@
 fun main()
+    # or just: stretch(4); creates 31 trees
     n := 10
     minDepth := 4
     maxDepth := n

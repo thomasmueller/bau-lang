@@ -10,6 +10,8 @@ public class Free implements Statement {
 
     public static final String INC_USE = "_incUse";
     public static final String DEC_USE = "_decUse";
+    public static final String INC_USE_STACK = "_incUseStack";
+    public static final String DEC_USE_STACK = "_decUseStack";
 
     private final Variable var;
 
@@ -118,7 +120,7 @@ public class Free implements Statement {
     @Override
     public String toC() {
         if (var.type().needIncDec()) {
-            return DEC_USE + "(" + var.toC() + ", " + var.type().nameC() +", 0);\n";
+            return DEC_USE_STACK + "(" + var.toC() + ", " + var.type().nameC() +");\n";
         } else if (var.type().needFree()) {
             return var.type().nameC() + "_free(&" + var.toC() + ");\n";
         } else {

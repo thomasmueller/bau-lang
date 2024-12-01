@@ -3,6 +3,8 @@ package org.bau;
 /**
 
 TODO memory management
+     initial count = 0? if only assigned to local variable and then dropped?
+     or initially has an owner, always?
 
 TODO auto-convert to the requested type if there is a conversion function,
      for println.
@@ -30,6 +32,9 @@ TODO improved memory management
      and use a separate stack for references
 
 TODO struct assignment (eg. str) also needs decRef/incRef -- via a function?
+
+TODO automatically adding a construction function?
+TODO types that have non-nullable fields: new(Tree) would set the fields to null...
 
 org.bau.Memory
   copy

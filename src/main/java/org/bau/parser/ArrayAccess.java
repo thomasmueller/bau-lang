@@ -66,7 +66,7 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ", 1);\n";
+            return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
         }
         return "";
     }
@@ -74,7 +74,7 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE + "(" + toC() + ", 1);\n";
+            return Free.INC_USE + "(" + toC() + ");\n";
         }
         return "";
     }

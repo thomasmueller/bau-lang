@@ -60,7 +60,7 @@ public class Service {
                 fmd.write(data);
                 fmd.setLength(data.length);
                 fmd.close();
-            }
+            }/*
             System.out.println("Interpreting ====================================");
             try {
                 long start = System.currentTimeMillis();
@@ -73,6 +73,7 @@ public class Service {
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
+            */
             System.out.println("Compiling =======================================");
             // int exitCode = runProcess("gcc", "-O3", fc.toString());
             int exitCode = runProcess("gcc", fc.toString());
@@ -82,12 +83,23 @@ public class Service {
                 long start = System.currentTimeMillis();
                 exitCode = runProcess(f2.getAbsolutePath());
                 long time = System.currentTimeMillis() - start;
-                System.out.println("(" + time + " ms, exitCode " + exitCode + ")");
+                System.out.println("(" + time + " ms)");
+                String msg = "";
+                if (exitCode != 0) {
+                    msg = "Exit code " + exitCode;
+                    if (exitCode == 139) {
+                        msg += ": Segmentation fault";
+                    } else if (exitCode == 134) {
+                        msg += ": Abort";
+                    } else if (exitCode == 138) {
+                        msg += ": Bus error";
+                    }
+                    System.out.println(msg);
+                }
             }
             System.out.println("Waiting =========================================");
         }
     }
-
 
     public static int runProcess(String... command) throws Exception {
         Process process = new ProcessBuilder(command).start();
@@ -113,9 +125,9 @@ public class Service {
             }
         });
         outThread2.start();
-        int exitCode = process.waitFor();
         outThread.join();
         outThread2.join();
+        int exitCode = process.waitFor();
         return exitCode;
     }
 
