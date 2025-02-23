@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a, g) if(a){(a)->_refCount++;}
-#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
-#define _malloc(a) malloc(a)
-#define _traceMalloc(a) ;
-#define _free(a) free(a)
-#define _end() ;
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _malloc(a)      malloc(a)
+#define _traceMalloc(a)
+#define _free(a)        free(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
 /* types */
 typedef struct int_array int_array;
 struct int_array;
@@ -46,14 +51,20 @@ void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
 void int_array_free(int_array* x);
+int int_array_freeIfUnused(void* x);
 void List_int_free(List_int* x);
+int List_int_freeIfUnused(void* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
 void List_int_free(List_int* x) {
-    _decUse(x->array, int_array, 0);
+    _decUse(x->array, int_array);
     _free(x);
+}
+int List_int_freeIfUnused(void* x) {
+    PRINT("== freeIfUnused %p count=%d\n", x, ((List_int*)x)->_refCount);
+    if (((List_int*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= this->array->len) {
@@ -71,10 +82,10 @@ void List_int_add_2(List_int* this, int64_t x) {
             }
             break;
         }
-        _decUse(this->array, int_array, 1);
+        _decUse(this->array, int_array);
         this->array = n;
-        _incUse(this->array, 1);
-        _decUse(n, int_array, 0);
+        _incUse(this->array);
+        _decUseStack(n, int_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -86,7 +97,7 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 void test_0() {
     List_int* list = List_int_new();
-    _decUse(list->array, int_array, 1);
+    _decUse(list->array, int_array);
     list->array = int_array_new(1);
     while (1 == 1) {
         int64_t i = 0;
@@ -110,7 +121,7 @@ void test_0() {
         }
         break;
     }
-    _decUse(list, List_int, 0);
+    _decUseStack(list, List_int);
 }
 int main() {
     test_0();

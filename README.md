@@ -300,6 +300,21 @@ The name needs to match the file path, here `org/bau/Math.bau`:
     module org.bau.Math
     PI : 3.14159265358979323846
 
+### Custom For Loops
+
+`for` loops can use user-defined functions.
+The loop is replaced with the function.
+
+    fun main()
+        for x := evenUntil(30)
+            println('even: ' x)
+
+    fun evenUntil(until int) int
+        _ := 0
+        while _ <= until
+            return _
+            _ += 2
+        
 ### Tour
 
 #### Hello World
@@ -473,6 +488,31 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 
     for i := until(3)
         println(i ':', if(i, '>0', 'zero'))
+
+#### Custom For Loops
+
+    fun main()
+        for x := primesUntil(30)
+            println('prime: ' x)
+    
+    fun primesUntil(until int) int
+        _ := 2
+        while 1 = 1
+            _ += 1 + (_ & 1)
+            break _ > until
+            if not isPrime(_)
+                continue 
+            return _
+    
+    fun isPrime(x int) int
+        if (x & 1) = 0
+            return 0
+        i := 3
+        while i * i <= x
+            if x % i = 0
+                return 0
+            i += 2
+        return 1
 
 ### Comparison
 

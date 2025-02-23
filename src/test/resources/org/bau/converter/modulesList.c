@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a, g) if(a){(a)->_refCount++;}
-#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
-#define _malloc(a) malloc(a)
-#define _traceMalloc(a) ;
-#define _free(a) free(a)
-#define _end() ;
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _malloc(a)      malloc(a)
+#define _traceMalloc(a)
+#define _free(a)        free(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
 /* types */
 typedef struct int_array int_array;
 struct int_array;
@@ -57,8 +62,11 @@ int64_t idx_2(int64_t x, int64_t len);
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T);
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x);
 void int_array_free(int_array* x);
+int int_array_freeIfUnused(void* x);
 void org_bau_List_List_free(org_bau_List_List* x);
+int org_bau_List_List_freeIfUnused(void* x);
 void org_bau_List_List_int_free(org_bau_List_List_int* x);
+int org_bau_List_List_int_freeIfUnused(void* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
@@ -66,9 +74,17 @@ void int_array_free(int_array* x) {
 void org_bau_List_List_free(org_bau_List_List* x) {
     _free(x);
 }
+int org_bau_List_List_freeIfUnused(void* x) {
+    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_List_List*)x)->_refCount);
+    if (((org_bau_List_List*)x)->_refCount == 0) { _free(x); return 1; } return 0;
+}
 void org_bau_List_List_int_free(org_bau_List_List_int* x) {
-    _decUse(x->array, int_array, 0);
+    _decUse(x->array, int_array);
     _free(x);
+}
+int org_bau_List_List_int_freeIfUnused(void* x) {
+    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_List_List_int*)x)->_refCount);
+    if (((org_bau_List_List_int*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
@@ -77,7 +93,7 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
     org_bau_List_List_int* result = org_bau_List_List_int_new();
-    _decUse(result->array, int_array, 1);
+    _decUse(result->array, int_array);
     result->array = int_array_new(4);
     result->size = 0;
     return result;
@@ -98,10 +114,10 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
             }
             break;
         }
-        _decUse(this->array, int_array, 1);
+        _decUse(this->array, int_array);
         this->array = n;
-        _incUse(this->array, 1);
-        _decUse(n, int_array, 0);
+        _incUse(this->array);
+        _decUseStack(n, int_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -112,7 +128,7 @@ int main() {
     org_bau_List_List_int_add_2(list, 80);
     printf("%lld\n", (long long)list->size);
     printf("%lld\n", (long long)list->array->data[idx_2(0, list->array->len)]);
-    _decUse(list, org_bau_List_List_int, 0);
+    _decUseStack(list, org_bau_List_List_int);
     _end();
     return 0;
 }

@@ -17,11 +17,12 @@ public class DataType {
     public static final String F32 = "f32";
     public static final String FLOAT = "float";
     public static final String TYPE = "type";
+    public static final String ARENA = "arena";
 
     // we only define INT_TYPE because the types have a "used" flag -
     // and we don't want to set it if not needed
     // TODO this means for int array, this is always set
-    public static final DataType INT_TYPE = new DataType(null, DataType.INT, 8, true, Collections.emptyList());
+    public static final DataType INT_TYPE = newBuiltIn(DataType.INT, 8);
     static {
         INT_TYPE.used();
         INT_TYPE.arrayType.used();
@@ -31,7 +32,9 @@ public class DataType {
     private final String name;
     private final int sizeOf;
     private final boolean isSystem;
+    private final boolean isNumber;
     private final boolean isArray;
+    private final boolean arenaAllocated;
     final boolean isFloatingPoint;
     private final DataType arrayType;
     private final DataType nullableType;
@@ -47,8 +50,24 @@ public class DataType {
     public String template;
     private boolean needsFree;
 
-    public DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields) {
-        this(module, name, sizeOf, isSystem, false, fields, false);
+    private DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields, boolean arenaAllocated) {
+        this(module, name, sizeOf, isSystem, false, fields, false, arenaAllocated);
+    }
+
+    public static DataType newBuiltIn(String name, int sizeOf) {
+        return new DataType(null, name, sizeOf, true, Collections.emptyList(), false);
+    }
+
+    public static DataType newEnumType(String module, String name) {
+        return new DataType(module, name, 8, false, Collections.emptyList(), false);
+    }
+
+    public static DataType newEmptyType(String module, String name) {
+        return new DataType(module, name, 0, false, Collections.emptyList(), false);
+    }
+
+    public static DataType newRegularType(String module, String name, int sizeOf, ArrayList<Variable> fields) {
+        return new DataType(module, name, sizeOf, false, fields, false);
     }
 
     public static boolean isGenericTypeName(String token) {
@@ -71,16 +90,17 @@ public class DataType {
         this.used = true;
     }
 
-    public DataType(String module, String name, int sizeOf, boolean isSystem, boolean isArray, List<Variable> fields, boolean isNullable) {
+    public DataType(String module, String name, int sizeOf, boolean isSystem, boolean isArray, List<Variable> fields, boolean isNullable, boolean arenaAllocated) {
         this.isNullable = isNullable;
         this.module = module;
         this.name = name;
         this.sizeOf = sizeOf;
         this.isSystem = isSystem;
+        this.isNumber = isSystem && sizeOf < 32;
         this.isArray = isArray;
         this.fields = fields;
         if (!isArray) {
-            arrayType = new DataType(module, name + "[]", sizeOf, false, true, fields, isNullable);
+            arrayType = new DataType(module, name + "[]", sizeOf, false, true, fields, isNullable, arenaAllocated);
             arrayType.baseType = this;
         } else {
             arrayType = this;
@@ -97,18 +117,27 @@ public class DataType {
         }
         baseType = this;
         if (!isArray && !valueType && !isSystem && !isNullable) {
-            nullableType = new DataType(module, name, sizeOf, false, false, fields, true);
+            nullableType = new DataType(module, name, sizeOf, false, false, fields, true, arenaAllocated);
         } else {
             nullableType = null;
         }
         if (isArray || isPointer()) {
             needsFree = true;
         }
+        this.arenaAllocated = arenaAllocated;
         addFields(fields);
     }
 
     public boolean isSystem() {
         return isSystem;
+    }
+
+    public boolean isNumber() {
+        return isNumber;
+    }
+
+    public boolean isArena() {
+        return isSystem && !isNumber;
     }
 
     public String fullName() {

@@ -124,13 +124,15 @@ public class Assignment implements Statement {
             buff.append(result);
         }
         buff.append(";\n");
-        if (Program.SIMPLE_REF_COUNTING) {
-            if (!(value instanceof Call || value instanceof New)) {
-                buff.append(leftValue.incrementRefCountC());
-            }
-        } else {
-            if (!(value instanceof Call)) {
-                buff.append(leftValue.incrementRefCountC());
+        if (!(value instanceof NullValue)) {
+            if (Program.SIMPLE_REF_COUNTING) {
+                if (!(value instanceof Call || value instanceof New)) {
+                    buff.append(leftValue.incrementRefCountC());
+                }
+            } else {
+                if (!(value instanceof Call)) {
+                    buff.append(leftValue.incrementRefCountC());
+                }
             }
         }
         return buff.toString();

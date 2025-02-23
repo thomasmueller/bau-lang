@@ -27,7 +27,7 @@ public class New implements Expression {
                 return null;
             }
             int l = len.intValue();
-            if (type.baseType().isSystem()) {
+            if (type.baseType().isNumber()) {
                 switch (type.baseType().name()) {
                 case DataType.I32:
                     result = new Value.ValueI32Array(l);

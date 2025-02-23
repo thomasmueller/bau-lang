@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a, g) if(a){(a)->_refCount++;}
-#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
-#define _malloc(a) malloc(a)
-#define _traceMalloc(a) ;
-#define _free(a) free(a)
-#define _end() ;
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _malloc(a)      malloc(a)
+#define _traceMalloc(a)
+#define _free(a)        free(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -61,8 +66,11 @@ void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 void test_0();
 void i8_array_free(i8_array* x);
+int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
+int int_array_freeIfUnused(void* x);
 void org_bau_File_File_free(org_bau_File_File* x);
+int org_bau_File_File_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -75,6 +83,10 @@ void org_bau_File_File_free(org_bau_File_File* x) {
     org_bau_File_File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
     _free(x);
+}
+int org_bau_File_File_freeIfUnused(void* x) {
+    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_File_File*)x)->_refCount);
+    if (((org_bau_File_File*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -110,8 +122,8 @@ void test_0() {
     org_bau_File_File_read_4(file, data, 0, 15);
     data->data[5] = 0;
     printf("%.*s\n", data->len, data->data);
-    _decUse(file, org_bau_File_File, 0);
-    _decUse(data, i8_array, 0);
+    _decUseStack(data, i8_array);
+    _decUseStack(file, org_bau_File_File);
 }
 int main() {
     string_1000 = str_const("hello.txt", 9);

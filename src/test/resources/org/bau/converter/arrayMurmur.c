@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a, g) if(a){(a)->_refCount++;}
-#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
-#define _malloc(a) malloc(a)
-#define _traceMalloc(a) ;
-#define _free(a) free(a)
-#define _end() ;
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _malloc(a)      malloc(a)
+#define _traceMalloc(a)
+#define _free(a)        free(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -52,7 +57,9 @@ int32_t rotLefti32_2(int32_t x, int32_t n);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
 void i8_array_free(i8_array* x);
+int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
+int int_array_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -199,11 +206,11 @@ int main() {
     int32_t _t8 = murmur3_32_1(string_1005);
     i8_array* _t9 = hex_2(_t8, 8);
     printf("%.*s\n", _t9->len, _t9->data);
-    _decUse(_t1, i8_array, 0);
-    _decUse(_t3, i8_array, 0);
-    _decUse(_t5, i8_array, 0);
-    _decUse(_t7, i8_array, 0);
-    _decUse(_t9, i8_array, 0);
+    _decUseStack(_t9, i8_array);
+    _decUseStack(_t7, i8_array);
+    _decUseStack(_t5, i8_array);
+    _decUseStack(_t3, i8_array);
+    _decUseStack(_t1, i8_array);
     _end();
     return 0;
 }

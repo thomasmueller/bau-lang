@@ -290,7 +290,7 @@ public class Parser {
             while (true) {
                 String t = readIdentifier();
                 parameters.add(t);
-                DataType type = new DataType(targetModule, t, 0, false, Collections.emptyList());
+                DataType type = DataType.newEmptyType(targetModule, t);
                 functionContext.addTemporaryType(type);
                 template = true;
                 if (matchOp(")")) {
@@ -309,7 +309,7 @@ public class Parser {
             return true;
         }
         ArrayList<Variable> fields = new ArrayList<>();
-        DataType type = new DataType(targetModule, name, sizeOf, false, fields);
+        DataType type = DataType.newRegularType(targetModule, name, sizeOf, fields);
         // need to add it first, because one of the fields could be of this type
         program.addType(type);
         program.addComment("type " + type.toString(), comment);
@@ -335,7 +335,7 @@ public class Parser {
 
     private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment) {
         String code = parseBlock(defIndent);
-        DataType type = new DataType(module, name, 0, false, Collections.emptyList());
+        DataType type = DataType.newEmptyType(module, name);
         type.parameters = parameters;
         type.template = code;
         lastComment = null;
@@ -378,7 +378,7 @@ public class Parser {
                 String name = readIdentifier();
                 if (matchOp(":")) {
                     Expression expr = parseExpression();
-                    if (expr.type().isFloatingPoint || expr.type().isNullable() || !expr.type().isSystem()) {
+                    if (expr.type().isFloatingPoint || expr.type().isNullable() || !expr.type().isNumber()) {
                         throw syntaxError("Only integer types are supported");
                     }
                     Value v = eval(expr, false);
@@ -402,7 +402,7 @@ public class Parser {
             }
         }
 
-        DataType type = new DataType(module, id, 8, false, Collections.emptyList());
+        DataType type = DataType.newEnumType(module, id);
         type.enumValues = entries;
         program.addType(type);
         program.addComment("enum " + type.toString(), comment);
@@ -485,7 +485,7 @@ public class Parser {
                 DataType type;
                 if (DataType.isGenericTypeName(token) && !template) {
                     template = true;
-                    type = new DataType(targetModule, token, 0, false, Collections.emptyList());
+                    type = DataType.newEmptyType(targetModule, token);
                     functionContext.addTemporaryType(type);
                     type = readType(template);
                     if (matchOp("..")) {
@@ -500,7 +500,7 @@ public class Parser {
                 } else if (match("type")) {
                     template = true;
                     type = program.getType2(null, DataType.TYPE);
-                    DataType t = new DataType(targetModule, name, 0, false, Collections.emptyList());
+                    DataType t = DataType.newEmptyType(targetModule, name);
                     functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
@@ -694,7 +694,7 @@ public class Parser {
                     throw syntaxError("May not throw an exception here");
                 }
                 String rangeTypeName = "0.." + upperBound.toString();
-                DataType newType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false);
+                DataType newType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false, false);
                 newType.maxValue = upperBound;
                 functionContext.addTemporaryType(newType);
                 return newType;
@@ -765,8 +765,8 @@ public class Parser {
         if (matchOp("?")) {
             if (t.isArray()) {
                 throw syntaxError("Array can't be null (but they can be empty)");
-            } else if (t.isSystem()) {
-                throw syntaxError("Built-in types can't be be null (but the value can be zero)");
+            } else if (t.isNumber()) {
+                throw syntaxError("Numbers can't be be null (but the value can be zero)");
             } else if (!t.isPointer()) {
                 throw syntaxError("Value types can't be be null (but the value can be zero)");
             }
@@ -892,7 +892,7 @@ public class Parser {
                     String rangeTypeName = "0.." + upperBound.toString();
                     DataType rangeType = functionContext.getType(null, rangeTypeName);
                     if (rangeType == null) {
-                        rangeType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false);
+                        rangeType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false, false);
                         rangeType.maxValue = upperBound;
                         functionContext.addTemporaryType(rangeType);
                     }
@@ -948,7 +948,7 @@ public class Parser {
                 Assignment s = new Assignment();
                 s.initial = true;
                 Expression value;
-                if (targetType.isSystem()) {
+                if (targetType.isNumber()) {
                     value = new NumberValue(Value.ValueInt.ZERO, targetType, false);
                 } else {
                     value = new NullValue();
@@ -2011,7 +2011,7 @@ public class Parser {
         Variable lastFreedVar = null;
         for (String name : list) {
             // do not close if we return it
-            if (Program.SIMPLE_REF_COUNTING && name.equals(exceptString)) {
+            if (program.simpleRefCount && name.equals(exceptString)) {
                 continue;
             }
             Variable var = functionContext.getVariable(null, name);
@@ -2025,7 +2025,7 @@ public class Parser {
             }
         }
         Collections.reverse(autoClose);
-        if (!Program.SIMPLE_REF_COUNTING && except != null) {
+        if (!program.simpleRefCount && except != null) {
             // we need to assign so that we get a _incUseStack
             assignTempVariable(autoClose, except);
             if (autoClose.size() == 2) {
@@ -2035,7 +2035,7 @@ public class Parser {
                 }
             }
         }
-        if (!Program.SIMPLE_REF_COUNTING && autoClose.size() > 0) {
+        if (!program.simpleRefCount && autoClose.size() > 0) {
             SpecialOperation op = new SpecialOperation(SpecialOperationType.ZERO_COUNT_TABLE_GC);
             autoClose.add(op);
         }
@@ -2054,6 +2054,9 @@ public class Parser {
         }
         if (expr.type().isSystem() && !(expr instanceof NumberValue)) {
             Value v = eval(expr, true);
+            if (expr.type().isArena()) {
+                return new ArenaValue(v, expr.type());
+            }
             if (v != null) {
                 return new NumberValue(v, expr.type(), false);
             }
@@ -2160,7 +2163,7 @@ public class Parser {
                 }
             }
             if (matchOp("(")) {
-                if ("new".equals(n) || "new".equals(n)) {
+                if ("new".equals(n)) {
                     DataType type = readType(false);
                     type.used();
                     Expression arrayLength = null;
@@ -2176,6 +2179,14 @@ public class Parser {
                     }
                     New newExpr = new New(type, arrayLength);
                     type.used();
+                    return newExpr;
+                } else if ("newArena".equals(n)) {
+                    DataType type = program.getType2(null, "arena");
+                    type.used();
+                    if (!matchOp(")")) {
+                        throw syntaxError("Expected ')', got '"+token+"' in constructor");
+                    }
+                    New newExpr = new New(type, null);
                     return newExpr;
                 }
                 Call call = new Call();

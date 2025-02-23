@@ -142,17 +142,17 @@ public class Operation implements Expression {
             return right.type().resolveEnumType();
         }
         DataType l = left.type().resolveEnumType();
-        if (!l.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + l + " for operation " + operator);
+        if (!l.isNumber()) {
+            throw new IllegalStateException("Not a number type: " + l + " for operation " + operator);
         }
         DataType r = right.type().resolveEnumType();
-        if (!r.isSystem()) {
-            throw new IllegalStateException("Not a built-in type: " + r + " for operation " + operator);
+        if (!r.isNumber()) {
+            throw new IllegalStateException("Not a number type: " + r + " for operation " + operator);
         }
         if (l.equals(r)) {
             return l;
         }
-        if (l.isSystem() && r.isSystem()) {
+        if (l.isNumber() && r.isNumber()) {
             DataType higher = null;
             if (l.isFloatingPoint != r.isFloatingPoint) {
                 // only on is floating point: take that
@@ -456,6 +456,10 @@ public class Operation implements Expression {
             }
         }
         if (var == null) {
+            return;
+        }
+        if (op == null) {
+            // eg. "if i & 1"
             return;
         }
         switch (op) {

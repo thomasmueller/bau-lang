@@ -2,12 +2,17 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
-#define _incUse(a, g) if(a){(a)->_refCount++;}
-#define _decUse(a, type, g) if(a){if(--((a)->_refCount) == 0) type##_free(a);}
-#define _malloc(a) malloc(a)
-#define _traceMalloc(a) ;
-#define _free(a) free(a)
-#define _end() ;
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _malloc(a)      malloc(a)
+#define _traceMalloc(a)
+#define _free(a)        free(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -62,8 +67,11 @@ void testContinue_0();
 void testIf_0();
 void testReturn_0();
 void i8_array_free(i8_array* x);
+int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
+int int_array_freeIfUnused(void* x);
 void Value_free(Value* x);
+int Value_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -74,6 +82,10 @@ void int_array_free(int_array* x) {
 }
 void Value_free(Value* x) {
     _free(x);
+}
+int Value_freeIfUnused(void* x) {
+    PRINT("== freeIfUnused %p count=%d\n", x, ((Value*)x)->_refCount);
+    if (((Value*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -104,18 +116,18 @@ void testBreak_0() {
         while (1) {
             Value* a = get_1(i);
             if (!(a)) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 break;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 break;
             }
             i = _next;
-            _decUse(a, Value, 0);
+            _decUseStack(a, Value);
         }
         break;
     }
@@ -127,18 +139,18 @@ void testContinue_0() {
         while (1) {
             Value* a = get_1(i);
             if (!(a)) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 goto continue1;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 break;
             }
             i = _next;
-            _decUse(a, Value, 0);
+            _decUseStack(a, Value);
         }
         break;
     }
@@ -157,11 +169,11 @@ void testIf_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 break;
             }
             i = _next;
-            _decUse(a, Value, 0);
+            _decUseStack(a, Value);
         }
         break;
     }
@@ -179,11 +191,11 @@ void testReturn_0() {
             continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
-                _decUse(a, Value, 0);
+                _decUseStack(a, Value);
                 break;
             }
             i = _next;
-            _decUse(a, Value, 0);
+            _decUseStack(a, Value);
         }
         break;
     }

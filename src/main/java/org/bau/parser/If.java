@@ -23,12 +23,18 @@ public class If implements Statement {
         for (int i = 0; i < listList.size(); i++) {
             ArrayList<Statement> l2 = new ArrayList<>();
             ArrayList<Statement> list = listList.get(i);
-            c.listList.add(list);
             for (int j = 0; j < list.size(); j++) {
                 l2.add(list.get(j).replace(old, with));
             }
             c.listList.add(l2);
-            c.autoClose.add(autoClose.get(i));
+        }
+        for (int i = 0; i < autoClose.size(); i++) {
+            ArrayList<Statement> l2 = new ArrayList<>();
+            List<Statement> list = autoClose.get(i);
+            for (int j = 0; j < list.size(); j++) {
+                l2.add(list.get(j).replace(old, with));
+            }
+            c.autoClose.add(l2);
         }
         return c;
     }

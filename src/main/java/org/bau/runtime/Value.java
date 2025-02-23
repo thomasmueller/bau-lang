@@ -11,7 +11,7 @@ public class Value {
     }
 
     public Number get() {
-        throw new IllegalStateException("Not a value");
+        throw new IllegalStateException("Not a number");
     }
 
     public int intValue() {

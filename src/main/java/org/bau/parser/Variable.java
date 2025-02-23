@@ -80,7 +80,9 @@ public class Variable implements Expression, LeftValue {
     public String toC() {
         if (constantValue != null && type.isSystem() && !type.isArray()) {
             StringBuilder buff = new StringBuilder();
-            if (type.isFloatingPoint) {
+            if (type.isArena()) {
+                buff.append("newArena()");
+            } else if (type.isFloatingPoint) {
                 buff.append(NumberValue.toC(constantValue.doubleValue()));
             } else {
                 buff.append(NumberValue.toC(constantValue.longValue()));
@@ -145,7 +147,7 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public void setBoundValue(Expression scope, String modify, Expression value) {
-        if (!value.type().isSystem()) {
+        if (!value.type().isNumber()) {
             return;
         }
         if (bounds == null) {

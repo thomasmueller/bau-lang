@@ -2,6 +2,135 @@ package org.bau;
 
 /**
 
+For memory-safe and fast programming language, I think one of the most important, and hardest, questions is memory management.
+
+For my language (compiled to C), I'm still struggling a bit, and I'm pretty sure I'm not the only one.
+Right now, my language uses reference counting. This works, but is a bit slow, compared to eg. Rust or C.
+
+My plan is to offer three options:
+
+* Reference counting (default)
+* Ownership (but much simpler than Rust)
+* Arena allocation (fastest)
+
+Reference counting is simple to use, and
+allows calling a custom "close" method, if needed.
+Speed is not all that great, and the counter needs some memory.
+Dealing with cycles: I plan to support weak references later. Right now,
+the user needs to prevent cycles.
+
+Ownership: each object has one owner.
+Borrowing is allowed (always mutable for now), but only on the stack
+(variables, parameters, return values; fields of value types).
+Only the owner can destroy the object; no borrowing is allowed when destroying.
+Unlike Rust, I don't want to implement a borrow checker at compile time, but
+at runtime: if the object is borrowed, the program panics, similar to array-index out of bounds
+or division by zero. Checking for this can be done in batches.
+Due to the runtime check, this is a bit slower than in Rust, but I hope not by much
+(to be tested).
+Internally, this uses malloc / free for each object.
+
+Arena allocation: object can be created in an arena, using a bump allocator.
+The arena knows how many objects are alive, and allocation fails if there is no more space.
+Each object has an owner, borrowing on the stack is possible (as above).
+Each arena has a counter of live objects, and if that reaches 0, the stack is checked
+for borrows (this might panic, same as with Ownership), and so the arena can be freed.
+Pointers are direct pointers; but internally actually two pointers:
+one to the arena, and one to the object. An alternative would be to use
+a "arena id" plus an offset within the arena. Or a tagged pointer, but that is not portable.
+It looks like this is the fastest memory management strategy
+(my hope is: faster than Rust; but I need to test first), but also the hardest to use
+efficiently. I'm not quite sure if there are other languages that use this strategy.
+
+Syntax: I'm not quite sure yet. I want to keep it simple. Maybe something like this:
+
+Reference counting:
+
+t := new(Tree)      // construction; ref count starts at 1
+t.left = l          // increment l
+t.left = null       // decrement t.left
+t.parent = p?       // weak reference
+t = null            // decrement
+
+Ownership:
+
+t := own(Tree)      // construction; the type of t is 'Tree*'
+left = t            // transfer ownership
+left = &t           // borrow
+doSomething(left)   // using the borrow
+fun get() Tree&     // returns a borrowed reference
+fun get() Tree*     // returns a owned tree
+
+Arena:
+
+arena := newArena(1_000_000) // 1 MB
+t := arena.own(Tree) // construction; the type of t is 'Tree**'
+arena(t)             // you can get the arena of an object
+left = &t            // borrow
+t = null             // decrements the live counter in the arena
+arena.reuse()        // this checks that there are no borrows on the stack
+
+In addition to the above, a user or library might use "index into array", optionally
+with a generation. Like Vale. But I think I will not support this strategy in the language itself for now.
+
+
+
+
+
+
+
+
+
+
+
+
+One of the advantages is that this is easy to use: no annotations are needed in most cases.
+Well there is the problem of cycles
+Except to for weak references
+to deal with cycles.
+(I don't want to use tracing GC , or trial deletion.
+
+
+
+
+
+Default case: reference counting. This i
+
+TODO memory management:
+     fast case: arena allocator
+         arena.new(Tree)
+         # support references to outside? maybe not
+         # support reference counted objects like like strings? maybe not
+         # pointer tagging to pick the arena
+
+     simple case: reference counting
+     fast case: ownership
+     fun getTree() Tree   # share (reference counting)
+     fun getTree() Tree?  # shared or null
+     fun getTree() Tree@  # weak reference
+     fun getTree() Tree*  # own
+     fun getTree() Tree&  # borrow
+
+     # can not return a weak reference?
+         x := new(Tree)      # shared; count = 1
+         x := own(Tree)      # owned ('my own')
+         y := x              # owned: move; x is invalid afterwards, or null
+         y <- x              # alternative syntax for move?
+         y := &x             # owned: borrow (mutable)
+         x := null           # owned: drop
+         return x            # owned: move
+         y := x              # shared: increment
+         x := null           # shared: decrement
+         y := &x             # shared: weak reference
+         return x            # shared: keep count
+         type Tree
+           owned  Tree*?     # owned ; may be null
+           shared Tree?      # shared; may be null
+           weak   Tree??     # weak reference
+           owned  Tree*      # owned ; may not be null
+           shared Tree       # shared; may not be null
+           borrow Tree&      # borrow (not supported: use shared instead)
+
 TODO memory management
      initial count = 0? if only assigned to local variable and then dropped?
      or initially has an owner, always?
@@ -17,7 +146,10 @@ TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
      npm run build-assets && gulp
      open http://192.168.45.88:3000/
 
+TODO No panic mode: https://blog.reverberate.org/2025/02/03/no-panic-rust.html
+
 TODO maybe buy the book about Lox https://craftinginterpreters.com/contents.html
+
 
 TODO test fully qualified package access (types,...)
 
