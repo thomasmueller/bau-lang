@@ -300,10 +300,13 @@ The name needs to match the file path, here `org/bau/Math.bau`:
     module org.bau.Math
     PI : 3.14159265358979323846
 
-### Custom For Loops
+### Custom Loops
 
-`for` loops can use user-defined functions.
-The loop is replaced with the function.
+Libraries and users can define their own `for` loops using user-defined functions.
+Such functions work like macros, as they are expanded at compile time.
+The loop is replaced during compilation with the function body.
+The variable `_` represents the current iteration value.
+The `return _` statement is replaced during compilation with the loop body.
 
     fun main()
         for x := evenUntil(30)
@@ -314,6 +317,14 @@ The loop is replaced with the function.
         while _ <= until
             return _
             _ += 2
+
+is equivalent to:
+
+    fun main()
+        x := 0
+        while x <= 30
+            println('even: ' x)
+            x += 2
         
 ### Tour
 
@@ -544,7 +555,8 @@ The loop is replaced with the function.
 * Reflection is not supported.
 * Tail calls are only optimized by the C compiler.
 * Multi-threading support is limited to what C supports.
-* Coroutines are not supported.
+* Coroutines are not supported; however,
+  custom `for` loops are supported that work like macros.
 * `goto` and labels are not supported.
 * String interpolation is not supported to simplify the language. 
   Instead, use an arrays of strings. As commas are optional, this is short.
