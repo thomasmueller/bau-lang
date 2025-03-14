@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -18,8 +18,6 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct HashMap HashMap;
-struct HashMap;
 typedef struct str str;
 struct str;
 typedef struct str_array str_array;
@@ -56,18 +54,8 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct HashMap {
-    int32_t _refCount;
-};
-HashMap* HashMap_new() {
-    HashMap* result = _malloc(sizeof(HashMap));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
 struct str {
     i8_array* value;
-    int32_t _refCount;
 };
 str str_new() {
     str result;
@@ -143,19 +131,11 @@ int64_t str_equals_2(str this, str other);
 int64_t str_hashCode_1(str this);
 void test_0();
 void i8_array_free(i8_array* x);
-int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
-void HashMap_free(HashMap* x);
-int HashMap_freeIfUnused(void* x);
 void str_free(str* x);
-int str_freeIfUnused(void* x);
 void str_array_free(str_array* x);
-int str_array_freeIfUnused(void* x);
 void HashMap_int_int_free(HashMap_int_int* x);
-int HashMap_int_int_freeIfUnused(void* x);
 void HashMap_str_str_free(HashMap_str_str* x);
-int HashMap_str_str_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -164,19 +144,8 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-void HashMap_free(HashMap* x) {
-    _free(x);
-}
-int HashMap_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((HashMap*)x)->_refCount);
-    if (((HashMap*)x)->_refCount == 0) { _free(x); return 1; } return 0;
-}
 void str_free(str* x) {
     _decUse(x->value, i8_array);
-}
-int str_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((str*)x)->_refCount);
-    if (((str*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void str_array_free(str_array* x) {
     for (int i = 0; i < x->len; i++) str_free(&(x->data[i]));
@@ -189,19 +158,11 @@ void HashMap_int_int_free(HashMap_int_int* x) {
     _decUse(x->hashes, int_array);
     _free(x);
 }
-int HashMap_int_int_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((HashMap_int_int*)x)->_refCount);
-    if (((HashMap_int_int*)x)->_refCount == 0) { _free(x); return 1; } return 0;
-}
 void HashMap_str_str_free(HashMap_str_str* x) {
     _decUse(x->keys, str_array);
     _decUse(x->values, str_array);
     _decUse(x->hashes, int_array);
     _free(x);
-}
-int HashMap_str_str_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((HashMap_str_str*)x)->_refCount);
-    if (((HashMap_str_str*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));

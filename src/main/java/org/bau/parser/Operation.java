@@ -95,7 +95,7 @@ public class Operation implements Expression {
                 return null;
             }
             if ("-".equals(operator)) {
-                if (right.type().isFloatingPoint) {
+                if (right.type().isFloatingPoint()) {
                     return new Value.ValueFloat(- r.doubleValue());
                 }
                 return new Value.ValueInt(- r.longValue());
@@ -154,9 +154,9 @@ public class Operation implements Expression {
         }
         if (l.isNumber() && r.isNumber()) {
             DataType higher = null;
-            if (l.isFloatingPoint != r.isFloatingPoint) {
+            if (l.isFloatingPoint() != r.isFloatingPoint()) {
                 // only on is floating point: take that
-                if (l.isFloatingPoint) {
+                if (l.isFloatingPoint()) {
                     higher = l;
                 } else {
                     higher = r;
@@ -178,7 +178,7 @@ public class Operation implements Expression {
     }
 
     public static Value eval(DataType type, Value l, String operator, Value r) {
-        if (type.isFloatingPoint) {
+        if (type.isFloatingPoint()) {
             return evalFloat(type, l, operator, r);
         }
         long result;
@@ -370,7 +370,7 @@ public class Operation implements Expression {
             return "shiftLeft_2(" +
                     left.toC() + ", " + right.toC() + ")";
         } else if ("/".equals(op)) {
-            if (widerType().isFloatingPoint) {
+            if (widerType().isFloatingPoint()) {
                 return left.toC() + " / " + right.toC();
             } else {
                 return "idiv_2(" +

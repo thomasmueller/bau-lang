@@ -120,7 +120,13 @@ public class Free implements Statement {
     @Override
     public String toC() {
         if (var.type().needIncDec()) {
-            return DEC_USE_STACK + "(" + var.toC() + ", " + var.type().nameC() +");\n";
+            if (var.type().memoryType() == MemoryType.REF_COUNT) {
+                return DEC_USE_STACK + "(" + var.toC() + ", " + var.type().nameC() +");\n";
+            } else if (var.type().memoryType() == MemoryType.OWNER) {
+                return var.type().nameC() + "_free(" + var.toC() + ");\n";
+            } else {
+                return "";
+            }
         } else if (var.type().needFree()) {
             return var.type().nameC() + "_free(&" + var.toC() + ");\n";
         } else {

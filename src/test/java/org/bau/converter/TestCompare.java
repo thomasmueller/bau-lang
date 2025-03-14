@@ -23,9 +23,7 @@ cd ..
 
 cp got/*.c src/test/resources/org/bau/converter/
 
-find src/test -name "*.c" -delete
 find src/test -name "*.c.out" -delete
-
 
 */
 public class TestCompare {

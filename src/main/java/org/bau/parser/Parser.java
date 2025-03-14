@@ -308,13 +308,13 @@ public class Parser {
             parseTypeTemplate(defIndent, name, parameters, comment);
             return true;
         }
-        ArrayList<Variable> fields = new ArrayList<>();
-        DataType type = DataType.newRegularType(targetModule, name, sizeOf, fields);
+        MemoryType memoryType = name.charAt(0) > 'Z' ? MemoryType.COPY : MemoryType.REF_COUNT;
+        DataType type = DataType.newRegularType(targetModule, name, sizeOf, memoryType);
         // need to add it first, because one of the fields could be of this type
         program.addType(type);
         program.addComment("type " + type.toString(), comment);
         lastComment = null;
-        fields = new ArrayList<>();
+        ArrayList<Variable> fields = new ArrayList<>();
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 String fieldName = readIdentifier();
@@ -378,7 +378,7 @@ public class Parser {
                 String name = readIdentifier();
                 if (matchOp(":")) {
                     Expression expr = parseExpression();
-                    if (expr.type().isFloatingPoint || expr.type().isNullable() || !expr.type().isNumber()) {
+                    if (expr.type().isFloatingPoint() || expr.type().isNullable() || !expr.type().isNumber()) {
                         throw syntaxError("Only integer types are supported");
                     }
                     Value v = eval(expr, false);
@@ -462,17 +462,25 @@ public class Parser {
         if (matchOp("(")) {
             def.name = id;
         } else {
-            def.callType = functionContext.getType(targetModule, id);
+            String typeName = id;
+            if (matchOp("+")) {
+                // owned
+                typeName += "+";
+            }
+            DataType callType = functionContext.getType(targetModule, typeName);
+            if (callType == null) {
+                throw syntaxError("Type not found: " + typeName);
+            }
+            def.callType = callType;
             def.name = readIdentifier();
             if (!matchOp("(")) {
                 throw syntaxError("Expected '(', got '" + token + "' when reading a function definition");
             }
-            DataType type = functionContext.getType(targetModule, id);
             if (type == null) {
                 throw syntaxError("Type '" + id + "' not found when reading a function definition");
             }
-            type.used();
-            Variable var = new Variable("this", type);
+            callType.used();
+            Variable var = new Variable("this", callType);
             var.isConstant = true;
             def.parameters.add(var);
             functionContext.addVariable(var);
@@ -499,7 +507,7 @@ public class Parser {
                     functionContext.addVariable(var);
                 } else if (match("type")) {
                     template = true;
-                    type = program.getType2(null, DataType.TYPE);
+                    type = program.getType(null, DataType.TYPE);
                     DataType t = DataType.newEmptyType(targetModule, name);
                     functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
@@ -561,7 +569,7 @@ public class Parser {
                 boolean found = false;
                 for (Variable f : def.exceptionType.fields) {
                     if (f.name.equals("exceptionType")) {
-                        if (f.type != program.getType2(null, DataType.INT)) {
+                        if (f.type != program.getType(null, DataType.INT)) {
                             throw syntaxError("The field 'exceptionType' must be of type 'int'");
                         }
                         found = true;
@@ -694,11 +702,15 @@ public class Parser {
                     throw syntaxError("May not throw an exception here");
                 }
                 String rangeTypeName = "0.." + upperBound.toString();
-                DataType newType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false, false);
+                DataType newType = DataType.newNumberType(rangeTypeName, 8);
                 newType.maxValue = upperBound;
                 functionContext.addTemporaryType(newType);
                 return newType;
             }
+        }
+        boolean borrow = false;
+        if (matchOp("&")) {
+            borrow = true;
         }
         String name = readIdentifier();
         while (matchOp(".")) {
@@ -762,15 +774,28 @@ public class Parser {
             t = t.arrayType();
         }
         t.used();
+        if (matchOp("+")) {
+            if (borrow) {
+                throw syntaxError("Borrow types don't need ':'");
+            }
+            if (t.memoryType() != MemoryType.REF_COUNT) {
+                throw syntaxError("Not a pointer type");
+            }
+            t = t.ownerType();
+        }
+        if (borrow) {
+            if (t.memoryType() != MemoryType.REF_COUNT) {
+                throw syntaxError("Not a pointer type");
+            }
+            t = t.borrowType();
+        }
         if (matchOp("?")) {
             if (t.isArray()) {
                 throw syntaxError("Array can't be null (but they can be empty)");
-            } else if (t.isNumber()) {
-                throw syntaxError("Numbers can't be be null (but the value can be zero)");
-            } else if (!t.isPointer()) {
-                throw syntaxError("Value types can't be be null (but the value can be zero)");
+            } else if (t.isCopyType()) {
+                throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
             }
-            return t.orNull();
+            t = t.orNull();
         }
         return t;
     }
@@ -892,7 +917,7 @@ public class Parser {
                     String rangeTypeName = "0.." + upperBound.toString();
                     DataType rangeType = functionContext.getType(null, rangeTypeName);
                     if (rangeType == null) {
-                        rangeType = new DataType(null, rangeTypeName, 8, true, false, Collections.emptyList(), false, false);
+                        rangeType = DataType.newNumberType(rangeTypeName, 8);
                         rangeType.maxValue = upperBound;
                         functionContext.addTemporaryType(rangeType);
                     }
@@ -1003,7 +1028,7 @@ public class Parser {
                     } else {
                         DataType type;
                         if ("len".equals(f) && left.type().isArray()) {
-                            type = program.getType2(null, DataType.I32);
+                            type = program.getType(null, DataType.I32);
                         } else {
                             type = left.type().getFieldDataType(f);
                         }
@@ -1142,7 +1167,7 @@ public class Parser {
                 return false;
             }
         }
-        FieldAccess f = new FieldAccess(base, "len", program.getType2(null, DataType.INT));
+        FieldAccess f = new FieldAccess(base, "len", program.getType(null, DataType.INT));
         Bounds b = arrayIndex.getBounds();
         if (b != null && b.compareTo(this, f) < 0) {
             return false;
@@ -1160,9 +1185,9 @@ public class Parser {
     }
 
     private void verifyBounds(Assignment s) {
-        if (!s.leftValue.type().isFloatingPoint) {
+        if (!s.leftValue.type().isFloatingPoint()) {
             DataType valueType = s.value.type();
-            if (valueType != null && valueType.isFloatingPoint) {
+            if (valueType != null && valueType.isFloatingPoint()) {
                 // TODO there are many more cases that are not allowed
                 throw syntaxError("The expression is floating point, but the variable is not.");
             }
@@ -1386,7 +1411,7 @@ public class Parser {
                 templateParams.add(t.fullName());
                 // we add a dummy value for each type parameter,
                 // to simplify the parser a bit
-                Expression p = new NumberValue(ValueInt.ZERO, program.getType2(null, DataType.INT), false);
+                Expression p = new NumberValue(ValueInt.ZERO, program.getType(null, DataType.INT), false);
                 call.args.add(p);
             } else {
                 Expression p = parseExpression();
@@ -1827,9 +1852,9 @@ public class Parser {
             type.maxValue = call.args.get(0);
         }
         Operation comp = new Operation(
-                new NumberValue(new Value.ValueInt(1), program.getType2(null, DataType.INT), false),
+                new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false),
                 "=",
-                new NumberValue(new Value.ValueInt(1), program.getType2(null, DataType.INT), false)
+                new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
                 );
         comp.operator = "=";
         Variable var = new Variable(variableName, call.type());
@@ -1964,9 +1989,9 @@ public class Parser {
             b.condition = new Operation(null, "not", loop.condition);
             loop.list.add(b);
             loop.condition = new Operation(
-                    new NumberValue(new Value.ValueInt(1), program.getType2(null, DataType.INT), false),
+                    new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false),
                     "=",
-                    new NumberValue(new Value.ValueInt(1), program.getType2(null, DataType.INT), false)
+                    new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
                     );
         }
         boolean sameLine;
@@ -2052,11 +2077,8 @@ public class Parser {
             // null
             return expr;
         }
-        if (expr.type().isSystem() && !(expr instanceof NumberValue)) {
+        if (expr.type().isNumber() && !(expr instanceof NumberValue)) {
             Value v = eval(expr, true);
-            if (expr.type().isArena()) {
-                return new ArenaValue(v, expr.type());
-            }
             if (v != null) {
                 return new NumberValue(v, expr.type(), false);
             }
@@ -2093,7 +2115,7 @@ public class Parser {
             String n = token;
             read();
             long v = Long.parseLong(n);
-            Expression expr = new NumberValue(new Value.ValueInt(v), program.getType2(null, DataType.INT), false);
+            Expression expr = new NumberValue(new Value.ValueInt(v), program.getType(null, DataType.INT), false);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -2102,7 +2124,7 @@ public class Parser {
             String n = token;
             read();
             long v = NumberValue.parseUnsignedHexLong(n.substring(2));
-            Expression expr = new NumberValue(new Value.ValueInt(v), program.getType2(null, DataType.INT), true);
+            Expression expr = new NumberValue(new Value.ValueInt(v), program.getType(null, DataType.INT), true);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -2111,7 +2133,7 @@ public class Parser {
             String n = token;
             read();
             double v = Double.parseDouble(n);
-            Expression expr = new NumberValue(new Value.ValueFloat(v), program.getType2(null, DataType.FLOAT), false);
+            Expression expr = new NumberValue(new Value.ValueFloat(v), program.getType(null, DataType.FLOAT), false);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -2120,13 +2142,17 @@ public class Parser {
             String n = token;
             long reference = program.addStringConstant(n);
             read();
-            DataType type = program.getType2(null, DataType.I8).arrayType();
+            DataType type = program.getType(null, DataType.I8).arrayType();
             type.used();
             Expression expr = new StringLiteral(n, type, reference);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
             return expr;
+        } else if (matchOp("&")) {
+            Expression target = parseExpressionPrimary();
+            target = new Borrow(target);
+            return target;
         } else if (type == TokenType.IDENTIFIER) {
             String n = token;
             if ("null".equals(n)) {
@@ -2180,14 +2206,6 @@ public class Parser {
                     New newExpr = new New(type, arrayLength);
                     type.used();
                     return newExpr;
-                } else if ("newArena".equals(n)) {
-                    DataType type = program.getType2(null, "arena");
-                    type.used();
-                    if (!matchOp(")")) {
-                        throw syntaxError("Expected ')', got '"+token+"' in constructor");
-                    }
-                    New newExpr = new New(type, null);
-                    return newExpr;
                 }
                 Call call = new Call();
                 Expression expr = parseCall(null, m, n, call, true);
@@ -2219,7 +2237,7 @@ public class Parser {
                         ValueI8Array str = (ValueI8Array) val;
                         String s = str.toString();
                         long reference = program.addStringConstant(s);
-                        DataType type = program.getType2(null, DataType.I8).arrayType();
+                        DataType type = program.getType(null, DataType.I8).arrayType();
                         type.used();
                         expr = new StringLiteral(s, type, reference);
                         return expr;
@@ -2248,7 +2266,7 @@ public class Parser {
                 if (thisVar != null) {
                     verifyNullAccess(thisVar);
                     DataType thisType = thisVar.type();
-                    if (!thisType.isSystem()) {
+                    if (!thisType.isCopyType()) {
                         DataType type = thisType.getFieldDataType(n);
                         if (type != null) {
                             var = new FieldAccess(thisVar, n, type);
@@ -2287,7 +2305,7 @@ public class Parser {
                 } else {
                     DataType type;
                     if ("len".equals(f) && vt.isArray()) {
-                        type = program.getType2(null, DataType.I32);
+                        type = program.getType(null, DataType.I32);
                     } else {
                         type = vt.getFieldDataType(f);
                     }

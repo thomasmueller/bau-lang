@@ -1,0 +1,63 @@
+import org.bau.Utils
+
+fun main()
+    minDepth : 4
+    maxDepth : 20
+    stretch Tree? := with(maxDepth + 1)
+    println('stretch tree of depth ' maxDepth ' check: ' stretch.nodeCount())
+    stretch = with(0)
+    longLived := with(maxDepth)
+    depth := minDepth
+    while depth <= maxDepth
+        iterations := 1 << (maxDepth - depth + minDepth)
+        check := 0;
+        i := 1
+        while i <= iterations
+            t := with(depth)
+            check += t.nodeCount()
+            i += 1
+        println(iterations ' trees of depth ' depth ' check: ' check)
+        depth += 2
+    println('long lived tree of depth ' maxDepth ' check: ' longLived.nodeCount())
+
+type Tree
+    left Tree?
+    right Tree?
+
+fun Tree nodeCount() int
+    result := 1
+    l := left
+    if l
+        result += l.nodeCount()
+    r := right
+    if r
+        result += r.nodeCount()
+    return result
+
+fun stretch(depth int)
+    c := count(depth)
+    println('stretch tree of depth ' depth '; check: ' c)
+
+fun count(depth int) int
+    t := with(depth)
+    c := t.nodeCount()
+    return c
+
+fun newTree(left Tree, right Tree) Tree
+    t := new(Tree)
+    t.left = left
+    t.right = right
+    return t
+
+fun with(depth int) Tree
+    if depth = 0
+        return newTree(null, null)
+    return newTree(with(depth - 1), with(depth - 1))
+
+## Expected
+stretch tree of depth 11; check: 4095
+1024 trees of depth 4; check: 31744
+256 trees of depth 6; check: 32512
+64 trees of depth 8; check: 32704
+16 trees of depth 10; check: 32752
+long lived tree of depth 10; check: 2047

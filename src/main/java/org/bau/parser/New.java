@@ -27,7 +27,7 @@ public class New implements Expression {
                 return null;
             }
             int l = len.intValue();
-            if (type.baseType().isNumber()) {
+            if (type.baseType().isCopyType()) {
                 switch (type.baseType().name()) {
                 case DataType.I32:
                     result = new Value.ValueI32Array(l);
@@ -82,12 +82,12 @@ public class New implements Expression {
             buff.append(type.nameC() + "_new(" + arrayLength.toC() + ")");
             return buff.toString();
         }
-        if (type.valueType) {
+        if (type.isPointer()) {
             if (arrayLength == null) {
             	return type.nameC() + "_new()";
             }
         }
-        String t = type.baseType().toC();
+        String t = type.toC();
         if (t.endsWith("*")) {
             // TODO hack to get rid of pointers
             t = t.substring(0, t.length() - 1);

@@ -164,10 +164,13 @@ public class Program {
         if (!type.isArray()) {
         	dataTypeMap.put(type.arrayType().fullName(), type.arrayType());
         }
+        if (type.memoryType() == MemoryType.REF_COUNT) {
+            dataTypeMap.put(type.ownerType().fullName(), type.ownerType());
+        }
         return type;
     }
 
-    public DataType getType2(String module, String name) {
+    public DataType getType(String module, String name) {
         String fullName = DataType.fullName(module, name);
         DataType t = dataTypeMap.get(fullName);
         if (t == null && module != null) {
@@ -221,12 +224,14 @@ public class Program {
             buff.append("#define _free(a)        free(a)\n");
         }
         if (SIMPLE_REF_COUNTING) {
-            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}\n");
+            // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
+            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
             buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}\n");
             buff.append("#define _incUseStack(a)       _incUse(a)\n");
             buff.append("#define _decUseStack(a, type) _decUse(a, type)\n");
         } else {
-            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}\n");
+            // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
+            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
             buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0){_addPossiblyFree((void*)a,type##_freeIfUnused);_zeroCountTableGC();}}}\n");
             buff.append("#define _incUseStack(a)       {REF_COUNT_STACK_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"+s  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0);_pushStack(&(a)->_refCount);}}\n");
             buff.append("#define _decUseStack(a, type) {REF_COUNT_STACK_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"-s  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(_popStack()==0)_addPossiblyFree((void*)a,type##_freeIfUnused);}}\n");
@@ -337,20 +342,20 @@ public class Program {
                     + "}");
         }
         buff.append("/* types */\n");
-        for(DataType t : dataTypeMap.values()) {
+        for (DataType t : dataTypeMap.values()) {
             if (t.enumValues != null) {
                 continue;
             }
-            if (!t.isSystem() && t.isUsed()) {
+            if (!t.isNumber() && t.isUsed()) {
                 buff.append("typedef struct " + t.nameC() + " " + t.nameC() + ";\n");
                 buff.append("struct ").append(t.nameC()).append(";\n");
             }
         }
-        for(DataType t : dataTypeMap.values()) {
+        for (DataType t : dataTypeMap.values()) {
             if (t.enumValues != null) {
                 continue;
             }
-            if (!t.isSystem() && t.isUsed()) {
+            if (!t.isNumber() && t.isUsed()) {
                 buff.append("struct ").append(t.nameC()).append(" {\n");
                 if (t.isArray()) {
                     buff.append(Statement.indent("int32_t len;\n"));
@@ -360,7 +365,9 @@ public class Program {
                         buff.append(Statement.indent(f.type.toC() + " " + f.name + ";\n"));
                     }
                 }
-                buff.append(Statement.indent("int32_t _refCount;\n"));
+                if (t.memoryType() == MemoryType.REF_COUNT) {
+                    buff.append(Statement.indent("int32_t _refCount;\n"));
+                }
                 buff.append("};\n");
                 if (t.isArray()) {
                     buff.append(t.nameC() + "* " + t.nameC() + "_new(uint32_t len) {\n");
@@ -376,8 +383,10 @@ public class Program {
                     buff.append(t.nameC() + "* " + t.nameC() + "_new() {\n");
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
-                    buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
-                    for(Variable f : t.fields) {
+                    if (t.memoryType() == MemoryType.REF_COUNT) {
+                        buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
+                    }
+                    for (Variable f : t.fields) {
                         buff.append(Statement.indent("result->" + f.name + " = 0;\n"));
                     }
                     buff.append(Statement.indent("return result;\n"));
@@ -445,47 +454,59 @@ public class Program {
         }
         // _free needs be after close
         for (DataType t : dataTypeMap.values()) {
-            if (!t.isSystem() && t.isUsed()) {
-                if (t.needFree()) {
+            if (t.isUsed()) {
+                if (t.isArray() || t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x);\n");
-                    buff.append("int " + t.nameC() + "_freeIfUnused(void* x);\n");
+                    if (!SIMPLE_REF_COUNTING) {
+                        buff.append("int " + t.nameC() + "_freeIfUnused(void* x);\n");
+                    }
                 }
             }
         }
         for (DataType t : dataTypeMap.values()) {
-            if (!t.isSystem() && t.isUsed()) {
-                if (t.isArray()) {
+            if (t.isUsed()) {
+                if (t.isArray() || t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
-                    if (t.baseType().needIncDec()) {
-                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + Free.DEC_USE + "(x->data[i], " + t.baseType().nameC() + ");\n"));
-                    } else if (t.baseType().needFree()) {
-                        buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + t.baseType().nameC() + "_free(&(x->data[i]));\n"));
+                    if (t.memoryType() == MemoryType.OWNER) {
+                        buff.append(Statement.indent("if (x == NULL) return;\n"));
                     }
-                    buff.append(Statement.indent("_free(x->data);\n"));
-                    buff.append(Statement.indent("_free(x);\n"));
-                    buff.append("}\n");
-                } else if (t.needFree()) {
-                    buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x) {\n");
-                    for (Variable f : t.fields) {
-                        if (f.type.needIncDec()) {
-                            buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
-                        } else if (f.type.needFree()) {
-                            buff.append(Statement.indent(f.type.nameC() + "_free(x->" + f.name + ");\n"));
+                    if (t.isArray()) {
+                        if (t.baseType().needIncDec()) {
+                            buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + Free.DEC_USE + "(x->data[i], " + t.baseType().nameC() + ");\n"));
+                        } else if (t.baseType().needFree()) {
+                            buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + t.baseType().nameC() + "_free(&(x->data[i]));\n"));
                         }
-                    }
-                    if (t.autoClose != null) {
-                        buff.append(Statement.indent(t.nameC() + "_close_1(x);\n"));
-                        buff.append(Statement.indent("if (x->_refCount) { fprintf(stdout, \"Object re-referenced in the close method\"); exit(1); }\n"));
-                    }
-                    if (t.needIncDec()) {
-                        // structs don't need free
+                        buff.append(Statement.indent("_free(x->data);\n"));
                         buff.append(Statement.indent("_free(x);\n"));
+                        buff.append("}\n");
+                    } else {
+                        for (Variable f : t.fields) {
+                            if (f.type.needIncDec()) {
+                                if (f.type.memoryType() == MemoryType.REF_COUNT) {
+                                    buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
+                                } else {
+                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type.nameC() + "_free(x->" + f.name + ");\n"));
+                                }
+                            } else if (f.type.needFree()) {
+                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type.nameC() + "_free(x->" + f.name + ");\n"));
+                            }
+                        }
+                        if (t.autoClose != null) {
+                            buff.append(Statement.indent(t.nameC() + "_close_1(x);\n"));
+                            buff.append(Statement.indent("if (x->_refCount) { fprintf(stdout, \"Object re-referenced in the close method\"); exit(1); }\n"));
+                        }
+                        if (t.needIncDec()) {
+                            // structs don't need free
+                            buff.append(Statement.indent("_free(x);\n"));
+                        }
+                        buff.append("}\n");
                     }
-                    buff.append("}\n");
-                    buff.append("int " + t.nameC() + "_freeIfUnused(void* x) {\n");
-                    buff.append(Statement.indent("PRINT(\"== freeIfUnused %p count=%d\\n\", x, ((" + t.nameC() + "*)x)->_refCount);\n"));
-                    buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); return 1; } return 0;\n"));
-                    buff.append("}\n");
+                    if (!SIMPLE_REF_COUNTING) {
+                        buff.append("int " + t.nameC() + "_freeIfUnused(void* x) {\n");
+                        buff.append(Statement.indent("PRINT(\"== freeIfUnused %p count=%d\\n\", x, ((" + t.nameC() + "*)x)->_refCount);\n"));
+                        buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); return 1; } return 0;\n"));
+                        buff.append("}\n");
+                    }
                 }
             }
         }

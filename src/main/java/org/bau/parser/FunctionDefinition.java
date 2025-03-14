@@ -64,7 +64,7 @@ public class FunctionDefinition {
             buff.append(module.replace(".", "_") + "_");
         }
         if (callType != null) {
-            buff.append(callType.name()).append('_');
+            buff.append(callType.idC()).append('_');
         }
         buff.append(name + "_");
         if (varArgs) {

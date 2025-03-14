@@ -2,6 +2,9 @@ package org.bau;
 
 /**
 
+
+Name: Mya, Pha
+
 For memory-safe and fast programming language, I think one of the most important, and hardest, questions is memory management.
 
 For my language (compiled to C), I'm still struggling a bit, and I'm pretty sure I'm not the only one.
@@ -167,6 +170,8 @@ TODO struct assignment (eg. str) also needs decRef/incRef -- via a function?
 
 TODO automatically adding a construction function?
 TODO types that have non-nullable fields: new(Tree) would set the fields to null...
+
+TODO mark loop functions as "loop macro" or so (make sure they can not be called)
 
 org.bau.Memory
   copy

@@ -58,6 +58,9 @@ public class Break implements Statement {
         } else {
             buff.append("break;\n");
         }
+        if (condition != null) {
+            buff.append(Borrow.resetUsedOwned(condition.getUsedOwned()));
+        }
         return buff.toString();
     }
 

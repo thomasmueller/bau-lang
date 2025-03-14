@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -52,7 +52,6 @@ int_array* int_array_new(uint32_t len) {
 }
 struct string {
     i8_array* data;
-    int32_t _refCount;
 };
 string string_new() {
     string result;
@@ -77,13 +76,9 @@ string_array* string_array_new(uint32_t len) {
 /* functions */
 string str_1(i8_array* s);
 void i8_array_free(i8_array* x);
-int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
 void string_free(string* x);
-int string_freeIfUnused(void* x);
 void string_array_free(string_array* x);
-int string_array_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -94,10 +89,6 @@ void int_array_free(int_array* x) {
 }
 void string_free(string* x) {
     _decUse(x->data, i8_array);
-}
-int string_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((string*)x)->_refCount);
-    if (((string*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void string_array_free(string_array* x) {
     for (int i = 0; i < x->len; i++) string_free(&(x->data[i]));

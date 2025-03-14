@@ -16,14 +16,13 @@ public class Std {
     private final static boolean ARRAY_BOUND_CHECK = true;
 
     public static void register(Program prog) {
-        DataType i8 = prog.addType(DataType.newBuiltIn(DataType.I8, 1));
-        DataType i16 = prog.addType(DataType.newBuiltIn(DataType.I16, 2));
-        DataType i32 = prog.addType(DataType.newBuiltIn(DataType.I32, 4));
+        DataType i8 = prog.addType(DataType.newNumberType(DataType.I8, 1));
+        DataType i16 = prog.addType(DataType.newNumberType(DataType.I16, 2));
+        DataType i32 = prog.addType(DataType.newNumberType(DataType.I32, 4));
         DataType i64 = prog.addType(DataType.INT_TYPE);
-        DataType f32 = prog.addType(DataType.newBuiltIn(DataType.F32, 4));
-        DataType f64 = prog.addType(DataType.newBuiltIn(DataType.FLOAT, 8));
-        prog.addType(DataType.newBuiltIn(DataType.TYPE, 8));
-        DataType arena = prog.addType(DataType.newBuiltIn(DataType.ARENA, 1024 * 1024));
+        DataType f32 = prog.addType(DataType.newNumberType(DataType.F32, 4));
+        DataType f64 = prog.addType(DataType.newNumberType(DataType.FLOAT, 8));
+        prog.addType(DataType.newNumberType(DataType.TYPE, 8));
 
         FunctionDefinition f = new FunctionDefinition();
         f.name = DataType.INT;
@@ -163,11 +162,6 @@ public class Std {
             f.cCode = "return x;\n";
         }
         prog.addFunction(f);
-
-        f = new FunctionDefinition();
-        f.name = "newArena";
-        f.includes = new ArrayList<>();
-        f.returnType = arena;
     }
 
     public static void registerRange(Program program) {

@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
@@ -99,6 +100,16 @@ public class FieldAccess implements Expression, LeftValue {
         }
     }
 
+    @Override
+    public List<Expression> getUsedOwned() {
+        ArrayList<Expression> usedOwned = new ArrayList<Expression>();
+        DataType type = type();
+        if (type != null && type.memoryType() == MemoryType.OWNER) {
+            usedOwned.add(this);
+        }
+        return usedOwned;
+    }
+
     public String assignmentC() {
         StringBuilder buff = new StringBuilder();
         buff.append(base.toC());
@@ -118,7 +129,11 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
+            } else {
+                return type().idC() + "_free(" + toC() + ");\n";
+            }
         }
         return "";
     }
@@ -126,7 +141,11 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE + "(" + toC() + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.INC_USE + "(" + toC() + ");\n";
+            } else {
+                return "";
+            }
         }
         return "";
     }

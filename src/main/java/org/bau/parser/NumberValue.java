@@ -35,7 +35,7 @@ public class NumberValue implements Expression {
     }
 
     public String toC() {
-        if (type.isFloatingPoint) {
+        if (type.isFloatingPoint()) {
             toC(value.doubleValue());
         } else {
             toC(value.longValue());

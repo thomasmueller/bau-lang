@@ -135,7 +135,7 @@ public class FunctionContext {
             t = dataTypeMap.get(name);
         }
         if (t == null) {
-            t = program.getType2(module, name);
+            t = program.getType(module, name);
         }
         return t;
     }

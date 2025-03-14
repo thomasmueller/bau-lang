@@ -78,11 +78,9 @@ public class Variable implements Expression, LeftValue {
     }
 
     public String toC() {
-        if (constantValue != null && type.isSystem() && !type.isArray()) {
+        if (constantValue != null && type.isNumber() && !type.isArray()) {
             StringBuilder buff = new StringBuilder();
-            if (type.isArena()) {
-                buff.append("newArena()");
-            } else if (type.isFloatingPoint) {
+            if (type.isFloatingPoint()) {
                 buff.append(NumberValue.toC(constantValue.doubleValue()));
             } else {
                 buff.append(NumberValue.toC(constantValue.longValue()));
@@ -96,7 +94,11 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() + ");\n";
+            } else {
+                return "";
+            }
         }
         return "";
     }
@@ -104,7 +106,11 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE_STACK + "(" + name + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.INC_USE_STACK + "(" + name + ");\n";
+            } else {
+                return "";
+            }
         }
         return "";
     }

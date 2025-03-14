@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -51,7 +51,6 @@ int_array* int_array_new(uint32_t len) {
 struct org_bau_Exception_exception {
     int64_t exceptionType;
     i8_array* message;
-    int32_t _refCount;
 };
 org_bau_Exception_exception org_bau_Exception_exception_new() {
     org_bau_Exception_exception result;
@@ -78,11 +77,8 @@ _or_exception exception_or_exception(org_bau_Exception_exception exception) {
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
 _or_exception print_1(int64_t x);
 void i8_array_free(i8_array* x);
-int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
-int org_bau_Exception_exception_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -93,10 +89,6 @@ void int_array_free(int_array* x) {
 }
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
     _decUse(x->message, i8_array);
-}
-int org_bau_Exception_exception_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_Exception_exception*)x)->_refCount);
-    if (((org_bau_Exception_exception*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));

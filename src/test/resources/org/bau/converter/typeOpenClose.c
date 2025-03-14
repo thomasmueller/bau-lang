@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -65,11 +65,8 @@ void File_close_1(File* this);
 void File_use_1(File* this);
 File* openFile_1(int64_t fp);
 void i8_array_free(i8_array* x);
-int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
 void File_free(File* x);
-int File_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -82,10 +79,6 @@ void File_free(File* x) {
     File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
     _free(x);
-}
-int File_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((File*)x)->_refCount);
-    if (((File*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));

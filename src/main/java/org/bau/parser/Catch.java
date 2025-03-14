@@ -65,6 +65,10 @@ public class Catch implements Statement {
         return buff.toString();
     }
 
+    public List<Expression> getUsedOwned() {
+        return List.of();
+    }
+
     public void autoClose(List<Statement> autoClose) {
         this.autoClose = autoClose;
     }

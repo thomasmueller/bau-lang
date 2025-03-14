@@ -54,6 +54,9 @@ public class Continue implements Statement {
         } else {
             buff.append("continue;\n");
         }
+        if (condition != null) {
+            buff.append(Borrow.resetUsedOwned(condition.getUsedOwned()));
+        }
         return buff.toString();
     }
 

@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -51,9 +51,7 @@ void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
 void List_int_free(List_int* x);
-int List_int_freeIfUnused(void* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
@@ -61,10 +59,6 @@ void int_array_free(int_array* x) {
 void List_int_free(List_int* x) {
     _decUse(x->array, int_array);
     _free(x);
-}
-int List_int_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((List_int*)x)->_refCount);
-    if (((List_int*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= this->array->len) {

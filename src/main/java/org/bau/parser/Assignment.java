@@ -135,6 +135,7 @@ public class Assignment implements Statement {
                 }
             }
         }
+        buff.append(Borrow.resetUsedOwned(value.getUsedOwned()));
         return buff.toString();
     }
 

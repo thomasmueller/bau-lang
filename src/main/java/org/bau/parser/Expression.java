@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.parser.Bounds.ApplyType;
 import org.bau.runtime.Memory;
@@ -56,5 +57,14 @@ public interface Expression {
      * @return the variable
      */
     Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target);
+
+    /**
+     * Get the list of owned fields or variables that are "used",
+     * for example when calling a function.
+     * Those need to be set to NULL afterwards.
+     */
+    default List<Expression> getUsedOwned() {
+        return List.of();
+    }
 
 }

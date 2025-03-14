@@ -1,23 +1,16 @@
 # Bau
 
-Bau is a simple, concise, safe, powerful and fast programming language. Features:
-
-* Easy to learn. Concise syntax.
-* Memory-safe. Statically typed.
-* Fast compilation and execution (transpiles to C).
+A programming language for everyone.
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
 
-It addresses other languages' issues:
-
-* Memory safety (C, C++)
-* Hard to use and master (C++, Rust)
-* Vendor lock-in (Java, Swift, C#)
-* GC pauses (Python, Java, C#,...)
-* Verbose syntax (C, Go, Java,...)
-* Slow execution (Python)
-* Null pointer errors (Java, C,...)
-* Array bound checks (Java, Rust,...)
+* Easy to learn with a concise syntax inspired by Python.
+* Memory-safe. Automatic memory management using reference counting by default.
+* As fast as Rust where needed, using single ownership and borrowing.
+* Low memory usage and without GC pauses.
+* Runs everwhere: transpiles to C.
+* Null safety: Null pointer errors are prevented at compile time.
+* Ability to avoid runtime array bound checks using static analysis.
 
 ## Example
 
@@ -259,6 +252,46 @@ The conditional `break` guarantees that `i` is within the bounds.
             break next >= data.len
             i = next
 
+### Memory Management
+
+Objects are reference counted by default.
+To avoid cycles, use weak references.
+For a weak references, add `*` to the type.
+
+    type Tree
+        left Tree?
+        right Tree?
+        parent Tree*?
+
+    fun Tree+ nodeCount() int
+        result := 1
+        l := left
+        if l
+            result += l.nodeCount()
+        r := right
+        if r
+            result += r.nodeCount()
+        return result
+
+Where speed is critical, use single ownership,
+by adding `+` to the type, and borrow with `&`.
+Weak references are still allowed:
+
+    type Tree
+        left Tree+?
+        right Tree+?
+        parent Tree*?
+
+    fun Tree+ nodeCount() int
+        result := 1
+        l := &left
+        if l
+            result += l.nodeCount()
+        r := &right
+        if r
+            result += r.nodeCount()
+        return result
+
 ### Exceptions
 
 `throw` throws an exception. `catch` is needed,
@@ -309,12 +342,12 @@ The variable `_` represents the current iteration value.
 The `return _` statement is replaced during compilation with the loop body.
 
     fun main()
-        for x := evenUntil(30)
+        for x := evenRange(0, 30)
             println('even: ' x)
 
-    fun evenUntil(until int) int
-        _ := 0
-        while _ <= until
+    fun evenRange(from int, to int) int
+        _ := from
+        while _ < to
             return _
             _ += 2
 
@@ -322,7 +355,7 @@ is equivalent to:
 
     fun main()
         x := 0
-        while x <= 30
+        while x < 30
             println('even: ' x)
             x += 2
         

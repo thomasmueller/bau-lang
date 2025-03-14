@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.bau.runtime.Memory;
@@ -159,8 +160,9 @@ public class Call implements Statement, Expression {
             buff.append(callToC());
             buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
             return buff.toString();
+        } else {
+            return callToC();
         }
-        return callToC();
     }
 
     public String callToC() {
@@ -169,7 +171,7 @@ public class Call implements Statement, Expression {
             buff.append(def.module.replace('.', '_') + "_");
         }
         if (def.callType != null) {
-            buff.append(def.callType.name()).append('_');
+            buff.append(def.callType.idC()).append('_');
         }
         buff.append(def.name + "_");
         if (def.varArgs) {
@@ -193,8 +195,26 @@ public class Call implements Statement, Expression {
         buff.append(")");
         if (statement) {
             buff.append(";\n");
+            buff.append(Borrow.resetUsedOwned(getUsedOwned()));
         }
         return buff.toString();
+    }
+
+    @Override
+    public List<Expression> getUsedOwned() {
+        ArrayList<Expression> usedOwned = new ArrayList<Expression>();
+        for (int i = 0; i < args.size(); i++) {
+            if (i == 0 && def.callType != null) {
+                // the "this" pointer is not used up
+                continue;
+            }
+            Expression e = args.get(i);
+            DataType type = e.type();
+            if (type != null && type.memoryType() == MemoryType.OWNER) {
+                usedOwned.add(e);
+            }
+        }
+        return usedOwned;
     }
 
     public String printlnToC() {

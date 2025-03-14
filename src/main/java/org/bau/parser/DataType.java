@@ -1,7 +1,6 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -17,12 +16,11 @@ public class DataType {
     public static final String F32 = "f32";
     public static final String FLOAT = "float";
     public static final String TYPE = "type";
-    public static final String ARENA = "arena";
 
     // we only define INT_TYPE because the types have a "used" flag -
     // and we don't want to set it if not needed
     // TODO this means for int array, this is always set
-    public static final DataType INT_TYPE = newBuiltIn(DataType.INT, 8);
+    public static final DataType INT_TYPE = newNumberType(DataType.INT, 8);
     static {
         INT_TYPE.used();
         INT_TYPE.arrayType.used();
@@ -31,44 +29,33 @@ public class DataType {
     final String module;
     private final String name;
     private final int sizeOf;
-    private final boolean isSystem;
+
+    // int, float, type, enum
     private final boolean isNumber;
-    private final boolean isArray;
-    private final boolean arenaAllocated;
-    final boolean isFloatingPoint;
-    private final DataType arrayType;
+    private final boolean isFloatingPoint;
+
+    private final MemoryType memoryType;
+
     private final DataType nullableType;
-    public final List<Variable> fields;
+    private final boolean isNullable;
+
+    // for non-array: the array type
+    private final DataType arrayType;
+
+    // for array: the base type
+    private final DataType arrayBaseType;
+
+    public List<Variable> fields = new ArrayList<>();
+
+    private DataType ownerType;
+    private DataType borrowType;
+
     public LinkedHashMap<String, Long> enumValues;
-    private DataType baseType;
     FunctionDefinition autoClose;
-    final boolean valueType;
     private boolean used;
     Expression maxValue;
-    private boolean isNullable;
     public ArrayList<String> parameters;
     public String template;
-    private boolean needsFree;
-
-    private DataType(String module, String name, int sizeOf, boolean isSystem, List<Variable> fields, boolean arenaAllocated) {
-        this(module, name, sizeOf, isSystem, false, fields, false, arenaAllocated);
-    }
-
-    public static DataType newBuiltIn(String name, int sizeOf) {
-        return new DataType(null, name, sizeOf, true, Collections.emptyList(), false);
-    }
-
-    public static DataType newEnumType(String module, String name) {
-        return new DataType(module, name, 8, false, Collections.emptyList(), false);
-    }
-
-    public static DataType newEmptyType(String module, String name) {
-        return new DataType(module, name, 0, false, Collections.emptyList(), false);
-    }
-
-    public static DataType newRegularType(String module, String name, int sizeOf, ArrayList<Variable> fields) {
-        return new DataType(module, name, sizeOf, false, fields, false);
-    }
 
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
@@ -76,72 +63,101 @@ public class DataType {
                 token.toUpperCase().equals(token);
     }
 
-    void addFields(List<Variable> fields) {
-        this.fields.addAll(fields);
-        for (Variable f : fields) {
-            if (f.type().needsFree) {
-                needsFree = true;
-                break;
-            }
-        }
+    public static DataType newNumberType(String name, int sizeOf) {
+        return new DataType(null, name, sizeOf, true, null, false, MemoryType.COPY);
     }
 
-    void used() {
-        this.used = true;
+    public static DataType newBuiltIn(String name, int sizeOf) {
+        return newNonArray(null, name, sizeOf, MemoryType.COPY);
     }
 
-    public DataType(String module, String name, int sizeOf, boolean isSystem, boolean isArray, List<Variable> fields, boolean isNullable, boolean arenaAllocated) {
+    public static DataType newEnumType(String module, String name) {
+        return new DataType(null, name, 8, true, null, false, MemoryType.COPY);
+    }
+
+    public static DataType newEmptyType(String module, String name) {
+        return newNonArray(module, name, 0,MemoryType.REF_COUNT);
+    }
+
+    public static DataType newRegularType(String module, String name, int sizeOf, MemoryType memoryType) {
+        return newNonArray(module, name, sizeOf, memoryType);
+    }
+
+    private static DataType newNonArray(String module, String name, int sizeOf, MemoryType memoryType) {
+        return new DataType(module, name, sizeOf, false, null, false, memoryType);
+    }
+
+    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, boolean isNullable, MemoryType memoryType) {
         this.isNullable = isNullable;
         this.module = module;
         this.name = name;
         this.sizeOf = sizeOf;
-        this.isSystem = isSystem;
-        this.isNumber = isSystem && sizeOf < 32;
-        this.isArray = isArray;
-        this.fields = fields;
-        if (!isArray) {
-            arrayType = new DataType(module, name + "[]", sizeOf, false, true, fields, isNullable, arenaAllocated);
-            arrayType.baseType = this;
-        } else {
-            arrayType = this;
-            if (!name.endsWith("[]")) {
-                throw new IllegalStateException();
-            }
-        }
-        // lowercase is value type
-        valueType = name.startsWith("0..") || name.charAt(0) > 'Z';
-        if (isSystem) {
+        this.isNumber = isNumber;
+        this.arrayBaseType = arrayBaseType;
+        this.memoryType = memoryType;
+        if (isNumber) {
             isFloatingPoint = name.charAt(0) == 'f';
         } else {
             isFloatingPoint = false;
         }
-        baseType = this;
-        if (!isArray && !valueType && !isSystem && !isNullable) {
-            nullableType = new DataType(module, name, sizeOf, false, false, fields, true, arenaAllocated);
+        if (!isArray() && memoryType != MemoryType.COPY && !isNullable) {
+            nullableType = new DataType(module, name, sizeOf, false, null, true, memoryType);
+            nullableType.fields = fields;
         } else {
             nullableType = null;
         }
-        if (isArray || isPointer()) {
-            needsFree = true;
+        if (!isArray()) {
+            arrayType = new DataType(module, name + "[]", sizeOf, false, this, isNullable, MemoryType.REF_COUNT);
+        } else {
+            arrayType = this;
         }
-        this.arenaAllocated = arenaAllocated;
-        addFields(fields);
     }
 
-    public boolean isSystem() {
-        return isSystem;
+    void addFields(List<Variable> fields) {
+        this.fields.addAll(fields);
+    }
+
+    void used() {
+        if (DataType.isGenericTypeName(name)) {
+            return;
+        }
+        if (fields.isEmpty() && !isArray() && isPointer()) {
+            // eg. List(T)
+            return;
+        }
+        this.used = true;
     }
 
     public boolean isNumber() {
         return isNumber;
     }
 
-    public boolean isArena() {
-        return isSystem && !isNumber;
+    public boolean isFloatingPoint() {
+        return isFloatingPoint;
+    }
+
+    public boolean isCopyType() {
+        return memoryType == MemoryType.COPY;
     }
 
     public String fullName() {
-        return fullName(module, name);
+        return fullName(module, id());
+    }
+
+    public String id() {
+        String n = name;
+        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
+            n += "+";
+        }
+        return n;
+    }
+
+    public String idC() {
+        String n = name;
+        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
+            n += "_owned";
+        }
+        return n;
     }
 
     public String name() {
@@ -153,11 +169,14 @@ public class DataType {
     }
 
     public DataType baseType() {
-        return baseType;
+        if (!isArray()) {
+            throw new IllegalStateException();
+        }
+        return arrayBaseType;
     }
 
     public DataType arrayType() {
-        if (isArray) {
+        if (isArray()) {
             throw new IllegalStateException();
         }
         return arrayType;
@@ -213,6 +232,9 @@ public class DataType {
             // replace "[]" with "_array"
             return s.substring(0, s.length() - 2) + "_array";
         }
+        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
+            s += "_owned";
+        }
         return s;
     }
 
@@ -232,7 +254,7 @@ public class DataType {
     }
 
     public boolean needFree() {
-        return needsFree;
+        return !isNumber;
     }
 
     public boolean needIncDec() {
@@ -240,11 +262,11 @@ public class DataType {
     }
 
     public boolean isPointer() {
-        return !valueType;
+        return memoryType != MemoryType.COPY;
     }
 
     public boolean isArray() {
-        return isArray;
+        return arrayBaseType != null;
     }
 
     public boolean isUsed() {
@@ -253,6 +275,26 @@ public class DataType {
 
     public DataType orNull() {
         return nullableType;
+    }
+
+    public MemoryType memoryType() {
+        return memoryType;
+    }
+
+    public DataType ownerType() {
+        if (ownerType == null) {
+            ownerType = new DataType(module, name, sizeOf, false, null, false, MemoryType.OWNER);
+            ownerType.fields = fields;
+        }
+        return ownerType;
+    }
+
+    public DataType borrowType() {
+        if (borrowType == null) {
+            borrowType = new DataType(module, name, sizeOf, false, null, false, MemoryType.BORROW);
+            borrowType.fields = fields;
+        }
+        return borrowType;
     }
 
     public boolean isNullable() {

@@ -9,7 +9,7 @@
 #define _malloc(a)      malloc(a)
 #define _traceMalloc(a)
 #define _free(a)        free(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);__builtin_assume((a)->_refCount > 0); (a)->_refCount++;}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
@@ -18,8 +18,6 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_List_List org_bau_List_List;
-struct org_bau_List_List;
 typedef struct org_bau_Exception_exception org_bau_Exception_exception;
 struct org_bau_Exception_exception;
 typedef struct Token Token;
@@ -60,19 +58,9 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct org_bau_List_List {
-    int32_t _refCount;
-};
-org_bau_List_List* org_bau_List_List_new() {
-    org_bau_List_List* result = _malloc(sizeof(org_bau_List_List));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
 struct org_bau_Exception_exception {
     int64_t exceptionType;
     i8_array* message;
-    int32_t _refCount;
 };
 org_bau_Exception_exception org_bau_Exception_exception_new() {
     org_bau_Exception_exception result;
@@ -127,7 +115,6 @@ org_bau_List_List_i8* org_bau_List_List_i8_new() {
 struct match {
     int64_t start;
     int64_t end;
-    int32_t _refCount;
 };
 match match_new() {
     match result;
@@ -214,21 +201,13 @@ int64_t org_bau_Std_ord_1(i8_array* s);
 _org_bau_List_List_Token_or_exception parse_1(i8_array* regex);
 void test_0();
 void i8_array_free(i8_array* x);
-int i8_array_freeIfUnused(void* x);
 void int_array_free(int_array* x);
-int int_array_freeIfUnused(void* x);
-void org_bau_List_List_free(org_bau_List_List* x);
-int org_bau_List_List_freeIfUnused(void* x);
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
-int org_bau_Exception_exception_freeIfUnused(void* x);
 void Token_free(Token* x);
-int Token_freeIfUnused(void* x);
 void Token_array_free(Token_array* x);
-int Token_array_freeIfUnused(void* x);
 void org_bau_List_List_i8_free(org_bau_List_List_i8* x);
-int org_bau_List_List_i8_freeIfUnused(void* x);
+void match_free(match* x);
 void org_bau_List_List_Token_free(org_bau_List_List_Token* x);
-int org_bau_List_List_Token_freeIfUnused(void* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -237,27 +216,12 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-void org_bau_List_List_free(org_bau_List_List* x) {
-    _free(x);
-}
-int org_bau_List_List_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_List_List*)x)->_refCount);
-    if (((org_bau_List_List*)x)->_refCount == 0) { _free(x); return 1; } return 0;
-}
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
     _decUse(x->message, i8_array);
-}
-int org_bau_Exception_exception_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_Exception_exception*)x)->_refCount);
-    if (((org_bau_Exception_exception*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void Token_free(Token* x) {
     _decUse(x->data, org_bau_List_List_i8);
     _free(x);
-}
-int Token_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((Token*)x)->_refCount);
-    if (((Token*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 void Token_array_free(Token_array* x) {
     for (int i = 0; i < x->len; i++) _decUse(x->data[i], Token);
@@ -268,17 +232,11 @@ void org_bau_List_List_i8_free(org_bau_List_List_i8* x) {
     _decUse(x->array, i8_array);
     _free(x);
 }
-int org_bau_List_List_i8_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_List_List_i8*)x)->_refCount);
-    if (((org_bau_List_List_i8*)x)->_refCount == 0) { _free(x); return 1; } return 0;
+void match_free(match* x) {
 }
 void org_bau_List_List_Token_free(org_bau_List_List_Token* x) {
     _decUse(x->array, Token_array);
     _free(x);
-}
-int org_bau_List_List_Token_freeIfUnused(void* x) {
-    PRINT("== freeIfUnused %p count=%d\n", x, ((org_bau_List_List_Token*)x)->_refCount);
-    if (((org_bau_List_List_Token*)x)->_refCount == 0) { _free(x); return 1; } return 0;
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -520,6 +478,7 @@ _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
         int64_t _t1 = result.end == text->len;
         _t0 = _t1;
     }
+    match_free(&result);
     return ok_int64_t_or_exception(_t0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
