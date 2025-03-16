@@ -19,7 +19,7 @@ A programming language for everyone.
             return 1
         return x * fact(x - 1)
 
-    for i:= range(0 20)
+    for i:= range(0, 20)
         println(fact(i))
 
 ## Keywords
