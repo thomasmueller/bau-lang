@@ -1,5 +1,7 @@
 package org.bau.parser;
 
+import java.util.HashSet;
+
 import org.bau.runtime.Memory;
 
 public class NativeCode implements Statement {
@@ -21,6 +23,11 @@ public class NativeCode implements Statement {
         // m.print(new Value.ValueI8Array(nativeCode.getBytes(StandardCharsets.UTF_8)));
         // m.println();
         return StatementResult.OK;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        // nothing
     }
 
     public void optimize(ProgramContext context) {

@@ -55,6 +55,11 @@ public class Parentheses implements Expression {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        base.setOwnedBoundsToNull(scope);
+    }
+
+    @Override
     public Expression simplify() {
         return this;
     }

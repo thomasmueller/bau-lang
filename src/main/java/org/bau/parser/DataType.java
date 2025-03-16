@@ -45,8 +45,11 @@ public class DataType {
     // for array: the base type
     private final DataType arrayBaseType;
 
+    // for owner and borrow: base type
+
     public List<Variable> fields = new ArrayList<>();
 
+    private final DataType refCountBaseType;
     private DataType ownerType;
     private DataType borrowType;
 
@@ -64,7 +67,7 @@ public class DataType {
     }
 
     public static DataType newNumberType(String name, int sizeOf) {
-        return new DataType(null, name, sizeOf, true, null, false, MemoryType.COPY);
+        return new DataType(null, name, sizeOf, true, null, null, false, MemoryType.COPY);
     }
 
     public static DataType newBuiltIn(String name, int sizeOf) {
@@ -72,7 +75,7 @@ public class DataType {
     }
 
     public static DataType newEnumType(String module, String name) {
-        return new DataType(null, name, 8, true, null, false, MemoryType.COPY);
+        return new DataType(null, name, 8, true, null, null, false, MemoryType.COPY);
     }
 
     public static DataType newEmptyType(String module, String name) {
@@ -80,20 +83,27 @@ public class DataType {
     }
 
     public static DataType newRegularType(String module, String name, int sizeOf, MemoryType memoryType) {
+        if (memoryType == MemoryType.BORROW || memoryType == MemoryType.OWNER) {
+            throw new IllegalArgumentException();
+        }
         return newNonArray(module, name, sizeOf, memoryType);
     }
 
     private static DataType newNonArray(String module, String name, int sizeOf, MemoryType memoryType) {
-        return new DataType(module, name, sizeOf, false, null, false, memoryType);
+        if (memoryType == MemoryType.BORROW || memoryType == MemoryType.OWNER) {
+            throw new IllegalArgumentException();
+        }
+        return new DataType(module, name, sizeOf, false, null, null, false, memoryType);
     }
 
-    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, boolean isNullable, MemoryType memoryType) {
+    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, DataType refCountBaseType, boolean isNullable, MemoryType memoryType) {
         this.isNullable = isNullable;
         this.module = module;
         this.name = name;
         this.sizeOf = sizeOf;
         this.isNumber = isNumber;
         this.arrayBaseType = arrayBaseType;
+        this.refCountBaseType = refCountBaseType;
         this.memoryType = memoryType;
         if (isNumber) {
             isFloatingPoint = name.charAt(0) == 'f';
@@ -101,13 +111,13 @@ public class DataType {
             isFloatingPoint = false;
         }
         if (!isArray() && memoryType != MemoryType.COPY && !isNullable) {
-            nullableType = new DataType(module, name, sizeOf, false, null, true, memoryType);
+            nullableType = new DataType(module, name, sizeOf, false, null, refCountBaseType, true, memoryType);
             nullableType.fields = fields;
         } else {
             nullableType = null;
         }
         if (!isArray()) {
-            arrayType = new DataType(module, name + "[]", sizeOf, false, this, isNullable, MemoryType.REF_COUNT);
+            arrayType = new DataType(module, name + "[]", sizeOf, false, this, null, isNullable, MemoryType.REF_COUNT);
         } else {
             arrayType = this;
         }
@@ -180,6 +190,10 @@ public class DataType {
             throw new IllegalStateException();
         }
         return arrayType;
+    }
+
+    public DataType refCountBaseType() {
+        return refCountBaseType;
     }
 
     public String toString() {
@@ -282,16 +296,26 @@ public class DataType {
     }
 
     public DataType ownerType() {
+        if (memoryType == MemoryType.OWNER) {
+            return this;
+        } else if (memoryType == MemoryType.BORROW) {
+            return refCountBaseType.ownerType();
+        }
         if (ownerType == null) {
-            ownerType = new DataType(module, name, sizeOf, false, null, false, MemoryType.OWNER);
+            ownerType = new DataType(module, name, sizeOf, false, null, this, false, MemoryType.OWNER);
             ownerType.fields = fields;
         }
         return ownerType;
     }
 
     public DataType borrowType() {
+        if (memoryType == MemoryType.BORROW) {
+            return this;
+        } else if (memoryType == MemoryType.OWNER) {
+            return refCountBaseType.borrowType();
+        }
         if (borrowType == null) {
-            borrowType = new DataType(module, name, sizeOf, false, null, false, MemoryType.BORROW);
+            borrowType = new DataType(module, name, sizeOf, false, null, this, false, MemoryType.BORROW);
             borrowType.fields = fields;
         }
         return borrowType;

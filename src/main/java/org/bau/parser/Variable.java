@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
@@ -92,6 +93,21 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
+    public List<Expression> getUsedOwned() {
+        ArrayList<Expression> usedOwned = new ArrayList<Expression>();
+        DataType type = type();
+        if (type != null && type.memoryType() == MemoryType.OWNER) {
+            usedOwned.add(this);
+        }
+        return usedOwned;
+    }
+
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        setBoundValue(scope, "=", new NullValue());
+    }
+
+    @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
             if (type().memoryType() == MemoryType.REF_COUNT) {
@@ -153,7 +169,7 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public void setBoundValue(Expression scope, String modify, Expression value) {
-        if (!value.type().isNumber()) {
+        if (!(value instanceof NullValue) && !value.type().isNumber()) {
             return;
         }
         if (bounds == null) {

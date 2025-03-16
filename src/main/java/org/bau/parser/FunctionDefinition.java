@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class FunctionDefinition {
@@ -25,8 +26,9 @@ public class FunctionDefinition {
     public String header;
     public String code;
     public String comment;
-
     private String catchLabel;
+    private HashSet<DataType> freedOwnedTypes = null;
+    private HashSet<DataType> borrowedTypes = null;
 
     public String getFunctionId() {
         int parameterCount = varArgs ? Integer.MAX_VALUE : parameters.size();
@@ -231,6 +233,43 @@ public class FunctionDefinition {
             buff.append(code);
         }
         return buff.toString();
+    }
+
+    boolean isOwnedTypeFreed(DataType type) {
+        if (freedOwnedTypes == null) {
+            collectTypes(new HashSet<>(), MemoryType.OWNER);
+        }
+        return freedOwnedTypes.contains(type);
+    }
+
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        if (memoryType == MemoryType.OWNER) {
+            if (freedOwnedTypes == null) {
+                freedOwnedTypes = new HashSet<>();
+                Program.collectTypes(list, freedOwnedTypes, memoryType);
+                Program.collectTypes(autoClose, freedOwnedTypes, memoryType);
+            }
+            set.addAll(freedOwnedTypes);
+        } else if (memoryType == MemoryType.BORROW) {
+            if (borrowedTypes == null) {
+                borrowedTypes = new HashSet<>();
+                Program.collectTypes(list, borrowedTypes, memoryType);
+                Program.collectTypes(autoClose, borrowedTypes, memoryType);
+            }
+            set.addAll(borrowedTypes);
+        }
+    }
+
+    void borrowCheck() {
+        collectTypes(new HashSet<>(), MemoryType.OWNER);
+        collectTypes(new HashSet<>(), MemoryType.BORROW);
+        for (DataType type : borrowedTypes) {
+            DataType ownerType = type.refCountBaseType().ownerType();
+            if (freedOwnedTypes.contains(ownerType)) {
+                throw new IllegalStateException(
+                        "Function " + getFunctionId() + ": borrowing " + type + " which is freed");
+            }
+        }
     }
 
 }

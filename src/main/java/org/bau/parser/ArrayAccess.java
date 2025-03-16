@@ -125,6 +125,11 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        // ignore
+    }
+
+    @Override
     public boolean isEasyToRead() {
         return true;
     }

@@ -1,9 +1,9 @@
 fun main()
     # or just: stretch(4); creates 31 trees
-    n := 10
-    minDepth := 4
-    maxDepth := n
-    stretchDepth := maxDepth + 1
+    n : 10
+    minDepth : 4
+    maxDepth : n
+    stretchDepth : maxDepth + 1
     stretch(stretchDepth)
     longLivedTree := with(maxDepth)
     depth := minDepth
@@ -17,7 +17,6 @@ fun main()
         println(iterations ' trees of depth ' depth '; check: ' sum)
         depth += 2
     count := longLivedTree.nodeCount()
-    longLivedTree.clear()
     println('long lived tree of depth ' maxDepth '; check: ' count)
 
 type Tree
@@ -27,7 +26,7 @@ type Tree
 fun Tree nodeCount() int
     result := 1
     # not-null conditions can only be on variable currently
-    # (it is safer: fields values could change)
+    # (it is safer: fields values could change)
     l := left
     if l
         result += l.nodeCount()
@@ -43,7 +42,6 @@ fun stretch(depth int)
 fun count(depth int) int
     t := with(depth)
     c := t.nodeCount()
-    t.clear()
     return c
 
 fun newTree(left Tree, right Tree) Tree
@@ -56,13 +54,6 @@ fun with(depth int) Tree
     if depth = 0
         return newTree(null, null)
     return newTree(with(depth - 1), with(depth - 1))
-
-fun Tree clear()
-    if left <> null
-        left.clear()
-        left = null
-        right.clear()
-        right = null
 
 ## Expected
 stretch tree of depth 11; check: 4095

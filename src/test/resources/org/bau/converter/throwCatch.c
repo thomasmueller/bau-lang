@@ -161,6 +161,6 @@ type exception
 An exception
 
 fun exception(message i8[]) exception
- Create a new exception with a message
+Create a new exception with a message
 
 */

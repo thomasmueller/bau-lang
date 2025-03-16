@@ -3,8 +3,10 @@ import org.bau.Utils
 fun main()
     minDepth : 4
     maxDepth : 20
-    stretch Tree+? := with(maxDepth + 1)
-    println('stretch tree of depth ' maxDepth ' check: ' stretch.nodeCount())
+    stretchDepth : maxDepth + 1
+    stretch Tree+? := with(stretchDepth)
+    println('ownership / borrowing')
+    println('stretch tree of depth ' stretchDepth '\t check: ' stretch.nodeCount())
     stretch = with(0)
     longLived := with(maxDepth)
     depth := minDepth
@@ -16,9 +18,9 @@ fun main()
             t := with(depth)
             check += t.nodeCount()
             i += 1
-        println(iterations ' trees of depth ' depth ' check: ' check)
+        println(iterations '\t trees of depth ' depth '\t check: ' check)
         depth += 2
-    println('long lived tree of depth ' maxDepth ' check: ' longLived.nodeCount())
+    println('long lived tree of depth ' maxDepth '\t check: ' longLived.nodeCount())
 
 type Tree
     left Tree+?
@@ -26,10 +28,10 @@ type Tree
 
 fun Tree+ nodeCount() int
     result := 1
-    l := &left
+    l : &left
     if l
         result += l.nodeCount()
-    r := &right
+    r : &right
     if r
         result += r.nodeCount()
     return result
@@ -55,9 +57,8 @@ fun with(depth int) Tree+
     return newTree(with(depth - 1), with(depth - 1))
 
 ## Expected
-stretch tree of depth 11; check: 4095
-1024 trees of depth 4; check: 31744
-256 trees of depth 6; check: 32512
-64 trees of depth 8; check: 32704
-16 trees of depth 10; check: 32752
-long lived tree of depth 10; check: 2047
+ownership / borrowing
+stretch tree of depth 4  check: 31
+8    trees of depth 1    check: 24
+2    trees of depth 3    check: 30
+long lived tree of depth 3   check: 15

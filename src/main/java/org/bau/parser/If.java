@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bau.runtime.Memory;
@@ -68,6 +69,18 @@ public class If implements Statement {
         l2.addAll(list);
         l2.addAll(ac);
         return Program.runSequence(m, l2);
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        for (int i = 0; i < listList.size(); i++) {
+            ArrayList<Statement> list = listList.get(i);
+            Program.collectTypes(list, set, memoryType);
+        }
+        for (int i = 0; i < autoClose.size(); i++) {
+            List<Statement> list = autoClose.get(i);
+            Program.collectTypes(list, set, memoryType);
+        }
     }
 
     @Override

@@ -600,6 +600,14 @@ public class Operation implements Expression {
         return 0;
     }
 
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        if (left != null) {
+            left.setOwnedBoundsToNull(scope);
+        }
+        right.setOwnedBoundsToNull(scope);
+    }
+
     public static Value convertToType(Value val, DataType targetType) {
         if (val == null) {
             throw new IllegalStateException("Cannot convert null to " + targetType);

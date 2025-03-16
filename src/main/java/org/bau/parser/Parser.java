@@ -401,7 +401,6 @@ public class Parser {
                 readEndOfStatement();
             }
         }
-
         DataType type = DataType.newEnumType(module, id);
         type.enumValues = entries;
         program.addType(type);
@@ -487,6 +486,7 @@ public class Parser {
         }
         boolean varArgs = false;
         boolean template = false;
+        List<Statement> ownedParameters = new ArrayList<>();
         if (!matchOp(")")) {
             while (true) {
                 String name = readIdentifier();
@@ -523,6 +523,13 @@ public class Parser {
                         type.used();
                     }
                     Variable var = new Variable(name, type);
+                    if (type.memoryType() == MemoryType.OWNER) {
+                        if (varArgs) {
+                            throw syntaxError("Owned var-args are not supported");
+                        }
+                        Free free = new Free(var);
+                        ownedParameters.add(free);
+                    }
                     var.isConstant = true;
                     def.parameters.add(var);
                     functionContext.addVariable(var);
@@ -600,6 +607,9 @@ public class Parser {
             int startCode = lastPos;
             String s = parseBlock(defIndent);
             String header = text.substring(startParse, startCode).trim() + "\n";
+            if (comment != null) {
+                header = "##\n" + comment + "\n##\n" + header;
+            }
             def.header = header;
             def.code = s;
             def.comment = comment;
@@ -633,6 +643,7 @@ public class Parser {
             def.list.add(new Return(null));
         }
         List<Statement> autoClose = autoClose(stackPosFunction, null);
+        autoClose.addAll(ownedParameters);
         def.autoClose(autoClose);
         functionContext.rewindStack(stackPos);
         currentLoop = null;
@@ -1016,6 +1027,10 @@ public class Parser {
             }
             while (true) {
                 if(matchOp(".")) {
+                    // TODO duplicate code, in parsePossibleDot
+                    if (left.type().isPointer()) {
+                        verifyNullAccess(left);
+                    }
                     String f = readIdentifier();
                     if (matchOp("(")) {
                         Call call = new Call();
@@ -1505,6 +1520,8 @@ public class Parser {
         if (call.exceptionType() != null) {
             exceptionType = call.exceptionType();
         }
+        // owned variables are now null
+        call.setBounds(getScope(0));
         return call;
     }
 
@@ -2343,6 +2360,12 @@ public class Parser {
             if (b == null || !b.isNotNull(this)) {
                 throw syntaxError("The expression '" + e + "' could be null here. You need to verify using 'if " + e + "' before accessing it.");
             }
+        } else if (e.type().memoryType() == MemoryType.OWNER) {
+            // owners are known to not be null, until they are cleared
+            Bounds b = e.getBounds();
+            if (b != null && !b.isNotNull(this)) {
+                throw syntaxError("The expression '" + e + "' could be null here. You need to verify using 'if " + e + "' before accessing it.");
+            }
         }
     }
 
@@ -2471,12 +2494,19 @@ public class Parser {
                     while (true) {
                         c = text.charAt(pos);
                         if (c == '\n') {
-                            pos++;
                             break;
                         }
                         pos++;
                     }
                     lastComment = text.substring(start, pos).trim();
+                }
+                if (pos + 1 < text.length() && text.charAt(pos + 1) == '\n') {
+                    // comments with newline afterwards are ignored
+                    lastComment = null;
+                }
+                if (indent != 0) {
+                    // indented comments are ignored
+                    lastComment = null;
                 }
             } else {
                 break;

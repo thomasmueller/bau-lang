@@ -1,12 +1,12 @@
 import org.bau.Utils
 
 fun main()
-    minDepth : 4
-    maxDepth : 20
+    minDepth : 1
+    maxDepth : 3
     stretchDepth : maxDepth + 1
     stretch Tree? := with(stretchDepth)
     println('ref count')
-    println('stretch tree of depth ' stretchDepth '\t check: ' stretch.nodeCount())
+    println('stretch tree of depth ' stretchDepth ' check: ' stretch.nodeCount())
     stretch = with(0)
     longLived := with(maxDepth)
     depth := minDepth
@@ -18,9 +18,9 @@ fun main()
             t := with(depth)
             check += t.nodeCount()
             i += 1
-        println(iterations '\t trees of depth ' depth '\t check: ' check)
+        println(iterations ' trees of depth ' depth ' check: ' check)
         depth += 2
-    println('long lived tree of depth ' maxDepth '\t check: ' longLived.nodeCount())
+    println('long lived tree of depth ' maxDepth ' check: ' longLived.nodeCount())
 
 type Tree
     left Tree?
@@ -35,10 +35,6 @@ fun Tree nodeCount() int
     if r
         result += r.nodeCount()
     return result
-
-fun stretch(depth int)
-    c := count(depth)
-    println('stretch tree of depth ' depth '; check: ' c)
 
 fun count(depth int) int
     t := with(depth)
@@ -58,7 +54,7 @@ fun with(depth int) Tree
 
 ## Expected
 ref count
-stretch tree of depth 4  check: 31
-8    trees of depth 1    check: 24
-2    trees of depth 3    check: 30
-long lived tree of depth 3   check: 15
+stretch tree of depth 4 check: 31
+8 trees of depth 1 check: 24
+2 trees of depth 3 check: 30
+long lived tree of depth 3 check: 15

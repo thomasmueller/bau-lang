@@ -110,6 +110,11 @@ public class FieldAccess implements Expression, LeftValue {
         return usedOwned;
     }
 
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        setBoundValue(scope, "=", new NullValue());
+    }
+
     public String assignmentC() {
         StringBuilder buff = new StringBuilder();
         buff.append(base.toC());

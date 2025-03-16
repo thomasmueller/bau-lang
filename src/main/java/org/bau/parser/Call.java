@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -112,6 +113,11 @@ public class Call implements Statement, Expression {
             }
         }
         return StatementResult.OK;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        def.collectTypes(set, memoryType);
     }
 
     public Call replace(Variable old, Expression with) {
@@ -320,6 +326,21 @@ public class Call implements Statement, Expression {
     @Override
     public boolean isSimple() {
         return false;
+    }
+
+    @Override
+    public void setBounds(Expression scope) {
+        List<Expression> list = getUsedOwned();
+        for (Expression e : list) {
+            e.setOwnedBoundsToNull(scope);
+        }
+    }
+
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        for(Expression a : args) {
+            a.setOwnedBoundsToNull(scope);
+        }
     }
 
     @Override

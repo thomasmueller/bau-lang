@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <time.h>
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
@@ -18,6 +19,8 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
+typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
+struct org_bau_Utils_dateTime;
 typedef struct Tree Tree;
 struct Tree;
 struct i8_array {
@@ -48,6 +51,26 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+struct org_bau_Utils_dateTime {
+    int32_t year;
+    int64_t month;
+    int64_t day;
+    int64_t hour;
+    int64_t minute;
+    int64_t second;
+    int64_t millis;
+};
+org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
+    org_bau_Utils_dateTime result;
+    result.year = 0;
+    result.month = 0;
+    result.day = 0;
+    result.hour = 0;
+    result.minute = 0;
+    result.second = 0;
+    result.millis = 0;
+    return result;
+}
 struct Tree {
     Tree* left;
     Tree* right;
@@ -64,13 +87,13 @@ Tree* Tree_new() {
 /* exception types */
 /* functions */
 int64_t Tree_nodeCount_1(Tree* this);
-int64_t count_1(int64_t depth);
 Tree* newTree_2(Tree* left, Tree* right);
 int64_t shiftLeft_2(int64_t a, int64_t b);
-void stretch_1(int64_t depth);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
 Tree* with_1(int64_t depth);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
+void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
 void Tree_free(Tree* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -79,6 +102,8 @@ void i8_array_free(i8_array* x) {
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
+}
+void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
 }
 void Tree_free(Tree* x) {
     _decUse(x->left, Tree);
@@ -96,6 +121,8 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
+i8_array* string_1004;
+int64_t randomSeed;
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;
     Tree* l = this->left;
@@ -112,12 +139,6 @@ int64_t Tree_nodeCount_1(Tree* this) {
     _decUseStack(l, Tree);
     return result;
 }
-int64_t count_1(int64_t depth) {
-    Tree* t = with_1(depth);
-    int64_t c = Tree_nodeCount_1(t);
-    _decUseStack(t, Tree);
-    return c;
-}
 Tree* newTree_2(Tree* left, Tree* right) {
     Tree* t = Tree_new();
     _decUse(t->left, Tree);
@@ -131,9 +152,8 @@ Tree* newTree_2(Tree* left, Tree* right) {
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
-void stretch_1(int64_t depth) {
-    int64_t c = count_1(depth);
-    printf("stretch tree of depth %lld; check: %lld\n", (long long)depth, (long long)c);
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
 }
 Tree* with_1(int64_t depth) {
     if (depth == 0) {
@@ -148,31 +168,65 @@ Tree* with_1(int64_t depth) {
     return _t3;
 }
 int main() {
-    string_1000 = str_const("stretch tree of depth ", 22);
-    string_1001 = str_const("; check: ", 9);
-    string_1002 = str_const(" trees of depth ", 16);
-    string_1003 = str_const("long lived tree of depth ", 25);
-    int64_t n = 10;
-    int64_t minDepth = 4;
-    int64_t maxDepth = 10;
-    int64_t stretchDepth = 11;
-    stretch_1(11);
-    Tree* longLivedTree = with_1(10);
-    int64_t depth = 4;
-    while (depth <= 10) {
-        int64_t iterations = shiftLeft_2(1, (( 10 - depth ) + 4));
-        int64_t sum = 0;
+    string_1000 = str_const("ref count", 9);
+    string_1001 = str_const("stretch tree of depth ", 22);
+    string_1002 = str_const(" check: ", 8);
+    string_1003 = str_const(" trees of depth ", 16);
+    string_1004 = str_const("long lived tree of depth ", 25);
+    int64_t randomSeed = 0;
+    int64_t minDepth = 1;
+    int64_t maxDepth = 3;
+    int64_t stretchDepth = 4;
+    Tree* stretch = with_1(4);
+    printf("ref count\n");
+    int64_t _t0 = Tree_nodeCount_1(stretch);
+    printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+    _decUseStack(stretch, Tree);
+    stretch = with_1(0);
+    Tree* longLived = with_1(3);
+    int64_t depth = 1;
+    while (depth <= 3) {
+        int64_t iterations = shiftLeft_2(1, (( 3 - depth ) + 1));
+        int64_t check = 0;
         int64_t i = 1;
         while (i <= iterations) {
-            sum += count_1(depth);
+            Tree* t = with_1(depth);
+            check += Tree_nodeCount_1(t);
             i += 1;
+            continue1:;
+            _decUseStack(t, Tree);
         }
-        printf("%lld trees of depth %lld; check: %lld\n", (long long)iterations, (long long)depth, (long long)sum);
+        printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t count = Tree_nodeCount_1(longLivedTree);
-    printf("long lived tree of depth %lld; check: %lld\n", (long long)10, (long long)count);
-    _decUseStack(longLivedTree, Tree);
+    int64_t _t1 = Tree_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t1);
+    _decUseStack(longLived, Tree);
+    _decUseStack(stretch, Tree);
     _end();
     return 0;
 }
+/*
+
+type dateTime
+Date and time.
+
+fun getDateTime() dateTime
+Get the local time in millisecond precision.
+
+fun getNanoTime() int
+Nanosecons since some undefined point in the past. Never jumps backwards.
+
+fun getNanoTimeUTC() int
+Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
+
+fun getRandomSeed() int
+Get the random seed.
+
+fun random() int
+Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun setRandomSeed(seed int)
+Set the random seed.
+
+*/

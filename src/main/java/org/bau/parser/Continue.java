@@ -1,5 +1,6 @@
 package org.bau.parser;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.bau.runtime.Memory;
@@ -33,6 +34,11 @@ public class Continue implements Statement {
             }
         }
         return StatementResult.CONTINUE;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        Program.collectTypes(autoClose, set, memoryType);
     }
 
     public void optimize(ProgramContext context) {

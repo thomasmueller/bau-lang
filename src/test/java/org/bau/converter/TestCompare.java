@@ -69,6 +69,16 @@ public class TestCompare {
     }
 
     @Test
+    public void binaryTreeOwned() throws IOException {
+        test("binaryTreeOwned");
+    }
+
+    @Test
+    public void binaryTreeRefCount() throws IOException {
+        test("binaryTreeRefCount");
+    }
+
+    @Test
     public void byteArray() throws IOException {
         test("byteArray");
     }
@@ -186,6 +196,11 @@ public class TestCompare {
     @Test
     public void operators() throws IOException {
         test("operators");
+    }
+
+    @Test
+    public void owned() throws IOException {
+        test("owned");
     }
 
     @Test

@@ -50,6 +50,11 @@ public class Borrow implements Expression {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+        // ignore
+    }
+
+    @Override
     public boolean isEasyToRead() {
         return base.isEasyToRead();
     }

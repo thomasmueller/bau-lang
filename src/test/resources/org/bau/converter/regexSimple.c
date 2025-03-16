@@ -762,7 +762,7 @@ type exception
 An exception
 
 fun exception(message i8[]) exception
- Create a new exception with a message
+Create a new exception with a message
 
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.

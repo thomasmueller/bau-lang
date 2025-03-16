@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -111,6 +112,15 @@ public class Free implements Statement {
             return free(var, m);
         } else {
             throw new IllegalArgumentException();
+        }
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        if (memoryType == MemoryType.OWNER) {
+            if (var.type().memoryType() == MemoryType.OWNER) {
+                set.add(var.type());
+            }
         }
     }
 

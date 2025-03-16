@@ -1,5 +1,7 @@
 package org.bau.parser;
 
+import java.util.HashSet;
+
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -44,6 +46,11 @@ public class Throw implements Statement {
         Value v = expr.eval(m);
         m.setGlobal(Memory.EXCEPTION, v);
         return StatementResult.THROW;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        // nothing
     }
 
 }

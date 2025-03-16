@@ -535,9 +535,6 @@ int main() {
 }
 /*
 
-type HashMap(K, V)
- module org.bau.HashMap
-
 fun hashCode(data i8[]) int
 4 bytes at a time if possible
 

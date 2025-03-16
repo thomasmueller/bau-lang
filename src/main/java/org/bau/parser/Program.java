@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -443,6 +444,7 @@ public class Program {
         buff.append("/* functions */\n");
         for (FunctionDefinition def : functions.values()) {
             if (def.used) {
+                def.borrowCheck();
                 context.function = def;
                 if (def.comment != null) {
                     buff.append("/*\n");
@@ -544,11 +546,15 @@ public class Program {
             buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
         }
         context.nextFunction();
+        FunctionDefinition main = new FunctionDefinition();
+        main.list = list;
+        main.name = "main";
+        main.borrowCheck();
         StringBuilder buff2 = new StringBuilder();
-        for(Statement s : list) {
+        for (Statement s : list) {
             s.optimize(context);
         }
-        for(Statement s : list) {
+        for (Statement s : list) {
             buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
@@ -754,6 +760,27 @@ Testing.
             }
         }
         return StatementResult.OK;
+    }
+
+    public static Set<DataType> freedOwnedTypes(List<Statement> list) {
+        HashSet<DataType> set = new HashSet<>();
+        collectTypes(list, set, MemoryType.OWNER);
+        return set;
+    }
+
+    /**
+     * Collect the set of types where owned variables or fields are freed. This is
+     * to ensure borrowing is only allowed if a function doesn't free fields of this
+     * type.
+     *
+     * @param list
+     * @param set
+     */
+    public static void collectTypes(List<Statement> list, HashSet<DataType> set, MemoryType memoryType) {
+        for (int i = 0; list != null && i < list.size(); i++) {
+            Statement s = list.get(i);
+            s.collectTypes(set, memoryType);
+        }
     }
 
     Value evalConstants(Expression expr) {

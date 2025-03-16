@@ -11,7 +11,7 @@
    *reset*
 */
 
-#include <malloc.h>
+// #include <malloc.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,12 +60,12 @@ treeNode* BottomUpTree(unsigned depth)
 
 void DeleteTree(treeNode* tree)
 {
-    if (tree->left != NULL)
-    {
+    if (tree->left != NULL) {
         DeleteTree(tree->left);
+    }
+    if (tree->right != NULL) {
         DeleteTree(tree->right);
     }
-
     free(tree);
 } /* DeleteTree() */
 

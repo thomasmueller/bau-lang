@@ -72,6 +72,10 @@ public class TernaryExpression implements Expression {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+    }
+
+    @Override
     public boolean isEasyToRead() {
         return false;
     }

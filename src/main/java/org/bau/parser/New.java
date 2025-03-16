@@ -95,6 +95,10 @@ public class New implements Expression {
         return type.nameC() + "_new()";
     }
 
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+    }
+
     public String toString() {
         if (arrayLength != null) {
             return "new " + type.baseType().name() + "[" + arrayLength + "]";

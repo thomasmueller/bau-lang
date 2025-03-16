@@ -1,5 +1,7 @@
 package org.bau.parser;
 
+import java.util.HashSet;
+
 import org.bau.runtime.Memory;
 
 public class SpecialOperation implements Statement {
@@ -34,6 +36,11 @@ public class SpecialOperation implements Statement {
 
     public enum SpecialOperationType {
         ZERO_COUNT_TABLE_GC
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        // nothing
     }
 
 }

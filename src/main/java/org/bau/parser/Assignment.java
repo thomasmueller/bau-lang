@@ -1,5 +1,7 @@
 package org.bau.parser;
 
+import java.util.HashSet;
+
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
@@ -42,6 +44,7 @@ public class Assignment implements Statement {
             // TODO update bounds
             //leftValue.setBoundValue(scope, modify, value);
         }
+        value.setOwnedBoundsToNull(scope);
     }
 
     @Override
@@ -74,6 +77,15 @@ public class Assignment implements Statement {
             }
         }
         return StatementResult.OK;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        if (memoryType == MemoryType.BORROW) {
+            if (leftValue.type().memoryType() == MemoryType.BORROW) {
+                set.add(type);
+            }
+        }
     }
 
     public void optimize(ProgramContext context) {

@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bau.runtime.Memory;
@@ -39,6 +40,11 @@ public class Catch implements Statement {
         m.setLocal(var.name, val);
         m.setGlobal(Memory.EXCEPTION, null);
         return Program.runSequence(m, list);
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        // nothing
     }
 
     public void optimize(ProgramContext context) {

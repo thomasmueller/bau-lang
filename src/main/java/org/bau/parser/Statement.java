@@ -1,5 +1,7 @@
 package org.bau.parser;
 
+import java.util.HashSet;
+
 import org.bau.runtime.Memory;
 
 public interface Statement {
@@ -37,5 +39,7 @@ public interface Statement {
     default void setBounds(Expression scope) {
 
     }
+
+    void collectTypes(HashSet<DataType> set, MemoryType memoryType);
 
 }

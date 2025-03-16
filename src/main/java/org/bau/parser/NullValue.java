@@ -44,6 +44,10 @@ public class NullValue implements Expression {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+    }
+
+    @Override
     public boolean isEasyToRead() {
         return true;
     }

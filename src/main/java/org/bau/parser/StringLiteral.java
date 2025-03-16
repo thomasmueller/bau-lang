@@ -44,6 +44,10 @@ public class StringLiteral implements Expression {
         return "string_" + reference;
     }
 
+    @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+    }
+
     public Expression replace(Variable old, Expression with) {
         return this;
     }

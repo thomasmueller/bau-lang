@@ -44,6 +44,14 @@ public interface Expression {
     }
 
     /**
+     * After "using" owned variables and fields, they are null
+     * (calling a method, assigning to another variable)
+     *
+     * @param scope
+     */
+    void setOwnedBoundsToNull(Expression scope);
+
+    /**
      * Whether the expression is a constant or a variable. Operations
      * (specially if they involve multiple variables) are not simple.
      */

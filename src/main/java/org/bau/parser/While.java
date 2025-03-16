@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bau.runtime.Memory;
@@ -70,6 +71,13 @@ public class While implements Statement {
             }
         }
         return StatementResult.OK;
+    }
+
+    @Override
+    public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
+        Program.collectTypes(list, set, memoryType);
+        Program.collectTypes(listContinue, set, memoryType);
+        Program.collectTypes(autoClose, set, memoryType);
     }
 
     @Override

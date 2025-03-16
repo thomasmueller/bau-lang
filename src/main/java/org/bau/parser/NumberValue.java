@@ -91,6 +91,10 @@ public class NumberValue implements Expression {
     }
 
     @Override
+    public void setOwnedBoundsToNull(Expression scope) {
+    }
+
+    @Override
     public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
         return this;
     }
