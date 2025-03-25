@@ -3,7 +3,39 @@ package org.bau;
 /**
 
 
+
 Name: Mya, Pha
+
+
+Stdlib:
+- unit testing
+- random number generation
+- bit arrays
+- linked list / array
+- sorted map (tree map, skip list)
+- hash map
+- set
+- stack
+- uuid
+- dqueue
+- string formatting and parsing
+- threads
+- time and date
+- base64
+- statistics (avg, median, approximate, hyperloglog, etc)
+- sorting (comparison, radix), binary search, etc.
+- starting / managing processes
+- file I/O
+- accessing file systems
+- networking
+- data compression
+- bloom filter
+- encryption / security
+- logging
+- sqlite
+
+
+
 
 For memory-safe and fast programming language, I think one of the most important, and hardest, questions is memory management.
 

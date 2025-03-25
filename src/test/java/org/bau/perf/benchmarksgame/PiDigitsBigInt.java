@@ -1,9 +1,9 @@
 package org.bau.perf.benchmarksgame;
 
-import java.math.BigInteger;
+import org.bau.stdlib.math.bigint.BigInt;
 
 // https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/pidigits-java-1.html
-public class PiDigits {
+public class PiDigitsBigInt {
     static final int L = 10;
 
     public static void main(String args[]) {
@@ -86,18 +86,18 @@ public class PiDigits {
     }
 
     static class Transformation {
-        BigInteger q, r, s, t;
+        BigInt q, r, s, t;
         int k;
 
         public Transformation(int q, int r, int s, int t) {
-            this.q = BigInteger.valueOf(q);
-            this.r = BigInteger.valueOf(r);
-            this.s = BigInteger.valueOf(s);
-            this.t = BigInteger.valueOf(t);
+            this.q = BigInt.valueOf(q);
+            this.r = BigInt.valueOf(r);
+            this.s = BigInt.valueOf(s);
+            this.t = BigInt.valueOf(t);
             k = 0;
         }
 
-        public Transformation(BigInteger q, BigInteger r, BigInteger s, BigInteger t) {
+        public Transformation(BigInt q, BigInt r, BigInt s, BigInt t) {
             this.q = q;
             this.r = r;
             this.s = s;
@@ -107,25 +107,25 @@ public class PiDigits {
 
         public Transformation next() {
             k++;
-            q = BigInteger.valueOf(k);
-            r = BigInteger.valueOf(4 * k + 2);
-            s = BigInteger.valueOf(0);
-            t = BigInteger.valueOf(2 * k + 1);
+            q = BigInt.valueOf(k);
+            r = BigInt.valueOf(4 * k + 2);
+            s = BigInt.valueOf(0);
+            t = BigInt.valueOf(2 * k + 1);
             return this;
         }
 
         public int extract(int j) {
-            BigInteger bigj = BigInteger.valueOf(j);
-            BigInteger numerator = (q.multiply(bigj)).add(r);
-            BigInteger denominator = (s.multiply(bigj)).add(t);
+            BigInt bigj = BigInt.valueOf(j);
+            BigInt numerator = (q.multiply(bigj)).add(r);
+            BigInt denominator = (s.multiply(bigj)).add(t);
             return (numerator.divide(denominator)).intValue();
         }
 
         public Transformation qrst(int q, int r, int s, int t) {
-            this.q = BigInteger.valueOf(q);
-            this.r = BigInteger.valueOf(r);
-            this.s = BigInteger.valueOf(s);
-            this.t = BigInteger.valueOf(t);
+            this.q = BigInt.valueOf(q);
+            this.r = BigInt.valueOf(r);
+            this.s = BigInt.valueOf(s);
+            this.t = BigInt.valueOf(t);
             k = 0;
             return this;
         }

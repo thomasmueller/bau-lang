@@ -52,8 +52,7 @@ Identifiers contain letters, digits, and `_`.
 
     PI : 3.14159
     x := 10
-    x = x + 1
-    x += 1      # shortcut
+    x += 1    # shortcut for x = x + 1
 
 A variable without value requires a type:
 
@@ -88,7 +87,7 @@ There are `for` and `while` loops.
 `,` is optional if the arguments are simple:
 
     # loop from 0 to 9
-    for i := range(0 10)
+    for i := range(0, 10)
         println(i)
 
 `for` is internally converted to `while`:
@@ -101,7 +100,7 @@ There are `for` and `while` loops.
 `break` exits a loop. It may have a condition:
 
     # prints 1 to 4
-    for i := range(1 10)
+    for i := range(1, 10)
         break i = 5
         println(i)
 
@@ -245,7 +244,7 @@ no runtime checks are done.
 The conditional `break` guarantees that `i` is within the bounds.
 
     if data.len
-        i := 0..data.len
+        i := 0 .. data.len
         while 1
             data[i]! = i
             next : i + 1
@@ -255,39 +254,35 @@ The conditional `break` guarantees that `i` is within the bounds.
 ### Memory Management
 
 Objects are reference counted by default.
-To avoid cycles, use weak references.
-For a weak references, add `*` to the type.
+To avoid cycles, explicitly set fields to `null`.
 
     type Tree
         left Tree?
         right Tree?
-        parent Tree*?
 
     fun Tree+ nodeCount() int
         result := 1
-        l := left
+        l : left
         if l
             result += l.nodeCount()
-        r := right
+        r : right
         if r
             result += r.nodeCount()
         return result
 
 Where speed is critical, use single ownership,
 by adding `+` to the type, and borrow with `&`.
-Weak references are still allowed:
 
     type Tree
         left Tree+?
         right Tree+?
-        parent Tree*?
 
     fun Tree+ nodeCount() int
         result := 1
-        l := &left
+        l : &left
         if l
             result += l.nodeCount()
-        r := &right
+        r : &right
         if r
             result += r.nodeCount()
         return result
@@ -422,7 +417,7 @@ is equivalent to:
 ##### For Loops
 
     sum := 0
-    for i := range(0 10)
+    for i := range(0, 10)
         sum += i
     println(sum)
 
@@ -585,6 +580,7 @@ is equivalent to:
 * Many concepts of functional programming languages are not supported, 
   for example high-order functions, functional composition,
   closures.
+* `map`, `filter`, etc are not supported. One problem here is exception handling.
 * Reflection is not supported.
 * Tail calls are only optimized by the C compiler.
 * Multi-threading support is limited to what C supports.
