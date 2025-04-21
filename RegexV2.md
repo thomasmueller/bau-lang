@@ -2,24 +2,29 @@
 
 ### Problems
 
-Regular expressions are powerful, flexible, and concise.
+Regular expressions are powerful, flexible, and concise -
+but they are notoriously difficult to read and write correctly
+due to complex escaping rules.
 
-However, due to the escaping rules, often regular expressions are hard to read.
-Many characters require escaping if one likes to search for them:
+Many characters have special meanings in regular expressions 
+and must be escaped to be matched literally:
 `\` `{` `}` `(` `)` `[` `]` `|` `*` `+` `?` `^` `$` `.`.
-The escaping rules are different inside square brackets: here, only `\` always need to be escaped,
-but sometimes also (depending on the position) `:` `[` `]` `^` and `-`.
-The escaping rules are arguably hard to remember and use. It is easy to make mistakes.
-Escaping is especially a challenge when the regular expression is embedded in a host language like Java or C.
-In this case, often double escaping is needed, which becomes even harder to read.
-As an example, the regular expression for a decimal number, `^\d*\.\d+$`, 
-requires double escaping when embedded into the Java host language: 
-`s.matches("\\d*\\.\\d");`. Searching for "not a backslash" is `"[^\\\\]"`.
+Inside square brackets `[...]` the escaping rules differ: 
+only the backslash `\` always requires escaping, 
+while characters like : `[` `]` `^` `:` and `-` only sometimes need escaping,
+depending on their position.
 
-A second problem is that regular expressions can be hard to read because
-(a) there are many single-character abbreviations, and (b) due to lack of spacing.
-Some regular expression flavors support character classes such as `:digit:`, `:lower:`, `\p{Lower}`.
-For (b) there is no solution.
+These inconsistencies make the rules hard to memorize. 
+It is easy to make mistakes.
+
+The problem becomes even worse when regular expressions are embedded
+in host languages like Java or C. 
+In these cases, double escaping is often required, 
+making the expressions even harder to read and maintain.
+
+For example, the regular expression to match a decimal number - `^\d*\.\d+$` -
+must be written in Java as:
+`s.matches("\\d*\\.\\d");`. Searching for "not a backslash" is `"[^\\\\]"`.
 
 ### Regular Expression Version 2 Syntax
 
@@ -83,8 +88,11 @@ Existing regular expression syntax do not have this ability:
 
 ## Related Work
 
-Many regular expression implementations already support a way to quote a literal, by enclosing the literal between `\Q` and `\E`. 
-This mechanism increases the length of the expression. Also, there are special rules if the terms `\Q` or `\E` are quoted:
+Many regular expression implementations already support a way to quote a literal,
+by enclosing the literal between `\Q` and `\E`. 
+This mechanism increases the length of the expression.
+Also, there is a special rule on how to escape `\E` inside
+such a block: it needs to be written as `\E\\E\Q`.
 
 ## Migration
 
