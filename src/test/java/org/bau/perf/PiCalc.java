@@ -6,7 +6,7 @@ import java.math.RoundingMode;
 public class PiCalc {
 
     public static void main(String[] args) {
-        for (int x = 1; x < 20; x++) {
+        for (int x = 1; x < 100; x++) {
             if (x < 10) {
                 double y = 0.0;
                 for (double i = 0; i <= x; i++) {

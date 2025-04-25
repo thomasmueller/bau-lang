@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -184,6 +188,9 @@ _org_bau_List_List_Token_or_exception exception_org_bau_List_List_Token_or_excep
     x.exception = exception;
     return x;
 }
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos);
 _match_or_exception find_2(i8_array* text, i8_array* regex);
@@ -385,8 +392,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 match match_2(int64_t start, int64_t end) {
     match m = match_new();
@@ -719,7 +725,9 @@ void test_0() {
         org_bau_Exception_exception_free(&e);
     skip0:;
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("Start or end in wrong location", 30);
     string_1001 = str_const("Unknown token type", 18);
     string_1002 = str_const("^", 1);

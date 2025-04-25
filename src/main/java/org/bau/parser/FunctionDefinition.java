@@ -29,6 +29,11 @@ public class FunctionDefinition {
     private String catchLabel;
     private HashSet<DataType> freedOwnedTypes = null;
     private HashSet<DataType> borrowedTypes = null;
+    final int lineOffset;
+
+    public FunctionDefinition(int lineOffset) {
+        this.lineOffset = lineOffset;
+    }
 
     public String getFunctionId() {
         int parameterCount = varArgs ? Integer.MAX_VALUE : parameters.size();
@@ -84,7 +89,7 @@ public class FunctionDefinition {
                 buff.append("int _vaCount,...");
                 break;
             } else {
-                buff.append(v.type.toC());
+                buff.append(v.type().toC());
                 buff.append(' ');
                 buff.append(v.name);
             }
@@ -210,10 +215,10 @@ public class FunctionDefinition {
             buff.append(v.name);
             buff.append(' ');
             if (varArgs && i == parameters.size() - 1) {
-                buff.append(v.type.baseType());
+                buff.append(v.type().baseType());
                 buff.append("..");
             } else {
-                buff.append(v.type);
+                buff.append(v.type());
             }
         }
         buff.append(")");

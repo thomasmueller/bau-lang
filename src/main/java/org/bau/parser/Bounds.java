@@ -71,27 +71,27 @@ public class Bounds {
             e.minVariable = var;
             e.minOffset = offset + 1;
             e.maxVariable = "";
-            e.maxOffset = Long.MAX_VALUE;
+            e.maxExcludingOffset = Long.MAX_VALUE;
         } else if (">=".equals(operation)) {
             e.minVariable = var;
             e.minOffset = offset;
             e.maxVariable = "";
-            e.maxOffset = Long.MAX_VALUE;
+            e.maxExcludingOffset = Long.MAX_VALUE;
         } else if ("=".equals(operation)) {
             e.minVariable = var;
             e.minOffset = offset;
             e.maxVariable = var;
-            e.maxOffset = offset;
+            e.maxExcludingOffset = offset + 1;
         } else if ("<".equals(operation)) {
             e.minVariable = "";
             e.minOffset = Long.MIN_VALUE;
             e.maxVariable = var;
-            e.maxOffset = offset - 1;
+            e.maxExcludingOffset = offset;
         } else if ("<=".equals(operation)) {
             e.minVariable = "";
             e.minOffset = Long.MIN_VALUE;
             e.maxVariable = var;
-            e.maxOffset = offset;
+            e.maxExcludingOffset = offset + 1;
         } else if ("<>".equals(operation)) {
             e.minVariable = "";
             e.maxVariable = "";
@@ -150,26 +150,28 @@ public class Bounds {
     }
 
     /**
-     * @return -1 smaller than max, 0 equal or unknown, 1 larger than max
+     * @return -1 smaller than max, 0 equal, 1 larger than max, Integer.MAX_VALUE unknown.
      */
-    public int compareTo(Parser p, Expression max) {
+    public CompareResult compareTo(Parser p, Expression max) {
         for (int i = list.size() - 1; i >= 0; i--) {
             Entry e = list.get(i);
+            if (e.operation.equals("<>")) {
+                continue;
+            }
             if (inScope(p.getBlockConditions(), e.scope)) {
                 String maxVar = getVariable(max);
                 long maxOffset = getOffset(max) - offset;
-                int result;
                 if (maxVar.equals(e.minVariable) && maxOffset < e.minOffset) {
-                    result = 1;
-                } else if (maxVar.equals(e.maxVariable) && maxOffset > e.maxOffset) {
-                    result = -1;
-                } else {
-                    result = 0;
+                    return CompareResult.LARGER;
+                } else if (maxVar.equals(e.maxVariable) && maxOffset >= e.maxExcludingOffset) {
+                    return CompareResult.SMALLER;
+                } else if (maxVar.equals(e.minVariable) && maxOffset == e.minOffset
+                        && maxVar.equals(e.maxVariable) && maxOffset == e.maxExcludingOffset) {
+                    return CompareResult.EQUAL;
                 }
-                return result;
             }
         }
-        return 0;
+        return CompareResult.UNKNOWN;
     }
 
     /**
@@ -182,7 +184,7 @@ public class Bounds {
             if (e.scope == null
                     && e.minVariable.equals("")
                     && e.maxVariable.equals("")
-                    && e.minOffset == e.maxOffset) {
+                    && e.minOffset == e.maxExcludingOffset - 1) {
                 return new Value.ValueInt(e.minOffset);
             }
         }
@@ -232,7 +234,7 @@ public class Bounds {
         String minVariable;
         long minOffset;
         String maxVariable;
-        long maxOffset;
+        long maxExcludingOffset;
         boolean notNull;
 
         public String toString() {
@@ -246,37 +248,39 @@ public class Bounds {
             if (notNull) {
                 buff.append(", isNotNull");
             }
-            buff.append(", bounds");
-            if (minVariable.isEmpty()) {
-                if (minOffset != Long.MIN_VALUE) {
-                    buff.append(" " + minOffset);
-                }
-            } else {
-                buff.append(" " + minVariable);
-                if (minOffset == 0) {
-                    // just the variable
-                } else if (minOffset != Long.MIN_VALUE) {
-                } else if (minOffset < 0) {
-                    buff.append(minOffset);
+            if (!operation.equals("<>")) {
+                buff.append(", bounds ");
+                if (minVariable.isEmpty()) {
+                    if (minOffset != Long.MIN_VALUE) {
+                        buff.append(minOffset);
+                    }
                 } else {
-                    buff.append("+" + minOffset);
+                    buff.append(minVariable);
+                    if (minOffset == 0) {
+                        // just the variable
+                    } else if (minOffset != Long.MIN_VALUE) {
+                    } else if (minOffset < 0) {
+                        buff.append(minOffset);
+                    } else {
+                        buff.append("+" + minOffset);
+                    }
                 }
-            }
-            buff.append(" ..");
-            if (maxVariable.isEmpty()) {
-                if (maxOffset != Long.MAX_VALUE) {
-                    buff.append(" " + maxOffset);
-                }
-            } else {
-                buff.append(" " + maxVariable);
-                if (maxOffset == 0) {
-                    // just the variable
-                } else if (maxOffset == Long.MAX_VALUE) {
-                    // no start
-                } else if (maxOffset < 0) {
-                    buff.append(maxOffset);
+                buff.append("..");
+                if (maxVariable.isEmpty()) {
+                    if (maxExcludingOffset != Long.MAX_VALUE) {
+                        buff.append(maxExcludingOffset);
+                    }
                 } else {
-                    buff.append("+" + maxOffset);
+                    buff.append(maxVariable);
+                    if (maxExcludingOffset == 0) {
+                        // just the variable
+                    } else if (maxExcludingOffset == Long.MAX_VALUE) {
+                        // no start
+                    } else if (maxExcludingOffset < 0) {
+                        buff.append(maxExcludingOffset);
+                    } else {
+                        buff.append("+" + maxExcludingOffset);
+                    }
                 }
             }
             buff.append(" (" );
@@ -293,6 +297,10 @@ public class Bounds {
         NEGATIVE,
         // undo a condition, e.g. after the "if" or "else" ended
         UNDO
+    }
+
+    enum CompareResult {
+        SMALLER, EQUAL, LARGER, UNKNOWN
     }
 
 }

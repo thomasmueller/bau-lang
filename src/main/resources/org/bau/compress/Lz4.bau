@@ -1,0 +1,487 @@
+module org.bau.compress.Lz4
+
+BLOCK_SIZE : 4 * 1024 * 1024
+
+PRIME1 : 2_654_435_761
+PRIME2 : 2_246_822_519
+PRIME3 : 3_266_489_917
+PRIME4 :   668_265_263
+PRIME5 :   374_761_393
+
+type XXHash
+    v1 i32
+    v2 i32
+    v3 i32
+    v4 i32
+    total int
+
+fun newXXHash(seed i32) XXHash
+    x : new(XXHash)
+    x.v1 = seed + PRIME1 + PRIME2
+    x.v2 = seed + PRIME2
+    x.v3 = seed
+    x.v4 = seed - PRIME1
+    x.total = 0
+    return x
+
+fun rotateLeft32(x i32, n i32) i32
+    return (x << n) | (x >> (32 - n))
+
+fun read4(d i8[], pos 0..d.len - 3) i32
+    return (d[pos]! & 0xff) | 
+           ((d[pos + 1]! & 0xff) << 8) | 
+           ((d[pos + 2]! & 0xff) << 16) | 
+           ((d[pos + 3]! & 0xff) << 24)
+
+fun write4(d i8[], pos 0..d.len - 3, x int)
+    d[pos]! = x
+    d[pos + 1]! = x >> 8
+    d[pos + 2]! = x >> 16
+    d[pos + 3]! = x >> 24
+
+fun read8(d i8[], pos 0..d.len - 7) int
+    return (d[pos]! & 0xff) |
+           ((d[pos + 1]! & 0xff) << 8) |
+           ((d[pos + 2]! & 0xff) << 16) |
+           ((d[pos + 3]! & 0xff) << 24) |
+           ((d[pos + 4]! & 0xff) << 32) |
+           ((d[pos + 5]! & 0xff) << 40) |
+           ((d[pos + 6]! & 0xff) << 48) |
+           ((d[pos + 7]! & 0xff) << 56)
+
+fun write8(d i8[], pos 0..d.len - 7, x int)
+    d[pos]! = x
+    d[pos + 1]! = x >> 8
+    d[pos + 2]! = x >> 16
+    d[pos + 3]! = x >> 24
+    d[pos + 4]! = x >> 32
+    d[pos + 5]! = x >> 40
+    d[pos + 6]! = x >> 48
+    d[pos + 7]! = x >> 56
+
+fun XXHash update(buf i8[], start 0..buf.len, len int) i32
+    end : start + len
+    pos := start
+    if len >= 16
+        if buf.len < 16
+            return -1
+        if pos >= buf.len - 16
+            return -1
+        p := 0..buf.len - 15
+        p = pos
+        while 1
+            v1 = rotateLeft32(read4(buf, p) * PRIME2 + v1, 13) * PRIME1
+            v2 = rotateLeft32(read4(buf, p + 4) * PRIME2 + v2, 13) * PRIME1
+            v3 = rotateLeft32(read4(buf, p + 8) * PRIME2 + v3, 13) * PRIME1
+            v4 = rotateLeft32(read4(buf, p + 12) * PRIME2 + v4, 13) * PRIME1
+            next := p + 16
+            break next >= buf.len - 16
+            p = next
+            break next > end - 16
+        pos = p
+    total += len
+    h32 := i32(total)
+    if total >= 16
+        h32 += rotateLeft32(v1, 1) + rotateLeft32(v2, 7) + 
+              rotateLeft32(v3, 12) + rotateLeft32(v4, 18)
+    else
+        h32 += v3 + PRIME5
+    if pos + 4 <= end
+        if buf.len < 4
+            return -1
+        p := 0..buf.len - 3
+        if pos >= buf.len - 4
+            return -1
+        p = pos
+        while p + 4 <= end
+            h32 = rotateLeft32(read4(buf, p) * PRIME3 + h32, 17) * PRIME4
+            next : p + 4
+            break next >= buf.len - 4
+            p = next
+        pos = p
+    while pos < end
+        h32 = rotateLeft32((buf[pos] & 0xff) * PRIME5 + h32, 11) * PRIME1
+        next : pos + 1
+        break next >= buf.len
+        pos = next
+    h32 = (h32 ^ (h32 >> 15)) * PRIME2
+    h32 = (h32 ^ (h32 >> 13)) * PRIME3
+    return h32 ^ (h32 >> 16)
+
+type LZ4Compress
+    hashTable int[]
+
+fun newLZ4Compress() LZ4Compress
+    x : new(LZ4Compress)
+    x.hashTable = new(int[], 4 * 1024)
+    return x
+
+fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
+    p := 0
+    if inData.len < 16
+        return -1
+    if outData.len < 16
+        return -1
+    while 1
+        tag := inData[p] & 0xff
+        next := p + 1
+        break next >= inData.len
+        p = next
+        literalLen := tag >> 4
+        if literalLen = 0xf
+            while 1
+                x := inData[p] & 0xff
+                p += 1
+                literalLen += x
+                break x <> 0xff
+        if p < inData.len - 8
+            s := 0..inData.len - 7
+            s = p
+            o := 0..outData.len - 7
+            if outPos >= outData.len - 8
+                return -1
+            o = outPos
+            n := 0
+            while 1
+                x : read8(inData, s)
+                write8(outData, o, x)
+                n += 8
+                break n >= literalLen
+                next = s + 8
+                break next > inData.len - 8
+                s = next
+                next = o + 8
+                break next > outData.len - 8
+                o = next
+        else
+            for i := range(0, literalLen)
+                outData[outPos + i] = inData[p + i]
+        outPos += literalLen
+        p += literalLen
+        if p + 1 >= inLen
+            break
+        offset := (inData[p] & 0xff) | ((inData[p + 1] & 0xff) << 8)
+        if offset = 0
+            return -1
+        if offset > outPos
+            return -1
+        p += 2
+        if p >= inLen - 1
+            break
+        runLen := tag & 0xf
+        if runLen = 0xf
+            while 1
+                x := inData[p] & 0xff
+                p += 1
+                runLen += x
+                break x <> 0xff
+        runLen += 4
+        if offset >= 8
+            next = outPos - offset
+            if next >= outData.len - 8
+                return -1
+            s := 0..outData.len - 7
+            s = next
+            o := 0..outData.len - 7
+            if outPos >= outData.len - 8
+                return -1
+            o = outPos
+            n := 0
+            while 1
+                x : read8(outData, s)
+                write8(outData, o, x)
+                n += 8
+                break n >= runLen
+                next = s + 8
+                break next >= outData.len - 8
+                s = next
+                next = o + 8
+                break next >= outData.len - 8
+                o = next
+        else
+            for i := range(0, runLen)
+                outData[outPos + i] = outData[outPos + i - offset]
+        outPos += runLen
+    return outPos
+
+
+fun hash5(data i8[], pos 0..data.len - 7) i32
+    x : read8(data, pos)
+    prime5bytes : 889523592379
+    return i32(((x << 24) * prime5bytes) >> (64 - 12))
+
+fun hash5Slow(data i8[], pos int) i32
+    if data.len < 8
+        return -1
+    p := 0..data.len - 7
+    if pos >= data.len - 8
+        return -1
+    p = pos
+    x : read8(data, p)
+    prime5bytes : 889523592379
+    return i32(((x << 24) * prime5bytes) >> (64 - 12))
+
+fun countTrailingZeros(x int) int
+    native('return __builtin_ctz(x);')
+    return 0
+
+fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..data.len - 7) int
+    runLen := 0
+    while 1
+        ax : read8(data, ai)
+        bx : read8(data, bi)
+        diff : ax ^ bx
+        if diff <> 0
+            runLen += countTrailingZeros(diff) >> 3
+            return runLen
+        next := ai + 8
+        break next >= aLen - 8
+        break next > data.len - 8
+        ai = next
+        next = bi + 8
+        break next > data.len - 8
+        bi = next
+        runLen += 8
+    #while ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+    #    runLen += 1
+    return runLen
+
+fun runLenCountSlow(data i8[], aLen 0..data.len - 7, ai int, bi int) int
+    runLen := 0
+    while ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+        runLen += 1
+    return runLen
+
+fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) int
+    if inData.len <= 16
+        return -1
+    if len >= inData.len - 7
+        return -1
+    if outData.len <= 16
+        return -1
+    inLen := 0..inData.len - 7
+    inLen = len
+    literalLen := 0
+    inPos := 0..inData.len - 7
+    skipTrigger := 6
+    searchMatch := 1 << skipTrigger
+    while 1
+        runLen := 0
+        candidatePos := 0..inData.len - 7
+        #candidatePos := 0
+        if inPos < inLen - 16
+            h := hash5(inData, inPos)
+            cp : hashTable[h]
+            hashTable[h] = inPos
+            #candidatePos = hashTable[h]
+            if cp >= inPos or cp + 0xffff < inPos
+                step : searchMatch >> skipTrigger
+                next := inPos + step
+                if next < inData.len - 8
+                    inPos = next
+                    literalLen += step
+                    searchMatch += 1
+                    continue
+                # end of block
+                literalLen += inLen - inPos
+                inPos = inLen
+                continue
+            else
+                if cp < inData.len - 8
+                    candidatePos = cp
+                runLen = runLenCountFast(inData, inLen, inPos, candidatePos)
+                # println('runLen ' runLen ' inLen ' inLen ' inPos ' inPos)
+                if runLen >= 4
+                    p := inPos + runLen - 2
+                    if p >= inData.len - 8
+                        return -1
+                    h = hash5(inData, p)
+                    hashTable[h] = p
+                else
+                    step : searchMatch >> skipTrigger
+                    next := inPos + step
+                    if next < inData.len - 8
+                        inPos = next
+                        literalLen += step
+                        searchMatch += 1
+                        continue
+                    # end of block
+                    literalLen += inLen - inPos
+                    inPos = inLen
+                    continue
+        else
+            # end of block
+            literalLen += inLen - inPos
+            inPos = inLen
+            runLen = 4
+            candidatePos = 0
+        tagPos := outPos
+        outPos += 1
+        # possibly increase the match len backwards
+        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1]! = inData[candidatePos - 1]!
+            runLen += 1
+            inPos -= 1
+            literalLen -= 1
+            candidatePos -= 1
+        copyLen := literalLen
+        if literalLen >= 0xf
+            while literalLen - 0xf >= 0xff
+                outData[outPos] = 0xff
+                outPos += 1
+                literalLen -= 0xff
+            outData[outPos] = literalLen - 0xf
+            outPos += 1
+            literalLen = 0xf
+        # println('copyLen ' copyLen ' inPos ' inPos)
+        s := 0..inData.len - 7
+        next := inPos - copyLen
+        if next >= inData.len - 8
+            return -1
+        s = next
+        o := 0..outData.len - 7
+        next = outPos
+        if next >= outData.len - 8
+            return -1
+        o = next
+        n := 0
+        while 1
+            x : read8(inData, s)
+            write8(outData, o, x)
+            n += 8
+            break n >= copyLen
+            next = s + 8
+            break next > inData.len - 8
+            s = next
+            next = o + 8
+            break next > outData.len - 8
+            o = next
+        ##
+        next := 0
+        for i := range(0, copyLen)
+            outData[outPos + i] = inData[inPos - copyLen + i]
+        ##
+        outPos += copyLen
+        if inPos < inLen
+            offset : inPos - candidatePos
+            outData[outPos] = offset
+            outData[outPos + 1] = offset >> 8
+            outPos += 2
+        else
+            tag : literalLen << 4
+            outData[tagPos] = tag
+            break
+        skipLen : runLen
+        runLen -= 4
+        # println('runLen ' runLen ' outPos ' outPos)
+        if runLen >= 0xf
+            while runLen - 0xf >= 0xff
+                outData[outPos] = 0xff
+                outPos += 1
+                runLen -= 0xff
+            outData[outPos] = runLen - 0xf
+            outPos += 1
+            runLen = 0xf
+        tag : (literalLen << 4) | runLen
+        outData[tagPos] = tag
+        next = inPos + skipLen
+        if next >= inData.len - 7
+            return -1
+        inPos = next
+        literalLen = 0
+        searchMatch = 1 << skipTrigger
+    # println('outPos ' outPos)
+    return outPos
+
+##
+fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int) int
+    if inData.len <= 0
+        return -1
+    if len >= inData.len
+        return -1
+    inLen := 0..inData.len
+    inLen = len
+    literalLen := 0
+    inPos := 0
+    skipTrigger := 6
+    searchMatch := 1 << skipTrigger
+    while 1
+        runLen := 0
+        candidatePos := 0
+        if inPos + 16 < inLen
+            h := hash5Slow(inData, inPos)
+            candidatePos = hashTable[h]
+            hashTable[h] = inPos
+            if candidatePos >= inPos or candidatePos + 0xffff < inPos
+                step : searchMatch >> skipTrigger
+                literalLen += step
+                inPos += step
+                searchMatch += 1
+                continue
+            else
+                runLen = runLenCountSlow(inData, inLen, inPos, candidatePos)
+                # println('runLen ' runLen ' inLen ' inLen ' inPos ' inPos)
+                if runLen < 4
+                    step : searchMatch >> skipTrigger
+                    literalLen += step
+                    inPos += step
+                    searchMatch += 1
+                    continue
+                p := inPos + runLen - 2
+                h = hash5Slow(inData, p)
+                hashTable[h] = p
+        else
+            # the last few bytes in the block
+            # are always encoded as literals
+            literalLen += inLen - inPos
+            inPos = inLen
+            runLen = 4
+            candidatePos = 0
+        tagPos := outPos
+        outPos += 1
+        # possibly increase the match len backwards
+        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1] = inData[candidatePos - 1]
+            runLen += 1
+            inPos -= 1
+            literalLen -= 1
+            candidatePos -= 1
+        copyLen := literalLen
+        if literalLen >= 0xf
+            while literalLen - 0xf >= 0xff
+                outData[outPos] = 0xff
+                outPos += 1
+                literalLen -= 0xff
+            outData[outPos] = literalLen - 0xf
+            outPos += 1
+            literalLen = 0xf
+        # println('copyLen ' copyLen ' inPos ' inPos)
+        for i := range(0, copyLen)
+            outData[outPos + i] = inData[inPos - copyLen + i]
+        outPos += copyLen
+        if inPos < inLen
+            offset : inPos - candidatePos
+            outData[outPos] = offset
+            outData[outPos + 1] = offset >> 8
+            outPos += 2
+        else
+            tag : literalLen << 4
+            outData[tagPos] = tag
+            break
+        skipLen : runLen
+        runLen -= 4
+        # println('runLen ' runLen ' outPos ' outPos)
+        if runLen >= 0xf
+            while runLen - 0xf >= 0xff
+                outData[outPos] = 0xff
+                outPos += 1
+                runLen -= 0xff
+            outData[outPos] = runLen - 0xf
+            outPos += 1
+            runLen = 0xf
+        tag : (literalLen << 4) | runLen
+        outData[tagPos] = tag
+        inPos += skipLen
+        literalLen = 0
+        searchMatch = 1 << skipTrigger
+    # println('outPos ' outPos)
+    return outPos
+##

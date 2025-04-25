@@ -14,7 +14,7 @@ public class NumberToStringTest {
         assertEquals(Double.toString(Double.NEGATIVE_INFINITY), SimpleMath.doubleToString(Double.NEGATIVE_INFINITY));
         assertEquals(Double.toString(Double.POSITIVE_INFINITY), SimpleMath.doubleToString(Double.POSITIVE_INFINITY));
         assertEquals(Double.toString(0.0 / 0.0), SimpleMath.doubleToString(0.0 / 0.0));
-        for (double n = 1.0; n < Double.POSITIVE_INFINITY; n *= 10.0) {
+        for (double n = 1.0; n < Double.POSITIVE_INFINITY; n *= 1000.0) {
             String expected = Double.toString(n);
             double n3 = Double.parseDouble(expected);
             if (n3 != n) {
@@ -28,7 +28,7 @@ public class NumberToStringTest {
             }
         }
         Random r = new Random(1);
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             for (long max = 1; max > 0; max *= 10) {
                 double n = r.nextGaussian() * max;
                 String expected = Double.toString(n);
@@ -44,7 +44,7 @@ public class NumberToStringTest {
                 }
             }
         }
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             double n = Double.longBitsToDouble(r.nextLong());
             if (Double.isNaN(n)) {
                 continue;

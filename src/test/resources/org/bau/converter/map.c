@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -111,6 +115,9 @@ HashMap_str_str* HashMap_str_str_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key);
 void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value);
@@ -428,8 +435,7 @@ int64_t hashCode_1(i8_array* data) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 int64_t int_equals_2(int64_t this, int64_t other) {
     int64_t _r0 = this == other;
@@ -522,7 +528,9 @@ void test_0() {
     _decUseStack(map2, HashMap_str_str);
     _decUseStack(map, HashMap_int_int);
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("hash of hello: ", 15);
     string_1001 = str_const("hello", 5);
     string_1002 = str_const("int map[", 8);

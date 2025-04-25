@@ -11,11 +11,9 @@ public class TestStringUtils {
 
     @Test
     public void split() {
-        assertEquals("[]", Arrays.toString(StringUtils.split("", "")));
-        assertEquals("[abc]", Arrays.toString(StringUtils.split("abc", "")));
-        assertEquals("[abc]", Arrays.toString(StringUtils.split("abc", "x")));
-        assertEquals("[a, b, c]", Arrays.toString(StringUtils.split("a|b|c", "|")));
-        assertEquals("[, b, , ]", Arrays.toString(StringUtils.split("|b||", "|")));
+        assertEquals("[abc]", Arrays.toString(StringUtils.split("abc", 'x')));
+        assertEquals("[a, b, c]", Arrays.toString(StringUtils.split("a|b|c", '|')));
+        assertEquals("[, b, , ]", Arrays.toString(StringUtils.split("|b||", '|')));
         assertEquals("[, b, , ]", Arrays.toString(";b;;".split(";", -1)));
     }
 

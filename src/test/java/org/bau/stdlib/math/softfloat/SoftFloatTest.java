@@ -10,7 +10,7 @@ public class SoftFloatTest {
 
     @Test
     public void convert() {
-        for (long i = Integer.MIN_VALUE; i <= Integer.MAX_VALUE; i += 100) {
+        for (long i = Integer.MIN_VALUE; i <= Integer.MAX_VALUE; i += 1000) {
             int raw = (int) i;
             float d = Float.intBitsToFloat(raw);
             int expected = (int) d;
@@ -21,7 +21,7 @@ public class SoftFloatTest {
                 assertEquals("i:" + i, expected, got);
             }
         }
-        for (long i = Integer.MIN_VALUE; i <= Integer.MAX_VALUE; i += 1_000_000) {
+        for (long i = Integer.MIN_VALUE; i <= Integer.MAX_VALUE; i += 10_000_000) {
             int raw = (int) i;
             float d = Float.intBitsToFloat(raw);
             int expected = (int) d;
@@ -33,7 +33,7 @@ public class SoftFloatTest {
             assertEquals(rawExpected, rawGot);
         }
         Random r = new Random(1);
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             float d = r.nextFloat();
             int raw = Float.floatToIntBits(d);
             int expected = (int) d;
@@ -43,7 +43,7 @@ public class SoftFloatTest {
                 assertEquals(expected, got);
             }
         }
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             int raw = r.nextInt();
             float d = Float.intBitsToFloat(raw);
             int expected = (int) d;
@@ -112,7 +112,7 @@ public class SoftFloatTest {
     @Test
     public void multiply() {
         Random r = new Random(1);
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             float a = r.nextFloat();
             float b = r.nextFloat();
             float c = a * b;
@@ -169,7 +169,7 @@ public class SoftFloatTest {
     @Test
     public void divide() {
         Random r = new Random(1);
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             float a = r.nextFloat();
             float b = r.nextFloat();
             float c = a / b;

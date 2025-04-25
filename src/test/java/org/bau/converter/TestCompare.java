@@ -149,6 +149,11 @@ public class TestCompare {
     }
 
     @Test
+    public void lz4() throws IOException {
+        test("lz4");
+    }
+
+    @Test
     public void macro() throws IOException {
         test("macro");
     }

@@ -15,6 +15,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct int_array int_array;
 struct int_array;
@@ -55,6 +59,9 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
@@ -79,8 +86,7 @@ int64_t idiv_2(int64_t a, int64_t b) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 void insertionSort_int_array_int_1(int_array* a) {
     while (1 == 1) {
@@ -209,7 +215,9 @@ void test_0() {
     }
     _decUseStack(x, int_array);
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     int64_t randomSeed = 0;
     test_0();
     _end();

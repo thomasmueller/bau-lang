@@ -25,13 +25,10 @@ public class NumberTestSort {
 
     @Test
     public void test() throws Exception {
-        for (int i = 0; i < 3; i++) {
-            log("");
-            test(Arrays.class);
-            test(CountingSort.class);
-            test(NumberIntroSort.class);
-            test(NumberShellSort.class);
-        }
+        test(Arrays.class);
+        test(CountingSort.class);
+        test(NumberIntroSort.class);
+        test(NumberShellSort.class);
     }
 
     private void test(Class<?> c) throws Exception {

@@ -1,18 +1,18 @@
 #module org.bau.HashMap
 
 type HashMap(K, V)
-  size int
-  keys K[]
-  values V[]
-  hashes int[]
+    size int
+    keys K[]
+    values V[]
+    hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-  result : HashMap(K, V)
-  result.size = 0
-  result.keys = K[4]
-  result.values = V[4]
-  result.hashes = int[4]
-  return result          
+    result : HashMap(K, V)
+    result.size = 0
+    result.keys = K[4]
+    result.values = V[4]
+    result.hashes = int[4]
+    return result          
 
 fun HashMap(K, V) put(hash int, key K, value V)
   if size * 2 >= keys.len

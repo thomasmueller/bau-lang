@@ -9,7 +9,6 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.instrument.Instrumentation;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Profiler implements Runnable {
 
-    private static Instrumentation instrumentation;
     private static final String LINE_SEPARATOR =
             System.getProperty("line.separator", "\n");
     private static final int MAX_ELEMENTS = 1000;
@@ -91,25 +89,6 @@ public class Profiler implements Runnable {
     private long start;
     private long time;
     private int threadDumps;
-
-    /**
-     * This method is called when the agent is installed.
-     *
-     * @param agentArgs the agent arguments
-     * @param inst the instrumentation object
-     */
-    public static void premain(@SuppressWarnings("unused") String agentArgs, Instrumentation inst) {
-        instrumentation = inst;
-    }
-
-    /**
-     * Get the instrumentation object if started as an agent.
-     *
-     * @return the instrumentation, or null
-     */
-    public static Instrumentation getInstrumentation() {
-        return instrumentation;
-    }
 
     /**
      * Run the command line version of the profiler. The JDK (jps and jstack)

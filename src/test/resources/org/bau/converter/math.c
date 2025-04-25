@@ -16,6 +16,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -50,6 +54,9 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 double float_1(double x);
 int64_t idiv_2(int64_t a, int64_t b);
@@ -149,8 +156,7 @@ int64_t idiv_2(int64_t a, int64_t b) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
@@ -789,7 +795,9 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1024 = str_const("isNegativeZero ", 15);
     string_1025 = str_const("convertDoubleToLongBits ", 24);
     string_1026 = str_const("convertLongBitsToDouble ", 24);

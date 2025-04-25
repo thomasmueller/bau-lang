@@ -4,8 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.bau.json.JsonObject;
-import org.bau.json.JsopBuilder;
+import org.bau.stdlib.json.Json;
+import org.bau.stdlib.json.JsonBuilder;
 
 /*
 
@@ -191,19 +191,19 @@ https://medium.com/@malintha1996/understanding-the-language-server-protocol-5c0b
  */
 
 public class Initialize {
-    
-    JsonObject obj;
-    JsonObject response;
+
+    Json obj;
+    Json response;
     String id;
 
-    public Initialize(JsonObject obj) {
+    public Initialize(Json obj) {
         this.obj = obj;
-        this.id = obj.getProperties().get("id");
-        
+        this.id = obj.get("id").getString();
+
     }
 
     public byte[] process() throws IOException {
-        JsopBuilder b = new JsopBuilder();
+        JsonBuilder b = new JsonBuilder();
         b.object().
             key("id").encodedValue(id).
             key("jsonrpc").value("2.0").
@@ -223,18 +223,18 @@ public class Initialize {
                 endObject().
             endObject().
         endObject();
-        
-        JsonObject response = JsonObject.fromJson(b.toString(), true);
-        
+
+        String response = b.toString();
+
         byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
-        
+
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String header = "Content-Length:" + bytes.length + "\r\n\r\n";
         out.write(header.getBytes(StandardCharsets.UTF_8));
         out.writeBytes(bytes);
         out.writeBytes("\r\n".getBytes(StandardCharsets.UTF_8));
         return out.toByteArray();
-                            
+
 //        response = new JsonObject();
 //        response.getProperties().put("id", id);
 //        response.getProperties().put("jsonrpc", "\"2.0\"");
@@ -245,7 +245,7 @@ public class Initialize {
 //        JsonObject completionProvider = new JsonObject();
 //        capabilities.getChildren().put("completionProvider", completionProvider);
 //        completionProvider
-//        
+//
 //        "triggerCharacters": [
 //                              ":",
 //                              ".",
@@ -259,8 +259,8 @@ public class Initialize {
 //                              ","
 //                            ]
 //                          },
-//        
-//        
+//
+//
 //        byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
 //        System.out.println("Content-Length:" + bytes.length + "\r\n\r\n");
 //        System.out.writeBytes(bytes);

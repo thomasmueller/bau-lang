@@ -41,13 +41,13 @@ public class InsertionSort {
         }
     }
 
-    public static <T> int binarySearch(T[] d, T x, int from, int to, Comparator<T> comp) {
-        while (from <= to) {
-            int m = (from + to) >>> 1;
+    private static <T> int binarySearch(T[] d, T x, int from, int toIncluding, Comparator<T> comp) {
+        while (from <= toIncluding) {
+            int m = (from + toIncluding) >>> 1;
             if (comp.compare(x, d[m]) >= 0) {
                 from = m + 1;
             } else {
-                to = m - 1;
+                toIncluding = m - 1;
             }
         }
         return from;

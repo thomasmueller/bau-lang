@@ -49,7 +49,7 @@ public class New implements Expression {
         } else {
             ValueStruct struct = new Value.ValueStruct();
             for (Variable f : type.fields) {
-                struct.set(f.name, f.type.getZeroValue());
+                struct.set(f.name, f.type().getZeroValue());
             }
             result = struct;
         }

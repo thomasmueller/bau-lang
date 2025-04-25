@@ -38,11 +38,11 @@ public class Assignment implements Statement {
 
     @Override
     public void setBounds(Expression scope) {
-        if (initial) {
+        if (initial || modify == null) {
             leftValue.setBoundValue(scope, "=", value);
         } else {
-            // TODO update bounds
-            //leftValue.setBoundValue(scope, modify, value);
+            // TODO modify bounds
+            // leftValue.setBoundValue(scope, modify, value);
         }
         value.setOwnedBoundsToNull(scope);
     }

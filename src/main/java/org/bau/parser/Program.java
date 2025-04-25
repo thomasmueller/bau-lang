@@ -61,7 +61,7 @@ public class Program {
     HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
 
     {
-        FunctionDefinition f = new FunctionDefinition();
+        FunctionDefinition f = new FunctionDefinition(0);
         // TODO move println to std
         f.name = "println";
         f.builtIn = true;
@@ -342,6 +342,10 @@ public class Program {
                     + "    return *(ref->refCount);\n"
                     + "}");
         }
+        buff.append("int64_t arrayOutOfBounds(int64_t x, int64_t len) {\n"
+                + "    fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
+                + "    exit(1);\n"
+                + "}\n");
         buff.append("/* types */\n");
         for (DataType t : dataTypeMap.values()) {
             if (t.enumValues != null) {
@@ -363,7 +367,7 @@ public class Program {
                     buff.append(Statement.indent(t.baseType().toC() + "* data;\n"));
                 } else {
                     for(Variable f : t.fields) {
-                        buff.append(Statement.indent(f.type.toC() + " " + f.name + ";\n"));
+                        buff.append(Statement.indent(f.type().toC() + " " + f.name + ";\n"));
                     }
                 }
                 if (t.memoryType() == MemoryType.REF_COUNT) {
@@ -441,6 +445,9 @@ public class Program {
                 buff.append("}\n");
             }
         }
+        buff.append("/* global */\n");
+        buff.append("int __argc;\n");
+        buff.append("char **__argv;\n");
         buff.append("/* functions */\n");
         for (FunctionDefinition def : functions.values()) {
             if (def.used) {
@@ -483,14 +490,14 @@ public class Program {
                         buff.append("}\n");
                     } else {
                         for (Variable f : t.fields) {
-                            if (f.type.needIncDec()) {
-                                if (f.type.memoryType() == MemoryType.REF_COUNT) {
+                            if (f.type().needIncDec()) {
+                                if (f.type().memoryType() == MemoryType.REF_COUNT) {
                                     buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
                                 } else {
-                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type.nameC() + "_free(x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
                                 }
-                            } else if (f.type.needFree()) {
-                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type.nameC() + "_free(x->" + f.name + ");\n"));
+                            } else if (f.type().needFree()) {
+                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
                             }
                         }
                         if (t.autoClose != null) {
@@ -526,7 +533,7 @@ public class Program {
             buff.append("i8_array* string_" + id + ";\n");
         }
         for (Variable var : globalVariables.values()) {
-            buff.append(var.type.toC() + " " + var.name + ";\n");
+            buff.append(var.type().toC() + " " + var.name + ";\n");
         }
         for (FunctionDefinition def : functions.values()) {
             if (def.used) {
@@ -536,17 +543,19 @@ public class Program {
                 buff.append(def.toC(context));
             }
         }
-        buff.append("int main() {\n");
+        buff.append("int main(int _argc, char *_argv[]) {\n");
         if (!SIMPLE_REF_COUNTING) {
             buff.append(Statement.indent("_initRefCount();\n"));
         }
+        buff.append(Statement.indent("__argc = _argc;\n"));
+        buff.append(Statement.indent("__argv = _argv;\n"));
         for (long id: stringConstantsMap.keySet()) {
             String s = stringConstantsMap.get(id);
             byte[] data = s.getBytes(StandardCharsets.UTF_8);
             buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
         }
         context.nextFunction();
-        FunctionDefinition main = new FunctionDefinition();
+        FunctionDefinition main = new FunctionDefinition(0);
         main.list = list;
         main.name = "main";
         main.borrowCheck();

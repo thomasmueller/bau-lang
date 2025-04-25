@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -47,6 +51,9 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 i8_array* hex_2(int64_t x, int64_t len);
 int64_t idx_2(int64_t x, int64_t len);
@@ -93,8 +100,7 @@ i8_array* hex_2(int64_t x, int64_t len) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 int64_t org_bau_Std_ord_1(i8_array* s) {
     if (s->len) {
@@ -103,7 +109,9 @@ int64_t org_bau_Std_ord_1(i8_array* s) {
     }
     return 0;
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("0", 1);
     string_1001 = str_const("a", 1);
     i8_array* _t0 = hex_2(0x12fea234, 8);

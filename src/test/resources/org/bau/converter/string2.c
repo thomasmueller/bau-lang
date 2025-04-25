@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -103,6 +107,9 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 int64_t idx_2(int64_t x, int64_t len);
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T);
@@ -170,8 +177,7 @@ i8_array* string_1012;
 i8_array* string_1013;
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
     org_bau_List_List_org_bau_String_string* result = org_bau_List_List_org_bau_String_string_new();
@@ -452,7 +458,9 @@ void test_0() {
     _decUseStack(_t1, i8_array);
     _decUseStack(x, i8_array);
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("", 0);
     string_1001 = str_const("hello world", 11);
     string_1002 = str_const("indexOf ll: ", 12);

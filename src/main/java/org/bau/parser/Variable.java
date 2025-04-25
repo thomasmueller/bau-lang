@@ -10,7 +10,7 @@ import org.bau.runtime.Value;
 public class Variable implements Expression, LeftValue {
     String name;
     String module;
-    DataType type;
+    private DataType type;
     private Bounds bounds;
     private Bounds lenBounds;
     boolean isConstant;
@@ -26,8 +26,8 @@ public class Variable implements Expression, LeftValue {
         this.name = name;
         this.global = global;
         this.type = type;
-        Expression max = type.maxValue;
-        if (max != null) {
+        if (type.isRange()) {
+            Expression max = type.maxValue;
             bounds = new Bounds();
             bounds.addCondition(null, "<", max);
         }
@@ -104,7 +104,9 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public void setOwnedBoundsToNull(Expression scope) {
-        setBoundValue(scope, "=", new NullValue());
+        if (type != null && type.memoryType() == MemoryType.OWNER) {
+            setBoundValue(scope, "=", new NullValue());
+        }
     }
 
     @Override
@@ -170,6 +172,9 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void setBoundValue(Expression scope, String modify, Expression value) {
         if (!(value instanceof NullValue) && !value.type().isNumber()) {
+            return;
+        }
+        if (value instanceof Call) {
             return;
         }
         if (bounds == null) {

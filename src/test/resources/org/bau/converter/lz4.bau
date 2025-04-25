@@ -1,0 +1,7 @@
+import org.bau.compress.Lz4Tool
+    
+fun main() int
+    Lz4Tool.main()
+    return 0
+
+## Expected

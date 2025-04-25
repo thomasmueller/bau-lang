@@ -4,30 +4,29 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.bau.json.JsonObject;
-import org.bau.json.JsopBuilder;
+import org.bau.stdlib.json.Json;
+import org.bau.stdlib.json.JsonBuilder;
 
 public class Shutdown {
-    JsonObject obj;
-    JsonObject response;
+    Json obj;
+    Json response;
     String id;
 
-    public Shutdown(JsonObject obj) {
+    public Shutdown(Json obj) {
         this.obj = obj;
-        this.id = obj.getProperties().get("id");
-
+        this.id = obj.get("id").getString();
     }
 
     public byte[] process() throws IOException {
-        JsopBuilder b = new JsopBuilder();
+        JsonBuilder b = new JsonBuilder();
         b.object().
             key("id").encodedValue(id).
             key("jsonrpc").value("2.0").
             key("result").value(null).
         endObject();
 
-        JsonObject response = JsonObject.fromJson(b.toString(), true);
-        byte[] bytes = response.toString().getBytes(StandardCharsets.UTF_8);
+        String response = b.toString();
+        byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
         System.out.println("Content-Length:" + bytes.length + "\r\n\r\n");
         System.out.write(bytes);
 

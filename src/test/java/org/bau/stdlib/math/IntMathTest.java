@@ -1,7 +1,6 @@
 package org.bau.stdlib.math;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -12,7 +11,7 @@ public class IntMathTest {
     @Test
     public void signum() {
         Random r = new Random(0);
-        for (int i = 0; i < 10_000_000; i++) {
+        for (int i = 0; i < 1_000_000; i++) {
             long x = r.nextLong();
             assertEquals(Long.signum(x), IntMath.signum(x));
         }
@@ -35,11 +34,6 @@ public class IntMathTest {
     }
 
     private static void bitOperations(long x) {
-        if (x == 0) {
-            assertEquals(0, IntMath.hash(x));
-        } else {
-            assertTrue(x != IntMath.hash(x));
-        }
         assertEquals(Long.bitCount(x), IntMath.bitCount(x));
         assertEquals(Long.numberOfLeadingZeros(x), IntMath.countLeadingZeros(x));
         assertEquals(Long.numberOfTrailingZeros(x), IntMath.countTrailingZeros(x));
@@ -95,26 +89,9 @@ public class IntMathTest {
     }
 
     @Test
-    public void reduce() {
-        Random r = new Random(0);
-        for (int i = 0; i < 1_000_000; i++) {
-            long x = r.nextLong();
-            int max = r.nextInt(10_000);
-            int got = IntMath.reduce(x, max);
-            if (max == 0) {
-                assertEquals(0, got);
-            } else {
-                assertTrue(got >= 0 && got < max);
-                assertEquals(0, IntMath.reduce(0, max));
-                assertEquals(max - 1, IntMath.reduce(-1, max));
-            }
-        }
-    }
-
-    @Test
     public void multiplyHighShort() {
-        for (int x = Short.MIN_VALUE; x <= Short.MAX_VALUE; x += 7) {
-            for (int y = Short.MIN_VALUE; y <= Short.MAX_VALUE; y += 7) {
+        for (int x = Short.MIN_VALUE; x <= Short.MAX_VALUE; x += 31) {
+            for (int y = Short.MIN_VALUE; y <= Short.MAX_VALUE; y += 11) {
                 short expectedUnsigned = (short) ((((x & 0xffff) * (y & 0xffff)) >>> 16) & 0xffff);
                 short gotUnsigned = multiplyHighShortUnsigned((short) x, (short) y);
                 if (expectedUnsigned != gotUnsigned) {

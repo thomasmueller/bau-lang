@@ -14,6 +14,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -85,6 +89,9 @@ Tree* Tree_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 int64_t Tree_nodeCount_1(Tree* this);
 Tree* newTree_2(Tree* left, Tree* right);
@@ -167,7 +174,9 @@ Tree* with_1(int64_t depth) {
     _decUseStack(_t1, Tree);
     return _t3;
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("ref count", 9);
     string_1001 = str_const("stretch tree of depth ", 22);
     string_1002 = str_const(" check: ", 8);

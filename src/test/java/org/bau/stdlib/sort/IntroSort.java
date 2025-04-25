@@ -51,7 +51,7 @@ public class IntroSort {
             l++;
             h--;
         }
-        if (swapCount == 0 && InsertionSort.isSorted(a, low, high, c)) {
+        if (swapCount < 3 && InsertionSort.isSorted(a, low, high, c)) {
             return;
         }
         quicksort(a, c, low, pi, depth + 1);

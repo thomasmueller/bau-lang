@@ -338,7 +338,7 @@ public class Call implements Statement, Expression {
 
     @Override
     public void setOwnedBoundsToNull(Expression scope) {
-        for(Expression a : args) {
+        for (Expression a : args) {
             a.setOwnedBoundsToNull(scope);
         }
     }

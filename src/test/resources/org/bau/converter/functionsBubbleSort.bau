@@ -1,17 +1,17 @@
 fun bubbleSort(T type, array T..)
-  n := array.len
-  while 1
-    swapped := 0
-    for i := until(array.len - 1)
-      if array[i] > array[i + 1]
-        tmp := array[i]
-        array[i] = array[i + 1]
-        array[i + 1] = tmp
-        swapped = 1
-    n -= 1
-    break swapped = 0
-  for i:= until(array.len)
-    println(array[i])
+    n := array.len
+    while 1
+        swapped := 0
+        for i := until(array.len - 1)
+            if array[i] > array[i + 1]
+                tmp := array[i]
+                array[i] = array[i + 1]
+                array[i + 1] = tmp
+                swapped = 1
+        n -= 1
+        break swapped = 0
+    for i:= until(array.len)
+        println(array[i])
 
 bubbleSort(int, 1, 3, 2)
 

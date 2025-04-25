@@ -364,7 +364,11 @@ public class Operation implements Expression {
             return op + " " + addBracketsIfNeededToC(right);
         }
         if (">>".equals(op)) {
-            return "shiftRight_" + left.type().name() + "_2(" +
+            DataType t = left.type();
+            if (t.isRange()) {
+                t = DataType.INT_TYPE;
+            }
+            return "shiftRight_" + t.name() + "_2(" +
                     left.toC() + ", " + right.toC() + ")";
         } else if ("<<".equals(op)) {
             return "shiftLeft_2(" +
@@ -527,7 +531,7 @@ public class Operation implements Expression {
             assign.initial = false;
             assign.isConstant = false;
             assign.leftValue = var;
-            assign.type = v2.type;
+            assign.type = v2.type();
             assign.value = v2;
             list.add(assign);
             target.add(ifStatement);
@@ -629,7 +633,7 @@ public class Operation implements Expression {
         case DataType.INT:
             return new ValueInt(val.longValue());
         }
-        if (targetType.maxValue != null) {
+        if (targetType.isRange()) {
             return new ValueInt(val.longValue());
         }
         if (targetType.isArray() || targetType.isPointer()) {

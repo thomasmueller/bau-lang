@@ -1,51 +1,51 @@
 module org.bau.File
 
 type File
-  filePointer int
+    filePointer int
 
 fun openFile(name i8[], mode i8[]) File
-  native(```
-    // TODO verify strings
-    FILE* fp = fopen(name->data, mode->data);
-    org_bau_File_File* f = org_bau_File_File_new();
-    f->filePointer = (uint64_t) fp;
-    return f;
-    ```)
+    native(```
+        // TODO verify strings
+        FILE* fp = fopen(name->data, mode->data);
+        org_bau_File_File* f = org_bau_File_File_new();
+        f->filePointer = (uint64_t) fp;
+        return f;
+        ```)
 
 fun File read(data i8[], pos int, len int) int
-  native(```
-    FILE* fp = (FILE*) (this->filePointer);
-    if (pos < 0 || len < 0 || pos + len > data->len) {
-      return 0;
-    } else {
-      return fread(data->data + pos, 1, len, fp);
-    }
-    ```)
+    native(```
+        FILE* fp = (FILE*) (this->filePointer);
+        if (pos < 0 || len < 0 || pos + len > data->len) {
+            return 0;
+        } else {
+            return fread(data->data + pos, 1, len, fp);
+        }
+        ```)
 
-fun File readFully(buffer i8[], len i32) i32
+fun File readFully(buffer i8[], pos int, len int) int
     count := 0
     while 1
-        l := this.read(buffer, count, len - count)
+        l := this.read(buffer, count + pos, len - count)
         if l = 0
             return count
         else
             count += l
 
 fun File write(data i8[], pos int, len int) int
-  native(```
-    FILE* fp = (FILE*) (this->filePointer);
-    if (pos < 0 || len < 0 || pos + len > data->len) {
-      return -1;
-    } else {
-      return fwrite(data->data + pos, 1, len, fp);
-    }
-    ```)
+    native(```
+        FILE* fp = (FILE*) (this->filePointer);
+        if (pos < 0 || len < 0 || pos + len > data->len) {
+            return -1;
+        } else {
+            return fwrite(data->data + pos, 1, len, fp);
+        }
+        ```)
 
 fun File close()
-  native(```
-    FILE* fp = (FILE*) (this->filePointer);
-    fclose(fp);
-    ```)
+    native(```
+        FILE* fp = (FILE*) (this->filePointer);
+        fclose(fp);
+        ```)
  
 fun putchar(x i8)
     native(```

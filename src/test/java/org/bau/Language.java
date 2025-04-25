@@ -6,6 +6,26 @@ package org.bau;
 
 Name: Mya, Pha
 
+bug:
+writeBlockSize : 1 << 31
+writeBlockSize |= read
+
+ord('a') => code('a')? or char('a')?
+
+bug: segmentation fault for lz4 -d with not existing files
+
+bug: a i32 : <int> uses int64_t instead of int32_t
+
+Require a main method (constants, global variables are outside of functions)
+
+interfaces (trait), like in Rust
+instanceof ?
+
+functions on arrays
+
+'is' instead of 'equals'?
+
+constants maybe use #define ?
 
 Stdlib:
 - unit testing

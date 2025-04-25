@@ -96,13 +96,13 @@ public class FunctionContext {
             throw new IllegalStateException("Variable already exists: " + name);
         }
         variables.put(name, var);
-        addIdentifier(name, var.type);
+        addIdentifier(name, var.type());
     }
 
     public void addTemporaryType(DataType type) {
         addType(type);
         addIdentifier(type.fullName(), type);
-        if (type.maxValue == null) {
+        if (!type.isRange()) {
             // no need for range types
             addIdentifier(type.arrayType().fullName(), type.arrayType());
         }

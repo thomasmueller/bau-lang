@@ -24,7 +24,7 @@ public class Std {
         DataType f64 = prog.addType(DataType.newNumberType(DataType.FLOAT, 8));
         prog.addType(DataType.newNumberType(DataType.TYPE, 8));
 
-        FunctionDefinition f = new FunctionDefinition();
+        FunctionDefinition f = new FunctionDefinition(0);
         f.name = DataType.INT;
         Variable var = new Variable("x", i64);
         f.parameters.add(var);
@@ -33,7 +33,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = DataType.I32;
         var = new Variable("x", i32);
         f.parameters.add(var);
@@ -42,7 +42,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = DataType.I16;
         var = new Variable("x", i16);
         f.parameters.add(var);
@@ -51,7 +51,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = DataType.I8;
         var = new Variable("x", i8);
         f.parameters.add(var);
@@ -60,7 +60,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = DataType.FLOAT;
         var = new Variable("x", f64);
         f.parameters.add(var);
@@ -69,7 +69,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = DataType.F32;
         var = new Variable("x", f32);
         f.parameters.add(var);
@@ -78,7 +78,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "idiv";
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
@@ -90,7 +90,7 @@ public class Std {
                 + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "imod";
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
@@ -102,7 +102,7 @@ public class Std {
                 + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "shiftLeft";
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
@@ -111,7 +111,7 @@ public class Std {
         f.cCode = "return a << b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "shiftRight_int";
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
@@ -120,7 +120,7 @@ public class Std {
         f.cCode = "return ((uint64_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "shiftRight_i32";
         f.parameters.add(new Variable("a", i32));
         f.parameters.add(new Variable("b", i64));
@@ -129,7 +129,7 @@ public class Std {
         f.cCode = "return ((uint32_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "shiftRight_i16";
         f.parameters.add(new Variable("a", i16));
         f.parameters.add(new Variable("b", i64));
@@ -138,7 +138,7 @@ public class Std {
         f.cCode = "return ((uint16_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "shiftRight_i8";
         f.parameters.add(new Variable("a", i8));
         f.parameters.add(new Variable("b", i64));
@@ -147,7 +147,7 @@ public class Std {
         f.cCode = "return ((uint8_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition();
+        f = new FunctionDefinition(0);
         f.name = "idx";
         f.parameters.add(new Variable("x", i64));
         f.parameters.add(new Variable("len", i64));
@@ -156,8 +156,7 @@ public class Std {
         if (ARRAY_BOUND_CHECK) {
             // when printing to stderr, it's harder to find where it happens
             f.cCode = "if (x >= 0 && x < len) return x;\n"
-                    + "fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
-                    + "exit(1);\n";
+                    + "return arrayOutOfBounds(x, len);\n";
         } else {
             f.cCode = "return x;\n";
         }
@@ -201,7 +200,7 @@ public class Std {
         }
         String stdModule = "org.bau.Std";
         String moduleSource = program.readModule(stdModule);
-        Parser p = new Parser(program, stdModule, moduleSource);
+        Parser p = new Parser(program, stdModule, moduleSource, 0);
         // disable the scan phase -- otherwise we would register recursively
         p.setScanPhase(false);
         p.parse();

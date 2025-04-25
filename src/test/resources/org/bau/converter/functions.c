@@ -14,6 +14,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -70,6 +74,9 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 double float_twice_1(double this);
 int64_t idx_2(int64_t x, int64_t len);
@@ -111,8 +118,7 @@ double float_twice_1(double this) {
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
-    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
-    exit(1);
+    return arrayOutOfBounds(x, len);
 }
 int64_t int_rotateRight_2(int64_t this, int64_t n) {
     int64_t _r0 = (shiftRight_int_2(this, n)) | (shiftLeft_2(this, (64 - n)));
@@ -164,7 +170,9 @@ int64_t sum_var(int64_t a, int _vaCount,...) {
     _decUseStack(b, int_array);
     return sum;
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const(" ", 1);
     string_1001 = str_const("ascii of \"0\" is ", 16);
     string_1002 = str_const("0", 1);

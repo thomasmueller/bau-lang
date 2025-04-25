@@ -37,7 +37,7 @@ public class Free implements Statement {
         if (val == null) {
             return StatementResult.OK;
         }
-        return decRefCount(val, var.type, m);
+        return decRefCount(val, var.type(), m);
     }
 
     public static StatementResult decRefCount(Value val, DataType type, Memory m) {
@@ -82,20 +82,20 @@ public class Free implements Statement {
         if (val == null) {
             return StatementResult.OK;
         }
-        return free(val, var.type, m);
+        return free(val, var.type(), m);
     }
 
     public static StatementResult free(Value val, DataType type, Memory m) {
         Value.ValueStruct struct = (Value.ValueStruct) val;
         for(Variable f : type.fields) {
             Value v = struct.get(f.name);
-            if (f.type.needIncDec()) {
-                StatementResult result = decRefCount(v, f.type, m);
+            if (f.type().needIncDec()) {
+                StatementResult result = decRefCount(v, f.type(), m);
                 if (result == StatementResult.PANIC) {
                     return result;
                 }
-            } else if (f.type.needFree()) {
-                StatementResult result = free(v, f.type, m);
+            } else if (f.type().needFree()) {
+                StatementResult result = free(v, f.type(), m);
                 if (result == StatementResult.PANIC) {
                     return result;
                 }

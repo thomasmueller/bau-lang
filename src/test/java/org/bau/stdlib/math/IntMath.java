@@ -2,16 +2,6 @@ package org.bau.stdlib.math;
 
 public class IntMath {
 
-    public static long hash(long x) {
-        x = (x ^ (x >>> 33)) * 0xff51afd7ed558ccdL;
-        x = (x ^ (x >>> 33)) * 0xc4ceb9fe1a85ec53L;
-        return x ^ (x >>> 33);
-    }
-
-    public static int reduce(long hash, int n) {
-        return (int) (((hash & 0xffffffffL) * (n & 0xffffffffL)) >>> 32);
-    }
-
     public static long multiplyHighSigned(long x, long y) {
         long xh = x >> 32;
         long yh = y >> 32;

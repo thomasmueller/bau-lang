@@ -6,25 +6,25 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.bau.json.JsonObject;
+import org.bau.stdlib.json.Json;
 
 public class BauLanguageServer {
 
 	// https://stackoverflow.com/questions/30687783/create-custom-language-in-visual-studio-code
-	
+
 	// https://macromates.com/manual/en/language_grammars
 	// https://code.visualstudio.com/api/language-extensions/language-configuration-guide
 	// https://github.com/microsoft/vscode/tree/main/extensions
 
     // https://langserver.org/
-	
+
     // https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
     // https://github.com/worlpaker/go-syntax/blob/master/syntaxes/go.tmLanguage.json
 	// https://github.com/microsoft/vscode/blob/main/extensions/lua/syntaxes/lua.tmLanguage.json
-    
+
     final static String stdInFile = "langServ.in.txt";
     final static String stdOutFile = "langServ.out.txt";
-    
+
     public static void main(String[] args) throws IOException {
         OutputStream logOut = new FileOutputStream(stdOutFile);
         OutputStream logIn = new FileOutputStream(stdInFile);
@@ -54,7 +54,7 @@ public class BauLanguageServer {
             }
             logIn.write(data, 0, i);
             String line = new String(data, 0, i, StandardCharsets.UTF_8);
-            
+
             line = line.trim();
             if (line.startsWith("Content-Length:")) {
                 nextContentLength = Integer.parseInt(line.substring("Content-Length:".length()).trim());
@@ -62,9 +62,9 @@ public class BauLanguageServer {
                  byte[] data2 = in.readNBytes(nextContentLength);
                  logIn.write(data2);
                  String content = new String(data2, StandardCharsets.UTF_8).trim();
-                 JsonObject obj = JsonObject.fromJson(content, false);
+                 Json obj = new Json(content);
                  logIn.write(obj.toString().getBytes(StandardCharsets.UTF_8));
-                 String method = obj.getProperties().get("method");
+                 String method = obj.get("method").getString();
                  if (method.equals("\"initialize\"")) {
                      byte[] result = new Initialize(obj).process();
                      System.out.write(result);

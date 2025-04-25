@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -75,6 +79,9 @@ Entry_owned* Entry_owned_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 void Entry_owned_print_1(Entry_owned* this);
 void i8_array_free(i8_array* x);
@@ -110,7 +117,9 @@ i8_array* string_1003;
 void Entry_owned_print_1(Entry_owned* this) {
     printf("key: %lld value: %lld\n", (long long)this->key, (long long)this->value);
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("key: ", 5);
     string_1001 = str_const(" value: ", 8);
     string_1002 = str_const("clear ", 6);

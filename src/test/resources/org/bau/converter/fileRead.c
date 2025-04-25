@@ -13,6 +13,10 @@
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
@@ -60,6 +64,9 @@ org_bau_File_File* org_bau_File_File_new() {
     return result;
 }
 /* exception types */
+/* global */
+int __argc;
+char **__argv;
 /* functions */
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode);
 void org_bau_File_File_close_1(org_bau_File_File* this);
@@ -104,9 +111,9 @@ void org_bau_File_File_close_1(org_bau_File_File* this) {
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len) {
     FILE* fp = (FILE*) (this->filePointer);
     if (pos < 0 || len < 0 || pos + len > data->len) {
-      return 0;
+        return 0;
     } else {
-      return fread(data->data + pos, 1, len, fp);
+        return fread(data->data + pos, 1, len, fp);
     }
 }
 void test_0() {
@@ -118,7 +125,9 @@ void test_0() {
     _decUseStack(data, i8_array);
     _decUseStack(file, org_bau_File_File);
 }
-int main() {
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
     string_1000 = str_const("hello.txt", 9);
     string_1001 = str_const("r", 1);
     test_0();

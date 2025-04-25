@@ -59,6 +59,7 @@ public class DataType {
     Expression maxValue;
     public ArrayList<String> parameters;
     public String template;
+    public int lineOffset;
 
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
@@ -261,7 +262,7 @@ public class DataType {
         // TODO use a map, not a loop
         for (Variable v : fields) {
             if (v.name.equals(f)) {
-                return v.type;
+                return v.type();
             }
         }
         return null;
@@ -293,6 +294,10 @@ public class DataType {
 
     public MemoryType memoryType() {
         return memoryType;
+    }
+
+    public boolean isRange() {
+        return maxValue != null;
     }
 
     public DataType ownerType() {

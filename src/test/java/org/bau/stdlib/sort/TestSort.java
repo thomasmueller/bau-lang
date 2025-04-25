@@ -1,5 +1,6 @@
 package org.bau.stdlib.sort;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
@@ -13,8 +14,15 @@ import org.junit.Test;
  */
 public class TestSort {
 
-    private static boolean LOG = false;
-    private static int SIZE = 10_000;
+    public static void main(String... args) {
+        TestSort test = new TestSort();
+        test.log = true;
+        test.size = 1_000_000;
+        test.test();
+    }
+
+    private boolean log = false;
+    private int size = 10_000;
 
     private boolean stable;
 
@@ -28,17 +36,18 @@ public class TestSort {
      */
     Comparator<Long> comp;
 
-    private final Long[] array = new Long[SIZE];
+    private Long[] array;
     private Class<?> clazz;
 
-    private static void log(String message) {
-        if (LOG) {
+    private void log(String message) {
+        if (log) {
             System.out.println(message);
         }
     }
 
     @Test
-    public void test() throws Exception {
+    public void test() {
+        array = new Long[size];
         for (int i = 0; i < 2; i++) {
             log("");
             test(Arrays.class, true);
@@ -49,7 +58,7 @@ public class TestSort {
         }
     }
 
-    private void test(Class<?> c, boolean stable) throws Exception {
+    private void test(Class<?> c, boolean stable) {
         this.clazz = c;
         this.stable = stable;
         ordered(array);
@@ -78,7 +87,7 @@ public class TestSort {
      *
      * @param type the type of data
      */
-    private void  test(String type) throws Exception {
+    private void  test(String type) {
         if (stable) {
             stabilize(array);
         }
@@ -94,10 +103,14 @@ public class TestSort {
 
         long t = System.nanoTime();
 
-        clazz.getMethod("sort", Object[].class, Comparator.class).invoke(null,
-                array, comp);
+        try {
+            clazz.getMethod("sort", Object[].class, Comparator.class).invoke(null,
+                    array, comp);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+            throw new RuntimeException(e);
+        }
 
-        if (LOG) {
+        if (log) {
             System.out.printf("%4d ms; %10d comparisons algorithm: %s stable: %s data: %s\n",
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t), compareCount.get(), clazz, stable, type);
         }
@@ -106,7 +119,7 @@ public class TestSort {
 
     }
 
-    private static void verify(Long[] array) {
+    private void verify(Long[] array) {
         long last = Long.MIN_VALUE;
         int len = array.length;
         for (int i = 0; i < len; i++) {

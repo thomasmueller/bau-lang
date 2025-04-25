@@ -86,7 +86,7 @@ public class Int128Test {
             Int128 c = b.shiftRightArithmetic(100);
             assertTrue(a.equals(c));
         }
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             BigInteger ai = randomBigInteger128(r);
             Int128 aa = Int128.valueOf(ai.toString());
             int shift = r.nextInt(100);

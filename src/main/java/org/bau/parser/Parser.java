@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.bau.parser.Bounds.ApplyType;
+import org.bau.parser.Bounds.CompareResult;
 import org.bau.parser.SpecialOperation.SpecialOperationType;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
@@ -58,17 +59,19 @@ public class Parser {
     private FunctionDefinition currentFunctionDefinition;
     private While currentLoop;
     private boolean scanPhase = true;
+    private final int lineOffset;
 
     public Parser(String text) {
-        this(new Program(Collections.emptyMap()), null, text);
+        this(new Program(Collections.emptyMap()), null, text, 0);
     }
 
-    public Parser(Program program, String module, String text) {
+    public Parser(Program program, String module, String text, int lineOffset) {
         this.program = program;
         this.functionContext = new FunctionContext(program);
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
+        this.lineOffset = lineOffset;
     }
 
     public void setScanPhase(boolean scanPhase) {
@@ -94,7 +97,7 @@ public class Parser {
             for (FunctionDefinition def : functions) {
                 if (def.code != null) {
                     String f = def.toString();
-                    Parser p = new Parser(program, def.module, f);
+                    Parser p = new Parser(program, def.module, f, def.lineOffset);
                     functionContext.reset();
                     p.functionContext = functionContext;
                     p.scanPhase = false;
@@ -107,7 +110,7 @@ public class Parser {
             for (FunctionDefinition def : functions) {
                 if (def.code != null) {
                     String f = def.toString();
-                    Parser p = new Parser(program, def.module, f);
+                    Parser p = new Parser(program, def.module, f, def.lineOffset);
                     functionContext.reset();
                     p.functionContext = functionContext;
                     p.scanPhase = false;
@@ -137,7 +140,7 @@ public class Parser {
                 line++;
             }
         }
-        return line;
+        return (lineOffset == 0 ? 0 : (lineOffset - 1)) + line;
     }
 
     private IllegalStateException syntaxError(String message) {
@@ -193,7 +196,7 @@ public class Parser {
                     }
                     pos = lastPos;
                     String mainCode = parseBlock(-1);
-                    FunctionDefinition def = new FunctionDefinition();
+                    FunctionDefinition def = new FunctionDefinition(getLine(pos));
                     def.name = "main";
                     def.code = Statement.indent(mainCode);
                     program.addFunction(def);
@@ -257,7 +260,7 @@ public class Parser {
                 throw syntaxError("Resource not found: '" + name + ".bau'");
             }
             try {
-                Parser parser = new Parser(program, name, moduleSource);
+                Parser parser = new Parser(program, name, moduleSource, 0);
                 parser.isImport = true;
                 parser.parse();
             } catch (IllegalStateException e) {
@@ -334,9 +337,11 @@ public class Parser {
     }
 
     private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment) {
+        int lastPos = pos;
         String code = parseBlock(defIndent);
         DataType type = DataType.newEmptyType(module, name);
         type.parameters = parameters;
+        type.lineOffset = getLine(lastPos);
         type.template = code;
         lastComment = null;
         program.addComment("type " + type.toString(), comment);
@@ -452,7 +457,7 @@ public class Parser {
             return true;
         }
         int stackPos = functionContext.getStackPos();
-        FunctionDefinition def = new FunctionDefinition();
+        FunctionDefinition def = new FunctionDefinition(getLine(lastPos));
         if (currentFunctionDefinition != null) {
             throw new IllegalStateException();
         }
@@ -576,7 +581,7 @@ public class Parser {
                 boolean found = false;
                 for (Variable f : def.exceptionType.fields) {
                     if (f.name.equals("exceptionType")) {
-                        if (f.type != program.getType(null, DataType.INT)) {
+                        if (f.type() != program.getType(null, DataType.INT)) {
                             throw syntaxError("The field 'exceptionType' must be of type 'int'");
                         }
                         found = true;
@@ -679,6 +684,7 @@ public class Parser {
         }
         buff.append(" " + functionName + "\n");
         buff.append(code);
+        t.lineOffset = getLine(lastPos);
         t.template += "\n" + buff.toString();
         if (comment != null) {
             program.addComment("fun " + t.toString() + " " + functionName.trim(), comment);
@@ -713,6 +719,10 @@ public class Parser {
                     throw syntaxError("May not throw an exception here");
                 }
                 String rangeTypeName = "0.." + upperBound.toString();
+                DataType t = functionContext.getType(null, rangeTypeName);
+                if (t != null) {
+                    return t;
+                }
                 DataType newType = DataType.newNumberType(rangeTypeName, 8);
                 newType.maxValue = upperBound;
                 functionContext.addTemporaryType(newType);
@@ -765,7 +775,7 @@ public class Parser {
                     code = Templates.convertTemplate(code, t.parameters, with);
                     code = "type " + typeId + "\n" + code;
                     try {
-                        Parser p = new Parser(program, module, code);
+                        Parser p = new Parser(program, module, code, t.lineOffset);
                         p.read();
                         p.parseTypeDefinition(t.module);
                         while (p.type != TokenType.END) {
@@ -802,7 +812,7 @@ public class Parser {
         }
         if (matchOp("?")) {
             if (t.isArray()) {
-                throw syntaxError("Array can't be null (but they can be empty)");
+                throw syntaxError("Arrays can't be null (but they can be empty)");
             } else if (t.isCopyType()) {
                 throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
             }
@@ -895,6 +905,9 @@ public class Parser {
                 v.setBoundValue(null, "=", s.value);
                 s.leftValue = v;
                 s.type = s.value.type();
+                if (functionContext.getVariable(null, v.name) != null) {
+                    throw syntaxError("Variable already defined: " + v.name);
+                }
                 functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
@@ -1184,11 +1197,14 @@ public class Parser {
         }
         FieldAccess f = new FieldAccess(base, "len", program.getType(null, DataType.INT));
         Bounds b = arrayIndex.getBounds();
-        if (b != null && b.compareTo(this, f) < 0) {
-            return false;
+        if (b != null) {
+            CompareResult r = b.compareTo(this, f);
+            if (r == CompareResult.SMALLER || r == CompareResult.EQUAL) {
+                return false;
+            }
         }
         DataType indexType = arrayIndex.type();
-        if (indexType.maxValue == null) {
+        if (!indexType.isRange()) {
             return true;
         }
         // TODO this is a bit fuzzy; need to compare identity
@@ -1223,11 +1239,13 @@ public class Parser {
         } else if (expr.type().isNullable() && !targetType.isNullable()) {
             throw syntaxError("The expression may be 'null', but this is not allowed here.");
         }
-        Expression max = targetType.maxValue;
-        if (max == null) {
+        if (!targetType.isRange()) {
             return;
         }
+        verifyBounds(targetType, expr, targetType.maxValue);
+    }
 
+    private void verifyBounds(DataType targetType, Expression expr, Expression max) {
         Value v = expr.eval(null);
         Value m = max.eval(null);
         if (v != null && m != null) {
@@ -1238,21 +1256,28 @@ public class Parser {
             return;
         }
         DataType exprType = expr.type();
-        if (exprType == targetType) {
+        if (exprType.toString().equals(targetType.toString())) {
             return;
+        }
+        if (exprType.isRange()) {
+            // the expression (parameter) type is a range,
+            // and the max value is the same as the max value of the parameter
+            if (exprType.maxValue.toString().equals(max.toString())) {
+                return;
+            }
         }
         Bounds b = expr.getBounds();
         if (b == null) {
             throw syntaxError("Can not verify if value is smaller than '" + max + "'");
         }
-        int result = b.compareTo(this, max);
-        if (result < 0) {
+        CompareResult result = b.compareTo(this, max);
+        if (result == CompareResult.SMALLER || result == CompareResult.EQUAL) {
             return;
         }
         Bounds mb = max.getBounds();
         if (mb != null) {
             result = mb.compareTo(this, expr);
-            if (result > 0) {
+            if (result == CompareResult.LARGER) {
                 return;
             }
         }
@@ -1296,7 +1321,7 @@ public class Parser {
             // replace generic types
             if (isGeneric) {
                 def.parameters.get(pi);
-                if (var.type.name().equals(type.name())) {
+                if (var.type().name().equals(type.name())) {
                     type = p.type();
                 }
             }
@@ -1347,7 +1372,7 @@ public class Parser {
     private static Expression replaceAll(Expression expr, ArrayList<Variable> params, ArrayList<Expression> args) {
         ArrayList<Variable> newParams = new ArrayList<>();
         for (Variable p : params) {
-            Variable v2 = new Variable("_" + p.name, p.type);
+            Variable v2 = new Variable("_" + p.name, p.type());
             newParams.add(v2);
         }
         for (int i = 0; i < params.size(); i++) {
@@ -1362,7 +1387,7 @@ public class Parser {
     private static Statement replaceAll(Statement stat, ArrayList<Variable> params, ArrayList<Expression> args) {
         ArrayList<Variable> newParams = new ArrayList<>();
         for (Variable p : params) {
-            Variable v2 = new Variable("_" + p.name, p.type);
+            Variable v2 = new Variable("_" + p.name, p.type());
             newParams.add(v2);
         }
         for (int i = 0; i < params.size(); i++) {
@@ -1400,7 +1425,7 @@ public class Parser {
                     throw syntaxError("Expected ',' after '" + last + "' or parentheses around the expression, to make it easier to read");
                 }
             }
-            if (template != null && pi < template.parameters.size() && DataType.TYPE.equals(template.parameters.get(pi).type.name())) {
+            if (template != null && pi < template.parameters.size() && DataType.TYPE.equals(template.parameters.get(pi).type().name())) {
                 if (DataType.TYPE.equals(token)) {
                     throw syntaxError("Type '" + token + "' may not be used here");
                 }
@@ -1435,7 +1460,7 @@ public class Parser {
                     // TODO this is not quite correct:
                     // we should probably have have a flag "templateWithoutExplicityParams"
                     if (templateNames.isEmpty()) {
-                        DataType t = template.parameters.get(pi).type;
+                        DataType t = template.parameters.get(pi).type();
                         if (template.varArgs && pi == template.parameters.size() - 1) {
                             // the last parameters of a varargs function is an array type
                             t = t.baseType();
@@ -1485,7 +1510,7 @@ public class Parser {
                 header = Templates.convertTemplate(header, templateNames, templateParams);
                 code = header.trim() + "\n" + code;
                 try {
-                    Parser p = new Parser(program, module, code);
+                    Parser p = new Parser(program, module, code, template.lineOffset);
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = program.getFunctionIfExists(type, module, fullName, call.args.size());
@@ -1499,7 +1524,6 @@ public class Parser {
         if (call.def == null) {
             throw syntaxError("Function '" + identifier + "' not found");
         }
-
         if (call.def.parameters.size() > call.args.size()) {
             int thisParam = call.def.callType == null ? 0 : 1;
             StringBuilder buff = new StringBuilder();
@@ -1514,6 +1538,40 @@ public class Parser {
             buff.append(")");
             throw syntaxError(buff.toString());
         }
+
+        // verify parameters with range restrictions
+        boolean hasRangeParameter = false;
+
+        for(Variable var : call.def.parameters) {
+            if (var.type().isRange()) {
+                hasRangeParameter = true;
+            }
+        }
+        if (hasRangeParameter) {
+            // build a list of original -> replacement pairs
+            ArrayList<Variable> original = new ArrayList<>();
+            ArrayList<Expression> replacement = new ArrayList<>();
+            for (int i = 0; i < call.def.parameters.size(); i++) {
+                Variable var = call.def.parameters.get(i);
+                Expression expr = call.args.get(i);
+                DataType varType = var.type();
+                if (varType.isRange()) {
+                    Expression max = varType.maxValue;
+                    // replace all
+                    for(int j = 0; j < original.size(); j++) {
+                        max = max.replace(original.get(j), replacement.get(j));
+                    }
+                    verifyBounds(varType, expr, max);
+                } else {
+                    if (!expr.isSimple()) {
+                        continue;
+                    }
+                    original.add(var);
+                    replacement.add(expr);
+                }
+            }
+        }
+
         if (use) {
             call.def.used = true;
         }
@@ -1858,13 +1916,13 @@ public class Parser {
         ArrayList<Expression> newArgs = new ArrayList<>();
         for (int i = 0; i < functionDef.parameters.size(); i++) {
             Variable v = functionDef.parameters.get(i);
-            Variable v2 = new Variable("_" + v.name, v.type);
+            Variable v2 = new Variable("_" + v.name, v.type());
             v2.isConstant = true;
             oldArgs.add(v);
             newArgs.add(call.args.get(i));
         }
         DataType type = functionDef.returnType;
-        if (type.maxValue != null) {
+        if (type.isRange()) {
             // TODO hack: replace maxValue for loops over arrays
             type.maxValue = call.args.get(0);
         }
@@ -2060,7 +2118,7 @@ public class Parser {
             if (var == null) {
                 throw syntaxError("Variable not found: '" + name + "'");
             }
-            if (var.type.needFree()) {
+            if (var.type().needFree()) {
                 lastFreedVar = var;
                 Free free = new Free(var);
                 autoClose.add(free);
@@ -2235,7 +2293,7 @@ public class Parser {
                     for (FunctionDefinition def : toCompileFirst) {
                         if (def.code != null) {
                             try {
-                                Parser p = new Parser(program, def.module, def.toString());
+                                Parser p = new Parser(program, def.module, def.toString(), def.lineOffset);
                                 p.scanPhase = false;
                                 p.read();
                                 p.parseFunctionDefinition(def.module);
@@ -2408,7 +2466,11 @@ public class Parser {
             } else if ("<<".equals(op)) {
                 program.getFunction(null, null, "shiftLeft", 2).used = true;
             } else if (">>".equals(op)) {
-                program.getFunction(null, null, "shiftRight_" + expr.type().name(), 2).used = true;
+                DataType t = expr.type();
+                if (t.isRange()) {
+                    t = DataType.INT_TYPE;
+                }
+                program.getFunction(null, null, "shiftRight_" + t.name(), 2).used = true;
             }
             if (Operation.isComparison(op) && (expr.isComparison() || right.isComparison())) {
                 throw syntaxError("Comparing a result of a comparison requires parenthesis");

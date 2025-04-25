@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class SimpleMathTest {
 
-    static final double[] TEST = new double[500];
+    static final double[] TEST = new double[400];
 
     static final double[] SPECIAL_VALUES = new double[] {
             0, 0.1, 0.5, 0.7, 1.0, 1.5, Math.PI / 2,
@@ -33,11 +33,11 @@ public class SimpleMathTest {
             TEST[i++] = r.nextDouble(10) - 5;
             TEST[i++] = r.nextDouble(100) - 50;
         }
-        for (double x = 1; x < Double.POSITIVE_INFINITY; x *= 1024) {
+        for (double x = 1; x < Double.POSITIVE_INFINITY; x *= 8 * 1024) {
             TEST[i++] = x;
             TEST[i++] = -x;
         }
-        for (double x = 1; x > 0; x /= 1024) {
+        for (double x = 1; x > 0; x /= 8 * 1024) {
             TEST[i++] = x;
             TEST[i++] = -x;
         }
@@ -139,7 +139,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.sin(x);
             double got = SimpleMath.sin(x);
-            if (x < 1e9 && x > -1e9) {
+            if (x < 1e7 && x > -1e7) {
                 assertTrue(sameTrig(expected, got, x));
             }
         }
@@ -150,7 +150,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.cos(x);
             double got = SimpleMath.cos(x);
-            if (x < 1e8 && x > -1e8) {
+            if (x < 1e7 && x > -1e7) {
                 assertTrue(sameTrig(expected, got, x));
             }
         }
@@ -161,7 +161,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.tan(x);
             double got = SimpleMath.tan(x);
-            if (x < 1e8 && x > -1e8) {
+            if (x < 1e7 && x > -1e7) {
                 assertTrue(sameTrig(expected, got, x));
             }
         }

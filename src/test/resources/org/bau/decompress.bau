@@ -1,25 +1,25 @@
 fun ord(s i8[]) int
-  if s.len <= 0
-    return 0
-  return s[0]
+    if s.len <= 0
+        return 0
+    return s[0]
 
 fun hex(x int, len int) i8[]
-  l := len
-  if l < 0
-    l = 0
-  elif l > 8
-    l = 8
-  data : i8[l]
-  y := x
-  i := l - 1
-  while i >= 0
-    c := ord('0') + (y & 0xf)
-    if (y & 0xf) > 9
-      c = ord('a') + (y & 0xf) - 10
-    data[i] = c
-    y >>= 4
-    i -= 1
-  return data
+    l := len
+    if l < 0
+        l = 0
+    elif l > 8
+        l = 8
+    data : i8[l]
+    y := x
+    i := l - 1
+    while i >= 0
+        c := ord('0') + (y & 0xf)
+        if (y & 0xf) > 9
+            c = ord('a') + (y & 0xf) - 10
+        data[i] = c
+        y >>= 4
+        i -= 1
+    return data
 
 import org.bau.File
 

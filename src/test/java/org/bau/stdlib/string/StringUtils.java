@@ -33,22 +33,22 @@ public class StringUtils {
     }
 
     /**
-     * Split at a delimiter. If the delimiter is empty or not found, one entry is returned.
+     * Split at a delimiter. If the delimiter is not found, one entry is returned.
      *
      * @param s the original string
      * @param delimiter the delimiter
      * @return an array of strings
      */
-    public static String[] split(String s, String delimiter) {
+    public static String[] split(String s, char delimiter) {
         int next = s.indexOf(delimiter);
-        if (delimiter.isEmpty() || next < 0) {
+        if (next < 0) {
             return new String[] {s};
         }
         ArrayList<String> list = new ArrayList<>();
         int index = 0;
         while (true) {
             list.add(s.substring(index, next));
-            index = next + delimiter.length();
+            index = next + 1;
             next = s.indexOf(delimiter, index);
             if (next < 0) {
                 break;
