@@ -87,8 +87,7 @@ int64_t idiv_2(int64_t a, int64_t b) {
 }
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
-    if (a == 0) return 0;
-    return a > 0 ? LLONG_MAX : LLONG_MIN;
+    return 0;
 }
 int64_t int_1(int64_t x) {
     return x;

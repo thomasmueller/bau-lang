@@ -209,6 +209,11 @@ public class TestCompare {
     }
 
     @Test
+    public void primes() throws IOException {
+        test("primes");
+    }
+
+    @Test
     public void regexSimple() throws IOException {
         test("regexSimple");
     }

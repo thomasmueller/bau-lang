@@ -69,7 +69,7 @@ fun XXHash update(buf i8[], start 0..buf.len, len int) i32
             return -1
         p := 0..buf.len - 15
         p = pos
-        while 1
+        while
             v1 = rotateLeft32(read4(buf, p) * PRIME2 + v1, 13) * PRIME1
             v2 = rotateLeft32(read4(buf, p + 4) * PRIME2 + v2, 13) * PRIME1
             v3 = rotateLeft32(read4(buf, p + 8) * PRIME2 + v3, 13) * PRIME1
@@ -122,14 +122,14 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         return -1
     if outData.len < 16
         return -1
-    while 1
+    while
         tag := inData[p] & 0xff
         next := p + 1
         break next >= inData.len
         p = next
         literalLen := tag >> 4
         if literalLen = 0xf
-            while 1
+            while
                 x := inData[p] & 0xff
                 p += 1
                 literalLen += x
@@ -142,7 +142,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
                 return -1
             o = outPos
             n := 0
-            while 1
+            while
                 x : read8(inData, s)
                 write8(outData, o, x)
                 n += 8
@@ -170,7 +170,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
             break
         runLen := tag & 0xf
         if runLen = 0xf
-            while 1
+            while
                 x := inData[p] & 0xff
                 p += 1
                 runLen += x
@@ -187,7 +187,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
                 return -1
             o = outPos
             n := 0
-            while 1
+            while
                 x : read8(outData, s)
                 write8(outData, o, x)
                 n += 8
@@ -227,7 +227,7 @@ fun countTrailingZeros(x int) int
 
 fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..data.len - 7) int
     runLen := 0
-    while 1
+    while
         ax : read8(data, ai)
         bx : read8(data, bi)
         diff : ax ^ bx
@@ -265,7 +265,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
     inPos := 0..inData.len - 7
     skipTrigger := 6
     searchMatch := 1 << skipTrigger
-    while 1
+    while
         runLen := 0
         candidatePos := 0..inData.len - 7
         #candidatePos := 0
@@ -344,7 +344,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
             return -1
         o = next
         n := 0
-        while 1
+        while
             x : read8(inData, s)
             write8(outData, o, x)
             n += 8
@@ -404,7 +404,7 @@ fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int
     inPos := 0
     skipTrigger := 6
     searchMatch := 1 << skipTrigger
-    while 1
+    while
         runLen := 0
         candidatePos := 0
         if inPos + 16 < inLen

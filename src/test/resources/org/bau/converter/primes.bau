@@ -1,0 +1,75 @@
+import org.bau.Utils
+
+type BitField
+    data int[]
+
+fun newBitField(len int) BitField
+    x : new(BitField)
+    x.data = new(int[], (len + 63) / 64)
+    return x
+
+fun BitField set(index int)
+    data[index >> 6] |= 1 << (index & 0x3f)
+
+fun BitField get(index int) int
+    return data[index >> 6] >> (index & 0x3f) & 1
+
+fun primeSum(limit int) int
+    sieve := newBitField(limit + 1)
+    i := 3
+    while i * i <= limit
+        if not sieve.get(i)
+            j := i * i
+            while j <= limit
+                sieve.set(j)
+                j += i
+        i += 2
+    sum := 2
+    i = 3
+    while i <= limit
+        if not sieve.get(i)
+            sum += i
+        i += 2
+    return sum
+
+fun primeSum2(limit int) int
+    len : (limit + 1 + 63) / 64
+    sieve : new(int[], len)
+    if sieve.len <= 0
+        return 0
+    m := 0..sieve.len
+    i := 3
+    while i * i <= limit
+        next := i >> 6
+        break next >= sieve.len
+        m = next
+        if not (sieve[m]! >> (i & 0x3f) & 1)
+            j := i * i
+            while 1
+                next = j >> 6
+                break next >= sieve.len
+                m = next
+                sieve[m]! |= 1 << (j & 0x3f)
+                j += i
+        i += 2
+    sum := 2
+    i = 3
+    while i <= limit
+        next := i >> 6
+        break next >= sieve.len
+        m = next
+        if not (sieve[m]! >> (i & 0x3f) & 1)
+            sum += i
+        i += 2
+    return sum
+  
+fun main() int
+    # for i := range(0, 10)
+    #     start : Utils.getNanoTime()
+    #     sum : primeSum(1_000_000)
+    #     time : (Utils.getNanoTime() - start) / 1000000
+    #     println('time ' time ' sum ' sum)
+    println(primeSum(100))
+
+## Expected
+1060

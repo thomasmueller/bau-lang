@@ -3,6 +3,7 @@ package org.bau.stdlib.collections;
 public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
 
     private TreeNode<K, V> root;
+    private int size;
 
     private int compare(TreeNode<K, V> node, K key) {
         return key.compareTo(node.key);
@@ -36,6 +37,7 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
             set(x, isLeft, i);
             balance(x, isLeft);
         }
+        size++;
     }
 
     private void balance(TreeNode<K, V> x, boolean isLeft) {
@@ -189,7 +191,7 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
             d.right = null;
             x = d;
         }
-
+        size--;
         boolean isLeft = x.isFromLeft();
         replace(x, n);
         n = x.parent;
@@ -240,6 +242,17 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         }
     }
 
+    @Override
+    public void clear() {
+        root = null;
+        size = 0;
+    }
+
+    @Override
+    public int size() {
+        return size;
+    }
+
     static class TreeNode<K, V> {
         K key;
         V value;
@@ -259,8 +272,4 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
 
     }
 
-    @Override
-    public void clear() {
-        root = null;
-    }
 }

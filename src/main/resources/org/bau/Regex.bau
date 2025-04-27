@@ -91,7 +91,7 @@ fun parse(regex i8[]) List(Token)
                 t.type = tokenType.LIST
             t.data.add(c)
             t.data.add(c)
-            while 1
+            while
                 i += 1
                 c = regex[i]
                 break c = ord(']')
@@ -160,7 +160,7 @@ fun find(text i8[], regex i8[]) int[]
         return match(-1, -1)
     }
     tp := 0
-    while 1
+    while
         end := matchHere(list, 0, text, tp)
         if end >= 0
             return match(tp, end)
@@ -183,7 +183,7 @@ fun matchHere(list List(Token), rp int, text i8[], tp int) int
 
 fun matchStar(t Token, list List(Token), rp int, text i8[], tp int, max int) int
     result = -1
-    while 1
+    while
         end := matchHere(list, rp, text, tp)
         if end >= 0
             result = end

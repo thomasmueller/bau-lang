@@ -11,6 +11,7 @@ public class SkipList<K extends Comparable<K>, V> implements SortedMap<K, V> {
     private final Random random = new Random();
     @SuppressWarnings("unchecked")
     private Node<K, V> head = new Node<>(null, null, new Node[1]);
+    private int size;
 
     public void put(K key, V value) {
         int newLevel = 1 + Long.numberOfLeadingZeros(random.nextLong());
@@ -19,14 +20,19 @@ public class SkipList<K extends Comparable<K>, V> implements SortedMap<K, V> {
         if (newLevel > head.next.length) {
             head = new Node<K, V>(null, null, Arrays.copyOf(head.next, newLevel));
         }
-        replace(key, newNode);
+        if (!replace(key, newNode)) {
+            size++;
+        }
     }
 
     public void remove(K key) {
-        replace(key, null);
+        if (replace(key, null)) {
+            size--;
+        }
     }
 
-    private void replace(K key, Node<K, V> newNode) {
+    private boolean replace(K key, Node<K, V> newNode) {
+        boolean found = false;
         Node<K, V> current = head;
         for (int i = head.next.length - 1; i >= 0; i--) {
             while (current.next[i] != null) {
@@ -34,6 +40,7 @@ public class SkipList<K extends Comparable<K>, V> implements SortedMap<K, V> {
                 if (comp > 0) {
                     break;
                 } else if (comp == 0) {
+                    found = true;
                     current.next[i] = current.next[i].next[i];
                     break;
                 }
@@ -44,6 +51,7 @@ public class SkipList<K extends Comparable<K>, V> implements SortedMap<K, V> {
                 current.next[i] = newNode;
             }
         }
+        return found;
     }
 
     private Node<K, V> findFirst(K key) {
@@ -132,6 +140,12 @@ public class SkipList<K extends Comparable<K>, V> implements SortedMap<K, V> {
     @SuppressWarnings("unchecked")
     public void clear() {
         head = new Node<>(null, null, new Node[1]);
+        size = 0;
+    }
+
+    @Override
+    public int size() {
+        return size;
     }
 
 }

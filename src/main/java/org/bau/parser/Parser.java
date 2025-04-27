@@ -2056,7 +2056,11 @@ public class Parser {
         While oldLoop = currentLoop;
         While loop = new While();
         currentLoop = loop;
-        loop.condition = parseCondition(loop.list);
+        if (type == TokenType.OPERATOR && "\n".equals(token) || "{".equals(token)) {
+            loop.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+        } else {
+            loop.condition = parseCondition(loop.list);
+        }
         addBlockCondition(loop.condition);
         if (!loop.list.isEmpty()) {
             // we need to make it a "while true" loop with a break condition

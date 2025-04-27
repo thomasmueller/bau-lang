@@ -17,7 +17,7 @@ public class BoundsTest {
                         fun test()
                             x : new(int[], 10)
                             i := 0..x.len
-                            while 1
+                            while
                                 println(x[i]!)
                                 next : i + 1
                                 break next >= x.len
@@ -33,7 +33,7 @@ public class BoundsTest {
                     fun test()
                         x : new(int[], 10)
                         i := 0..x.len
-                        while 1
+                        while
                             println(x[i]!)
                             next : i + 1
                             break next > x.len
@@ -52,7 +52,7 @@ public class BoundsTest {
                     fun test()
                         x : new(int[], 10)
                         i := 0..x.len
-                        while 1
+                        while
                             println(x[i]!)
                             next : i - 1
                             break next >= x.len

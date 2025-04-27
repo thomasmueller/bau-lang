@@ -305,7 +305,7 @@ fun appendInt(n int, buff i8[], pos int) int
     else
         n = -n
     start := pos
-    while 1
+    while
         buff[pos] = ord('0') - (n % 10)
         pos += 1
         n /= 10
@@ -386,7 +386,7 @@ fun sqrtInt(x int) int
         return 0
     g := 1 << 31
     c := g
-    while 1
+    while
         t : g * g
         if t > x or t < 0
             g ^= c

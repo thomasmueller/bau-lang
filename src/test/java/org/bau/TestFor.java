@@ -7,7 +7,7 @@ import org.bau.parser.Parser;
 import org.junit.Test;
 
 public class TestFor {
-    
+
     @Test
     public void breakOutsideOfLoop() {
         try {

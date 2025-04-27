@@ -98,8 +98,7 @@ public class Std {
         f.includes.add("<limits.h>");
         f.returnType = i64;
         f.cCode = "if (b != 0) return a % b;\n"
-                + "if (a == 0) return 0;\n"
-                + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
+                + "return 0;\n";
         prog.addFunction(f);
 
         f = new FunctionDefinition(0);

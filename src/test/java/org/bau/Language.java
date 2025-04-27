@@ -2,9 +2,18 @@ package org.bau;
 
 /**
 
-
-
 Name: Mya, Pha
+
+endless loop using just "while"
+
+bug: main method is defined as "int" but doesn't return a method, and that's ok?
+
+constructor:
+x : HashMap()
+x : int[100]
+
+n modulo 0 => n?
+0 modulo 0 => ?
 
 bug:
 writeBlockSize : 1 << 31
@@ -17,6 +26,8 @@ bug: segmentation fault for lz4 -d with not existing files
 bug: a i32 : <int> uses int64_t instead of int32_t
 
 Require a main method (constants, global variables are outside of functions)
+
+support slices as an alternative / addition to range tracking?
 
 interfaces (trait), like in Rust
 instanceof ?
@@ -566,8 +577,6 @@ https://en.wikipedia.org/wiki/Circular_buffer
 
 Do we also want conditional return? return 123 if ... ?
 
-"while 1" or just "while", or "while true"?
-
     while exp do block end
     repeat block until exp
     if exp then block {elseif exp then block} [else block] end
@@ -783,7 +792,7 @@ readFile(name string) string throws IOException
   catch e IOException
     logger.log('Could not open file ', name)
     throw e
-  while 1
+  while
     c : fgetc(fp)
     break feof(fp)
     print(c)
@@ -842,7 +851,7 @@ read() : i32
 
 read() : i32, throws
   fp = fopen('file.txt', 'r')
-  while 1
+  while
     c : fgetc(fp)
     break feof(fp)
     print(c)
@@ -856,7 +865,7 @@ read() i32?
   fp = fopen('file.txt', 'r')
   catch e
     throw e+1
-  while 1
+  while
     c : fgetc(fp)?
     break feof(fp)?
     print(c)

@@ -18,10 +18,10 @@ fun indexOf(s i8[], find i8[], start int) int
     if start >= s.len
         return -1
     i = start
-    while 1
+    while
         j := 0..find.len
         x := i
-        while 1
+        while
             break s[x]! <> find[j]!
             nj : j + 1
             if nj >= find.len
@@ -39,7 +39,7 @@ fun indexOf(s i8[], find i8[], start int) int
 fun indexOf1(s i8[], find i8[]) int
     for i := until(s.len - find.len + 1)
         j := 0
-        while 1
+        while
             if j = find.len
                 return i
             break s[i + j] <> find[j]
@@ -95,7 +95,7 @@ fun replaceAll(s i8[], before i8[], after i8[]) i8[]
     buff := new(StringBuilder)
     buff.data = new(i8[], s.len)
     index := 0
-    while 1
+    while
         buff.append(s, index, next)
         buff.append(after, 0, after.len)
         index = next + before.len
@@ -116,7 +116,7 @@ fun split(s i8[], delimiter i8[]) List(string)
         list.add(str(s))
         return list
     index := 0
-    while 1
+    while
         p : substring(s, index, next)
         list.add(str(p))
         index = next + delimiter.len

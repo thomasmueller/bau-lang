@@ -60,7 +60,7 @@ public class Service {
                 fmd.write(data);
                 fmd.setLength(data.length);
                 fmd.close();
-            }/*
+            }
             System.out.println("Interpreting ====================================");
             try {
                 long start = System.currentTimeMillis();
@@ -73,7 +73,6 @@ public class Service {
             } catch (Exception e) {
                 e.printStackTrace(System.out);
             }
-            */
             System.out.println("Compiling =======================================");
             // int exitCode = runProcess("gcc", "-O3", fc.toString());
             int exitCode = runProcess("gcc", fc.toString());

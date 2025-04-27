@@ -63,6 +63,7 @@ int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
+void operations_2(int64_t a, int64_t b);
 double org_bau_Math_abs_1(double x);
 double org_bau_Math_acos_1(double x);
 int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
@@ -113,6 +114,10 @@ i8_array* string_1026;
 i8_array* string_1027;
 i8_array* string_1028;
 i8_array* string_1029;
+i8_array* string_1030;
+i8_array* string_1031;
+i8_array* string_1032;
+i8_array* string_1033;
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
@@ -160,11 +165,16 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
-    if (a == 0) return 0;
-    return a > 0 ? LLONG_MAX : LLONG_MIN;
+    return 0;
 }
 int64_t int_1(int64_t x) {
     return x;
+}
+void operations_2(int64_t a, int64_t b) {
+    printf("%lld  / %lld = %lld\n", (long long)a, (long long)b, (long long)(idiv_2(a, b)));
+    printf("%lld  %% %lld = %lld\n", (long long)a, (long long)b, (long long)(imod_2(a, b)));
+    printf("%lld >> %lld = %lld\n", (long long)a, (long long)b, (long long)(shiftRight_int_2(a, b)));
+    printf("%lld << %lld = %lld\n", (long long)a, (long long)b, (long long)(shiftLeft_2(a, b)));
 }
 double org_bau_Math_abs_1(double x) {
     return fabs(x);
@@ -798,12 +808,16 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1024 = str_const("isNegativeZero ", 15);
-    string_1025 = str_const("convertDoubleToLongBits ", 24);
-    string_1026 = str_const("convertLongBitsToDouble ", 24);
-    string_1027 = str_const("pow ", 4);
-    string_1028 = str_const("min ", 4);
-    string_1029 = str_const("max ", 4);
+    string_1024 = str_const("atan   ", 7);
+    string_1025 = str_const("asin   ", 7);
+    string_1026 = str_const("acos   ", 7);
+    string_1027 = str_const("isNotANumber   ", 15);
+    string_1028 = str_const("isNegativeZero ", 15);
+    string_1029 = str_const("convertDoubleToLongBits ", 24);
+    string_1030 = str_const("convertLongBitsToDouble ", 24);
+    string_1031 = str_const("pow ", 4);
+    string_1032 = str_const("min ", 4);
+    string_1033 = str_const("max ", 4);
     string_1000 = str_const("-", 1);
     string_1001 = str_const("0", 1);
     string_1002 = str_const("E", 1);
@@ -811,23 +825,23 @@ int main(int _argc, char *_argv[]) {
     string_1004 = str_const("NaN", 3);
     string_1005 = str_const("Infinity", 8);
     string_1006 = str_const("-Infinity", 9);
-    string_1007 = str_const("signum ", 7);
+    string_1007 = str_const("  / ", 4);
     string_1008 = str_const(" = ", 3);
-    string_1009 = str_const("abs    ", 7);
-    string_1010 = str_const("floor  ", 7);
-    string_1011 = str_const("ceil   ", 7);
-    string_1012 = str_const("round  ", 7);
-    string_1013 = str_const("exp    ", 7);
-    string_1014 = str_const("log    ", 7);
-    string_1015 = str_const("log10  ", 7);
-    string_1016 = str_const("sqrt   ", 7);
-    string_1017 = str_const("sin    ", 7);
-    string_1018 = str_const("cos    ", 7);
-    string_1019 = str_const("tan    ", 7);
-    string_1020 = str_const("atan   ", 7);
-    string_1021 = str_const("asin   ", 7);
-    string_1022 = str_const("acos   ", 7);
-    string_1023 = str_const("isNotANumber   ", 15);
+    string_1009 = str_const("  % ", 4);
+    string_1010 = str_const(" >> ", 4);
+    string_1011 = str_const(" << ", 4);
+    string_1012 = str_const("signum ", 7);
+    string_1013 = str_const("abs    ", 7);
+    string_1014 = str_const("floor  ", 7);
+    string_1015 = str_const("ceil   ", 7);
+    string_1016 = str_const("round  ", 7);
+    string_1017 = str_const("exp    ", 7);
+    string_1018 = str_const("log    ", 7);
+    string_1019 = str_const("log10  ", 7);
+    string_1020 = str_const("sqrt   ", 7);
+    string_1021 = str_const("sin    ", 7);
+    string_1022 = str_const("cos    ", 7);
+    string_1023 = str_const("tan    ", 7);
     double POS_INFINITY = (1.0 / 0.0);
     double NEG_INFINITY = (-1.0 / 0.0);
     double NOT_A_NUMBER = (0.0 / 0.0);
@@ -837,6 +851,10 @@ int main(int _argc, char *_argv[]) {
     double LOG2 = 0.6931471805599453;
     int64_t MIN_INT = 0x8000000000000000;
     int64_t MAX_INT = 0x7fffffffffffffff;
+    operations_2(0, 0);
+    operations_2(1, 0);
+    operations_2(-1, 0);
+    operations_2(3, -50);
     double x = -1.0;
     x = -1;
     while (x <= 1) {

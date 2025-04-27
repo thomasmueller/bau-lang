@@ -60,6 +60,7 @@ public class SortedMapTest {
             myMap.clear();
             TreeMap<Integer, Long> map = new TreeMap<>();
             for (int i = 0; i < 200_000; i++) {
+                assertEquals(map.size(), myMap.size());
                 int key = random.nextInt(1000);
                 long value = random.nextInt(10_000);
                 switch (random.nextInt(10)) {

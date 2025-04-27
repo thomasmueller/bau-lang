@@ -49,7 +49,7 @@ fun xxhashFile(inputFileName i8[]) int
     hash : newXXHash(0)
     buffer : new(i8[], Lz4.BLOCK_SIZE + 10)
     result := 0
-    while 1
+    while
         read : in.readFully(buffer, 0, Lz4.BLOCK_SIZE)
         if read <= 0
             return result
@@ -109,7 +109,7 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     block : new(i8[], 4 * 1024 * 1024 + 10)
     outBlock : new(i8[], 4 * 1024 * 1024 + 10)
     outputFileSize := 0
-    while 1
+    while
         # readExact
         in.readFully(header, 0, 4)
         blockSize : Lz4.read4(header, 0)
@@ -151,7 +151,7 @@ fun compressFile(inputFileName i8[], outputFileName i8[], level int) int
     outBlock : new(i8[], 5 * 1024 * 1024)
     lz4 : newLZ4Compress()
     totalSize := 0
-    while 1
+    while
         read : in.readFully(block, 0, blockSize)
         break read = 0
         totalSize += read

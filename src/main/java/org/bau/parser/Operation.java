@@ -204,7 +204,11 @@ public class Operation implements Expression {
             break;
         }
         case "%":
-            result = l.longValue() % r.longValue();
+            if (r.longValue() == 0) {
+                result = 0;
+            } else {
+                result = l.longValue() % r.longValue();
+            }
             break;
         case "-":
             result = l.longValue() - r.longValue();

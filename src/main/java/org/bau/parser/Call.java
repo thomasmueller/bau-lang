@@ -231,6 +231,7 @@ public class Call implements Statement, Expression {
         for (Expression a : args) {
             if (a instanceof StringLiteral) {
                 String s = ((StringLiteral) a).value;
+                s = s.replaceAll("%", "%%");
                 b2.append(StringLiteral.escape(s));
             } else {
                 switch (a.type().name()) {

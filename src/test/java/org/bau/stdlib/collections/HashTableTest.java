@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import org.junit.Test;
 
@@ -41,7 +41,7 @@ public class HashTableTest {
     }
 
     @Test
-    public void randomHashTable() {
+    public void random() {
         HashTable<Integer, Long> myMap = new HashTable<>();
         randomOps(myMap);
     }
@@ -115,17 +115,24 @@ public class HashTableTest {
                         }
                     }
                 }
+                assertEquals(map.size(), myMap.size());
             }
         }
     }
 
-    public void memoryUsage() {
+    public static void main(String... args) {
+        memoryUsage();
+    }
+
+    public static void memoryUsage() {
         // -mx1g: i=12000000
         // HashMap<Integer, Long> map = new HashMap<>();
-        // -mx1g: i=33000000
+        // -mx1g: i=16000000
         HashTable<Integer, Long> map = new HashTable<>();
-        for(int i=0; i<1_000_000_000; i++) {
-            map.put(i, i * 10L);
+        Random r = new Random();
+        for (int i = 0; i < 1_000_000_000; i++) {
+            int key = r.nextInt();
+            map.put(key, key * 10L);
             if (i % 1_000_000 == 0) {
                 System.out.println("i=" + i);
             }
@@ -144,11 +151,11 @@ public class HashTableTest {
         int dummy = 0;
         Random random = new Random(1);
 
-        // time: 824 ms -1253345464
-        // HashMap<Integer, Long> map = new HashMap<>();
+        // time: 840 ms -1253345464
+        HashMap<Integer, Long> map = new HashMap<>();
 
-        // time: 819 ms -1253345464
-        HashTable<Integer, Long> map = new HashTable<>();
+        // time: 781 ms -1253345464
+        // HashTable<Integer, Long> map = new HashTable<>();
 
         for (int i = 0; i < 10_000_000; i++) {
             int key = random.nextInt(1_000_000);

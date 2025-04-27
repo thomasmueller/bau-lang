@@ -24,5 +24,11 @@ public class TestOperators {
             }
         }
     }
-    
+
+    @Test
+    public void shift() {
+        assertEquals(49152, 3L << -50);
+        assertEquals(0, 3L >>> -50);
+    }
+
 }
