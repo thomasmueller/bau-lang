@@ -7,7 +7,7 @@ A programming language for everyone.
 * Easy to learn with a concise syntax inspired by Python.
 * Memory-safe. Automatic memory management using reference counting by default.
 * As fast as Rust where needed, using single ownership and borrowing.
-* Low memory usage and without GC pauses.
+* Low memory usage; no GC pauses.
 * Runs everwhere: transpiles to C.
 * Null safety: Null pointer errors are prevented at compile time.
 * Ability to avoid runtime array bound checks using static analysis.
@@ -84,7 +84,7 @@ Spaces group statements into blocks.
 ### Loops
 
 There are `for` and `while` loops.
-`,` is optional if the arguments are simple:
+`while` without condition is an endless loop.
 
     # loop from 0 to 9
     for i := range(0, 10)
@@ -97,7 +97,8 @@ There are `for` and `while` loops.
         println(i)
         i += 1
 
-`break` exits a loop. It may have a condition:
+`break` exits a loop. `continue` restarts.
+They may have a condition:
 
     # prints 1 to 4
     for i := range(1, 10)
@@ -245,7 +246,7 @@ The conditional `break` guarantees that `i` is within the bounds.
 
     if data.len
         i := 0 .. data.len
-        while 1
+        while
             data[i]! = i
             next : i + 1
             break next >= data.len
@@ -536,7 +537,7 @@ is equivalent to:
     
     fun primesUntil(until int) int
         _ := 2
-        while 1 = 1
+        while
             _ += 1 + (_ & 1)
             break _ > until
             if not isPrime(_)
@@ -663,7 +664,7 @@ is equivalent to:
   This is to be more consistent with the floating point division, and
   to avoid panic for cases were it was used for "unimportant" operations
   such as calculating the number of instructions per second, for zero seconds.
-  The same goes for modulo operations.
+  Modulo by zero always returns zero.
 * Where array bound checks are needed, and the index is out of bounds,
   the program panics.
 * If a type has a  `close()` function, it is called when the memory

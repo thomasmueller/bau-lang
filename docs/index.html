@@ -91,7 +91,7 @@ println('x=' p.x ' y=' p.y)
 `data : new(i8[], 10)
 if data.len
     i := 0..data.len
-    while 1
+    while
         data[i]! = i * i
         next : i + 1
         break next >= data.len
