@@ -142,7 +142,11 @@ public class FunctionDefinition {
             buff.append(Statement.indent(v.type().nameC() + "* " + v.name + " = " + v.type().nameC() + "_new(_vaCount);\n"));
             buff.append(Statement.indent("va_start(_vaList, _vaCount);\n"));
             buff.append(Statement.indent("for (int _vaI = 0; _vaI < _vaCount; _vaI++) {\n"));
-            buff.append("    " + Statement.indent(v.name + "->data[_vaI] = va_arg(_vaList, "+ v.type().baseType().toC() +");\n"));
+            if (v.type().baseType().isNumber() && v.type().baseType().sizeOf() <= 1) {
+                buff.append("    " + Statement.indent(v.name + "->data[_vaI] = (" + v.type().baseType().toC() + ") va_arg(_vaList, int);\n"));
+            } else {
+                buff.append("    " + Statement.indent(v.name + "->data[_vaI] = va_arg(_vaList, " + v.type().baseType().toC() + ");\n"));
+            }
             buff.append(Statement.indent("}\n"));
             buff.append(Statement.indent("va_end(_vaList);\n"));
         }

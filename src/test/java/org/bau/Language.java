@@ -4,26 +4,15 @@ package org.bau;
 
 Name: Mya, Pha
 
-endless loop using just "while"
-
 bug: main method is defined as "int" but doesn't return a method, and that's ok?
 
 constructor:
 x : HashMap()
 x : int[100]
 
-n modulo 0 => n?
-0 modulo 0 => ?
-
-bug:
-writeBlockSize : 1 << 31
-writeBlockSize |= read
+bug: "a i32 : <int>" uses int64_t instead of int32_t
 
 ord('a') => code('a')? or char('a')?
-
-bug: segmentation fault for lz4 -d with not existing files
-
-bug: a i32 : <int> uses int64_t instead of int32_t
 
 Require a main method (constants, global variables are outside of functions)
 

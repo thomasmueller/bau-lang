@@ -138,6 +138,51 @@ public class Program {
         return def;
     }
 
+    public Expression cast(Expression expr, DataType target) {
+        DataType source = expr.type();
+        if (source == null) {
+            return expr;
+        } else if (source == target) {
+            return null;
+        } else if (source.isRange()) {
+            return expr;
+        } else if (source.isFloatingPoint()) {
+            if (!target.isFloatingPoint()) {
+                return null;
+            }
+            if (target.sizeOf() >= source.sizeOf()) {
+                return expr;
+            }
+            return null;
+        } else if (source.isNumber()) {
+            if (!target.isNumber()) {
+                return null;
+            }
+            if (target.sizeOf() >= source.sizeOf() || target.isFloatingPoint()) {
+                return expr;
+            } else if (expr instanceof NumberValue) {
+                NumberValue nv = (NumberValue) expr;
+                Value v = expr.eval(null);
+                if (v != null) {
+                    long x = v.longValue();
+                    long minValue = -(1L << (target.sizeOf() * 8 - 1));
+                    long maxValue = (1L << (target.sizeOf() * 8 - 1)) - 1;
+                    if (x >= minValue && x <= maxValue) {
+                        // small value
+                        return new NumberValue(v, target, nv.hex);
+                    }
+                }
+            }
+            return null;
+        } else if (source.toString().equals(target.toString())) {
+            // memory type is different
+            return expr;
+        } else if (source.isNullable() && target.orNull() == source) {
+            return expr;
+        }
+        return null;
+    }
+
     public FunctionDefinition getFunctionIfExists(DataType type, String module, String name, int parameterCount) {
         if ("println".equals(name)) {
             // TODO support varargs
@@ -525,7 +570,7 @@ public class Program {
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
-            buff.append(Statement.indent("result->data = data;\n"));
+            buff.append(Statement.indent("result->data = (int8_t*) data;\n"));
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
         }

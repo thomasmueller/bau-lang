@@ -6,7 +6,7 @@ type File
 fun openFile(name i8[], mode i8[]) File
     native(```
         // TODO verify strings
-        FILE* fp = fopen(name->data, mode->data);
+        FILE* fp = fopen((char*) name->data, (char*) mode->data);
         org_bau_File_File* f = org_bau_File_File_new();
         f->filePointer = (uint64_t) fp;
         return f;

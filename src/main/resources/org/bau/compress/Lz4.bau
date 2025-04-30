@@ -24,7 +24,7 @@ fun newXXHash(seed i32) XXHash
     x.total = 0
     return x
 
-fun rotateLeft32(x i32, n i32) i32
+fun rotateLeft32(x i32, n int) i32
     return (x << n) | (x >> (32 - n))
 
 fun read4(d i8[], pos 0..d.len - 3) i32
@@ -70,10 +70,10 @@ fun XXHash update(buf i8[], start 0..buf.len, len int) i32
         p := 0..buf.len - 15
         p = pos
         while
-            v1 = rotateLeft32(read4(buf, p) * PRIME2 + v1, 13) * PRIME1
-            v2 = rotateLeft32(read4(buf, p + 4) * PRIME2 + v2, 13) * PRIME1
-            v3 = rotateLeft32(read4(buf, p + 8) * PRIME2 + v3, 13) * PRIME1
-            v4 = rotateLeft32(read4(buf, p + 12) * PRIME2 + v4, 13) * PRIME1
+            v1 = i32(rotateLeft32(i32(read4(buf, p) * PRIME2 + v1), 13) * PRIME1)
+            v2 = i32(rotateLeft32(i32(read4(buf, p + 4) * PRIME2 + v2), 13) * PRIME1)
+            v3 = i32(rotateLeft32(i32(read4(buf, p + 8) * PRIME2 + v3), 13) * PRIME1)
+            v4 = i32(rotateLeft32(i32(read4(buf, p + 12) * PRIME2 + v4), 13) * PRIME1)
             next := p + 16
             break next >= buf.len - 16
             p = next
@@ -94,13 +94,13 @@ fun XXHash update(buf i8[], start 0..buf.len, len int) i32
             return -1
         p = pos
         while p + 4 <= end
-            h32 = rotateLeft32(read4(buf, p) * PRIME3 + h32, 17) * PRIME4
+            h32 = rotateLeft32(i32(read4(buf, p) * PRIME3 + h32), 17) * PRIME4
             next : p + 4
             break next >= buf.len - 4
             p = next
         pos = p
     while pos < end
-        h32 = rotateLeft32((buf[pos] & 0xff) * PRIME5 + h32, 11) * PRIME1
+        h32 = rotateLeft32(i32((buf[pos] & 0xff) * PRIME5 + h32), 11) * PRIME1
         next : pos + 1
         break next >= buf.len
         pos = next

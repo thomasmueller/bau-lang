@@ -31,14 +31,14 @@ typedef struct org_bau_File_File org_bau_File_File;
 struct org_bau_File_File;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -103,7 +103,7 @@ org_bau_File_File* org_bau_File_File_new() {
 int __argc;
 char **__argv;
 /* functions */
-int32_t i32_1(int32_t x);
+int32_t i32_1(int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 i8_array* org_bau_Env_arg_1(int64_t index);
 int64_t org_bau_Env_argCount_0();
@@ -120,7 +120,7 @@ org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_newLZ4Compress_0();
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_newXXHash_1(int32_t seed);
 int32_t org_bau_compress_Lz4_read4_2(i8_array* d, int64_t pos);
 int64_t org_bau_compress_Lz4_read8_2(i8_array* d, int64_t pos);
-int32_t org_bau_compress_Lz4_rotateLeft32_2(int32_t x, int32_t n);
+int32_t org_bau_compress_Lz4_rotateLeft32_2(int32_t x, int64_t n);
 int64_t org_bau_compress_Lz4_runLenCountFast_4(i8_array* data, int64_t aLen, int64_t ai, int64_t bi);
 void org_bau_compress_Lz4_write4_3(i8_array* d, int64_t pos, int64_t x);
 void org_bau_compress_Lz4_write8_3(i8_array* d, int64_t pos, int64_t x);
@@ -134,7 +134,7 @@ int64_t org_bau_compress_Lz4Tool_main_0();
 int64_t org_bau_compress_Lz4Tool_xxhashFile_1(i8_array* inputFileName);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
-char shiftRight_i8_2(char a, int64_t b);
+int8_t shiftRight_i8_2(int8_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
@@ -165,7 +165,7 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = data;
+    result->data = (int8_t*) data;
     return result;
 }
 i8_array* string_1008;
@@ -186,7 +186,7 @@ int64_t PRIME2;
 int64_t PRIME3;
 int64_t PRIME4;
 int64_t PRIME5;
-int32_t i32_1(int32_t x) {
+int32_t i32_1(int64_t x) {
     return x;
 }
 int64_t idx_2(int64_t x, int64_t len) {
@@ -206,7 +206,7 @@ i8_array* org_bau_Env_arg_1(int64_t index) {
     int64_t len = 0;
     len = strlen(__argv[index]);
     i8_array* result = i8_array_new(len);
-    strncpy(result->data, __argv[index], len);
+    strncpy((char*) result->data, __argv[index], len);
     return result;
 }
 int64_t org_bau_Env_argCount_0() {
@@ -215,7 +215,7 @@ int64_t org_bau_Env_argCount_0() {
 }
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
     // TODO verify strings
-    FILE* fp = fopen(name->data, mode->data);
+    FILE* fp = fopen((char*) name->data, (char*) mode->data);
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
@@ -253,7 +253,7 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
 }
 int64_t org_bau_Std_ord_1(i8_array* s) {
     if (s->len) {
-        char _r0 = s->data[idx_2(0, s->len)];
+        int8_t _r0 = s->data[idx_2(0, s->len)];
         return _r0;
     }
     return 0;
@@ -429,7 +429,7 @@ int64_t org_bau_compress_Lz4_read8_2(i8_array* d, int64_t pos) {
     int64_t _r0 = (d->data[pos] & 255) | (shiftLeft_2((d->data[pos + 1] & 255), 8)) | (shiftLeft_2((d->data[pos + 2] & 255), 16)) | (shiftLeft_2((d->data[pos + 3] & 255), 24)) | (shiftLeft_2((d->data[pos + 4] & 255), 32)) | (shiftLeft_2((d->data[pos + 5] & 255), 40)) | (shiftLeft_2((d->data[pos + 6] & 255), 48)) | (shiftLeft_2((d->data[pos + 7] & 255), 56));
     return _r0;
 }
-int32_t org_bau_compress_Lz4_rotateLeft32_2(int32_t x, int32_t n) {
+int32_t org_bau_compress_Lz4_rotateLeft32_2(int32_t x, int64_t n) {
     int64_t _r0 = (shiftLeft_2(x, n)) | (shiftRight_i32_2(x, (32 - n)));
     return _r0;
 }
@@ -664,10 +664,10 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
         int64_t p = 0;
         p = pos;
         while (1) {
-            this->v1 = org_bau_compress_Lz4_rotateLeft32_2(( org_bau_compress_Lz4_read4_2(buf, p) * 2246822519 ) + this->v1, 13) * 2654435761;
-            this->v2 = org_bau_compress_Lz4_rotateLeft32_2(( org_bau_compress_Lz4_read4_2(buf, p + 4) * 2246822519 ) + this->v2, 13) * 2654435761;
-            this->v3 = org_bau_compress_Lz4_rotateLeft32_2(( org_bau_compress_Lz4_read4_2(buf, p + 8) * 2246822519 ) + this->v3, 13) * 2654435761;
-            this->v4 = org_bau_compress_Lz4_rotateLeft32_2(( org_bau_compress_Lz4_read4_2(buf, p + 12) * 2246822519 ) + this->v4, 13) * 2654435761;
+            this->v1 = i32_1(org_bau_compress_Lz4_rotateLeft32_2(i32_1(( org_bau_compress_Lz4_read4_2(buf, p) * 2246822519 ) + this->v1), 13) * 2654435761);
+            this->v2 = i32_1(org_bau_compress_Lz4_rotateLeft32_2(i32_1(( org_bau_compress_Lz4_read4_2(buf, p + 4) * 2246822519 ) + this->v2), 13) * 2654435761);
+            this->v3 = i32_1(org_bau_compress_Lz4_rotateLeft32_2(i32_1(( org_bau_compress_Lz4_read4_2(buf, p + 8) * 2246822519 ) + this->v3), 13) * 2654435761);
+            this->v4 = i32_1(org_bau_compress_Lz4_rotateLeft32_2(i32_1(( org_bau_compress_Lz4_read4_2(buf, p + 12) * 2246822519 ) + this->v4), 13) * 2654435761);
             int64_t next = p + 16;
             if (next >= ( buf->len - 16 )) {
                 break;
@@ -696,7 +696,7 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
         }
         p = pos;
         while (( p + 4 ) <= end) {
-            h32 = org_bau_compress_Lz4_rotateLeft32_2(( org_bau_compress_Lz4_read4_2(buf, p) * 3266489917 ) + h32, 17) * 668265263;
+            h32 = org_bau_compress_Lz4_rotateLeft32_2(i32_1(( org_bau_compress_Lz4_read4_2(buf, p) * 3266489917 ) + h32), 17) * 668265263;
             int64_t next = p + 4;
             if (next >= ( buf->len - 4 )) {
                 break;
@@ -706,7 +706,7 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
         pos = p;
     }
     while (pos < end) {
-        h32 = org_bau_compress_Lz4_rotateLeft32_2((buf->data[pos] & 255) * 374761393 + h32, 11) * 2654435761;
+        h32 = org_bau_compress_Lz4_rotateLeft32_2(i32_1((buf->data[pos] & 255) * 374761393 + h32), 11) * 2654435761;
         int64_t next = pos + 1;
         if (next >= buf->len) {
             break;
@@ -812,7 +812,7 @@ int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_ar
         _decUseStack(in, org_bau_File_File);
         return -1;
     }
-    char flags = header->data[4];
+    int8_t flags = header->data[4];
     int64_t version = shiftRight_i8_2(flags, 6);
     if (version != 1) {
         _decUseStack(header, i8_array);
@@ -854,7 +854,7 @@ int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_ar
         _decUseStack(in, org_bau_File_File);
         return -1;
     }
-    char bd = header->data[5];
+    int8_t bd = header->data[5];
     int64_t blockMaxSize = (shiftRight_i8_2(bd, 4)) & 7;
     int64_t _t0 = blockMaxSize < 4;
     if (!(_t0)) {
@@ -1030,7 +1030,7 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int32_t shiftRight_i32_2(int32_t a, int64_t b) {
     return ((uint32_t) a) >> b;
 }
-char shiftRight_i8_2(char a, int64_t b) {
+int8_t shiftRight_i8_2(int8_t a, int64_t b) {
     return ((uint8_t) a) >> b;
 }
 int64_t shiftRight_int_2(int64_t a, int64_t b) {

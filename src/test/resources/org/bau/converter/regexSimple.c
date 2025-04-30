@@ -36,14 +36,14 @@ typedef struct org_bau_List_List_Token org_bau_List_List_Token;
 struct org_bau_List_List_Token;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -203,7 +203,7 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T);
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T);
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x);
-void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, char x);
+void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x);
 int64_t org_bau_Std_ord_1(i8_array* s);
 _org_bau_List_List_Token_or_exception parse_1(i8_array* regex);
 void test_0();
@@ -249,7 +249,7 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = data;
+    result->data = (int8_t*) data;
     return result;
 }
 i8_array* string_1000;
@@ -282,7 +282,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
     if (pos >= text->len) {
         return ok_int64_t_or_exception(0);
     }
-    char c = text->data[pos];
+    int8_t c = text->data[pos];
     int64_t _t0 = this->type;
     if ((_t0 == 0) || (_t0 == 1)) {
         org_bau_Exception_exception _t1 = org_bau_Exception_exception_1(string_1000);
@@ -295,8 +295,8 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
         while (1 == 1) {
             int64_t i = 0;
             while (i < this->data->size) {
-                char min = this->data->array->data[idx_2(i, this->data->array->len)];
-                char max = this->data->array->data[idx_2(i + 1, this->data->array->len)];
+                int8_t min = this->data->array->data[idx_2(i, this->data->array->len)];
+                int8_t max = this->data->array->data[idx_2(i + 1, this->data->array->len)];
                 int64_t _t2 = c >= min;
                 if (_t2) {
                     int64_t _t3 = c <= max;
@@ -316,8 +316,8 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
         while (1 == 1) {
             int64_t i = 0;
             while (i < this->data->size) {
-                char min = this->data->array->data[idx_2(i, this->data->array->len)];
-                char max = this->data->array->data[idx_2(i + 1, this->data->array->len)];
+                int8_t min = this->data->array->data[idx_2(i, this->data->array->len)];
+                int8_t max = this->data->array->data[idx_2(i + 1, this->data->array->len)];
                 int64_t _t4 = c >= min;
                 if (_t4) {
                     int64_t _t5 = c <= max;
@@ -351,23 +351,27 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
     _x0 = parse_1(regex);
     if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
     org_bau_List_List_Token* list = _x0.result;
-    int64_t _t0 = list->size > 0;
-    if (_t0) {
-        int64_t _t1 = list->array->data[idx_2(0, list->array->len)]->type == 0;
-        _t0 = _t1;
-    }
-    if (_t0) {
-        _x1 = matchHere_4(list, 1, text, 0);
-        if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
-        int64_t end = _x1.result;
-        if (end >= 0) {
-            match _t2 = match_2(0, end);
-            _decUseStack(list, org_bau_List_List_Token);
-            return ok_match_or_exception(_t2);
+    if (list->size > 0) {
+        Token* e = list->array->data[idx_2(0, list->array->len)];
+        _incUseStack(e);
+        if (e != NULL) {
+            if (e->type == 0) {
+                _x1 = matchHere_4(list, 1, text, 0);
+                if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+                int64_t end = _x1.result;
+                if (end >= 0) {
+                    match _t0 = match_2(0, end);
+                    _decUseStack(e, Token);
+                    _decUseStack(list, org_bau_List_List_Token);
+                    return ok_match_or_exception(_t0);
+                }
+                match _t1 = match_2(-1, -1);
+                _decUseStack(e, Token);
+                _decUseStack(list, org_bau_List_List_Token);
+                return ok_match_or_exception(_t1);
+            }
         }
-        match _t3 = match_2(-1, -1);
-        _decUseStack(list, org_bau_List_List_Token);
-        return ok_match_or_exception(_t3);
+        _decUseStack(e, Token);
     }
     int64_t tp = 0;
     while (1) {
@@ -375,18 +379,18 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         if (_x2.exception.exceptionType != -1) { _lastException = _x2.exception; goto catch0; };
         int64_t end = _x2.result;
         if (end >= 0) {
-            match _t4 = match_2(tp, end);
+            match _t2 = match_2(tp, end);
             _decUseStack(list, org_bau_List_List_Token);
-            return ok_match_or_exception(_t4);
+            return ok_match_or_exception(_t2);
         }
         if (tp < text->len) {
             break;
         }
         tp += 1;
     }
-    match _t5 = match_2(-1, -1);
+    match _t3 = match_2(-1, -1);
     _decUseStack(list, org_bau_List_List_Token);
-    return ok_match_or_exception(_t5);
+    return ok_match_or_exception(_t3);
     catch0:
     return exception_match_or_exception(_lastException);
 }
@@ -409,6 +413,10 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
     }
     Token* t = list->array->data[idx_2(rp, list->array->len)];
     _incUseStack(t);
+    if (!(t)) {
+        _decUseStack(t, Token);
+        return ok_int64_t_or_exception(tp);
+    }
     if (t->type == 1) {
         if (tp == text->len) {
             _decUseStack(t, Token);
@@ -539,7 +547,7 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     _incUse(this->array->data[idx_2(this->size, this->array->len)]);
     this->size += 1;
 }
-void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, char x) {
+void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
     if (this->size >= this->array->len) {
         i8_array* n = i8_array_new(this->array->len * 2);
         while (1 == 1) {
@@ -565,7 +573,7 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, char x) {
 }
 int64_t org_bau_Std_ord_1(i8_array* s) {
     if (s->len) {
-        char _r0 = s->data[idx_2(0, s->len)];
+        int8_t _r0 = s->data[idx_2(0, s->len)];
         return _r0;
     }
     return 0;
@@ -576,7 +584,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
     org_bau_List_List_Token* result = org_bau_List_newList_Token_1(0);
     int64_t i = 0;
     while (i < regex->len) {
-        char c = regex->data[i];
+        int8_t c = regex->data[i];
         Token* t = Token_new();
         _decUse(t->data, org_bau_List_List_i8);
         t->data = org_bau_List_newList_i8_1(0);
@@ -763,7 +771,7 @@ List
 fun List(T) add(x T)
 Add an entry to the list
 
-fun List(T) get(x int) T
+fun List(T) get(x int) T?
 Add an entry to the list
 
 type exception

@@ -428,22 +428,29 @@ public class Parser {
         int defIndent = indent;
         isGlobalScope = false;
         String id = readIdentifier();
-        DataType t1 = functionContext.getType(targetModule, id);
-        if (t1 != null) {
-        	if (matchOp("[")) {
+        String typeName = id;
+        DataType callType = functionContext.getType(targetModule, id);
+        if (callType != null) {
+            if (matchOp("[")) {
                 if (!matchOp("]")) {
-                	throw syntaxError("Expected ']', got '" + token + "' when reading type");
+                    throw syntaxError("Expected ']', got '" + token + "' when reading type");
                 }
-                t1 = t1.arrayType();
-        	}
+                callType = callType.arrayType();
+            } else {
+                if (matchOp("+")) {
+                    // owned
+                    typeName = id + "+";
+                    callType = functionContext.getType(targetModule, typeName);
+                }
+            }
         }
-        if (t1 != null && t1.template != null) {
+        if (callType != null && callType.template != null) {
             if (!matchOp("(")) {
                 throw syntaxError("Expected '(', got '" + token + "' when reading a function definition template");
             }
-            for (int i = 0; i < t1.parameters.size(); i++) {
+            for (int i = 0; i < callType.parameters.size(); i++) {
                 String p = readIdentifier();
-                String expected = t1.parameters.get(i);
+                String expected = callType.parameters.get(i);
                 if (!p.equals(expected)) {
                     throw syntaxError("Expected '" + expected + "' , got '" + p
                             + "' when reading a function definition template");
@@ -453,7 +460,7 @@ public class Parser {
             if (!matchOp(")")) {
                 throw syntaxError("Expected ')', got '" + token + "' when reading a function definition template");
             }
-            parseTypeFunctionTemplate(defIndent, t1);
+            parseTypeFunctionTemplate(defIndent, callType);
             return true;
         }
         int stackPos = functionContext.getStackPos();
@@ -466,12 +473,6 @@ public class Parser {
         if (matchOp("(")) {
             def.name = id;
         } else {
-            String typeName = id;
-            if (matchOp("+")) {
-                // owned
-                typeName += "+";
-            }
-            DataType callType = functionContext.getType(targetModule, typeName);
             if (callType == null) {
                 throw syntaxError("Type not found: " + typeName);
             }
@@ -485,7 +486,7 @@ public class Parser {
             }
             callType.used();
             Variable var = new Variable("this", callType);
-            var.isConstant = true;
+            var.isConstant = false;
             def.parameters.add(var);
             functionContext.addVariable(var);
         }
@@ -507,7 +508,7 @@ public class Parser {
                         type.used();
                     }
                     Variable var = new Variable(name, type);
-                    var.isConstant = true;
+                    var.isConstant = false;
                     def.parameters.add(var);
                     functionContext.addVariable(var);
                 } else if (match("type")) {
@@ -517,7 +518,7 @@ public class Parser {
                     functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
-                    var.isConstant = true;
+                    var.isConstant = false;
                     def.parameters.add(var);
                     functionContext.addVariable(var);
                 } else {
@@ -535,7 +536,7 @@ public class Parser {
                         Free free = new Free(var);
                         ownedParameters.add(free);
                     }
-                    var.isConstant = true;
+                    var.isConstant = false;
                     def.parameters.add(var);
                     functionContext.addVariable(var);
                 }
@@ -814,9 +815,11 @@ public class Parser {
             if (t.isArray()) {
                 throw syntaxError("Arrays can't be null (but they can be empty)");
             } else if (t.isCopyType()) {
-                throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
+                // ignore, to support templates
+                // throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
+            } else {
+                t = t.orNull();
             }
-            t = t.orNull();
         }
         return t;
     }
@@ -888,6 +891,12 @@ public class Parser {
                 s.initial = true;
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
+                if (s.type == null && s.value instanceof NullValue) {
+                    if (targetType == null) {
+                        throw syntaxError("Can only assign null if the type is known");
+                    }
+                    s.value = new NullValue(targetType);
+                }
                 s.value = s.value.writeStatements(this, true, target);
                 boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, s.value.type());
@@ -912,6 +921,9 @@ public class Parser {
                 if (global) {
                     program.addGlobalVariable(v);
                 }
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -926,6 +938,12 @@ public class Parser {
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
                 s.value = s.value.writeStatements(this, true, target);
+                if (s.type == null && s.value instanceof NullValue) {
+                    if (targetType == null) {
+                        throw syntaxError("Can only assign null if the type is known");
+                    }
+                    s.value = new NullValue(targetType);
+                }
                 DataType type = s.value.type();
                 if (type.isArray()) {
                     throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
@@ -993,14 +1011,13 @@ public class Parser {
                 }
                 return;
             } else if (matchOp("\n") && targetType != null) {
-                // TODO assign null or zero
                 Assignment s = new Assignment();
                 s.initial = true;
                 Expression value;
                 if (targetType.isNumber()) {
                     value = new NumberValue(Value.ValueInt.ZERO, targetType, false);
                 } else {
-                    value = new NullValue();
+                    value = new NullValue(targetType);
                 }
                 s.value = value;
                 boolean global = isGlobalScope;
@@ -1013,6 +1030,9 @@ public class Parser {
                 functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
+                }
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
                 // already read
@@ -1085,9 +1105,19 @@ public class Parser {
             }
             Assignment s = new Assignment();
             s.leftValue = left;
+            if (left.isContant()) {
+                throw syntaxError("Can not modify contants: " + left);
+            }
             if (matchOp("=")) {
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
+                if (s.value instanceof NullValue) {
+                    // for templates, we want to support assignment to null
+                    s.value = left.type().nullExpression();
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1097,6 +1127,9 @@ public class Parser {
                 s.modify = "*";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1106,6 +1139,9 @@ public class Parser {
                 s.modify = "/";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 program.getFunction(null, null, "idiv", 2).used = true;
@@ -1116,6 +1152,9 @@ public class Parser {
                 s.modify = "+";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1125,6 +1164,9 @@ public class Parser {
                 s.modify = "-";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1134,6 +1176,9 @@ public class Parser {
                 s.modify = "&";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1143,6 +1188,9 @@ public class Parser {
                 s.modify = "|";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1152,6 +1200,9 @@ public class Parser {
                 s.modify = "^";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1161,6 +1212,9 @@ public class Parser {
                 s.modify = ">>";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1170,6 +1224,9 @@ public class Parser {
                 s.modify = "<<";
                 s.value = parseExpression();
                 s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
                 readEndOfStatement();
@@ -1216,6 +1273,16 @@ public class Parser {
     }
 
     private void verifyBounds(Assignment s) {
+        if (!s.leftValue.type().isNumber() && s.leftValue.type() != s.value.type()) {
+            if (s.value.type() == null) {
+                throw syntaxError("The type of the variable is different than the type of the expression");
+            }
+            if (s.value.type().orNull() == s.leftValue.type()) {
+                // setting a not-null value to a nullable variable is ok
+            } else {
+                throw syntaxError("The type of the variable is different than the type of the expression");
+            }
+        }
         if (!s.leftValue.type().isFloatingPoint()) {
             DataType valueType = s.value.type();
             if (valueType != null && valueType.isFloatingPoint()) {
@@ -1571,7 +1638,42 @@ public class Parser {
                 }
             }
         }
-
+        // cast
+        if (call.def.name.equals("println")) {
+            // special case for now
+        } else {
+            if (call.def.parameters.size() > call.args.size()) {
+                throw syntaxError("Function '" + identifier + "' not found");
+            }
+            for (int i = 0; i < call.args.size(); i++) {
+                DataType targetType;
+                if (i >= call.def.parameters.size() - 1  && call.def.varArgs) {
+                    // last
+                    Variable var = call.def.parameters.get(call.def.parameters.size() - 1);
+                    targetType = var.type().baseType();
+                } else if (i >= call.def.parameters.size()) {
+                    throw syntaxError("Function '" + identifier + "' not found");
+                } else {
+                    Variable var = call.def.parameters.get(i);
+                    targetType = var.type();
+                }
+                Expression expr = call.args.get(i);
+                if (expr.type() == targetType) {
+                    continue;
+                }
+                if (expr.type() != null
+                        && (expr.type().isNumber() || expr.type().isFloatingPoint())
+                        && call.def.name.equals(targetType.toString())) {
+                    // explicit cast
+                    continue;
+                }
+                Expression cast = program.cast(expr, targetType);
+                if (cast == null) {
+                    throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
+                }
+                call.args.set(i, cast);
+            }
+        }
         if (use) {
             call.def.used = true;
         }
@@ -1751,7 +1853,7 @@ public class Parser {
     private Expression parseCondition(ArrayList<Statement> target) {
         Expression expr = parseExpression(target);
         if (expr.type().isNullable()) {
-            return new Operation(expr, "<>", new NullValue());
+            return new Operation(expr, "<>", new NullValue(expr.type()));
         }
         return expr;
     }
@@ -2236,7 +2338,7 @@ public class Parser {
             String n = token;
             if ("null".equals(n)) {
                 read();
-                return new NullValue();
+                return new NullValue(null);
             }
             Variable thisVar = functionContext.getVariable(null, "this");
             String m = null;
@@ -2554,7 +2656,8 @@ public class Parser {
                             break;
                         }
                     }
-                    lastComment = text.substring(start, pos - 2).trim();
+                    int end = Math.max(start, pos - 2);
+                    lastComment = text.substring(start, end).trim();
                 } else {
                     int start = pos;
                     while (true) {
@@ -2690,6 +2793,9 @@ public class Parser {
                     buff.append((char) c);
                 }
                 pos++;
+                if (pos >= text.length()) {
+                    throw syntaxError("Unclosed string");
+                }
                 c = text.charAt(pos);
             }
             type = TokenType.STRING;

@@ -1,3 +1,25 @@
+fun main()
+      data : new(int[], 16)
+      fill(data)
+      for i := until(data.len)
+        println(data[i]!)
+    a : arrayOf(i8, 0 1 2 3 i8(300))
+    for i := until(a.len)
+        println(a[i])
+    b : array(0 1 2 3)
+    for i := until(b.len)
+        println(b[i])
+    c : array(1.0, 2.0, 3.0)
+    for i := until(c.len)
+        println(c[i])
+    x : arrayOf(int, 0 1 2 3)
+    y : arrayOf(float, 1.0, 2.0, 3.0)
+    z : arrayOf(i8, 1, i8(256), i8(300))
+    println('len ' z.len)
+    for i := until(z.len)
+        println(z[i])
+    println('len of hello is ' 'hello'.len())
+
 fun fill(data int[])
   if data.len <= 0
     return
@@ -8,13 +30,18 @@ fun fill(data int[])
     break next >= data.len
     i = next
 
-fun test()
-  data : new(int[], 16)
-  fill(data)
-  for i := until(data.len)
-    println(data[i]!)
+fun arrayOf(T type, entries T..) T[]
+    return entries
 
-test()
+fun i8[] len() int
+  return this.len
+
+fun sum(a int, b int) int
+    return a + b
+
+fun array(entries T..) T[]
+    return entries
+
 
 ## Expected
 0
@@ -33,3 +60,20 @@ test()
 13
 14
 15
+0
+1
+2
+3
+44
+0
+1
+2
+3
+1.0
+2.0
+3.0
+len 3
+1
+0
+44
+len of hello is 5

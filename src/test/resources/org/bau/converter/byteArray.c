@@ -24,14 +24,14 @@ typedef struct int_array int_array;
 struct int_array;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -55,6 +55,7 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
+int32_t i32_1(int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 int32_t readI32Le_2(i8_array* d, int32_t pos);
 int64_t shiftLeft_2(int64_t a, int64_t b);
@@ -68,6 +69,9 @@ void i8_array_free(i8_array* x) {
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
+}
+int32_t i32_1(int64_t x) {
+    return x;
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;

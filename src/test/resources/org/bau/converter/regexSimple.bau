@@ -167,6 +167,8 @@ fun matchHere(list List(Token), rp int, text i8[], tp int) int throws exception
     if rp >= list.size
         return tp
     t := list.array[rp]
+    if not t
+        return tp
     if t.type = tokenType.END
         if tp = text.len
             return tp
@@ -179,11 +181,14 @@ fun matchHere(list List(Token), rp int, text i8[], tp int) int throws exception
 
 fun find(text i8[], regex i8[]) match throws exception
     list := parse(regex)
-    if list.size > 0 and list.array[0].type = tokenType.START
-        end := matchHere(list, 1, text, 0)
-        if end >= 0
-            return match(0, end)
-        return match(-1, -1)
+    if list.size > 0
+        e : list.array[0]
+        if e
+            if e.type = tokenType.START
+                end := matchHere(list, 1, text, 0)
+                if end >= 0
+                    return match(0, end)
+                return match(-1, -1)
     tp := 0
     while 1
         end := matchHere(list, 0, text, tp)

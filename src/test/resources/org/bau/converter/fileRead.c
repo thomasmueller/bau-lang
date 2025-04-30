@@ -26,14 +26,14 @@ typedef struct org_bau_File_File org_bau_File_File;
 struct org_bau_File_File;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -92,14 +92,14 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = data;
+    result->data = (int8_t*) data;
     return result;
 }
 i8_array* string_1000;
 i8_array* string_1001;
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
     // TODO verify strings
-    FILE* fp = fopen(name->data, mode->data);
+    FILE* fp = fopen((char*) name->data, (char*) mode->data);
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;

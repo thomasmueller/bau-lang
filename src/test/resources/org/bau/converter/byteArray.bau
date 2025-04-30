@@ -7,7 +7,7 @@ fun test()
   x[1]! = 0x34
   x[2]! = 0x56
   x[3]! = 0x78
-  println(readI32Le(x, 0))
+  println(readI32Le(x, i32(0)))
 
 test()
 

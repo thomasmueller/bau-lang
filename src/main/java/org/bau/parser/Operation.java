@@ -27,7 +27,7 @@ public class Operation implements Expression {
             Value l = left.eval(null);
             if (l != null) {
                 if (l == ValueNull.INSTANCE) {
-                    left = new NullValue();
+                    left = new NullValue(right.type());
                 } else {
                     left = new NumberValue(l, left.type(), false);
                 }
@@ -36,7 +36,7 @@ public class Operation implements Expression {
         Value r = right.eval(null);
         if (r != null) {
             if (r == ValueNull.INSTANCE) {
-                right = new NullValue();
+                right = new NullValue(right.type());
             } else {
                 right = new NumberValue(r, right.type(), false);
             }
@@ -140,6 +140,10 @@ public class Operation implements Expression {
         }
         if (left == null) {
             return right.type().resolveEnumType();
+        }
+        if (left.type() == null) {
+            ;
+            System.out.println("?? " + left.type());
         }
         DataType l = left.type().resolveEnumType();
         if (!l.isNumber()) {
@@ -438,7 +442,7 @@ public class Operation implements Expression {
                 if (right instanceof LeftValue) {
                     op = "<>";
                     var = (LeftValue) right;
-                    compare = new NullValue();
+                    compare = new NullValue(right.type());
                 }
                 break;
             case ">":
@@ -617,8 +621,8 @@ public class Operation implements Expression {
     }
 
     public static Value convertToType(Value val, DataType targetType) {
-        if (val == null) {
-            throw new IllegalStateException("Cannot convert null to " + targetType);
+        if (targetType == null || val == null) {
+            return val;
         }
         if (val instanceof ValueStruct || val instanceof ValueRef) {
             return val;

@@ -8,6 +8,12 @@ import org.bau.runtime.Value.ValueNull;
 
 public class NullValue implements Expression {
 
+    private final DataType type;
+
+    public NullValue(DataType type) {
+        this.type = type;
+    }
+
     @Override
     public Value eval(Memory memory) {
         return ValueNull.INSTANCE;
@@ -15,7 +21,7 @@ public class NullValue implements Expression {
 
     @Override
     public DataType type() {
-        return null;
+        return type;
     }
 
     @Override

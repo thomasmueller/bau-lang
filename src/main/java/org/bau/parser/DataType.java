@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValueNull;
 
 public class DataType {
@@ -97,6 +98,16 @@ public class DataType {
         return new DataType(module, name, sizeOf, false, null, null, false, memoryType);
     }
 
+    public Expression nullExpression() {
+        if (isNumber) {
+            return new NumberValue(ValueInt.ZERO, this, false);
+        } else if (!isPointer()) {
+            return new New(this, null);
+        } else {
+            return new NullValue(this);
+        }
+    }
+
     private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, DataType refCountBaseType, boolean isNullable, MemoryType memoryType) {
         this.isNullable = isNullable;
         this.module = module;
@@ -168,6 +179,9 @@ public class DataType {
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             n += "_owned";
         }
+        if (isArray()) {
+            n = arrayBaseType.id() + "_array";
+        }
         return n;
     }
 
@@ -221,7 +235,7 @@ public class DataType {
     public String nameC() {
         String s;
         if ("i8".equals(name)) {
-            s = "char";
+            s = "int8_t";
         } else if ("i16".equals(name)) {
             s = "int16_t";
         } else if ("i32".equals(name)) {

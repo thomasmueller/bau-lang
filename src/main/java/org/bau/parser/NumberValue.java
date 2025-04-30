@@ -38,7 +38,10 @@ public class NumberValue implements Expression {
         if (type.isFloatingPoint()) {
             toC(value.doubleValue());
         } else {
-            toC(value.longValue());
+            if (hex) {
+                return "0x" + Long.toHexString(value.longValue());
+            }
+            return toC(value.longValue());
         }
         return toString();
     }

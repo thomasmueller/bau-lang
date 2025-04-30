@@ -99,7 +99,7 @@ public class TernaryExpression implements Expression {
         } else {
             Expression init = type.isNumber() ?
                     new NumberValue(Value.ValueInt.ZERO, type, false) :
-                    new NullValue();
+                    new NullValue(type);
             result = parser.assignTempVariable(target, init, type);
         }
         If ifStatement = new If();

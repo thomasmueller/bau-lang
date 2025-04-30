@@ -112,7 +112,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public void setOwnedBoundsToNull(Expression scope) {
-        setBoundValue(scope, "=", new NullValue());
+        setBoundValue(scope, "=", new NullValue(type));
     }
 
     public String assignmentC() {
@@ -237,5 +237,10 @@ public class FieldAccess implements Expression, LeftValue {
             v.set(fieldName, val);
         }
         return null;
+    }
+
+    @Override
+    public boolean isContant() {
+        return false;
     }
 }

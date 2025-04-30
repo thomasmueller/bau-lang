@@ -30,14 +30,14 @@ typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
 struct org_bau_Utils_dateTime;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -124,7 +124,7 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = data;
+    result->data = (int8_t*) data;
     return result;
 }
 i8_array* string_1000;
@@ -190,7 +190,7 @@ int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     int64_t end = pos;
     while (pos > start) {
         pos -= 1;
-        char temp = buff->data[idx_2(pos, buff->len)];
+        int8_t temp = buff->data[idx_2(pos, buff->len)];
         buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
         buff->data[idx_2(start, buff->len)] = temp;
         start += 1;
@@ -664,7 +664,7 @@ double org_bau_Math_sqrt_1(double x) {
 }
 int64_t org_bau_Std_ord_1(i8_array* s) {
     if (s->len) {
-        char _r0 = s->data[idx_2(0, s->len)];
+        int8_t _r0 = s->data[idx_2(0, s->len)];
         return _r0;
     }
     return 0;

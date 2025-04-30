@@ -80,6 +80,7 @@ public class Call implements Statement, Expression {
             return new ValuePanic(m.getGlobal(Memory.PANIC).toString());
         }
         Value val = m.getGlobal(Memory.RESULT);
+        val = Operation.convertToType(val, def.returnType);
         return val;
     }
 

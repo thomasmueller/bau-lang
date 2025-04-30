@@ -26,7 +26,7 @@ public class Std {
 
         FunctionDefinition f = new FunctionDefinition(0);
         f.name = DataType.INT;
-        Variable var = new Variable("x", i64);
+        Variable var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i64;
         f.constExpr = true;
@@ -35,7 +35,7 @@ public class Std {
 
         f = new FunctionDefinition(0);
         f.name = DataType.I32;
-        var = new Variable("x", i32);
+        var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i32;
         f.constExpr = true;
@@ -44,7 +44,7 @@ public class Std {
 
         f = new FunctionDefinition(0);
         f.name = DataType.I16;
-        var = new Variable("x", i16);
+        var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i16;
         f.constExpr = true;
@@ -53,7 +53,7 @@ public class Std {
 
         f = new FunctionDefinition(0);
         f.name = DataType.I8;
-        var = new Variable("x", i8);
+        var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i8;
         f.constExpr = true;
@@ -71,7 +71,7 @@ public class Std {
 
         f = new FunctionDefinition(0);
         f.name = DataType.F32;
-        var = new Variable("x", f32);
+        var = new Variable("x", f64);
         f.parameters.add(var);
         f.returnType = f32;
         f.constExpr = true;

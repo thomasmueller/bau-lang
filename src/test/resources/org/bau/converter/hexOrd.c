@@ -24,14 +24,14 @@ typedef struct int_array int_array;
 struct int_array;
 struct i8_array {
     int32_t len;
-    char* data;
+    int8_t* data;
     int32_t _refCount;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
-    result->data = _malloc(sizeof(char) * len);
+    result->data = _malloc(sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -72,7 +72,7 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = data;
+    result->data = (int8_t*) data;
     return result;
 }
 i8_array* string_1000;
@@ -104,7 +104,7 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 int64_t org_bau_Std_ord_1(i8_array* s) {
     if (s->len) {
-        char _r0 = s->data[idx_2(0, s->len)];
+        int8_t _r0 = s->data[idx_2(0, s->len)];
         return _r0;
     }
     return 0;

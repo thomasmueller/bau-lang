@@ -19,7 +19,7 @@ A programming language for everyone.
             return 1
         return x * fact(x - 1)
 
-    for i:= range(0, 20)
+    for i := range(0, 20)
         println(fact(i))
 
 ## Keywords
@@ -161,10 +161,6 @@ Functions can share a name if the number of arguments is different.
 They can be declared first and implemented later.
 `const` functions are executed at compile time
 if the arguments are constants.
-`macro` function calls are replaced at compile time
-with the implementation.
-Types can be passed as parameters or implicitly
-(internally, this functions are templates).
 
     fun square(x int) int
         return x * x
@@ -175,16 +171,40 @@ Types can be passed as parameters or implicitly
             sum += x[i]
         return sum
 
-    fun if(cond int, true T, false T) macro T
-        if cond
-            return true
-        else
-            return false
-    
     println('sum: ' sum(1 2 3))
     for i := until(5)
         println(square(i))
-        println(if(i % 2, 'odd', 'even'))
+
+### Template Functions
+
+Types can be passed as parameters, or implicitly.
+Internally, this functions are templates.
+
+    fun main()
+        a : arrayOf(i8, 0, 1, 2, 3)
+        b : array(0, 1, 2, 3)
+
+    fun arrayOf(T type, entries T..) T[]
+        return entries
+
+    fun array(entries T..) T[]
+        return entries
+
+### Macro Functions
+
+`macro` function calls are replaced at compile time
+with the implementation,
+and so parameter are only evaluated when needed:
+
+    fun if(cond int, a T, b T) macro T
+        if cond
+            return a
+        else
+            return b
+
+    text : 'Hello'
+    for i := until(10)
+        println(if(i < text.len, text[i], 0))
 
 ### Types
 
@@ -192,18 +212,24 @@ Types can have fields and functions:
 
     type Square
         length int
+
     fun Square area() int
         return length * length
+
     s : new(Square)
       
 If a type has a `close` function, then it is called
 before the memory is freed.
 `int` and other lowercase types are copied when assigned;
 uppercase types are referenced.
+
+### Types
+
 Functions on built-in types are allowed:
 
     fun int square() int
         return this * this
+
     println(12.square())
 
 Types can have parameters:
@@ -211,8 +237,10 @@ Types can have parameters:
     type List(T)
         array T[]
         size int
+
     fun newList(T type) List(T)
         ...
+
     list := newList(Circle)
 
 ### Null
@@ -228,7 +256,7 @@ There are no null pointer errors at runtime.
     if v
         print(v.area())
 
-Value types (eg. `int`) can't be `null`.
+For value types and numbers, `null` means zero.
 
 ### Arrays Access
 
@@ -261,7 +289,7 @@ To avoid cycles, explicitly set fields to `null`.
         left Tree?
         right Tree?
 
-    fun Tree+ nodeCount() int
+    fun Tree nodeCount() int
         result := 1
         l : left
         if l

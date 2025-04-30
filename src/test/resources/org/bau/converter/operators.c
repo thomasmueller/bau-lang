@@ -40,11 +40,11 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
-float f32_1(float x);
+float f32_1(double x);
 double float_1(double x);
-int16_t i16_1(int16_t x);
-int32_t i32_1(int32_t x);
-char i8_1(char x);
+int16_t i16_1(int64_t x);
+int32_t i32_1(int64_t x);
+int8_t i8_1(int64_t x);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
@@ -58,26 +58,26 @@ void int_array_free(int_array* x) {
 int64_t i64v;
 int32_t i32v;
 int16_t i16v;
-char i8v;
+int8_t i8v;
 double f64v;
 float f32v;
 int64_t a;
 int64_t b;
 int64_t c;
 int64_t d;
-float f32_1(float x) {
+float f32_1(double x) {
     return x;
 }
 double float_1(double x) {
     return x;
 }
-int16_t i16_1(int16_t x) {
+int16_t i16_1(int64_t x) {
     return x;
 }
-int32_t i32_1(int32_t x) {
+int32_t i32_1(int64_t x) {
     return x;
 }
-char i8_1(char x) {
+int8_t i8_1(int64_t x) {
     return x;
 }
 int64_t idiv_2(int64_t a, int64_t b) {
@@ -104,7 +104,7 @@ int main(int _argc, char *_argv[]) {
     int64_t i64v = 1;
     int32_t i32v = 1;
     int16_t i16v = 1;
-    char i8v = 1;
+    int8_t i8v = 1;
     double f64v = 1.0;
     float f32v = 1.0;
     int64_t a = 6172;

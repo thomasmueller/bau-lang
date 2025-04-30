@@ -105,7 +105,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void setOwnedBoundsToNull(Expression scope) {
         if (type != null && type.memoryType() == MemoryType.OWNER) {
-            setBoundValue(scope, "=", new NullValue());
+            setBoundValue(scope, "=", new NullValue(type));
         }
     }
 
@@ -229,6 +229,11 @@ public class Variable implements Expression, LeftValue {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean isContant() {
+        return isConstant;
     }
 
 }

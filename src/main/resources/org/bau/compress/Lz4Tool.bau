@@ -112,7 +112,7 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     while
         # readExact
         in.readFully(header, 0, 4)
-        blockSize : Lz4.read4(header, 0)
+        blockSize := Lz4.read4(header, 0)
         break blockSize = 0
         uncompressed : (blockSize >> 31) & 1
         blockSize &= 0x7fffffff

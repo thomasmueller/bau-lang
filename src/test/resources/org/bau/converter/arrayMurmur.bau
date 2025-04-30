@@ -16,7 +16,7 @@ fun hex(x int, len int) i8[]
     i -= 1
   return data
 
-fun rotLefti32(x i32, n i32) i32
+fun rotLefti32(x i32, n int) i32
   return (x << n) | (x >> (32 - n))
 
 fun murmur3_32_old(data i8[]) i32

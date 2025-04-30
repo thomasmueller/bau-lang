@@ -81,7 +81,13 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public DataType type() {
-        return base.type().baseType();
+        // array elements is always nullable
+        DataType type = base.type().baseType();
+        if (type.orNull() != null) {
+            return type.orNull();
+        }
+        // numbers can not be null
+        return type;
     }
 
     @Override
@@ -201,6 +207,11 @@ public class ArrayAccess implements Expression, LeftValue {
             array.set(index, val);
         }
         return null;
+    }
+
+    @Override
+    public boolean isContant() {
+        return false;
     }
 
 }
