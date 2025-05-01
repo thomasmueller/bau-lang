@@ -4,9 +4,7 @@ type BitField
     data int[]
 
 fun newBitField(len int) BitField
-    x : new(BitField)
-    x.data = new(int[], (len + 63) / 64)
-    return x
+    return BitField(int[(len + 63) / 64])
 
 fun BitField set(index int)
     data[index >> 6] |= 1 << (index & 0x3f)
@@ -34,7 +32,7 @@ fun primeSum(limit int) int
 
 fun primeSum2(limit int) int
     len : (limit + 1 + 63) / 64
-    sieve : new(int[], len)
+    sieve : int[len]
     if sieve.len <= 0
         return 0
     m := 0..sieve.len

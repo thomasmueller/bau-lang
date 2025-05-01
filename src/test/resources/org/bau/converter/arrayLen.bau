@@ -2,7 +2,7 @@ fun printLen(data i8[])
   println(data.len)
 
 fun test()
-  data : new(i8[], 10)
+  data : i8[10]
   println(data.len)
   printLen(data)
 

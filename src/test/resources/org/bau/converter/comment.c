@@ -54,6 +54,7 @@ List_int* List_int_new() {
 int __argc;
 char **__argv;
 /* functions */
+List_int* List_int_1(int_array* array);
 void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
@@ -66,6 +67,14 @@ void int_array_free(int_array* x) {
 void List_int_free(List_int* x) {
     _decUse(x->array, int_array);
     _free(x);
+}
+List_int* List_int_1(int_array* array) {
+    List_int* _t0 = List_int_new();
+    _decUse(_t0->array, int_array);
+    _t0->array = array;
+    _incUse(_t0->array);
+    _t0->size = 0;
+    return _t0;
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= this->array->len) {
@@ -96,9 +105,7 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 void test_0() {
-    List_int* list = List_int_new();
-    _decUse(list->array, int_array);
-    list->array = int_array_new(1);
+    List_int* list = List_int_1(int_array_new(1));
     while (1 == 1) {
         int64_t i = 0;
         while (i < 10) {

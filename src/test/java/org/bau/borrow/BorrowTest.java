@@ -12,7 +12,7 @@ public class BorrowTest {
     @Test
     public void movedOk() {
         assertEquals("""
-                x : new Entry
+                x : Entry_owned()
                 x.key = 1
                 x.value = 100
                 print(x)
@@ -22,7 +22,7 @@ public class BorrowTest {
                 """,
                 new Parser("""
                         fun main()
-                            x : new(Entry+)
+                            x : Entry+()
                             x.key = 1
                             x.value = 100
                             x.print()
@@ -47,7 +47,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : new(Entry+)
+                        x : Entry+()
                         x.key = 1
                         x.value = 100
                         x.print()
@@ -76,7 +76,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : new(Entry+)
+                        x : Entry+()
                         x.key = 1
                         x.value = 100
                         x.print()
@@ -105,7 +105,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : new(Entry+)
+                        x : Entry+()
                         x.key = 1
                         x.value = 100
                         y : &x

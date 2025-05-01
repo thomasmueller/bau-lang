@@ -5,12 +5,34 @@ package org.bau;
 Name: Mya, Pha
 
 bug: main method is defined as "int" but doesn't return a method, and that's ok?
+-> add a native method to set the exit value
 
-constructor:
-x : HashMap()
-x : int[100]
+simplify constructor:
+generic types: List<T>
+x : new Point(10, 10) -- or any non-null field
+x : new(HashMap(int))(10)
+x : new int[100]
+x : new HashMap(int)[10]
+x : HashMap(int)[10]
+x : new(int[], 100)
+x : new HashMap(int, 10)
+generic types: List(T)
 
-bug: "a i32 : <int>" uses int64_t instead of int32_t
+does this work with templates?
+
+
+fun main()
+    a : newList(int, 10)
+    a : List<int>(10)
+    println(a.array.len)
+
+type List<T>
+    array T[]
+    size int
+
+fun newList(T type, capacity int) List<T>
+    return new List<T>(new T[size])
+
 
 ord('a') => code('a')? or char('a')?
 
@@ -21,8 +43,6 @@ support slices as an alternative / addition to range tracking?
 interfaces (trait), like in Rust
 instanceof ?
 
-functions on arrays
-
 'is' instead of 'equals'?
 
 constants maybe use #define ?
@@ -32,9 +52,9 @@ Stdlib:
 - random number generation
 - bit arrays
 - linked list / array
-- sorted map (tree map, skip list)
+- sorted map (tree map, skip list, b-tree?)
 - hash map
-- set
+- set (hash set, sorted set?)
 - stack
 - uuid
 - dqueue
@@ -53,8 +73,6 @@ Stdlib:
 - encryption / security
 - logging
 - sqlite
-
-
 
 
 For memory-safe and fast programming language, I think one of the most important, and hardest, questions is memory management.

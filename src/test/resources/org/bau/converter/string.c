@@ -82,6 +82,7 @@ int __argc;
 char **__argv;
 /* functions */
 string str_1(i8_array* s);
+string string_1(i8_array* data);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void string_free(string* x);
@@ -114,11 +115,15 @@ i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 string str_1(i8_array* s) {
-    string x = string_new();
-    _decUse(x.data, i8_array);
-    x.data = s;
-    _incUse(x.data);
+    string x = string_1(s);
     return x;
+}
+string string_1(i8_array* data) {
+    string _t0 = string_new();
+    _decUse(_t0.data, i8_array);
+    _t0.data = data;
+    _incUse(_t0.data);
+    return _t0;
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

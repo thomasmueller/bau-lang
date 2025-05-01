@@ -108,12 +108,12 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
-    org_bau_Exception_exception result = org_bau_Exception_exception_new();
-    result.exceptionType = 0;
-    _decUse(result.message, i8_array);
-    result.message = message;
-    _incUse(result.message);
-    return result;
+    org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
+    _t0.exceptionType = 0;
+    _decUse(_t0.message, i8_array);
+    _t0.message = message;
+    _incUse(_t0.message);
+    return _t0;
 }
 _int64_t_or_exception square_1(int64_t x) {
     org_bau_Exception_exception _lastException;
@@ -151,8 +151,5 @@ int main(int _argc, char *_argv[]) {
 
 type exception
 An exception
-
-fun exception(message i8[]) exception
-Create a new exception with a message
 
 */

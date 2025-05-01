@@ -15,7 +15,7 @@ public class BoundsTest {
                 """,
                 new Parser("""
                         fun test()
-                            x : new(int[], 10)
+                            x : int[10]
                             i := 0..x.len
                             while
                                 println(x[i]!)
@@ -31,7 +31,7 @@ public class BoundsTest {
         try {
             new Parser("""
                     fun test()
-                        x : new(int[], 10)
+                        x : int[10]
                         i := 0..x.len
                         while
                             println(x[i]!)
@@ -50,7 +50,7 @@ public class BoundsTest {
         try {
             new Parser("""
                     fun test()
-                        x : new(int[], 10)
+                        x : int[10]
                         i := 0..x.len
                         while
                             println(x[i]!)

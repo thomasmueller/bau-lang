@@ -76,11 +76,13 @@ BitField* BitField_new() {
 int __argc;
 char **__argv;
 /* functions */
+BitField* BitField_1(int_array* data);
 int64_t BitField_get_2(BitField* this, int64_t index);
 void BitField_set_2(BitField* this, int64_t index);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 BitField* newBitField_1(int64_t len);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t primeSum_1(int64_t limit);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -98,6 +100,13 @@ void BitField_free(BitField* x) {
     _free(x);
 }
 int64_t randomSeed;
+BitField* BitField_1(int_array* data) {
+    BitField* _t0 = BitField_new();
+    _decUse(_t0->data, int_array);
+    _t0->data = data;
+    _incUse(_t0->data);
+    return _t0;
+}
 int64_t BitField_get_2(BitField* this, int64_t index) {
     int64_t _r0 = ( shiftRight_int_2(this->data->data[idx_2(shiftRight_int_2(index, 6), this->data->len)], (index & 63)) ) & 1;
     return _r0;
@@ -115,10 +124,19 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 BitField* newBitField_1(int64_t len) {
-    BitField* x = BitField_new();
-    _decUse(x->data, int_array);
-    x->data = int_array_new(idiv_2((len + 63), 64));
-    return x;
+    BitField* _t0 = BitField_1(int_array_new(idiv_2((len + 63), 64)));
+    return _t0;
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t primeSum_1(int64_t limit) {
     BitField* sieve = newBitField_1(limit + 1);

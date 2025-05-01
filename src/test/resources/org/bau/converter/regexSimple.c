@@ -73,7 +73,7 @@ org_bau_Exception_exception org_bau_Exception_exception_new() {
     return result;
 }
 struct Token {
-    int64_t type;
+    int64_t ttype;
     org_bau_List_List_i8* data;
     int64_t min;
     int64_t max;
@@ -83,7 +83,7 @@ Token* Token_new() {
     Token* result = _malloc(sizeof(Token));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->type = 0;
+    result->ttype = 0;
     result->data = 0;
     result->min = 0;
     result->max = 0;
@@ -192,14 +192,18 @@ _org_bau_List_List_Token_or_exception exception_org_bau_List_List_Token_or_excep
 int __argc;
 char **__argv;
 /* functions */
+Token* Token_1(org_bau_List_List_i8* data);
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos);
 _match_or_exception find_2(i8_array* text, i8_array* regex);
 int64_t idx_2(int64_t x, int64_t len);
+match match_0();
 match match_2(int64_t start, int64_t end);
 _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp);
 _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp, int64_t max);
 _int64_t_or_exception matches_2(i8_array* text, i8_array* regex);
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
+org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array);
+org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array);
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T);
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T);
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x);
@@ -275,6 +279,16 @@ i8_array* string_1019;
 i8_array* string_1020;
 i8_array* string_1021;
 i8_array* string_1022;
+Token* Token_1(org_bau_List_List_i8* data) {
+    Token* _t0 = Token_new();
+    _t0->ttype = 0;
+    _decUse(_t0->data, org_bau_List_List_i8);
+    _t0->data = data;
+    _incUse(_t0->data);
+    _t0->min = 0;
+    _t0->max = 0;
+    return _t0;
+}
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos) {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
@@ -283,7 +297,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
         return ok_int64_t_or_exception(0);
     }
     int8_t c = text->data[pos];
-    int64_t _t0 = this->type;
+    int64_t _t0 = this->ttype;
     if ((_t0 == 0) || (_t0 == 1)) {
         org_bau_Exception_exception _t1 = org_bau_Exception_exception_1(string_1000);
         _x0 = exception_int64_t_or_exception(_t1); _lastException = _x0.exception; goto catch0;
@@ -355,7 +369,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         Token* e = list->array->data[idx_2(0, list->array->len)];
         _incUseStack(e);
         if (e != NULL) {
-            if (e->type == 0) {
+            if (e->ttype == 0) {
                 _x1 = matchHere_4(list, 1, text, 0);
                 if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
                 int64_t end = _x1.result;
@@ -398,8 +412,14 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
+match match_0() {
+    match _t2 = match_new();
+    _t2.start = 0;
+    _t2.end = 0;
+    return _t2;
+}
 match match_2(int64_t start, int64_t end) {
-    match m = match_new();
+    match m = match_0();
     m.start = start;
     m.end = end;
     return m;
@@ -417,7 +437,7 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
         _decUseStack(t, Token);
         return ok_int64_t_or_exception(tp);
     }
-    if (t->type == 1) {
+    if (t->ttype == 1) {
         if (tp == text->len) {
             _decUseStack(t, Token);
             return ok_int64_t_or_exception(tp);
@@ -498,26 +518,36 @@ _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
     return exception_int64_t_or_exception(_lastException);
 }
 org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
-    org_bau_Exception_exception result = org_bau_Exception_exception_new();
-    result.exceptionType = 0;
-    _decUse(result.message, i8_array);
-    result.message = message;
-    _incUse(result.message);
-    return result;
+    org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
+    _t0.exceptionType = 0;
+    _decUse(_t0.message, i8_array);
+    _t0.message = message;
+    _incUse(_t0.message);
+    return _t0;
+}
+org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
+    org_bau_List_List_Token* _t0 = org_bau_List_List_Token_new();
+    _decUse(_t0->array, Token_array);
+    _t0->array = array;
+    _incUse(_t0->array);
+    _t0->size = 0;
+    return _t0;
+}
+org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
+    org_bau_List_List_i8* _t0 = org_bau_List_List_i8_new();
+    _decUse(_t0->array, i8_array);
+    _t0->array = array;
+    _incUse(_t0->array);
+    _t0->size = 0;
+    return _t0;
 }
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T) {
-    org_bau_List_List_Token* result = org_bau_List_List_Token_new();
-    _decUse(result->array, Token_array);
-    result->array = Token_array_new(4);
-    result->size = 0;
-    return result;
+    org_bau_List_List_Token* _t0 = org_bau_List_List_Token_1(Token_array_new(4));
+    return _t0;
 }
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T) {
-    org_bau_List_List_i8* result = org_bau_List_List_i8_new();
-    _decUse(result->array, i8_array);
-    result->array = i8_array_new(4);
-    result->size = 0;
-    return result;
+    org_bau_List_List_i8* _t0 = org_bau_List_List_i8_1(i8_array_new(4));
+    return _t0;
 }
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     if (this->size >= this->array->len) {
@@ -585,38 +615,37 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
     int64_t i = 0;
     while (i < regex->len) {
         int8_t c = regex->data[i];
-        Token* t = Token_new();
-        _decUse(t->data, org_bau_List_List_i8);
-        t->data = org_bau_List_newList_i8_1(0);
+        org_bau_List_List_i8* _t0 = org_bau_List_newList_i8_1(0);
+        Token* t = Token_1(_t0);
         t->min = 1;
         t->max = 1;
         if (c == 94) {
-            t->type = 0;
+            t->ttype = 0;
             org_bau_List_List_Token_add_2(result, t);
             i += 1;
             continue;
         }
         if (c == 36) {
-            t->type = 1;
+            t->ttype = 1;
             org_bau_List_List_Token_add_2(result, t);
             i += 1;
             continue;
         }
         if (c == 46) {
-            t->type = 5;
+            t->ttype = 5;
         } else if (c == 92) {
-            t->type = 2;
+            t->ttype = 2;
             i += 1;
             org_bau_List_List_i8_add_2(t->data, regex->data[i]);
         } else if (c == 91) {
             i += 1;
             c = regex->data[i];
             if (c == 94) {
-                t->type = 4;
+                t->ttype = 4;
                 i += 1;
                 c = regex->data[i];
             } else {
-                t->type = 3;
+                t->ttype = 3;
             }
             org_bau_List_List_i8_add_2(t->data, c);
             org_bau_List_List_i8_add_2(t->data, c);
@@ -636,12 +665,13 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                 }
             }
         } else {
-            t->type = 2;
+            t->ttype = 2;
             org_bau_List_List_i8_add_2(t->data, c);
         }
         org_bau_List_List_Token_add_2(result, t);
         if (( i + 1 ) >= regex->len) {
             _decUseStack(t, Token);
+            _decUseStack(_t0, org_bau_List_List_i8);
             break;
         }
         i += 1;
@@ -660,12 +690,12 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
             int64_t value = 0;
             while (i < regex->len) {
                 c = regex->data[i];
-                int64_t _t0 = c < 48;
-                if (!(_t0)) {
-                    int64_t _t1 = c > 57;
-                    _t0 = _t1;
+                int64_t _t1 = c < 48;
+                if (!(_t1)) {
+                    int64_t _t2 = c > 57;
+                    _t1 = _t2;
                 }
-                if (_t0) {
+                if (_t1) {
                     break;
                 }
                 value = ( value * 10 ) + c - 48;
@@ -682,12 +712,12 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                 value = 0;
                 while (i < regex->len) {
                     c = regex->data[i];
-                    int64_t _t2 = c < 48;
-                    if (!(_t2)) {
-                        int64_t _t3 = c > 57;
-                        _t2 = _t3;
+                    int64_t _t3 = c < 48;
+                    if (!(_t3)) {
+                        int64_t _t4 = c > 57;
+                        _t3 = _t4;
                     }
-                    if (_t2) {
+                    if (_t3) {
                         break;
                     }
                     value = ( value * 10 ) + c - 48;
@@ -699,9 +729,9 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                 t->max = value;
             }
             if (c != 125) {
-                org_bau_Exception_exception _t4 = org_bau_Exception_exception_1(string_1017);
-                _x0 = exception_org_bau_List_List_Token_or_exception(_t4); _lastException = _x0.exception; goto catch0;
-                org_bau_Exception_exception_free(&_t4);
+                org_bau_Exception_exception _t5 = org_bau_Exception_exception_1(string_1017);
+                _x0 = exception_org_bau_List_List_Token_or_exception(_t5); _lastException = _x0.exception; goto catch0;
+                org_bau_Exception_exception_free(&_t5);
             }
         } else {
             i -= 1;
@@ -709,6 +739,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         i += 1;
         continue0:;
         _decUseStack(t, Token);
+        _decUseStack(_t0, org_bau_List_List_i8);
     }
     return ok_org_bau_List_List_Token_or_exception(result);
     catch0:
@@ -776,9 +807,6 @@ Add an entry to the list
 
 type exception
 An exception
-
-fun exception(message i8[]) exception
-Create a new exception with a message
 
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.

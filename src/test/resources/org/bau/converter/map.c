@@ -119,9 +119,11 @@ HashMap_str_str* HashMap_str_str_new() {
 int __argc;
 char **__argv;
 /* functions */
+HashMap_int_int* HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes);
 int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key);
 void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value);
 int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key);
+HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes);
 str HashMap_str_str_get_2(HashMap_str_str* this, str key);
 void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value);
 int64_t hashCode_1(i8_array* data);
@@ -133,7 +135,7 @@ HashMap_int_int* newHashMap_int_int_2(int64_t _K, int64_t _V);
 HashMap_str_str* newHashMap_str_str_2(int64_t _K, int64_t _V);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
-str str_1(i8_array* x);
+str str_1(i8_array* value);
 int64_t str_equals_2(str this, str other);
 int64_t str_hashCode_1(str this);
 void test_0();
@@ -184,6 +186,20 @@ i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
 i8_array* string_1005;
+HashMap_int_int* HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes) {
+    HashMap_int_int* _t0 = HashMap_int_int_new();
+    _t0->size = 0;
+    _decUse(_t0->keys, int_array);
+    _t0->keys = keys;
+    _incUse(_t0->keys);
+    _decUse(_t0->values, int_array);
+    _t0->values = values;
+    _incUse(_t0->values);
+    _decUse(_t0->hashes, int_array);
+    _t0->hashes = hashes;
+    _incUse(_t0->hashes);
+    return _t0;
+}
 int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (this->keys->len - 1);
@@ -311,6 +327,20 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
         p2 = (p2 + 1) & (this->keys->len - 1);
     }
     return 1;
+}
+HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes) {
+    HashMap_str_str* _t0 = HashMap_str_str_new();
+    _t0->size = 0;
+    _decUse(_t0->keys, str_array);
+    _t0->keys = keys;
+    _incUse(_t0->keys);
+    _decUse(_t0->values, str_array);
+    _t0->values = values;
+    _incUse(_t0->values);
+    _decUse(_t0->hashes, int_array);
+    _t0->hashes = hashes;
+    _incUse(_t0->hashes);
+    return _t0;
 }
 str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     int64_t hash = str_hashCode_1(key);
@@ -452,25 +482,11 @@ int64_t mix_1(int64_t z) {
     return _r0;
 }
 HashMap_int_int* newHashMap_int_int_2(int64_t _K, int64_t _V) {
-    HashMap_int_int* result = HashMap_int_int_new();
-    result->size = 0;
-    _decUse(result->keys, int_array);
-    result->keys = int_array_new(4);
-    _decUse(result->values, int_array);
-    result->values = int_array_new(4);
-    _decUse(result->hashes, int_array);
-    result->hashes = int_array_new(4);
+    HashMap_int_int* result = HashMap_int_int_3(int_array_new(4), int_array_new(4), int_array_new(4));
     return result;
 }
 HashMap_str_str* newHashMap_str_str_2(int64_t _K, int64_t _V) {
-    HashMap_str_str* result = HashMap_str_str_new();
-    result->size = 0;
-    _decUse(result->keys, str_array);
-    result->keys = str_array_new(4);
-    _decUse(result->values, str_array);
-    result->values = str_array_new(4);
-    _decUse(result->hashes, int_array);
-    result->hashes = int_array_new(4);
+    HashMap_str_str* result = HashMap_str_str_3(str_array_new(4), str_array_new(4), int_array_new(4));
     return result;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
@@ -479,12 +495,12 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
-str str_1(i8_array* x) {
-    str result = str_new();
-    _decUse(result.value, i8_array);
-    result.value = x;
-    _incUse(result.value);
-    return result;
+str str_1(i8_array* value) {
+    str _t0 = str_new();
+    _decUse(_t0.value, i8_array);
+    _t0.value = value;
+    _incUse(_t0.value);
+    return _t0;
 }
 int64_t str_equals_2(str this, str other) {
     int64_t _r0 = this.value->len == other.value->len;

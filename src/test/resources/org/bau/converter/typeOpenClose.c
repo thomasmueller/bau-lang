@@ -68,6 +68,7 @@ File* File_new() {
 int __argc;
 char **__argv;
 /* functions */
+File* File_0();
 void File_close_1(File* this);
 void File_use_1(File* this);
 File* openFile_1(int64_t fp);
@@ -98,6 +99,11 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
+File* File_0() {
+    File* _t0 = File_new();
+    _t0->fp = 0;
+    return _t0;
+}
 void File_close_1(File* this) {
     printf("closing %lld\n", (long long)this->fp);
 }
@@ -105,7 +111,7 @@ void File_use_1(File* this) {
     printf("use %lld\n", (long long)this->fp);
 }
 File* openFile_1(int64_t fp) {
-    File* f = File_new();
+    File* f = File_0();
     f->fp = fp;
     printf("opening %lld\n", (long long)f->fp);
     return f;

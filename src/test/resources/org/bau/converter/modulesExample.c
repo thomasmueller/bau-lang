@@ -104,6 +104,7 @@ double org_bau_Math_pow_2(double x, double y);
 double org_bau_Math_sin_1(double x);
 double org_bau_Math_sqrt_1(double x);
 int64_t org_bau_Std_ord_1(i8_array* s);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t org_bau_Utils_random_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -668,6 +669,17 @@ int64_t org_bau_Std_ord_1(i8_array* s) {
         return _r0;
     }
     return 0;
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;

@@ -93,8 +93,10 @@ Tree* Tree_new() {
 int __argc;
 char **__argv;
 /* functions */
+Tree* Tree_0();
 int64_t Tree_nodeCount_1(Tree* this);
 Tree* newTree_2(Tree* left, Tree* right);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 Tree* with_1(int64_t depth);
@@ -130,6 +132,14 @@ i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
 int64_t randomSeed;
+Tree* Tree_0() {
+    Tree* _t0 = Tree_new();
+    _decUse(_t0->left, Tree);
+    _t0->left = NULL;
+    _decUse(_t0->right, Tree);
+    _t0->right = NULL;
+    return _t0;
+}
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;
     Tree* l = this->left;
@@ -147,7 +157,7 @@ int64_t Tree_nodeCount_1(Tree* this) {
     return result;
 }
 Tree* newTree_2(Tree* left, Tree* right) {
-    Tree* t = Tree_new();
+    Tree* t = Tree_0();
     _decUse(t->left, Tree);
     t->left = left;
     _incUse(t->left);
@@ -155,6 +165,17 @@ Tree* newTree_2(Tree* left, Tree* right) {
     t->right = right;
     _incUse(t->right);
     return t;
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;

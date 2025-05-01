@@ -22,8 +22,6 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct Entry Entry;
-struct Entry;
 typedef struct Entry_owned Entry_owned;
 struct Entry_owned;
 struct i8_array {
@@ -54,19 +52,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct Entry {
-    int64_t key;
-    int64_t value;
-    int32_t _refCount;
-};
-Entry* Entry_new() {
-    Entry* result = _malloc(sizeof(Entry));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    result->key = 0;
-    result->value = 0;
-    return result;
-}
 struct Entry_owned {
     int64_t key;
     int64_t value;
@@ -84,9 +69,9 @@ int __argc;
 char **__argv;
 /* functions */
 void Entry_owned_print_1(Entry_owned* this);
+Entry_owned* Entry_owned_0();
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void Entry_free(Entry* x);
 void Entry_owned_free(Entry_owned* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -94,9 +79,6 @@ void i8_array_free(i8_array* x) {
 }
 void int_array_free(int_array* x) {
     _free(x->data);
-    _free(x);
-}
-void Entry_free(Entry* x) {
     _free(x);
 }
 void Entry_owned_free(Entry_owned* x) {
@@ -117,6 +99,12 @@ i8_array* string_1003;
 void Entry_owned_print_1(Entry_owned* this) {
     printf("key: %lld value: %lld\n", (long long)this->key, (long long)this->value);
 }
+Entry_owned* Entry_owned_0() {
+    Entry_owned* _t1 = Entry_owned_new();
+    _t1->key = 0;
+    _t1->value = 0;
+    return _t1;
+}
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
@@ -124,7 +112,7 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const(" value: ", 8);
     string_1002 = str_const("clear ", 6);
     string_1003 = str_const("end", 3);
-    Entry_owned* x = Entry_owned_new();
+    Entry_owned* x = Entry_owned_0();
     x->key = 1;
     x->value = 100;
     Entry_owned_print_1(x);

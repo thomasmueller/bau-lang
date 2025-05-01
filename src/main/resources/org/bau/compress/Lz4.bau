@@ -16,7 +16,7 @@ type XXHash
     total int
 
 fun newXXHash(seed i32) XXHash
-    x : new(XXHash)
+    x : XXHash()
     x.v1 = seed + PRIME1 + PRIME2
     x.v2 = seed + PRIME2
     x.v3 = seed
@@ -112,8 +112,7 @@ type LZ4Compress
     hashTable int[]
 
 fun newLZ4Compress() LZ4Compress
-    x : new(LZ4Compress)
-    x.hashTable = new(int[], 4 * 1024)
+    x : LZ4Compress(int[4 * 1024])
     return x
 
 fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int

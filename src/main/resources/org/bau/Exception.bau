@@ -5,9 +5,3 @@ type exception
   exceptionType int
   message i8[]
 
-# Create a new exception with a message
-fun exception(message i8[]) exception
-  result : new(exception)
-  result.exceptionType = 0
-  result.message = message
-  return result

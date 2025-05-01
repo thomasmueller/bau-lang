@@ -30,7 +30,7 @@ fun getDateTime() dateTime
         result.millis = time.tv_nsec / 1000000;
         return result;
         ```)
-    alternative := new(dateTime)
+    alternative := dateTime()
     alternative.year = 2000
     alternative.month = 1
     alternative.day = 1

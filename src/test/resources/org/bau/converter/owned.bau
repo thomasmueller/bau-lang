@@ -1,5 +1,5 @@
 fun main()
-    x : new(Entry+)
+    x : Entry+()
     x.key = 1
     x.value = 100
     x.print()

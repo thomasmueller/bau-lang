@@ -44,7 +44,7 @@ type Value
 fun get(key int) Value?
     if key <= 0
         return null
-    result : new(Value)
+    result : Value()
     result.data = key * 10
     return result
 
@@ -58,6 +58,6 @@ test()
         } catch (Exception e) {
             assertTrue(e.getMessage().indexOf("'a' could be null here") > 0);
         }
-    }       
-  
+    }
+
 }

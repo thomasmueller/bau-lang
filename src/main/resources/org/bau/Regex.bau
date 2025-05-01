@@ -26,7 +26,7 @@ type match
     end int
 
 fun match(start int, end int)
-    m := new(match)
+    m := match()
     m.start = start
     m.end = end
 
@@ -62,7 +62,7 @@ fun parse(regex i8[]) List(Token)
     result := newList(Token)
     for i := until(regex.len)
         c := regex[i]
-        t := new(Token)
+        t := Token()
         t.min = 1
         t.max = 1
         if c = ord('^')

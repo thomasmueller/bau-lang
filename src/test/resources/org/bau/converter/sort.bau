@@ -25,7 +25,7 @@ fun insertionSort(a T[])
         a[j + 1] = t
 
 fun test()
-    x : new(int[], 5)
+    x : int[5]
     for i := until(x.len)
         x[i] = Utils.random()
     insertionSort(x)

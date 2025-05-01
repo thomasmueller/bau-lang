@@ -11,7 +11,7 @@ fun hex(x int, len int) i8[]
     l = 0
   elif l > 8
     l = 8
-  data : new(i8[], l)
+  data : i8[l]
   y := x
   i := l - 1
   while i >= 0

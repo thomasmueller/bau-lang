@@ -13,7 +13,7 @@ enum tokenType
     ANY
 
 type Token
-    type tokenType
+    ttype tokenType
     data List(i8)
     min int
     max int
@@ -22,7 +22,7 @@ fun Token matchChar(text i8[], pos int) int throws exception
     if pos >= text.len
         return 0
     c := text[pos]
-    switch type
+    switch ttype
     case tokenType.START, tokenType.END
         throw exception('Start or end in wrong location')
     case tokenType.MATCH
@@ -53,7 +53,7 @@ type match
     end int
 
 fun match(start int, end int) match
-    m := new(match)
+    m := match()
     m.start = start
     m.end = end
     return m
@@ -63,35 +63,34 @@ fun parse(regex i8[]) List(Token) throws exception
     i := 0
     while i < regex.len
         c := regex[i]
-        t := new(Token)
-        t.data = newList(i8)
+        t := Token(newList(i8))
         t.min = 1
         t.max = 1
         if c = ord('^')
-            t.type = tokenType.START
+            t.ttype = tokenType.START
             result.add(t)
             i += 1
             continue
         if c = ord('$')
-            t.type = tokenType.END
+            t.ttype = tokenType.END
             result.add(t)
             i += 1
             continue;
         if c = ord('.')
-            t.type = tokenType.ANY
+            t.ttype = tokenType.ANY
         elif c = ord('\\')
-            t.type = tokenType.MATCH
+            t.ttype = tokenType.MATCH
             i += 1
             t.data.add(regex[i])
         elif c = ord('[')
             i += 1
             c = regex[i]
             if c = ord('^')
-                t.type = tokenType.NOT_LIST
+                t.ttype = tokenType.NOT_LIST
                 i += 1
                 c = regex[i]
             else
-                t.type = tokenType.LIST
+                t.ttype = tokenType.LIST
             t.data.add(c)
             t.data.add(c)
             while 1
@@ -106,7 +105,7 @@ fun parse(regex i8[]) List(Token) throws exception
                     t.data.add(c)
                     t.data.add(c)
         else
-            t.type = tokenType.MATCH
+            t.ttype = tokenType.MATCH
             t.data.add(c)
         result.add(t)
         break i + 1 >= regex.len
@@ -169,7 +168,7 @@ fun matchHere(list List(Token), rp int, text i8[], tp int) int throws exception
     t := list.array[rp]
     if not t
         return tp
-    if t.type = tokenType.END
+    if t.ttype = tokenType.END
         if tp = text.len
             return tp
         return -1
@@ -184,7 +183,7 @@ fun find(text i8[], regex i8[]) match throws exception
     if list.size > 0
         e : list.array[0]
         if e
-            if e.type = tokenType.START
+            if e.ttype = tokenType.START
                 end := matchHere(list, 1, text, 0)
                 if end >= 0
                     return match(0, end)

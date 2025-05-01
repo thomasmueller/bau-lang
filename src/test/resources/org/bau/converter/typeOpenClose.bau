@@ -2,7 +2,7 @@ type File
     fp int
 
 fun openFile(fp int) File
-    f : new(File)
+    f : File()
     f.fp = fp
     println('opening ' f.fp)
     return f

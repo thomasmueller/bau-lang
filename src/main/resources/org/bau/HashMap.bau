@@ -7,7 +7,7 @@ type HashMap(K, V)
   hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-  result : new(HashMap(K, V))
+  result : HashMap(K, V)()
   result.size = 0
   result.keys = K[4]
   result.values = V[4]
@@ -17,9 +17,9 @@ fun newHashMap(K type, V type) HashMap(K, V)
 fun HashMap(K, V) put(hash int, key K, value V)
   if size * 2 >= keys.len
     println('grow')
-    kn : new(K[], keys.len * 2)
-    vn : new(V[], keys.len * 2)
-    hn : new(int[], keys.len * 2)
+    kn : K[keys.len * 2]
+    vn : V[keys.len * 2]
+    hn : int[keys.len * 2]
     ok : keys
     oh : hashes
     ov : values

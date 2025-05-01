@@ -70,6 +70,7 @@ Tree* Tree_new() {
 int __argc;
 char **__argv;
 /* functions */
+Tree* Tree_0();
 int64_t Tree_nodeCount_1(Tree* this);
 int64_t count_1(int64_t depth);
 Tree* newTree_2(Tree* left, Tree* right);
@@ -103,6 +104,14 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
+Tree* Tree_0() {
+    Tree* _t0 = Tree_new();
+    _decUse(_t0->left, Tree);
+    _t0->left = NULL;
+    _decUse(_t0->right, Tree);
+    _t0->right = NULL;
+    return _t0;
+}
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;
     Tree* l = this->left;
@@ -126,7 +135,7 @@ int64_t count_1(int64_t depth) {
     return c;
 }
 Tree* newTree_2(Tree* left, Tree* right) {
-    Tree* t = Tree_new();
+    Tree* t = Tree_0();
     _decUse(t->left, Tree);
     t->left = left;
     _incUse(t->left);

@@ -2,11 +2,10 @@ type string
     data i8[]
 
 fun str(s i8[]) string
-    x := new(string)
-    x.data = s
+    x := string(s)
     return x
 
-x : new(string[], 3)
+x : string[3]
 x[0] = str('hello')
 x[1] = str('world')
 x[2] = str('!')

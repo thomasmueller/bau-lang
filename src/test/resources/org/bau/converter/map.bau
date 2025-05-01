@@ -7,18 +7,14 @@ type HashMap(K, V)
     hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-    result : new(HashMap(K, V))
-    result.size = 0
-    result.keys = new(K[], 4)
-    result.values = new(V[], 4)
-    result.hashes = new(int[], 4)
+    result : HashMap(K, V)(K[4], V[4], int[4])
     return result
 
 fun HashMap(K, V) put(key K, value V)
     if size * 2 >= keys.len
-        kn : new(K[], keys.len * 2)
-        vn : new(V[], keys.len * 2)
-        hn : new(int[], keys.len * 2)
+        kn : K[keys.len * 2]
+        vn : V[keys.len * 2]
+        hn : int[keys.len * 2]
         ok : keys
         oh : hashes
         ov : values
@@ -142,11 +138,6 @@ fun str equals(other str) int
 
 fun str hashCode() int
     return hashCode(this.value)
-
-fun str(x i8[]) str
-    result := new(str)
-    result.value = x
-    return result
 
 fun test()
     println('hash of hello: ' hashCode('hello'))

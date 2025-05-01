@@ -1,5 +1,5 @@
 fun test()
-    data : new(i8[], 10)
+    data : i8[10]
     if data.len <= 0
         return
     i := 0 .. data.len

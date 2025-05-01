@@ -1,5 +1,5 @@
 fun main()
-      data : new(int[], 16)
+      data : int[16]
       fill(data)
       for i := until(data.len)
         println(data[i]!)

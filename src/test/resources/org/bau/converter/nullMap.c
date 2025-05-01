@@ -52,6 +52,7 @@ Value* Value_new() {
 int __argc;
 char **__argv;
 /* functions */
+Value* Value_0();
 Value* get_1(int64_t key);
 void test_0();
 void int_array_free(int_array* x);
@@ -63,11 +64,16 @@ void int_array_free(int_array* x) {
 void Value_free(Value* x) {
     _free(x);
 }
+Value* Value_0() {
+    Value* _t0 = Value_new();
+    _t0->data = 0;
+    return _t0;
+}
 Value* get_1(int64_t key) {
     if (key <= 0) {
         return NULL;
     }
-    Value* result = Value_new();
+    Value* result = Value_0();
     result->data = key * 10;
     return result;
 }

@@ -55,6 +55,7 @@ int __argc;
 char **__argv;
 /* functions */
 int64_t idx_2(int64_t x, int64_t len);
+org_bau_List_List_int* org_bau_List_List_int_1(int_array* array);
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T);
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x);
 void int_array_free(int_array* x);
@@ -71,12 +72,17 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
+org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
+    org_bau_List_List_int* _t0 = org_bau_List_List_int_new();
+    _decUse(_t0->array, int_array);
+    _t0->array = array;
+    _incUse(_t0->array);
+    _t0->size = 0;
+    return _t0;
+}
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
-    org_bau_List_List_int* result = org_bau_List_List_int_new();
-    _decUse(result->array, int_array);
-    result->array = int_array_new(4);
-    result->size = 0;
-    return result;
+    org_bau_List_List_int* _t0 = org_bau_List_List_int_1(int_array_new(4));
+    return _t0;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= this->array->len) {

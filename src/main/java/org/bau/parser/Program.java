@@ -183,6 +183,43 @@ public class Program {
         return null;
     }
 
+    public FunctionDefinition getFunctionFuzzyMatch(DataType type, String module, String name,
+            int expectedParameterCount) {
+        for (int offset = 0; offset < 20; offset++) {
+            // start with the expected count (eg. 5), and then:
+            // 4, 6, 3, 7, 2, 8, 1, 9, 0, 10, 11, 12,...
+            int parameterCount;
+            if (offset == 0) {
+                parameterCount = expectedParameterCount;
+            } else {
+                int o = (offset + 1) / 2;
+                if (offset % 2 == 1) {
+                    parameterCount = expectedParameterCount - o;
+                } else {
+                    parameterCount = expectedParameterCount + o;
+                }
+            }
+            if (parameterCount < 0) {
+                continue;
+            }
+            String id = FunctionDefinition.getFunctionId(type, module, name, parameterCount);
+            FunctionDefinition fd = functions.get(id);
+            if (fd != null) {
+                return fd;
+            }
+            id = FunctionDefinition.getFunctionId(type, module, name, Integer.MAX_VALUE);
+            FunctionDefinition result = functions.get(id);
+            if (result == null && module != null) {
+                // no method in this module - but the might be a global function
+                result = getFunctionIfExists(type, null, name, parameterCount);
+            }
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
     public FunctionDefinition getFunctionIfExists(DataType type, String module, String name, int parameterCount) {
         if ("println".equals(name)) {
             // TODO support varargs

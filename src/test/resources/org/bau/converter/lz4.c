@@ -113,6 +113,8 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
 int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer, int64_t pos, int64_t len);
 int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 int64_t org_bau_Std_ord_1(i8_array* s);
+org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable);
+org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0();
 int64_t org_bau_compress_Lz4_countTrailingZeros_1(int64_t x);
 int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, i8_array* outData, int64_t outPos);
 int32_t org_bau_compress_Lz4_hash5_2(i8_array* data, int64_t pos);
@@ -257,6 +259,22 @@ int64_t org_bau_Std_ord_1(i8_array* s) {
         return _r0;
     }
     return 0;
+}
+org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable) {
+    org_bau_compress_Lz4_LZ4Compress* _t2 = org_bau_compress_Lz4_LZ4Compress_new();
+    _decUse(_t2->hashTable, int_array);
+    _t2->hashTable = hashTable;
+    _incUse(_t2->hashTable);
+    return _t2;
+}
+org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0() {
+    org_bau_compress_Lz4_XXHash* _t0 = org_bau_compress_Lz4_XXHash_new();
+    _t0->v1 = 0;
+    _t0->v2 = 0;
+    _t0->v3 = 0;
+    _t0->v4 = 0;
+    _t0->total = 0;
+    return _t0;
 }
 int64_t org_bau_compress_Lz4_countTrailingZeros_1(int64_t x) {
     return __builtin_ctz(x);
@@ -407,13 +425,11 @@ int32_t org_bau_compress_Lz4_hash5_2(i8_array* data, int64_t pos) {
     return _t0;
 }
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_newLZ4Compress_0() {
-    org_bau_compress_Lz4_LZ4Compress* x = org_bau_compress_Lz4_LZ4Compress_new();
-    _decUse(x->hashTable, int_array);
-    x->hashTable = int_array_new(4096);
+    org_bau_compress_Lz4_LZ4Compress* x = org_bau_compress_Lz4_LZ4Compress_1(int_array_new(4096));
     return x;
 }
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_newXXHash_1(int32_t seed) {
-    org_bau_compress_Lz4_XXHash* x = org_bau_compress_Lz4_XXHash_new();
+    org_bau_compress_Lz4_XXHash* x = org_bau_compress_Lz4_XXHash_0();
     x->v1 = ( seed + 2654435761 ) + 2246822519;
     x->v2 = seed + 2246822519;
     x->v3 = seed;

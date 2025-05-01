@@ -216,12 +216,16 @@ Types can have fields and functions:
     fun Square area() int
         return length * length
 
-    s : new(Square)
+    s : Square()
       
+A constructor function is added automatically for each type.
+The arguments of this function are the non-nullable fields.
+
+`int` and other lowercase types are copied when assigned;
+Types that start with uppercase are referenced.
+
 If a type has a `close` function, then it is called
 before the memory is freed.
-`int` and other lowercase types are copied when assigned;
-uppercase types are referenced.
 
 ### Types
 
@@ -239,9 +243,9 @@ Types can have parameters:
         size int
 
     fun newList(T type) List(T)
-        ...
+        return List(T)(T[0])
 
-    list := newList(Circle)
+    list := newList(Square)
 
 ### Null
 
@@ -260,9 +264,9 @@ For value types and numbers, `null` means zero.
 
 ### Arrays Access
 
-To create and access arrays, use:
+To create a new array and then access it, use:
 
-    data : new(i8[], 3)
+    data : i8[3]
     data[0] = 10
 
 Bounds are checked where needed.
@@ -504,13 +508,13 @@ is equivalent to:
         x int
         y int
     
-    p := new(point)
+    p := point()
     p.x = 10
     p.y = 20
     
 ##### Arrays
 
-    array : new(i8[], 10)
+    array : i8[10]
     for i := until(array.len)
         array[i] = i
 

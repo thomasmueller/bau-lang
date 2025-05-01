@@ -25,8 +25,6 @@ typedef struct int_array int_array;
 struct int_array;
 typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
 struct org_bau_Utils_dateTime;
-typedef struct Tree Tree;
-struct Tree;
 typedef struct Tree_owned Tree_owned;
 struct Tree_owned;
 struct i8_array {
@@ -77,19 +75,6 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
     result.millis = 0;
     return result;
 }
-struct Tree {
-    Tree_owned* left;
-    Tree_owned* right;
-    int32_t _refCount;
-};
-Tree* Tree_new() {
-    Tree* result = _malloc(sizeof(Tree));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    result->left = 0;
-    result->right = 0;
-    return result;
-}
 struct Tree_owned {
     Tree_owned* left;
     Tree_owned* right;
@@ -107,14 +92,15 @@ int __argc;
 char **__argv;
 /* functions */
 int64_t Tree_owned_nodeCount_1(Tree_owned* this);
+Tree_owned* Tree_owned_0();
 Tree_owned* newTree_2(Tree_owned* left, Tree_owned* right);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 Tree_owned* with_1(int64_t depth);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
-void Tree_free(Tree* x);
 void Tree_owned_free(Tree_owned* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -125,11 +111,6 @@ void int_array_free(int_array* x) {
     _free(x);
 }
 void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
-}
-void Tree_free(Tree* x) {
-    if (x->left) Tree_owned_free(x->left);
-    if (x->right) Tree_owned_free(x->right);
-    _free(x);
 }
 void Tree_owned_free(Tree_owned* x) {
     if (x == NULL) return;
@@ -162,8 +143,16 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     }
     return result;
 }
+Tree_owned* Tree_owned_0() {
+    Tree_owned* _t1 = Tree_owned_new();
+    Tree_owned_free(_t1->left);
+    _t1->left = NULL;
+    Tree_owned_free(_t1->right);
+    _t1->right = NULL;
+    return _t1;
+}
 Tree_owned* newTree_2(Tree_owned* left, Tree_owned* right) {
-    Tree_owned* t = Tree_owned_new();
+    Tree_owned* t = Tree_owned_0();
     Tree_owned_free(t->left);
     t->left = left;
     left = NULL;
@@ -171,6 +160,17 @@ Tree_owned* newTree_2(Tree_owned* left, Tree_owned* right) {
     t->right = right;
     right = NULL;
     return t;
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;

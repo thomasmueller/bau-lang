@@ -5,7 +5,7 @@ fun readInt(d i8[], pos 0 .. d.len - 4) int
            ((d[pos + 3]! & 0xff) << 24)
 
 fun test()
-    data : new(i8[], 4)
+    data : i8[4]
     println(readInt(data, 0))
 
 test()

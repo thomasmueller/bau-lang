@@ -66,6 +66,7 @@ char **__argv;
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 void insertionSort_int_array_int_1(int_array* a);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t org_bau_Utils_random_0();
 void shellSort_int_array_int_1(int_array* a);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -112,6 +113,17 @@ void insertionSort_int_array_int_1(int_array* a) {
         }
         break;
     }
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;

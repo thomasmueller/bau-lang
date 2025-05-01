@@ -29,7 +29,7 @@ fun hex(x int, len int) i8[]
         l = 0
     elif l > 8
         l = 8
-    data : new(i8[], l)
+    data : i8[l]
     y := x
     i := l - 1
     while i >= 0
@@ -47,7 +47,7 @@ fun xxhashFile(inputFileName i8[]) int
         println('File not found: ' inputFileName)
         return 0
     hash : newXXHash(0)
-    buffer : new(i8[], Lz4.BLOCK_SIZE + 10)
+    buffer : i8[Lz4.BLOCK_SIZE + 10]
     result := 0
     while
         read : in.readFully(buffer, 0, Lz4.BLOCK_SIZE)
@@ -72,7 +72,7 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     if not out.filePointer
         println('Could not open file: ' outputFileName)
         return 0
-    header : new(i8[], 7)
+    header : i8[7]
     # todo readExact
     in.readFully(header, 0, 7)
     magic : Lz4.read4(header, 0);
@@ -106,8 +106,8 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     xxhash : (hash.update(header, 4, 2) >> 8) & 0xff
     if (xxhash & 0xff) <> headerChecksum
         return -1
-    block : new(i8[], 4 * 1024 * 1024 + 10)
-    outBlock : new(i8[], 4 * 1024 * 1024 + 10)
+    block : i8[4 * 1024 * 1024 + 10]
+    outBlock : i8[4 * 1024 * 1024 + 10]
     outputFileSize := 0
     while
         # readExact
@@ -139,7 +139,7 @@ fun compressFile(inputFileName i8[], outputFileName i8[], level int) int
     if not out.filePointer
         println('Could not open file: ' outputFileName)
         return 0
-    header : new(i8[], 7)
+    header : i8[7]
     Lz4.write4(header, 0, 0x184d2204)
     header[4] = (1 << 6) | (1 << 5)
     header[5] = (7 << 4)
@@ -147,8 +147,8 @@ fun compressFile(inputFileName i8[], outputFileName i8[], level int) int
     header[6] = (hash.update(header, 4, 2) >> 8) & 0xff
     out.write(header, 0, 7)
     blockSize : 4 * 1024 * 1024
-    block : new(i8[], blockSize + 10)
-    outBlock : new(i8[], 5 * 1024 * 1024)
+    block : i8[blockSize + 10]
+    outBlock : i8[5 * 1024 * 1024]
     lz4 : newLZ4Compress()
     totalSize := 0
     while

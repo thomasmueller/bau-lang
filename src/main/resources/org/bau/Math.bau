@@ -320,9 +320,9 @@ fun appendInt(n int, buff i8[], pos int) int
     return end
 
 fun intToString(n int) i8[]
-    buff : new(i8[], 20)
+    buff : i8[20]
     pos := appendInt(n, buff, 0)
-    result : new(i8[], pos)
+    result : i8[pos]
     for j := until(pos)
         result[j] = buff[j]
     return result
@@ -368,7 +368,7 @@ fun floatToString(n float) i8[]
         return 'Infinity'
     if n = NEG_INFINITY
         return '-Infinity'
-    buff : new(i8[], 30)
+    buff : i8[30]
     pos := 0
     if n < 0
         buff[pos] = ord('-')
@@ -376,7 +376,7 @@ fun floatToString(n float) i8[]
         n = -n
     else
     end : appendfloat(n, buff, pos)
-    result : new(i8[], end)
+    result : i8[end]
     for j := until(end)
         result[j] = buff[j]
     return result

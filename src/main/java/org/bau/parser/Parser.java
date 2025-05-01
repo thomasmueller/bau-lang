@@ -333,7 +333,40 @@ public class Parser {
             type.parameters = parameters;
         }
         functionContext.rewindStack(stackPos);
+        defineConstructor(type);
+        if (!type.isCopyType()) {
+            defineConstructor(type.ownerType());
+        }
         return true;
+    }
+
+    private void defineConstructor(DataType type) {
+        FunctionDefinition def = new FunctionDefinition(0);
+        def.module = type.module;
+        def.name = type.name();
+        if (type.memoryType() == MemoryType.OWNER) {
+            def.name += "_owned";
+        }
+        def.returnType = type;
+        New n = new New(type, null);
+        Variable result = assignTempVariable(def.list, n);
+        for (Variable var : type.fields) {
+            Assignment assign = new Assignment();
+            assign.type = var.type();
+            assign.initial = false;
+            assign.leftValue = new FieldAccess(result, var.name, var.type());
+            if (var.type().isCopyType() || var.type().isNullable()) {
+                assign.value = var.type().nullExpression();
+            } else {
+                Variable arg = new Variable(var.name, var.type());
+                def.parameters.add(arg);
+                assign.value = arg;
+            }
+            def.list.add(assign);
+        }
+        Return ret = new Return(result);
+        def.list.add(ret);
+        program.addFunction(def);
     }
 
     private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment) {
@@ -709,6 +742,10 @@ public class Parser {
      * @return the type
      */
     private DataType readType(boolean templatesOk) {
+        return readType(templatesOk, true);
+    }
+
+    private DataType readType(boolean templatesOk, boolean arraysOk) {
         if (DataType.TYPE.equals(token)) {
             throw syntaxError("Type '" + token + "' may not be used here");
         }
@@ -748,54 +785,19 @@ public class Parser {
             throw syntaxError("Type '" + name + "' not found when reading a type");
         }
         if (t.template != null) {
-            if (!matchOp("(")) {
-                throw syntaxError("Type '" + name + "' is a template; need to specify the parameters");
-            }
-            ArrayList<DataType> params = new ArrayList<>();
-            for (int i = 0; i < t.parameters.size(); i++) {
-                DataType t2 = readType(templatesOk);
-                params.add(t2);
-                matchOp(",");
-            }
-            if (!matchOp(")")) {
-                throw syntaxError("Type '" + name + "' is a template; need to specify " + t.parameters.size() + " parameters");
-            }
+            ArrayList<DataType> params = parseTypeParameters(t, templatesOk);
             // if templates can be returned, then
             // we must not replace the types
             if (!templatesOk) {
-                String typeId = DataType.getId(name, params);
-                DataType t2 = functionContext.getType(t.module, typeId);
-                if (t2 != null) {
-                    t = t2;
-                } else {
-                    String code = t.template;
-                    ArrayList<String> with = new ArrayList<>();
-                    for (int i = 0; i < t.parameters.size(); i++) {
-                        with.add(params.get(i).fullName());
-                    }
-                    code = Templates.convertTemplate(code, t.parameters, with);
-                    code = "type " + typeId + "\n" + code;
-                    try {
-                        Parser p = new Parser(program, module, code, t.lineOffset);
-                        p.read();
-                        p.parseTypeDefinition(t.module);
-                        while (p.type != TokenType.END) {
-                            p.parseFunctionDefinition(t.module);
-                        }
-                        t = functionContext.getType(t.module, typeId);
-                    } catch (IllegalStateException e) {
-                        throw syntaxError("Error parsing template: " + e.getMessage(), e);
-                    }
-                }
+                t = parseTemplatedType(t, params);
             }
         }
-        if (matchOp("[")) {
+        if (arraysOk && matchOp("[")) {
             if (!matchOp("]")) {
                 throw syntaxError("Expected ']', got '\"+token+\"' when reading a type");
             }
             t = t.arrayType();
         }
-        t.used();
         if (matchOp("+")) {
             if (borrow) {
                 throw syntaxError("Borrow types don't need ':'");
@@ -819,6 +821,52 @@ public class Parser {
                 // throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
             } else {
                 t = t.orNull();
+            }
+        }
+        return t;
+    }
+
+    private ArrayList<DataType> parseTypeParameters(DataType t, boolean templatesOk) {
+        String name = t.name();
+        if (!matchOp("(")) {
+            throw syntaxError("Type '" + name + "' is a template; need to specify the parameters");
+        }
+        ArrayList<DataType> params = new ArrayList<>();
+        for (int i = 0; i < t.parameters.size(); i++) {
+            DataType t2 = readType(templatesOk);
+            params.add(t2);
+            matchOp(",");
+        }
+        if (!matchOp(")")) {
+            throw syntaxError("Type '" + name + "' is a template; need to specify " + t.parameters.size() + " parameters");
+        }
+        return params;
+    }
+
+    private DataType parseTemplatedType(DataType t, ArrayList<DataType> params) {
+        String name = t.name();
+        String typeId = DataType.getId(name, params);
+        DataType t2 = functionContext.getType(t.module, typeId);
+        if (t2 != null) {
+            t = t2;
+        } else {
+            String code = t.template;
+            ArrayList<String> with = new ArrayList<>();
+            for (int i = 0; i < t.parameters.size(); i++) {
+                with.add(params.get(i).fullName());
+            }
+            code = Templates.convertTemplate(code, t.parameters, with);
+            code = "type " + typeId + "\n" + code;
+            try {
+                Parser p = new Parser(program, module, code, t.lineOffset);
+                p.read();
+                p.parseTypeDefinition(t.module);
+                while (p.type != TokenType.END) {
+                    p.parseFunctionDefinition(t.module);
+                }
+                t = functionContext.getType(t.module, typeId);
+            } catch (IllegalStateException e) {
+                throw syntaxError("Error parsing template: " + e.getMessage(), e);
             }
         }
         return t;
@@ -1589,7 +1637,12 @@ public class Parser {
             call.def = program.getFunctionIfExists(type, module, identifier, call.args.size());
         }
         if (call.def == null) {
-            throw syntaxError("Function '" + identifier + "' not found");
+            FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
+            String notFound = "Function '" + identifier + "' not found";
+            if (didYouMean != null) {
+                notFound += "; did you mean " + didYouMean.name + " with " + didYouMean.parameters.size() + " parameter(s)?";
+            }
+            throw syntaxError(notFound);
         }
         if (call.def.parameters.size() > call.args.size()) {
             int thisParam = call.def.callType == null ? 0 : 1;
@@ -2369,25 +2422,57 @@ public class Parser {
                     }
                 }
             }
-            if (matchOp("(")) {
-                if ("new".equals(n)) {
-                    DataType type = readType(false);
-                    type.used();
-                    Expression arrayLength = null;
-                    if (type.isArray()) {
-                        matchOp(",");
-                        arrayLength = parseExpression();
-                        if (arrayLength.canThrowException() != null) {
-                            throw syntaxError("May not throw an exception here");
-                        }
+            DataType dataType = functionContext.getType(m, n);
+            if (dataType != null && dataType.enumValues != null) {
+                DataType enumType = functionContext.getType(m, n);
+                read();
+                if (matchOp(".")) {
+                    throw syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
+                }
+                String val = readIdentifier();
+                Long value = enumType.enumValues.get(val);
+                if (value == null) {
+                    throw syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
+                }
+                Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
+                return expr;
+            } else if (dataType != null) {
+                if (dataType.template != null) {
+                    ArrayList<DataType> params = parseTypeParameters(dataType, false);
+                    // if templates can be returned, then
+                    // we must not replace the types
+                    dataType = parseTemplatedType(dataType, params);
+                    // the name of the constructor includes the type names
+                    n = dataType.name();
+                }
+                if (matchOp("+")) {
+                    dataType = dataType.ownerType();
+                    // call the constructor of the owned type
+                    n += "_owned";
+                }
+                dataType.used();
+                if (matchOp("[")) {
+                    Expression arrayLength = parseExpression();
+                    if (arrayLength.canThrowException() != null) {
+                        throw syntaxError("May not throw an exception here");
                     }
-                    if (!matchOp(")")) {
-                        throw syntaxError("Expected ')', got '"+token+"' in constructor");
+                    if (!matchOp("]")) {
+                        throw syntaxError("Expected ')', got '" + token + "' in constructor");
                     }
-                    New newExpr = new New(type, arrayLength);
-                    type.used();
+                    New newExpr = new New(dataType.arrayType(), arrayLength);
+                    dataType.used();
+                    dataType.arrayType().used();
                     return newExpr;
                 }
+                if (matchOp("(")) {
+                    Call call = new Call();
+                    Expression expr = parseCall(null, m, n, call, true);
+                    return expr;
+                } else {
+                    throw syntaxError("Expected '(' to call the constructor");
+                }
+            }
+            if (matchOp("(")) {
                 Call call = new Call();
                 Expression expr = parseCall(null, m, n, call, true);
                 Value val = eval(expr, true);
@@ -2426,20 +2511,6 @@ public class Parser {
                         return new NumberValue(val, expr.type(), false);
                     }
                 }
-                return expr;
-            }
-            DataType enumType = functionContext.getType(m, n);
-            if (enumType != null && enumType.enumValues != null) {
-                read();
-                if (matchOp(".")) {
-                    throw syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
-                }
-                String val = readIdentifier();
-                Long value = enumType.enumValues.get(val);
-                if (value == null) {
-                    throw syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
-                }
-                Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
                 return expr;
             }
             Expression var = functionContext.getVariable(m, n);

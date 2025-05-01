@@ -82,6 +82,7 @@ double float_twice_1(double this);
 int64_t idx_2(int64_t x, int64_t len);
 int64_t int_rotateRight_2(int64_t this, int64_t n);
 int64_t org_bau_Std_ord_1(i8_array* s);
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 int64_t square_1(int64_t x);
@@ -130,6 +131,17 @@ int64_t org_bau_Std_ord_1(i8_array* s) {
         return _r0;
     }
     return 0;
+}
+org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
+    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
+    _t0.year = 0;
+    _t0.month = 0;
+    _t0.day = 0;
+    _t0.hour = 0;
+    _t0.minute = 0;
+    _t0.second = 0;
+    _t0.millis = 0;
+    return _t0;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
