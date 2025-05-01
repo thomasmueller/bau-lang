@@ -81,14 +81,14 @@ println(12.square())
     x int
     y int
 
-p := new(point)
+p := point()
 p.x = 10
 p.y = 20
 println('x=' p.x ' y=' p.y)
 `;
                 } else if (obj.value == 'arrays') {
                     text = 
-`data : new(i8[], 10)
+`data : i8[10]
 if data.len
     i := 0..data.len
     while
@@ -175,14 +175,14 @@ for i := until(2)
         a[j + 1] = t
 
 import org.bau.Utils
-x : new(int[], 10)
+x : int[10]
 for i := until(x.len)
     x[i] = Utils.random()
 insertionSort(x)
 for i := until(x.len)
     println('x[' i '] = ' x[i])
 
-y : new(float[], 10)
+y : float[10]
 for i := until(y.len)
     y[i] = float(Utils.random()) / 1_000_000_000_000
 insertionSort(y)
