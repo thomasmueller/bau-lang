@@ -77,7 +77,7 @@ fun signum(x float) float
         return 1
     return -1
     
-fun exp(x float) float
+fun exp(x float) const float
     native('return exp(x);')
     if isNotANumber(x) or x = POS_INFINITY
         return x
@@ -93,7 +93,7 @@ fun exp(x float) float
         approx += term
     return approx
 
-fun log(x float) float
+fun log(x float) const float
     native('return log(x);')
     if x = 0
         return NEG_INFINITY
@@ -123,7 +123,7 @@ fun log10(x float) float
     native('return log10(x);')    
     return log(x) / LOG10
 
-fun pow(x float, y float) float
+fun pow(x float, y float) const float
     native('return pow(x, y);')
     if x > 0 and y > 0
         return exp(y * log(x))

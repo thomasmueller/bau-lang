@@ -6,6 +6,7 @@ import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValuePanic;
+import org.bau.runtime.Value.ValueRef;
 
 public class ArrayAccess implements Expression, LeftValue {
 
@@ -24,8 +25,13 @@ public class ArrayAccess implements Expression, LeftValue {
         Value val = base.eval(memory);
         Value idx = arrayIndex.eval(memory);
         if (val != null && idx != null) {
-            Value array = memory.getHeap(val.longValue());
-            if (array.isArray()) {
+            Value array = null;
+            if (val instanceof ValueRef) {
+                array = memory.getHeap(val.longValue());
+            } else if (val.isArray()) {
+                array = val;
+            }
+            if (array != null && array.isArray()) {
                 int index = idx.intValue();
                 long len = array.len().longValue();
                 if (index < 0 || index >= len) {
@@ -180,7 +186,12 @@ public class ArrayAccess implements Expression, LeftValue {
         if (baseVal == null) {
             throw new IllegalStateException();
         }
-        Value array = memory.getHeap(baseVal.longValue());
+        Value array;
+        if (baseVal instanceof ValueRef) {
+            array = memory.getHeap(baseVal.longValue());
+        } else {
+            array = baseVal;
+        }
         long len = array.len().longValue();
         if (index < 0 || index >= len) {
             String message = "Array index " + index +

@@ -11,6 +11,7 @@ import org.bau.parser.Bounds.ApplyType;
 import org.bau.parser.Bounds.CompareResult;
 import org.bau.parser.SpecialOperation.SpecialOperationType;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueArray;
 import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValueI8Array;
 import org.bau.runtime.Value.ValueInt;
@@ -92,9 +93,14 @@ public class Parser {
                     // (this is only needed if we support custom range functions)
                     functions.remove(main);
                     functions.add(main);
+                    if (main.returnType != null) {
+                        throw syntaxError("The 'main' method may not return a value; use org.bau.Env.exit instead");
+                    }
                 }
             }
             for (FunctionDefinition def : functions) {
+                // the function could be compiled in the meantime (constants)
+                def = program.getFunctionById(def.getFunctionId());
                 if (def.code != null) {
                     String f = def.toString();
                     Parser p = new Parser(program, def.module, f, def.lineOffset);
@@ -189,11 +195,8 @@ public class Parser {
                 mainStatements = true;
                 // ok
             } else {
-                if (mainStatements && module == null) {
-                    FunctionDefinition old = program.getFunctionIfExists(null, null, "main", 0);
-                    if (old != null) {
-                        throw syntaxError("Function 'main' already exists");
-                    }
+                if (mainStatements && module == null && program.getFunctionIfExists(null, null, "main", 0) == null) {
+                    // there is no main yet: we thread the statements as a main function
                     pos = lastPos;
                     String mainCode = parseBlock(-1);
                     FunctionDefinition def = new FunctionDefinition(getLine(pos));
@@ -387,7 +390,11 @@ public class Parser {
         while (text.charAt(pos) != '\n') {
             pos--;
         }
+        int startPos = pos;
         pos++;
+        if (pos >= text.length()) {
+            return "";
+        }
         while (true) {
             if ("\n".equals(token)) {
                 readSpaces();
@@ -396,6 +403,9 @@ public class Parser {
                 break;
             }
             read();
+        }
+        if (pos >= text.length()) {
+            System.out.println("?? " + startPos);
         }
         return text.substring(pos, lastPos);
     }
@@ -949,15 +959,28 @@ public class Parser {
                 boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, s.value.type());
                 v.isConstant = true;
-                v.constantValue = eval(s.value, true);
-                if (v.constantValue instanceof Value.ValueRef) {
-                    // the value would be in the heap, but we don't retain the heap
-                    // here, so the data would be lost
-                    v.constantValue = null;
+                Value constValue = eval(s.value, true);
+                if (constValue != null) {
+                    if (constValue.isArray() || constValue instanceof Value.ValueRef) {
+                        // the value would be in the heap, but we don't retain the heap
+                        // here, so the data would be lost
+                        constValue = null;
+                    }
                 }
-                if (s.value.type().isArray() && s.value instanceof New) {
-                    New n = (New) s.value;
-                    v.addLenBoundCondition(null, "=", n.arrayLength);
+                v.constantValue = constValue;
+                if (v.constantValue instanceof Value.ValueRef) {
+                }
+                if (s.value.type().isArray()) {
+                    if (s.value instanceof New) {
+                        New n = (New) s.value;
+                        v.addLenBoundCondition(null, "=", n.arrayLength);
+                    } else if (s.value instanceof StringLiteral) {
+                        StringLiteral n = (StringLiteral) s.value;
+                        v.addLenBoundCondition(null, "=", new NumberValue(n.array.len(), DataType.INT_TYPE, false));
+                    } else if (s.value instanceof ArrayConstant) {
+                        ArrayConstant n = (ArrayConstant) s.value;
+                        v.addLenBoundCondition(null, "=", new NumberValue(n.len(), DataType.INT_TYPE, false));
+                    }
                 }
                 v.setBoundValue(null, "=", s.value);
                 s.leftValue = v;
@@ -1025,6 +1048,7 @@ public class Parser {
                     program.addGlobalVariable(v);
                 }
                 verifyBounds(s);
+                s.setBounds(getScope(0));
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1296,8 +1320,10 @@ public class Parser {
                 }
             }
             Value v2 = base.eval(null);
-            if (v2 != null && v.longValue() < v2.longValue()) {
-                return false;
+            if (v2 != null && v2.isArray()) {
+                if (v.longValue() < v2.len().longValue()) {
+                    return false;
+                }
             }
         }
         FieldAccess f = new FieldAccess(base, "len", program.getType(null, DataType.INT));
@@ -1855,6 +1881,12 @@ public class Parser {
         throw syntaxError("Expected end of statement, got '" + token + "' in 'break' statement");
     }
 
+    /**
+     * Get the "scope" condition at the specified level.
+     *
+     * @param level the level (0 for "top scope", that is valid within the function)
+     * @return the condition (if any)
+     */
     private Expression getScope(int level) {
         int l = getBlockConditions().size() + level - 1;
         if (l < 0) {
@@ -2482,6 +2514,10 @@ public class Parser {
                     // we compile those functions first, but only once
                     program.uncompiledFunctions.clear();
                     for (FunctionDefinition def : toCompileFirst) {
+                        FunctionDefinition latest = program.functions.get(def.getFunctionId());
+                        if (def != latest) {
+                            continue;
+                        }
                         if (def.code != null) {
                             try {
                                 Parser p = new Parser(program, def.module, def.toString(), def.lineOffset);
@@ -2507,7 +2543,16 @@ public class Parser {
                         type.used();
                         expr = new StringLiteral(s, type, reference);
                         return expr;
-                    } else if (!(val instanceof ValueRef)) {
+                    } else if (val instanceof ValueArray) {
+                        if (call.type().baseType().isNumber()) {
+                            Variable var = new Variable("x", call.type());
+                            var.constantValue = val;
+                            long reference = program.addArrayConstant(var);
+                            return new ArrayConstant((ValueArray) val, expr.type(), reference);
+                        }
+                    } else if (val instanceof ValueRef) {
+                        // the memory is no longer available
+                    } else {
                         return new NumberValue(val, expr.type(), false);
                     }
                 }

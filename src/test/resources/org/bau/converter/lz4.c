@@ -170,10 +170,6 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1008;
-i8_array* string_1009;
-i8_array* string_1010;
-i8_array* string_1011;
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
@@ -182,6 +178,12 @@ i8_array* string_1004;
 i8_array* string_1005;
 i8_array* string_1006;
 i8_array* string_1007;
+i8_array* string_1008;
+i8_array* string_1009;
+i8_array* string_1010;
+i8_array* string_1011;
+i8_array* string_1012;
+i8_array* string_1013;
 int64_t BLOCK_SIZE;
 int64_t PRIME1;
 int64_t PRIME2;
@@ -579,14 +581,17 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
             }
             int64_t _t6 = _t4;
             if (_t6) {
-                int64_t _t7 = inData->data[inPos - 1] == inData->data[candidatePos - 1];
+                int64_t _t7 = inData->data[idx_2(inPos - 1, inData->len)] == inData->data[candidatePos - 1];
                 _t6 = _t7;
             }
             if (!(_t6)) {
                 break;
             }
             runLen += 1;
-            inPos -= 1;
+            int64_t next = inPos - 1;
+            if (next < ( inData->len - 7 )) {
+                inPos = next;
+            }
             literalLen -= 1;
             candidatePos -= 1;
         }
@@ -735,13 +740,13 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
     return _r0;
 }
 int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_array* outputFileName, int64_t level) {
-    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1000);
+    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
     if (!(in->filePointer)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
         return 0;
     }
-    org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1002);
+    org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1004);
     if (!(out->filePointer)) {
         printf("Could not open file: %.*s\n", outputFileName->len, outputFileName->data);
         _decUseStack(out, org_bau_File_File);
@@ -806,13 +811,13 @@ int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_arra
     return totalSize;
 }
 int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_array* outputFileName) {
-    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1000);
+    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
     if (!(in->filePointer)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
         return 0;
     }
-    org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1002);
+    org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1004);
     if (!(out->filePointer)) {
         printf("Could not open file: %.*s\n", outputFileName->len, outputFileName->data);
         _decUseStack(out, org_bau_File_File);
@@ -983,17 +988,17 @@ int64_t org_bau_compress_Lz4Tool_main_0() {
     i8_array* a2 = org_bau_Env_arg_1(2);
     int64_t _t0 = args == 4;
     if (_t0) {
-        int64_t _t1 = org_bau_compress_Lz4Tool_is_2(a1, string_1006);
+        int64_t _t1 = org_bau_compress_Lz4Tool_is_2(a1, string_1008);
         _t0 = _t1;
     }
     int64_t _t4 = args == 4;
     if (_t4) {
-        int64_t _t5 = org_bau_compress_Lz4Tool_is_2(a1, string_1009);
+        int64_t _t5 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
         _t4 = _t5;
     }
     int64_t _t8 = args == 3;
     if (_t8) {
-        int64_t _t9 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
+        int64_t _t9 = org_bau_compress_Lz4Tool_is_2(a1, string_1013);
         _t8 = _t9;
     }
     if (_t0) {
@@ -1017,7 +1022,7 @@ int64_t org_bau_compress_Lz4Tool_main_0() {
     return 0;
 }
 int64_t org_bau_compress_Lz4Tool_xxhashFile_1(i8_array* inputFileName) {
-    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1000);
+    org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
     if (!(in->filePointer)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
@@ -1055,27 +1060,28 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1008 = str_const(" bytes", 6);
-    string_1009 = str_const("-1", 2);
-    string_1010 = str_const("Compressed ", 11);
-    string_1011 = str_const("-h", 2);
-    string_1000 = str_const("r", 1);
-    string_1001 = str_const("File not found: ", 16);
-    string_1002 = str_const("w", 1);
-    string_1003 = str_const("Could not open file: ", 21);
-    string_1004 = str_const("0", 1);
-    string_1005 = str_const("a", 1);
-    string_1006 = str_const("-d", 2);
-    string_1007 = str_const("Decompressed ", 13);
-    int64_t BLOCK_SIZE = 4194304;
-    int64_t PRIME1 = 2654435761;
-    int64_t PRIME2 = 2246822519;
-    int64_t PRIME3 = 3266489917;
-    int64_t PRIME4 = 668265263;
-    int64_t PRIME5 = 374761393;
+    string_1000 = str_const("Exit code ", 10);
+    string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
+    string_1002 = str_const("r", 1);
+    string_1003 = str_const("File not found: ", 16);
+    string_1004 = str_const("w", 1);
+    string_1005 = str_const("Could not open file: ", 21);
+    string_1006 = str_const("0", 1);
+    string_1007 = str_const("a", 1);
+    string_1008 = str_const("-d", 2);
+    string_1009 = str_const("Decompressed ", 13);
+    string_1010 = str_const(" bytes", 6);
+    string_1011 = str_const("-1", 2);
+    string_1012 = str_const("Compressed ", 11);
+    string_1013 = str_const("-h", 2);
+    BLOCK_SIZE = 4194304;
+    PRIME1 = 2654435761;
+    PRIME2 = 2246822519;
+    PRIME3 = 3266489917;
+    PRIME4 = 668265263;
+    PRIME5 = 374761393;
     int64_t _t0 = org_bau_compress_Lz4Tool_main_0();
     ;
-    return 0;
     _end();
     return 0;
 }

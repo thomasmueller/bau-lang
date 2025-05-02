@@ -174,6 +174,11 @@ public class TestCompare {
     }
 
     @Test
+    public void munchausen() throws IOException {
+        test("munchausen");
+    }
+
+    @Test
     public void modulesExample() throws IOException {
         test("modulesExample");
     }

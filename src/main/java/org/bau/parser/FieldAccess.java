@@ -6,6 +6,7 @@ import java.util.List;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueRef;
 import org.bau.runtime.Value.ValueStruct;
 
 public class FieldAccess implements Expression, LeftValue {
@@ -48,13 +49,20 @@ public class FieldAccess implements Expression, LeftValue {
                         }
                     }
                 }
-                Value array = memory.getHeap(v.longValue());
-                return array.len();
+                if (v instanceof ValueRef) {
+                    Value array = memory.getHeap(v.longValue());
+                    return array.len();
+                } else if (v.isArray()) {
+                    return v.len();
+                }
             }
         }
         Value v = base.eval(memory);
         if (v == null) {
             return null;
+        }
+        if (fieldName.equals("len") && v.isArray()) {
+            return v.len();
         }
         if (base.type().isPointer()) {
             v = memory.getHeap(v.longValue());

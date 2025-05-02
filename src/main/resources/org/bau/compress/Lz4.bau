@@ -317,9 +317,11 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         tagPos := outPos
         outPos += 1
         # possibly increase the match len backwards
-        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1]! = inData[candidatePos - 1]!
+        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1] = inData[candidatePos - 1]
             runLen += 1
-            inPos -= 1
+            next := inPos - 1
+            if next < inData.len - 7
+                inPos = next
             literalLen -= 1
             candidatePos -= 1
         copyLen := literalLen

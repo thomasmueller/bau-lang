@@ -3,6 +3,8 @@
 A programming language for everyone.
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
+<br>
+<a href="transpile.md">Transpile on the command line.</a>
 
 * Easy to learn with a concise syntax inspired by Python.
 * Memory-safe. Automatic memory management using reference counting by default.
@@ -591,19 +593,20 @@ is equivalent to:
 |Feature               |Bau    |Python |C      |C++    |Java   |C#     |Go     |Rust   |Swift  |
 |----------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
 |Memory Safety         |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
-|Easy to Learn and Use |&check;|&check;|&check;|       |&check;|&check;|&check;|       |&check;|
+|Easy to Learn and Use |&check;|&check;|       |       |&check;|&check;|&check;|       |&check;|
 |Concise Syntax        |&check;|&check;|       |       |       |       |&check;|       |&check;|
 |Vendor Independent    |&check;|&check;|&check;|&check;|       |       |       |&check;|       |
 |Strongly Typed        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Fast Execution        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |No GC Pauses          |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
-|Runs Everywhere       |&check;|       |&check;|       |       |       |       |       |       |
-|Generics / Templates  |&check;|       |       |&check;|&check;|&check;|&check;|&check;|&check;|
-|Macros                |&check;|       |&check;|&check;|       |       |       |&check;|       |
-|Exception Handling    |&check;|&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
-|Null Safety           |&check;|       |       |       |       |&check;|       |&check;|&check;|
+|Low Memory Usage      |&check;|       |&check;|&check;|       |       |&check;|&check;|&check;|
+|Runs Everywhere       |&check;|       |&check;|&check;|       |       |       |&check;|       |
+|Generics / Templates  |&check;|&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
+|Macros                |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
+|Exception Support     |&check;|&check;|       |&check;|&check;|&check;|       |&check;|&check;|
+|Null Safety           |&check;|       |       |       |       |&check;|&check;|&check;|&check;|
 |Array Bounds Checks   |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
-|Compile-Time Execution|&check;|       |       |&check;|       |       |       |&check;|       |
+|Compile-Time Execution|&check;|       |       |&check;|       |       |       |&check;|&check;|
 
 ### Non-Features
 
@@ -663,6 +666,9 @@ is equivalent to:
   a number of zeros are added to the left. The arithmetic shift is not supported
   by the language itself, but can be supported by a library function
   (same as eg. rotation). The reason is that logical shifts are more common.
+* A main method is not needed. However, if there is no main method,
+  then the variables before the first function (if any) are global
+  variables, and those after a function are local variables.
 
 ### Safety 
 * There is no way to write unsafe code, except by calling C methods.

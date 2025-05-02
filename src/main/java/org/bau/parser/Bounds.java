@@ -203,6 +203,18 @@ public class Bounds {
         return false;
     }
 
+    public boolean largerThan(Expression scope, long value) {
+        for (Entry e : list) {
+            if (e.scope == scope
+                    && e.minVariable.equals("")
+                    && e.maxVariable.equals("")
+                    && e.minOffset > value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean isNotNull(Parser p) {
         for (Entry e : list) {
             if (inScope(p.getBlockConditions(), e.scope)) {

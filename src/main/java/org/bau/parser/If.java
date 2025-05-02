@@ -48,7 +48,8 @@ public class If implements Statement {
             Expression cond = conditions.get(i);
             Value value = cond.eval(m);
             if (value == null) {
-                throw new IllegalStateException();
+                // eg. due to an uncompiled function
+                return StatementResult.TIMEOUT;
             }
             long v = value.longValue();
             if (v != 0) {

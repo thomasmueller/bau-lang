@@ -2,217 +2,44 @@ package org.bau;
 
 /**
 
-Name: Mya, Pha
-
-bug: main method is defined as "int" but doesn't return a method, and that's ok?
--> add a native method to set the exit value
-
-simplify constructor:
-generic types: List<T>
-x : new Point(10, 10) -- or any non-null field
-x : new(HashMap(int))(10)
-x : new int[100]
-x : new HashMap(int)[10]
-x : HashMap(int)[10]
-x : new(int[], 100)
-x : new HashMap(int, 10)
-generic types: List(T)
-
-does this work with templates?
+Name: Mya, Pha, Tau (Anouk), Atlas, Soma
+https://github.com/NicoNex/tau
 
 
-fun main()
-    a : newList(int, 10)
-    a : List<int>(10)
-    println(a.array.len)
-
-type List<T>
-    array T[]
-    size int
-
-fun newList(T type, capacity int) List<T>
-    return new List<T>(new T[size])
-
+interfaces (trait), like in Rust
+instanceof?
 
 ord('a') => code('a')? or char('a')?
 
-Require a main method (constants, global variables are outside of functions)
+'is' instead of 'equals'?
+
+varargs: converting all parameters to a certain type
+print and println without help of C
 
 support slices as an alternative / addition to range tracking?
 
-interfaces (trait), like in Rust
-instanceof ?
-
-'is' instead of 'equals'?
-
-constants maybe use #define ?
-
 Stdlib:
+- array copy / move
 - unit testing
-- random number generation
-- bit arrays
+- btree
+- speed up hash table and increase load factor
 - linked list / array
-- sorted map (tree map, skip list, b-tree?)
-- hash map
 - set (hash set, sorted set?)
-- stack
-- uuid
-- dqueue
 - string formatting and parsing
 - threads
-- time and date
-- base64
 - statistics (avg, median, approximate, hyperloglog, etc)
 - sorting (comparison, radix), binary search, etc.
 - starting / managing processes
 - file I/O
-- accessing file systems
+- accessing file systems (directories, file listing)
+- memory management
+- memory mapped files
+- system calls
 - networking
 - data compression
-- bloom filter
 - encryption / security
 - logging
 - sqlite
-
-
-For memory-safe and fast programming language, I think one of the most important, and hardest, questions is memory management.
-
-For my language (compiled to C), I'm still struggling a bit, and I'm pretty sure I'm not the only one.
-Right now, my language uses reference counting. This works, but is a bit slow, compared to eg. Rust or C.
-
-My plan is to offer three options:
-
-* Reference counting (default)
-* Ownership (but much simpler than Rust)
-* Arena allocation (fastest)
-
-Reference counting is simple to use, and
-allows calling a custom "close" method, if needed.
-Speed is not all that great, and the counter needs some memory.
-Dealing with cycles: I plan to support weak references later. Right now,
-the user needs to prevent cycles.
-
-Ownership: each object has one owner.
-Borrowing is allowed (always mutable for now), but only on the stack
-(variables, parameters, return values; fields of value types).
-Only the owner can destroy the object; no borrowing is allowed when destroying.
-Unlike Rust, I don't want to implement a borrow checker at compile time, but
-at runtime: if the object is borrowed, the program panics, similar to array-index out of bounds
-or division by zero. Checking for this can be done in batches.
-Due to the runtime check, this is a bit slower than in Rust, but I hope not by much
-(to be tested).
-Internally, this uses malloc / free for each object.
-
-Arena allocation: object can be created in an arena, using a bump allocator.
-The arena knows how many objects are alive, and allocation fails if there is no more space.
-Each object has an owner, borrowing on the stack is possible (as above).
-Each arena has a counter of live objects, and if that reaches 0, the stack is checked
-for borrows (this might panic, same as with Ownership), and so the arena can be freed.
-Pointers are direct pointers; but internally actually two pointers:
-one to the arena, and one to the object. An alternative would be to use
-a "arena id" plus an offset within the arena. Or a tagged pointer, but that is not portable.
-It looks like this is the fastest memory management strategy
-(my hope is: faster than Rust; but I need to test first), but also the hardest to use
-efficiently. I'm not quite sure if there are other languages that use this strategy.
-
-Syntax: I'm not quite sure yet. I want to keep it simple. Maybe something like this:
-
-Reference counting:
-
-t := new(Tree)      // construction; ref count starts at 1
-t.left = l          // increment l
-t.left = null       // decrement t.left
-t.parent = p?       // weak reference
-t = null            // decrement
-
-Ownership:
-
-t := own(Tree)      // construction; the type of t is 'Tree*'
-left = t            // transfer ownership
-left = &t           // borrow
-doSomething(left)   // using the borrow
-fun get() Tree&     // returns a borrowed reference
-fun get() Tree*     // returns a owned tree
-
-Arena:
-
-arena := newArena(1_000_000) // 1 MB
-t := arena.own(Tree) // construction; the type of t is 'Tree**'
-arena(t)             // you can get the arena of an object
-left = &t            // borrow
-t = null             // decrements the live counter in the arena
-arena.reuse()        // this checks that there are no borrows on the stack
-
-In addition to the above, a user or library might use "index into array", optionally
-with a generation. Like Vale. But I think I will not support this strategy in the language itself for now.
-
-
-
-
-
-
-
-
-
-
-
-
-One of the advantages is that this is easy to use: no annotations are needed in most cases.
-Well there is the problem of cycles
-Except to for weak references
-to deal with cycles.
-(I don't want to use tracing GC , or trial deletion.
-
-
-
-
-
-Default case: reference counting. This i
-
-TODO memory management:
-     fast case: arena allocator
-         arena.new(Tree)
-         # support references to outside? maybe not
-         # support reference counted objects like like strings? maybe not
-         # pointer tagging to pick the arena
-
-     simple case: reference counting
-     fast case: ownership
-     fun getTree() Tree   # share (reference counting)
-     fun getTree() Tree?  # shared or null
-     fun getTree() Tree@  # weak reference
-     fun getTree() Tree*  # own
-     fun getTree() Tree&  # borrow
-
-     # can not return a weak reference?
-         x := new(Tree)      # shared; count = 1
-         x := own(Tree)      # owned ('my own')
-         y := x              # owned: move; x is invalid afterwards, or null
-         y <- x              # alternative syntax for move?
-         y := &x             # owned: borrow (mutable)
-         x := null           # owned: drop
-         return x            # owned: move
-         y := x              # shared: increment
-         x := null           # shared: decrement
-         y := &x             # shared: weak reference
-         return x            # shared: keep count
-         type Tree
-           owned  Tree*?     # owned ; may be null
-           shared Tree?      # shared; may be null
-           weak   Tree??     # weak reference
-           owned  Tree*      # owned ; may not be null
-           shared Tree       # shared; may not be null
-           borrow Tree&      # borrow (not supported: use shared instead)
-
-TODO memory management
-     initial count = 0? if only assigned to local variable and then dropped?
-     or initially has an owner, always?
-
-TODO auto-convert to the requested type if there is a conversion function,
-     for println.
-
-TODO don't use printf when converting to C; use string conversion and concat
-     (so we have no differences between interpreted and compiled output)
 
 TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
      cd /Users/mueller/Downloads/xcc
@@ -221,25 +48,11 @@ TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
 
 TODO No panic mode: https://blog.reverberate.org/2025/02/03/no-panic-rust.html
 
-TODO maybe buy the book about Lox https://craftinginterpreters.com/contents.html
-
-
 TODO test fully qualified package access (types,...)
 
 TODO converter from Java or C or Rust to Bau
 
 TODO 100% code coverage, for parser at least
-
-TODO tagged union support, or interfaces like in Go?
-
-TODO improved memory management
-     maybe avoid reference counting for local variables,
-     and use a separate stack for references
-
-TODO struct assignment (eg. str) also needs decRef/incRef -- via a function?
-
-TODO automatically adding a construction function?
-TODO types that have non-nullable fields: new(Tree) would set the fields to null...
 
 TODO mark loop functions as "loop macro" or so (make sure they can not be called)
 
@@ -278,7 +91,6 @@ https://github.com/google/j2cl
 https://www.teavm.org/docs/intro/getting-started.html
 
 Memory management
-Arena Allocator
 https://nullprogram.com/blog/2024/05/25/
 
 Lobster
@@ -291,8 +103,6 @@ better document, test, implement constant expression functions
 
 debugger:
 line number mapping
-
-pub
 
 input
 keyboard character input
@@ -323,25 +133,6 @@ disallowed in a constant expression.
 no observable side-effect is permitted.
 recursion depth (the standard suggests a minimum of 512)
 
-c++14 relaxed rules for constexpr
-
-c++11:
-the function body cannot declare variables or define new types.
-the body may only contain declarations, null statements and a single return statement
-
-
-Rust
-const fn
-Constant evaluating a complex constant, this might take some time
-exceeded interpreter step limit (see `#[const_eval_limit]`)
-
-Swift
-@compilerEvaluable
-
-Go and C#: do not have it
-
-ord('a') function
-
 main function with array of strings
 
 chess program
@@ -357,24 +148,11 @@ A B C D E F G H
 
 tetris program
 
-
-
 String data type
-
-Built-in data types:
-
-Do we just need int, f64, f32, and range?
-u8: 0..0xff
-u16: 0..0xffff
-u32: 0..0xffff_ffff
-
-
-Convert to Javascript as well?
 
 https://en.wikipedia.org/wiki/Language_Server_Protocol
 
 https://langserver.org/
-
 
 # Documentation
 
@@ -384,31 +162,12 @@ https://ryjo.codes/tour-of-clips.html
 
 # IDE, Debugger
 
-
-
-# This
-
-A) ensure that fields can not be hidden by parameters and variables?
-B) use ".": .radius * .radius; parameters setColor(color int) { .color = color }
-
-
 # Online tool
 
 https://emscripten.org/
 https://tryclojure.org/
 WASM
 https://stackoverflow.com/questions/61925125/is-there-a-way-to-run-c-program-locally-in-a-browser
-
-https://bellard.org/tcc/
-
-
-Name:
-Tau (Anouk)
-https://github.com/NicoNex/tau
-
-Bau
-Atlas
-Soma
 
 https://docs.python.org/3/reference/index.html
 
@@ -421,7 +180,6 @@ Forth
 C
 
 https://github.com/google/wuffs
-
 
 # Stack Size
 
@@ -445,30 +203,10 @@ https://elv.sh/
 
 # Memory Management
 
-type address
-  name i8[20]
-
-type Address
-  name i8[200]
-
-a : int        -- value type, 64 bit
-a : address    -- value type, user defined
-a : Address    -- unique_ptr (the memory is released once the loop repeats,
-                              the loop exits, or the method returns;
-                              unless it is assigned to another pointer)
-                              The drop function in Rust is a special function
-                              that is automatically called when an
-                              owned value goes out of scope.
-a : Address?   -- reference to a value that might might not exist or was deleted
-
-
-# C++
-
 The C++ Iceberg
 https://fouronnes.github.io/cppiceberg/
 
 # RAII
-
 https://doc.rust-lang.org/nomicon/obrm.html
 
 make_unique
@@ -476,25 +214,11 @@ unique_prt
 call constructor
 call deconstructor
 
-
 If a type has new/delete methods, then the object is automatically
 deleted.
 The new() method is called after initialization, and delete() when
 it is no longer assigned (e.g. goes out of scope).
 It can only be assigned to one variable.
-
-type File
-  fp i64
-  File(fp i64)
-    this.fp = fp
-  new()
-    print('opening ', fp)
-  delete()
-    print'closing ', fp)
-
-for i := range(0, 10)
-  f := File(i)
-  print('opened ', i)
 
 # Non-Features
 
@@ -565,11 +289,6 @@ https://github.com/jabbalaci/SpeedTests/tree/master/java
 Commas could be optional - see Lisp, Clojure
 https://discourse.julialang.org/t/optional-use-of-commas/29757
 
-# Tabs vs Spaces
-
-Spaces are more popular
-https://hoffa.medium.com/400-000-github-repositories-1-billion-files-14-terabytes-of-code-spaces-or-tabs-7cfe0b5dd7fd
-
 # Arrays
 
 - Option to use power of 2 sizes
@@ -581,8 +300,6 @@ circular buffer / circular array / ring buffer
 https://en.wikipedia.org/wiki/Circular_buffer
 
 # Syntax
-
-Do we also want conditional return? return 123 if ... ?
 
     while exp do block end
     repeat block until exp
@@ -598,17 +315,6 @@ Do we also want conditional return? return 123 if ... ?
     local attnamelist [‘=’ explist]
     To-be-closed Variables
 
-# Keywords and Reserved Words
-"goto": reserved keyword? so we can write really low-level code, and can convert "C" or assembler
-"label <abc>" keyword?
-"assert" reserved keyword?
-"switch" reserved keyword?
-
-switch vs if else if
-
-for i to list.len(), a = list[i]
-for a in list
-
 C#
 https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/iteration-statements
 List<int> fibNumbers = [0, 1, 1, 2, 3, 5, 8, 13];
@@ -620,28 +326,6 @@ A type has the public parameterless GetEnumerator method.
 The return type of the GetEnumerator method has the public
   Current property and the public parameterless
   MoveNext method whose return type is bool.
-
-# Keywords
-
-Keywords
-Lua:
-and          break        do           else         elseif       end
-false        for          function     goto         if           in
-local        nil          not          or           repeat       return
-then         true         until        while
-
-Go:
-break        default      func         interface    select
-case         defer        go           map          struct
-chan         else         goto         package      switch
-const        fallthrough  if           range        type
-continue     for          import       return       var
-
-MyLang
-if           elif         else         while        break
-not          and          or           return
-catch        throw
-continue?
 
 
 # Functions

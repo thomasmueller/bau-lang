@@ -6,6 +6,7 @@ import java.util.List;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueArray;
 
 public class Variable implements Expression, LeftValue {
     String name;
@@ -196,7 +197,8 @@ public class Variable implements Expression, LeftValue {
     @Override
     public Value setValue(Memory memory, Value val, boolean incRefCount) {
         if (global) {
-            if (type.needIncDec()) {
+            if (type.needIncDec() && !(val instanceof ValueArray)) {
+                // ValueArray is a constant
                 Value old = memory.getGlobal(name);
                 if (old != null) {
                     StatementResult result = Free.decRefCount(old, type, memory);
@@ -212,7 +214,8 @@ public class Variable implements Expression, LeftValue {
                 memory.setGlobal(name, val);
             }
         } else {
-            if (type.needIncDec()) {
+            if (type.needIncDec() && !(val instanceof ValueArray)) {
+                // ValueArray is a constant
                 Value old = memory.getLocal(name);
                 if (old != null) {
                     StatementResult result = Free.decRefCount(old, type, memory);

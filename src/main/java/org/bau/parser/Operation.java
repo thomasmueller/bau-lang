@@ -141,10 +141,6 @@ public class Operation implements Expression {
         if (left == null) {
             return right.type().resolveEnumType();
         }
-        if (left.type() == null) {
-            ;
-            System.out.println("?? " + left.type());
-        }
         DataType l = left.type().resolveEnumType();
         if (!l.isNumber()) {
             throw new IllegalStateException("Not a number type: " + l + " for operation " + operator);
@@ -646,6 +642,8 @@ public class Operation implements Expression {
         }
         if (targetType.isArray() || targetType.isPointer()) {
             if (val instanceof ValueNull) {
+                return val;
+            } else if (val.isArray()) {
                 return val;
             }
         }

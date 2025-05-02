@@ -25,9 +25,14 @@ public class Call implements Statement, Expression {
         if (def.list == null) {
             // it was replaced, for example declared with just a name,
             // and then later a concrete implementation was set
-            def = m.getFunction(def.getFunctionId());
+            FunctionDefinition newDef = m.getFunction(def.getFunctionId());
+            if (newDef == null) {
+                m.addUncompiledFunction(def.getFunctionId(), def);
+                return null;
+            }
+            def = newDef;
         }
-        if (m == null || m.evaluateOnlyConstExpr() && !def.constExpr) {
+        if (m == null || m.evaluateOnlyConstExpr() && (def == null || !def.constExpr)) {
             return null;
         }
         if (def.list.isEmpty() && def.code != null) {

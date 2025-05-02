@@ -142,10 +142,10 @@ fun square(x int) int throws exception
     return x * x
     
 for i := range(2_999_999_999, 3_000_000_002)
-  x := square(i)
-  println(i '^2 = ' x)
-  catch e
-    println(i '^2 = ' e.message)
+    x := square(i)
+    println(i '^2 = ' x)
+    catch e
+      println(i '^2 = ' e.message)
 `;
                 } else if (obj.value == 'macros') {
                     text = 

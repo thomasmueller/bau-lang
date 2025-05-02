@@ -18,6 +18,7 @@ import java.util.TreeSet;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueRef;
 import org.bau.std.Std;
 
 public class Program {
@@ -35,7 +36,9 @@ public class Program {
     HashMap<String, Long> stringConstants = new HashMap<>();
 
     // reference -> string
-    HashMap<Long, String> stringConstantsMap = new HashMap<>();
+    TreeMap<Long, String> stringConstantsMap = new TreeMap<>();
+
+    TreeMap<Long, Variable> arrayConstantsMap = new TreeMap<>();
 
     HashMap<String, Variable> variables = new HashMap<>();
 
@@ -101,6 +104,12 @@ public class Program {
     public Variable getGlobalVariable(String module, String name) {
         String id = Variable.getGlobalVariableId(module, name);
         return globalVariables.get(id);
+    }
+
+    public long addArrayConstant(Variable var) {
+        long reference = 1000L + arrayConstantsMap.size();
+        arrayConstantsMap.put(reference, var);
+        return reference;
     }
 
     public long addStringConstant(String n) {
@@ -610,9 +619,22 @@ public class Program {
             buff.append(Statement.indent("result->data = (int8_t*) data;\n"));
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
+            for (long id: stringConstantsMap.keySet()) {
+                buff.append("i8_array* string_" + id + ";\n");
+            }
         }
-        for (long id: stringConstantsMap.keySet()) {
-            buff.append("i8_array* string_" + id + ";\n");
+        if (!arrayConstantsMap.isEmpty()) {
+            buff.append("int_array* int_array_const(int64_t* data, uint32_t len) {\n");
+            buff.append(Statement.indent("int_array* result = _malloc(sizeof(int_array));\n"));
+            buff.append(Statement.indent("result->len = len;\n"));
+            // 0 means do not free the memory (it looks like it's already free)
+            buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
+            buff.append(Statement.indent("result->data = (int64_t*) data;\n"));
+            buff.append(Statement.indent("return result;\n"));
+            buff.append("}\n");
+            for (long id: arrayConstantsMap.keySet()) {
+                buff.append("int_array* array_" + id + ";\n");
+            }
         }
         for (Variable var : globalVariables.values()) {
             buff.append(var.type().toC() + " " + var.name + ";\n");
@@ -635,6 +657,23 @@ public class Program {
             String s = stringConstantsMap.get(id);
             byte[] data = s.getBytes(StandardCharsets.UTF_8);
             buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
+        }
+        for (long id : arrayConstantsMap.keySet()) {
+            Variable var = arrayConstantsMap.get(id);
+            if (var.type().baseType() != DataType.INT_TYPE) {
+                throw new IllegalStateException("Only integer array constants are supported currently");
+            }
+            Value data = var.constantValue;
+            StringBuilder buff2 = new StringBuilder();
+            for (int i = 0; i < data.len().intValue(); i++) {
+                if (i > 0) {
+                    buff2.append(", ");
+                }
+                buff2.append(data.get(i).toString());
+            }
+            buff.append(Statement.indent("int64_t array_const_" + id + "[] = {" + buff2.toString() + "};\n"));
+            buff.append(Statement.indent(
+                    "array_" + id + " = int_array_const(array_const_" + id + ", " + data.len().intValue() + ");\n"));
         }
         context.nextFunction();
         FunctionDefinition main = new FunctionDefinition(0);
@@ -880,11 +919,19 @@ Testing.
         memory.evaluateOnlyConstExpr(true, 1_000_000);
         Value result = expr.eval(memory);
         uncompiledFunctions.putAll(memory.getUncompiledFunctions());
+        if (result instanceof ValueRef) {
+            // e.g. arrays
+            result = memory.getHeap(result.get().longValue());
+        }
         return result;
     }
 
     public List<FunctionDefinition> getFunctions() {
         return new ArrayList<>(functions.values());
+    }
+
+    public FunctionDefinition getFunctionById(String functionId) {
+        return functions.get(functionId);
     }
 
 }

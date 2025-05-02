@@ -39,7 +39,21 @@ public class Assignment implements Statement {
     @Override
     public void setBounds(Expression scope) {
         if (initial || modify == null) {
-            leftValue.setBoundValue(scope, "=", value);
+            if (value instanceof Operation) {
+                Operation op = (Operation) value;
+                if (op.operator.equals("%")) {
+                    // if the bounds of the left operand are >= 0, then
+                    // we can set the bounds to be >= 0 and smaller than the right
+                    Bounds b = op.left.getBounds();
+                    if (b != null && b.largerThan(scope, -1)) {
+                        leftValue.setBoundValue(scope, "<", op.right);
+                    }
+                } else {
+                    leftValue.setBoundValue(scope, "=", value);
+                }
+            } else {
+                leftValue.setBoundValue(scope, "=", value);
+            }
         } else {
             // TODO modify bounds
             // leftValue.setBoundValue(scope, modify, value);
@@ -120,7 +134,7 @@ public class Assignment implements Statement {
         } else {
             result = value.toC();
         }
-        if (initial) {
+        if (initial && !isGlobalScope) {
             buff.append(type.toC());
             buff.append(' ');
         }

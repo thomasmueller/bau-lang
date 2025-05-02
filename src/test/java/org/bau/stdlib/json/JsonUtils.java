@@ -20,18 +20,18 @@ public class JsonUtils {
         while (true) {
             TokenType token = t.nextToken();
             switch (token) {
-            case TokenType.END:
+            case END:
                 return buff.toString();
-            case TokenType.STRING:
+            case STRING:
                 buff.append('\"').append(t.getEscapedValue()).append('\"');
                 break;
-            case TokenType.NUMBER:
-            case TokenType.TRUE:
-            case TokenType.FALSE:
-            case TokenType.NULL:
+            case NUMBER:
+            case TRUE:
+            case FALSE:
+            case NULL:
                 buff.append(t.getEscapedValue());
                 break;
-            case TokenType.OBJECT:
+            case OBJECT:
                 if (t.matches(TokenType.OBJECT_END)) {
                     buff.append("{}");
                 } else {
@@ -39,21 +39,21 @@ public class JsonUtils {
                     buff.append('{').append(newline).append(linePrefix);
                 }
                 break;
-            case TokenType.OBJECT_END:
+            case OBJECT_END:
                 if (linePrefix.length() >= indent.length()) {
                     linePrefix = linePrefix.substring(0, linePrefix.length() - indent.length());
                 }
                 buff.append(newline).append(linePrefix).append('}');
                 break;
-            case TokenType.ARRAY:
+            case ARRAY:
                 inArray = true;
                 buff.append('[');
                 break;
-            case TokenType.ARRAY_END:
+            case ARRAY_END:
                 inArray = false;
                 buff.append(']');
                 break;
-            case TokenType.COMMA:
+            case COMMA:
                 buff.append(',');
                 if (!inArray) {
                     buff.append(newline).append(linePrefix);
@@ -61,7 +61,7 @@ public class JsonUtils {
                     buff.append(space);
                 }
                 break;
-            case TokenType.COLON:
+            case COLON:
                 buff.append(':').append(space);
                 break;
             default:

@@ -131,7 +131,6 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1008;
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
@@ -140,6 +139,7 @@ i8_array* string_1004;
 i8_array* string_1005;
 i8_array* string_1006;
 i8_array* string_1007;
+i8_array* string_1008;
 int64_t randomSeed;
 double POS_INFINITY;
 double NEG_INFINITY;
@@ -738,7 +738,6 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1008 = str_const(":", 1);
     string_1000 = str_const("-", 1);
     string_1001 = str_const("0", 1);
     string_1002 = str_const("E", 1);
@@ -747,16 +746,17 @@ int main(int _argc, char *_argv[]) {
     string_1005 = str_const("Infinity", 8);
     string_1006 = str_const("-Infinity", 9);
     string_1007 = str_const(" ", 1);
+    string_1008 = str_const(":", 1);
     int64_t randomSeed = 0;
-    double POS_INFINITY = (1.0 / 0.0);
-    double NEG_INFINITY = (-1.0 / 0.0);
-    double NOT_A_NUMBER = (0.0 / 0.0);
-    double PI = 3.141592653589793;
-    double E = 2.718281828459045;
-    double LOG10 = 2.302585092994046;
-    double LOG2 = 0.6931471805599453;
-    int64_t MIN_INT = 0x8000000000000000;
-    int64_t MAX_INT = 0x7fffffffffffffff;
+    POS_INFINITY = (1.0 / 0.0);
+    NEG_INFINITY = (-1.0 / 0.0);
+    NOT_A_NUMBER = (0.0 / 0.0);
+    PI = 3.141592653589793;
+    E = 2.718281828459045;
+    LOG10 = 2.302585092994046;
+    LOG2 = 0.6931471805599453;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
     int64_t a = org_bau_Utils_getNanoTime_0();
     printf("%lld\n", (long long)a);
     int64_t b = org_bau_Utils_getNanoTime_0();
