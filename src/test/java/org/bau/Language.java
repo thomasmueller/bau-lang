@@ -5,6 +5,10 @@ package org.bau;
 Name: Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
+playground: stop if program runs is too slow
+
+varargs: converting all parameters to a certain type
+
 print and println without help of C
 - each type has a "toStr()" method
 
@@ -16,8 +20,6 @@ malloc / free replacement: tlsf?
 ord('a') => code('a')? or char('a')?
 
 'is' instead of 'equals'?
-
-varargs: converting all parameters to a certain type
 
 support slices as an alternative / addition to range tracking?
 
@@ -40,8 +42,10 @@ Stdlib:
 - statistics (avg, median, approximate, hyperloglog, etc)
 - radix sort
 
-TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
-     cd /Users/mueller/Downloads/xcc
+TODO integrate C compiler in the browser, once goto is available:
+     https://github.com/tyfkda/xcc
+     cd ~/data/xcc
+     npm up
      npm run build-assets && gulp
      open http://192.168.45.88:3000/
 

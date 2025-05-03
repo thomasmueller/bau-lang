@@ -786,7 +786,14 @@ Testing.
     }
 
     public String run() {
+        return run(Long.MAX_VALUE);
+    }
+
+    public String run(long maxTicks) {
         Memory m = new Memory();
+        if (maxTicks != Long.MAX_VALUE) {
+            m.evaluateOnlyConstExpr(false, maxTicks);
+        }
         for (Entry<String, FunctionDefinition> e : functions.entrySet()) {
             m.addFunction(e.getKey(), e.getValue());
         }
@@ -803,7 +810,11 @@ Testing.
         l2.addAll(autoClose);
         runSequence(m, l2);
         this.ticksExecuted = m.getTicksExecuted();
-        return m.getOutput();
+        String output = m.getOutput();
+        if (ticksExecuted >= maxTicks) {
+            output += "\n(Program stopped after " + ticksExecuted + " ticks)";
+        }
+        return output;
     }
 
     public long getTicksExecuted() {
