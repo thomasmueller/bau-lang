@@ -1,5 +1,5 @@
 fun main()
-    for i := range(0, LIMIT)
+    for i := until(LIMIT)
         if isMunchausen(i)
             println(i)
 

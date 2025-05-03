@@ -74,4 +74,16 @@ public class Break implements Statement {
         return condition != null ? "break " + condition + "\n" : "break\n";
     }
 
+    @Override
+    public void used(Program program) {
+        if (condition != null) {
+            condition.used(program);
+        }
+        if (autoClose != null) {
+            for(Statement s : autoClose) {
+                s.used(program);
+            }
+        }
+    }
+
 }

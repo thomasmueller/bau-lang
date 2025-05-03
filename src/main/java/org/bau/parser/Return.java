@@ -77,4 +77,16 @@ public class Return implements Statement {
         return expr != null ? "return " + expr + "\n" : "return\n";
     }
 
+    @Override
+    public void used(Program program) {
+        if (expr != null) {
+            expr.used(program);
+        }
+        if (autoClose != null) {
+            for (Statement s : autoClose) {
+                s.used(program);
+            }
+        }
+    }
+
 }

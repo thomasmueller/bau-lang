@@ -36,7 +36,7 @@ public class Program {
     HashMap<String, Long> stringConstants = new HashMap<>();
 
     // reference -> string
-    TreeMap<Long, String> stringConstantsMap = new TreeMap<>();
+    TreeMap<Long, StringLiteral> stringConstantsMap = new TreeMap<>();
 
     TreeMap<Long, Variable> arrayConstantsMap = new TreeMap<>();
 
@@ -112,12 +112,20 @@ public class Program {
         return reference;
     }
 
-    public long addStringConstant(String n) {
+    public StringLiteral getStringLiteral(String n) {
+        Long reference = stringConstants.get(n);
+        if (reference == null) {
+            return null;
+        }
+        return stringConstantsMap.get(reference);
+    }
+
+    public long addStringConstant(String n, StringLiteral literal) {
         Long reference = stringConstants.get(n);
         if (reference == null) {
             reference = 1000L + stringConstants.size();
             stringConstants.put(n, reference);
-            stringConstantsMap.put(reference, n);
+            stringConstantsMap.put(reference, literal);
         }
         return reference;
     }
@@ -135,7 +143,6 @@ public class Program {
         functions.put(id, def);
         if (def.name.equals("close") && def.callType != null && def.callType.isPointer()) {
             def.callType.autoClose = def;
-            def.used = true;
         }
     }
 
@@ -280,6 +287,9 @@ public class Program {
     }
 
     public String toC() {
+        for(Statement s : list) {
+            s.used(this);
+        }
         ProgramContext context = new ProgramContext();
         StringBuilder buff = new StringBuilder();
         buff.append("#include <stdio.h>\n");
@@ -288,7 +298,7 @@ public class Program {
         buff.append("#include <stdint.h>\n");
 
         for(FunctionDefinition def : functions.values()) {
-            if (def.used && def.includes != null) {
+            if (def.isUsed() && def.includes != null) {
                 includes.addAll(def.includes);
             }
         }
@@ -502,7 +512,7 @@ public class Program {
         HashSet<String> exceptionStructs = new HashSet<>();
         for (FunctionDefinition def : functions.values()) {
             String s = def.getExceptionStruct();
-            if (def.used && s != null && !exceptionStructs.contains(s)) {
+            if (def.isUsed() && s != null && !exceptionStructs.contains(s)) {
                 exceptionStructs.add(s);
                 buff.append("typedef struct " + s + " " + s + ";\n");
                 buff.append("struct ").append(s).append(" {\n");
@@ -541,7 +551,7 @@ public class Program {
         buff.append("char **__argv;\n");
         buff.append("/* functions */\n");
         for (FunctionDefinition def : functions.values()) {
-            if (def.used) {
+            if (def.isUsed()) {
                 def.borrowCheck();
                 context.function = def;
                 if (def.comment != null) {
@@ -610,7 +620,14 @@ public class Program {
                 }
             }
         }
-        if (!stringConstantsMap.isEmpty()) {
+        boolean hasStringConstants = false;
+        for (long id: stringConstantsMap.keySet()) {
+            if (stringConstantsMap.get(id).isUsed()) {
+                hasStringConstants = true;
+                break;
+            }
+        }
+        if (hasStringConstants) {
             buff.append("i8_array* str_const(char* data, uint32_t len) {\n");
             buff.append(Statement.indent("i8_array* result = _malloc(sizeof(i8_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
@@ -620,7 +637,9 @@ public class Program {
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
             for (long id: stringConstantsMap.keySet()) {
-                buff.append("i8_array* string_" + id + ";\n");
+                if (stringConstantsMap.get(id).isUsed()) {
+                    buff.append("i8_array* string_" + id + ";\n");
+                }
             }
         }
         if (!arrayConstantsMap.isEmpty()) {
@@ -640,7 +659,7 @@ public class Program {
             buff.append(var.type().toC() + " " + var.name + ";\n");
         }
         for (FunctionDefinition def : functions.values()) {
-            if (def.used) {
+            if (def.isUsed()) {
                 context.nextFunction();
                 context.function = def;
                 def.optimize(context);
@@ -654,9 +673,12 @@ public class Program {
         buff.append(Statement.indent("__argc = _argc;\n"));
         buff.append(Statement.indent("__argv = _argv;\n"));
         for (long id: stringConstantsMap.keySet()) {
-            String s = stringConstantsMap.get(id);
-            byte[] data = s.getBytes(StandardCharsets.UTF_8);
-            buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
+            StringLiteral literal = stringConstantsMap.get(id);
+            if (literal.isUsed()) {
+                String s = literal.value;
+                byte[] data = s.getBytes(StandardCharsets.UTF_8);
+                buff.append(Statement.indent("string_" + id + " = str_const(\"" + StringLiteral.escape(s) + "\", " + data.length + ");\n"));
+            }
         }
         for (long id : arrayConstantsMap.keySet()) {
             Variable var = arrayConstantsMap.get(id);
@@ -768,8 +790,8 @@ Testing.
         for (Entry<String, FunctionDefinition> e : functions.entrySet()) {
             m.addFunction(e.getKey(), e.getValue());
         }
-        for (Entry<Long, String> e : stringConstantsMap.entrySet()) {
-            byte[] bytes = e.getValue().getBytes(StandardCharsets.UTF_8);
+        for (Entry<Long, StringLiteral> e : stringConstantsMap.entrySet()) {
+            byte[] bytes = e.getValue().value.getBytes(StandardCharsets.UTF_8);
             Value v = new Value.ValueI8Array(bytes);
             m.setConstant(e.getKey(), v);
         }

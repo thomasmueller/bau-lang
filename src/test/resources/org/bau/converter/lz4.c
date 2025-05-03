@@ -112,7 +112,6 @@ void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer, int64_t pos, int64_t len);
 int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
-int64_t org_bau_Std_ord_1(i8_array* s);
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable);
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0();
 int64_t org_bau_compress_Lz4_countTrailingZeros_1(int64_t x);
@@ -170,14 +169,10 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
 i8_array* string_1005;
-i8_array* string_1006;
-i8_array* string_1007;
 i8_array* string_1008;
 i8_array* string_1009;
 i8_array* string_1010;
@@ -254,13 +249,6 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     } else {
         return fwrite(data->data + pos, 1, len, fp);
     }
-}
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
 }
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable) {
     org_bau_compress_Lz4_LZ4Compress* _t2 = org_bau_compress_Lz4_LZ4Compress_new();
@@ -1060,14 +1048,10 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("Exit code ", 10);
-    string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
     string_1002 = str_const("r", 1);
     string_1003 = str_const("File not found: ", 16);
     string_1004 = str_const("w", 1);
     string_1005 = str_const("Could not open file: ", 21);
-    string_1006 = str_const("0", 1);
-    string_1007 = str_const("a", 1);
     string_1008 = str_const("-d", 2);
     string_1009 = str_const("Decompressed ", 13);
     string_1010 = str_const(" bytes", 6);

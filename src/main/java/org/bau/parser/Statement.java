@@ -42,4 +42,6 @@ public interface Statement {
 
     void collectTypes(HashSet<DataType> set, MemoryType memoryType);
 
+    void used(Program program);
+
 }

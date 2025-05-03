@@ -86,7 +86,7 @@ Spaces group statements into blocks.
 ### Loops
 
 There are `for` and `while` loops.
-`while` without condition is an endless loop.
+`while` without a condition is endless.
 
     # loop from 0 to 9
     for i := range(0, 10)
@@ -151,7 +151,7 @@ and may be indented.
 `not` inverses a comparison. `and` `or` combines comparisons;
 the right side is only evaluated when needed.
 Integer `+` `-` `*` wrap around on over- / underflow.
-`/` `%`: integer division by 0 returns max, min, or 0.
+`/` division by 0 returns max, min, or 0; `%` by 0 return 0.
 `&` `|` `^` `~` `<<` `>>` are bitwise and, or, xor, not, 
 shift right, and logical shift right: the leftmost bits become `0`.
 
@@ -196,7 +196,7 @@ Internally, this functions are templates.
 
 `macro` function calls are replaced at compile time
 with the implementation,
-and so parameter are only evaluated when needed:
+and so parameters are only evaluated when needed:
 
     fun if(cond int, a T, b T) macro T
         if cond
@@ -207,62 +207,6 @@ and so parameter are only evaluated when needed:
     text : 'Hello'
     for i := until(10)
         println(if(i < text.len, text[i], 0))
-
-### Types
-
-Types can have fields and functions:
-
-    type Square
-        length int
-
-    fun Square area() int
-        return length * length
-
-    s : Square()
-      
-A constructor function is added automatically for each type.
-The arguments of this function are the non-nullable fields.
-
-`int` and other lowercase types are copied when assigned;
-Types that start with uppercase are referenced.
-
-If a type has a `close` function, then it is called
-before the memory is freed.
-
-### Types
-
-Functions on built-in types are allowed:
-
-    fun int square() int
-        return this * this
-
-    println(12.square())
-
-Types can have parameters:
-
-    type List(T)
-        array T[]
-        size int
-
-    fun newList(T type) List(T)
-        return List(T)(T[0])
-
-    list := newList(Square)
-
-### Null
-
-`?` means it may be `null`. 
-An explicit check is required before using the value.
-There are no null pointer errors at runtime.
-
-    fun get(key int) Circle?
-        # may return null
-
-    v : get(key) 
-    if v
-        print(v.area())
-
-For value types and numbers, `null` means zero.
 
 ### Arrays Access
 
@@ -285,6 +229,63 @@ The conditional `break` guarantees that `i` is within the bounds.
             next : i + 1
             break next >= data.len
             i = next
+
+### Types
+
+Types can have fields and functions:
+
+    type Square
+        length int
+
+    fun Square area() int
+        return length * length
+
+    s : Square()
+
+`int` and other types that start with lowercase are copied when assigned;
+types that start with uppercase are referenced.
+
+If a type has a `close` function, then it is called
+before the memory is freed.
+
+For each type, a constructor is automatically added,
+which has the non-nullable fields as arguments.
+
+Functions on built-in types, and arrays, are allowed.
+
+    fun int square() int
+        return this * this
+
+    println(12.square())
+
+### Template Types
+
+Types can have parameters. Such types are called templates:
+
+    type List(T)
+        array T[]
+        size int
+
+    fun newList(T type) List(T)
+        return List(T)(T[0])
+
+    intList := newList(int)
+    squareList := newList(Square)
+
+### Null
+
+`?` means it may be `null`. 
+An explicit check is required before using the value.
+There are no null pointer errors at runtime.
+
+    fun get(key int) Circle?
+        # may return null
+
+    v : get(key) 
+    if v
+        print(v.area())
+
+For value types and numbers, `null` means zero.
 
 ### Memory Management
 

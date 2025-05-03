@@ -60,14 +60,11 @@ char **__argv;
 /* functions */
 double float_1(double x);
 int64_t idiv_2(int64_t a, int64_t b);
-int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 void operations_2(int64_t a, int64_t b);
 double org_bau_Math_abs_1(double x);
 double org_bau_Math_acos_1(double x);
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
-int64_t org_bau_Math_appendfloat_3(double n, i8_array* buff, int64_t pos);
 double org_bau_Math_asin_1(double x);
 double org_bau_Math_atan_1(double x);
 double org_bau_Math_ceil_1(double x);
@@ -88,7 +85,6 @@ double org_bau_Math_signum_1(double x);
 double org_bau_Math_sin_1(double x);
 double org_bau_Math_sqrt_1(double x);
 double org_bau_Math_tan_1(double x);
-int64_t org_bau_Std_ord_1(i8_array* s);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
@@ -108,13 +104,6 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
-i8_array* string_1004;
-i8_array* string_1005;
-i8_array* string_1006;
 i8_array* string_1007;
 i8_array* string_1008;
 i8_array* string_1009;
@@ -159,10 +148,6 @@ int64_t idiv_2(int64_t a, int64_t b) {
     if (a == 0) return 0;
     return a > 0 ? LLONG_MAX : LLONG_MIN;
 }
-int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
-    return arrayOutOfBounds(x, len);
-}
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
@@ -189,89 +174,6 @@ double org_bau_Math_acos_1(double x) {
     double _t0 = org_bau_Math_asin_1(x);
     double _r0 = 1.5707963267948966 - _t0;
     return _r0;
-}
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
-    if (n < 0) {
-        buff->data[idx_2(pos, buff->len)] = 45;
-        pos += 1;
-    } else {
-        n = - n;
-    }
-    int64_t start = pos;
-    while (1) {
-        buff->data[idx_2(pos, buff->len)] = 48 - (imod_2(n, 10));
-        pos += 1;
-        n /= 10;
-        if (n == 0) {
-            break;
-        }
-    }
-    int64_t end = pos;
-    while (pos > start) {
-        pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, buff->len)];
-        buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
-        buff->data[idx_2(start, buff->len)] = temp;
-        start += 1;
-    }
-    return end;
-}
-int64_t org_bau_Math_appendfloat_3(double n, i8_array* buff, int64_t pos) {
-    int64_t e = 0;
-    int64_t _t0 = n >= 1.0E8;
-    if (!(_t0)) {
-        int64_t _t1 = n <= 0.001;
-        _t0 = _t1;
-    }
-    if (_t0) {
-        while (n > 1.0E20) {
-            n /= 1.0E20;
-            e += 20;
-        }
-        while (n < 1.0E-20) {
-            n *= 1.0E20;
-            e -= 20;
-        }
-        while (n >= 10) {
-            n /= 10;
-            e += 1;
-        }
-        while (n < 1) {
-            n *= 10;
-            e -= 1;
-        }
-        pos = org_bau_Math_appendfloat_3(n, buff, pos);
-        buff->data[idx_2(pos, buff->len)] = 69;
-        pos += 1;
-        pos = org_bau_Math_appendInt_3(e, buff, pos);
-        return pos;
-    }
-    pos = org_bau_Math_appendInt_3(int_1(n), buff, pos);
-    buff->data[idx_2(pos, buff->len)] = 46;
-    pos += 1;
-    n = (n - int_1(n)) * 10;
-    int64_t y = int_1(n * 100000000000000000);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            if (y <= 0) {
-                break;
-            }
-            int64_t x = idiv_2(y, 100000000000000000);
-            buff->data[idx_2(pos, buff->len)] = 48 + (imod_2(x, 10));
-            pos += 1;
-            y -= x * 100000000000000000;
-            y *= 10;
-            continue5:;
-            int64_t _next = i + 1;
-            if (_next >= 19) {
-                break;
-            }
-            i = _next;
-        }
-        break;
-    }
-    return pos;
 }
 double org_bau_Math_asin_1(double x) {
     return asin(x);
@@ -792,13 +694,6 @@ double org_bau_Math_tan_1(double x) {
     double _r0 = _t0 / _t1;
     return _r0;
 }
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
-}
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
@@ -808,13 +703,6 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("-", 1);
-    string_1001 = str_const("0", 1);
-    string_1002 = str_const("E", 1);
-    string_1003 = str_const(".", 1);
-    string_1004 = str_const("NaN", 3);
-    string_1005 = str_const("Infinity", 8);
-    string_1006 = str_const("-Infinity", 9);
     string_1007 = str_const("  / ", 4);
     string_1008 = str_const(" = ", 3);
     string_1009 = str_const("  % ", 4);

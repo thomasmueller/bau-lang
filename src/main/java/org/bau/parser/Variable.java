@@ -239,4 +239,9 @@ public class Variable implements Expression, LeftValue {
         return isConstant;
     }
 
+    @Override
+    public void used(Program program) {
+        type.used(program);
+    }
+
 }

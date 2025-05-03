@@ -59,7 +59,6 @@ i8_array* hex_2(int64_t x, int64_t len);
 int32_t i32_1(int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 int32_t murmur3_32_1(i8_array* data);
-int64_t org_bau_Std_ord_1(i8_array* s);
 int32_t rotLefti32_2(int32_t x, int64_t n);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
@@ -80,7 +79,6 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
@@ -171,13 +169,6 @@ int32_t murmur3_32_1(i8_array* data) {
     h ^= shiftRight_i32_2(h, 16);
     return h;
 }
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
-}
 int32_t rotLefti32_2(int32_t x, int64_t n) {
     int64_t _r0 = (shiftLeft_2(x, n)) | (shiftRight_i32_2(x, (32 - n)));
     return _r0;
@@ -191,7 +182,6 @@ int32_t shiftRight_i32_2(int32_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("0", 1);
     string_1001 = str_const("a", 1);
     string_1002 = str_const("", 0);
     string_1003 = str_const("test", 4);

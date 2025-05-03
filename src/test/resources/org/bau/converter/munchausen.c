@@ -40,11 +40,9 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
-int_array* getCache_0();
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t imod_2(int64_t a, int64_t b);
 int64_t isMunchausen_1(int64_t number);
-int64_t pow_2(int64_t a, int64_t b);
 void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
@@ -60,20 +58,6 @@ int_array* int_array_const(int64_t* data, uint32_t len) {
 int_array* array_1000;
 int64_t LIMIT;
 int_array* cache;
-int_array* getCache_0() {
-    int_array* result = int_array_new(10);
-    result->data[0] = 0;
-    while (1 == 1) {
-        int64_t i = 1;
-        while (i < 10) {
-            result->data[i] = pow_2(i, i);
-            continue1:;
-            i += 1;
-        }
-        break;
-    }
-    return result;
-}
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
     if (a == 0) return 0;
@@ -97,23 +81,6 @@ int64_t isMunchausen_1(int64_t number) {
     int64_t _r0 = total == number;
     return _r0;
 }
-int64_t pow_2(int64_t a, int64_t b) {
-    int64_t result = 1;
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            result *= a;
-            continue1:;
-            int64_t _next = i + 1;
-            if (_next >= b) {
-                break;
-            }
-            i = _next;
-        }
-        break;
-    }
-    return result;
-}
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
@@ -124,13 +91,17 @@ int main(int _argc, char *_argv[]) {
     _incUseStack(cache);
     while (1 == 1) {
         int64_t i = 0;
-        while (i < 4400) {
+        while (1) {
             int64_t _t0 = isMunchausen_1(i);
             if (_t0) {
-                printf("%lld\n", (long long)i);
+                printf("%lld\n", i);
             }
             continue1:;
-            i += 1;
+            int64_t _next = i + 1;
+            if (_next >= 4400) {
+                break;
+            }
+            i = _next;
         }
         break;
     }

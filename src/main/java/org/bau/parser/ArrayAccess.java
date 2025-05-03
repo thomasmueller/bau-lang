@@ -225,4 +225,15 @@ public class ArrayAccess implements Expression, LeftValue {
         return false;
     }
 
+    @Override
+    public void used(Program program) {
+        base.used(program);
+        if (arrayIndex != null) {
+            if (checkBounds) {
+                program.getFunction(null, null, "idx", 2).used(program);
+            }
+            arrayIndex.used(program);
+        }
+    }
+
 }

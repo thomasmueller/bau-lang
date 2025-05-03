@@ -22,8 +22,6 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
 /* types */
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
-struct org_bau_Utils_dateTime;
 typedef struct BitField BitField;
 struct BitField;
 struct int_array {
@@ -38,26 +36,6 @@ int_array* int_array_new(uint32_t len) {
     result->data = _malloc(sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
-    return result;
-}
-struct org_bau_Utils_dateTime {
-    int32_t year;
-    int64_t month;
-    int64_t day;
-    int64_t hour;
-    int64_t minute;
-    int64_t second;
-    int64_t millis;
-};
-org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
-    org_bau_Utils_dateTime result;
-    result.year = 0;
-    result.month = 0;
-    result.day = 0;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    result.millis = 0;
     return result;
 }
 struct BitField {
@@ -82,18 +60,14 @@ void BitField_set_2(BitField* this, int64_t index);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 BitField* newBitField_1(int64_t len);
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t primeSum_1(int64_t limit);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void int_array_free(int_array* x);
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
 void BitField_free(BitField* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
-}
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
 }
 void BitField_free(BitField* x) {
     _decUse(x->data, int_array);
@@ -125,17 +99,6 @@ int64_t idx_2(int64_t x, int64_t len) {
 }
 BitField* newBitField_1(int64_t len) {
     BitField* _t0 = BitField_1(int_array_new(idiv_2((len + 63), 64)));
-    return _t0;
-}
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
-    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
-    _t0.year = 0;
-    _t0.month = 0;
-    _t0.day = 0;
-    _t0.hour = 0;
-    _t0.minute = 0;
-    _t0.second = 0;
-    _t0.millis = 0;
     return _t0;
 }
 int64_t primeSum_1(int64_t limit) {

@@ -22,8 +22,6 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
 /* types */
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
-struct org_bau_Utils_dateTime;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -38,26 +36,6 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct org_bau_Utils_dateTime {
-    int32_t year;
-    int64_t month;
-    int64_t day;
-    int64_t hour;
-    int64_t minute;
-    int64_t second;
-    int64_t millis;
-};
-org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
-    org_bau_Utils_dateTime result;
-    result.year = 0;
-    result.month = 0;
-    result.day = 0;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    result.millis = 0;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
@@ -66,18 +44,14 @@ char **__argv;
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 void insertionSort_int_array_int_1(int_array* a);
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t org_bau_Utils_random_0();
 void shellSort_int_array_int_1(int_array* a);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void test_0();
 void int_array_free(int_array* x);
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
-}
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
 }
 int64_t randomSeed;
 int64_t idiv_2(int64_t a, int64_t b) {
@@ -113,17 +87,6 @@ void insertionSort_int_array_int_1(int_array* a) {
         }
         break;
     }
-}
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
-    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
-    _t0.year = 0;
-    _t0.month = 0;
-    _t0.day = 0;
-    _t0.hour = 0;
-    _t0.minute = 0;
-    _t0.second = 0;
-    _t0.millis = 0;
-    return _t0;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;

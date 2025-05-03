@@ -20,8 +20,6 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
 /* types */
 typedef struct int_array int_array;
 struct int_array;
-typedef struct float_array float_array;
-struct float_array;
 struct int_array {
     int32_t len;
     int64_t* data;
@@ -36,94 +34,15 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct float_array {
-    int32_t len;
-    double* data;
-    int32_t _refCount;
-};
-float_array* float_array_new(uint32_t len) {
-    float_array* result = _malloc(sizeof(float_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(double) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
 char **__argv;
 /* functions */
-double float_1(double x);
-int64_t int_1(int64_t x);
-double sum_float_var(int _vaCount,...);
-int64_t sum_int_var(int _vaCount,...);
 void int_array_free(int_array* x);
-void float_array_free(float_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
-}
-void float_array_free(float_array* x) {
-    _free(x->data);
-    _free(x);
-}
-double float_1(double x) {
-    return x;
-}
-int64_t int_1(int64_t x) {
-    return x;
-}
-double sum_float_var(int _vaCount,...) {
-    va_list _vaList;
-    float_array* x = float_array_new(_vaCount);
-    va_start(_vaList, _vaCount);
-    for (int _vaI = 0; _vaI < _vaCount; _vaI++) {
-        x->data[_vaI] = va_arg(_vaList, double);
-    }
-    va_end(_vaList);
-    double result = 0.0;
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            result += x->data[i];
-            continue1:;
-            int64_t _next = i + 1;
-            if (_next >= x->len) {
-                break;
-            }
-            i = _next;
-        }
-        break;
-    }
-    _decUseStack(x, float_array);
-    return result;
-}
-int64_t sum_int_var(int _vaCount,...) {
-    va_list _vaList;
-    int_array* x = int_array_new(_vaCount);
-    va_start(_vaList, _vaCount);
-    for (int _vaI = 0; _vaI < _vaCount; _vaI++) {
-        x->data[_vaI] = va_arg(_vaList, int64_t);
-    }
-    va_end(_vaList);
-    int64_t result = 0;
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            result += x->data[i];
-            continue1:;
-            int64_t _next = i + 1;
-            if (_next >= x->len) {
-                break;
-            }
-            i = _next;
-        }
-        break;
-    }
-    _decUseStack(x, int_array);
-    return result;
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

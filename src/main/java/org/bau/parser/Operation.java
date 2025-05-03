@@ -650,4 +650,34 @@ public class Operation implements Expression {
         throw new IllegalStateException("Unsupported target type " + targetType + " for " + val);
     }
 
+    @Override
+    public void used(Program program) {
+        if (left != null) {
+            left.used(program);
+        }
+        switch (operator) {
+        case ">>":
+            DataType t = left.type();
+            if (t.isRange()) {
+                t = DataType.INT_TYPE;
+            }
+            program.getFunction(null, null, "shiftRight_" + t.name(), 2).used(program);
+            break;
+        case "<<":
+            program.getFunction(null, null, "shiftLeft", 2).used(program);
+            break;
+        case "/":
+            if (widerType().isFloatingPoint()) {
+                // floating point
+            } else {
+                program.getFunction(null, null, "idiv", 2).used(program);
+            }
+            break;
+        case "%":
+            program.getFunction(null, null, "imod", 2).used(program);
+            break;
+        }
+        right.used(program);
+    }
+
 }

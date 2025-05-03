@@ -55,7 +55,6 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
-int64_t fibonacciConst_1(int64_t n);
 int64_t fibonacciIterative_1(int64_t n);
 int64_t fibonacciRecursive_1(int64_t n);
 void i8_array_free(i8_array* x);
@@ -80,23 +79,6 @@ i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 int64_t ticks;
-int64_t fibonacciConst_1(int64_t n) {
-    int64_t r0 = 0;
-    int64_t r1 = 0;
-    int64_t r = 1;
-    while (1 == 1) {
-        int64_t i = 1;
-        while (i < n) {
-            r1 = r0;
-            r0 = r;
-            r = r1 + r0;
-            continue1:;
-            i += 1;
-        }
-        break;
-    }
-    return r;
-}
 int64_t fibonacciIterative_1(int64_t n) {
     int64_t r0 = 0;
     int64_t r1 = 0;

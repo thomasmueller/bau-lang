@@ -57,7 +57,6 @@ char **__argv;
 /* functions */
 i8_array* hex_2(int64_t x, int64_t len);
 int64_t idx_2(int64_t x, int64_t len);
-int64_t org_bau_Std_ord_1(i8_array* s);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
@@ -68,15 +67,6 @@ void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
 }
-i8_array* str_const(char* data, uint32_t len) {
-    i8_array* result = _malloc(sizeof(i8_array));
-    result->len = len;
-    result->_refCount = INT32_MAX;
-    result->data = (int8_t*) data;
-    return result;
-}
-i8_array* string_1000;
-i8_array* string_1001;
 i8_array* hex_2(int64_t x, int64_t len) {
     int64_t l = len;
     if (l < 0) {
@@ -102,18 +92,9 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
-}
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("0", 1);
-    string_1001 = str_const("a", 1);
     i8_array* _t0 = hex_2(0x12fea234, 8);
     printf("%.*s\n", _t0->len, _t0->data);
     _decUseStack(_t0, i8_array);

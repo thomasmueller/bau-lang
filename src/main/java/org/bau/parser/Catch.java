@@ -79,4 +79,15 @@ public class Catch implements Statement {
         this.autoClose = autoClose;
     }
 
+    @Override
+    public void used(Program program) {
+        for (Statement s : list) {
+            s.used(program);
+        }
+        for (Statement s : autoClose) {
+            s.used(program);
+        }
+        var.type().used(program);
+    }
+
 }

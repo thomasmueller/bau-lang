@@ -112,4 +112,9 @@ public class NumberValue implements Expression {
                 Long.parseLong(hex.substring(8), 16);
     }
 
+    @Override
+    public void used(Program program) {
+        type.used(program);
+    }
+
 }

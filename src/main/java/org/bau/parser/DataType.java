@@ -22,10 +22,6 @@ public class DataType {
     // and we don't want to set it if not needed
     // TODO this means for int array, this is always set
     public static final DataType INT_TYPE = newNumberType(DataType.INT, 8);
-    static {
-        INT_TYPE.used();
-        INT_TYPE.arrayType.used();
-    }
 
     final String module;
     private final String name;
@@ -139,15 +135,14 @@ public class DataType {
         this.fields.addAll(fields);
     }
 
-    void used() {
+    void used(Program program) {
         if (DataType.isGenericTypeName(name)) {
-            return;
-        }
-        if (fields.isEmpty() && !isArray() && isPointer()) {
-            // eg. List(T)
-            return;
+            throw new IllegalStateException();
         }
         this.used = true;
+        if (autoClose != null) {
+            program.getFunctionById(autoClose.getFunctionId()).used(program);
+        }
     }
 
     public boolean isNumber() {

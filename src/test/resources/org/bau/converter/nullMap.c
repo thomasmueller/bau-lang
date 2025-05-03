@@ -18,24 +18,8 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     exit(1);
 }
 /* types */
-typedef struct int_array int_array;
-struct int_array;
 typedef struct Value Value;
 struct Value;
-struct int_array {
-    int32_t len;
-    int64_t* data;
-    int32_t _refCount;
-};
-int_array* int_array_new(uint32_t len) {
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 struct Value {
     int64_t data;
     int32_t _refCount;
@@ -55,12 +39,7 @@ char **__argv;
 Value* Value_0();
 Value* get_1(int64_t key);
 void test_0();
-void int_array_free(int_array* x);
 void Value_free(Value* x);
-void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
-}
 void Value_free(Value* x) {
     _free(x);
 }

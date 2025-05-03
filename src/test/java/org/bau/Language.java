@@ -5,41 +5,40 @@ package org.bau;
 Name: Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
+print and println without help of C
+- each type has a "toStr()" method
 
-interfaces (trait), like in Rust
-instanceof?
+function pointers (more low-level; required for callbacks)?
+interfaces (trait), like in Rust instanceof?
+
+malloc / free replacement: tlsf?
 
 ord('a') => code('a')? or char('a')?
 
 'is' instead of 'equals'?
 
 varargs: converting all parameters to a certain type
-print and println without help of C
 
 support slices as an alternative / addition to range tracking?
 
 Stdlib:
-- array copy / move
 - unit testing
-- btree
-- speed up hash table and increase load factor
-- linked list / array
-- set (hash set, sorted set?)
-- string formatting and parsing
-- threads
-- statistics (avg, median, approximate, hyperloglog, etc)
-- sorting (comparison, radix), binary search, etc.
-- starting / managing processes
-- file I/O
 - accessing file systems (directories, file listing)
-- memory management
+- networking
+- array copy / move
+- starting / managing processes
+- threads
+- file I/O
+- speed up hash table and increase load factor
+- memory management (retrieve free space)
 - memory mapped files
 - system calls
-- networking
-- data compression
-- encryption / security
 - logging
+- set (hash set, sorted set)
+- btree
 - sqlite
+- statistics (avg, median, approximate, hyperloglog, etc)
+- radix sort
 
 TODO integrate C compiler in the browser: https://github.com/tyfkda/xcc
      cd /Users/mueller/Downloads/xcc

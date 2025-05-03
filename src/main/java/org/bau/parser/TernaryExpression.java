@@ -130,4 +130,18 @@ public class TernaryExpression implements Expression {
         return result;
     }
 
+    @Override
+    public void used(Program program) {
+        type.used(program);
+        condition.used(program);
+        for (Statement s : ifTrueStatements) {
+            s.used(program);
+        }
+        ifTrue.used(program);
+        for (Statement s : ifFalseStatements) {
+            s.used(program);
+        }
+        ifFalse.used(program);
+    }
+
 }

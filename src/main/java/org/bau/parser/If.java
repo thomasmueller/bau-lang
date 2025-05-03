@@ -169,4 +169,21 @@ public class If implements Statement {
         this.autoClose.add(autoClose);
     }
 
+    @Override
+    public void used(Program program) {
+        for (Expression e : conditions) {
+            e.used(program);
+        }
+        for (ArrayList<Statement> l : listList) {
+            for (Statement s : l) {
+                s.used(program);
+            }
+        }
+        for (List<Statement> l : autoClose) {
+            for (Statement s : l) {
+                s.used(program);
+            }
+        }
+    }
+
 }

@@ -134,4 +134,12 @@ public class New implements Expression {
         return this;
     }
 
+    @Override
+    public void used(Program program) {
+        type.used(program);
+        if (arrayLength != null) {
+            arrayLength.used(program);
+        }
+    }
+
 }

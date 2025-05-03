@@ -23,8 +23,6 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
-struct org_bau_Utils_dateTime;
 struct i8_array {
     int32_t len;
     int8_t* data;
@@ -53,36 +51,13 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct org_bau_Utils_dateTime {
-    int32_t year;
-    int64_t month;
-    int64_t day;
-    int64_t hour;
-    int64_t minute;
-    int64_t second;
-    int64_t millis;
-};
-org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
-    org_bau_Utils_dateTime result;
-    result.year = 0;
-    result.month = 0;
-    result.day = 0;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    result.millis = 0;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
 char **__argv;
 /* functions */
 double float_twice_1(double this);
-int64_t idx_2(int64_t x, int64_t len);
 int64_t int_rotateRight_2(int64_t this, int64_t n);
-int64_t org_bau_Std_ord_1(i8_array* s);
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 int64_t square_1(int64_t x);
@@ -90,7 +65,6 @@ int64_t square_2(int64_t a, int64_t b);
 int64_t sum_var(int64_t a, int _vaCount,...);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -98,8 +72,6 @@ void i8_array_free(i8_array* x) {
 void int_array_free(int_array* x) {
     _free(x->data);
     _free(x);
-}
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -110,38 +82,15 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1002;
 i8_array* string_1003;
 int64_t randomSeed;
 double float_twice_1(double this) {
     double _r0 = this + this;
     return _r0;
 }
-int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
-    return arrayOutOfBounds(x, len);
-}
 int64_t int_rotateRight_2(int64_t this, int64_t n) {
     int64_t _r0 = (shiftRight_int_2(this, n)) | (shiftLeft_2(this, (64 - n)));
     return _r0;
-}
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
-}
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
-    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
-    _t0.year = 0;
-    _t0.month = 0;
-    _t0.day = 0;
-    _t0.hour = 0;
-    _t0.minute = 0;
-    _t0.second = 0;
-    _t0.millis = 0;
-    return _t0;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -187,7 +136,6 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const(" ", 1);
     string_1001 = str_const("ascii of \"0\" is ", 16);
-    string_1002 = str_const("0", 1);
     string_1003 = str_const(" = ", 3);
     int64_t randomSeed = 0;
     int64_t _t0 = square_1(2);

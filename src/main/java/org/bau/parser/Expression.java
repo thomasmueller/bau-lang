@@ -75,4 +75,6 @@ public interface Expression {
         return List.of();
     }
 
+    void used(Program program);
+
 }

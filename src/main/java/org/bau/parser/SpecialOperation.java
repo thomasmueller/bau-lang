@@ -43,4 +43,8 @@ public class SpecialOperation implements Statement {
         // nothing
     }
 
+    @Override
+    public void used(Program program) {
+    }
+
 }

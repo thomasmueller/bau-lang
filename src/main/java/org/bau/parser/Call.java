@@ -367,4 +367,12 @@ public class Call implements Statement, Expression {
         return var;
     }
 
+    @Override
+    public void used(Program program) {
+        program.getFunctionById(def.getFunctionId()).used(program);
+        for (Expression e : args) {
+            e.used(program);
+        }
+    }
+
 }

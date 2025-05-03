@@ -87,4 +87,9 @@ public class ArrayConstant implements Expression {
         return this;
     }
 
+    @Override
+    public void used(Program program) {
+        type.used(program);
+    }
+
 }

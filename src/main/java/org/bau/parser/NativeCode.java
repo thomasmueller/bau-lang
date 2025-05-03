@@ -42,4 +42,8 @@ public class NativeCode implements Statement {
         return "native(" + StringLiteral.escape(nativeCode) + ")";
     }
 
+    @Override
+    public void used(Program program) {
+    }
+
 }

@@ -73,4 +73,11 @@ public class NullValue implements Expression {
         return this;
     }
 
+    @Override
+    public void used(Program program) {
+        if (type != null) {
+            type.used(program);
+        }
+    }
+
 }

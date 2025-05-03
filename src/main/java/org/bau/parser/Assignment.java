@@ -184,4 +184,13 @@ public class Assignment implements Statement {
         return buff.toString();
     }
 
+    @Override
+    public void used(Program program) {
+        leftValue.used(program);
+        if (type != null) {
+            type.used(program);
+        }
+        value.used(program);
+    }
+
 }

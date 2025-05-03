@@ -527,7 +527,6 @@ public class Parser {
             if (type == null) {
                 throw syntaxError("Type '" + id + "' not found when reading a function definition");
             }
-            callType.used();
             Variable var = new Variable("this", callType);
             var.isConstant = false;
             def.parameters.add(var);
@@ -548,7 +547,6 @@ public class Parser {
                     if (matchOp("..")) {
                         varArgs = true;
                         type = type.arrayType();
-                        type.used();
                     }
                     Variable var = new Variable(name, type);
                     var.isConstant = false;
@@ -569,7 +567,6 @@ public class Parser {
                     if (matchOp("..")) {
                         varArgs = true;
                         type = type.arrayType();
-                        type.used();
                     }
                     Variable var = new Variable(name, type);
                     if (type.memoryType() == MemoryType.OWNER) {
@@ -672,9 +669,6 @@ public class Parser {
                 program.removeFunction(old);
                 // this ensures it is not called
                 old.list = null;
-                if (old.used) {
-                    def.used = true;
-                }
             } else {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
@@ -1167,9 +1161,6 @@ public class Parser {
                     } else if (!matchOp("]")) {
                         throw syntaxError("Expected ']', got '" + token + "' in array access");
                     }
-                    if (checkBounds) {
-                        program.getFunction(null, null, "idx", 2).used = true;
-                    }
                     left = new ArrayAccess(left, arrayIndex, checkBounds);
                 } else {
                     break;
@@ -1216,7 +1207,6 @@ public class Parser {
                 }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
-                program.getFunction(null, null, "idiv", 2).used = true;
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1752,9 +1742,6 @@ public class Parser {
                 }
                 call.args.set(i, cast);
             }
-        }
-        if (use) {
-            call.def.used = true;
         }
         if (call.exceptionType() != null) {
             exceptionType = call.exceptionType();
@@ -2406,11 +2393,12 @@ public class Parser {
             return expr;
         } else if (type == TokenType.STRING) {
             String n = token;
-            long reference = program.addStringConstant(n);
             read();
             DataType type = program.getType(null, DataType.I8).arrayType();
-            type.used();
-            Expression expr = new StringLiteral(n, type, reference);
+            Expression expr = program.getStringLiteral(n);
+            if (expr == null) {
+                expr = new StringLiteral(n, type, program);
+            }
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -2482,7 +2470,6 @@ public class Parser {
                     // call the constructor of the owned type
                     n += "_owned";
                 }
-                dataType.used();
                 if (matchOp("[")) {
                     Expression arrayLength = parseExpression();
                     if (arrayLength.canThrowException() != null) {
@@ -2492,8 +2479,6 @@ public class Parser {
                         throw syntaxError("Expected ')', got '" + token + "' in constructor");
                     }
                     New newExpr = new New(dataType.arrayType(), arrayLength);
-                    dataType.used();
-                    dataType.arrayType().used();
                     return newExpr;
                 }
                 if (matchOp("(")) {
@@ -2538,10 +2523,8 @@ public class Parser {
                     if (val instanceof ValueI8Array) {
                         ValueI8Array str = (ValueI8Array) val;
                         String s = str.toString();
-                        long reference = program.addStringConstant(s);
                         DataType type = program.getType(null, DataType.I8).arrayType();
-                        type.used();
-                        expr = new StringLiteral(s, type, reference);
+                        expr = new StringLiteral(s, type, program);
                         return expr;
                     } else if (val instanceof ValueArray) {
                         if (call.type().baseType().isNumber()) {
@@ -2622,9 +2605,6 @@ public class Parser {
                 } else if (!matchOp("]")) {
                     throw syntaxError("Expected ']', got '" + token + "' in array access");
                 }
-                if (checkBounds) {
-                    program.getFunction(null, null, "idx", 2).used = true;
-                }
                 v = new ArrayAccess(v, arrayIndex, checkBounds);
                 vt = v.type();
             } else {
@@ -2680,19 +2660,6 @@ public class Parser {
                     break;
                 }
                 right = parseExpression(right, prec + (p2 > prec ? 1 : 0));
-            }
-            if ("/".equals(op)) {
-                program.getFunction(null, null, "idiv", 2).used = true;
-            } else if ("%".equals(op)) {
-                program.getFunction(null, null, "imod", 2).used = true;
-            } else if ("<<".equals(op)) {
-                program.getFunction(null, null, "shiftLeft", 2).used = true;
-            } else if (">>".equals(op)) {
-                DataType t = expr.type();
-                if (t.isRange()) {
-                    t = DataType.INT_TYPE;
-                }
-                program.getFunction(null, null, "shiftRight_" + t.name(), 2).used = true;
             }
             if (Operation.isComparison(op) && (expr.isComparison() || right.isComparison())) {
                 throw syntaxError("Comparing a result of a comparison requires parenthesis");

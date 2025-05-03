@@ -70,4 +70,15 @@ public class Continue implements Statement {
         return condition != null ? "continue " + condition + "\n" : "continue\n";
     }
 
+    @Override
+    public void used(Program program) {
+        if (condition != null) {
+            condition.used(program);
+        }
+        if (autoClose != null) {
+            for(Statement s : autoClose) {
+                s.used(program);
+            }
+        }
+    }
 }

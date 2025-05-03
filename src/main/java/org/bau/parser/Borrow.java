@@ -86,4 +86,9 @@ public class Borrow implements Expression {
         return buff.toString();
     }
 
+    @Override
+    public void used(Program program) {
+        base.used(program);
+    }
+
 }

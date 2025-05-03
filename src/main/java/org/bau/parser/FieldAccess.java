@@ -251,4 +251,10 @@ public class FieldAccess implements Expression, LeftValue {
     public boolean isContant() {
         return false;
     }
+
+    @Override
+    public void used(Program program) {
+        base.used(program);
+        type.used(program);
+    }
 }

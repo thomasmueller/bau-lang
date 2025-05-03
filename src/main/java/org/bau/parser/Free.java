@@ -149,4 +149,9 @@ public class Free implements Statement {
         return "# free " + var.name;
     }
 
+    @Override
+    public void used(Program program) {
+        var.type().used(program);
+    }
+
 }

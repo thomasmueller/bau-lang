@@ -94,7 +94,6 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1002;
 i8_array* string_1003;
 void Entry_owned_print_1(Entry_owned* this) {
     printf("key: %lld value: %lld\n", (long long)this->key, (long long)this->value);
@@ -110,7 +109,6 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("key: ", 5);
     string_1001 = str_const(" value: ", 8);
-    string_1002 = str_const("clear ", 6);
     string_1003 = str_const("end", 3);
     Entry_owned* x = Entry_owned_0();
     x->key = 1;

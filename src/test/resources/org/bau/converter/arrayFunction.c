@@ -77,7 +77,6 @@ int_array* arrayOf_int_var(int64_t _T, int _vaCount,...);
 float_array* array_float_var(int _vaCount,...);
 int_array* array_int_var(int _vaCount,...);
 void fill_1(int_array* data);
-int8_t i8_1(int64_t x);
 int64_t i8_array_len_1(i8_array* this);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
@@ -167,9 +166,6 @@ void fill_1(int_array* data) {
         }
         i = next;
     }
-}
-int8_t i8_1(int64_t x) {
-    return x;
 }
 int64_t i8_array_len_1(i8_array* this) {
     int32_t _r0 = this->len;

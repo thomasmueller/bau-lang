@@ -16,7 +16,7 @@ public class FunctionDefinition {
     public String name;
     public DataType returnType;
     public DataType exceptionType;
-    boolean used;
+    private boolean used;
     public ArrayList<String> includes;
     public String cCode;
     public boolean varArgs;
@@ -278,6 +278,46 @@ public class FunctionDefinition {
                 throw new IllegalStateException(
                         "Function " + getFunctionId() + ": borrowing " + type + " which is freed");
             }
+        }
+    }
+
+    boolean isUsed() {
+        return used;
+    }
+
+    void used(Program program) {
+        if (used) {
+            return;
+        }
+        used = true;
+        if (macro) {
+            throw new IllegalStateException();
+        }
+        if (template != null) {
+            throw new IllegalStateException();
+        }
+        this.used = true;
+        if (list != null) {
+            for (Statement s : list) {
+                s.used(program);
+            }
+        }
+        if (autoClose != null) {
+            for (Statement s : autoClose) {
+                s.used(program);
+            }
+        }
+        for (Variable var : parameters) {
+            var.type().used(program);
+        }
+        if (callType != null) {
+            callType.used(program);
+        }
+        if (returnType != null) {
+            returnType.used(program);
+        }
+        if (exceptionType != null) {
+            exceptionType.used(program);
         }
     }
 

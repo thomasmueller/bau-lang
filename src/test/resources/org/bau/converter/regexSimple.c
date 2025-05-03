@@ -208,7 +208,6 @@ org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T);
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T);
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x);
 void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x);
-int64_t org_bau_Std_ord_1(i8_array* s);
 _org_bau_List_List_Token_or_exception parse_1(i8_array* regex);
 void test_0();
 void i8_array_free(i8_array* x);
@@ -258,21 +257,6 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
-i8_array* string_1004;
-i8_array* string_1005;
-i8_array* string_1006;
-i8_array* string_1007;
-i8_array* string_1008;
-i8_array* string_1009;
-i8_array* string_1010;
-i8_array* string_1011;
-i8_array* string_1012;
-i8_array* string_1013;
-i8_array* string_1014;
-i8_array* string_1015;
-i8_array* string_1016;
 i8_array* string_1017;
 i8_array* string_1018;
 i8_array* string_1019;
@@ -601,13 +585,6 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
 }
-int64_t org_bau_Std_ord_1(i8_array* s) {
-    if (s->len) {
-        int8_t _r0 = s->data[idx_2(0, s->len)];
-        return _r0;
-    }
-    return 0;
-}
 _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
     org_bau_Exception_exception _lastException;
     _org_bau_List_List_Token_or_exception _x0;
@@ -769,21 +746,6 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("Start or end in wrong location", 30);
     string_1001 = str_const("Unknown token type", 18);
-    string_1002 = str_const("^", 1);
-    string_1003 = str_const("$", 1);
-    string_1004 = str_const(".", 1);
-    string_1005 = str_const("\\", 1);
-    string_1006 = str_const("[", 1);
-    string_1007 = str_const("]", 1);
-    string_1008 = str_const("-", 1);
-    string_1009 = str_const("+", 1);
-    string_1010 = str_const("*", 1);
-    string_1011 = str_const("?", 1);
-    string_1012 = str_const("{", 1);
-    string_1013 = str_const("0", 1);
-    string_1014 = str_const("9", 1);
-    string_1015 = str_const(",", 1);
-    string_1016 = str_const("}", 1);
     string_1017 = str_const("Expected }", 10);
     string_1018 = str_const("hello", 5);
     string_1019 = str_const("hell.*", 6);

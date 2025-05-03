@@ -53,4 +53,9 @@ public class Throw implements Statement {
         // nothing
     }
 
+    @Override
+    public void used(Program program) {
+        expr.used(program);
+    }
+
 }

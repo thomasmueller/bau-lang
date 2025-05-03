@@ -13,11 +13,12 @@ public class StringLiteral implements Expression {
     ValueI8Array array;
     DataType type;
     long reference;
+    private boolean used;
 
-    public StringLiteral(String value, DataType type, long reference) {
+    public StringLiteral(String value, DataType type, Program program) {
         this.value = value;
         this.type = type;
-        this.reference = reference;
+        this.reference = program.addStringConstant(value, this);
         byte[] data = value.getBytes(StandardCharsets.UTF_8);
         this.array = new ValueI8Array(data);
     }
@@ -136,6 +137,16 @@ public class StringLiteral implements Expression {
             }
         }
         return buff.toString();
+    }
+
+    @Override
+    public void used(Program program) {
+        used = true;
+        type.used(program);
+    }
+
+    public boolean isUsed() {
+        return used;
     }
 
 }

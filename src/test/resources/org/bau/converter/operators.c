@@ -40,16 +40,8 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
-float f32_1(double x);
-double float_1(double x);
-int16_t i16_1(int64_t x);
-int32_t i32_1(int64_t x);
-int8_t i8_1(int64_t x);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t imod_2(int64_t a, int64_t b);
-int64_t int_1(int64_t x);
-int64_t shiftLeft_2(int64_t a, int64_t b);
-int64_t shiftRight_int_2(int64_t a, int64_t b);
 void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
     _free(x->data);
@@ -65,21 +57,6 @@ int64_t a;
 int64_t b;
 int64_t c;
 int64_t d;
-float f32_1(double x) {
-    return x;
-}
-double float_1(double x) {
-    return x;
-}
-int16_t i16_1(int64_t x) {
-    return x;
-}
-int32_t i32_1(int64_t x) {
-    return x;
-}
-int8_t i8_1(int64_t x) {
-    return x;
-}
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
     if (a == 0) return 0;
@@ -88,15 +65,6 @@ int64_t idiv_2(int64_t a, int64_t b) {
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
-}
-int64_t int_1(int64_t x) {
-    return x;
-}
-int64_t shiftLeft_2(int64_t a, int64_t b) {
-    return a << b;
-}
-int64_t shiftRight_int_2(int64_t a, int64_t b) {
-    return ((uint64_t) a) >> b;
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

@@ -79,4 +79,9 @@ public class Parentheses implements Expression {
         return this;
     }
 
+    @Override
+    public void used(Program program) {
+        base.used(program);
+    }
+
 }
