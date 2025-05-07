@@ -86,6 +86,7 @@ string string_1(i8_array* data);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void string_free(string* x);
+void string_copy(string* x);
 void string_array_free(string_array* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
@@ -97,6 +98,9 @@ void int_array_free(int_array* x) {
 }
 void string_free(string* x) {
     _decUse(x->data, i8_array);
+}
+void string_copy(string* x) {
+    _incUse(x->data);
 }
 void string_array_free(string_array* x) {
     for (int i = 0; i < x->len; i++) string_free(&(x->data[i]));
@@ -132,12 +136,15 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("world", 5);
     string_1002 = str_const("!", 1);
     string_1003 = str_const(" ", 1);
-    string_array* x = string_array_new(3);
+    string_array* _t0 = string_array_new(3);
+    string_array* x = _t0;
+    _incUseStack(x);
     x->data[0] = str_1(string_1000);
     x->data[1] = str_1(string_1001);
     x->data[2] = str_1(string_1002);
     printf("%.*s %.*s %.*s\n", x->data[0].data->len, x->data[0].data->data, x->data[1].data->len, x->data[1].data->data, x->data[2].data->len, x->data[2].data->data);
     _decUseStack(x, string_array);
+    _decUseStack(_t0, string_array);
     _end();
     return 0;
 }

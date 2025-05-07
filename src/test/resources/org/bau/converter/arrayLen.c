@@ -71,10 +71,13 @@ void printLen_1(i8_array* data) {
     printf("%d\n", data->len);
 }
 void test_0() {
-    i8_array* data = i8_array_new(10);
+    i8_array* _t0 = i8_array_new(10);
+    i8_array* data = _t0;
+    _incUseStack(data);
     printf("%d\n", 10);
     printLen_1(data);
     _decUseStack(data, i8_array);
+    _decUseStack(_t0, i8_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

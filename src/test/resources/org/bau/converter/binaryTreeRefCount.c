@@ -162,7 +162,9 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const(" check: ", 8);
     string_1003 = str_const(" trees of depth ", 16);
     string_1004 = str_const("long lived tree of depth ", 25);
-    int64_t randomSeed = 0;
+    {
+        int64_t randomSeed = 0;
+    }
     int64_t minDepth = 1;
     int64_t maxDepth = 3;
     int64_t stretchDepth = 4;
@@ -182,7 +184,6 @@ int main(int _argc, char *_argv[]) {
             Tree* t = with_1(depth);
             check += Tree_nodeCount_1(t);
             i += 1;
-            continue1:;
             _decUseStack(t, Tree);
         }
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);

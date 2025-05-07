@@ -91,7 +91,9 @@ i8_array* hex_2(int64_t x, int64_t len) {
     } else if (l > 16) {
         l = 16;
     }
-    i8_array* data = i8_array_new(l);
+    i8_array* _t0 = i8_array_new(l);
+    i8_array* data = _t0;
+    _incUseStack(data);
     int64_t y = x;
     int64_t i = l - 1;
     while (i >= 0) {
@@ -103,6 +105,7 @@ i8_array* hex_2(int64_t x, int64_t len) {
         y >>= 4;
         i -= 1;
     }
+    _decUseStack(_t0, i8_array);
     return data;
 }
 int32_t i32_1(int64_t x) {

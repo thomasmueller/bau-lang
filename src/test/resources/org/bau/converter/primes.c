@@ -98,8 +98,10 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 BitField* newBitField_1(int64_t len) {
-    BitField* _t0 = BitField_1(int_array_new(idiv_2((len + 63), 64)));
-    return _t0;
+    int_array* _t0 = int_array_new(idiv_2((len + 63), 64));
+    BitField* _t1 = BitField_1(_t0);
+    _decUseStack(_t0, int_array);
+    return _t1;
 }
 int64_t primeSum_1(int64_t limit) {
     BitField* sieve = newBitField_1(limit + 1);
@@ -136,7 +138,9 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    int64_t randomSeed = 0;
+    {
+        int64_t randomSeed = 0;
+    }
     int64_t _t0 = primeSum_1(100);
     printf("%lld\n", (long long)_t0);
     _end();

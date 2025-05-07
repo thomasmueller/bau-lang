@@ -7,6 +7,8 @@ import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueArray;
+import org.bau.runtime.Value.ValueNull;
+import org.bau.runtime.Value.ValueStruct;
 
 public class Variable implements Expression, LeftValue {
     String name;
@@ -17,6 +19,7 @@ public class Variable implements Expression, LeftValue {
     boolean isConstant;
     Value constantValue;
     public boolean global;
+    public boolean used;
 
     public Variable(String name, DataType type) {
         this(null, name, false, type);
@@ -114,7 +117,9 @@ public class Variable implements Expression, LeftValue {
     public String decrementRefCountC() {
         if (type().needIncDec()) {
             if (type().memoryType() == MemoryType.REF_COUNT) {
-                return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() + ");\n";
+                return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() +");\n";
+            } else if (type().memoryType() == MemoryType.OWNER) {
+                return type().nameC() + "_free(" + name + ");\n";
             } else {
                 return "";
             }
@@ -130,6 +135,8 @@ public class Variable implements Expression, LeftValue {
             } else {
                 return "";
             }
+        } else if (type().needFree()) {
+            return type().toC() + "_copy(&" + name + ");\n";
         }
         return "";
     }
@@ -231,6 +238,22 @@ public class Variable implements Expression, LeftValue {
                 memory.setLocal(name, val);
             }
         }
+        if (type().isCopyType() && type().needFree()) {
+            // for value type (structs that are not ref counted),
+            // we need to increment the ref counts of the fields
+            // TODO this needs to be done recursively
+            if (val instanceof ValueStruct) {
+                ValueStruct s = (ValueStruct) val;
+                for (Variable f : type().fields) {
+                    if (f.type.needIncDec()) {
+                        Value v = s.get(f.name);
+                        if (v != ValueNull.INSTANCE) {
+                            memory.incHeap(v.longValue());
+                        }
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -242,6 +265,16 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void used(Program program) {
         type.used(program);
+        this.used = true;
+    }
+
+    public boolean isUsed() {
+        return used;
+    }
+
+    public void copyBounds(Variable v2) {
+        lenBounds = v2.lenBounds;
+        bounds = v2.bounds;
     }
 
 }

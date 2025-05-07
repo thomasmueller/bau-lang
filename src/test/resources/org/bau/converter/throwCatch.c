@@ -88,6 +88,7 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
+void org_bau_Exception_exception_copy(org_bau_Exception_exception* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -98,6 +99,9 @@ void int_array_free(int_array* x) {
 }
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
     _decUse(x->message, i8_array);
+}
+void org_bau_Exception_exception_copy(org_bau_Exception_exception* x) {
+    _incUse(x->message);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));

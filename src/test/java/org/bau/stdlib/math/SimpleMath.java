@@ -1,7 +1,5 @@
 package org.bau.stdlib.math;
 
-import java.nio.charset.StandardCharsets;
-
 public class SimpleMath {
 
     public static double E =            2.71828182845904523536;
@@ -121,6 +119,13 @@ public class SimpleMath {
     }
 
     public static double sqrt(double x) {
+        long x2 = (long) x;
+        if (x2 > 0 && x2 == x) {
+            long exact = sqrtLong(x2);
+            if (exact * exact == x) {
+                return exact;
+            }
+        }
         return exp(log(x) / 2);
     }
 
@@ -169,6 +174,14 @@ public class SimpleMath {
     }
 
     public static double pow(double x, double y) {
+        int x2 = (int) x;
+        int y2 = (int) y;
+        if (x2 == x && y2 == y) {
+            long r = powInt(x2, y2);
+            if (r != -1) {
+                return r;
+            }
+        }
         if (x > 0 && y > 0) {
             return exp(y * log(x));
         } else if (y == 0.0) {
@@ -214,6 +227,30 @@ public class SimpleMath {
             return POS_INFINITY;
         }
         return NOT_A_NUMBER;
+    }
+
+    public static long powInt(int base, int exponent) {
+        if (exponent < 0) {
+            return -1;
+        }
+        long result = 1;
+        long b = base;
+        while (exponent > 0) {
+            if ((exponent & 1) == 1) {
+                result *= b;
+                if (result > Integer.MAX_VALUE || result < Integer.MIN_VALUE) {
+                    return -1;
+                }
+            }
+            exponent >>= 1;
+            if (exponent > 0) {
+                b *= b;
+                if (b > Integer.MAX_VALUE || b < Integer.MIN_VALUE) {
+                    return -1;
+                }
+            }
+        }
+        return result;
     }
 
     public static double sin(double x) {
@@ -361,95 +398,6 @@ public class SimpleMath {
         }
         long fraction = (long) (x * (1L << 52)) << 11 >>> 11;
         return ((exp + 1022) << 52) + fraction;
-    }
-
-    public static String longToString(long n) {
-        byte[] buff = new byte[20];
-        int start = 0;
-        if (n < 0) {
-            buff[start++] = '-';
-        } else {
-            n = -n;
-        }
-        int i = start;
-        do {
-            buff[i++] = (byte) ('0' - (n % 10));
-            n /= 10;
-        } while (n < 0);
-        int end = i;
-        while (i > start) {
-            i--;
-            byte temp = buff[i];
-            buff[i] = buff[start];
-            buff[start] = temp;
-            start++;
-        }
-        return new String(buff, 0, end, StandardCharsets.UTF_8);
-    }
-
-    public static int longToString(long n, byte[] buff, int start) {
-        if (n < 0) {
-            buff[start++] = '-';
-        } else {
-            n = -n;
-        }
-        int i = start;
-        do {
-            buff[i++] = (byte) ('0' - (n % 10));
-            n /= 10;
-        } while (n < 0);
-        int end = i;
-        while (i > start) {
-            i--;
-            byte temp = buff[i];
-            buff[i] = buff[start];
-            buff[start] = temp;
-            start++;
-        }
-        return end;
-    }
-
-
-    public static String doubleToString(double n) {
-        if (n < 0) {
-            return "-" + doubleToString(-n);
-        } else if (Double.isNaN(n)) {
-            return "NaN";
-        } else if (n == Double.POSITIVE_INFINITY) {
-            return "Infinity";
-        }
-        int e = 0;
-        if (n >= 1e8 || n <= 1e-3) {
-            while (n > 1e20) {
-                n /= 1e20;
-                e += 20;
-            }
-            while (n < 1e-20) {
-                n *= 1e20;
-                e -= 20;
-            }
-            while (n >= 10) {
-                n /= 10;
-                e++;
-            }
-            while (n < 1) {
-                n *= 10;
-                e--;
-            }
-            return doubleToString(n) + "E" + e;
-        }
-        StringBuilder buff = new StringBuilder();
-        buff.append(SimpleMath.longToString((long) n));
-        buff.append('.');
-        n = (n - (long) n) * 10;
-        long y = (long) (n * 100_000_000_000_000_000L);
-        for (int i = 0; i <= 18 && y > 0; i++) {
-            long x = y / 100_000_000_000_000_000L;
-            buff.append((char) ('0' + (x % 10)));
-            y -= x * 100_000_000_000_000_000L;
-            y *= 10;
-        }
-        return buff.toString();
     }
 
 }

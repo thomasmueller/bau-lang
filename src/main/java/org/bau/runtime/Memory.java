@@ -56,7 +56,7 @@ public class Memory {
     public long putHeap(Value value, boolean constant) {
         HeapEntry e = new HeapEntry();
         e.value = value;
-        e.refCount = constant ? Integer.MAX_VALUE : 0;
+        e.refCount = constant ? Long.MAX_VALUE : 0;
         long heapId = nextHeapId();
         heap.put(heapId, e);
         return heapId;
@@ -75,7 +75,9 @@ public class Memory {
             return false;
         }
         HeapEntry e = heap.get(heapId);
-        --e.refCount;
+        if (e.refCount != Long.MAX_VALUE) {
+            --e.refCount;
+        }
         return e.refCount == 0;
     }
 
@@ -84,7 +86,9 @@ public class Memory {
             return;
         }
         HeapEntry e = heap.get(heapId);
-        e.refCount++;
+        if (e.refCount != Long.MAX_VALUE) {
+            e.refCount++;
+        }
     }
 
     public Value getGlobal(String variable) {

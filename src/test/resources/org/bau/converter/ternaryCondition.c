@@ -100,7 +100,6 @@ int main(int _argc, char *_argv[]) {
             printf("abs(%lld)= %lld\n", (long long)i, (long long)_t0);
             int64_t _t1 = int_then_int_3((i < 0), - i, i);
             printf("abs(%lld)= %lld\n", (long long)i, (long long)_t1);
-            continue1:;
             i += 1;
         }
         break;

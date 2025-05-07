@@ -65,7 +65,7 @@ public class Service {
             try {
                 long start = System.currentTimeMillis();
                 Program prog = new Parser(s).parse();
-                String result = prog.run();
+                String result = prog.run(100_000_000);
                 System.out.println(result);
                 long ticksExecuted = prog.getTicksExecuted();
                 long time = System.currentTimeMillis() - start;
@@ -74,8 +74,8 @@ public class Service {
                 e.printStackTrace(System.out);
             }
             System.out.println("Compiling =======================================");
-            // int exitCode = runProcess("gcc", "-O3", fc.toString());
-            int exitCode = runProcess("gcc", fc.toString());
+            int exitCode = runProcess("gcc", "-O3", fc.toString());
+            // int exitCode = runProcess("gcc", fc.toString());
             File f2 = new File("a.out");
             if (exitCode == 0) {
                 System.out.println("Running =========================================");

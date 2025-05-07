@@ -118,11 +118,14 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
 }
 void test_0() {
     org_bau_File_File* file = org_bau_File_openFile_2(string_1000, string_1001);
-    i8_array* data = i8_array_new(16);
+    i8_array* _t0 = i8_array_new(16);
+    i8_array* data = _t0;
+    _incUseStack(data);
     org_bau_File_File_read_4(file, data, 0, 15);
     data->data[5] = 0;
     printf("%.*s\n", data->len, data->data);
     _decUseStack(data, i8_array);
+    _decUseStack(_t0, i8_array);
     _decUseStack(file, org_bau_File_File);
 }
 int main(int _argc, char *_argv[]) {

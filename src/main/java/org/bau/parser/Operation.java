@@ -276,74 +276,79 @@ public class Operation implements Expression {
     }
 
     public static Value evalFloat(DataType type, Value l, String operator, Value r) {
-        double result;
+        long longResult;
         switch (operator) {
-        case "+":
-            result = l.doubleValue() + r.doubleValue();
-            break;
-        case "*":
-            result = l.doubleValue() * r.doubleValue();
-            break;
-        case "/":
-            result = l.doubleValue() / r.doubleValue();
-            break;
-        case "%":
-            result = l.doubleValue() % r.doubleValue();
-            break;
-        case "-":
-            result = l.doubleValue() - r.doubleValue();
-            break;
         case ">":
-            result = l.doubleValue() > r.doubleValue() ? 1 : 0;
+            longResult = l.doubleValue() > r.doubleValue() ? 1 : 0;
             break;
         case ">=":
-            result = l.doubleValue() >= r.doubleValue() ? 1 : 0;
+            longResult = l.doubleValue() >= r.doubleValue() ? 1 : 0;
             break;
         case "<":
-            result = l.doubleValue() < r.doubleValue() ? 1 : 0;
+            longResult = l.doubleValue() < r.doubleValue() ? 1 : 0;
             break;
         case "<=":
-            result = l.doubleValue() <= r.doubleValue() ? 1 : 0;
+            longResult = l.doubleValue() <= r.doubleValue() ? 1 : 0;
             break;
         case "=":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
-                result = l == r ? 1 : 0;
+                longResult = l == r ? 1 : 0;
             } else {
-                result = l.doubleValue() == r.doubleValue() ? 1 : 0;
+                longResult = l.doubleValue() == r.doubleValue() ? 1 : 0;
             }
             break;
         case "<>":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
-                result = l != r ? 1 : 0;
+                longResult = l != r ? 1 : 0;
             } else {
-                result = l.doubleValue() != r.doubleValue() ? 1 : 0;
+                longResult = l.doubleValue() != r.doubleValue() ? 1 : 0;
             }
             break;
         case "&":
-            result = l.longValue() & r.longValue();
+            longResult = l.longValue() & r.longValue();
             break;
         case "|":
-            result = l.longValue() | r.longValue();
+            longResult = l.longValue() | r.longValue();
             break;
         case "^":
-            result = l.longValue() ^ r.longValue();
+            longResult = l.longValue() ^ r.longValue();
             break;
         case ">>":
-            result = l.longValue() >>> r.longValue();
+            longResult = l.longValue() >>> r.longValue();
             break;
         case "<<":
-            result = l.longValue() << r.longValue();
+            longResult = l.longValue() << r.longValue();
             break;
         case "and":
-            result = (l.longValue() != 0 && r.longValue() != 0) ? 1 : 0;
+            longResult = (l.longValue() != 0 && r.longValue() != 0) ? 1 : 0;
             break;
         case "or":
-            result = (l.longValue() != 0 || r.longValue() != 0) ? 1 : 0;
+            longResult = (l.longValue() != 0 || r.longValue() != 0) ? 1 : 0;
             break;
         default:
-            throw new IllegalStateException("operation " + operator);
+            double result;
+            switch (operator) {
+            case "+":
+                result = l.doubleValue() + r.doubleValue();
+                break;
+            case "*":
+                result = l.doubleValue() * r.doubleValue();
+                break;
+            case "/":
+                result = l.doubleValue() / r.doubleValue();
+                break;
+            case "%":
+                result = l.doubleValue() % r.doubleValue();
+                break;
+            case "-":
+                result = l.doubleValue() - r.doubleValue();
+                break;
+            default:
+                throw new IllegalStateException("operation " + operator);
+            }
+            return new ValueFloat(result);
         }
-        return new ValueFloat(result);
+        return new ValueInt(longResult);
     }
 
     @Override

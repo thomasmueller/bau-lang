@@ -69,16 +69,18 @@ int64_t imod_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    int64_t i64v = 1;
-    int32_t i32v = 1;
-    int16_t i16v = 1;
-    int8_t i8v = 1;
-    double f64v = 1.0;
-    float f32v = 1.0;
-    int64_t a = 6172;
-    int64_t b = 24690;
-    int64_t c = idiv_2(a, b);
-    int64_t d = imod_2(a, b);
+    {
+        int64_t i64v = 1;
+        int32_t i32v = 1;
+        int16_t i16v = 1;
+        int8_t i8v = 1;
+        double f64v = 1.0;
+        float f32v = 1.0;
+        int64_t a = 6172;
+        int64_t b = 24690;
+        int64_t c = idiv_2(a, b);
+        int64_t d = imod_2(a, b);
+    }
     _end();
     return 0;
 }

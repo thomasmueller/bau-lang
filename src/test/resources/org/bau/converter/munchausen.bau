@@ -24,7 +24,7 @@ fun isMunchausen(number int) int
         total += cache[digit]!
         if total > number
             return 0
-        n = n / 10
+        n /= 10
     return total = number
 
 LIMIT : 4400

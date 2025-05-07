@@ -180,6 +180,18 @@ public class DataType {
         return n;
     }
 
+    public String getCamelCaseName() {
+        String result = name;
+        char firstChar = name.charAt(0);
+        if (firstChar >= 'a' && firstChar <= 'z') {
+            result = (char)(firstChar - 'a' + 'A') + result.substring(1);
+        }
+        if (result.endsWith("[]")) {
+            result = result.substring(0, result.length() - 2) + "Array";
+        }
+        return result;
+    }
+
     public String name() {
         return name;
     }

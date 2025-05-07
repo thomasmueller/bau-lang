@@ -126,7 +126,6 @@ void testBreak_0() {
                 break;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
                 _decUseStack(a, Value);
@@ -172,7 +171,6 @@ void testIf_0() {
             } else {
                 printf("  get(%lld) = null\n", i);
             }
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
                 _decUseStack(a, Value);
@@ -194,7 +192,6 @@ void testReturn_0() {
                 return;
             }
             printf("  get(%lld) = %lld\n", i, (long long)a->data);
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 3) {
                 _decUseStack(a, Value);

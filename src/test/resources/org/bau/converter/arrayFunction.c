@@ -177,13 +177,14 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("len ", 4);
     string_1001 = str_const("len of hello is ", 16);
     string_1002 = str_const("hello", 5);
-    int_array* data = int_array_new(16);
+    int_array* _t0 = int_array_new(16);
+    int_array* data = _t0;
+    _incUseStack(data);
     fill_1(data);
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)data->data[i]);
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 16) {
                 break;
@@ -197,7 +198,6 @@ int main(int _argc, char *_argv[]) {
         int64_t i = 0;
         while (1) {
             printf("%d\n", a->data[i]);
-            continue3:;
             int64_t _next = i + 1;
             if (_next >= a->len) {
                 break;
@@ -211,7 +211,6 @@ int main(int _argc, char *_argv[]) {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)b->data[i]);
-            continue5:;
             int64_t _next = i + 1;
             if (_next >= b->len) {
                 break;
@@ -225,7 +224,6 @@ int main(int _argc, char *_argv[]) {
         int64_t i = 0;
         while (1) {
             printf("%.9f\n", c->data[i]);
-            continue7:;
             int64_t _next = i + 1;
             if (_next >= c->len) {
                 break;
@@ -242,7 +240,6 @@ int main(int _argc, char *_argv[]) {
         int64_t i = 0;
         while (1) {
             printf("%d\n", z->data[i]);
-            continue9:;
             int64_t _next = i + 1;
             if (_next >= z->len) {
                 break;
@@ -251,8 +248,8 @@ int main(int _argc, char *_argv[]) {
         }
         break;
     }
-    int64_t _t0 = i8_array_len_1(string_1002);
-    printf("len of hello is %lld\n", (long long)_t0);
+    int64_t _t1 = i8_array_len_1(string_1002);
+    printf("len of hello is %lld\n", (long long)_t1);
     _decUseStack(z, i8_array);
     _decUseStack(y, float_array);
     _decUseStack(x, int_array);
@@ -260,6 +257,7 @@ int main(int _argc, char *_argv[]) {
     _decUseStack(b, int_array);
     _decUseStack(a, i8_array);
     _decUseStack(data, int_array);
+    _decUseStack(_t0, int_array);
     _end();
     return 0;
 }

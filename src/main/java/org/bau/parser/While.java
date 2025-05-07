@@ -7,11 +7,13 @@ import java.util.List;
 import org.bau.runtime.Memory;
 
 public class While implements Statement {
-    int continueId;
     ArrayList<Statement> list = new ArrayList<>();
     ArrayList<Statement> listContinue = new ArrayList<>();
     List<Statement> autoClose;
     Expression condition;
+
+    private boolean continueIdUsed;
+    private int continueId;
 
     @Override
     public Statement replace(Variable old, Expression with) {
@@ -22,6 +24,16 @@ public class While implements Statement {
             c.list.add(s.replace(old, with));
         }
         return c;
+    }
+
+
+    public void setContinueId(int continueId) {
+        this.continueId = continueId;
+    }
+
+    int getContinueIdAndMarkUsed() {
+        continueIdUsed = true;
+        return continueId;
     }
 
     @Override
@@ -40,34 +52,13 @@ public class While implements Statement {
             if (v != 1) {
                 break;
             }
-            for (int i = 0; i < l2.size(); i++) {
-                Statement s = l2.get(i);
-                StatementResult n = s.run(m);
-                if (m.tick()) {
-                    return StatementResult.TIMEOUT;
-                }
-                if (n == StatementResult.OK) {
-                    // ok
-                } else if (n == StatementResult.BREAK) {
-                    break outer;
-                } else if (n == StatementResult.CONTINUE) {
-                    i = continuePoint - 1;
-                } else if (n == StatementResult.RETURN) {
-                    return n;
-                } else if (n == StatementResult.THROW) {
-                    for (; i < list.size(); i++) {
-                        s = list.get(i);
-                        if (s instanceof Catch) {
-                            i--;
-                            break;
-                        }
-                    }
-                    if (i == list.size()) {
-                        return n;
-                    }
-                } else if (n == StatementResult.PANIC) {
-                    return n;
-                }
+            StatementResult result = Program.runSequence(m, l2, continuePoint);
+            if (result == StatementResult.OK) {
+                // ok
+            } else if (result == StatementResult.BREAK) {
+                break outer;
+            } else {
+                return result;
             }
         }
         return StatementResult.OK;
@@ -115,7 +106,9 @@ public class While implements Statement {
             }
         }
         if (buffContinue.length() > 0) {
-            buff.append(Statement.indent("continue" + continueId + ":;\n"));
+            if (continueIdUsed) {
+                buff.append(Statement.indent("continue" + continueId + ":;\n"));
+            }
             buff.append(buffContinue);
         }
         buff.append("}\n");

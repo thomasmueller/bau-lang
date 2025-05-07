@@ -5,6 +5,7 @@ import java.util.HashSet;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
+import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValuePanic;
 
 public class Assignment implements Statement {
@@ -140,14 +141,28 @@ public class Assignment implements Statement {
         }
         buff.append(leftValue.assignmentC());
         buff.append(' ');
-        if (modify != null) {
-            buff.append(modify);
-        }
-        if (initial && value instanceof New && value.toC().equals(type.toC())) {
-            // value types are auto-initialized
-        } else {
+        if ("%".equals(modify) || "/".equals(modify)) {
+            // first, use "%" or "/" by "0", and then
+            // replace the last '0' with the right expression
+            // TODO this is a hack
+            Operation op = new Operation(leftValue, modify, new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false));
+            String ops = op.toC();
+            int index = ops.lastIndexOf('0');
+            ops = ops.substring(0, index) + result + ops.substring(index + 1);
             buff.append("= ");
-            buff.append(result);
+            buff.append(ops);
+        } else {
+            if (modify == null) {
+                // reqular assignment
+            } else {
+                buff.append(modify);
+            }
+            if (initial && value instanceof New && value.toC().equals(type.toC())) {
+                // value types are auto-initialized
+            } else {
+                buff.append("= ");
+                buff.append(result);
+            }
         }
         buff.append(";\n");
         if (!(value instanceof NullValue)) {
@@ -186,11 +201,34 @@ public class Assignment implements Statement {
 
     @Override
     public void used(Program program) {
+        if ("%".equals(modify) || "/".equals(modify)) {
+            Operation op = new Operation(leftValue, modify, value);
+            op.used(program);
+        }
         leftValue.used(program);
         if (type != null) {
             type.used(program);
         }
         value.used(program);
+    }
+
+    public void setConstantBounds(Variable v) {
+        if (value.type().isArray()) {
+            if (value instanceof New) {
+                New n = (New) value;
+                v.addLenBoundCondition(null, "=", n.arrayLength);
+            } else if (value instanceof StringLiteral) {
+                StringLiteral n = (StringLiteral) value;
+                v.addLenBoundCondition(null, "=", new NumberValue(n.array.len(), DataType.INT_TYPE, false));
+            } else if (value instanceof ArrayConstant) {
+                ArrayConstant n = (ArrayConstant) value;
+                v.addLenBoundCondition(null, "=", new NumberValue(n.len(), DataType.INT_TYPE, false));
+            } else if (value instanceof Variable) {
+                Variable v2 = (Variable) value;
+                v.copyBounds(v2);
+            }
+        }
+        v.setBoundValue(null, "=", value);
     }
 
 }

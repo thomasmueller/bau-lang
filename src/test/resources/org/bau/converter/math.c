@@ -80,10 +80,12 @@ double org_bau_Math_log10_1(double x);
 double org_bau_Math_max_2(double a, double b);
 double org_bau_Math_min_2(double a, double b);
 double org_bau_Math_pow_2(double x, double y);
+int64_t org_bau_Math_powInt_2(int64_t base, int64_t exponent);
 double org_bau_Math_round_1(double x);
 double org_bau_Math_signum_1(double x);
 double org_bau_Math_sin_1(double x);
 double org_bau_Math_sqrt_1(double x);
+int64_t org_bau_Math_sqrtInt_1(int64_t x);
 double org_bau_Math_tan_1(double x);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -201,7 +203,6 @@ double org_bau_Math_atan_1(double x) {
             approx += sign * p / n;
             sign = - sign;
             n += 1;
-            continue1:;
             n += 1;
         }
         break;
@@ -240,11 +241,11 @@ int64_t org_bau_Math_convertDoubleToLongBits_1(double x) {
     int64_t exp = 0;
     while (x >= 4294967296) {
         exp += 32;
-        x /= 4294967296;
+        x = x / 4294967296;
     }
     while (x >= 2) {
         exp += 1;
-        x /= 2;
+        x = x / 2;
     }
     while (1 == 1) {
         int64_t _t3 = x < 2.3283064365386963E-10;
@@ -302,9 +303,8 @@ double org_bau_Math_convertLongBitsToDouble_1(int64_t x) {
             if ((fraction & 1) == 1) {
                 result += 1;
             }
-            result /= 2;
+            result = result / 2;
             fraction >>= 1;
-            continue1:;
             i += 1;
         }
         break;
@@ -316,11 +316,11 @@ double org_bau_Math_convertLongBitsToDouble_1(int64_t x) {
     }
     exp -= 1023;
     while (exp <= -32) {
-        result /= 4294967296;
+        result = result / 4294967296;
         exp += 32;
     }
     while (exp < 0) {
-        result /= 2;
+        result = result / 2;
         exp += 1;
     }
     while (exp >= 32) {
@@ -369,7 +369,6 @@ double org_bau_Math_exp_1(double x) {
         while (i < 22) {
             term *= x / i;
             approx += term;
-            continue1:;
             i += 1;
         }
         break;
@@ -456,7 +455,6 @@ double org_bau_Math_log_1(double x) {
             sign = - sign;
             term *= base;
             result += sign * term / i;
-            continue1:;
             i += 1;
         }
         break;
@@ -519,26 +517,40 @@ double org_bau_Math_min_2(double a, double b) {
 }
 double org_bau_Math_pow_2(double x, double y) {
     return pow(x, y);
-    int64_t _t0 = x > 0;
-    if (_t0) {
-        int64_t _t1 = y > 0;
-        _t0 = _t1;
+    int64_t x2 = int_1(x);
+    int64_t y2 = int_1(y);
+    double _t0 = float_1(x2);
+    int64_t _t1 = _t0 == x;
+    if (_t1) {
+        int64_t _t2 = float_1(y2) == y;
+        _t1 = _t2;
     }
-    if (_t0) {
-        double _t2 = org_bau_Math_log_1(x);
-        double _t3 = org_bau_Math_exp_1(y * _t2);
-        return _t3;
+    if (_t1) {
+        int64_t r = org_bau_Math_powInt_2(x2, y2);
+        if (r != -1) {
+            return r;
+        }
+    }
+    int64_t _t3 = x > 0;
+    if (_t3) {
+        int64_t _t4 = y > 0;
+        _t3 = _t4;
+    }
+    if (_t3) {
+        double _t5 = org_bau_Math_log_1(x);
+        double _t6 = org_bau_Math_exp_1(y * _t5);
+        return _t6;
     }
     if (y == 0.0) {
         return 1.0;
     }
-    int64_t _t4 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t5 = _t4;
-    if (!(_t5)) {
-        int64_t _t6 = org_bau_Math_isNotANumber_1(y);
-        _t5 = _t6;
+    int64_t _t7 = org_bau_Math_isNotANumber_1(x);
+    int64_t _t8 = _t7;
+    if (!(_t8)) {
+        int64_t _t9 = org_bau_Math_isNotANumber_1(y);
+        _t8 = _t9;
     }
-    if (_t5) {
+    if (_t8) {
         return (0.0 / 0.0);
     }
     double absX = org_bau_Math_abs_1(x);
@@ -552,35 +564,35 @@ double org_bau_Math_pow_2(double x, double y) {
         return (1.0 / 0.0);
     }
     int64_t yy = int_1(y);
-    int64_t _t7 = (yy == y);
-    if (_t7) {
-        int64_t _t8 = ((yy & 1) == 1);
-        _t7 = _t8;
-    }
-    int64_t odd = _t7;
-    int64_t _t9 = org_bau_Math_isNegativeZero_1(x);
-    int64_t _t10 = _t9;
+    int64_t _t10 = (yy == y);
     if (_t10) {
-        int64_t _t11 = yy == y;
+        int64_t _t11 = ((yy & 1) == 1);
         _t10 = _t11;
     }
-    if (_t10) {
+    int64_t odd = _t10;
+    int64_t _t12 = org_bau_Math_isNegativeZero_1(x);
+    int64_t _t13 = _t12;
+    if (_t13) {
+        int64_t _t14 = yy == y;
+        _t13 = _t14;
+    }
+    if (_t13) {
         if (odd) {
-            double _t12 = org_bau_Math_pow_2(- x, y);
-            double _r0 = - _t12;
+            double _t15 = org_bau_Math_pow_2(- x, y);
+            double _r0 = - _t15;
             return _r0;
         }
-        double _t13 = org_bau_Math_pow_2(- x, y);
-        return _t13;
+        double _t16 = org_bau_Math_pow_2(- x, y);
+        return _t16;
     }
     if (x >= 0) {
-        double _t14 = org_bau_Math_log_1(x);
-        double _t15 = org_bau_Math_exp_1(y * _t14);
-        return _t15;
+        double _t17 = org_bau_Math_log_1(x);
+        double _t18 = org_bau_Math_exp_1(y * _t17);
+        return _t18;
     }
     if (odd) {
-        double _t16 = org_bau_Math_pow_2(- x, y);
-        double _r1 = - _t16;
+        double _t19 = org_bau_Math_pow_2(- x, y);
+        double _r1 = - _t19;
         return _r1;
     }
     if (x == (-1.0 / 0.0)) {
@@ -590,14 +602,14 @@ double org_bau_Math_pow_2(double x, double y) {
         return (1.0 / 0.0);
     }
     if (yy == y) {
-        double _t17 = org_bau_Math_pow_2(- x, y);
-        return _t17;
+        double _t20 = org_bau_Math_pow_2(- x, y);
+        return _t20;
     }
-    double _t18 = org_bau_Math_abs_1(y);
-    if (_t18 > 1.0E19) {
+    double _t21 = org_bau_Math_abs_1(y);
+    if (_t21 > 1.0E19) {
         if (y > 0) {
-            double _t19 = org_bau_Math_pow_2(- x, y);
-            return _t19;
+            double _t22 = org_bau_Math_pow_2(- x, y);
+            return _t22;
         }
         if (x == -1) {
             return 1;
@@ -608,6 +620,39 @@ double org_bau_Math_pow_2(double x, double y) {
         return (1.0 / 0.0);
     }
     return (0.0 / 0.0);
+}
+int64_t org_bau_Math_powInt_2(int64_t base, int64_t exponent) {
+    if (exponent < 0) {
+        return -1;
+    }
+    int64_t result = 1;
+    int64_t b = base;
+    while (exponent > 0) {
+        if ((exponent & 1) == 1) {
+            result *= b;
+            int64_t _t0 = result > 2147483648;
+            if (!(_t0)) {
+                int64_t _t1 = result < -2147483648;
+                _t0 = _t1;
+            }
+            if (_t0) {
+                return -1;
+            }
+        }
+        exponent >>= 1;
+        if (exponent > 0) {
+            b *= b;
+            int64_t _t2 = b > 2147483648;
+            if (!(_t2)) {
+                int64_t _t3 = b < -2147483648;
+                _t2 = _t3;
+            }
+            if (_t2) {
+                return -1;
+            }
+        }
+    }
+    return result;
 }
 double org_bau_Math_round_1(double x) {
     return floor(x + 0.5);
@@ -674,7 +719,6 @@ double org_bau_Math_sin_1(double x) {
             p *= x * x / (n * (n + 1));
             sign = - sign;
             n += 1;
-            continue1:;
             n += 1;
         }
         break;
@@ -683,9 +727,45 @@ double org_bau_Math_sin_1(double x) {
 }
 double org_bau_Math_sqrt_1(double x) {
     return sqrt(x);
-    double _t0 = org_bau_Math_log_1(x);
-    double _t1 = org_bau_Math_exp_1(_t0 / 2);
-    return _t1;
+    int64_t x2 = int_1(x);
+    int64_t _t0 = x2 > 0;
+    if (_t0) {
+        int64_t _t1 = x2 == x;
+        _t0 = _t1;
+    }
+    if (_t0) {
+        int64_t exact = org_bau_Math_sqrtInt_1(x2);
+        if (( exact * exact ) == x) {
+            return exact;
+        }
+    }
+    double _t2 = org_bau_Math_log_1(x);
+    double _t3 = org_bau_Math_exp_1(_t2 / 2);
+    return _t3;
+}
+int64_t org_bau_Math_sqrtInt_1(int64_t x) {
+    if (x < 0) {
+        return 0;
+    }
+    int64_t g = 2147483648;
+    int64_t c = g;
+    while (1) {
+        int64_t t = g * g;
+        int64_t _t0 = t > x;
+        if (!(_t0)) {
+            int64_t _t1 = t < 0;
+            _t0 = _t1;
+        }
+        if (_t0) {
+            g ^= c;
+        }
+        c >>= 1;
+        if (c == 0) {
+            break;
+        }
+        g |= c;
+    }
+    return g;
 }
 double org_bau_Math_tan_1(double x) {
     return tan(x);
@@ -730,15 +810,17 @@ int main(int _argc, char *_argv[]) {
     string_1031 = str_const("pow ", 4);
     string_1032 = str_const("min ", 4);
     string_1033 = str_const("max ", 4);
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
+    {
+        POS_INFINITY = (1.0 / 0.0);
+        NEG_INFINITY = (-1.0 / 0.0);
+        NOT_A_NUMBER = (0.0 / 0.0);
+        PI = 3.141592653589793;
+        E = 2.718281828459045;
+        LOG10 = 2.302585092994046;
+        LOG2 = 0.6931471805599453;
+        MIN_INT = 0x8000000000000000;
+        MAX_INT = 0x7fffffffffffffff;
+    }
     operations_2(0, 0);
     operations_2(1, 0);
     operations_2(-1, 0);

@@ -60,14 +60,17 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
 void test_0() {
-    i8_array* x = i8_array_new(4);
+    i8_array* _t0 = i8_array_new(4);
+    i8_array* x = _t0;
+    _incUseStack(x);
     x->data[0] = 0x12;
     x->data[1] = 0x34;
     x->data[2] = 0x56;
     x->data[3] = 0x78;
-    int32_t _t0 = readI32Le_2(x, 0);
-    printf("%d\n", _t0);
+    int32_t _t1 = readI32Le_2(x, 0);
+    printf("%d\n", _t1);
     _decUseStack(x, i8_array);
+    _decUseStack(_t0, i8_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

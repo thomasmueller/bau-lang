@@ -73,16 +73,18 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    int64_t randomSeed = 0;
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
+    {
+        int64_t randomSeed = 0;
+        POS_INFINITY = (1.0 / 0.0);
+        NEG_INFINITY = (-1.0 / 0.0);
+        NOT_A_NUMBER = (0.0 / 0.0);
+        PI = 3.141592653589793;
+        E = 2.718281828459045;
+        LOG10 = 2.302585092994046;
+        LOG2 = 0.6931471805599453;
+        MIN_INT = 0x8000000000000000;
+        MAX_INT = 0x7fffffffffffffff;
+    }
     int64_t _t0 = org_bau_Utils_random_0();
     printf("%lld\n", (long long)_t0);
     printf("%.9f\n", 3.141592653589793);

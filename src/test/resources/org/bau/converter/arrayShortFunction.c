@@ -61,10 +61,13 @@ void fill_1(int_array* data) {
     }
 }
 void test_0() {
-    int_array* data = int_array_new(16);
+    int_array* _t0 = int_array_new(16);
+    int_array* data = _t0;
+    _incUseStack(data);
     fill_1(data);
     printf("%d\n", 16);
     _decUseStack(data, int_array);
+    _decUseStack(_t0, int_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

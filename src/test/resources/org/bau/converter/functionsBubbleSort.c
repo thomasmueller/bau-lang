@@ -65,7 +65,6 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
                     array->data[i + 1] = tmp;
                     swapped = 1;
                 }
-                continue2:;
                 int64_t _next = i + 1;
                 if (_next >= ( array->len - 1 )) {
                     break;
@@ -83,7 +82,6 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)array->data[i]);
-            continue4:;
             int64_t _next = i + 1;
             if (_next >= array->len) {
                 break;

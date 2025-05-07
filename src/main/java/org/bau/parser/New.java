@@ -131,7 +131,10 @@ public class New implements Expression {
         if (arrayLength != null) {
             arrayLength = arrayLength.writeStatements(parser, false, target);
         }
-        return this;
+        // we need to have a temp variable so that we will free the memory
+        // (for example, if the new expression is an argument of a function call)
+        Variable var = parser.assignTempVariable(target, this);
+        return var;
     }
 
     @Override

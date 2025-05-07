@@ -78,12 +78,13 @@ List_int* List_int_1(int_array* array) {
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= this->array->len) {
-        int_array* n = int_array_new(this->array->len * 2);
+        int_array* _t0 = int_array_new(this->array->len * 2);
+        int_array* n = _t0;
+        _incUseStack(n);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 n->data[idx_2(i, n->len)] = this->array->data[idx_2(i, this->array->len)];
-                continue1:;
                 int64_t _next = i + 1;
                 if (_next >= this->size) {
                     break;
@@ -96,6 +97,7 @@ void List_int_add_2(List_int* this, int64_t x) {
         this->array = n;
         _incUse(this->array);
         _decUseStack(n, int_array);
+        _decUseStack(_t0, int_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
@@ -105,12 +107,12 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 void test_0() {
-    List_int* list = List_int_1(int_array_new(1));
+    int_array* _t0 = int_array_new(1);
+    List_int* list = List_int_1(_t0);
     while (1 == 1) {
         int64_t i = 0;
         while (i < 10) {
             List_int_add_2(list, i);
-            continue1:;
             i += 1;
         }
         break;
@@ -119,7 +121,6 @@ void test_0() {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)list->array->data[idx_2(i, list->array->len)]);
-            continue3:;
             int64_t _next = i + 1;
             if (_next >= list->size) {
                 break;
@@ -129,6 +130,7 @@ void test_0() {
         break;
     }
     _decUseStack(list, List_int);
+    _decUseStack(_t0, int_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

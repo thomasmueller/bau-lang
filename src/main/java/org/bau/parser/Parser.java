@@ -127,7 +127,7 @@ public class Parser {
                 FunctionDefinition main = program.getFunctionIfExists(null, null, "main", 0);
                 if (main != null) {
                     program.removeFunction(main);
-                    program.list.addAll(main.list);
+                    program.mainList.addAll(main.list);
                     program.autoClose = main.autoClose;
                 }
             }
@@ -205,7 +205,7 @@ public class Parser {
                     program.addFunction(def);
                 } else {
                     isGlobalScope = true;
-                    parseStatements(program.list);
+                    parseStatements(program.initList);
                 }
             }
         }
@@ -964,20 +964,8 @@ public class Parser {
                 v.constantValue = constValue;
                 if (v.constantValue instanceof Value.ValueRef) {
                 }
-                if (s.value.type().isArray()) {
-                    if (s.value instanceof New) {
-                        New n = (New) s.value;
-                        v.addLenBoundCondition(null, "=", n.arrayLength);
-                    } else if (s.value instanceof StringLiteral) {
-                        StringLiteral n = (StringLiteral) s.value;
-                        v.addLenBoundCondition(null, "=", new NumberValue(n.array.len(), DataType.INT_TYPE, false));
-                    } else if (s.value instanceof ArrayConstant) {
-                        ArrayConstant n = (ArrayConstant) s.value;
-                        v.addLenBoundCondition(null, "=", new NumberValue(n.len(), DataType.INT_TYPE, false));
-                    }
-                }
-                v.setBoundValue(null, "=", s.value);
                 s.leftValue = v;
+                s.setConstantBounds(v);
                 s.type = s.value.type();
                 if (functionContext.getVariable(null, v.name) != null) {
                     throw syntaxError("Variable already defined: " + v.name);
@@ -1200,6 +1188,18 @@ public class Parser {
                 return;
             } else if (matchOp("/=")) {
                 s.modify = "/";
+                s.value = parseExpression();
+                s.type = s.value.type();
+                if (targetType != null && targetType != s.value.type()) {
+                    throw syntaxError("The type of the variable is different than the type of the expression");
+                }
+                verifyBounds(s);
+                s.setBounds(getScope(0));
+                readEndOfStatement();
+                target.add(s);
+                return;
+            } else if (matchOp("%=")) {
+                s.modify = "%";
                 s.value = parseExpression();
                 s.type = s.value.type();
                 if (targetType != null && targetType != s.value.type()) {
@@ -1530,7 +1530,7 @@ public class Parser {
         return stat;
     }
 
-    private Expression parseCall(DataType type, String module, String identifier, Call call, boolean use) {
+    private Expression parseCall(DataType type, String module, String identifier, Call call, boolean nonMacroCall) {
         if (type != null && type.module != null) {
             module = type.module;
         }
@@ -1677,6 +1677,11 @@ public class Parser {
 
         // verify parameters with range restrictions
         boolean hasRangeParameter = false;
+        if (nonMacroCall && currentFunctionDefinition != null &&
+                currentFunctionDefinition.constExpr &&
+                !call.def.constExpr) {
+            throw syntaxError("A method marked as const can only call methods marked as const, but " + call.def.name + " is not");
+        }
 
         for(Variable var : call.def.parameters) {
             if (var.type().isRange()) {
@@ -1891,7 +1896,7 @@ public class Parser {
             target.add(c);
             return;
         }
-        c.continuedId = currentLoop.continueId;
+        c.continuedId = currentLoop.getContinueIdAndMarkUsed();
         c.condition = parseCondition(target);
         c.condition.applyBoundCondition(getScope(0), ApplyType.NEGATIVE);
         c.autoClose = autoClose(stackPosLoop, null);
@@ -2085,7 +2090,7 @@ public class Parser {
         int oldStackPosLoop = stackPosLoop;
         stackPosLoop = stackPos;
         While outerLoop = new While();
-        outerLoop.continueId = nextContinueId++;
+        outerLoop.setContinueId(nextContinueId++);
         ArrayList<Variable> oldArgs = new ArrayList<>();
         ArrayList<Expression> newArgs = new ArrayList<>();
         for (int i = 0; i < functionDef.parameters.size(); i++) {
@@ -2109,7 +2114,7 @@ public class Parser {
         Variable var = new Variable(variableName, call.type());
         functionContext.addVariable(var);
         While loop = new While();
-        loop.continueId = nextContinueId++;
+        loop.setContinueId(nextContinueId++);
         int i = 0;
         Variable old = new Variable("_", call.def.returnType);
         ArrayList<Statement> whileLoop = null;
@@ -2258,7 +2263,7 @@ public class Parser {
         int stackPos = functionContext.getStackPos();
         int oldStackPosLoop = stackPosLoop;
         stackPosLoop = stackPos;
-        loop.continueId = nextContinueId++;
+        loop.setContinueId(nextContinueId++);
         while (true) {
             if (sameLine) {
                 if (matchOp("}")) {
@@ -2977,11 +2982,12 @@ public class Parser {
     public Variable assignTempVariable(ArrayList<Statement> target, Expression expr, DataType type) {
         Assignment assign = new Assignment();
         assign.initial = true;
-        assign.isConstant = false;
+        assign.isConstant = true;
         Variable var = new Variable("_t" + functionContext.nextTempVariableId(), type);
         assign.type = type;
         assign.leftValue = var;
         assign.value = expr;
+        assign.setConstantBounds(var);
         target.add(assign);
         functionContext.addVariable(var);
         return var;

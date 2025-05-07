@@ -82,7 +82,6 @@ int main(int _argc, char *_argv[]) {
             } else {
                 printf("...is some other day\n");
             }
-            continue1:;
             int64_t _next = a + 1;
             if (_next >= 7) {
                 break;

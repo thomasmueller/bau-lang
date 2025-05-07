@@ -67,7 +67,9 @@ void int_array_free(int_array* x) {
     _free(x);
 }
 void test_0() {
-    i8_array* data = i8_array_new(10);
+    i8_array* _t0 = i8_array_new(10);
+    i8_array* data = _t0;
+    _incUseStack(data);
     if (0) {
         return;
     }
@@ -92,6 +94,7 @@ void test_0() {
     }
     printf("%lld\n", (long long)sum);
     _decUseStack(data, i8_array);
+    _decUseStack(_t0, i8_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

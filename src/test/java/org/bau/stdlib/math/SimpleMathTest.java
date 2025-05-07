@@ -53,6 +53,14 @@ public class SimpleMathTest {
             double got = SimpleMath.sqrt(x);
             assertTrue(same(expected, got, x));
         }
+        for (long x = 0; x < Integer.MAX_VALUE; x += 101) {
+            long x2 = x * x;
+            if ((long) ((double) x2) != x2) {
+                break;
+            }
+            long got = (long) SimpleMath.sqrt(x2);
+            assertEquals(x, got);
+        }
     }
 
     @Test
@@ -243,8 +251,29 @@ public class SimpleMathTest {
             for (double y : TEST) {
                 double expected = Math.pow(x, y);
                 double got = SimpleMath.pow(x, y);
+                if (!same(expected, got, x)) {
+                    got = SimpleMath.pow(x, y);
+                }
+                if (!same(expected, got, x)) {
+                    System.out.println("??");
+                }
                 assertTrue(same(expected, got, x));
             }
+        }
+    }
+
+    @Test
+    public void powIntTest() {
+        Random r = new Random(1);
+        for (int i = 0; i < 100000; i++) {
+            int a = r.nextInt();
+            int b = r.nextInt();
+            double got = SimpleMath.powInt(a, b);
+            if (got == -1) {
+                continue;
+            }
+            double expected = Math.pow(a, b);
+            assertTrue(same(expected, got, a));
         }
     }
 

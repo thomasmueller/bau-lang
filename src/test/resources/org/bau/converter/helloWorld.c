@@ -77,7 +77,9 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Hello World", 11);
-    printf("Hello World\n");
+    {
+        printf("Hello World\n");
+    }
     _end();
     return 0;
 }

@@ -76,10 +76,13 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
 void test_0() {
-    i8_array* data = i8_array_new(4);
-    int64_t _t0 = readInt_2(data, 0);
-    printf("%lld\n", (long long)_t0);
+    i8_array* _t0 = i8_array_new(4);
+    i8_array* data = _t0;
+    _incUseStack(data);
+    int64_t _t1 = readInt_2(data, 0);
+    printf("%lld\n", (long long)_t1);
     _decUseStack(data, i8_array);
+    _decUseStack(_t0, i8_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

@@ -5,15 +5,24 @@ package org.bau;
 Name: Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
-playground: stop if program runs is too slow
-
-varargs: converting all parameters to a certain type
+auto-conversion:
+convert<type>To<type>
+vs
+toString
 
 print and println without help of C
 - each type has a "toStr()" method
 
-function pointers (more low-level; required for callbacks)?
-interfaces (trait), like in Rust instanceof?
+arrays may not be null,
+but can only be empty (meaning: have zero elements).
+- this should be modelled as null, so that no memory is used.
+- avoid inc/dec ref count for empty array
+
+type.name, id, size,... (fields or functions)
+
+function pointers (for callbacks; eg. sort), or
+interfaces (trait), like in Rust
+for interfaces, support instanceof and cast
 
 malloc / free replacement: tlsf?
 

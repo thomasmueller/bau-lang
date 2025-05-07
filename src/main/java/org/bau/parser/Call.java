@@ -86,6 +86,7 @@ public class Call implements Statement, Expression {
         }
         Value val = m.getGlobal(Memory.RESULT);
         val = Operation.convertToType(val, def.returnType);
+        m.setGlobal(Memory.RESULT, val);
         return val;
     }
 

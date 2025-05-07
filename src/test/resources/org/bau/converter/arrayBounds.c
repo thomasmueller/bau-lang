@@ -72,12 +72,13 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 void test_0() {
-    i8_array* data = i8_array_new(10);
+    i8_array* _t0 = i8_array_new(10);
+    i8_array* data = _t0;
+    _incUseStack(data);
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
             data->data[i] = i;
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 10) {
                 break;
@@ -91,13 +92,13 @@ void test_0() {
         int64_t i = 0;
         while (i < 20) {
             sum += data->data[idx_2(i, data->len)];
-            continue3:;
             i += 1;
         }
         break;
     }
     printf("%lld\n", (long long)sum);
     _decUseStack(data, i8_array);
+    _decUseStack(_t0, i8_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;

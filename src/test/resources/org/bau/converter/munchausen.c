@@ -86,9 +86,11 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     int64_t array_const_1000[] = {0, 1, 4, 27, 256, 3125, 46656, 823543, 16777216, 387420489};
     array_1000 = int_array_const(array_const_1000, 10);
-    LIMIT = 4400;
-    cache = array_1000;
-    _incUseStack(cache);
+    {
+        LIMIT = 4400;
+        cache = array_1000;
+        _incUseStack(cache);
+    }
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
@@ -96,7 +98,6 @@ int main(int _argc, char *_argv[]) {
             if (_t0) {
                 printf("%lld\n", i);
             }
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 4400) {
                 break;

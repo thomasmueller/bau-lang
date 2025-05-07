@@ -80,10 +80,12 @@ org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
 int __argc;
 char **__argv;
 /* functions */
+int64_t int_1(int64_t x);
 double org_bau_Math_exp_1(double x);
 int64_t org_bau_Math_isNotANumber_1(double x);
 double org_bau_Math_log_1(double x);
 double org_bau_Math_sqrt_1(double x);
+int64_t org_bau_Math_sqrtInt_1(int64_t x);
 org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
 org_bau_Utils_dateTime org_bau_Utils_getDateTime_0();
 int64_t org_bau_Utils_getNanoTime_0();
@@ -93,6 +95,7 @@ int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
+void org_bau_Utils_dateTime_copy(org_bau_Utils_dateTime* x);
 void i8_array_free(i8_array* x) {
     _free(x->data);
     _free(x);
@@ -103,6 +106,8 @@ void int_array_free(int_array* x) {
 }
 void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
 }
+void org_bau_Utils_dateTime_copy(org_bau_Utils_dateTime* x) {
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
@@ -110,7 +115,7 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1000;
+i8_array* string_1001;
 i8_array* string_1003;
 i8_array* string_1007;
 i8_array* string_1008;
@@ -124,6 +129,9 @@ double LOG10;
 double LOG2;
 int64_t MIN_INT;
 int64_t MAX_INT;
+int64_t int_1(int64_t x) {
+    return x;
+}
 double org_bau_Math_exp_1(double x) {
     return exp(x);
     int64_t _t0 = org_bau_Math_isNotANumber_1(x);
@@ -151,7 +159,6 @@ double org_bau_Math_exp_1(double x) {
         while (i < 22) {
             term *= x / i;
             approx += term;
-            continue1:;
             i += 1;
         }
         break;
@@ -197,7 +204,6 @@ double org_bau_Math_log_1(double x) {
             sign = - sign;
             term *= base;
             result += sign * term / i;
-            continue1:;
             i += 1;
         }
         break;
@@ -206,9 +212,45 @@ double org_bau_Math_log_1(double x) {
 }
 double org_bau_Math_sqrt_1(double x) {
     return sqrt(x);
-    double _t0 = org_bau_Math_log_1(x);
-    double _t1 = org_bau_Math_exp_1(_t0 / 2);
-    return _t1;
+    int64_t x2 = int_1(x);
+    int64_t _t0 = x2 > 0;
+    if (_t0) {
+        int64_t _t1 = x2 == x;
+        _t0 = _t1;
+    }
+    if (_t0) {
+        int64_t exact = org_bau_Math_sqrtInt_1(x2);
+        if (( exact * exact ) == x) {
+            return exact;
+        }
+    }
+    double _t2 = org_bau_Math_log_1(x);
+    double _t3 = org_bau_Math_exp_1(_t2 / 2);
+    return _t3;
+}
+int64_t org_bau_Math_sqrtInt_1(int64_t x) {
+    if (x < 0) {
+        return 0;
+    }
+    int64_t g = 2147483648;
+    int64_t c = g;
+    while (1) {
+        int64_t t = g * g;
+        int64_t _t0 = t > x;
+        if (!(_t0)) {
+            int64_t _t1 = t < 0;
+            _t0 = _t1;
+        }
+        if (_t0) {
+            g ^= c;
+        }
+        c >>= 1;
+        if (c == 0) {
+            break;
+        }
+        g |= c;
+    }
+    return g;
 }
 org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
     org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
@@ -270,20 +312,22 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("-", 1);
-    string_1003 = str_const(".", 1);
+    string_1001 = str_const(".", 1);
+    string_1003 = str_const("-", 1);
     string_1007 = str_const(" ", 1);
     string_1008 = str_const(":", 1);
-    int64_t randomSeed = 0;
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
+    {
+        int64_t randomSeed = 0;
+        POS_INFINITY = (1.0 / 0.0);
+        NEG_INFINITY = (-1.0 / 0.0);
+        NOT_A_NUMBER = (0.0 / 0.0);
+        PI = 3.141592653589793;
+        E = 2.718281828459045;
+        LOG10 = 2.302585092994046;
+        LOG2 = 0.6931471805599453;
+        MIN_INT = 0x8000000000000000;
+        MAX_INT = 0x7fffffffffffffff;
+    }
     int64_t a = org_bau_Utils_getNanoTime_0();
     printf("%lld\n", (long long)a);
     int64_t b = org_bau_Utils_getNanoTime_0();
@@ -295,8 +339,15 @@ int main(int _argc, char *_argv[]) {
     int64_t _t1 = org_bau_Utils_random_0();
     printf("%lld\n", (long long)_t1);
     printf("%.9f\n", 3.141592653589793);
-    double _t2 = org_bau_Math_sqrt_1(2);
-    printf("%.9f\n", _t2);
+    while (1 == 1) {
+        int64_t i = 2;
+        while (i < 4) {
+            double _t2 = org_bau_Math_sqrt_1(i);
+            printf("%.9f\n", _t2);
+            i += 1;
+        }
+        break;
+    }
     org_bau_Utils_dateTime_free(&c);
     _end();
     return 0;

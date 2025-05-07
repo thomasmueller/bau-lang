@@ -133,7 +133,6 @@ int main(int _argc, char *_argv[]) {
         }
         File_use_1(f);
         i += 1;
-        continue0:;
         _decUseStack(f, File);
     }
     _end();

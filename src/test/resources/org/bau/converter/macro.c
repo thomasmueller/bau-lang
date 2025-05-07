@@ -120,7 +120,6 @@ int main(int _argc, char *_argv[]) {
             } else {
             }
             printf("next\n");
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 2) {
                 _decUseStack(x, i8_array);

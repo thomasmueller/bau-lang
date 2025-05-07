@@ -18,7 +18,8 @@ import org.junit.Test;
 
 cd got
 find . -name "*.c" -exec gcc {} -o {}.out \;
-find . -name "*.c.out" -exec echo "############################# " {} \; -exec {} \;
+find . -name "*.c.out" -exec echo "############################# " {} \; -exec {} \; > out.txt
+open out.txt
 cd ..
 
 cp got/*.c src/test/resources/org/bau/converter/

@@ -28,7 +28,8 @@ public class Program {
 
     private final static boolean TRACE_REF_COUNTS = false;
 
-    ArrayList<Statement> list = new ArrayList<>();
+    ArrayList<Statement> initList = new ArrayList<>();
+    ArrayList<Statement> mainList = new ArrayList<>();
 
     LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
 
@@ -162,7 +163,28 @@ public class Program {
             return null;
         } else if (source.isRange()) {
             return expr;
-        } else if (source.isFloatingPoint()) {
+        }
+
+        // 'convertIntToString(int x) org.bau.String'
+        String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();
+        FunctionDefinition fromFunction = getFunctionIfExists(null, source.module, convertFunctionName, 1);
+        if (fromFunction != null) {
+            Call call = new Call();
+            call.args.add(expr);
+            call.def = fromFunction;
+            return call;
+        }
+        // 'int toString() org.bau.String'
+        String toFunctionName = "to" + target.getCamelCaseName();
+        FunctionDefinition toFunction = getFunctionIfExists(source, target.module, toFunctionName, 1);
+        if (toFunction != null) {
+            Call call = new Call();
+            call.args.add(expr);
+            call.def = toFunction;
+            return call;
+        }
+
+        if (source.isFloatingPoint()) {
             if (!target.isFloatingPoint()) {
                 return null;
             }
@@ -280,14 +302,20 @@ public class Program {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
-        for(Statement s : list) {
+        for(Statement s : initList) {
+            buff.append(s);
+        }
+        for(Statement s : mainList) {
             buff.append(s);
         }
         return buff.toString();
     }
 
     public String toC() {
-        for(Statement s : list) {
+        for(Statement s : initList) {
+            s.used(this);
+        }
+        for(Statement s : mainList) {
             s.used(this);
         }
         ProgramContext context = new ProgramContext();
@@ -570,6 +598,9 @@ public class Program {
                     if (!SIMPLE_REF_COUNTING) {
                         buff.append("int " + t.nameC() + "_freeIfUnused(void* x);\n");
                     }
+                    if (t.isCopyType() && !t.isArray()) {
+                        buff.append("void " + t.nameC() + "_copy(" + t.nameC() + "* x);\n");
+                    }
                 }
             }
         }
@@ -617,6 +648,21 @@ public class Program {
                         buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); return 1; } return 0;\n"));
                         buff.append("}\n");
                     }
+                    if (t.isCopyType() && !t.isArray()) {
+                        buff.append("void " + t.nameC() + "_copy(" + t.nameC() + "* x) {\n");
+                        for (Variable f : t.fields) {
+                            if (f.type().needIncDec()) {
+                                if (f.type().memoryType() == MemoryType.REF_COUNT) {
+                                    buff.append(Statement.indent(Free.INC_USE + "(x->" + f.name + ");\n"));
+                                } else {
+                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_copy(x->" + f.name + ");\n"));
+                                }
+                            } else if (f.type().needFree()) {
+                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_copy(x->" + f.name + ");\n"));
+                            }
+                        }
+                        buff.append("}\n");
+                    }
                 }
             }
         }
@@ -656,7 +702,9 @@ public class Program {
             }
         }
         for (Variable var : globalVariables.values()) {
-            buff.append(var.type().toC() + " " + var.name + ";\n");
+            if (var.isUsed()) {
+                buff.append(var.type().toC() + " " + var.name + ";\n");
+            }
         }
         for (FunctionDefinition def : functions.values()) {
             if (def.isUsed()) {
@@ -699,14 +747,26 @@ public class Program {
         }
         context.nextFunction();
         FunctionDefinition main = new FunctionDefinition(0);
-        main.list = list;
+        main.list = mainList;
         main.name = "main";
         main.borrowCheck();
         StringBuilder buff2 = new StringBuilder();
-        for (Statement s : list) {
+        for (Statement s : initList) {
             s.optimize(context);
         }
-        for (Statement s : list) {
+        for (Statement s : mainList) {
+            s.optimize(context);
+        }
+        if (!initList.isEmpty()) {
+            StringBuilder buff3 = new StringBuilder();
+            buff3.append("{\n");
+            for (Statement s : initList) {
+                buff3.append(Statement.indent(s.toC()));
+            }
+            buff3.append("}\n");
+            buff2.append(Statement.indent(buff3.toString()));
+        }
+        for (Statement s : mainList) {
             buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
@@ -806,7 +866,8 @@ Testing.
             m.setGlobal(e.getValue().name, e.getValue().type().getZeroValue());
         }
         ArrayList<Statement> l2 = new ArrayList<>();
-        l2.addAll(list);
+        l2.addAll(initList);
+        l2.addAll(mainList);
         l2.addAll(autoClose);
         runSequence(m, l2);
         this.ticksExecuted = m.getTicksExecuted();
@@ -892,6 +953,10 @@ Testing.
     }
 
     public static StatementResult runSequence(Memory m, List<Statement> list) {
+        return runSequence(m, list, -1);
+    }
+
+    public static StatementResult runSequence(Memory m, List<Statement> list, int continuePoint) {
         for (int i = 0; i < list.size(); i++) {
             Statement s = list.get(i);
             StatementResult n = s.run(m);
@@ -903,7 +968,11 @@ Testing.
             } else if (n == StatementResult.BREAK) {
                 return n;
             } else if (n == StatementResult.CONTINUE) {
-                return n;
+                if (continuePoint == -1) {
+                    return n;
+                } else {
+                    i = continuePoint - 1;
+                }
             } else if (n == StatementResult.RETURN) {
                 return n;
             } else if (n == StatementResult.THROW) {

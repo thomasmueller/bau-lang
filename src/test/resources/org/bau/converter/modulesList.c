@@ -81,17 +81,20 @@ org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
     return _t0;
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
-    org_bau_List_List_int* _t0 = org_bau_List_List_int_1(int_array_new(4));
-    return _t0;
+    int_array* _t0 = int_array_new(4);
+    org_bau_List_List_int* _t1 = org_bau_List_List_int_1(_t0);
+    _decUseStack(_t0, int_array);
+    return _t1;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= this->array->len) {
-        int_array* n = int_array_new(this->array->len * 2);
+        int_array* _t0 = int_array_new(this->array->len * 2);
+        int_array* n = _t0;
+        _incUseStack(n);
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 n->data[idx_2(i, n->len)] = this->array->data[i];
-                continue1:;
                 int64_t _next = i + 1;
                 if (_next >= this->array->len) {
                     break;
@@ -104,6 +107,7 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
         this->array = n;
         _incUse(this->array);
         _decUseStack(n, int_array);
+        _decUseStack(_t0, int_array);
     }
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;

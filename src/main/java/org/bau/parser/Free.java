@@ -42,9 +42,9 @@ public class Free implements Statement {
 
     public static StatementResult decRefCount(Value val, DataType type, Memory m) {
         long heapId = val.longValue();
-        boolean close = m.decHeap(heapId);
+        boolean gc = m.decHeap(heapId);
         StatementResult result = StatementResult.OK;
-        if (close) {
+        if (gc) {
             FunctionDefinition def = type.autoClose;
             if (def != null) {
                 m.setLocal("this", val);
@@ -70,7 +70,7 @@ public class Free implements Statement {
         return result;
     }
 
-    public static StatementResult free(Variable var, Memory m) {
+    private static StatementResult free(Variable var, Memory m) {
         Value val;
         if (var.global) {
             val = m.getGlobal(var.name);
@@ -85,9 +85,9 @@ public class Free implements Statement {
         return free(val, var.type(), m);
     }
 
-    public static StatementResult free(Value val, DataType type, Memory m) {
+    private static StatementResult free(Value val, DataType type, Memory m) {
         Value.ValueStruct struct = (Value.ValueStruct) val;
-        for(Variable f : type.fields) {
+        for (Variable f : type.fields) {
             Value v = struct.get(f.name);
             if (f.type().needIncDec()) {
                 StatementResult result = decRefCount(v, f.type(), m);
@@ -105,17 +105,6 @@ public class Free implements Statement {
     }
 
     @Override
-    public StatementResult run(Memory m) {
-        if (var.type().needIncDec()) {
-            return decRefCount(var, m);
-        } else if (var.type().needFree()) {
-            return free(var, m);
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    @Override
     public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
         if (memoryType == MemoryType.OWNER) {
             if (var.type().memoryType() == MemoryType.OWNER) {
@@ -125,6 +114,17 @@ public class Free implements Statement {
     }
 
     public void optimize(ProgramContext context) {
+    }
+
+    @Override
+    public StatementResult run(Memory m) {
+        if (var.type().needIncDec()) {
+            return decRefCount(var, m);
+        } else if (var.type().needFree()) {
+            return free(var, m);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

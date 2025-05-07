@@ -10,7 +10,7 @@ LOG2         : 0.69314718055994530942
 MIN_INT      : 0x8000000000000000
 MAX_INT      : 0x7fffffffffffffff
 
-fun abs(x float) float
+fun abs(x float) const float
     native(```
         #include <math.h>
         return fabs(x);
@@ -19,14 +19,14 @@ fun abs(x float) float
         return x
     return -x
 
-fun isNotANumber(x float) int
+fun isNotANumber(x float) const int
     native('return isnan(x);')
     return x <> x
 
-fun isNegativeZero(x float) int
+fun isNegativeZero(x float) const int
     return (x = 0.0) and (1.0 / x = NEG_INFINITY)
 
-fun min(a float, b float) float
+fun min(a float, b float) const float
     native('return fmin(a, b);')    
     if isNotANumber(a)
         return a
@@ -36,7 +36,7 @@ fun min(a float, b float) float
         return a
     return b
 
-fun max(a float, b float) float
+fun max(a float, b float) const float
     native('return fmax(a, b);')    
     if isNotANumber(a)
         return a
@@ -46,7 +46,7 @@ fun max(a float, b float) float
         return a
     return b
 
-fun floor(x float) float
+fun floor(x float) const float
     native('return floor(x);')    
     if x <= MIN_INT or x >= MAX_INT or isNotANumber(x) or x = 0
         return x
@@ -56,11 +56,11 @@ fun floor(x float) float
         return d
     return d - 1
 
-fun ceil(x float) float
+fun ceil(x float) const float
     native('return ceil(x);')    
     return -floor(-x)
 
-fun round(x float) float
+fun round(x float) const float
     native('return floor(x + 0.5);')    
     if isNotANumber(x)
         return 0
@@ -70,7 +70,7 @@ fun round(x float) float
         return MAX_INT
     return int(floor(x + 0.5))
 
-fun signum(x float) float  
+fun signum(x float) const float
     if x = 0.0 or isNotANumber(x)
         return x
     if x >= 0
@@ -115,16 +115,27 @@ fun log(x float) const float
         result += sign * term / i
     return result
 
-fun sqrt(x float) float
+fun sqrt(x float) const float
     native('return sqrt(x);')
+    x2 := int(x)
+    if x2 > 0 and x2 = x
+        exact : sqrtInt(x2)
+        if exact * exact = x
+            return exact
     return exp(log(x) / 2)
     
-fun log10(x float) float
+fun log10(x float) const float
     native('return log10(x);')    
     return log(x) / LOG10
 
 fun pow(x float, y float) const float
     native('return pow(x, y);')
+    x2 : int(x)
+    y2 : int(y)
+    if float(x2) = x and float(y2) = y
+        r : powInt(x2, y2)
+        if r <> -1
+            return r
     if x > 0 and y > 0
         return exp(y * log(x))
     if y = 0.0
@@ -163,6 +174,23 @@ fun pow(x float, y float) const float
             return 0
         return POS_INFINITY
     return NOT_A_NUMBER
+
+fun powInt(base int, exponent int) const int
+    if exponent < 0
+        return -1
+    result := 1
+    b := base
+    while exponent > 0
+        if (exponent & 1) = 1
+            result *= b
+            if result > (1 << 31) or result < -(1 << 31)
+                return -1
+        exponent >>= 1
+        if exponent > 0
+            b *= b
+            if b > (1 << 31) or b < -(1 << 31)
+                return -1
+    return result
 
 fun sin(x float) float
     native('return sin(x);')    
@@ -327,7 +355,7 @@ fun intToString(n int) i8[]
         result[j] = buff[j]
     return result
 
-fun appendfloat(n float, buff i8[], pos int) int
+fun appendFloat(n float, buff i8[], pos int) int
     e := 0
     if n >= 1e8 or n <= 1e-3
         while n > 1e20
@@ -342,7 +370,7 @@ fun appendfloat(n float, buff i8[], pos int) int
         while n < 1
             n *= 10
             e -= 1
-        pos = appendfloat(n, buff, pos)
+        pos = appendFloat(n, buff, pos)
         buff[pos] = ord('E')
         pos += 1
         pos = appendInt(e, buff, pos)
@@ -375,13 +403,13 @@ fun floatToString(n float) i8[]
         pos += 1
         n = -n
     else
-    end : appendfloat(n, buff, pos)
+    end : appendFloat(n, buff, pos)
     result : i8[end]
     for j := until(end)
         result[j] = buff[j]
     return result
 
-fun sqrtInt(x int) int
+fun sqrtInt(x int) const int
     if x < 0
         return 0
     g := 1 << 31

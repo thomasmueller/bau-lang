@@ -82,7 +82,6 @@ void insertionSort_int_array_int_1(int_array* a) {
                 j -= 1;
             }
             a->data[idx_2(j + 1, a->len)] = t;
-            continue1:;
             i += 1;
         }
         break;
@@ -122,7 +121,6 @@ void shellSort_int_array_int_1(int_array* a) {
                     j -= g;
                 }
                 a->data[idx_2(j + g, a->len)] = t;
-                continue3:;
                 i += 1;
             }
             break;
@@ -133,12 +131,13 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
 void test_0() {
-    int_array* x = int_array_new(5);
+    int_array* _t0 = int_array_new(5);
+    int_array* x = _t0;
+    _incUseStack(x);
     while (1 == 1) {
         int64_t i = 0;
         while (1) {
             x->data[i] = org_bau_Utils_random_0();
-            continue1:;
             int64_t _next = i + 1;
             if (_next >= 5) {
                 break;
@@ -152,7 +151,6 @@ void test_0() {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)x->data[i]);
-            continue3:;
             int64_t _next = i + 1;
             if (_next >= 5) {
                 break;
@@ -165,7 +163,6 @@ void test_0() {
         int64_t i = 0;
         while (1) {
             x->data[i] = org_bau_Utils_random_0();
-            continue5:;
             int64_t _next = i + 1;
             if (_next >= 5) {
                 break;
@@ -179,7 +176,6 @@ void test_0() {
         int64_t i = 0;
         while (1) {
             printf("%lld\n", (long long)x->data[i]);
-            continue7:;
             int64_t _next = i + 1;
             if (_next >= 5) {
                 break;
@@ -189,11 +185,14 @@ void test_0() {
         break;
     }
     _decUseStack(x, int_array);
+    _decUseStack(_t0, int_array);
 }
 int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
-    int64_t randomSeed = 0;
+    {
+        int64_t randomSeed = 0;
+    }
     test_0();
     _end();
     return 0;

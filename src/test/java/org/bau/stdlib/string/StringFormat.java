@@ -92,4 +92,6 @@ public class StringFormat {
         return new StringBuilder().repeat(' ', len - s.length()) + s;
     }
 
+
+
 }

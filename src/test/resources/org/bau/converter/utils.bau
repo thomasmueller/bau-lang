@@ -10,7 +10,8 @@ println(c.year '-' c.month '-' c.day ' ' c.hour ':' c.minute ':' c.second '.' c.
 Utils.setRandomSeed(Utils.getNanoTime())
 println(Utils.random())
 println(Math.PI)
-println(Math.sqrt(2))
+for i := range(2, 4)
+    println(Math.sqrt(i))
 
 ## Expected
 0
@@ -19,3 +20,4 @@ println(Math.sqrt(2))
 -2152535657050944081
 3.141592653589793
 1.4142135623730954
+1.7320508075688774

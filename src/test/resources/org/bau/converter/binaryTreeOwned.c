@@ -159,7 +159,9 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const(" check: ", 8);
     string_1003 = str_const(" trees of depth ", 16);
     string_1004 = str_const("long lived tree of depth ", 25);
-    int64_t randomSeed = 0;
+    {
+        int64_t randomSeed = 0;
+    }
     int64_t minDepth = 1;
     int64_t maxDepth = 3;
     int64_t stretchDepth = 4;
@@ -167,6 +169,7 @@ int main(int _argc, char *_argv[]) {
     printf("ownership / borrowing\n");
     int64_t _t0 = Tree_owned_nodeCount_1(stretch);
     printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+    Tree_owned_free(stretch);
     stretch = with_1(0);
     Tree_owned* longLived = with_1(3);
     int64_t depth = 1;
@@ -178,7 +181,6 @@ int main(int _argc, char *_argv[]) {
             Tree_owned* t = with_1(depth);
             check += Tree_owned_nodeCount_1(t);
             i += 1;
-            continue1:;
             Tree_owned_free(t);
         }
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);

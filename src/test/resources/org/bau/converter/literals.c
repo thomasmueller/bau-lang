@@ -88,16 +88,18 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("String literal", 14);
     string_1001 = str_const("Raw string", 10);
     string_1002 = str_const("Two-line\nraw string with `", 26);
-    a = 1000000;
-    b = 3.1415;
-    c = 0xcafe;
-    d = string_1000;
-    _incUseStack(d);
-    e = string_1001;
-    _incUseStack(e);
-    f = string_1002;
-    _incUseStack(f);
-    g = -1.23E-45;
+    {
+        a = 1000000;
+        b = 3.1415;
+        c = 0xcafe;
+        d = string_1000;
+        _incUseStack(d);
+        e = string_1001;
+        _incUseStack(e);
+        f = string_1002;
+        _incUseStack(f);
+        g = -1.23E-45;
+    }
     _decUseStack(f, i8_array);
     _decUseStack(e, i8_array);
     _decUseStack(d, i8_array);
