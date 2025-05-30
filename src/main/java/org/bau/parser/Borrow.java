@@ -80,7 +80,10 @@ public class Borrow implements Expression {
             return "";
         }
         StringBuilder buff = new StringBuilder();
-        for(Expression e : usedOwnedList) {
+        for (Expression e : usedOwnedList) {
+            if (e instanceof NullValue) {
+                continue;
+            }
             buff.append(e.toC() + " = NULL;\n");
         }
         return buff.toString();

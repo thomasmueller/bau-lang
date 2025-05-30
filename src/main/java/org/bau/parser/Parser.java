@@ -358,7 +358,7 @@ public class Parser {
             assign.type = var.type();
             assign.initial = false;
             assign.leftValue = new FieldAccess(result, var.name, var.type());
-            if (var.type().isCopyType() || var.type().isNullable()) {
+            if (var.type().isCopyType()) {
                 assign.value = var.type().nullExpression();
             } else {
                 Variable arg = new Variable(var.name, var.type());

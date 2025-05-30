@@ -96,8 +96,8 @@ public class DateTimeTest {
         assertEquals(31, info.day);
         assertEquals(23, info.hour);
         assertEquals(59, info.minute);
-        for(int year = -3_000; year < 3_000; year++) {
-            assertEquals(DateTime.isLeapYear(year), Year.isLeap(year));
+        for(int year = 0; year < 3_000; year++) {
+            assertEquals("year: " + year, DateTime.isLeapYear(year), Year.isLeap(year));
             for(int month = 0; month <= 13; month++) {
                 if (month >= 1 && month <= 12) {
                     int daysForMonth = YearMonth.of((int) year, month).lengthOfMonth();

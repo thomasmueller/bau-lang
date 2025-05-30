@@ -46,7 +46,7 @@ fun count(depth int) int
     return c
 
 fun newTree(left Tree+, right Tree+) Tree+
-    t := new(Tree+)
+    t := Tree+()
     t.left = left
     t.right = right
     return t

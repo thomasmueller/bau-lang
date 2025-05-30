@@ -70,10 +70,9 @@ Tree* Tree_new() {
 int __argc;
 char **__argv;
 /* functions */
-Tree* Tree_0();
+Tree* Tree_2(Tree* left, Tree* right);
 int64_t Tree_nodeCount_1(Tree* this);
 int64_t count_1(int64_t depth);
-Tree* newTree_2(Tree* left, Tree* right);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 void stretch_1(int64_t depth);
 Tree* with_1(int64_t depth);
@@ -104,12 +103,14 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
-Tree* Tree_0() {
+Tree* Tree_2(Tree* left, Tree* right) {
     Tree* _t0 = Tree_new();
     _decUse(_t0->left, Tree);
-    _t0->left = NULL;
+    _t0->left = left;
+    _incUse(_t0->left);
     _decUse(_t0->right, Tree);
-    _t0->right = NULL;
+    _t0->right = right;
+    _incUse(_t0->right);
     return _t0;
 }
 int64_t Tree_nodeCount_1(Tree* this) {
@@ -134,16 +135,6 @@ int64_t count_1(int64_t depth) {
     _decUseStack(t, Tree);
     return c;
 }
-Tree* newTree_2(Tree* left, Tree* right) {
-    Tree* t = Tree_0();
-    _decUse(t->left, Tree);
-    t->left = left;
-    _incUse(t->left);
-    _decUse(t->right, Tree);
-    t->right = right;
-    _incUse(t->right);
-    return t;
-}
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
@@ -153,12 +144,12 @@ void stretch_1(int64_t depth) {
 }
 Tree* with_1(int64_t depth) {
     if (depth == 0) {
-        Tree* _t0 = newTree_2(NULL, NULL);
+        Tree* _t0 = Tree_2(NULL, NULL);
         return _t0;
     }
     Tree* _t1 = with_1(depth - 1);
     Tree* _t2 = with_1(depth - 1);
-    Tree* _t3 = newTree_2(_t1, _t2);
+    Tree* _t3 = Tree_2(_t1, _t2);
     _decUseStack(_t2, Tree);
     _decUseStack(_t1, Tree);
     return _t3;

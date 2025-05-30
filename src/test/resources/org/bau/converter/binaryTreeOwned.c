@@ -70,8 +70,7 @@ int __argc;
 char **__argv;
 /* functions */
 int64_t Tree_owned_nodeCount_1(Tree_owned* this);
-Tree_owned* Tree_owned_0();
-Tree_owned* newTree_2(Tree_owned* left, Tree_owned* right);
+Tree_owned* Tree_owned_2(Tree_owned* left, Tree_owned* right);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 Tree_owned* with_1(int64_t depth);
 void i8_array_free(i8_array* x);
@@ -116,35 +115,27 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     }
     return result;
 }
-Tree_owned* Tree_owned_0() {
+Tree_owned* Tree_owned_2(Tree_owned* left, Tree_owned* right) {
     Tree_owned* _t1 = Tree_owned_new();
     Tree_owned_free(_t1->left);
-    _t1->left = NULL;
-    Tree_owned_free(_t1->right);
-    _t1->right = NULL;
-    return _t1;
-}
-Tree_owned* newTree_2(Tree_owned* left, Tree_owned* right) {
-    Tree_owned* t = Tree_owned_0();
-    Tree_owned_free(t->left);
-    t->left = left;
+    _t1->left = left;
     left = NULL;
-    Tree_owned_free(t->right);
-    t->right = right;
+    Tree_owned_free(_t1->right);
+    _t1->right = right;
     right = NULL;
-    return t;
+    return _t1;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
 }
 Tree_owned* with_1(int64_t depth) {
     if (depth == 0) {
-        Tree_owned* _t0 = newTree_2(NULL, NULL);
+        Tree_owned* _t0 = Tree_owned_2(NULL, NULL);
         return _t0;
     }
     Tree_owned* _t1 = with_1(depth - 1);
     Tree_owned* _t2 = with_1(depth - 1);
-    Tree_owned* _t3 = newTree_2(_t1, _t2);
+    Tree_owned* _t3 = Tree_owned_2(_t1, _t2);
     _t1 = NULL;
     _t2 = NULL;
     Tree_owned_free(_t2);

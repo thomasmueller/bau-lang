@@ -35,7 +35,6 @@ public class Tar {
             System.out.printf("%10d %s %-50s \n", e.size, ts, e.name);
         }
         f.close();
-        int test;
 
     }
 
@@ -85,8 +84,7 @@ public class Tar {
     }
 
     static String readString(byte[] data, int pos, int len) {
-        int todoReuseBuffer;
-        // re-use?
+        // TODO re-use?
         byte[] buff = new byte[len + 1];
         int i = 0;
         for (; i < len; i++) {

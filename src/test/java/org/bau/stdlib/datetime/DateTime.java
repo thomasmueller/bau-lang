@@ -108,7 +108,9 @@ public class DateTime {
     }
 
     public static boolean isLeapYear(long year) {
-        return (year & 3) == 0 && (year % 100 != 0 || year % 400 == 0);
+        // https://hueffner.de/falk/blog/a-leap-year-check-in-three-instructions.html
+        return ((year * 1073750999L) & 3221352463L) <= 126976;
+        // return (year & 3) == 0 && (year % 100 != 0 || year % 400 == 0);
     }
 
     public static class DateTimeInfo {

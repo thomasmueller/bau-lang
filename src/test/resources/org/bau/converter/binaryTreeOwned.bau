@@ -41,16 +41,10 @@ fun count(depth int) int
     c := t.nodeCount()
     return c
 
-fun newTree(left Tree+, right Tree+) Tree+
-    t := Tree+()
-    t.left = left
-    t.right = right
-    return t
-
 fun with(depth int) Tree+
     if depth = 0
-        return newTree(null, null)
-    return newTree(with(depth - 1), with(depth - 1))
+        return Tree+(null, null)
+    return Tree+(with(depth - 1), with(depth - 1))
 
 ## Expected
 ownership / borrowing

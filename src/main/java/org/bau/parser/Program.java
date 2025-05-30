@@ -23,6 +23,7 @@ import org.bau.std.Std;
 
 public class Program {
 
+    public final static boolean TM_MALLOC = true;
     public final static boolean SIMPLE_REF_COUNTING = true;
     public boolean simpleRefCount = SIMPLE_REF_COUNTING;
 
@@ -156,6 +157,15 @@ public class Program {
     }
 
     public Expression cast(Expression expr, DataType target) {
+        if (target.isNullable()) {
+            if (expr.type() == null) {
+                if (expr instanceof NullValue) {
+                    return new NullValue(target);
+                }
+            } else if (expr.type().orNull() == target) {
+                return expr;
+            }
+        }
         DataType source = expr.type();
         if (source == null) {
             return expr;
@@ -325,13 +335,19 @@ public class Program {
         buff.append("#include <stdarg.h>\n");
         buff.append("#include <stdint.h>\n");
 
-        for(FunctionDefinition def : functions.values()) {
+        for (FunctionDefinition def : functions.values()) {
             if (def.isUsed() && def.includes != null) {
                 includes.addAll(def.includes);
             }
         }
+        if (TM_MALLOC) {
+            includes.addAll(List.of(StandardLib.TM_MALLOC_INCLUDE.split("\n")));
+        }
         for(String i : includes) {
             buff.append("#include " + i + "\n");
+        }
+        if (TM_MALLOC) {
+            buff.append(StandardLib.TM_MALLOC);
         }
         if (TRACE_REF_COUNTS) {
             buff.append("int __globalObjects = 0;\n");
@@ -341,17 +357,23 @@ public class Program {
             buff.append("#define REF_COUNT_STACK_INC __refCountStackUpdates++\n");
             buff.append("#define PRINT(...)          printf(__VA_ARGS__);\n");
             buff.append("#define _end()              {PRINT(\"refCountUpdates: %d, stack: %d\\n\", __refCountUpdates, __refCountStackUpdates); if(__globalObjects!=0)PRINT(\"################ MEMORY LEAK: %d ################\\n\", __globalObjects);}\n");
-            buff.append("#define _malloc(a)          malloc(a)\n");
             buff.append("#define _traceMalloc(a)     PRINT(\"new %p line %d (%d)\\n\", a, __LINE__, ++__globalObjects);\n");
+            buff.append("#define _malloc(a)          malloc(a)\n");
             buff.append("#define _free(a)            {PRINT(\"del %p line %d (%d)\\n\", a, __LINE__, --__globalObjects);free(a);}\n");
         } else {
             buff.append("#define REF_COUNT_INC\n");
             buff.append("#define REF_COUNT_STACK_INC\n");
             buff.append("#define PRINT(...)\n");
             buff.append("#define _end()\n");
-            buff.append("#define _malloc(a)      malloc(a)\n");
-            buff.append("#define _traceMalloc(a)\n");
-            buff.append("#define _free(a)        free(a)\n");
+            if (TM_MALLOC) {
+                buff.append("#define _malloc(a)      tmmalloc(a)\n");
+                buff.append("#define _traceMalloc(a)\n");
+                buff.append("#define _free(a)        tmfree(a)\n");
+            } else {
+                buff.append("#define _malloc(a)      malloc(a)\n");
+                buff.append("#define _traceMalloc(a)\n");
+                buff.append("#define _free(a)        free(a)\n");
+            }
         }
         if (SIMPLE_REF_COUNTING) {
             // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
@@ -717,6 +739,9 @@ public class Program {
         buff.append("int main(int _argc, char *_argv[]) {\n");
         if (!SIMPLE_REF_COUNTING) {
             buff.append(Statement.indent("_initRefCount();\n"));
+        }
+        if (TM_MALLOC) {
+            buff.append(Statement.indent("tmmalloc_init();\n"));
         }
         buff.append(Statement.indent("__argc = _argc;\n"));
         buff.append(Statement.indent("__argv = _argv;\n"));

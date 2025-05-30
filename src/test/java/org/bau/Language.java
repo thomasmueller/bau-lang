@@ -2,7 +2,7 @@ package org.bau;
 
 /**
 
-Name: Mya, Pha, Tau (Anouk), Atlas, Soma
+Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
 auto-conversion:
@@ -10,13 +10,28 @@ convert<type>To<type>
 vs
 toString
 
+tmmalloc: OOME should panic? or allocate more memory?
+
 print and println without help of C
 - each type has a "toStr()" method
 
+short string optimization
+
+maybe support slices
+
+maybe support LINQ via ast -> string, plus compile time evaluation
+
+second constructor with all fields: speed up binaryTrees
+
 arrays may not be null,
 but can only be empty (meaning: have zero elements).
-- this should be modelled as null, so that no memory is used.
-- avoid inc/dec ref count for empty array
+- empty array should map to null in C, so that no memory is used.
+- and so, no inc/dec ref count
+
+re-arrange fields for arrays?
+combine array length, refcount, array data
+
+maybe support something line __LINE__ and __FILE__ -- see https://stackoverflow.com/questions/2849832/c-c-line-number
 
 type.name, id, size,... (fields or functions)
 
@@ -24,11 +39,13 @@ function pointers (for callbacks; eg. sort), or
 interfaces (trait), like in Rust
 for interfaces, support instanceof and cast
 
-malloc / free replacement: tlsf?
+ord('a') => code('a')?
 
-ord('a') => code('a')? or char('a')?
+faster itoa
 
-'is' instead of 'equals'?
+more accurate double to ascii, or document
+
+'is' function instead of 'equals'?
 
 support slices as an alternative / addition to range tracking?
 
@@ -51,7 +68,7 @@ Stdlib:
 - statistics (avg, median, approximate, hyperloglog, etc)
 - radix sort
 
-TODO integrate C compiler in the browser, once goto is available:
+TODO integrate C compiler in the browser, once 'goto' is available:
      https://github.com/tyfkda/xcc
      cd ~/data/xcc
      npm up
