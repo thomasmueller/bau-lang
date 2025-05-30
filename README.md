@@ -4,7 +4,7 @@ A programming language for everyone.
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
 <br>
-<a href="transpile.md">Transpile on the command line.</a>
+<a href="doc/transpile.md">Transpile on the command line.</a>
 
 * Easy to learn with a concise syntax inspired by Python.
 * Memory-safe. Automatic memory management using reference counting by default.
