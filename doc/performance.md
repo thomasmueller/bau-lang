@@ -1,24 +1,25 @@
 # Performance and Efficiency
 
-Performance and efficiency have multiple aspects: ease of learning and usage, 
-developer productivity, compilation speed, startup time, runtime performance, and memory usage.
+Performance and efficiency have multiple aspects: ease of learning and usage
+(developer productivity), compilation speed, startup time, runtime performance, and memory usage.
 
-This language transpiles to C, enabling use in embedded and server contexts
-while taking advantage of highly optimized C toolchains. It does slow down compilation a bit,
+This language transpiles to C, which has a highly optimized toolchain, and is available
+for embedded systems and server usage. This added step does slow down compilation a bit,
 compared to pure C.
 
 Startup time is significantly faster than that of virtual machine-based languages like Java or C#, 
 as there is no VM or runtime to initialize.
 
-In terms of runtime performance, the language aims to compete with high-performance languages 
-such as C, Rust, Go, Java, and Swift. 
-It avoids a tracing garbage collector, helping maintain low and predictable memory usage
-and eliminating GC pauses.
+Runtime performance: this language aims to compete with high-performance languages
+such as C, Rust, Go, Java, and Swift.
+It avoids a tracing garbage collector, which results in low memory usage and eliminates GC pauses.
 
-There is some runtime overhead from features like reference counting and array bounds checking. 
-However, for performance-critical sections, this overhead can be mitigated: 
-The language supports ownership semantics for references, and range-restricted index variables, 
-enabling the compiler to safely eliminate these checks where applicable.
+Memory safety results in runtime overhead from reference counting and array bounds checking.
+However, for performance-critical sections, this overhead can be mitigated:
+The language supports ownership semantics for references, and range-restricted index variables,
+so that the compiler can eliminate these checks where applicable.
+The complexity of these features is however not needed in the majority of the cases,
+which results in simple code and high productivity.
 
 ## Benchmarks
 
