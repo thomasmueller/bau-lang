@@ -1,7 +1,5 @@
 import org.bau.Utils
 
-# treeCount := 0
-
 fun main()
     # stretch(20)
     for i := until(10)
@@ -36,17 +34,10 @@ fun count(depth int) int
     t.clear()
     return c
 
-fun newTree(left Tree, right Tree) Tree
-    t := Tree()
-    # treeCount += 1
-    t.left = left
-    t.right = right
-    return t
-
 fun with(depth int) Tree
     if depth = 0
-        return newTree(null, null)
-    return newTree(with(depth - 1), with(depth - 1))
+        return Tree(null, null)
+    return Tree(with(depth - 1), with(depth - 1))
 
 fun Tree clear()
     if left <> null

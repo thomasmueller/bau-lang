@@ -9,6 +9,7 @@ contributed by Isaac Gouy
 */
 public class BinaryTrees {
 
+    /*
     public static void main(String[] args) {
         for (int i = 0; i < 10; i++) {
             long time = System.currentTimeMillis();
@@ -18,8 +19,9 @@ public class BinaryTrees {
         // stretch tree of depth 20  check: 2097151
         // stretch tree of depth 20; check: 2097151
     }
+    */
 
-    public static void main2(String[] args) {
+    public static void main(String[] args) {
         int n = 10;
         if (args.length > 0)
             n = Integer.parseInt(args[0]);

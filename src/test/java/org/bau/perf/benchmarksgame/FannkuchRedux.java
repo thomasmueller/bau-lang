@@ -12,16 +12,19 @@ package org.bau.perf.benchmarksgame;
 public final class FannkuchRedux {
 
 
-    public static void main(String[] args){
-//       int n = (args.length > 0)
-//          ? Integer.parseInt(args[0])
-//          : 12;
+    public static void main(String[] args) {
+       int n = (args.length > 0)
+          ? Integer.parseInt(args[0])
+          : 12;
+       System.out.println("Pfannkuchen(" + n + ") = " + fannkuch(n));
+        /*
         for (int n = 1; n <= 11; n++) {
             long start = System.currentTimeMillis();
             System.out.println("Pfannkuchen(" + n + ") = " + fannkuch(n));
             long time = System.currentTimeMillis() - start;
             System.out.println("(" + time + " ms)");
         }
+        */
     }
 
     public static int fannkuch(int n) {

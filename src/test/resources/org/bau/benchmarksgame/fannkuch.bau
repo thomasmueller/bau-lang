@@ -1,9 +1,18 @@
+import org.bau.Math
+import org.bau.Env
+
+fun main()
+    n := 4
+    if Env.argCount() > 1
+        n = Math.parseInt(Env.arg(1))
+    println('Pfannkuchen(' n ') is ' fannkuch(n))
+    
 fun fannkuch(n int) int
-    perm1 : new(int[], n)
+    perm1 : int[n]
     for i := until(n)
         perm1[i] = i
-    perm : new(int[], n)
-    count : new(int[], n)
+    perm : int[n]
+    count : int[n]
     f := 0
     flips := 0
     nperm := 0
@@ -53,17 +62,3 @@ fun fannkuch(n int) int
                 r += 1
         nperm += 1
     return flips
-
-n := 12
-println('Pfannkuchen(' n ') is ' fannkuch(n))
-##
-
-3968050
-Pfannkuchen(12) = 65
-(27838 ms)
-    
-3968050
-Pfannkuchen(12) = 65
-(26403 ms)
-
-##

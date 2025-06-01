@@ -205,6 +205,6 @@ public class StandardLib {
             + "    long mask = ~((diff - 1) >> 63);\n"
             + "    tmmalloc_levelBitmap &= ~(1ULL << index) | mask;\n"
             + "}\n"
-            + "// tmmalloc end =============================";
+            + "// tmmalloc end =============================\n";
 
 }

@@ -10,18 +10,12 @@ convert<type>To<type>
 vs
 toString
 
-tmmalloc: OOME should panic? or allocate more memory?
-
 print and println without help of C
 - each type has a "toStr()" method
 
 short string optimization
 
 maybe support slices
-
-maybe support LINQ via ast -> string, plus compile time evaluation
-
-second constructor with all fields: speed up binaryTrees
 
 arrays may not be null,
 but can only be empty (meaning: have zero elements).
@@ -42,6 +36,23 @@ for interfaces, support instanceof and cast
 ord('a') => code('a')?
 
 faster itoa
+
+maybe support LINQ via ast -> string, plus compile time evaluation
+type Book
+    id column(int)
+    title column(str)
+    published column(int)
+b : Book
+db.from(b).where(b.published > 2010).select(b.id, b.title)
+fun macro database from(table T) query
+    return query(#table)
+fun macro query where(condition bool) query
+    this.setCondition(#condition)
+    return this
+fun  macro query select(x column..) query
+    for i := range(x.len)
+        this.addColumns(#x[i])
+    return this
 
 more accurate double to ascii, or document
 

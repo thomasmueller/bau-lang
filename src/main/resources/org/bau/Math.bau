@@ -409,6 +409,23 @@ fun floatToString(n float) i8[]
         result[j] = buff[j]
     return result
 
+fun parseInt(value i8[]) int
+    x := 0
+    sign := 1
+    if value.len
+        i := 0
+        if value[0] = ord('-')
+            sign = -1
+            i += 1
+        while i < value.len
+            n : value[i]
+            if n >= ord('0') and n <= ord('9')
+                x *= 10
+                x += n - ord('0')
+            i += 1
+        return sign * x
+    return 0
+
 fun sqrtInt(x int) const int
     if x < 0
         return 0

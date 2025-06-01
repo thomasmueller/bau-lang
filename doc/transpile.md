@@ -9,7 +9,7 @@ Using Maven:
 
     mvn -DskipTests clean install
 
-Using the Make:
+Alternatively, using the Make:
 
     make jar
 

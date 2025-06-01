@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     unsigned   N, depth, minDepth, maxDepth, stretchDepth;
     treeNode   *stretchTree, *longLivedTree, *tempTree;
 
-    N = atol(argv[1]);
+    N = argc > 1 ? atol(argv[1]) : 20;
 
     minDepth = 4;
 

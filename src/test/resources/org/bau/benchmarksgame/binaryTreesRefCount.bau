@@ -1,8 +1,12 @@
 import org.bau.Utils
+import org.bau.Math
+import org.bau.Env
 
 fun main()
     minDepth : 4
-    maxDepth : 20
+    maxDepth := 10
+    if Env.argCount() > 1
+        maxDepth = Math.parseInt(Env.arg(1))
     stretchDepth : maxDepth + 1
     stretch Tree? := with(stretchDepth)
     println('ref count')
@@ -45,16 +49,10 @@ fun count(depth int) int
     c := t.nodeCount()
     return c
 
-fun newTree(left Tree, right Tree) Tree
-    t := Tree()
-    t.left = left
-    t.right = right
-    return t
-
 fun with(depth int) Tree
     if depth = 0
-        return newTree(null, null)
-    return newTree(with(depth - 1), with(depth - 1))
+        return Tree(null, null)
+    return Tree(with(depth - 1), with(depth - 1))
 
 ## Expected
 ref count

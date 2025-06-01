@@ -3,16 +3,19 @@
 A programming language for everyone.
 
 <a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
-<br>
-<a href="doc/transpile.md">Transpile on the command line.</a>
 
+* <a href="doc/performance.md">High performance and efficiency</a>.
 * Easy to learn with a concise syntax inspired by Python.
 * Memory-safe. Automatic memory management using reference counting by default.
 * As fast as Rust where needed, using single ownership and borrowing.
 * Low memory usage; no GC pauses.
-* Runs everwhere: transpiles to C.
+* Runs everwhere: transpiles to C. No runtime library needed.
 * Null safety: Null pointer errors are prevented at compile time.
 * Ability to avoid runtime array bound checks using static analysis.
+
+
+<br>
+<a href="doc/transpile.md">Transpile on the command line.</a>
 
 ## Example
 
