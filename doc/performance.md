@@ -32,10 +32,29 @@ Benchmark results in seconds (lower is better; best of 3 runs):
 
 |Benchmark               |  C |Java| Bau|
 |------------------------|----|----|----|
-|Binary Trees            | 5.0| 3.4| 3.4|
-|Fannkuch Redux          | 2.2| 2.4| 2.2|
-|SpeedTest               | 1.8| 4.4| 1.8|
+|#1 Binary Trees         | 5.0| 3.4| 3.4|
+|#2 Fannkuch Redux       | 2.2| 2.4| 2.2|
+|#3 SpeedTest            | 1.8| 4.4| 1.8|
 
+So in summary, for these benchmarks, Bau is as fast as the C version. 
+
+```mermaid
+---
+config:
+    xyChart:
+        width: 500
+        height: 500
+    themeVariables:
+        xyChart:
+            titleColor: "#000000"
+            plotColorPalette: "#0000ff"
+---
+xychart-beta
+    title "Performance"
+    x-axis [C.1, C.2, C.3, Java.1, Java.2, Java.3, Bau.1, Bau.2, Bau.3]
+    y-axis "Seconds (lower is better)" 1 --> 6
+    bar [5.0, 2.2, 1.8, 3.4, 2.4, 4.4, 3.4, 2.2, 1.8]
+```
 
 ### Binary Trees
 
