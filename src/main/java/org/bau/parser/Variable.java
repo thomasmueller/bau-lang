@@ -20,6 +20,8 @@ public class Variable implements Expression, LeftValue {
     Value constantValue;
     public boolean global;
     public boolean used;
+    int reassignCount;
+    boolean skipIncrementDecrementRefCount;
 
     public Variable(String name, DataType type) {
         this(null, name, false, type);
@@ -113,22 +115,33 @@ public class Variable implements Expression, LeftValue {
         }
     }
 
-    @Override
-    public String decrementRefCountC() {
-        if (type().needIncDec()) {
-            if (type().memoryType() == MemoryType.REF_COUNT) {
-                return Free.DEC_USE_STACK + "(" + name + ", " + type().nameC() +");\n";
-            } else if (type().memoryType() == MemoryType.OWNER) {
-                return type().nameC() + "_free(" + name + ");\n";
+    public static String decrementRefCountC(String expr, String empty, DataType type) {
+        if (type.needIncDec()) {
+            if (type.memoryType() == MemoryType.REF_COUNT) {
+                return Free.DEC_USE_STACK + "(" + expr + ", " + type.nameC() +");\n";
+            } else if (type.memoryType() == MemoryType.OWNER) {
+                return type.nameC() + "_free(" + expr + ");\n";
             } else {
-                return "";
+                return empty;
             }
         }
-        return "";
+        return empty;
+    }
+
+    @Override
+    public String decrementRefCountC() {
+        if (skipIncrementDecrementRefCount) {
+            return "";
+        }
+        return decrementRefCountC(name, "", type());
     }
 
     @Override
     public String incrementRefCountC() {
+        if (skipIncrementDecrementRefCount) {
+            return "";
+        }
+        // copy of FieldAccess
         if (type().needIncDec()) {
             if (type().memoryType() == MemoryType.REF_COUNT) {
                 return Free.INC_USE_STACK + "(" + name + ");\n";
@@ -137,6 +150,20 @@ public class Variable implements Expression, LeftValue {
             }
         } else if (type().needFree()) {
             return type().toC() + "_copy(&" + name + ");\n";
+        }
+        return "";
+    }
+
+    public static String incrementRefCountC(String expr, DataType type) {
+        // copy of FieldAccess
+        if (type.needIncDec()) {
+            if (type.memoryType() == MemoryType.REF_COUNT) {
+                return Free.INC_USE_STACK + "(" + expr + ");\n";
+            } else {
+                return "";
+            }
+        } else if (type.needFree()) {
+            return type.toC() + "_copy(&" + expr + ");\n";
         }
         return "";
     }
@@ -202,20 +229,24 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
-    public Value setValue(Memory memory, Value val, boolean incRefCount) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial) {
         if (global) {
             if (type.needIncDec() && !(val instanceof ValueArray)) {
                 // ValueArray is a constant
                 Value old = memory.getGlobal(name);
-                if (old != null) {
-                    StatementResult result = Free.decRefCount(old, type, memory);
-                    if (result == StatementResult.PANIC) {
-                        return memory.getGlobal(Memory.PANIC);
-                    }
-                }
                 memory.setGlobal(name, val);
-                if (incRefCount) {
-                    memory.incHeap(val.longValue());
+                if (!skipIncrementDecrementRefCount) {
+                    if (incRefCount) {
+                        memory.incHeap(val.longValue());
+                    }
+                    if (old != null && !initial) {
+                        // if initial is true, then the old value
+                        // could be from another variable
+                        StatementResult result = Free.decRefCount(old, type, memory);
+                        if (result == StatementResult.PANIC) {
+                            return memory.getGlobal(Memory.PANIC);
+                        }
+                    }
                 }
             } else {
                 memory.setGlobal(name, val);
@@ -224,15 +255,17 @@ public class Variable implements Expression, LeftValue {
             if (type.needIncDec() && !(val instanceof ValueArray)) {
                 // ValueArray is a constant
                 Value old = memory.getLocal(name);
-                if (old != null) {
-                    StatementResult result = Free.decRefCount(old, type, memory);
-                    if (result == StatementResult.PANIC) {
-                        return memory.getGlobal(Memory.PANIC);
-                    }
-                }
                 memory.setLocal(name, val);
-                if (incRefCount) {
-                    memory.incHeap(val.longValue());
+                if (!skipIncrementDecrementRefCount) {
+                    if (incRefCount) {
+                        memory.incHeap(val.longValue());
+                    }
+                    if (old != null && !initial) {
+                        StatementResult result = Free.decRefCount(old, type, memory);
+                        if (result == StatementResult.PANIC) {
+                            return memory.getGlobal(Memory.PANIC);
+                        }
+                    }
                 }
             } else {
                 memory.setLocal(name, val);
@@ -275,6 +308,11 @@ public class Variable implements Expression, LeftValue {
     public void copyBounds(Variable v2) {
         lenBounds = v2.lenBounds;
         bounds = v2.bounds;
+    }
+
+    @Override
+    public void incrementReassignCount() {
+        reassignCount++;
     }
 
 }

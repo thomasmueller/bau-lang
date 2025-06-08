@@ -195,6 +195,8 @@ Internally, this functions are templates.
     fun array(entries T..) T[]
         return entries
 
+The name of the type is available using `T.name`.
+
 ### Macro Functions
 
 `macro` function calls are replaced at compile time
@@ -210,6 +212,16 @@ and so parameters are only evaluated when needed:
     text : 'Hello'
     for i := until(10)
         println(if(i < text.len, text[i], 0))
+
+The source code of the parameter is available
+using `.source`:
+
+    fun assert(x int) macro
+        if not x
+            println('assertion failed: ' x.source)
+
+    for i := until(10)
+        assert(i < 5)
 
 ### Arrays Access
 

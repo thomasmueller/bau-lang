@@ -30,6 +30,7 @@ public class FunctionDefinition {
     private HashSet<DataType> freedOwnedTypes = null;
     private HashSet<DataType> borrowedTypes = null;
     final int lineOffset;
+    public boolean isConstructor;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;
@@ -120,7 +121,7 @@ public class FunctionDefinition {
             catchLabel = "catch" + context.nextCatchLabel;
         }
         if (autoClose != null) {
-            for(Statement s : autoClose) {
+            for (Statement s : autoClose) {
                 s.optimize(context);
             }
         }
@@ -149,6 +150,16 @@ public class FunctionDefinition {
             }
             buff.append(Statement.indent("}\n"));
             buff.append(Statement.indent("va_end(_vaList);\n"));
+        }
+        if (!isConstructor) {
+            for (int i = 0; i < parameters.size(); i++) {
+                if (varArgs && i == parameters.size() - 1) {
+                    // no need to increment varargs array
+                    continue;
+                }
+                Variable v = parameters.get(i);
+                buff.append(Statement.indent(v.incrementRefCountC()));
+            }
         }
         StringBuilder buff2 = new StringBuilder();
         boolean hasReturn = false;

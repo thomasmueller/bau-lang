@@ -19,8 +19,10 @@ public interface LeftValue extends Expression {
     String decrementRefCountC();
     String incrementRefCountC();
 
-    Value setValue(Memory memory, Value val, boolean incRefCount);
+    Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial);
 
     boolean isContant();
+
+    void incrementReassignCount();
 
 }

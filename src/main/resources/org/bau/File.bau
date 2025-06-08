@@ -11,6 +11,7 @@ fun openFile(name i8[], mode i8[]) File
         f->filePointer = (uint64_t) fp;
         return f;
         ```)
+    return File()
 
 fun File read(data i8[], pos int, len int) int
     native(```
@@ -21,6 +22,7 @@ fun File read(data i8[], pos int, len int) int
             return fread(data->data + pos, 1, len, fp);
         }
         ```)
+    return 0
 
 fun File readFully(buffer i8[], pos int, len int) int
     count := 0
@@ -40,6 +42,7 @@ fun File write(data i8[], pos int, len int) int
             return fwrite(data->data + pos, 1, len, fp);
         }
         ```)
+    return 0
 
 fun File close()
     native(```

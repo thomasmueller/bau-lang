@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 // malloc =============================
@@ -136,10 +137,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -203,13 +200,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -235,6 +233,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -249,6 +248,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -263,6 +263,7 @@ float_array* float_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(double) * len);
+    memset(result->data, 0, sizeof(double) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -283,16 +284,16 @@ void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void float_array_free(float_array* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void float_array_free(float_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -380,75 +381,85 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("len of hello is ", 16);
     string_1002 = str_const("hello", 5);
     int_array* _t0 = int_array_new(16);
+    _incUseStack(_t0);
     int_array* data = _t0;
-    _incUseStack(data);
     fill_1(data);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            printf("%lld\n", (long long)data->data[i]);
-            int64_t _next = i + 1;
-            if (_next >= 16) {
-                break;
+    if (16 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                printf("%lld\n", (long long)data->data[i]);
+                int64_t _next = i + 1;
+                if (_next >= 16) {
+                    break;
+                }
+                i = _next;
             }
-            i = _next;
+            break;
         }
-        break;
     }
     i8_array* a = arrayOf_i8_var(0, /* argCount */ 5, 0, 1, 2, 3, 44);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            printf("%d\n", a->data[i]);
-            int64_t _next = i + 1;
-            if (_next >= a->len) {
-                break;
+    if (a->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                printf("%d\n", a->data[i]);
+                int64_t _next = i + 1;
+                if (_next >= a->len) {
+                    break;
+                }
+                i = _next;
             }
-            i = _next;
+            break;
         }
-        break;
     }
     int_array* b = array_int_var(/* argCount */ 4, 0, 1, 2, 3);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            printf("%lld\n", (long long)b->data[i]);
-            int64_t _next = i + 1;
-            if (_next >= b->len) {
-                break;
+    if (b->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                printf("%lld\n", (long long)b->data[i]);
+                int64_t _next = i + 1;
+                if (_next >= b->len) {
+                    break;
+                }
+                i = _next;
             }
-            i = _next;
+            break;
         }
-        break;
     }
     float_array* c = array_float_var(/* argCount */ 3, 1.0, 2.0, 3.0);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            printf("%.9f\n", c->data[i]);
-            int64_t _next = i + 1;
-            if (_next >= c->len) {
-                break;
+    if (c->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                printf("%.9f\n", c->data[i]);
+                int64_t _next = i + 1;
+                if (_next >= c->len) {
+                    break;
+                }
+                i = _next;
             }
-            i = _next;
+            break;
         }
-        break;
     }
     int_array* x = arrayOf_int_var(0, /* argCount */ 4, 0, 1, 2, 3);
     float_array* y = arrayOf_float_var(0, /* argCount */ 3, 1.0, 2.0, 3.0);
     i8_array* z = arrayOf_i8_var(0, /* argCount */ 3, 1, 0, 44);
     printf("len %d\n", z->len);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            printf("%d\n", z->data[i]);
-            int64_t _next = i + 1;
-            if (_next >= z->len) {
-                break;
+    if (z->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                printf("%d\n", z->data[i]);
+                int64_t _next = i + 1;
+                if (_next >= z->len) {
+                    break;
+                }
+                i = _next;
             }
-            i = _next;
+            break;
         }
-        break;
     }
     int64_t _t1 = i8_array_len_1(string_1002);
     printf("len of hello is %lld\n", (long long)_t1);

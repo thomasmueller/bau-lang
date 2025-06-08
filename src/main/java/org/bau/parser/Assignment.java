@@ -82,9 +82,9 @@ public class Assignment implements Statement {
                     throw new IllegalStateException();
                 }
                 Value v2 = Operation.eval(leftValue.type(), old, modify, val);
-                panic = leftValue.setValue(m, v2, incRefCount);
+                panic = leftValue.setValue(m, v2, incRefCount, initial);
             } else {
-                panic = leftValue.setValue(m, val, incRefCount);
+                panic = leftValue.setValue(m, val, incRefCount, initial);
             }
             if (panic != null) {
                 m.setGlobal(Memory.PANIC, val);
@@ -115,10 +115,24 @@ public class Assignment implements Statement {
                 catchLabel = "catch" + context.nextCatchLabel;
             }
         }
+        leftValue.incrementReassignCount();
     }
 
     public String toC() {
         StringBuilder buff = new StringBuilder();
+
+        if (!(value instanceof NullValue)) {
+            if (Program.SIMPLE_REF_COUNTING) {
+                if (!(value instanceof Call || value instanceof New)) {
+                    buff.append(Variable.incrementRefCountC(value.toC(), value.type()));
+                }
+            } else {
+                if (!(value instanceof Call)) {
+                    buff.append(Variable.incrementRefCountC(value.toC(), value.type()));
+                }
+            }
+        }
+
         if (!initial) {
             buff.append(leftValue.decrementRefCountC());
         }
@@ -165,17 +179,6 @@ public class Assignment implements Statement {
             }
         }
         buff.append(";\n");
-        if (!(value instanceof NullValue)) {
-            if (Program.SIMPLE_REF_COUNTING) {
-                if (!(value instanceof Call || value instanceof New)) {
-                    buff.append(leftValue.incrementRefCountC());
-                }
-            } else {
-                if (!(value instanceof Call)) {
-                    buff.append(leftValue.incrementRefCountC());
-                }
-            }
-        }
         buff.append(Borrow.resetUsedOwned(value.getUsedOwned()));
         return buff.toString();
     }

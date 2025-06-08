@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -24,10 +23,10 @@ import org.bau.std.Std;
 public class Program {
 
     public final static boolean TM_MALLOC = true;
+    private final static boolean TRACE_REF_COUNTS = false;
+
     public final static boolean SIMPLE_REF_COUNTING = true;
     public boolean simpleRefCount = SIMPLE_REF_COUNTING;
-
-    private final static boolean TRACE_REF_COUNTS = false;
 
     ArrayList<Statement> initList = new ArrayList<>();
     ArrayList<Statement> mainList = new ArrayList<>();
@@ -268,6 +267,20 @@ public class Program {
         return null;
     }
 
+    public FunctionDefinition getFunctionIfExists(DataType type, FunctionDefinition calledFrom, String module, String name, int parameterCount) {
+        FunctionDefinition def = getFunctionIfExists(type, module, name, parameterCount);
+        if (def != null) {
+            return def;
+        }
+
+        // try to call a "this." function (e.g. from within a function BigInt.add(), call BigInt.negate())
+        if (type == null && calledFrom != null && calledFrom.callType != null) {
+            // add the "this." parameter
+            def = getFunctionIfExists(calledFrom.callType, module, name, 1 + parameterCount);
+        }
+        return def;
+    }
+
     public FunctionDefinition getFunctionIfExists(DataType type, String module, String name, int parameterCount) {
         if ("println".equals(name)) {
             // TODO support varargs
@@ -334,7 +347,7 @@ public class Program {
         buff.append("#include <stdlib.h>\n");
         buff.append("#include <stdarg.h>\n");
         buff.append("#include <stdint.h>\n");
-
+        buff.append("#include <string.h>\n");
         for (FunctionDefinition def : functions.values()) {
             if (def.isUsed() && def.includes != null) {
                 includes.addAll(def.includes);
@@ -348,6 +361,11 @@ public class Program {
         }
         if (TM_MALLOC) {
             buff.append(StandardLib.TM_MALLOC);
+            buff.append("#define _malloc(a)      tmmalloc(a)\n");
+            buff.append("#define _free(a)        tmfree(a)\n");
+        } else {
+            buff.append("#define _malloc(a)      malloc(a)\n");
+            buff.append("#define _free(a)        free(a)\n");
         }
         if (TRACE_REF_COUNTS) {
             buff.append("int __globalObjects = 0;\n");
@@ -358,27 +376,20 @@ public class Program {
             buff.append("#define PRINT(...)          printf(__VA_ARGS__);\n");
             buff.append("#define _end()              {PRINT(\"refCountUpdates: %d, stack: %d\\n\", __refCountUpdates, __refCountStackUpdates); if(__globalObjects!=0)PRINT(\"################ MEMORY LEAK: %d ################\\n\", __globalObjects);}\n");
             buff.append("#define _traceMalloc(a)     PRINT(\"new %p line %d (%d)\\n\", a, __LINE__, ++__globalObjects);\n");
-            buff.append("#define _malloc(a)          malloc(a)\n");
-            buff.append("#define _free(a)            {PRINT(\"del %p line %d (%d)\\n\", a, __LINE__, --__globalObjects);free(a);}\n");
+            buff.append("#define _traceFree(a)       PRINT(\"del %p line %d (%d)\\n\", a, __LINE__, --__globalObjects);\n");
         } else {
             buff.append("#define REF_COUNT_INC\n");
             buff.append("#define REF_COUNT_STACK_INC\n");
             buff.append("#define PRINT(...)\n");
             buff.append("#define _end()\n");
-            if (TM_MALLOC) {
-                buff.append("#define _malloc(a)      tmmalloc(a)\n");
-                buff.append("#define _traceMalloc(a)\n");
-                buff.append("#define _free(a)        tmfree(a)\n");
-            } else {
-                buff.append("#define _malloc(a)      malloc(a)\n");
-                buff.append("#define _traceMalloc(a)\n");
-                buff.append("#define _free(a)        free(a)\n");
-            }
+            buff.append("#define _traceMalloc(a)\n");
+            buff.append("#define _traceFree(a)\n");
         }
         if (SIMPLE_REF_COUNTING) {
             // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
             buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
             buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}\n");
+            // buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if((a)->_refCount < 0) PRINT(\"################ DOUBLE FREE ################\\n\"); if(--((a)->_refCount) == 0)type##_free(a);}}\n");
             buff.append("#define _incUseStack(a)       _incUse(a)\n");
             buff.append("#define _decUseStack(a, type) _decUse(a, type)\n");
         } else {
@@ -531,6 +542,7 @@ public class Program {
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
                     buff.append(Statement.indent("result->len = len;\n"));
                     buff.append(Statement.indent("result->data = _malloc(sizeof(" + t.baseType().toC() + ") * len);\n"));
+                    buff.append(Statement.indent("memset(result->data, 0, sizeof(" + t.baseType().toC() + ") * len);\n"));
                     buff.append(Statement.indent("_traceMalloc(result->data);\n"));
                     buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
                     buff.append(Statement.indent("return result;\n"));
@@ -543,7 +555,9 @@ public class Program {
                         buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
                     }
                     for (Variable f : t.fields) {
-                        buff.append(Statement.indent("result->" + f.name + " = 0;\n"));
+                        if (f.type().isNumber() || !f.type().isCopyType()) {
+                            buff.append(Statement.indent("result->" + f.name + " = 0;\n"));
+                        }
                     }
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
@@ -639,8 +653,8 @@ public class Program {
                         } else if (t.baseType().needFree()) {
                             buff.append(Statement.indent("for (int i = 0; i < x->len; i++) " + t.baseType().nameC() + "_free(&(x->data[i]));\n"));
                         }
-                        buff.append(Statement.indent("_free(x->data);\n"));
-                        buff.append(Statement.indent("_free(x);\n"));
+                        buff.append(Statement.indent("_free(x->data); _traceFree(x->data);\n"));
+                        buff.append(Statement.indent("_free(x); _traceFree(x);\n"));
                         buff.append("}\n");
                     } else {
                         for (Variable f : t.fields) {
@@ -651,7 +665,11 @@ public class Program {
                                     buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
                                 }
                             } else if (f.type().needFree()) {
-                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
+                                if (f.type().isCopyType()) {
+                                    buff.append(Statement.indent(f.type().nameC() + "_free(&x->" + f.name + ");\n"));
+                                } else {
+                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
+                                }
                             }
                         }
                         if (t.autoClose != null) {
@@ -660,14 +678,14 @@ public class Program {
                         }
                         if (t.needIncDec()) {
                             // structs don't need free
-                            buff.append(Statement.indent("_free(x);\n"));
+                            buff.append(Statement.indent("_free(x); _traceFree(x);\n"));
                         }
                         buff.append("}\n");
                     }
                     if (!SIMPLE_REF_COUNTING) {
                         buff.append("int " + t.nameC() + "_freeIfUnused(void* x) {\n");
                         buff.append(Statement.indent("PRINT(\"== freeIfUnused %p count=%d\\n\", x, ((" + t.nameC() + "*)x)->_refCount);\n"));
-                        buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); return 1; } return 0;\n"));
+                        buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); _traceFree(x); return 1; } return 0;\n"));
                         buff.append("}\n");
                     }
                     if (t.isCopyType() && !t.isArray()) {
@@ -894,7 +912,11 @@ Testing.
         l2.addAll(initList);
         l2.addAll(mainList);
         l2.addAll(autoClose);
-        runSequence(m, l2);
+        try {
+            runSequence(m, l2);
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
         this.ticksExecuted = m.getTicksExecuted();
         String output = m.getOutput();
         if (ticksExecuted >= maxTicks) {
@@ -981,6 +1003,35 @@ Testing.
         return runSequence(m, list, -1);
     }
 
+    public static boolean doesReturn(List<Statement> list) {
+        boolean doesReturn = false;
+        for (Statement s : list) {
+            if (s instanceof Return) {
+                doesReturn = true;
+                break;
+            } else if (s instanceof Throw) {
+                doesReturn = true;
+                break;
+            } else if (s instanceof If) {
+                If ifStatement = (If) s;
+                for (List<Statement> l2 : ifStatement.listList) {
+                    // TODO we need to check all branches
+                    if (doesReturn(l2)) {
+                        doesReturn = true;
+                        break;
+                    }
+                }
+            } else if (s instanceof While) {
+                While whileStatement = (While) s;
+                if (doesReturn(whileStatement.list)) {
+                    doesReturn = true;
+                    break;
+                }
+            }
+        }
+        return doesReturn;
+    }
+
     public static StatementResult runSequence(Memory m, List<Statement> list, int continuePoint) {
         for (int i = 0; i < list.size(); i++) {
             Statement s = list.get(i);
@@ -1017,12 +1068,6 @@ Testing.
             }
         }
         return StatementResult.OK;
-    }
-
-    public static Set<DataType> freedOwnedTypes(List<Statement> list) {
-        HashSet<DataType> set = new HashSet<>();
-        collectTypes(list, set, MemoryType.OWNER);
-        return set;
     }
 
     /**

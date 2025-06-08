@@ -26,7 +26,18 @@ public class Templates {
                 String f = find.get(i);
                 String r = replace.get(i);
                 if (p.token.equals(f)) {
-                    buff.append(raw.replace(f, r));
+                    String n = "";
+                    if (p.text.length() >= p2 + ".name".length()) {
+                        n = p.text.substring(pos, p2 + ".name".length());
+                    }
+                    if (n.equals(".name")) {
+                        p.read();
+                        p.read();
+                        pos = p.pos;
+                        buff.append(" '" + StringLiteral.escape(r) + "' ");
+                    } else {
+                        buff.append(raw.replace(f, r));
+                    }
                     replaced = true;
                     break;
                 } else if (p.token.endsWith(f + "_")) {

@@ -5,10 +5,32 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
+##
+
+Memory leak if return value is not used.
+Always assign return value of each function to a temp variable?
+
+type Data
+    x int
+
+fun Data inc() Data
+    result : Data()
+    result.x = x + 1
+    return result
+
+fun main()
+    x : Data()
+    x.inc()
+
+##
+
+
 auto-conversion:
 convert<type>To<type>
 vs
 toString
+
+https://github.com/kostya/benchmarks
 
 print and println without help of C
 - each type has a "toStr()" method
@@ -53,6 +75,11 @@ fun  macro query select(x column..) query
     for i := range(x.len)
         this.addColumns(#x[i])
     return this
+
+Text editor
+https://news.ycombinator.com/item?id=44034459
+https://github.com/antirez/kilo
+
 
 more accurate double to ascii, or document
 

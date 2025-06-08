@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 // malloc =============================
@@ -136,10 +137,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -203,13 +200,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -237,6 +235,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -251,6 +250,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -273,6 +273,7 @@ string_array* string_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(string) * len);
+    memset(result->data, 0, sizeof(string) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -290,12 +291,12 @@ void string_free(string* x);
 void string_copy(string* x);
 void string_array_free(string_array* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void string_free(string* x) {
     _decUse(x->data, i8_array);
@@ -305,8 +306,8 @@ void string_copy(string* x) {
 }
 void string_array_free(string_array* x) {
     for (int i = 0; i < x->len; i++) string_free(&(x->data[i]));
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -325,9 +326,9 @@ string str_1(i8_array* s) {
 }
 string string_1(i8_array* data) {
     string _t0 = string_new();
+    _incUseStack(data);
     _decUse(_t0.data, i8_array);
     _t0.data = data;
-    _incUse(_t0.data);
     return _t0;
 }
 int main(int _argc, char *_argv[]) {
@@ -339,12 +340,21 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const("!", 1);
     string_1003 = str_const(" ", 1);
     string_array* _t0 = string_array_new(3);
+    _incUseStack(_t0);
     string_array* x = _t0;
-    _incUseStack(x);
-    x->data[0] = str_1(string_1000);
-    x->data[1] = str_1(string_1001);
-    x->data[2] = str_1(string_1002);
+    string _t1 = str_1(string_1000);
+    string_copy(&_t1);
+    x->data[0] = _t1;
+    string _t2 = str_1(string_1001);
+    string_copy(&_t2);
+    x->data[1] = _t2;
+    string _t3 = str_1(string_1002);
+    string_copy(&_t3);
+    x->data[2] = _t3;
     printf("%.*s %.*s %.*s\n", x->data[0].data->len, x->data[0].data->data, x->data[1].data->len, x->data[1].data->data, x->data[2].data->len, x->data[2].data->data);
+    string_free(&_t3);
+    string_free(&_t2);
+    string_free(&_t1);
     _decUseStack(x, string_array);
     _decUseStack(_t0, string_array);
     _end();

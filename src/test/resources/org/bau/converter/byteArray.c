@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 // malloc =============================
@@ -136,10 +137,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -203,13 +200,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -231,6 +229,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -246,8 +245,8 @@ int64_t shiftLeft_2(int64_t a, int64_t b);
 void test_0();
 void i8_array_free(i8_array* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
@@ -262,8 +261,8 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 }
 void test_0() {
     i8_array* _t0 = i8_array_new(4);
+    _incUseStack(_t0);
     i8_array* x = _t0;
-    _incUseStack(x);
     x->data[0] = 0x12;
     x->data[1] = 0x34;
     x->data[2] = 0x56;

@@ -1,0 +1,160 @@
+import org.bau.BigInt
+    bigInt
+    newBigInt
+
+fun main()
+    n := 10_000
+    i := 0
+    k := 0
+    L : 10
+    buff : i8[L]
+    j := 0
+    dummy := 0
+    while i < n
+        k += 1
+        nextTerm(k)
+        if num.compareTo(acc) > 0
+            continue
+        d := extractDigit(3)
+        if d <> extractDigit(4)
+            continue
+        eliminateDigit(d)
+        dummy += d
+        buff[j] = ord('0') + d
+        j += 1
+        i += 1
+        if j = L
+            # println(buff '\t: ' i)
+            j = 0
+    println('dummy: ' dummy)
+
+tmp1 := newBigInt(0)
+tmp2 := newBigInt(0)
+acc := newBigInt(0)
+den := newBigInt(1)
+num := newBigInt(1)
+
+fun extractDigit(nth int) int
+    tmp1 = num.multiplyInt(nth)
+    tmp2 = tmp1.add(acc)
+    tmp1 = tmp2.divide(den)
+    return tmp1.intValue()
+
+fun eliminateDigit(d int)
+    acc = acc.subtract(den.multiplyInt(d))
+    acc = acc.multiplyInt(10)
+    num = num.multiplyInt(10)
+
+fun nextTerm(k int)
+    acc = acc.add(num.shiftLeft(1))
+    acc = acc.multiplyInt(k * 2 + 1)
+    den = den.multiplyInt(k * 2 + 1)
+    num = num.multiplyInt(k)
+
+##
+type Transformation
+    q bigInt
+    r bigInt
+    s bigInt
+    t bigInt
+    k int
+
+fun newTransformation(q int, r int, s int, t int) Transformation
+    return Transformation(
+        newBigInt(q),
+        newBigInt(r),
+        newBigInt(s),
+        newBigInt(t))
+
+fun Transformation next() Transformation
+    k += 1
+    q = newBigInt(k)
+    r = newBigInt(4 * k + 2)
+    s = newBigInt(0)
+    t = newBigInt(2 * k + 1)
+    return this;
+
+fun Transformation extract(j int) int
+    bigj : newBigInt(j)
+    numerator : q.multiply(bigj).add(r)
+    denominator : s.multiply(bigj).add(t)
+    return numerator.divide(denominator).intValue()
+
+fun Transformation qrst(q int, r int, s int, t int) Transformation
+    this.q = newBigInt(q)
+    this.r = newBigInt(r)
+    this.s = newBigInt(s)
+    this.t = newBigInt(t)
+    this.k = 0
+    return this
+
+fun Transformation compose(a Transformation) Transformation
+    return Transformation(
+        q.multiply(a.q),
+        q.multiply(a.r).add(r.multiply(a.t)),
+        s.multiply(a.q).add(t.multiply(a.s)),
+        s.multiply(a.r).add(t.multiply(a.t)))
+
+type PiDigitSpigot
+    z Transformation
+    x Transformation
+    inverse Transformation
+
+fun newPiDigitSpigot() PiDigitSpigot
+    return PiDigitSpigot(
+        newTransformation(1, 0, 0, 1),
+        newTransformation(0, 0, 0, 0),
+        newTransformation(0, 0, 0, 0))
+
+fun PiDigitSpigot next() int
+    y : digit()
+    if isSafe(y)
+        z = produce(y)
+        return y
+    else
+        z = consume(x.next())
+        return next()
+
+fun PiDigitSpigot digit() int
+    return z.extract(3)
+
+fun PiDigitSpigot isSafe(digit int) int
+    return digit = z.extract(4)
+
+fun PiDigitSpigot produce(i int) Transformation
+    return inverse.qrst(10, -10 * i, 0, 1).compose(z)
+
+fun PiDigitSpigot consume(a Transformation) Transformation
+    return z.compose(a)
+
+fun main()
+    L : 10
+    n := 10_000
+    j := 0
+    digits : newPiDigitSpigot()
+    dummy := 0
+    while n > 0
+        str : i8[L + n]
+        p := 0
+        if n >= L
+            for i := until(L)
+                digit : digits.next()
+                dummy += digit
+                str[p] = ord('0') + digit
+                p += 1
+            j += L
+        else
+            for i := until(n)
+                digit : digits.next()
+                dummy += digit
+                str[p] = ord('0') + digits.next()
+                p += 1
+            i := n
+            while i < L
+                str[p] = ord(' ')
+                p += 1
+                i += 1
+            j += n
+        # println(str '\t:' j)
+        n -= L
+    println('dummy: ' dummy)

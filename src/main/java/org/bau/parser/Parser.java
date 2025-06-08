@@ -293,6 +293,7 @@ public class Parser {
         boolean template = false;
         ArrayList<String> parameters = new ArrayList<>();
         if (matchOp("(")) {
+            matchOp("\n");
             while (true) {
                 String t = readIdentifier();
                 parameters.add(t);
@@ -346,6 +347,7 @@ public class Parser {
     private void defineConstructor(DataType type) {
         FunctionDefinition def = new FunctionDefinition(0);
         def.module = type.module;
+        def.isConstructor = true;
         def.name = type.name();
         if (type.memoryType() == MemoryType.OWNER) {
             def.name += "_owned";
@@ -358,7 +360,7 @@ public class Parser {
             assign.type = var.type();
             assign.initial = false;
             assign.leftValue = new FieldAccess(result, var.name, var.type());
-            if (var.type().isCopyType()) {
+            if (var.type().isCopyType() && var.type().isNumber()) {
                 assign.value = var.type().nullExpression();
             } else {
                 Variable arg = new Variable(var.name, var.type());
@@ -491,6 +493,7 @@ public class Parser {
             if (!matchOp("(")) {
                 throw syntaxError("Expected '(', got '" + token + "' when reading a function definition template");
             }
+            matchOp("\n");
             for (int i = 0; i < callType.parameters.size(); i++) {
                 String p = readIdentifier();
                 String expected = callType.parameters.get(i);
@@ -513,7 +516,11 @@ public class Parser {
         }
         currentFunctionDefinition = def;
         def.module = targetModule;
+        // stack position is before the "this" parameter
+        // (which also may need to be incremented, if the function returns "this")
+        stackPosFunction = functionContext.getStackPos();
         if (matchOp("(")) {
+            matchOp("\n");
             def.name = id;
         } else {
             if (callType == null) {
@@ -524,6 +531,7 @@ public class Parser {
             if (!matchOp("(")) {
                 throw syntaxError("Expected '(', got '" + token + "' when reading a function definition");
             }
+            matchOp("\n");
             if (type == null) {
                 throw syntaxError("Type '" + id + "' not found when reading a function definition");
             }
@@ -573,8 +581,6 @@ public class Parser {
                         if (varArgs) {
                             throw syntaxError("Owned var-args are not supported");
                         }
-                        Free free = new Free(var);
-                        ownedParameters.add(free);
                     }
                     var.isConstant = false;
                     def.parameters.add(var);
@@ -634,11 +640,6 @@ public class Parser {
             }
             readEndOfStatement();
         }
-        stackPosFunction = functionContext.getStackPos();
-        if (def.varArgs) {
-            // for varargs, we have an array that needs to be freed
-            stackPosFunction--;
-        }
         FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
         if (scanPhase && !def.macro) {
             if (old != null) {
@@ -687,12 +688,40 @@ public class Parser {
         }
         List<Statement> autoClose = autoClose(stackPosFunction, null);
         autoClose.addAll(ownedParameters);
+        // we don't need to increment + decrement the function arguments,
+        // if the function doesn't return this type
+        for (int i = 0; i < autoClose.size(); i++) {
+            Statement s = autoClose.get(i);
+            if (s instanceof Free) {
+                Free free = (Free) s;
+                if (free.var.type() == def.returnType) {
+                    continue;
+                }
+                for (int j = 0; j < def.parameters.size(); j++) {
+                    if (def.varArgs && j == def.parameters.size() - 1) {
+                        // var arg array needs to be freed
+                        continue;
+                    }
+                    if (def.parameters.get(j) == free.var) {
+                        if (free.var.reassignCount == 0) {
+                            free.var.skipIncrementDecrementRefCount = true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
         def.autoClose(autoClose);
         functionContext.rewindStack(stackPos);
         currentLoop = null;
         undoLastBlockCondition();
         if (!blockConditions.isEmpty()) {
             throw new IllegalStateException();
+        }
+        if (currentFunctionDefinition.returnType != null) {
+            if (!Program.doesReturn(currentFunctionDefinition.list)) {
+                throw syntaxError("Function does not return or throw");
+            }
         }
         currentFunctionDefinition = null;
         if (def.macro) {
@@ -798,7 +827,7 @@ public class Parser {
         }
         if (arraysOk && matchOp("[")) {
             if (!matchOp("]")) {
-                throw syntaxError("Expected ']', got '\"+token+\"' when reading a type");
+                throw syntaxError("Expected ']', got '" + token + "' when reading a type");
             }
             t = t.arrayType();
         }
@@ -835,6 +864,7 @@ public class Parser {
         if (!matchOp("(")) {
             throw syntaxError("Type '" + name + "' is a template; need to specify the parameters");
         }
+        matchOp("\n");
         ArrayList<DataType> params = new ArrayList<>();
         for (int i = 0; i < t.parameters.size(); i++) {
             DataType t2 = readType(templatesOk);
@@ -988,6 +1018,7 @@ public class Parser {
                 }
                 Assignment s = new Assignment();
                 s.initial = true;
+                s.isGlobalScope = isGlobalScope;
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
                 s.value = s.value.writeStatements(this, true, target);
@@ -1035,6 +1066,7 @@ public class Parser {
                 target.add(s);
                 return;
             } else if (matchOp("(")) {
+                matchOp("\n");
                 if ("native".equals(identifier)) {
                     String s = token;
                     read();
@@ -1113,20 +1145,30 @@ public class Parser {
                 left = new FieldAccess(left, identifier, type);
             }
             while (true) {
-                if(matchOp(".")) {
+                if (matchOp(".")) {
                     // TODO duplicate code, in parsePossibleDot
                     if (left.type().isPointer()) {
                         verifyNullAccess(left);
                     }
                     String f = readIdentifier();
                     if (matchOp("(")) {
+                        matchOp("\n");
                         Call call = new Call();
-                        call.statement = true;
                         call.args.add(left);
                         parseCall(left.type(), m, f, call, true);
-                        readEndOfStatement();
-                        target.add(call);
-                        return;
+                        if (".".equals(token)) {
+                            // chained call
+                            left = call;
+                        } else {
+                            readEndOfStatement();
+                            call.statement = true;
+                            Expression expr = call.writeStatements(this, false, target);
+                            if (expr instanceof Call) {
+                                // could return a variable
+                                target.add((Call) call);
+                            }
+                            return;
+                        }
                     } else {
                         DataType type;
                         if ("len".equals(f) && left.type().isArray()) {
@@ -1161,6 +1203,9 @@ public class Parser {
             }
             if (matchOp("=")) {
                 s.value = parseExpression();
+                // this possibly updates the reference,
+                // and so it's important we have a temp variable
+                s.value = s.value.writeStatements(this, false, target);
                 s.type = s.value.type();
                 if (targetType != null && targetType != s.value.type()) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1456,8 +1501,17 @@ public class Parser {
                     type = p.type();
                 }
             }
+            // first source code, so that we replace that first
+            // (otherwise, the variable is replaced in the field)
+            DataType type2 = program.getType(null, DataType.I8).arrayType();
+            Variable sourceVar = new Variable(var.name + ".source", type2);
+            StringLiteral sourceCode = new StringLiteral(p.toString(), type2, program);
+            params.add(sourceVar);
+            args.add(sourceCode);
+
             params.add(var);
             args.add(p);
+
             // dangling ',' is supported
             lastWasComma = matchOp(",");
             // new line after operation
@@ -1631,7 +1685,7 @@ public class Parser {
             for(String t : templateParams) {
                 fullName += "_" + t.replace('.', '_').replace("[]", "_array");
             }
-            call.def = program.getFunctionIfExists(type, module, fullName, call.args.size());
+            call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
             if (call.def == null) {
                 String code = template.template;
                 code = Templates.convertTemplate(code, templateNames, templateParams);
@@ -1644,13 +1698,13 @@ public class Parser {
                     Parser p = new Parser(program, module, code, template.lineOffset);
                     p.read();
                     p.parseFunctionDefinition(module);
-                    call.def = program.getFunctionIfExists(type, module, fullName, call.args.size());
+                    call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
                 } catch (IllegalStateException e) {
                     throw syntaxError("Error parsing template: " + e.getMessage(), e);
                 }
             }
         } else {
-            call.def = program.getFunctionIfExists(type, module, identifier, call.args.size());
+            call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
         }
         if (call.def == null) {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
@@ -1659,6 +1713,11 @@ public class Parser {
                 notFound += "; did you mean " + didYouMean.name + " with " + didYouMean.parameters.size() + " parameter(s)?";
             }
             throw syntaxError(notFound);
+        }
+        if (type == null && currentFunctionDefinition != null && call.def.callType != null && call.def.callType == currentFunctionDefinition.callType) {
+            // add the "this." parameter at the beginning
+            Variable thisVar = functionContext.getVariable(null, "this");
+            call.args.add(0, thisVar);
         }
         if (call.def.parameters.size() > call.args.size()) {
             int thisParam = call.def.callType == null ? 0 : 1;
@@ -1683,7 +1742,7 @@ public class Parser {
             throw syntaxError("A method marked as const can only call methods marked as const, but " + call.def.name + " is not");
         }
 
-        for(Variable var : call.def.parameters) {
+        for (Variable var : call.def.parameters) {
             if (var.type().isRange()) {
                 hasRangeParameter = true;
             }
@@ -2071,6 +2130,7 @@ public class Parser {
         if (!matchOp("(")) {
             throw syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
         }
+        matchOp("\n");
         if ("range".equals(method)) {
             Std.registerRange(program);
         } else if ("until".equals(method)) {
@@ -2118,23 +2178,31 @@ public class Parser {
         int i = 0;
         Variable old = new Variable("_", call.def.returnType);
         ArrayList<Statement> whileLoop = null;
-        if (functionDef.list.size() == 1) {
-            Statement stat = functionDef.list.get(0);
+        If wrappingIf = null;
+        ArrayList<Statement> loopFunctionList = new ArrayList<>();
+        loopFunctionList.addAll(functionDef.list);
+        if (loopFunctionList.size() == 1) {
+            Statement stat = loopFunctionList.get(0);
             if (stat instanceof If) {
-                If w = (If) stat;
-                Expression condition = w.conditions.get(0);
+                wrappingIf = (If) stat;
+                if (wrappingIf.conditions.size() > 1 || wrappingIf.listList.size() != 1) {
+                    throw syntaxError("Only a very simple 'if' condition is supported");
+                }
+                Expression condition = wrappingIf.conditions.get(0);
                 condition = condition.replace(old, var);
                 for(int k = 0; k < oldArgs.size(); k++) {
                     condition = condition.replace(oldArgs.get(k), newArgs.get(k));
                 }
-                outerLoop.condition = condition;
-                functionDef.list = w.listList.get(0);
+                loopFunctionList = wrappingIf.listList.get(0);
+                // clone
+                wrappingIf = new If();
+                wrappingIf.conditions.add(condition);
             }
         }
         addBlockCondition(comp);
         outerLoop.condition = comp;
-        for (; i < functionDef.list.size(); i++) {
-            Statement s = functionDef.list.get(i);
+        for (; i < loopFunctionList.size(); i++) {
+            Statement s = loopFunctionList.get(i);
             s = s.replace(old, var);
             for(int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
@@ -2203,8 +2271,8 @@ public class Parser {
         }
         undoLastBlockCondition();
         outerLoop.list.add(loop);
-        for (; i < functionDef.list.size(); i++) {
-            Statement s = functionDef.list.get(i);
+        for (; i < loopFunctionList.size(); i++) {
+            Statement s = loopFunctionList.get(i);
             outerLoop.list.add(s);
         }
         outerLoop.list.add(new Break());
@@ -2213,7 +2281,15 @@ public class Parser {
         undoLastBlockCondition();
         stackPosLoop = oldStackPosLoop;
         currentLoop = oldLoop;
-        target.add(outerLoop);
+        if (wrappingIf == null) {
+            target.add(outerLoop);
+        } else {
+            ArrayList<Statement> list = new ArrayList<>();
+            list.add(outerLoop);
+            wrappingIf.listList.add(list);
+            wrappingIf.autoClose.add(new ArrayList<>());
+            target.add(wrappingIf);
+        }
     }
 
     private void addBlockCondition(Expression condition) {
@@ -2347,13 +2423,13 @@ public class Parser {
     private Expression parseFunctionOnLiteral(Expression expr) {
         String f = readIdentifier();
         matchOp("(");
+        matchOp("\n");
         Call call = new Call();
         call.args.add(expr);
         String m = null;
         if (isImport) {
             m = module;
         }
-        // TODO support chained calls?
         return parseCall(expr.type(), m, f, call, true);
     }
 
@@ -2487,6 +2563,7 @@ public class Parser {
                     return newExpr;
                 }
                 if (matchOp("(")) {
+                    matchOp("\n");
                     Call call = new Call();
                     Expression expr = parseCall(null, m, n, call, true);
                     return expr;
@@ -2495,6 +2572,7 @@ public class Parser {
                 }
             }
             if (matchOp("(")) {
+                matchOp("\n");
                 Call call = new Call();
                 Expression expr = parseCall(null, m, n, call, true);
                 Value val = eval(expr, true);
@@ -2544,18 +2622,16 @@ public class Parser {
                         return new NumberValue(val, expr.type(), false);
                     }
                 }
-                return expr;
+                return parsePossibleDot(expr);
             }
             Expression var = functionContext.getVariable(m, n);
             if (var == null) {
                 if (thisVar != null) {
                     verifyNullAccess(thisVar);
                     DataType thisType = thisVar.type();
-                    if (!thisType.isCopyType()) {
-                        DataType type = thisType.getFieldDataType(n);
-                        if (type != null) {
-                            var = new FieldAccess(thisVar, n, type);
-                        }
+                    DataType type = thisType.getFieldDataType(n);
+                    if (type != null) {
+                        var = new FieldAccess(thisVar, n, type);
                     }
                 }
                 if (var == null) {
@@ -2564,6 +2640,7 @@ public class Parser {
             }
             return parsePossibleDot(var);
         } else if (matchOp("(")) {
+            matchOp("\n");
             Expression expr = parseExpression();
             if (!matchOp(")")) {
                 throw syntaxError("Expected ')', got '" + token + "' in nested expression");
@@ -2581,12 +2658,15 @@ public class Parser {
                 if (vt.isPointer()) {
                     verifyNullAccess(v);
                 }
+                matchOp("\n");
                 String f = readIdentifier();
                 if (matchOp("(")) {
+                    matchOp("\n");
                     Call call = new Call();
                     call.args.add(v);
                     // TODO support chained calls?
-                    return parseCall(vt, module, f, call, true);
+                    v = parseCall(vt, module, f, call, true);
+                    vt = v.type();
                 } else {
                     DataType type;
                     if ("len".equals(f) && vt.isArray()) {
@@ -2595,7 +2675,13 @@ public class Parser {
                         type = vt.getFieldDataType(f);
                     }
                     if (type == null) {
-                        throw syntaxError("Field '" + f + "' not found in type '" + vt + "'");
+                        if (currentFunctionDefinition != null
+                                && currentFunctionDefinition.macro
+                                && "source".equals(f)) {
+                            type = program.getType(null, DataType.I8).arrayType();
+                        } else {
+                            throw syntaxError("Field '" + f + "' not found in type '" + vt + "'");
+                        }
                     }
                     v = new FieldAccess(v, f, type);
                     vt = v.type();
@@ -2609,6 +2695,9 @@ public class Parser {
                     }
                 } else if (!matchOp("]")) {
                     throw syntaxError("Expected ']', got '" + token + "' in array access");
+                }
+                if (!v.type().isArray()) {
+                    throw syntaxError("Not an array type: " + v.type());
                 }
                 v = new ArrayAccess(v, arrayIndex, checkBounds);
                 vt = v.type();

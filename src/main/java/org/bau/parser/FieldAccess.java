@@ -85,7 +85,12 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public FieldAccess replace(Variable old, Expression with) {
+    public Expression replace(Variable old, Expression with) {
+        if (fieldName.equals("source")
+                && old.name.endsWith(".source")
+                && old.name.startsWith(base.toString() + ".")) {
+            return with;
+        }
         Expression b2 = base.replace(old, with);
         if (b2 == base) {
             return this;
@@ -153,12 +158,15 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public String incrementRefCountC() {
+        // copy of Variable
         if (type().needIncDec()) {
             if (type().memoryType() == MemoryType.REF_COUNT) {
                 return Free.INC_USE + "(" + toC() + ");\n";
-            } else {
+            } else if (type().needFree()) {
                 return "";
             }
+        } else if (type().needFree()) {
+            return type().toC() + "_copy(&" + toC() + ");\n";
         }
         return "";
     }
@@ -217,7 +225,7 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public Value setValue(Memory memory, Value val, boolean incRefCount) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial) {
         Value baseVal = base.eval(memory);
         if (baseVal == null) {
             throw new IllegalStateException();
@@ -231,15 +239,15 @@ public class FieldAccess implements Expression, LeftValue {
         ValueStruct v = (ValueStruct) baseVal;
         if (type().needIncDec()) {
             Value old = v.get(fieldName);
-            if (old != null) {
+            v.set(fieldName, val);
+            if (incRefCount) {
+                memory.incHeap(val.longValue());
+            }
+            if (old != null && !initial) {
                 StatementResult result = Free.decRefCount(old, type, memory);
                 if (result == StatementResult.PANIC) {
                     return memory.getGlobal(Memory.PANIC);
                 }
-            }
-            v.set(fieldName, val);
-            if (incRefCount) {
-                memory.incHeap(val.longValue());
             }
         } else {
             v.set(fieldName, val);
@@ -257,4 +265,10 @@ public class FieldAccess implements Expression, LeftValue {
         base.used(program);
         type.used(program);
     }
+
+    @Override
+    public void incrementReassignCount() {
+        // ignore
+    }
+
 }

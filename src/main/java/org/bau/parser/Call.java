@@ -12,7 +12,7 @@ import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValuePanic;
 import org.bau.std.Std;
 
-public class Call implements Statement, Expression {
+public class Call implements Statement, Expression, LeftValue {
     boolean statement;
     ArrayList<Expression> args = new ArrayList<>();
     FunctionDefinition def;
@@ -42,7 +42,7 @@ public class Call implements Statement, Expression {
         if (m.tick()) {
             return null;
         }
-        HashMap<String, Value> params = new HashMap<>();
+        HashMap<Variable, Value> params = new HashMap<>();
         ArrayList<Value> list = new ArrayList<>(args.size());
         Value varArgsValue = null;
         for (int i = 0; i < args.size(); i++) {
@@ -57,7 +57,7 @@ public class Call implements Statement, Expression {
                     Variable var = def.parameters.get(i);
                     varArgsValue = new Value.ValueArray(len, new Value.ValueInt(0));
                     Value varArgsRef = new Value.ValueRef(m.putHeap(varArgsValue));
-                    params.put(var.name, varArgsRef);
+                    params.put(var, varArgsRef);
                     v = Operation.convertToType(v, var.type().baseType());
                     list.add(v);
                 }
@@ -65,13 +65,17 @@ public class Call implements Statement, Expression {
             } else {
                 Variable var = def.parameters.get(i);
                 v = Operation.convertToType(v, var.type());
-                params.put(var.name, v);
+                params.put(var, v);
                 list.add(v);
             }
         }
         m.saveLocal();
-        for (Entry<String, Value> e : params.entrySet()) {
-            m.setLocal(e.getKey(), e.getValue());
+        for (Entry<Variable, Value> e : params.entrySet()) {
+            if (!def.isConstructor) {
+                e.getKey().setValue(m, e.getValue(), true, true);
+            } else {
+                m.setLocal(e.getKey().name, e.getValue());
+            }
         }
         StatementResult r = Program.runSequence(m, def.list);
         if (def.cCode != null) {
@@ -83,6 +87,8 @@ public class Call implements Statement, Expression {
             return new ValueException(m.getGlobal(Memory.EXCEPTION).toString());
         } else if (r == StatementResult.PANIC) {
             return new ValuePanic(m.getGlobal(Memory.PANIC).toString());
+        } else if (r == StatementResult.TIMEOUT) {
+            return new ValuePanic("Timeout");
         }
         Value val = m.getGlobal(Memory.RESULT);
         val = Operation.convertToType(val, def.returnType);
@@ -167,12 +173,16 @@ public class Call implements Statement, Expression {
         if (def.callType == null && "println".equals(def.name)) {
             return printlnToC();
         }
-        if (statement && def.exceptionType != null) {
-            StringBuilder buff = new StringBuilder();
-            buff.append(exceptionVar + " = ");
-            buff.append(callToC());
-            buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
-            return buff.toString();
+        if (statement) {
+            if (def.exceptionType != null && exceptionVar != null) {
+                StringBuilder buff = new StringBuilder();
+                buff.append(exceptionVar + " = ");
+                buff.append(callToC());
+                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
+                return buff.toString();
+            } else {
+                return callToC();
+            }
         } else {
             return callToC();
         }
@@ -374,6 +384,53 @@ public class Call implements Statement, Expression {
         for (Expression e : args) {
             e.used(program);
         }
+    }
+
+    @Override
+    public String assignmentC() {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void setBoundValue(Expression scope, String modify, Expression value) {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void addBoundCondition(Expression scope, String operation, Expression right) {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public String decrementRefCountC() {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public String incrementRefCountC() {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial) {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean isContant() {
+        // can not assign
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public void incrementReassignCount() {
+        // ignore
     }
 
 }

@@ -72,7 +72,11 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public String decrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.DEC_USE + "(" + toC() + ", " + type().nameC() + ");\n";
+            } else {
+                return type().idC() + "_free(" + toC() + ");\n";
+            }
         }
         return "";
     }
@@ -80,7 +84,13 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public String incrementRefCountC() {
         if (type().needIncDec()) {
-            return Free.INC_USE + "(" + toC() + ");\n";
+            if (type().memoryType() == MemoryType.REF_COUNT) {
+                return Free.INC_USE + "(" + toC() + ");\n";
+            } else if (type().needFree()) {
+                return "";
+            }
+        } else if (type().needFree()) {
+            return type().toC() + "_copy(&" + toC() + ");\n";
         }
         return "";
     }
@@ -176,7 +186,7 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public Value setValue(Memory memory, Value val, boolean incRefCount) {
+    public Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial) {
         Value indexValue = arrayIndex.eval(memory);
         if (indexValue == null) {
             throw new IllegalStateException();
@@ -204,15 +214,15 @@ public class ArrayAccess implements Expression, LeftValue {
         }
         if (type().needIncDec()) {
             Value old = array.get(index);
+            array.set(index, val);
+            if (incRefCount) {
+                memory.incHeap(val.longValue());
+            }
             if (old != null) {
                 StatementResult result = Free.decRefCount(old, type(), memory);
                 if (result == StatementResult.PANIC) {
                     return memory.getGlobal(Memory.PANIC);
                 }
-            }
-            array.set(index, val);
-            if (incRefCount) {
-                memory.incHeap(val.longValue());
             }
         } else {
             array.set(index, val);
@@ -234,6 +244,11 @@ public class ArrayAccess implements Expression, LeftValue {
             }
             arrayIndex.used(program);
         }
+    }
+
+    @Override
+    public void incrementReassignCount() {
+        // ignore
     }
 
 }

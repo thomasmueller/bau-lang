@@ -8,14 +8,21 @@ fun int then(a T, b T) const T
         return a
     return b
 
+fun typeName(a T) i8[]
+    return T.name
+
 for i := range(-1, 2)
     println('abs(' i ')= ' if(i < 0, -i, i))
     println('abs(' i ')= ' (i < 0).then(-i, i))
+    println('typeName: ' typeName(1))
 
 ## Expected
 abs(-1)= 1
 abs(-1)= 1
+typeName: int
 abs(0)= 0
 abs(0)= 0
+typeName: int
 abs(1)= 1
 abs(1)= 1
+typeName: int

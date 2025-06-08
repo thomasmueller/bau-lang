@@ -139,10 +139,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {

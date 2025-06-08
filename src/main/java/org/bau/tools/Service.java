@@ -65,7 +65,7 @@ public class Service {
             try {
                 long start = System.currentTimeMillis();
                 Program prog = new Parser(s).parse();
-                String result = prog.run(100_000_000);
+                String result = prog.run(1_000_000);
                 System.out.println(result);
                 long ticksExecuted = prog.getTicksExecuted();
                 long time = System.currentTimeMillis() - start;

@@ -1,0 +1,426 @@
+module org.bau.BigInt
+
+type bigInt
+    negative int
+    data i32[]
+
+KARATSUBA_LIMIT : 100
+I32_MIN_VALUE : -(1 << 31)
+I32_MAX_VALUE : (1 << 32) - 1
+INT_MIN_VALUE : -(1 << 63)
+
+fun numberOfLeadingZeros(x int) int
+    native(`return x == 0 ? 64 : __builtin_clzll(x);`)
+    if x <= 0
+        return if(x = 0, 32, 0)
+    n := 63
+    shift := 32
+    while shift > 0
+        if x >= 1 << shift
+            n -= shift
+            x >>= shift
+        shift >>= 1
+    return n
+
+fun copyOf(a T[], len int) T[]
+    x : T[len]
+    i := 0
+    while i < len and i < a.len
+        x[i] = a[i]
+        i += 1
+    return x
+
+fun copyOfRange(a T[], from int, to int) T[]
+    len : to - from
+    x : T[len]
+    i := 0
+    while i + from < to and i < a.len
+        x[i] = a[i + from]
+        i += 1
+    return x
+
+type str
+    data i8[]
+
+fun newBigIntShorten(data i32[], negative int) bigInt
+    newLen := data.len
+    while newLen > 0 and data[newLen - 1] = 0
+        newLen -= 1
+    if newLen = 0
+        negative = 0
+    d2 : if(newLen = data.len, data, copyOf(data, newLen))
+    result : bigInt(d2)
+    result.negative = negative
+    return result
+
+# create a new bigInt
+fun newBigInt(value int) bigInt
+    if value = 0 
+        return bigInt(i32[0])
+    elif value < 0 
+        if value >= I32_MIN_VALUE
+            x : bigInt(i32[1])
+            x.data[0] = -value
+            x.negative = 1
+            return x
+        elif value > INT_MIN_VALUE 
+            x : bigInt(i32[2])
+            x.data[0] = -value
+            x.data[1] = -value >> 32
+            x.negative = 1
+            return x
+        else 
+            x : bigInt(i32[2])
+            x.data[0] = 0
+            x.data[1] = 0x80000000
+            x.negative = 1
+            return x
+    else 
+        if value <= I32_MAX_VALUE
+            x : bigInt(i32[1])
+            x.data[0] = value
+            return x
+        else
+            x : bigInt(i32[2])
+            x.data[0] = value
+            x.data[1] = value >> 32 
+            return x
+
+# negate
+fun bigInt negate() bigInt
+    if data.len = 0
+        return this
+    x : bigInt(data)
+    x.negative = not negative
+    return x
+
+# left shift
+fun bigInt shiftLeft(n int) bigInt
+    len : len()
+    if len <= 0
+        return newBigInt(0)
+    len2 := len + n
+    data2 : i32[(len2 + 31) / 32]
+    carry := 0
+    i := 0
+    while i < len
+        old := data[i >> 5] & 0xffffffff
+        data2[(i + n) >> 5] = i32((old << (n & 31)) | carry)
+        carry = old >> (32 - (n & 31))
+        i += 32
+    data2[data2.len - 1] |= carry
+    return newBigIntShorten(data2, negative)
+
+# length in bits
+fun bigInt len() int
+    if not data.len
+        return 0
+    lastLen := 64 - numberOfLeadingZeros(data[data.len - 1] & 0xffffffff)
+    return (data.len - 1) * 32 + lastLen
+
+fun if(cond int, a T, b T) macro T
+    if cond
+        return a
+    else
+        return b
+
+# compare to another value
+fun bigInt compareTo(o bigInt) int
+    if negative <> o.negative
+        return if(negative, -1, 1)
+    if negative
+        return - negate().compareTo(o.negate())
+    len : len()
+    oLen : o.len()
+    if len <> oLen
+        return if(len > oLen, 1, -1)
+    i := data.len - 1
+    while i >= 0
+        x : data[i] & 0xffffffff
+        y : o.data[i] & 0xffffffff
+        if x <> y
+            return if(x > y, 1, -1)
+        i -= 1
+    return 0
+
+# addition
+fun bigInt add(other bigInt) bigInt
+    if len() = 0
+        return other
+    elif other.len() = 0
+        return this
+    if negative
+        if other.negative
+            return add(data, other.data).negate()
+        return negate().subtract(other).negate()
+    if other.negative
+        return subtract(other.negate())
+    return add(data, other.data)
+
+fun add(a i32[], b i32[]) bigInt
+    if a.len < b.len
+        temp : a
+        a = b
+        b = temp
+    result : copyOf(a, a.len)
+    carry := 0
+    for i := until(a.len)
+        x : result[i] & 0xffffffff
+        y : if(i >= b.len, 0, b[i] & 0xffffffff)
+        z : x + y + carry
+        result[i] = i32(z)
+        carry = z >> 32
+    if carry = 0
+        return bigInt(result)
+    r2 : copyOf(result, result.len + 1)
+    r2[r2.len - 1] = 1
+    return bigInt(r2)
+
+# subtraction
+fun bigInt subtract(other bigInt) bigInt
+    if len() = 0
+        return other.negate()
+    elif other.len() = 0
+        return this
+    if negative
+        if not other.negative
+            return negate().add(other).negate()
+        return negate().subtract(other.negate()).negate()
+    if other.negative
+        return add(other.negate())
+    if compareTo(other) < 0
+        return other.subtract(this).negate()
+    return subtract(data, other.data)
+
+fun subtract(a i32[], b i32[]) bigInt
+    result : copyOf(a, a.len)
+    carry := 0
+    for i := until(a.len)
+        x : result[i] & 0xffffffff
+        y := 0
+        if i < b.len
+            y = b[i] & 0xffffffff
+        z : x - y - carry
+        carry = (z >> 63) & 1
+        result[i] = i32(z)
+    return newBigIntShorten(result, 0)
+
+# get the int value (at most 32 bits)
+fun bigInt intValue() int
+    return signum() * if(data.len = 0, 0, data[0] & 0xffffffff)
+
+# multiplication
+fun bigInt multiply(other bigInt) bigInt
+    thisLen : len()
+    otherLen : other.len()
+    if thisLen = 0
+        return this
+    elif otherLen = 0
+        return other
+    if negative <> other.negative
+        return multiply(other.negate()).negate()
+    if thisLen > otherLen
+        return other.multiply(this)
+    elif thisLen = 1
+        # multiply by 1 / -1
+        if negative
+            return other.negate()
+        return other
+    return multiply(data, other.data)
+
+# multiply by an integer
+fun bigInt multiplyInt(value int) bigInt
+    if (value >= 1 << 31 or value <= -(1 << 31))
+        return multiply(newBigInt(value))
+    other := i32(value)
+    thisLen : len()
+    if thisLen = 0
+        return this
+    elif other = 0
+        return newBigInt(other)
+    otherNegative : other < 0
+    if negative <> otherNegative
+        return multiplyInt(-other).negate()
+    elif thisLen = 1
+        # multiply by 1 / -1
+        if negative
+            return newBigInt(-other)
+        return newBigInt(other)
+    if otherNegative
+        other = -other
+    return multiplyVerySmall(other, data)
+
+fun multiply(a i32[], b i32[]) bigInt
+    if a.len < b.len
+        return multiply(b, a)
+    # now a.len >= b.len
+    if a.len < KARATSUBA_LIMIT or b.len < KARATSUBA_LIMIT
+        return multiplySmall(a, b)
+    half := a.len / 2
+    # return multiplySmall(a, b)
+    a0 := bigInt(a)
+    a0 = a0.shiftRight(half * 32)
+    # BigInt a0 = new bigInt(a, false).shiftRight(half * 32);
+    a1 : newBigIntShorten(copyOf(a, half), 0)
+    # BigInt a1 = new bigInt(Arrays.copyOf(a, half), false);
+    b0 := bigInt(b)
+    b0 = b0.shiftRight(half * 32)
+    # BigInt b0 = new bigInt(b, false).shiftRight(half * 32);
+    b1 : newBigIntShorten(copyOf(b, half), 0)
+    # BigInt b1 = new bigInt(Arrays.copyOf(b, half), false);
+    z0 : a0.multiply(b0)
+    # BigInt z0 = a0.multiply(b0);
+    z1 := a0.add(a1)
+    z1 = z1.multiply(b0.add(b1))
+    # BigInt z1 = a0.add(a1).multiply(b0.add(b1));
+    z2 : a1.multiply(b1)
+    # BigInt z2 = a1.multiply(b1);
+    result := z0.shiftLeft(half * 64)
+    # BigInt result = z0.shiftLeft(half * 64);
+    temp := z1.subtract(z0)
+    temp = temp.subtract(z2)
+    temp = temp.shiftLeft(half * 32)
+    result = result.add(temp)
+    # result = result.add(z1.subtract(z0).subtract(z2).shiftLeft(half * 32));
+    result = result.add(z2)
+    # result = result.add(z2);
+    return result
+
+fun multiplyVerySmall(a i32, b i32[]) bigInt
+    if a = 1
+        return bigInt(b)
+    result : i32[b.len + 1]
+    ax := a & 0xffffffff
+    carry := 0
+    i := 0
+    bi := 0
+    while bi < b.len
+        bx : b[bi] & 0xffffffff
+        z : ax * bx + (result[i] & 0xffffffff) + carry
+        result[i] = i32(z)
+        carry = z >> 32
+        bi += 1
+        i += 1
+    while carry > 0
+        z : result[i] + carry
+        result[i] = i32(z)
+        carry = z >> 32
+        i += 1
+    return newBigIntShorten(result, 0)
+
+fun multiplySmall(a i32[], b i32[]) bigInt
+    if a.len = 1
+        return multiplyVerySmall(a[0], b)
+    elif b.len = 1
+        return multiplyVerySmall(b[0], a)
+    result : i32[a.len + b.len]
+    for ai := until(a.len)
+        ax : a[ai] & 0xffffffff
+        carry := 0
+        i := i32(ai)
+        for bi := until(b.len)
+            bx : b[bi] & 0xffffffff
+            z : ax * bx + (result[i] & 0xffffffff) + carry
+            result[i] = i32(z)
+            carry = z >> 32
+            i += 1
+        while carry > 0
+            z : result[i] + carry
+            result[i] = i32(z)
+            carry = z >> 32
+            i += 1
+    return newBigIntShorten(result, 0)
+
+# division
+fun bigInt divide(other bigInt) bigInt
+    if other.len() = 0
+        # TODO division by zero: currently we return 0
+        # throw exception instead?
+        return newBigInt(0)
+    elif negative <> other.negative
+        return divide(other.negate()).negate()
+    elif negative
+        return negate().divide(other.negate())
+    cmp : compareTo(other)
+    if cmp < 0
+        return newBigInt(0)
+    elif cmp = 0
+        return newBigInt(1)
+    remainder := this
+    result := newBigInt(0)
+    shifted := other
+    shiftCount := 0
+    shiftedLen : shifted.len()
+    len : remainder.len()
+    if len - shiftedLen > 1
+        shifted = shifted.shiftLeft(len - shiftedLen - 1)
+        shiftCount = len - shiftedLen - 1
+    while remainder.compareTo(other) >= 0
+        result = result.add(newBigInt(1).shiftLeft(shiftCount))
+        remainder = remainder.subtract(shifted)
+        while shiftCount > 0 and shifted.compareTo(remainder) >= 0
+            shifted = shifted.shiftRight(1)
+            shiftCount -= 1
+    return result
+
+# right shift
+fun bigInt shiftRight(n int) bigInt
+    len2 : len() - n
+    if len2 <= 0
+        return newBigInt(0)
+    data2 : copyOfRange(data, n / 32, data.len)
+    carry := 0
+    i := data2.len - 1
+    while i >= 0
+        x : data2[i] & 0xffffffff
+        data2[i] = i32((carry | x) >> (n & 31))
+        carry = x << 32
+        i -= 1
+    return newBigIntShorten(data2, negative)
+
+fun intToStr(n int, buff i8[], start int, size int) int
+    i := 0
+    while i < size
+        buff[start + i] = ord('0') + (n % 10)
+        n /= 10
+        i += 1
+    return i + start
+
+# convert to string
+fun bigInt toStr() i8[]
+    n := this
+    buff := str(i8[50])
+    start := 0
+    if negative
+        buff.data[0] = ord('-')
+        start = 1
+        n = n.negate()
+    i := start
+    group := newBigInt(1_000_000_000)
+    while
+        next := n.divide(group)
+        remainder := n.subtract(next.multiply(group))
+        val : remainder.intValue()
+        if i + 9 >= buff.data.len
+            buff = str(copyOf(buff.data, buff.data.len * 2))
+        i = intToStr(val, buff.data, i, 9)
+        n = next
+        break n.signum() = 0
+    while i > start + 1 and buff.data[i - 1] = ord('0')
+        i -= 1
+    end : i
+    while i > start
+        i -= 1
+        temp : buff.data[i]
+        buff.data[i] = buff.data[start]
+        buff.data[start] = temp
+        start += 1
+    return copyOf(buff.data, end)
+
+# get the signum
+fun bigInt signum() int
+    if data.len = 0
+        return 0
+    elif negative
+        return -1
+    return 1

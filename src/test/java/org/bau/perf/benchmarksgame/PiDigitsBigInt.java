@@ -8,7 +8,7 @@ public class PiDigitsBigInt {
 
     public static void main(String args[]) {
         // int n = Integer.parseInt(args[0]);
-        int n = 1_000;
+        int n = 10_000;
         int j = 0;
         long start = System.currentTimeMillis();
 
@@ -38,7 +38,7 @@ public class PiDigitsBigInt {
             n -= L;
         }
         long time = System.currentTimeMillis() - start;
-        System.out.println("time: " + time + " ms dummy:" + dummy);
+        System.out.println("time: " + time + " ms dummy: " + dummy);
     }
 
     private static void print(int digit) {

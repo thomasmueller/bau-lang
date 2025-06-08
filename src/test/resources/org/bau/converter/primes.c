@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -138,10 +139,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -205,13 +202,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -235,6 +233,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -267,19 +266,19 @@ int64_t shiftRight_int_2(int64_t a, int64_t b);
 void int_array_free(int_array* x);
 void BitField_free(BitField* x);
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void BitField_free(BitField* x) {
     _decUse(x->data, int_array);
-    _free(x);
+    _free(x); _traceFree(x);
 }
 int64_t randomSeed;
 BitField* BitField_1(int_array* data) {
     BitField* _t0 = BitField_new();
+    _incUseStack(data);
     _decUse(_t0->data, int_array);
     _t0->data = data;
-    _incUse(_t0->data);
     return _t0;
 }
 int64_t BitField_get_2(BitField* this, int64_t index) {
@@ -341,7 +340,7 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     {
-        int64_t randomSeed = 0;
+        randomSeed = 0;
     }
     int64_t _t0 = primeSum_1(100);
     printf("%lld\n", (long long)_t0);

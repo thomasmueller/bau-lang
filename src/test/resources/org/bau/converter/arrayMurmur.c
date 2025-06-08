@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 // malloc =============================
@@ -136,10 +137,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -203,13 +200,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -233,6 +231,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -247,6 +246,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -266,12 +266,12 @@ int32_t shiftRight_i32_2(int32_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -293,8 +293,8 @@ i8_array* hex_2(int64_t x, int64_t len) {
         l = 16;
     }
     i8_array* _t0 = i8_array_new(l);
+    _incUseStack(_t0);
     i8_array* data = _t0;
-    _incUseStack(data);
     int64_t y = x;
     int64_t i = l - 1;
     while (i >= 0) {
@@ -328,10 +328,12 @@ int32_t murmur3_32_1(i8_array* data) {
         while (1) {
             int32_t x = i32_1(((data->data[i] & 255)) | (shiftLeft_2((data->data[i + 1] & 255), 8)) | (shiftLeft_2((data->data[i + 2] & 255), 16)) | (shiftLeft_2((data->data[i + 3] & 255), 24)));
             x *= -862048943;
-            x = rotLefti32_2(x, 15);
+            int32_t _t0 = rotLefti32_2(x, 15);
+            x = _t0;
             x *= 461845907;
             h ^= x;
-            h = rotLefti32_2(h, 13);
+            int32_t _t1 = rotLefti32_2(h, 13);
+            h = _t1;
             h = ( h * 5 ) + 3864292196;
             int64_t n = i + 4;
             if (n > ( data->len - 4 )) {
@@ -344,12 +346,12 @@ int32_t murmur3_32_1(i8_array* data) {
     if (i < ( data->len - 4 )) {
         i += 4;
     }
-    int64_t _t0 = i < data->len;
-    if (_t0) {
-        int64_t _t1 = i != ( data->len - 4 );
-        _t0 = _t1;
+    int64_t _t2 = i < data->len;
+    if (_t2) {
+        int64_t _t3 = i != ( data->len - 4 );
+        _t2 = _t3;
     }
-    if (_t0) {
+    if (_t2) {
         int64_t s = 0;
         while (1) {
             x ^= shiftLeft_2((data->data[i] & 255), s);
@@ -361,7 +363,8 @@ int32_t murmur3_32_1(i8_array* data) {
             s += 8;
         }
         x *= -862048943;
-        x = rotLefti32_2(x, 15);
+        int32_t _t4 = rotLefti32_2(x, 15);
+        x = _t4;
         x *= 461845907;
         h ^= x;
     }

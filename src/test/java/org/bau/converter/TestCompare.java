@@ -65,6 +65,11 @@ public class TestCompare {
     }
 
     @Test
+    public void bigIntTest() throws IOException {
+        test("bigIntTest");
+    }
+
+    @Test
     public void binaryTree() throws IOException {
         test("binaryTree");
     }
@@ -212,6 +217,11 @@ public class TestCompare {
     @Test
     public void owned() throws IOException {
         test("owned");
+    }
+
+    @Test
+    public void pi() throws IOException {
+        test("pi");
     }
 
     @Test

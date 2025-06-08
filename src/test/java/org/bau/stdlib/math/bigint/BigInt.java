@@ -50,18 +50,19 @@ public class BigInt implements Comparable<BigInt> {
         if (data.length == 0) {
             return 0;
         }
-        int lastLen = 32 - Long.numberOfLeadingZeros(data[data.length - 1] & 0xffffffffL);
-        return data.length * 32 + lastLen;
+        int lastLen = 64 - Long.numberOfLeadingZeros(data[data.length - 1] & 0xffffffffL);
+        return (data.length - 1) * 32 + lastLen;
     }
 
     public BigInt shiftLeft(int n) {
-        if (len() <= 0) {
+        int len = len();
+        if (len <= 0) {
             return BigInt.valueOf(0);
         }
-        int len2 = len() + n;
+        int len2 = len + n;
         int[] data2 = new int[(len2 + 31) / 32];
         long carry = 0;
-        for (int i = 0; i < len(); i += 32) {
+        for (int i = 0; i < len; i += 32) {
             long old = data[i >>> 5] & 0xffffffffL;
             data2[(i + n) >>> 5] = (int) ((old << (n & 31)) | carry);
             carry = old >>> (32 - (n & 31));
@@ -109,6 +110,9 @@ public class BigInt implements Comparable<BigInt> {
     }
 
     public BigInt negate() {
+        if (data.length == 0) {
+            return this;
+        }
         return new BigInt(data, !negative);
     }
 
@@ -119,7 +123,7 @@ public class BigInt implements Comparable<BigInt> {
         return negate();
     }
 
-    private BigInt subtract(int[] a, int[] b) {
+    private static BigInt subtract(int[] a, int[] b) {
         int[] result = Arrays.copyOf(a, a.length);
         long carry = 0;
         for (int i = 0; i < a.length; i++) {
@@ -135,11 +139,9 @@ public class BigInt implements Comparable<BigInt> {
         return new BigInt(result, false);
     }
 
-    private BigInt multiply(int[] a, int[] b) {
+    private static BigInt multiply(int[] a, int[] b) {
         if (a.length < b.length) {
-            int[] temp = a;
-            a = b;
-            b = temp;
+            return multiply(b, a);
         }
         // now a.len >= b.len
         if (a.length < KARATSUBA_LIMIT || b.length < KARATSUBA_LIMIT) {
@@ -159,7 +161,34 @@ public class BigInt implements Comparable<BigInt> {
         return result;
     }
 
-    private BigInt multiplySmall(int[] a, int[] b) {
+    private static BigInt multiplyVerySmall(int a, int[] b) {
+        if (a == 1) {
+            return new BigInt(b, false);
+        }
+        int[] result = new int[b.length + 1];
+        long ax = a & 0xffffffffL;
+        long carry = 0;
+        int i = 0;
+        for (int bi = 0; bi < b.length; bi++, i++) {
+            long bx = b[bi] & 0xffffffffL;
+            long z = ax * bx + (result[i] & 0xffffffffL) + carry;
+            result[i] = (int) z;
+            carry = z >>> 32;
+        }
+        for (;carry > 0; i++) {
+            long z = result[i] + carry;
+            result[i] = (int) z;
+            carry = z >>> 32;
+        }
+        return new BigInt(result, false);
+    }
+
+    private static BigInt multiplySmall(int[] a, int[] b) {
+        if (a.length == 1) {
+            return multiplyVerySmall(a[0], b);
+        } else if (b.length == 1) {
+            return multiplyVerySmall(b[0], a);
+        }
         int[] result = new int[a.length + b.length];
         for (int ai = 0; ai < a.length; ai++) {
             long ax = a[ai] & 0xffffffffL;
@@ -220,13 +249,24 @@ public class BigInt implements Comparable<BigInt> {
     }
 
     public BigInt multiply(BigInt other) {
-        if (this.len() == 0) {
+        int thisLen = this.len();
+        int otherLen = other.len();
+        if (thisLen == 0) {
             return this;
-        } else if (other.len() == 0) {
+        } else if (otherLen == 0) {
             return other;
         }
         if (negative != other.negative) {
             return multiply(other.negate()).negate();
+        }
+        if (thisLen > otherLen) {
+            return other.multiply(this);
+        } else if (thisLen == 1) {
+            // multiply by 1 / -1
+            if (negative) {
+                return other.negate();
+            }
+            return other;
         }
         return multiply(data, other.data);
     }
@@ -249,7 +289,7 @@ public class BigInt implements Comparable<BigInt> {
     }
 
     public int intValue() {
-        return data.length == 0 ? 0 : data[0] & 0xffffffff;
+        return signum() * (data.length == 0 ? 0 : data[0] & 0xffffffff);
     }
 
     public String toString() {
@@ -348,14 +388,12 @@ public class BigInt implements Comparable<BigInt> {
         BigInt result = BigInt.valueOf(0);
         BigInt shifted = other;
         int shiftCount = 0;
-        BigInt old = shifted;
-        while (shifted.compareTo(remainder) <= 0) {
-            old = shifted;
-            shifted = shifted.shiftLeft(1);
-            shiftCount++;
+        int shiftedLen = shifted.len();
+        int len = remainder.len();
+        if (len - shiftedLen > 1) {
+            shifted = shifted.shiftLeft(len - shiftedLen - 1);
+            shiftCount = len - shiftedLen - 1;
         }
-        shifted = old;
-        shiftCount--;
         while (remainder.compareTo(other) >= 0) {
             result = result.add(BigInt.valueOf(1).shiftLeft(shiftCount));
             remainder = remainder.subtract(shifted);

@@ -1,0 +1,56 @@
+import org.bau.BigInt
+    newBigInt
+
+fun assert(x int) macro
+    if not x
+        println('assertion failed: ' x.source)
+    # continue
+        
+fun main()
+    # add
+    assert(newBigInt(123).
+        add(newBigInt(456)).intValue() = 579)
+    assert(newBigInt(123).shiftLeft(100).
+        add(newBigInt(456).shiftLeft(100)).
+        shiftRight(100).intValue() = 579)
+    # subtract
+    assert(newBigInt(1000).
+        subtract(newBigInt(250)).intValue() = 750)
+    assert(newBigInt(250).
+        subtract(newBigInt(1000)).intValue() = -750)
+    # multiply
+    assert(newBigInt(20).
+        multiply(newBigInt(5)).intValue() = 100)
+    assert(newBigInt(20).shiftLeft(100).
+        multiply(newBigInt(5).shiftLeft(100)).
+        shiftRight(200).intValue() = 100)
+    # divide
+    assert(newBigInt(100).
+        divide(newBigInt(5)).intValue() = 20)
+    assert(newBigInt(100).shiftLeft(100).
+        divide(newBigInt(5).shiftLeft(100)).intValue() = 20)
+    # shift
+    assert(newBigInt(1).shiftLeft(3).intValue() = 8)
+    assert(newBigInt(16).shiftRight(2).intValue() = 4)
+    # negate
+    assert(newBigInt(50).negate().intValue() = -50)
+    assert(newBigInt(50).negate().negate().intValue() = 50)
+    # compare
+    assert(newBigInt(10).compareTo(newBigInt(20)) = -1)
+    assert(newBigInt(10).compareTo(newBigInt(-20)) = 1)
+    assert(newBigInt(10).compareTo(newBigInt(10)) = 0)    
+    # signum
+    assert(newBigInt(123).signum() = 1)
+    assert(newBigInt(0).signum() = 0)
+    assert(newBigInt(-123).signum() = -1)
+    # len
+    assert(newBigInt(1).len() = 1)
+    assert(newBigInt(2).len() = 2)
+    assert(newBigInt(255).len() = 8)
+    assert(newBigInt(256).len() = 9)
+    assert(newBigInt(256).shiftLeft(100).len() = 109)
+    
+    println(newBigInt(1234).shiftLeft(100).multiply(newBigInt(5678).shiftLeft(100)).toStr())
+
+## Expected
+11259255661683342732106639778226391631287398650794192985050056753152

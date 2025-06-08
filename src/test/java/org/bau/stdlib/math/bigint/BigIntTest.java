@@ -130,6 +130,13 @@ public class BigIntTest {
     }
 
     @Test
+    public void intValue() {
+        assertEquals(0, BigInt.valueOf(0).intValue());
+        assertEquals(100, BigInt.valueOf(100).intValue());
+        assertEquals(-100, BigInt.valueOf(-100).intValue());
+    }
+
+    @Test
     public void subtract() {
         Random r = new Random(1);
         for (int i = 0; i < 1000; i++) {

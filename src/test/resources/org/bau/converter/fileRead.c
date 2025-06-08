@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 // malloc =============================
@@ -136,10 +137,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -203,13 +200,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -235,6 +233,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -249,6 +248,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -269,6 +269,7 @@ org_bau_File_File* org_bau_File_File_new() {
 int __argc;
 char **__argv;
 /* functions */
+org_bau_File_File* org_bau_File_File_0();
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode);
 void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
@@ -277,17 +278,17 @@ void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_File_File_free(org_bau_File_File* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void org_bau_File_File_free(org_bau_File_File* x) {
     org_bau_File_File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
-    _free(x);
+    _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -298,12 +299,19 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
+org_bau_File_File* org_bau_File_File_0() {
+    org_bau_File_File* _t0 = org_bau_File_File_new();
+    _t0->filePointer = 0;
+    return _t0;
+}
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
     // TODO verify strings
     FILE* fp = fopen((char*) name->data, (char*) mode->data);
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
+    org_bau_File_File* _t0 = org_bau_File_File_0();
+    return _t0;
 }
 void org_bau_File_File_close_1(org_bau_File_File* this) {
     FILE* fp = (FILE*) (this->filePointer);
@@ -316,13 +324,15 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
     } else {
         return fread(data->data + pos, 1, len, fp);
     }
+    return 0;
 }
 void test_0() {
     org_bau_File_File* file = org_bau_File_openFile_2(string_1000, string_1001);
     i8_array* _t0 = i8_array_new(16);
+    _incUseStack(_t0);
     i8_array* data = _t0;
-    _incUseStack(data);
-    org_bau_File_File_read_4(file, data, 0, 15);
+    int64_t _t1 = org_bau_File_File_read_4(file, data, 0, 15);
+    ;
     data->data[5] = 0;
     printf("%.*s\n", data->len, data->data);
     _decUseStack(data, i8_array);

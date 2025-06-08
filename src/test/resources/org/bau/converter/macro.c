@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -137,10 +138,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -204,13 +201,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -234,6 +232,7 @@ i8_array* i8_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -248,6 +247,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -262,12 +262,12 @@ i8_array* expensiveCalc_1(i8_array* a);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -277,17 +277,18 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1000;
-i8_array* string_1001;
 i8_array* string_1002;
-i8_array* string_1003;
 i8_array* string_1004;
-i8_array* string_1005;
 i8_array* string_1006;
+i8_array* string_1008;
+i8_array* string_1010;
+i8_array* string_1011;
 void exit_1(int64_t code) {
     exit(code);
     exit_1(code);
 }
 i8_array* expensiveCalc_1(i8_array* a) {
+    _incUseStack(a);
     printf("expensive calculation with param: %.*s\n", a->len, a->data);
     return a;
 }
@@ -296,43 +297,45 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("expensive calculation with param: ", 34);
-    string_1001 = str_const("not zero", 8);
-    string_1002 = str_const("zero", 4);
-    string_1003 = str_const(": ", 2);
-    string_1004 = str_const("assertion failed", 16);
-    string_1005 = str_const("next", 4);
-    string_1006 = str_const("end", 3);
-    while (1 == 1) {
-        int64_t i = 0;
-        while (1) {
-            i8_array* _t0 = NULL;
-            if (i) {
-                _decUseStack(_t0, i8_array);
-                _t0 = expensiveCalc_1(string_1001);
-            } else {
-                _decUseStack(_t0, i8_array);
-                _t0 = expensiveCalc_1(string_1002);
-            }
-            i8_array* x = _t0;
-            _incUseStack(x);
-            printf("%lld: %.*s\n", i, x->len, x->data);
-            if (!(( i < 1 ))) {
-                printf("assertion failed\n");
-                exit_1(1);
-            } else {
-            }
-            printf("next\n");
-            int64_t _next = i + 1;
-            if (_next >= 2) {
+    string_1002 = str_const("not zero", 8);
+    string_1004 = str_const("zero", 4);
+    string_1006 = str_const(": ", 2);
+    string_1008 = str_const("assertion failed", 16);
+    string_1010 = str_const("next", 4);
+    string_1011 = str_const("end", 3);
+    if (2 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                i8_array* _t0 = NULL;
+                if (i) {
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1002);
+                } else {
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1004);
+                }
+                _incUseStack(_t0);
+                i8_array* x = _t0;
+                printf("%lld: %.*s\n", i, x->len, x->data);
+                if (!(( i < 1 ))) {
+                    printf("assertion failed\n");
+                    exit_1(1);
+                } else {
+                }
+                printf("next\n");
+                int64_t _next = i + 1;
+                if (_next >= 2) {
+                    _decUseStack(x, i8_array);
+                    _decUseStack(_t0, i8_array);
+                    break;
+                }
+                i = _next;
                 _decUseStack(x, i8_array);
                 _decUseStack(_t0, i8_array);
-                break;
             }
-            i = _next;
-            _decUseStack(x, i8_array);
-            _decUseStack(_t0, i8_array);
+            break;
         }
-        break;
     }
     printf("end\n");
     _end();

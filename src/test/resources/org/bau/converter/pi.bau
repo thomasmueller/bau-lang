@@ -1,0 +1,65 @@
+import org.bau.BigInt
+    bigInt
+    newBigInt
+
+fun main()
+    n := 100
+    i := 0
+    k := 0
+    L : 10
+    buff : i8[L]
+    j := 0
+    dummy := 0
+    while i < n
+        k += 1
+        nextTerm(k)
+        if num.compareTo(acc) > 0
+            continue
+        d := extractDigit(3)
+        if d <> extractDigit(4)
+            continue
+        eliminateDigit(d)
+        dummy += d
+        buff[j] = ord('0') + d
+        j += 1
+        i += 1
+        if j = L
+            println(buff ' : ' i)
+            j = 0
+    println('dummy: ' dummy)
+
+tmp1 := newBigInt(0)
+tmp2 := newBigInt(0)
+acc := newBigInt(0)
+den := newBigInt(1)
+num := newBigInt(1)
+
+fun extractDigit(nth int) int
+    tmp1 = num.multiplyInt(nth)
+    tmp2 = tmp1.add(acc)
+    tmp1 = tmp2.divide(den)
+    return tmp1.intValue()
+
+fun eliminateDigit(d int)
+    acc = acc.subtract(den.multiplyInt(d))
+    acc = acc.multiplyInt(10)
+    num = num.multiplyInt(10)
+
+fun nextTerm(k int)
+    acc = acc.add(num.shiftLeft(1))
+    acc = acc.multiplyInt(k * 2 + 1)
+    den = den.multiplyInt(k * 2 + 1)
+    num = num.multiplyInt(k)
+
+## Expected
+3141592653 : 10
+5897932384 : 20
+6264338327 : 30
+9502884197 : 40
+1693993751 : 50
+0582097494 : 60
+4592307816 : 70
+4062862089 : 80
+9862803482 : 90
+5342117067 : 100
+dummy: 471

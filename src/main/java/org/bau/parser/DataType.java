@@ -140,6 +140,9 @@ public class DataType {
             throw new IllegalStateException();
         }
         this.used = true;
+        if (isArray()) {
+            arrayBaseType.used(program);
+        }
         if (autoClose != null) {
             program.getFunctionById(autoClose.getFunctionId()).used(program);
         }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <string.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -137,10 +138,6 @@ void* tmmalloc_larger(int size, int index0) {
     uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
     uint64_t currentSize = block[0] >> 1;
     ASSERT((block[0] & 1) == 1);
-    if(block[0] >> 32 != 0) {
-        int prevSize = block[0] >> 32;
-        printf("prev block of free block is free: %p; prev size %d -> %p\n", block, prevSize, block - prevSize);
-    }
     tmmalloc_removeFromFreeBlocksMap(block, index);
     ASSERT(block[0] >> 32 == 0);
     if (currentSize >= size + 3) {
@@ -204,13 +201,14 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
     tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
 }
 // tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
 #define REF_COUNT_INC
 #define REF_COUNT_STACK_INC
 #define PRINT(...)
 #define _end()
-#define _malloc(a)      tmmalloc(a)
 #define _traceMalloc(a)
-#define _free(a)        tmfree(a)
+#define _traceFree(a)
 #define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
 #define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
@@ -232,6 +230,7 @@ int_array* int_array_new(uint32_t len) {
     _traceMalloc(result);
     result->len = len;
     result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -245,8 +244,8 @@ int64_t idiv_2(int64_t a, int64_t b);
 int64_t imod_2(int64_t a, int64_t b);
 void int_array_free(int_array* x);
 void int_array_free(int_array* x) {
-    _free(x->data);
-    _free(x);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
 }
 int64_t i64v;
 int32_t i32v;
@@ -272,16 +271,16 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     {
-        int64_t i64v = 1;
-        int32_t i32v = 1;
-        int16_t i16v = 1;
-        int8_t i8v = 1;
-        double f64v = 1.0;
-        float f32v = 1.0;
-        int64_t a = 6172;
-        int64_t b = 24690;
-        int64_t c = idiv_2(a, b);
-        int64_t d = imod_2(a, b);
+        i64v = 1;
+        i32v = 1;
+        i16v = 1;
+        i8v = 1;
+        f64v = 1.0;
+        f32v = 1.0;
+        a = 6172;
+        b = 24690;
+        c = idiv_2(a, b);
+        d = imod_2(a, b);
     }
     _end();
     return 0;

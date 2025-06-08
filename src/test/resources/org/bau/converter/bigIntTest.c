@@ -1,0 +1,1484 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+#include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
+// malloc =============================
+#define ASSERT(A)   
+// #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
+size_t tmmalloc_nextAllocate = 32 * 1024 * 1024;
+int tmmalloc_arenaRemaining = 0;
+uint64_t* tmmalloc_arenaStart = 0;
+uint64_t tmmalloc_levelBitmap = 0;
+int tmmalloc_poolId;
+uint64_t tmmalloc_data[256];
+uint64_t* tmmalloc_init();
+void* tmmalloc(size_t size);
+void* tmmalloc_larger(int size, int index0);
+void tmfree(void* ptr);
+void tmmalloc_insertIntoFreeBlocksMap(uint64_t* block, uint64_t size);
+void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index);
+int tmmalloc_sizeClass(uint64_t size) {
+    int log2 = 63 - __builtin_clzll(size);
+    int result = 2 * log2 + (int) (((size) << 1 >> log2) ^ 2);
+    return result > 63 ? 63 : result;
+}
+int tmmalloc_sizeClassRoundUp(uint64_t size) {
+    int log2 = 63 - __builtin_clzll(size);
+    int64_t twoBits = (size >> (log2 - 1)) << (log2 - 1);
+    int result = 2 * log2 + (int) ((size << 1 >> log2) ^ 2);
+    int64_t mask = (twoBits - (int64_t) size) >> 63;
+    return result + (mask & 1);
+}
+void tmmalloc_insertIntoFreeBlocksMap(uint64_t* block, uint64_t size) {
+    int index = tmmalloc_sizeClass(size);
+    block[0] = (size << 1) | 1;
+    ASSERT(block[0] << 1 >> 32 == 0);
+    block[1] = (uint64_t) tmmalloc_data[2 * index];
+    block[2] = (uint64_t) &tmmalloc_data[2 * index];
+    tmmalloc_data[2 * index] = (uint64_t) (block + 1);
+    uint64_t* n = (uint64_t*) block[1];
+    n[1] = (uint64_t) (block + 1);
+    tmmalloc_levelBitmap |= 1ULL << index;
+}
+uint64_t* tmmalloc_addMemory() {
+    for (int i = 0; i < 10; i++) {
+        uint64_t x = (uint64_t) (uintptr_t) malloc(tmmalloc_nextAllocate);
+        if (x != 0) {
+            tmmalloc_data[tmmalloc_poolId++] = x;
+            tmmalloc_insertIntoFreeBlocksMap((uint64_t*) x, (tmmalloc_nextAllocate - 8) >> 3);
+            tmmalloc_nextAllocate *= 2;
+            return (uint64_t*) x;
+        }
+        tmmalloc_nextAllocate /= 2;
+    }
+    printf("Out of memory");
+    exit(-1);
+}
+uint64_t* tmmalloc_init() {
+    tmmalloc_levelBitmap = 0;
+    tmmalloc_arenaStart = 0;
+    tmmalloc_arenaRemaining = 0;
+    for (int i = 0; i < 64; i++) {
+        uintptr_t x = (uintptr_t) &tmmalloc_data[2 * i];
+        tmmalloc_data[2 * i] = (uint64_t) x;
+        tmmalloc_data[2 * i + 1] = (uint64_t) x;
+    }
+    tmmalloc_poolId = 128;
+    return (uint64_t*) tmmalloc_addMemory();
+}
+void tmmalloc_freeAll() {
+    while (tmmalloc_poolId > 128) {
+        free((uint64_t*) tmmalloc_data[--tmmalloc_poolId]);
+    }
+}
+void* tmmalloc(size_t sizeBytes) {
+    if (sizeBytes == 0) return 0;
+    // 8 bytes more for metadata; round up, and convert to i64
+    uint64_t size = (sizeBytes + 8 + 7) >> 3;  
+    if (size < 3) size = 3;
+    int index0;
+    int result = tmmalloc_sizeClassRoundUp(size);
+    index0 = result > 63 ? 63 : result;
+    // return tmmalloc_larger(size, index0); 
+    if ((tmmalloc_levelBitmap & (1ULL << index0)) == 1) {
+        return tmmalloc_larger(size, index0);        
+    }
+    if (size <= 16) {
+        if (tmmalloc_arenaRemaining < size) {
+            if (tmmalloc_arenaRemaining > 0) {
+                ASSERT(tmmalloc_arenaRemaining >= 3);
+                tmmalloc_arenaRemaining = 0;
+                tmfree(tmmalloc_arenaStart + 1);
+            }
+            int s2 = size * 32;
+            int index2 = tmmalloc_sizeClassRoundUp(s2);
+            uint64_t* xx = (uint64_t*) tmmalloc_larger(s2, index2);
+            if (xx != 0) {
+                tmmalloc_arenaStart = xx - 1;
+                tmmalloc_arenaRemaining = tmmalloc_arenaStart[0] >> 1;
+                ASSERT((tmmalloc_arenaStart[0] & 1) == 0);
+                ASSERT(tmmalloc_arenaStart[0] >> 32 == 0);
+            }
+        }
+        if (tmmalloc_arenaRemaining >= size ) {
+            uint64_t* result = tmmalloc_arenaStart;
+            // prev may be free already        
+            uint64_t old = tmmalloc_arenaStart[0] >> 32 << 32;
+            if (tmmalloc_arenaRemaining - size >= 3) {
+                tmmalloc_arenaStart[0] = old | (size << 1);
+                tmmalloc_arenaRemaining -= size;
+                tmmalloc_arenaStart += size;
+                tmmalloc_arenaStart[0] = tmmalloc_arenaRemaining << 1;
+            } else {
+                tmmalloc_arenaStart[0] = old | (tmmalloc_arenaRemaining << 1);
+                tmmalloc_arenaRemaining = 0;
+            }
+            return result + 1;
+        }
+    }
+    return tmmalloc_larger(size, index0);
+}
+void* tmmalloc_larger(int size, int index0) {
+    uint64_t mask = tmmalloc_levelBitmap & (~0ULL << index0);
+    int index = __builtin_ctzll(mask);
+    if (index >= 64) {
+        tmmalloc_addMemory();
+        mask = tmmalloc_levelBitmap & (~0ULL << index0);
+        index = __builtin_ctzll(mask);
+        if (index >= 64) {
+            printf("Out of memory trying to allocate %d; levels %llx\n", size, tmmalloc_levelBitmap) ; 
+            exit(0);
+            return 0;
+        }
+    }
+    uint64_t* block = ((uint64_t*) tmmalloc_data[2 * index]) - 1;
+    uint64_t currentSize = block[0] >> 1;
+    ASSERT((block[0] & 1) == 1);
+    tmmalloc_removeFromFreeBlocksMap(block, index);
+    ASSERT(block[0] >> 32 == 0);
+    if (currentSize >= size + 3) {
+        uint64_t* remaining = block + size;
+        uint64_t remainingSize = currentSize - size;
+        block[currentSize] &= (1L << 32) - 1;
+        block[currentSize] |= remainingSize << 32;
+        ASSERT((block[currentSize] & 1) == 0);
+        ASSERT(block[currentSize] >> 32 != 0);
+        tmmalloc_insertIntoFreeBlocksMap(remaining, remainingSize);
+        block[0] = size << 1;
+        ASSERT(block[size] >> 32 == 0);
+    } else {
+        block[currentSize] &= (1L << 32) - 1;
+        block[0] = currentSize << 1;
+        ASSERT((block[currentSize] & 1) == 0);
+        ASSERT(block[currentSize] >> 32 == 0);
+    }
+    return block + 1;
+}
+void tmfree(void* ptr) {
+    if (ptr == 0) return;
+    uint64_t* block = (uint64_t*) ptr;
+    block -= 1;    
+    uint64_t header = block[0];
+    ASSERT((block[0] & 1) == 0);
+    uint64_t size = (((1L << 32) - 1) & header) >> 1;
+    int prevSize = header >> 32;
+    uint64_t* next = block + size;
+    int nextSize = next[0] & ((1L << 32) - 1);
+    if ((nextSize & 1) == 1) {
+        nextSize >>= 1;
+        int index = tmmalloc_sizeClass(nextSize);
+        tmmalloc_removeFromFreeBlocksMap(next, index);
+        size += nextSize;
+    }
+    if (prevSize) {
+        uint64_t* prev = block - prevSize;
+        int index = tmmalloc_sizeClass(prevSize);
+        ASSERT((prev[0] & 1) == 1);
+        tmmalloc_removeFromFreeBlocksMap(prev, index);
+        size += prevSize;
+        block = prev;
+    }
+    block[size] &= (1L << 32) - 1;
+    block[size] |= size << 32;
+    ASSERT((block[size] & 1) == 0);
+    ASSERT(block[size] >> 32 != 0);
+    tmmalloc_insertIntoFreeBlocksMap(block, size);
+}
+void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
+    uint64_t* prev = (uint64_t*) block[2];
+    uint64_t* next = (uint64_t*) block[1];
+    prev[0] = (uint64_t) next;
+    next[1] = (uint64_t) prev;
+    int head = 2 * index;
+    uint64_t a = tmmalloc_data[head];
+    uint64_t b = (uint64_t) &tmmalloc_data[head];
+    long diff = a - b;
+    long mask = ~((diff - 1) >> 63);
+    tmmalloc_levelBitmap &= ~(1ULL << index) | mask;
+}
+// tmmalloc end =============================
+#define _malloc(a)      tmmalloc(a)
+#define _free(a)        tmfree(a)
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _traceMalloc(a)
+#define _traceFree(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
+/* types */
+typedef struct i8_array i8_array;
+struct i8_array;
+typedef struct i32_array i32_array;
+struct i32_array;
+typedef struct int_array int_array;
+struct int_array;
+typedef struct org_bau_BigInt_bigInt org_bau_BigInt_bigInt;
+struct org_bau_BigInt_bigInt;
+typedef struct org_bau_BigInt_str org_bau_BigInt_str;
+struct org_bau_BigInt_str;
+struct i8_array {
+    int32_t len;
+    int8_t* data;
+    int32_t _refCount;
+};
+i8_array* i8_array_new(uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+struct i32_array {
+    int32_t len;
+    int32_t* data;
+    int32_t _refCount;
+};
+i32_array* i32_array_new(uint32_t len) {
+    i32_array* result = _malloc(sizeof(i32_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int32_t) * len);
+    memset(result->data, 0, sizeof(int32_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+struct int_array {
+    int32_t len;
+    int64_t* data;
+    int32_t _refCount;
+};
+int_array* int_array_new(uint32_t len) {
+    int_array* result = _malloc(sizeof(int_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int64_t) * len);
+    memset(result->data, 0, sizeof(int64_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+struct org_bau_BigInt_bigInt {
+    int64_t negative;
+    i32_array* data;
+};
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_new() {
+    org_bau_BigInt_bigInt result;
+    result.negative = 0;
+    result.data = 0;
+    return result;
+}
+struct org_bau_BigInt_str {
+    i8_array* data;
+};
+org_bau_BigInt_str org_bau_BigInt_str_new() {
+    org_bau_BigInt_str result;
+    result.data = 0;
+    return result;
+}
+/* exception types */
+/* global */
+int __argc;
+char **__argv;
+/* functions */
+int32_t i32_1(int64_t x);
+int64_t idiv_2(int64_t a, int64_t b);
+int64_t idx_2(int64_t x, int64_t len);
+int64_t imod_2(int64_t a, int64_t b);
+org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data);
+i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to);
+i32_array* org_bau_BigInt_copyOf_i32_array_i32_2(i32_array* a, int64_t len);
+i8_array* org_bau_BigInt_copyOf_i8_array_i8_2(i8_array* a, int64_t len);
+int64_t org_bau_BigInt_intToStr_4(int64_t n, i8_array* buff, int64_t start, int64_t size);
+org_bau_BigInt_bigInt org_bau_BigInt_multiply_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_multiplySmall_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_multiplyVerySmall_2(int32_t a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value);
+org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t negative);
+int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x);
+org_bau_BigInt_str org_bau_BigInt_str_1(i8_array* data);
+org_bau_BigInt_bigInt org_bau_BigInt_subtract_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+int64_t org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt this);
+int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_bigInt this);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_bigInt this, int64_t n);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt this, int64_t n);
+int64_t org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_bigInt this);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+i8_array* org_bau_BigInt_bigInt_toStr_1(org_bau_BigInt_bigInt this);
+int64_t shiftLeft_2(int64_t a, int64_t b);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
+void i8_array_free(i8_array* x);
+void i32_array_free(i32_array* x);
+void int_array_free(int_array* x);
+void org_bau_BigInt_bigInt_free(org_bau_BigInt_bigInt* x);
+void org_bau_BigInt_bigInt_copy(org_bau_BigInt_bigInt* x);
+void org_bau_BigInt_str_free(org_bau_BigInt_str* x);
+void org_bau_BigInt_str_copy(org_bau_BigInt_str* x);
+void i8_array_free(i8_array* x) {
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void i32_array_free(i32_array* x) {
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void int_array_free(int_array* x) {
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void org_bau_BigInt_bigInt_free(org_bau_BigInt_bigInt* x) {
+    _decUse(x->data, i32_array);
+}
+void org_bau_BigInt_bigInt_copy(org_bau_BigInt_bigInt* x) {
+    _incUse(x->data);
+}
+void org_bau_BigInt_str_free(org_bau_BigInt_str* x) {
+    _decUse(x->data, i8_array);
+}
+void org_bau_BigInt_str_copy(org_bau_BigInt_str* x) {
+    _incUse(x->data);
+}
+i8_array* str_const(char* data, uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    result->len = len;
+    result->_refCount = INT32_MAX;
+    result->data = (int8_t*) data;
+    return result;
+}
+i8_array* string_1016;
+i8_array* string_1017;
+i8_array* string_1018;
+i8_array* string_1019;
+i8_array* string_1020;
+i8_array* string_1021;
+i8_array* string_1022;
+i8_array* string_1023;
+i8_array* string_1024;
+i8_array* string_1025;
+i8_array* string_1026;
+i8_array* string_1027;
+i8_array* string_1028;
+i8_array* string_1029;
+i8_array* string_1030;
+i8_array* string_1031;
+i8_array* string_1032;
+i8_array* string_1033;
+i8_array* string_1034;
+i8_array* string_1035;
+i8_array* string_1036;
+i8_array* string_1037;
+i8_array* string_1038;
+i8_array* string_1039;
+int64_t KARATSUBA_LIMIT;
+int64_t I32_MIN_VALUE;
+int64_t I32_MAX_VALUE;
+int64_t INT_MIN_VALUE;
+int32_t i32_1(int64_t x) {
+    return x;
+}
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    return arrayOutOfBounds(x, len);
+}
+int64_t imod_2(int64_t a, int64_t b) {
+    if (b != 0) return a % b;
+    return 0;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b) {
+    if (a->len < b->len) {
+        _incUseStack(a);
+        i32_array* temp = a;
+        _incUseStack(b);
+        a = b;
+        _incUseStack(temp);
+        b = temp;
+        _decUseStack(temp, i32_array);
+    }
+    i32_array* result = org_bau_BigInt_copyOf_i32_array_i32_2(a, a->len);
+    int64_t carry = 0;
+    if (a->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                int64_t x = result->data[idx_2(i, result->len)] & 4294967295;
+                int64_t _t0 = 0;
+                if (i >= b->len) {
+                    _t0 = 0;
+                } else {
+                    _t0 = b->data[idx_2(i, b->len)] & 4294967295;
+                }
+                int64_t y = _t0;
+                int64_t z = ( x + y ) + carry;
+                int32_t _t1 = i32_1(z);
+                result->data[idx_2(i, result->len)] = _t1;
+                carry = shiftRight_int_2(z, 32);
+                int64_t _next = i + 1;
+                if (_next >= a->len) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    if (carry == 0) {
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_1(result);
+        _decUseStack(result, i32_array);
+        return _t2;
+    }
+    i32_array* r2 = org_bau_BigInt_copyOf_i32_array_i32_2(result, result->len + 1);
+    r2->data[idx_2(r2->len - 1, r2->len)] = 1;
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_1(r2);
+    _decUseStack(r2, i32_array);
+    _decUseStack(result, i32_array);
+    return _t3;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data) {
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_new();
+    _t0.negative = 0;
+    _incUseStack(data);
+    _decUse(_t0.data, i32_array);
+    _t0.data = data;
+    return _t0;
+}
+i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to) {
+    _incUseStack(a);
+    int64_t len = to - from;
+    i32_array* _t0 = i32_array_new(len);
+    _incUseStack(_t0);
+    i32_array* x = _t0;
+    int64_t i = 0;
+    while (1 == 1) {
+        int64_t _t1 = ( i + from ) < to;
+        if (_t1) {
+            int64_t _t2 = i < a->len;
+            _t1 = _t2;
+        }
+        if (!(_t1)) {
+            break;
+        }
+        x->data[idx_2(i, x->len)] = a->data[idx_2(i + from, a->len)];
+        i += 1;
+    }
+    _decUseStack(_t0, i32_array);
+    _decUseStack(a, i32_array);
+    return x;
+}
+i32_array* org_bau_BigInt_copyOf_i32_array_i32_2(i32_array* a, int64_t len) {
+    _incUseStack(a);
+    i32_array* _t0 = i32_array_new(len);
+    _incUseStack(_t0);
+    i32_array* x = _t0;
+    int64_t i = 0;
+    while (1 == 1) {
+        int64_t _t1 = i < len;
+        if (_t1) {
+            int64_t _t2 = i < a->len;
+            _t1 = _t2;
+        }
+        if (!(_t1)) {
+            break;
+        }
+        x->data[idx_2(i, x->len)] = a->data[idx_2(i, a->len)];
+        i += 1;
+    }
+    _decUseStack(_t0, i32_array);
+    _decUseStack(a, i32_array);
+    return x;
+}
+i8_array* org_bau_BigInt_copyOf_i8_array_i8_2(i8_array* a, int64_t len) {
+    _incUseStack(a);
+    i8_array* _t0 = i8_array_new(len);
+    _incUseStack(_t0);
+    i8_array* x = _t0;
+    int64_t i = 0;
+    while (1 == 1) {
+        int64_t _t1 = i < len;
+        if (_t1) {
+            int64_t _t2 = i < a->len;
+            _t1 = _t2;
+        }
+        if (!(_t1)) {
+            break;
+        }
+        x->data[idx_2(i, x->len)] = a->data[idx_2(i, a->len)];
+        i += 1;
+    }
+    _decUseStack(_t0, i8_array);
+    _decUseStack(a, i8_array);
+    return x;
+}
+int64_t org_bau_BigInt_intToStr_4(int64_t n, i8_array* buff, int64_t start, int64_t size) {
+    int64_t i = 0;
+    while (i < size) {
+        buff->data[idx_2(start + i, buff->len)] = 48 + (imod_2(n, 10));
+        n = idiv_2(n, 10);
+        i += 1;
+    }
+    int64_t _r0 = i + start;
+    return _r0;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_multiply_2(i32_array* a, i32_array* b) {
+    if (a->len < b->len) {
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_multiply_2(b, a);
+        return _t0;
+    }
+    int64_t _t1 = a->len < 100;
+    if (!(_t1)) {
+        int64_t _t2 = b->len < 100;
+        _t1 = _t2;
+    }
+    if (_t1) {
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_multiplySmall_2(a, b);
+        return _t3;
+    }
+    int64_t half = idiv_2(a->len, 2);
+    org_bau_BigInt_bigInt a0 = org_bau_BigInt_bigInt_1(a);
+    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_shiftRight_2(a0, half * 32);
+    org_bau_BigInt_bigInt_copy(&_t4);
+    a0 = _t4;
+    i32_array* _t5 = org_bau_BigInt_copyOf_i32_array_i32_2(a, half);
+    org_bau_BigInt_bigInt a1 = org_bau_BigInt_newBigIntShorten_2(_t5, 0);
+    org_bau_BigInt_bigInt b0 = org_bau_BigInt_bigInt_1(b);
+    org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_shiftRight_2(b0, half * 32);
+    org_bau_BigInt_bigInt_copy(&_t6);
+    b0 = _t6;
+    i32_array* _t7 = org_bau_BigInt_copyOf_i32_array_i32_2(b, half);
+    org_bau_BigInt_bigInt b1 = org_bau_BigInt_newBigIntShorten_2(_t7, 0);
+    org_bau_BigInt_bigInt z0 = org_bau_BigInt_bigInt_multiply_2(a0, b0);
+    org_bau_BigInt_bigInt z1 = org_bau_BigInt_bigInt_add_2(a0, a1);
+    org_bau_BigInt_bigInt _t8 = org_bau_BigInt_bigInt_add_2(b0, b1);
+    org_bau_BigInt_bigInt _t9 = org_bau_BigInt_bigInt_multiply_2(z1, _t8);
+    org_bau_BigInt_bigInt_copy(&_t9);
+    z1 = _t9;
+    org_bau_BigInt_bigInt z2 = org_bau_BigInt_bigInt_multiply_2(a1, b1);
+    org_bau_BigInt_bigInt result = org_bau_BigInt_bigInt_shiftLeft_2(z0, half * 64);
+    org_bau_BigInt_bigInt temp = org_bau_BigInt_bigInt_subtract_2(z1, z0);
+    org_bau_BigInt_bigInt _t10 = org_bau_BigInt_bigInt_subtract_2(temp, z2);
+    org_bau_BigInt_bigInt_copy(&_t10);
+    temp = _t10;
+    org_bau_BigInt_bigInt _t11 = org_bau_BigInt_bigInt_shiftLeft_2(temp, half * 32);
+    org_bau_BigInt_bigInt_copy(&_t11);
+    temp = _t11;
+    org_bau_BigInt_bigInt _t12 = org_bau_BigInt_bigInt_add_2(result, temp);
+    org_bau_BigInt_bigInt_copy(&_t12);
+    result = _t12;
+    org_bau_BigInt_bigInt _t13 = org_bau_BigInt_bigInt_add_2(result, z2);
+    org_bau_BigInt_bigInt_copy(&_t13);
+    result = _t13;
+    org_bau_BigInt_bigInt_free(&_t13);
+    org_bau_BigInt_bigInt_free(&_t12);
+    org_bau_BigInt_bigInt_free(&_t11);
+    org_bau_BigInt_bigInt_free(&_t10);
+    org_bau_BigInt_bigInt_free(&temp);
+    org_bau_BigInt_bigInt_free(&z2);
+    org_bau_BigInt_bigInt_free(&_t9);
+    org_bau_BigInt_bigInt_free(&_t8);
+    org_bau_BigInt_bigInt_free(&z1);
+    org_bau_BigInt_bigInt_free(&z0);
+    org_bau_BigInt_bigInt_free(&b1);
+    _decUseStack(_t7, i32_array);
+    org_bau_BigInt_bigInt_free(&_t6);
+    org_bau_BigInt_bigInt_free(&b0);
+    org_bau_BigInt_bigInt_free(&a1);
+    _decUseStack(_t5, i32_array);
+    org_bau_BigInt_bigInt_free(&_t4);
+    org_bau_BigInt_bigInt_free(&a0);
+    return result;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_multiplySmall_2(i32_array* a, i32_array* b) {
+    if (a->len == 1) {
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_multiplyVerySmall_2(a->data[idx_2(0, a->len)], b);
+        return _t0;
+    } else if (b->len == 1) {
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_multiplyVerySmall_2(b->data[idx_2(0, b->len)], a);
+        return _t1;
+    }
+    i32_array* _t2 = i32_array_new(a->len + b->len);
+    _incUseStack(_t2);
+    i32_array* result = _t2;
+    if (a->len > 0) {
+        while (1 == 1) {
+            int64_t ai = 0;
+            while (1) {
+                int64_t ax = a->data[ai] & 4294967295;
+                int64_t carry = 0;
+                int32_t i = i32_1(ai);
+                if (b->len > 0) {
+                    while (1 == 1) {
+                        int64_t bi = 0;
+                        while (1) {
+                            int64_t bx = b->data[bi] & 4294967295;
+                            int64_t z = ( ax * bx ) + (result->data[idx_2(i, result->len)] & 4294967295) + carry;
+                            int32_t _t3 = i32_1(z);
+                            result->data[idx_2(i, result->len)] = _t3;
+                            carry = shiftRight_int_2(z, 32);
+                            i += 1;
+                            int64_t _next = bi + 1;
+                            if (_next >= b->len) {
+                                break;
+                            }
+                            bi = _next;
+                        }
+                        break;
+                    }
+                }
+                while (carry > 0) {
+                    int64_t z = result->data[idx_2(i, result->len)] + carry;
+                    int32_t _t4 = i32_1(z);
+                    result->data[idx_2(i, result->len)] = _t4;
+                    carry = shiftRight_int_2(z, 32);
+                    i += 1;
+                }
+                int64_t _next = ai + 1;
+                if (_next >= a->len) {
+                    break;
+                }
+                ai = _next;
+            }
+            break;
+        }
+    }
+    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    _decUseStack(result, i32_array);
+    _decUseStack(_t2, i32_array);
+    return _t5;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_multiplyVerySmall_2(int32_t a, i32_array* b) {
+    if (a == 1) {
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_1(b);
+        return _t0;
+    }
+    i32_array* _t1 = i32_array_new(b->len + 1);
+    _incUseStack(_t1);
+    i32_array* result = _t1;
+    int64_t ax = a & 4294967295;
+    int64_t carry = 0;
+    int64_t i = 0;
+    int64_t bi = 0;
+    while (bi < b->len) {
+        int64_t bx = b->data[bi] & 4294967295;
+        int64_t z = ( ax * bx ) + (result->data[idx_2(i, result->len)] & 4294967295) + carry;
+        int32_t _t2 = i32_1(z);
+        result->data[idx_2(i, result->len)] = _t2;
+        carry = shiftRight_int_2(z, 32);
+        bi += 1;
+        i += 1;
+    }
+    while (carry > 0) {
+        int64_t z = result->data[idx_2(i, result->len)] + carry;
+        int32_t _t3 = i32_1(z);
+        result->data[idx_2(i, result->len)] = _t3;
+        carry = shiftRight_int_2(z, 32);
+        i += 1;
+    }
+    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    _decUseStack(result, i32_array);
+    _decUseStack(_t1, i32_array);
+    return _t4;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
+    if (value == 0) {
+        i32_array* _t0 = i32_array_new(0);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_1(_t0);
+        _decUseStack(_t0, i32_array);
+        return _t1;
+    } else if (value < 0) {
+        if (value >= -2147483648) {
+            i32_array* _t2 = i32_array_new(1);
+            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t2);
+            x.data->data[idx_2(0, x.data->len)] = - value;
+            x.negative = 1;
+            _decUseStack(_t2, i32_array);
+            return x;
+        } else if (value > (-9223372036854775807LL-1LL)) {
+            i32_array* _t3 = i32_array_new(2);
+            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t3);
+            x.data->data[idx_2(0, x.data->len)] = - value;
+            x.data->data[idx_2(1, x.data->len)] = shiftRight_int_2(- value, 32);
+            x.negative = 1;
+            _decUseStack(_t3, i32_array);
+            return x;
+        } else {
+            i32_array* _t4 = i32_array_new(2);
+            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t4);
+            x.data->data[idx_2(0, x.data->len)] = 0;
+            x.data->data[idx_2(1, x.data->len)] = 0x80000000;
+            x.negative = 1;
+            _decUseStack(_t4, i32_array);
+            return x;
+        }
+    } else {
+        if (value <= 4294967295) {
+            i32_array* _t5 = i32_array_new(1);
+            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t5);
+            x.data->data[idx_2(0, x.data->len)] = value;
+            _decUseStack(_t5, i32_array);
+            return x;
+        } else {
+            i32_array* _t6 = i32_array_new(2);
+            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t6);
+            x.data->data[idx_2(0, x.data->len)] = value;
+            x.data->data[idx_2(1, x.data->len)] = shiftRight_int_2(value, 32);
+            _decUseStack(_t6, i32_array);
+            return x;
+        }
+    }
+}
+org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t negative) {
+    int32_t newLen = data->len;
+    while (1 == 1) {
+        int64_t _t0 = newLen > 0;
+        if (_t0) {
+            int64_t _t1 = data->data[newLen - 1] == 0;
+            _t0 = _t1;
+        }
+        if (!(_t0)) {
+            break;
+        }
+        newLen -= 1;
+    }
+    if (newLen == 0) {
+        negative = 0;
+    }
+    i32_array* _t2 = NULL;
+    if (newLen == data->len) {
+        _incUseStack(data);
+        _decUseStack(_t2, i32_array);
+        _t2 = data;
+    } else {
+        _decUseStack(_t2, i32_array);
+        _t2 = org_bau_BigInt_copyOf_i32_array_i32_2(data, newLen);
+    }
+    _incUseStack(_t2);
+    i32_array* d2 = _t2;
+    org_bau_BigInt_bigInt result = org_bau_BigInt_bigInt_1(d2);
+    result.negative = negative;
+    _decUseStack(d2, i32_array);
+    _decUseStack(_t2, i32_array);
+    return result;
+}
+int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x) {
+    return x == 0 ? 64 : __builtin_clzll(x);
+    if (x <= 0) {
+        int64_t _t0 = 0;
+        if (x == 0) {
+            _t0 = 32;
+        } else {
+            _t0 = 0;
+        }
+        return _t0;
+    }
+    int64_t n = 63;
+    int64_t shift = 32;
+    while (shift > 0) {
+        if (x >= ( shiftLeft_2(1, shift) )) {
+            n -= shift;
+            x >>= shift;
+        }
+        shift >>= 1;
+    }
+    return n;
+}
+org_bau_BigInt_str org_bau_BigInt_str_1(i8_array* data) {
+    org_bau_BigInt_str _t1 = org_bau_BigInt_str_new();
+    _incUseStack(data);
+    _decUse(_t1.data, i8_array);
+    _t1.data = data;
+    return _t1;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_subtract_2(i32_array* a, i32_array* b) {
+    i32_array* result = org_bau_BigInt_copyOf_i32_array_i32_2(a, a->len);
+    int64_t carry = 0;
+    if (a->len > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                int64_t x = result->data[idx_2(i, result->len)] & 4294967295;
+                int64_t y = 0;
+                if (i < b->len) {
+                    y = b->data[i] & 4294967295;
+                }
+                int64_t z = ( x - y ) - carry;
+                carry = (shiftRight_int_2(z, 63)) & 1;
+                int32_t _t0 = i32_1(z);
+                result->data[idx_2(i, result->len)] = _t0;
+                int64_t _next = i + 1;
+                if (_next >= a->len) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    _decUseStack(result, i32_array);
+    return _t1;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt_copy(&other);
+    int64_t _t0 = org_bau_BigInt_bigInt_len_1(this);
+    int64_t _t1 = org_bau_BigInt_bigInt_len_1(other);
+    if (_t0 == 0) {
+        org_bau_BigInt_bigInt_free(&this);
+        return other;
+    } else if (_t1 == 0) {
+        org_bau_BigInt_bigInt_free(&other);
+        return this;
+    }
+    if (this.negative) {
+        if (other.negative) {
+            org_bau_BigInt_bigInt _t2 = org_bau_BigInt_add_2(this.data, other.data);
+            org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_negate_1(_t2);
+            org_bau_BigInt_bigInt_free(&_t2);
+            org_bau_BigInt_bigInt_free(&other);
+            org_bau_BigInt_bigInt_free(&this);
+            return _t3;
+        }
+        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(this);
+        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_subtract_2(_t4, other);
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_negate_1(_t5);
+        org_bau_BigInt_bigInt_free(&_t5);
+        org_bau_BigInt_bigInt_free(&_t4);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t6;
+    }
+    if (other.negative) {
+        org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_bigInt_subtract_2(this, _t7);
+        org_bau_BigInt_bigInt_free(&_t7);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t8;
+    }
+    org_bau_BigInt_bigInt _t9 = org_bau_BigInt_add_2(this.data, other.data);
+    org_bau_BigInt_bigInt_free(&other);
+    org_bau_BigInt_bigInt_free(&this);
+    return _t9;
+}
+int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o) {
+    if (this.negative != o.negative) {
+        int64_t _t0 = 0;
+        if (this.negative) {
+            _t0 = -1;
+        } else {
+            _t0 = 1;
+        }
+        return _t0;
+    }
+    if (this.negative) {
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(this);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(o);
+        int64_t _t3 = org_bau_BigInt_bigInt_compareTo_2(_t1, _t2);
+        int64_t _r0 = - _t3;
+        org_bau_BigInt_bigInt_free(&_t2);
+        org_bau_BigInt_bigInt_free(&_t1);
+        return _r0;
+    }
+    int64_t len = org_bau_BigInt_bigInt_len_1(this);
+    int64_t oLen = org_bau_BigInt_bigInt_len_1(o);
+    if (len != oLen) {
+        int64_t _t4 = 0;
+        if (len > oLen) {
+            _t4 = 1;
+        } else {
+            _t4 = -1;
+        }
+        return _t4;
+    }
+    int64_t i = this.data->len - 1;
+    while (i >= 0) {
+        int64_t x = this.data->data[i] & 4294967295;
+        int64_t y = o.data->data[idx_2(i, o.data->len)] & 4294967295;
+        if (x != y) {
+            int64_t _t5 = 0;
+            if (x > y) {
+                _t5 = 1;
+            } else {
+                _t5 = -1;
+            }
+            return _t5;
+        }
+        i -= 1;
+    }
+    return 0;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt_copy(&other);
+    int64_t _t0 = org_bau_BigInt_bigInt_len_1(other);
+    if (_t0 == 0) {
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_newBigInt_1(0);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t1;
+    } else if (this.negative != other.negative) {
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_divide_2(this, _t2);
+        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(_t3);
+        org_bau_BigInt_bigInt_free(&_t3);
+        org_bau_BigInt_bigInt_free(&_t2);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t4;
+    } else if (this.negative) {
+        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_negate_1(this);
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_divide_2(_t5, _t6);
+        org_bau_BigInt_bigInt_free(&_t6);
+        org_bau_BigInt_bigInt_free(&_t5);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t7;
+    }
+    int64_t cmp = org_bau_BigInt_bigInt_compareTo_2(this, other);
+    if (cmp < 0) {
+        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_newBigInt_1(0);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t8;
+    } else if (cmp == 0) {
+        org_bau_BigInt_bigInt _t9 = org_bau_BigInt_newBigInt_1(1);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t9;
+    }
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt remainder = this;
+    org_bau_BigInt_bigInt result = org_bau_BigInt_newBigInt_1(0);
+    org_bau_BigInt_bigInt_copy(&other);
+    org_bau_BigInt_bigInt shifted = other;
+    int64_t shiftCount = 0;
+    int64_t shiftedLen = org_bau_BigInt_bigInt_len_1(shifted);
+    int64_t len = org_bau_BigInt_bigInt_len_1(remainder);
+    if (( len - shiftedLen ) > 1) {
+        org_bau_BigInt_bigInt _t10 = org_bau_BigInt_bigInt_shiftLeft_2(shifted, ( len - shiftedLen ) - 1);
+        org_bau_BigInt_bigInt_copy(&_t10);
+        shifted = _t10;
+        shiftCount = ( len - shiftedLen ) - 1;
+        org_bau_BigInt_bigInt_free(&_t10);
+    }
+    while (1 == 1) {
+        int64_t _t11 = org_bau_BigInt_bigInt_compareTo_2(remainder, other);
+        if (!(( _t11 >= 0 ))) {
+            break;
+        }
+        org_bau_BigInt_bigInt _t12 = org_bau_BigInt_newBigInt_1(1);
+        org_bau_BigInt_bigInt _t13 = org_bau_BigInt_bigInt_shiftLeft_2(_t12, shiftCount);
+        org_bau_BigInt_bigInt _t14 = org_bau_BigInt_bigInt_add_2(result, _t13);
+        org_bau_BigInt_bigInt_copy(&_t14);
+        result = _t14;
+        org_bau_BigInt_bigInt _t15 = org_bau_BigInt_bigInt_subtract_2(remainder, shifted);
+        org_bau_BigInt_bigInt_copy(&_t15);
+        remainder = _t15;
+        while (1 == 1) {
+            int64_t _t16 = shiftCount > 0;
+            if (_t16) {
+                int64_t _t17 = org_bau_BigInt_bigInt_compareTo_2(shifted, remainder) >= 0;
+                _t16 = _t17;
+            }
+            if (!(_t16)) {
+                break;
+            }
+            org_bau_BigInt_bigInt _t18 = org_bau_BigInt_bigInt_shiftRight_2(shifted, 1);
+            org_bau_BigInt_bigInt_copy(&_t18);
+            shifted = _t18;
+            shiftCount -= 1;
+            org_bau_BigInt_bigInt_free(&_t18);
+        }
+        org_bau_BigInt_bigInt_free(&_t15);
+        org_bau_BigInt_bigInt_free(&_t14);
+        org_bau_BigInt_bigInt_free(&_t13);
+        org_bau_BigInt_bigInt_free(&_t12);
+    }
+    org_bau_BigInt_bigInt_free(&shifted);
+    org_bau_BigInt_bigInt_free(&remainder);
+    org_bau_BigInt_bigInt_free(&other);
+    org_bau_BigInt_bigInt_free(&this);
+    return result;
+}
+int64_t org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt this) {
+    int64_t _t0 = org_bau_BigInt_bigInt_signum_1(this);
+    int64_t _t1 = 0;
+    if (this.data->len == 0) {
+        _t1 = 0;
+    } else {
+        _t1 = this.data->data[idx_2(0, this.data->len)] & 4294967295;
+    }
+    int64_t _r0 = _t0 * _t1;
+    return _r0;
+}
+int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this) {
+    if (!(this.data->len)) {
+        return 0;
+    }
+    int64_t _t0 = org_bau_BigInt_numberOfLeadingZeros_1(this.data->data[idx_2(this.data->len - 1, this.data->len)] & 4294967295);
+    int64_t lastLen = 64 - _t0;
+    int64_t _r0 = (this.data->len - 1) * 32 + lastLen;
+    return _r0;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt_copy(&other);
+    int64_t thisLen = org_bau_BigInt_bigInt_len_1(this);
+    int64_t otherLen = org_bau_BigInt_bigInt_len_1(other);
+    if (thisLen == 0) {
+        org_bau_BigInt_bigInt_free(&other);
+        return this;
+    } else if (otherLen == 0) {
+        org_bau_BigInt_bigInt_free(&this);
+        return other;
+    }
+    if (this.negative != other.negative) {
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_multiply_2(this, _t0);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(_t1);
+        org_bau_BigInt_bigInt_free(&_t1);
+        org_bau_BigInt_bigInt_free(&_t0);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t2;
+    }
+    if (thisLen > otherLen) {
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiply_2(other, this);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t3;
+    } else if (thisLen == 1) {
+        if (this.negative) {
+            org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(other);
+            org_bau_BigInt_bigInt_free(&other);
+            org_bau_BigInt_bigInt_free(&this);
+            return _t4;
+        }
+        org_bau_BigInt_bigInt_free(&this);
+        return other;
+    }
+    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_multiply_2(this.data, other.data);
+    org_bau_BigInt_bigInt_free(&other);
+    org_bau_BigInt_bigInt_free(&this);
+    return _t5;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_bigInt this) {
+    org_bau_BigInt_bigInt_copy(&this);
+    if (this.data->len == 0) {
+        return this;
+    }
+    org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(this.data);
+    x.negative = !(this.negative);
+    org_bau_BigInt_bigInt_free(&this);
+    return x;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_bigInt this, int64_t n) {
+    org_bau_BigInt_bigInt_copy(&this);
+    int64_t len = org_bau_BigInt_bigInt_len_1(this);
+    if (len <= 0) {
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_newBigInt_1(0);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t0;
+    }
+    int64_t len2 = len + n;
+    i32_array* _t1 = i32_array_new(idiv_2((len2 + 31), 32));
+    _incUseStack(_t1);
+    i32_array* data2 = _t1;
+    int64_t carry = 0;
+    int64_t i = 0;
+    while (i < len) {
+        int64_t old = this.data->data[idx_2(shiftRight_int_2(i, 5), this.data->len)] & 4294967295;
+        int32_t _t2 = i32_1((shiftLeft_2(old, (n & 31))) | carry);
+        data2->data[idx_2(shiftRight_int_2((i + n), 5), data2->len)] = _t2;
+        carry = shiftRight_int_2(old, (32 - (n & 31)));
+        i += 32;
+    }
+    data2->data[idx_2(data2->len - 1, data2->len)] |= carry;
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_newBigIntShorten_2(data2, this.negative);
+    _decUseStack(data2, i32_array);
+    _decUseStack(_t1, i32_array);
+    org_bau_BigInt_bigInt_free(&this);
+    return _t3;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt this, int64_t n) {
+    org_bau_BigInt_bigInt_copy(&this);
+    int64_t _t0 = org_bau_BigInt_bigInt_len_1(this);
+    int64_t len2 = _t0 - n;
+    if (len2 <= 0) {
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_newBigInt_1(0);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t1;
+    }
+    i32_array* data2 = org_bau_BigInt_copyOfRange_i32_array_i32_3(this.data, idiv_2(n, 32), this.data->len);
+    int64_t carry = 0;
+    int64_t i = data2->len - 1;
+    while (i >= 0) {
+        int64_t x = data2->data[i] & 4294967295;
+        int32_t _t2 = i32_1(shiftRight_int_2((carry | x), (n & 31)));
+        data2->data[i] = _t2;
+        carry = shiftLeft_2(x, 32);
+        i -= 1;
+    }
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_newBigIntShorten_2(data2, this.negative);
+    _decUseStack(data2, i32_array);
+    org_bau_BigInt_bigInt_free(&this);
+    return _t3;
+}
+int64_t org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_bigInt this) {
+    if (this.data->len == 0) {
+        return 0;
+    } else if (this.negative) {
+        return -1;
+    }
+    return 1;
+}
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt_copy(&other);
+    int64_t _t0 = org_bau_BigInt_bigInt_len_1(this);
+    int64_t _t2 = org_bau_BigInt_bigInt_len_1(other);
+    if (_t0 == 0) {
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t1;
+    } else if (_t2 == 0) {
+        org_bau_BigInt_bigInt_free(&other);
+        return this;
+    }
+    if (this.negative) {
+        if (!(other.negative)) {
+            org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_negate_1(this);
+            org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_add_2(_t3, other);
+            org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_negate_1(_t4);
+            org_bau_BigInt_bigInt_free(&_t4);
+            org_bau_BigInt_bigInt_free(&_t3);
+            org_bau_BigInt_bigInt_free(&other);
+            org_bau_BigInt_bigInt_free(&this);
+            return _t5;
+        }
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_negate_1(this);
+        org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_bigInt_subtract_2(_t6, _t7);
+        org_bau_BigInt_bigInt _t9 = org_bau_BigInt_bigInt_negate_1(_t8);
+        org_bau_BigInt_bigInt_free(&_t8);
+        org_bau_BigInt_bigInt_free(&_t7);
+        org_bau_BigInt_bigInt_free(&_t6);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t9;
+    }
+    if (other.negative) {
+        org_bau_BigInt_bigInt _t10 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t11 = org_bau_BigInt_bigInt_add_2(this, _t10);
+        org_bau_BigInt_bigInt_free(&_t10);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t11;
+    }
+    int64_t _t12 = org_bau_BigInt_bigInt_compareTo_2(this, other);
+    if (_t12 < 0) {
+        org_bau_BigInt_bigInt _t13 = org_bau_BigInt_bigInt_subtract_2(other, this);
+        org_bau_BigInt_bigInt _t14 = org_bau_BigInt_bigInt_negate_1(_t13);
+        org_bau_BigInt_bigInt_free(&_t13);
+        org_bau_BigInt_bigInt_free(&other);
+        org_bau_BigInt_bigInt_free(&this);
+        return _t14;
+    }
+    org_bau_BigInt_bigInt _t15 = org_bau_BigInt_subtract_2(this.data, other.data);
+    org_bau_BigInt_bigInt_free(&other);
+    org_bau_BigInt_bigInt_free(&this);
+    return _t15;
+}
+i8_array* org_bau_BigInt_bigInt_toStr_1(org_bau_BigInt_bigInt this) {
+    org_bau_BigInt_bigInt_copy(&this);
+    org_bau_BigInt_bigInt n = this;
+    i8_array* _t0 = i8_array_new(50);
+    org_bau_BigInt_str buff = org_bau_BigInt_str_1(_t0);
+    int64_t start = 0;
+    if (this.negative) {
+        buff.data->data[idx_2(0, buff.data->len)] = 45;
+        start = 1;
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(n);
+        org_bau_BigInt_bigInt_copy(&_t1);
+        n = _t1;
+        org_bau_BigInt_bigInt_free(&_t1);
+    }
+    int64_t i = start;
+    org_bau_BigInt_bigInt group = org_bau_BigInt_newBigInt_1(1000000000);
+    while (1) {
+        org_bau_BigInt_bigInt next = org_bau_BigInt_bigInt_divide_2(n, group);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_multiply_2(next, group);
+        org_bau_BigInt_bigInt remainder = org_bau_BigInt_bigInt_subtract_2(n, _t2);
+        int64_t val = org_bau_BigInt_bigInt_intValue_1(remainder);
+        if (( i + 9 ) >= buff.data->len) {
+            i8_array* _t3 = org_bau_BigInt_copyOf_i8_array_i8_2(buff.data, buff.data->len * 2);
+            org_bau_BigInt_str _t4 = org_bau_BigInt_str_1(_t3);
+            org_bau_BigInt_str_copy(&_t4);
+            buff = _t4;
+            org_bau_BigInt_str_free(&_t4);
+            _decUseStack(_t3, i8_array);
+        }
+        int64_t _t5 = org_bau_BigInt_intToStr_4(val, buff.data, i, 9);
+        i = _t5;
+        org_bau_BigInt_bigInt_copy(&next);
+        n = next;
+        int64_t _t6 = org_bau_BigInt_bigInt_signum_1(n);
+        if (_t6 == 0) {
+            org_bau_BigInt_bigInt_free(&remainder);
+            org_bau_BigInt_bigInt_free(&_t2);
+            org_bau_BigInt_bigInt_free(&next);
+            break;
+        }
+        org_bau_BigInt_bigInt_free(&remainder);
+        org_bau_BigInt_bigInt_free(&_t2);
+        org_bau_BigInt_bigInt_free(&next);
+    }
+    while (1 == 1) {
+        int64_t _t7 = i > ( start + 1 );
+        if (_t7) {
+            int64_t _t8 = buff.data->data[idx_2(i - 1, buff.data->len)] == 48;
+            _t7 = _t8;
+        }
+        if (!(_t7)) {
+            break;
+        }
+        i -= 1;
+    }
+    int64_t end = i;
+    while (i > start) {
+        i -= 1;
+        int8_t temp = buff.data->data[idx_2(i, buff.data->len)];
+        buff.data->data[idx_2(i, buff.data->len)] = buff.data->data[idx_2(start, buff.data->len)];
+        buff.data->data[idx_2(start, buff.data->len)] = temp;
+        start += 1;
+    }
+    i8_array* _t9 = org_bau_BigInt_copyOf_i8_array_i8_2(buff.data, end);
+    org_bau_BigInt_bigInt_free(&group);
+    org_bau_BigInt_str_free(&buff);
+    _decUseStack(_t0, i8_array);
+    org_bau_BigInt_bigInt_free(&n);
+    return _t9;
+}
+int64_t shiftLeft_2(int64_t a, int64_t b) {
+    return a << b;
+}
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
+}
+int main(int _argc, char *_argv[]) {
+    tmmalloc_init();
+    __argc = _argc;
+    __argv = _argv;
+    string_1016 = str_const("assertion failed: ", 18);
+    string_1017 = str_const("intValue(add(newBigInt(123), newBigInt(456))) = 579", 51);
+    string_1018 = str_const("intValue(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) = 579", 100);
+    string_1019 = str_const("intValue(subtract(newBigInt(1000), newBigInt(250))) = 750", 57);
+    string_1020 = str_const("intValue(subtract(newBigInt(250), newBigInt(1000))) = -750", 58);
+    string_1021 = str_const("intValue(multiply(newBigInt(20), newBigInt(5))) = 100", 53);
+    string_1022 = str_const("intValue(shiftRight(multiply(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) = 100", 102);
+    string_1023 = str_const("intValue(divide(newBigInt(100), newBigInt(5))) = 20", 51);
+    string_1024 = str_const("intValue(divide(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) = 20", 83);
+    string_1025 = str_const("intValue(shiftLeft(newBigInt(1), 3)) = 8", 40);
+    string_1026 = str_const("intValue(shiftRight(newBigInt(16), 2)) = 4", 42);
+    string_1027 = str_const("intValue(negate(newBigInt(50))) = -50", 37);
+    string_1028 = str_const("intValue(negate(negate(newBigInt(50)))) = 50", 44);
+    string_1029 = str_const("compareTo(newBigInt(10), newBigInt(20)) = -1", 44);
+    string_1030 = str_const("compareTo(newBigInt(10), newBigInt(-20)) = 1", 44);
+    string_1031 = str_const("compareTo(newBigInt(10), newBigInt(10)) = 0", 43);
+    string_1032 = str_const("signum(newBigInt(123)) = 1", 26);
+    string_1033 = str_const("signum(newBigInt(0)) = 0", 24);
+    string_1034 = str_const("signum(newBigInt(-123)) = -1", 28);
+    string_1035 = str_const("len(newBigInt(1)) = 1", 21);
+    string_1036 = str_const("len(newBigInt(2)) = 2", 21);
+    string_1037 = str_const("len(newBigInt(255)) = 8", 23);
+    string_1038 = str_const("len(newBigInt(256)) = 9", 23);
+    string_1039 = str_const("len(shiftLeft(newBigInt(256), 100)) = 109", 41);
+    {
+        KARATSUBA_LIMIT = 100;
+        I32_MIN_VALUE = -2147483648;
+        I32_MAX_VALUE = 4294967295;
+        INT_MIN_VALUE = (-9223372036854775807LL-1LL);
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_add_2(org_bau_BigInt_newBigInt_1(123), org_bau_BigInt_newBigInt_1(456))) == 579 ))) {
+        printf("assertion failed: intValue(add(newBigInt(123), newBigInt(456))) = 579\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(123), 100), org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(456), 100)), 100)) == 579 ))) {
+        printf("assertion failed: intValue(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) = 579\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_newBigInt_1(1000), org_bau_BigInt_newBigInt_1(250))) == 750 ))) {
+        printf("assertion failed: intValue(subtract(newBigInt(1000), newBigInt(250))) = 750\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_newBigInt_1(250), org_bau_BigInt_newBigInt_1(1000))) == -750 ))) {
+        printf("assertion failed: intValue(subtract(newBigInt(250), newBigInt(1000))) = -750\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_newBigInt_1(20), org_bau_BigInt_newBigInt_1(5))) == 100 ))) {
+        printf("assertion failed: intValue(multiply(newBigInt(20), newBigInt(5))) = 100\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(20), 100), org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(5), 100)), 200)) == 100 ))) {
+        printf("assertion failed: intValue(shiftRight(multiply(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) = 100\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_newBigInt_1(100), org_bau_BigInt_newBigInt_1(5))) == 20 ))) {
+        printf("assertion failed: intValue(divide(newBigInt(100), newBigInt(5))) = 20\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(100), 100), org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(5), 100))) == 20 ))) {
+        printf("assertion failed: intValue(divide(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) = 20\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(1), 3)) == 8 ))) {
+        printf("assertion failed: intValue(shiftLeft(newBigInt(1), 3)) = 8\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_newBigInt_1(16), 2)) == 4 ))) {
+        printf("assertion failed: intValue(shiftRight(newBigInt(16), 2)) = 4\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_newBigInt_1(50))) == -50 ))) {
+        printf("assertion failed: intValue(negate(newBigInt(50))) = -50\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_newBigInt_1(50)))) == 50 ))) {
+        printf("assertion failed: intValue(negate(negate(newBigInt(50)))) = 50\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_newBigInt_1(10), org_bau_BigInt_newBigInt_1(20)) == -1 ))) {
+        printf("assertion failed: compareTo(newBigInt(10), newBigInt(20)) = -1\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_newBigInt_1(10), org_bau_BigInt_newBigInt_1(-20)) == 1 ))) {
+        printf("assertion failed: compareTo(newBigInt(10), newBigInt(-20)) = 1\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_newBigInt_1(10), org_bau_BigInt_newBigInt_1(10)) == 0 ))) {
+        printf("assertion failed: compareTo(newBigInt(10), newBigInt(10)) = 0\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_newBigInt_1(123)) == 1 ))) {
+        printf("assertion failed: signum(newBigInt(123)) = 1\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_newBigInt_1(0)) == 0 ))) {
+        printf("assertion failed: signum(newBigInt(0)) = 0\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_newBigInt_1(-123)) == -1 ))) {
+        printf("assertion failed: signum(newBigInt(-123)) = -1\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_len_1(org_bau_BigInt_newBigInt_1(1)) == 1 ))) {
+        printf("assertion failed: len(newBigInt(1)) = 1\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_len_1(org_bau_BigInt_newBigInt_1(2)) == 2 ))) {
+        printf("assertion failed: len(newBigInt(2)) = 2\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_len_1(org_bau_BigInt_newBigInt_1(255)) == 8 ))) {
+        printf("assertion failed: len(newBigInt(255)) = 8\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_len_1(org_bau_BigInt_newBigInt_1(256)) == 9 ))) {
+        printf("assertion failed: len(newBigInt(256)) = 9\n");
+    } else {
+    }
+    if (!(( org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_newBigInt_1(256), 100)) == 109 ))) {
+        printf("assertion failed: len(shiftLeft(newBigInt(256), 100)) = 109\n");
+    } else {
+    }
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_newBigInt_1(1234);
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_shiftLeft_2(_t0, 100);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_newBigInt_1(5678);
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_shiftLeft_2(_t2, 100);
+    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_multiply_2(_t1, _t3);
+    i8_array* _t5 = org_bau_BigInt_bigInt_toStr_1(_t4);
+    printf("%.*s\n", _t5->len, _t5->data);
+    _decUseStack(_t5, i8_array);
+    org_bau_BigInt_bigInt_free(&_t4);
+    org_bau_BigInt_bigInt_free(&_t3);
+    org_bau_BigInt_bigInt_free(&_t2);
+    org_bau_BigInt_bigInt_free(&_t1);
+    org_bau_BigInt_bigInt_free(&_t0);
+    _end();
+    return 0;
+}
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+fun newBigInt(value int) bigInt
+create a new bigInt
+
+fun bigInt add(other bigInt) bigInt
+addition
+
+fun bigInt compareTo(o bigInt) int
+compare to another value
+
+fun bigInt divide(other bigInt) bigInt
+division
+
+fun bigInt intValue() int
+get the int value (at most 32 bits)
+
+fun bigInt len() int
+length in bits
+
+fun bigInt multiply(other bigInt) bigInt
+multiplication
+
+fun bigInt multiplyInt(value int) bigInt
+multiply by an integer
+
+fun bigInt negate() bigInt
+negate
+
+fun bigInt shiftLeft(n int) bigInt
+left shift
+
+fun bigInt shiftRight(n int) bigInt
+right shift
+
+fun bigInt signum() int
+get the signum
+
+fun bigInt subtract(other bigInt) bigInt
+subtraction
+
+fun bigInt toStr() i8[]
+convert to string
+
+*/

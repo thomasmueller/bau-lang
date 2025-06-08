@@ -14,7 +14,7 @@ public class Free implements Statement {
     public static final String INC_USE_STACK = "_incUseStack";
     public static final String DEC_USE_STACK = "_decUseStack";
 
-    private final Variable var;
+    final Variable var;
 
     Free(Variable var) {
         this.var = var;
@@ -26,6 +26,9 @@ public class Free implements Statement {
     }
 
     public static StatementResult decRefCount(Variable var, Memory m) {
+        if (var.skipIncrementDecrementRefCount) {
+            return StatementResult.OK;
+        }
         Value val;
         if (var.global) {
             val = m.getGlobal(var.name);
@@ -108,7 +111,11 @@ public class Free implements Statement {
     public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
         if (memoryType == MemoryType.OWNER) {
             if (var.type().memoryType() == MemoryType.OWNER) {
-                set.add(var.type());
+                if (var.skipIncrementDecrementRefCount && var.name.equals("this")) {
+                    // skip the "this" pointer
+                } else {
+                    set.add(var.type());
+                }
             }
         }
     }
@@ -129,6 +136,9 @@ public class Free implements Statement {
 
     @Override
     public String toC() {
+        if (var.skipIncrementDecrementRefCount) {
+            return "";
+        }
         if (var.type().needIncDec()) {
             if (var.type().memoryType() == MemoryType.REF_COUNT) {
                 return DEC_USE_STACK + "(" + var.toC() + ", " + var.type().nameC() +");\n";
