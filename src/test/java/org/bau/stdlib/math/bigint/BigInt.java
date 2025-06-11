@@ -384,23 +384,27 @@ public class BigInt implements Comparable<BigInt> {
         } else if (cmp == 0) {
             return new BigInt(new int[] { 1 }, false);
         }
-        BigInt remainder = this;
+        BigInt rem = this;
+        long x = other.data[other.data.length - 1] & 0xffffffffL;
+        int shiftBoth = 31 + Long.numberOfLeadingZeros(x);
+        rem = rem.shiftLeft(shiftBoth);
+        other = other.shiftLeft(shiftBoth);
         BigInt result = BigInt.valueOf(0);
-        BigInt shifted = other;
-        int shiftCount = 0;
-        int shiftedLen = shifted.len();
-        int len = remainder.len();
-        if (len - shiftedLen > 1) {
-            shifted = shifted.shiftLeft(len - shiftedLen - 1);
-            shiftCount = len - shiftedLen - 1;
-        }
-        while (remainder.compareTo(other) >= 0) {
-            result = result.add(BigInt.valueOf(1).shiftLeft(shiftCount));
-            remainder = remainder.subtract(shifted);
-            while (shiftCount > 0 && shifted.compareTo(remainder) >= 0) {
-                shifted = shifted.shiftRight(1);
-                shiftCount--;
+        int shiftCount = (rem.data.length - other.data.length) * 32;
+        long b = other.data[other.data.length - 1] & 0xffffffffL;
+        BigInt shifted = other.shiftLeft(shiftCount).shiftRight(32);
+        while (rem.compareTo(other) >= 0) {
+            long a = ((long) rem.data[rem.data.length - 1] << 32) | (rem.data[rem.data.length - 2] & 0xffffffffL);
+            long q = Long.divideUnsigned(a, b);
+            BigInt minus = BigInt.valueOf(q).multiply(other).shiftLeft(shiftCount).shiftRight(32);
+            rem = rem.subtract(minus);
+            while (rem.negative) {
+                q--;
+                rem = rem.add(shifted);
             }
+            result = result.add(BigInt.valueOf(q).shiftLeft(shiftCount).shiftRight(32));
+            shiftCount -= 32;
+            shifted = shifted.shiftRight(32);
         }
         return result;
     }

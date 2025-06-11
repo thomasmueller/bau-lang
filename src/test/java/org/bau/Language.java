@@ -5,25 +5,15 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
+
+bug:
 ##
+fun sql(condition int) macro
+    println('where ' condition)
 
-Memory leak if return value is not used.
-Always assign return value of each function to a temp variable?
-
-type Data
-    x int
-
-fun Data inc() Data
-    result : Data()
-    result.x = x + 1
-    return result
-
-fun main()
-    x : Data()
-    x.inc()
-
+id int
+sql(id > 10)
 ##
-
 
 auto-conversion:
 convert<type>To<type>

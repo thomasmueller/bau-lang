@@ -105,10 +105,10 @@ public class While implements Statement {
                 buffContinue.append(Statement.indent(s.toC()));
             }
         }
+        if (continueIdUsed) {
+            buff.append(Statement.indent("continue" + continueId + ":;\n"));
+        }
         if (buffContinue.length() > 0) {
-            if (continueIdUsed) {
-                buff.append(Statement.indent("continue" + continueId + ":;\n"));
-            }
             buff.append(buffContinue);
         }
         buff.append("}\n");

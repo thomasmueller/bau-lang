@@ -181,6 +181,14 @@ public class BigIntTest {
 
     @Test
     public void divideReminder() {
+        BigInt allOnes = BigInt.valueOf(1).shiftLeft(128).subtract(BigInt.valueOf(1));
+        BigInt oneOne = BigInt.valueOf(1).shiftLeft(190);
+        BigInt div = oneOne.divide(allOnes);
+        BigInteger all1 = BigInteger.valueOf(1).shiftLeft(128).subtract(BigInteger.valueOf(1));
+        BigInteger one1 = BigInteger.valueOf(1).shiftLeft(190);
+        BigInteger divExp = one1.divide(all1);
+        assertEquals(divExp.toString(), div.toString());
+
         Random r = new Random(1);
         for (int i = 0; i < 1000; i++) {
             long a = randomLong(r, i);
@@ -228,6 +236,8 @@ public class BigIntTest {
             assertEquals(bi.toString(), bb.toString());
             BigInteger ci;
             BigInt cc;
+            BigInteger di;
+            BigInt dc;
             ci = ai.add(bi);
             cc = aa.add(bb);
             assertEquals(ci.toString(), cc.toString());
@@ -237,6 +247,11 @@ public class BigIntTest {
             ci = ai.multiply(bi);
             cc = aa.multiply(bb);
             assertEquals(ci.toString(), cc.toString());
+            if (bi.signum() != 0) {
+                di = ci.divide(bi);
+                dc = cc.divide(bb);
+                assertEquals(di.toString(), dc.toString());
+            }
         }
     }
 

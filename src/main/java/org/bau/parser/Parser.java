@@ -1210,6 +1210,9 @@ public class Parser {
                 if (targetType != null && targetType != s.value.type()) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                if (s.leftValue instanceof Variable && s.type != null && s.type.isArray()) {
+                    throw syntaxError("Arrays can not be re-assigned to simplify array-bound verification");
+                }
                 if (s.value instanceof NullValue) {
                     // for templates, we want to support assignment to null
                     s.value = left.type().nullExpression();
@@ -1550,6 +1553,10 @@ public class Parser {
                     }
                 }
             }
+        }
+        if (ternary.condition == null) {
+            ternary.condition = new NumberValue(new ValueInt(1), DataType.INT_TYPE, false);
+            ternary.ifTrueStatements.addAll(def.list);
         }
         return ternary;
     }
