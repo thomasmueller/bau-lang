@@ -392,7 +392,6 @@ public class Parser {
         while (text.charAt(pos) != '\n') {
             pos--;
         }
-        int startPos = pos;
         pos++;
         if (pos >= text.length()) {
             return "";
@@ -405,9 +404,6 @@ public class Parser {
                 break;
             }
             read();
-        }
-        if (pos >= text.length()) {
-            System.out.println("?? " + startPos);
         }
         return text.substring(pos, lastPos);
     }

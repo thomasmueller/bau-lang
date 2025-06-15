@@ -101,6 +101,8 @@ public class Operation implements Expression {
                 return new Value.ValueInt(- r.longValue());
             } else if ("not".equals(operator)){
                 return new Value.ValueInt(r.longValue() == 0 ? 1 : 0);
+            } else if ("~".equals(operator)) {
+                return new Value.ValueInt(~r.longValue());
             } else {
                 throw new IllegalStateException("operation " + operator);
             }
@@ -593,17 +595,16 @@ public class Operation implements Expression {
         case "<<":
         case ">>":
             return 50;
+        case "^":
+        case "&":
+        case "|":
+            return 40;
         case "=":
         case "<>":
         case "<=":
         case ">=":
         case "<":
         case ">":
-            return 40;
-        case "^":
-        case "&":
-        case "|":
-            // TODO this is weird, and should result in an error
             return 30;
         case "and":
             return 20;

@@ -49,7 +49,7 @@ fun main()
     assert(newBigInt(255).len() = 8)
     assert(newBigInt(256).len() = 9)
     assert(newBigInt(256).shiftLeft(100).len() = 109)
-    
+    # toStr
     println(newBigInt(1234).shiftLeft(100).multiply(newBigInt(5678).shiftLeft(100)).toStr())
 
 ## Expected

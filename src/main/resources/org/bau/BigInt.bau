@@ -8,10 +8,14 @@ I32_MIN_VALUE : -(1 << 31)
 I32_MAX_VALUE : (1 << 32) - 1
 INT_MIN_VALUE : -(1 << 63)
 
+fun arithmeticRightShift(x int, n int) int
+    native(`return (int64_t) (((uint64_t) x) >> n);`)
+    return (x >> n) | ((0 - (x < 0)) << (64 - n))
+    
 fun numberOfLeadingZeros(x int) int
     native(`return x == 0 ? 64 : __builtin_clzll(x);`)
     if x <= 0
-        return if(x = 0, 32, 0)
+        return if(x = 0, 64, 0)
     n := 63
     shift := 32
     while shift > 0
@@ -21,18 +25,43 @@ fun numberOfLeadingZeros(x int) int
         shift >>= 1
     return n
 
+fun divideUnsigned(dividend int, divisor int) int
+    # From Hacker's Delight
+    if divisor < 0
+        return (dividend & ~(dividend - divisor)) >> 63
+    q : ((dividend >> 1) / divisor) << 1
+    r : dividend - (q * divisor)
+    return q + ((r | ~(r - divisor)) >> 63)
+
+fun compareUnsigned(a int, b int) int
+    a += 0x8000000000000000
+    b += 0x8000000000000000
+    if a = b
+        return 0
+    if a < b
+        return -1
+    return 1
+
 fun copyOf(a i32[], newLen int) i32[]
-    result : i32[newLen]
     copyLen := newLen
     if a.len < newLen
         copyLen = a.len
     native(```
         #include <stdio.h>
-        memcpy(result->data, a->data, copyLen * sizeof(int32_t));
-        _decUseStack(_t0, i32_array);
+        i32_array* result1 = _malloc(sizeof(i32_array));
+        _traceMalloc(array);
+        result1->len = newLen;
+        result1->data = _malloc(sizeof(int32_t) * newLen);
+        if (newLen > copyLen) {
+            memset(result1->data + copyLen, 0, sizeof(int32_t) * (newLen - copyLen));
+        }
+        _traceMalloc(result1->data);
+        result1->_refCount = 1;
+        memcpy(result1->data, a->data, copyLen * sizeof(int32_t));
         _decUseStack(a, i32_array);
-        return result;
+        return result1;
         ```)
+    result : i32[newLen]
     i := 0
     while i < newLen and i < a.len
         result[i] = a[i]
@@ -105,6 +134,8 @@ fun bigInt negate() bigInt
 
 # left shift
 fun bigInt shiftLeft(n int) bigInt
+    if n < 0
+        return shiftRight(-n)
     if data.len = 0
         return newBigInt(0)
     len : len()
@@ -118,6 +149,23 @@ fun bigInt shiftLeft(n int) bigInt
         carry = old >> (32 - (n & 31))
         i += 32
     data2[data2.len - 1] |= carry
+    return newBigIntShorten(data2, negative)
+
+# right shift
+fun bigInt shiftRight(n int) bigInt
+    if n < 0
+        return shiftLeft(-n)
+    len2 : len() - n
+    if len2 <= 0
+        return newBigInt(0)
+    data2 : copyOfRange(data, n / 32, data.len)
+    carry := 0
+    i := data2.len - 1
+    while i >= 0
+        x : data2[i] & 0xffffffff
+        data2[i] = i32((carry | x) >> (n & 31))
+        carry = x << 32
+        i -= 1
     return newBigIntShorten(data2, negative)
 
 # length in bits
@@ -266,7 +314,10 @@ fun multiply(a i32[], b i32[]) bigInt
 fun multiplySmall(a i32, b i32[]) bigInt
     if a = 1
         return bigInt(b)
-    result : copyOf(b, b.len + 1)
+    newSize := b.len
+    if (b[b.len - 1] | a) >> 16 <> 0
+        newSize += 1
+    result : copyOf(b, newSize)
     ax := a & 0xffffffff
     carry := 0
     for i := until(result.len)
@@ -274,6 +325,8 @@ fun multiplySmall(a i32, b i32[]) bigInt
         z : ax * bx + carry
         result[i] = i32(z)
         carry = z >> 32
+    if carry
+        result[result.len - 1] = carry
     return newBigIntShorten(result, 0)
 
 fun multiplyBig(a i32[], b i32[]) bigInt
@@ -314,37 +367,56 @@ fun bigInt divide(other bigInt) bigInt
         return newBigInt(0)
     elif cmp = 0
         return newBigInt(1)
-    remainder := this
-    result := newBigInt(0)
-    shifted := other
-    shiftCount := 0
-    shiftedLen : shifted.len()
-    len : remainder.len()
-    if len - shiftedLen > 1
-        shifted = shifted.shiftLeft(len - shiftedLen - 1)
-        shiftCount = len - shiftedLen - 1
-    while remainder.compareTo(other) >= 0
-        result = result.add(newBigInt(1).shiftLeft(shiftCount))
-        remainder = remainder.subtract(shifted)
-        while shiftCount > 0 and shifted.compareTo(remainder) >= 0
-            shifted = shifted.shiftRight(1)
-            shiftCount -= 1
-    return result
-
-# right shift
-fun bigInt shiftRight(n int) bigInt
-    len2 : len() - n
-    if len2 <= 0
-        return newBigInt(0)
-    data2 : copyOfRange(data, n / 32, data.len)
-    carry := 0
-    i := data2.len - 1
-    while i >= 0
-        x : data2[i] & 0xffffffff
-        data2[i] = i32((carry | x) >> (n & 31))
-        carry = x << 32
-        i -= 1
-    return newBigIntShorten(data2, negative)
+    if data.len > 2 and len() - other.len() < 16
+        # optimization for very small results
+        x : shiftRight(other.len() - 16).intValue()
+        y : other.shiftRight(other.len() - 16).intValue()
+        z : x / y
+        if z = x / (y + 1) and z = x / (y - 1)
+            return newBigInt(z)
+    otherLen : other.len()
+    shift := (32 - otherLen) & 31
+    if otherLen >= 128
+        shift = 32
+    elif otherLen <= 32
+        shift += 32
+    u : this.shiftLeft(shift).data
+    vn : other.shiftLeft(shift).data
+    m : u.len
+    n : vn.len
+    q : i32[m - n + 1]
+    b : 1 << 32
+    un : copyOf(u, u.len + 1)
+    j := m - n
+    while j >= 0
+        aa : ((un[j + n] & 0xffffffff) * b) + (un[j + n - 1] & 0xffffffff)
+        bb : vn[n - 1] & 0xffffffff
+        qhat := divideUnsigned(aa, bb)
+        rhat := aa - qhat * bb
+        while qhat >= b or compareUnsigned(qhat * (vn[n - 2] & 0xffffffff), (rhat * b) + (un[j + n - 2] & 0xffffffff)) > 0
+            qhat -= 1
+            rhat = rhat + (vn[n-1] & 0xffffffff)
+            break rhat >= b
+        carry := 0
+        for i := until(n)
+            p : qhat * (vn[i] & 0xffffffff)
+            t : (un[i + j] & 0xffffffff) - carry - (p & 0xffffffff)
+            un[i + j] = int(t)
+            carry = (p >> 32) - arithmeticRightShift(t, 32)
+        t := (un[j + n] & 0xffffffff) - carry
+        un[j + n] = int(t)
+        q[j] = int(qhat)
+        if t < 0
+            q[j] -= 1
+            break j = 0
+            carry = 0
+            for i := until(n)
+                t = (un[i + j] & 0xffffffff) + (vn[i] & 0xffffffff) + carry
+                un[i + j] = int(t)
+                carry = t >> 32;
+            un[j + n] = int((un[j + n] & 0xffffffff) + carry)
+        j -= 1
+    return bigInt(q)
 
 fun intToStr(n int, buff i8[], start int, size int) int
     i := 0

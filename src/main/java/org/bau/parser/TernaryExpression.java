@@ -112,7 +112,7 @@ public class TernaryExpression implements Expression {
             assign.isConstant = false;
             assign.leftValue = result;
             assign.type = type;
-            assign.value = ifTrue;
+            assign.value = ifTrue.writeStatements(parser, assignment, target);
             ifTrueStatements.add(assign);
         }
         ifStatement.listList.add(ifFalseStatements);
@@ -123,7 +123,7 @@ public class TernaryExpression implements Expression {
             assign.isConstant = false;
             assign.leftValue = result;
             assign.type = type;
-            assign.value = ifFalse;
+            assign.value = ifFalse.writeStatements(parser, assignment, target);
             ifFalseStatements.add(assign);
         }
         target.add(ifStatement);

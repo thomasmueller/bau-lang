@@ -10,7 +10,7 @@ import org.bau.runtime.Value.ValueRef;
 
 public class ArrayAccess implements Expression, LeftValue {
 
-    final Expression base;
+    Expression base;
     Expression arrayIndex;
     final boolean checkBounds;
 
@@ -181,6 +181,7 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
+        base = base.writeStatements(parser, false, target);
         arrayIndex = arrayIndex.writeStatements(parser, false, target);
         return this;
     }

@@ -6,12 +6,13 @@ import java.util.List;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValuePanic;
 import org.bau.runtime.Value.ValueRef;
 import org.bau.runtime.Value.ValueStruct;
 
 public class FieldAccess implements Expression, LeftValue {
 
-    final Expression base;
+    Expression base;
     final String fieldName;
     private Bounds lenBounds;
     final DataType type;
@@ -66,6 +67,9 @@ public class FieldAccess implements Expression, LeftValue {
         }
         if (base.type().isPointer()) {
             v = memory.getHeap(v.longValue());
+        }
+        if (v instanceof ValuePanic) {
+            return v;
         }
         if (!(v instanceof ValueStruct)) {
             throw new IllegalStateException("Expected a struct, got " + v);
@@ -221,6 +225,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
+        base = base.writeStatements(parser, false, target);
         return this;
     }
 

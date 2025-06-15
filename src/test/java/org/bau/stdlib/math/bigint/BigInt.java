@@ -55,6 +55,9 @@ public class BigInt implements Comparable<BigInt> {
     }
 
     public BigInt shiftLeft(int n) {
+        if (n < 0) {
+            return shiftRight(-n);
+        }
         int len = len();
         if (len <= 0) {
             return BigInt.valueOf(0);
@@ -72,6 +75,9 @@ public class BigInt implements Comparable<BigInt> {
     }
 
     public BigInt shiftRight(int n) {
+        if (n < 0) {
+            return shiftLeft(-n);
+        }
         int len2 = len() - n;
         if (len2 <= 0) {
             return BigInt.valueOf(0);
@@ -165,7 +171,12 @@ public class BigInt implements Comparable<BigInt> {
         if (a == 1) {
             return new BigInt(b, false);
         }
-        int[] result = new int[b.length + 1];
+        int newSize = b.length;
+        long last = b[b.length - 1] & 0xffffffff;
+        if (((last | a) >>> 16) != 0) {
+            newSize += 1;
+        }
+        int[] result = new int[newSize];
         long ax = a & 0xffffffffL;
         long carry = 0;
         int i = 0;
@@ -175,10 +186,8 @@ public class BigInt implements Comparable<BigInt> {
             result[i] = (int) z;
             carry = z >>> 32;
         }
-        for (;carry > 0; i++) {
-            long z = result[i] + carry;
-            result[i] = (int) z;
-            carry = z >>> 32;
+        if (carry != 0) {
+            result[result.length - 1] = (int) carry;
         }
         return new BigInt(result, false);
     }
@@ -370,8 +379,33 @@ public class BigInt implements Comparable<BigInt> {
         return subtract(div.multiply(other));
     }
 
+    public static long compareUnsigned(long a, long b) {
+        a += 0x8000000000000000L;
+        b += 0x8000000000000000L;
+        if (a == b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        }
+        return 1;
+    }
+
+    public static long arithmeticRightShift(long x, int n) {
+        // return a >> n;
+        return (x >> n) | ((0 - (x < 0 ? 1 : 0)) << (64 - n));
+    }
+
+    int getShiftedValue(int index, int n) {
+        int bitIndex = (index << 5) + n;
+        int ai = (bitIndex - 1) >>> 5;
+        int bi = ai - 1;
+        long a = ai < 0 || ai >= data.length ? 0 : data[ai] & 0xffffffffL;
+        long b = bi < 0 || bi >= data.length ? 0 : data[bi] & 0xffffffffL;
+        return (int) ((b >>> (32 - (n & 31))) | ((a << (n & 31)) & 0xffffffffL));
+    }
+
     public BigInt divide(BigInt other) {
-        if (other.len() == 0) {
+        if (other.data.length == 0) {
             return null;
         } else if (negative != other.negative) {
             return divide(other.negate()).negate();
@@ -384,29 +418,115 @@ public class BigInt implements Comparable<BigInt> {
         } else if (cmp == 0) {
             return new BigInt(new int[] { 1 }, false);
         }
-        BigInt rem = this;
-        long x = other.data[other.data.length - 1] & 0xffffffffL;
-        int shiftBoth = 31 + Long.numberOfLeadingZeros(x);
-        rem = rem.shiftLeft(shiftBoth);
-        other = other.shiftLeft(shiftBoth);
-        BigInt result = BigInt.valueOf(0);
-        int shiftCount = (rem.data.length - other.data.length) * 32;
-        long b = other.data[other.data.length - 1] & 0xffffffffL;
-        BigInt shifted = other.shiftLeft(shiftCount).shiftRight(32);
-        while (rem.compareTo(other) >= 0) {
-            long a = ((long) rem.data[rem.data.length - 1] << 32) | (rem.data[rem.data.length - 2] & 0xffffffffL);
-            long q = Long.divideUnsigned(a, b);
-            BigInt minus = BigInt.valueOf(q).multiply(other).shiftLeft(shiftCount).shiftRight(32);
-            rem = rem.subtract(minus);
-            while (rem.negative) {
-                q--;
-                rem = rem.add(shifted);
+        if (data.length > 2 && len() - other.len() < 16) {
+            int x = shiftRight(other.len() - 16).intValue();
+            int y = other.shiftRight(other.len() - 16).intValue();
+            if (x / y == x / (y + 1) && x / y == x / (y - 1)) {
+                return BigInt.valueOf(x / y);
             }
-            result = result.add(BigInt.valueOf(q).shiftLeft(shiftCount).shiftRight(32));
-            shiftCount -= 32;
-            shifted = shifted.shiftRight(32);
         }
-        return result;
+        int[] u = data;
+        int[] v = other.data;
+        int s = Integer.numberOfLeadingZeros(v[v.length - 1]);
+        long b = 1L << 32;
+        int m;
+        int n;
+        int[] vn;
+        int[] un;
+        if(v.length > 3) {
+            n = v.length + 1;
+            vn = v;
+            m = u.length + 1;
+            un = new int[m];
+            System.arraycopy(u, 0, un, 0, m - 1);
+        } else {
+            m = u.length + 2;
+            n = v.length + 1;
+            vn = new int[n - 1];
+            long last = v[n - 2] & 0xffffffffL;
+            for (int i = n - 2; i > 0; i--) {
+                long x = v[i - 1] & 0xffffffffL;
+                vn[i] = (int) ((last << s) | ((x >>> (32 - s))));
+                last = x;
+            }
+            vn[0] = (int) (last << s);
+            un = new int[m];
+            last = 0;
+            for (int i = m - 2; i > 0; i--) {
+                long x = u[i - 1] & 0xffffffffL;
+                un[i] = (int) ((last << s) | ((x >>> (32 - s))));
+                last = x;
+            }
+            un[0] = (int) (last << s);
+        }
+        int[] q = new int[m - n + 1];
+        long vn1 = vn[n - 2] & 0xffffffffL;
+        long vn2 = n >= 3 ? vn[n - 3] & 0xffffffffL : 0;
+        for (int j = m - n; j >= 0; j--) {
+            long aa = ((un[j + n - 1] & 0xffffffffL) * b) + (un[j + n - 2] & 0xffffffffL);
+            long qhat = Long.divideUnsigned(aa, vn1);
+            long rhat = aa - qhat * vn1;
+            while (true) {
+                if (qhat < b) {
+                    long unnn = j + n - 3 < 0 ? 0 : un[j + n - 3] & 0xffffffffL;
+                    if (compareUnsigned(qhat * vn2, (rhat * b) + (unnn)) <= 0) {
+                        break;
+                    }
+                }
+                qhat -= 1;
+                rhat = rhat + vn1;
+                if (rhat >= b) {
+                    break;
+                }
+            }
+            long carry = 0;
+            for (int i = 0; i < n - 1; i++) {
+                long p = qhat * (vn[i] & 0xffffffffL);
+                long t = (un[i + j] & 0xffffffffL) - carry - (p & 0xffffffffL);
+                un[i + j] = (int) t;
+                carry = (p >>> 32) - (t >> 32);
+            }
+            long t = (un[j + n - 1] & 0xffffffffL) - carry;
+            un[j + n - 1] = (int) t;
+            q[j] = (int) qhat;
+            if (t < 0) {
+                q[j] -= 1;
+                carry = 0;
+                for (int i = 0; i < n - 1; i++) {
+                    t = (long) (un[i + j] & 0xffffffffL) + (vn[i] & 0xffffffffL) + carry;
+                    un[i + j - 2] = (int) t;
+                    carry = t >>> 32;
+                }
+                un[j + n - 1] = (int) ((un[j + n - 1] & 0xffffffffL) + carry);
+            }
+        }
+        return new BigInt(q, false);
+    }
+
+    BigInt divideOld(BigInt other) {
+      BigInt rem = this;
+      long x = other.data[other.data.length - 1] & 0xffffffffL;
+      int shiftBoth = 31 + Long.numberOfLeadingZeros(x);
+      rem = rem.shiftLeft(shiftBoth);
+      other = other.shiftLeft(shiftBoth);
+      BigInt result = BigInt.valueOf(0);
+      int shiftCount = (rem.data.length - other.data.length) * 32;
+      long b = other.data[other.data.length - 1] & 0xffffffffL;
+      BigInt shifted = other.shiftLeft(shiftCount).shiftRight(32);
+      while (rem.compareTo(other) >= 0) {
+          long a = ((long) rem.data[rem.data.length - 1] << 32) | (rem.data[rem.data.length - 2] & 0xffffffffL);
+          long q = Long.divideUnsigned(a, b);
+          BigInt minus = BigInt.valueOf(q).multiply(other).shiftLeft(shiftCount).shiftRight(32);
+          rem = rem.subtract(minus);
+          while (rem.negative) {
+              q--;
+              rem = rem.add(shifted);
+          }
+          result = result.add(BigInt.valueOf(q).shiftLeft(shiftCount).shiftRight(32));
+          shiftCount -= 32;
+          shifted = shifted.shiftRight(32);
+      }
+      return result;
     }
 
     public int signum() {

@@ -30,13 +30,15 @@ For all languages, a very simple single-threaded implementation is used (without
 
 Benchmark results in seconds (lower is better; best of 3 runs):
 
-|Benchmark               |  C |Java| Bau|
-|------------------------|----|----|----|
-|#1 Binary Trees         | 5.0| 3.4| 3.4|
-|#2 Fannkuch Redux       | 2.2| 2.4| 2.2|
-|#3 SpeedTest            | 1.8| 4.4| 1.8|
+| Benchmark              |  Bau |   C  |  Go  | Java |Python|
+|------------------------|------|------|------|------|------|
+| #1 Binary Trees        |  3.4 |  5.0 |      |  3.4 |      |
+| #2 Fannkuch Redux      |  2.2 |  2.2 |      |  2.4 |      |
+| #3 SpeedTest           |  1.8 |  1.8 |      |  4.4 |      |
+| #4 Pi Digits           |  3.0 |      |  0.9 |  3.3 |  5.1 |
 
-So in summary, for these benchmarks, Bau is as fast as the C version. 
+So in summary, for these benchmarks, Bau has a similar performance
+then other popular programming languages. 
 
 ```mermaid
 ---
@@ -89,6 +91,19 @@ This test is about the <a href="https://github.com/jabbalaci/SpeedTests">Müncha
 * <a href="../blob/src/test/java/org/bau/perf/speedtest/munchausen.c">C</a>
 * <a href="../blob/src/test/java/org/bau/perf/speedtest/munchausen.bau">Bau</a>
 
+### Pi Digits
+
+This uses a big integer library that computes .
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/pidigits.html#pidigits">10'000 digits of Pi</a>.
+Performance depends on the big integer library.
+The big integer library of Go, for example, is highly optimized using platform-specific assembly.
+The Bau library is around 400 lines of code, without platform-specific code.
+
+* <a href="https://github.com/jabbalaci/SpeedTests/blob/master/c/main.c">Original</a>
+* <a href="../blob/src/test/java/org/bau/perf/speedtest/Munchausen.java">Java</a>
+* <a href="../blob/src/test/java/org/bau/perf/speedtest/munchausen.c">C</a>
+* <a href="../blob/src/test/java/org/bau/perf/speedtest/munchausen.bau">Bau</a>
+
 ### Running the Test
 
 Download and build the latest version:
@@ -107,7 +122,9 @@ Using Make:
 Compiling and Running the C, Java, and Bau versions:
 
     mkdir -p target/benchmark
+    mkdir -p target/benchmark/org/src/bau
 
+    # C
     cp src/test/resources/org/bau/benchmarksgame/*.c target/benchmark
     cp src/test/java/org/bau/perf/speedtest/*.c target/benchmark
     gcc -O3 target/benchmark/binaryTrees.c -o target/benchmark/binaryTreesC
@@ -117,6 +134,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time target/benchmark/fannkuchC 11; done    
     for i in {1..3}; do time target/benchmark/munchausenC; done
 
+    # Java
     javac src/test/java/org/bau/perf/benchmarksgame/BinaryTrees.java -d target/benchmark
     javac src/test/java/org/bau/perf/benchmarksgame/FannkuchRedux.java -d target/benchmark
     javac src/test/java/org/bau/perf/speedtest/Munchausen.java -d target/benchmark
@@ -125,12 +143,15 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time java -cp target/benchmark org.bau.perf.benchmarksgame.FannkuchRedux 11; done
     for i in {1..3}; do time java -cp target/benchmark org.bau.perf.speedtest.Munchausen; done
     
+    # Bau
+    cp src/main/resources/org/bau/*.bau target/benchmark
     cp src/test/resources/org/bau/benchmarksgame/*.bau target/benchmark
     cp src/test/java/org/bau/perf/speedtest/*.bau target/benchmark
     java -jar target/bau.jar target/benchmark/binaryTreesRefCount.bau
     java -jar target/bau.jar target/benchmark/binaryTreesOwned.bau
     java -jar target/bau.jar target/benchmark/fannkuch.bau
     java -jar target/bau.jar target/benchmark/munchausen.bau
+    java -jar target/bau.jar target/benchmark/piDigits.bau
     gcc -O3 target/benchmark/binaryTreesRefCount.c -o target/benchmark/binaryTreesRefCountBau
     gcc -O3 target/benchmark/binaryTreesOwned.c -o target/benchmark/binaryTreesOwnedBau
     gcc -O3 target/benchmark/fannkuch.c -o target/benchmark/fannkuchBau
@@ -139,4 +160,11 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time target/benchmark/binaryTreesOwnedBau 20; done
     for i in {1..3}; do time target/benchmark/fannkuchBau 11; done
     for i in {1..3}; do time target/benchmark/munchausenBau; done
+    for i in {1..3}; do time target/benchmark/piDigits > out.txt; done
 
+    # Python
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarksgame/piDigits.py 10000 > out.txt; done
+    
+    # Go
+    go build -ldflags="-s -w" src/test/resources/org/bau/benchmarksgame/piDigits.go
+    for i in {1..3}; do time ./piDigits > out.txt; done

@@ -11,6 +11,24 @@ import org.junit.Test;
 
 public class BigIntTest {
 
+    @Test
+    public void divideUnsigned() {
+        Random r = new Random(1);
+        for(int i=0; i<1000; i++) {
+            long a = r.nextLong();
+            long b = r.nextLong();
+            if (a < 0 || b < 0) {
+                continue;
+            }
+            long c = a / b;
+            long c1 = Long.divideUnsigned(a, b);
+            if (c != c1) {
+                System.out.println(a + "/" + b + " expected " + c + " got " + c1);
+                assertEquals(c, c1);
+            }
+        }
+    }
+
     private static long randomLong(Random r, int i) {
         if (i == 0) {
             return 0;
@@ -41,25 +59,41 @@ public class BigIntTest {
 
     @Test
     public void shift() {
-        BigInt a = BigInt.valueOf(1);
-        for (int j = 0; j < 1000; j++) {
-            BigInt b = a.shiftLeft(1);
-            BigInt c = b.shiftRight(1);
-            assertEquals(a, c);
-            b = c;
+        for (long j = 1; j < 10_000_000_000L; j += j + 1) {
+            for(int i = 1; i < 60; i += 7) {
+                BigInt a = BigInt.valueOf(j);
+                BigInt b = a.shiftLeft(i);
+                BigInt c = b.shiftRight(i);
+                assertEquals(a, c);
+                b = a.shiftRight(-i);
+                c = b.shiftLeft(-i);
+                assertEquals(a, c);
+            }
         }
         Random r = new Random(1);
         for (int i = 0; i < 1000; i++) {
             BigInteger ai = randomBigInteger(r);
             BigInt aa = BigInt.valueOf(ai.toString());
-            int shift = r.nextInt(100);
+            int shift = r.nextInt(100) - 10;
+            if (r.nextBoolean()) {
+                BigInteger li = ai.shiftRight(shift);
+                BigInt la = aa.shiftRight(shift);
+                assertEquals(li.toString(), la.toString());
+                BigInteger ri = ai.shiftRight(shift);
+                BigInt ra = aa.shiftRight(shift);
+                assertEquals(ri.toString(), ra.toString());
+            } else {
+                BigInteger li = ai.shiftLeft(shift);
+                BigInt la = aa.shiftLeft(shift);
+if (!li.toString().equals(la.toString())) {
+    la = aa.shiftLeft(shift);
+}
 
-            BigInteger li = ai.shiftRight(shift);
-            BigInt la = aa.shiftRight(shift);
-            assertEquals(li.toString(), la.toString());
-            BigInteger ri = ai.shiftRight(shift);
-            BigInt ra = aa.shiftRight(shift);
-            assertEquals(ri.toString(), ra.toString());
+                assertEquals(li.toString(), la.toString());
+                BigInteger ri = ai.shiftLeft(shift);
+                BigInt ra = aa.shiftLeft(shift);
+                assertEquals(ri.toString(), ra.toString());
+            }
         }
     }
 

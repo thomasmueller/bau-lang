@@ -120,7 +120,6 @@ public class Assignment implements Statement {
 
     public String toC() {
         StringBuilder buff = new StringBuilder();
-
         if (!(value instanceof NullValue)) {
             if (Program.SIMPLE_REF_COUNTING) {
                 if (!(value instanceof Call || value instanceof New)) {
@@ -132,7 +131,6 @@ public class Assignment implements Statement {
                 }
             }
         }
-
         if (!initial) {
             buff.append(leftValue.decrementRefCountC());
         }
