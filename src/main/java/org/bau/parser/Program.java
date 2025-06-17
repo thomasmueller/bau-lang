@@ -22,7 +22,7 @@ import org.bau.std.Std;
 
 public class Program {
 
-    public final static boolean TM_MALLOC = true;
+    public final static boolean TM_MALLOC = false;
     private final static boolean TRACE_REF_COUNTS = false;
 
     public final static boolean SIMPLE_REF_COUNTING = true;

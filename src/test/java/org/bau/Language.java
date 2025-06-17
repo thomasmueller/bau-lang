@@ -7,6 +7,16 @@ https://github.com/NicoNex/tau
 
 
 bug:
+https://github.com/thomasmueller/bau-lang/issues/3#issuecomment-2978557241
+##
+fun add1(x int) int
+  return x + 1
+_t0 := 3
+add1(_t0)
+##
+
+
+bug:
 ##
 fun sql(condition int) macro
     println('where ' condition)
@@ -14,6 +24,10 @@ fun sql(condition int) macro
 id int
 sql(id > 10)
 ##
+
+
+Performance:
+https://github.com/smarr/are-we-fast-yet
 
 auto-conversion:
 convert<type>To<type>

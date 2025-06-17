@@ -21,7 +21,7 @@ fun fannkuch(n int) int
     r := n
     while r > 0
         while r > 1 
-            count[r-1] = r
+            count[r - 1] = r
             r -= 1
         for i := until(n)
             perm[i] = perm1[i]
@@ -32,13 +32,13 @@ fun fannkuch(n int) int
             for i := until(perm.len)
                 break (2*i) >= k
                 t := perm[i]
-                perm[i] = perm[k-i]
-                perm[k-i] = t
+                perm[i] = perm[k - i]
+                perm[k - i] = t
             k = perm[0]
             f += 1
         if f > flips
             flips = f
-        if (nperm & 0x1) = 0
+        if (nperm & 1) = 0
             checksum += f
         else 
             checksum -= f

@@ -5,17 +5,12 @@ import java.math.BigInteger;
 public class PiDigits {
 
     public static void main(String... args) {
-        for (int i = 0; i < 4; i++) {
-            long start = System.currentTimeMillis();
-            new PiDigits().run();
-            System.out.println(System.currentTimeMillis() - start);
-        }
+        new PiDigits().run();
     }
 
     void run() {
         int n = 10_000;
         int k = 0;
-        int sum = 0;
         int i = 0;
         while (i < n) {
             k++;
@@ -28,14 +23,12 @@ public class PiDigits {
                 continue;
             }
             eliminateDigit(d);
-            sum += d;
-//            System.out.print((char) ('0' + d));
+            System.out.print((char) ('0' + d));
             i++;
             if (i % 10 == 0) {
-//                System.out.println(" : " + i);
+                System.out.println(" : " + i);
             }
         }
-        System.out.println("sum: " + sum);
     }
 
     BigInteger ten = BigInteger.TEN;

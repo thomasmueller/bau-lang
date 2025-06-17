@@ -1,0 +1,45 @@
+import org.bau.File
+    putchar
+
+# See:
+# https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-2.html
+# Usage:
+# gcc -O3 demo.c
+# ./a.out > test.tiff
+fun main()
+    w: 200
+    h: 200
+    iter: 50
+    limit: 2.0
+    bitNum := 0
+    byteAcc := i8(0)
+    println('P4\n' w ' ' h)
+    for y := until(h)
+        for x := until(w)
+            Zr := 0.0
+            Zi := 0.0
+            Tr := 0.0
+            Ti := 0.0
+            Cr := 2.0 * x / w - 1.5
+            Ci := 2.0 * y / h - 1.0
+            for i := until(iter)
+                break Tr + Ti >= limit * limit
+                Zi = 2.0 * Zr * Zi + Ci
+                Zr = Tr - Ti + Cr
+                Tr = Zr * Zr
+                Ti = Zi * Zi
+            byteAcc <<= 1 
+            if Tr + Ti <= limit * limit
+                byteAcc |= 0x01
+            bitNum += 1
+            if bitNum = 8
+                File.putchar(byteAcc)
+                byteAcc = 0
+                bitNum = 0
+            elif x = w - 1
+                byteAcc <<= 8 - (w % 8)
+                File.putchar(byteAcc)
+                byteAcc = 0
+                bitNum = 0
+
+main()

@@ -9,18 +9,6 @@ contributed by Isaac Gouy
 */
 public class BinaryTrees {
 
-    /*
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            long time = System.currentTimeMillis();
-            stretch(20);
-            System.out.println(System.currentTimeMillis() - time);
-        }
-        // stretch tree of depth 20  check: 2097151
-        // stretch tree of depth 20; check: 2097151
-    }
-    */
-
     public static void main(String[] args) {
         int n = 10;
         if (args.length > 0)
