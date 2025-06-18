@@ -41,7 +41,7 @@ by running the same test 3 times inside the same JVM
 |------------------------|------|------|------|------|------|------|
 | #1 Binary Trees        |  5.2 |  5.1 |  5.6 |  3.3 | 10.7 |  5.5 |
 | #2 Fannkuch Redux      |  1.9 |  1.9 |  2.2 |  2.3 |  9.7 |  1.9 |
-| #3 SpeedTest           |  1.8 |  1.8 |  3.2 |  4.4 |   ?  |  1.7 |
+| #3 SpeedTest           |  1.8 |  1.8 |  3.2 |  4.4 |270.0 |  1.7 |
 | #4 Pi Digits           |  3.0 |   -  |  0.9 |  3.5 |  5.1 |  1.4 |
 
 So in summary, for these benchmarks, Bau has a similar performance
@@ -160,9 +160,7 @@ xychart-beta
 This test generates a number of binary trees and counts the nodes.
 The Java version is very fast if given enough memory, because it doesn't collect garbage;
 when limiting memory to 128 MB, it i similar in speed than C.
-In Bau, a faster malloc implementation is used, which is faster than the default one.
-If C uses the same malloc implementation, it is as fast as Bau.
-For Bau, the ownership variant is used; the reference counted variant is 3.7 seconds.
+For Bau, the ownership variant is used; the reference counted variant is a bit slower.
 
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/performance/binarytrees.html">Original</a>
  - <a href="../blob/src/test/java/org/bau/perf/benchmarksgame/BinaryTrees.java">Java</a>
@@ -183,7 +181,7 @@ This test uses many array accesses. For Bau, no attempt was made to eliminate th
 
 This test is about the <a href="https://github.com/jabbalaci/SpeedTests">Münchausen numbers problem</a>.
 This is a very fast loop with a lot of array access. 
-Python is particularly slow here because it is interpreted.
+(Standard) Python is particularly slow here because it is interpreted and doesn't use a JIT compiler.
 
 * <a href="https://github.com/jabbalaci/SpeedTests/blob/master/c/main.c">Original</a>
 * <a href="../blob/src/test/java/org/bau/perf/speedtest/Munchausen.java">Java</a>
