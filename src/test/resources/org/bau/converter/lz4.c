@@ -1347,14 +1347,12 @@ int main(int _argc, char *_argv[]) {
     string_1011 = str_const("-1", 2);
     string_1012 = str_const("Compressed ", 11);
     string_1013 = str_const("-h", 2);
-    {
-        BLOCK_SIZE = 4194304;
-        PRIME1 = 2654435761;
-        PRIME2 = 2246822519;
-        PRIME3 = 3266489917;
-        PRIME4 = 668265263;
-        PRIME5 = 374761393;
-    }
+    BLOCK_SIZE = 4194304;
+    PRIME1 = 2654435761;
+    PRIME2 = 2246822519;
+    PRIME3 = 3266489917;
+    PRIME4 = 668265263;
+    PRIME5 = 374761393;
     int64_t _t0 = org_bau_compress_Lz4Tool_main_0();
     ;
     _end();

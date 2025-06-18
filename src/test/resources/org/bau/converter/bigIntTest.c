@@ -1399,11 +1399,9 @@ int main(int _argc, char *_argv[]) {
     string_1037 = str_const("len(newBigInt(255)) = 8", 23);
     string_1038 = str_const("len(newBigInt(256)) = 9", 23);
     string_1039 = str_const("len(shiftLeft(newBigInt(256), 100)) = 109", 41);
-    {
-        I32_MIN_VALUE = -2147483648;
-        I32_MAX_VALUE = 4294967295;
-        INT_MIN_VALUE = (-9223372036854775807LL-1LL);
-    }
+    I32_MIN_VALUE = -2147483648;
+    I32_MAX_VALUE = 4294967295;
+    INT_MIN_VALUE = (-9223372036854775807LL-1LL);
     if (!(( org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt_add_2(org_bau_BigInt_newBigInt_1(123), org_bau_BigInt_newBigInt_1(456))) == 579 ))) {
         printf("assertion failed: intValue(add(newBigInt(123), newBigInt(456))) = 579\n");
     } else {

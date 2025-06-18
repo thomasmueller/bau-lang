@@ -22,6 +22,7 @@ public class Variable implements Expression, LeftValue {
     public boolean used;
     int reassignCount;
     boolean skipIncrementDecrementRefCount;
+    boolean isInternal;
 
     public Variable(String name, DataType type) {
         this(null, name, false, type);
@@ -80,10 +81,6 @@ public class Variable implements Expression, LeftValue {
         return name;
     }
 
-    public String assignmentC() {
-        return name;
-    }
-
     public String toC() {
         if (constantValue != null && type.isNumber() && !type.isArray()) {
             StringBuilder buff = new StringBuilder();
@@ -92,10 +89,10 @@ public class Variable implements Expression, LeftValue {
             } else {
                 buff.append(NumberValue.toC(constantValue.longValue()));
             }
-            buff.append(" /* " + name + " */");
+            buff.append(" /* " + nameC() + " */");
             return buff.toString();
         }
-        return name;
+        return nameC();
     }
 
     @Override
@@ -133,7 +130,7 @@ public class Variable implements Expression, LeftValue {
         if (skipIncrementDecrementRefCount) {
             return "";
         }
-        return decrementRefCountC(name, "", type());
+        return decrementRefCountC(nameC(), "", type());
     }
 
     @Override
@@ -144,12 +141,12 @@ public class Variable implements Expression, LeftValue {
         // copy of FieldAccess
         if (type().needIncDec()) {
             if (type().memoryType() == MemoryType.REF_COUNT) {
-                return Free.INC_USE_STACK + "(" + name + ");\n";
+                return Free.INC_USE_STACK + "(" + nameC() + ");\n";
             } else {
                 return "";
             }
         } else if (type().needFree()) {
-            return type().toC() + "_copy(&" + name + ");\n";
+            return type().toC() + "_copy(&" + nameC() + ");\n";
         }
         return "";
     }
@@ -321,6 +318,18 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void incrementReassignCount() {
         reassignCount++;
+    }
+
+    public String nameC() {
+        if (isInternal) {
+            return name;
+        }
+        return Program.esc(name);
+    }
+
+    @Override
+    public String assignmentC() {
+        return nameC();
     }
 
 }

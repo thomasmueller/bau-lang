@@ -270,18 +270,16 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    {
-        i64v = 1;
-        i32v = 1;
-        i16v = 1;
-        i8v = 1;
-        f64v = 1.0;
-        f32v = 1.0;
-        a = 6172;
-        b = 24690;
-        c = idiv_2(a, b);
-        d = imod_2(a, b);
-    }
+    i64v = 1;
+    i32v = 1;
+    i16v = 1;
+    i8v = 1;
+    f64v = 1.0;
+    f32v = 1.0;
+    a = 6172;
+    b = 24690;
+    c = idiv_2(a, b);
+    d = imod_2(a, b);
     _end();
     return 0;
 }

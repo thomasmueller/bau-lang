@@ -379,20 +379,20 @@ public class Operation implements Expression {
             if (t.isRange()) {
                 t = DataType.INT_TYPE;
             }
-            return "shiftRight_" + t.name() + "_2(" +
+            return Program.esc("shiftRight") + "_" + t.name() + "_2(" +
                     left.toC() + ", " + right.toC() + ")";
         } else if ("<<".equals(op)) {
-            return "shiftLeft_2(" +
+            return Program.esc("shiftLeft") + "_2(" +
                     left.toC() + ", " + right.toC() + ")";
         } else if ("/".equals(op)) {
             if (widerType().isFloatingPoint()) {
                 return left.toC() + " / " + right.toC();
             } else {
-                return "idiv_2(" +
+                return Program.esc("idiv") + "_2(" +
                         left.toC() + ", " + right.toC() + ")";
             }
         } else if ("%".equals(op)) {
-            return "imod_2(" +
+            return Program.esc("imod") + "_2(" +
                     left.toC() + ", " + right.toC() + ")";
         } else if ("and".equals(op)) {
             return "(" + left.toC() + ") && (" + right.toC() + ")";

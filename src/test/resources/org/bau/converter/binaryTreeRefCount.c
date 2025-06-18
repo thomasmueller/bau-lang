@@ -355,9 +355,7 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const(" check: ", 8);
     string_1003 = str_const(" trees of depth ", 16);
     string_1004 = str_const("long lived tree of depth ", 25);
-    {
-        randomSeed = 0;
-    }
+    randomSeed = 0;
     int64_t minDepth = 1;
     int64_t maxDepth = 3;
     int64_t stretchDepth = 4;

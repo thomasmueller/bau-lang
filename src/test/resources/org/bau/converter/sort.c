@@ -401,9 +401,7 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    {
-        randomSeed = 0;
-    }
+    randomSeed = 0;
     test_0();
     _end();
     return 0;

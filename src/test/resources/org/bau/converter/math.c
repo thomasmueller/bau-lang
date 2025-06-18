@@ -1014,17 +1014,15 @@ int main(int _argc, char *_argv[]) {
     string_1032 = str_const("pow ", 4);
     string_1033 = str_const("min ", 4);
     string_1034 = str_const("max ", 4);
-    {
-        POS_INFINITY = (1.0 / 0.0);
-        NEG_INFINITY = (-1.0 / 0.0);
-        NOT_A_NUMBER = (0.0 / 0.0);
-        PI = 3.141592653589793;
-        E = 2.718281828459045;
-        LOG10 = 2.302585092994046;
-        LOG2 = 0.6931471805599453;
-        MIN_INT = 0x8000000000000000;
-        MAX_INT = 0x7fffffffffffffff;
-    }
+    POS_INFINITY = (1.0 / 0.0);
+    NEG_INFINITY = (-1.0 / 0.0);
+    NOT_A_NUMBER = (0.0 / 0.0);
+    PI = 3.141592653589793;
+    E = 2.718281828459045;
+    LOG10 = 2.302585092994046;
+    LOG2 = 0.6931471805599453;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
     operations_2(0, 0);
     operations_2(1, 0);
     operations_2(-1, 0);

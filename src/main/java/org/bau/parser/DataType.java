@@ -173,7 +173,7 @@ public class DataType {
     }
 
     public String idC() {
-        String n = name;
+        String n = Program.esc(name);
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             n += "_owned";
         }
@@ -261,15 +261,16 @@ public class DataType {
         } else if (enumValues != null) {
             s = "int64_t";
         } else {
-            if (module != null) {
-                s = module.replace(".", "_") + "_" + name;
-            } else {
-                s = name;
+            String n = name;
+            if (isArray()) {
+                // replace "[]" with "_array"
+                n = n.substring(0, n.length() - 2) + "_array";
             }
-        }
-        if (isArray()) {
-            // replace "[]" with "_array"
-            return s.substring(0, s.length() - 2) + "_array";
+            if (module != null) {
+                s = Program.esc(module.replace(".", "_")) + "_" + Program.esc(n);
+            } else {
+                s = Program.esc(n);
+            }
         }
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             s += "_owned";

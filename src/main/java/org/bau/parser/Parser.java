@@ -907,33 +907,42 @@ public class Parser {
             return;
         }
         if (type == TokenType.IDENTIFIER) {
-            if (match("if")) {
-                parseIf(target);
-                return;
-            } else if (match("while")) {
-                parseWhile(target);
-                return;
-            } else if (match("for")) {
-                parseFor(target);
-                return;
-            } else if (match("switch")) {
-                parseSwitch(target);
-                return;
-            } else if (match("break")) {
-                parseBreak(target);
-                return;
-            } else if (match("continue")) {
-                parseContinue(target);
-                return;
-            } else if (match("return")) {
-                parseReturn(target);
-                return;
-            } else if (match("throw")) {
-                parseThrow(target);
-                return;
-            } else if (match("catch")) {
-                parseCatch(target);
-                return;
+            // if we parse inside an 'if' statement etc,
+            // then we are no longer on the global scope
+            // (variables are no longer global)
+            boolean previousGlobal = isGlobalScope;
+            isGlobalScope = false;
+            try {
+                if (match("if")) {
+                    parseIf(target);
+                    return;
+                } else if (match("while")) {
+                    parseWhile(target);
+                    return;
+                } else if (match("for")) {
+                    parseFor(target);
+                    return;
+                } else if (match("switch")) {
+                    parseSwitch(target);
+                    return;
+                } else if (match("break")) {
+                    parseBreak(target);
+                    return;
+                } else if (match("continue")) {
+                    parseContinue(target);
+                    return;
+                } else if (match("return")) {
+                    parseReturn(target);
+                    return;
+                } else if (match("throw")) {
+                    parseThrow(target);
+                    return;
+                } else if (match("catch")) {
+                    parseCatch(target);
+                    return;
+                }
+            } finally {
+                isGlobalScope = previousGlobal;
             }
             String m = module;
             String identifier = readIdentifier();
@@ -1014,7 +1023,8 @@ public class Parser {
                 }
                 Assignment s = new Assignment();
                 s.initial = true;
-                s.isGlobalScope = isGlobalScope;
+                boolean global = isGlobalScope;
+                s.isGlobalScope = global;
                 // no need for temp variables as it's just an assignment
                 s.value = parseExpression();
                 s.value = s.value.writeStatements(this, true, target);
@@ -1029,6 +1039,9 @@ public class Parser {
                     throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
                 }
                 if (matchOp("..")) {
+                    if (global) {
+                        throw syntaxError("Global ranges are not allowed; they need to be in a function");
+                    }
                     if (!"0".equals(s.value.toString())) {
                         throw syntaxError("Range needs to start from 0: '"+s+"'");
                     }
@@ -1045,16 +1058,16 @@ public class Parser {
                     }
                     type = rangeType;
                 }
-                boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, type);
                 s.leftValue = v;
                 s.type = s.value.type();
-                if (functionContext.getVariable(module, v.name) != null) {
-                    throw syntaxError("Variable '" + v.name + "' already exists");
-                }
-                functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
+                } else {
+                    if (functionContext.getVariable(module, v.name) != null) {
+                        throw syntaxError("Variable '" + v.name + "' already exists");
+                    }
+                    functionContext.addVariable(v);
                 }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
@@ -1851,7 +1864,9 @@ public class Parser {
             if (type == null) {
                 throw syntaxError("No type");
             }
-            ret.leftValue = new Variable(constId, type);
+            Variable var = new Variable(constId, type);
+            var.isInternal = true;
+            ret.leftValue = var;
             ret.type = b.expr.type();
             ret.value = b.expr;
             b.expr = ret.leftValue;
@@ -3076,6 +3091,7 @@ public class Parser {
         assign.initial = true;
         assign.isConstant = true;
         Variable var = new Variable("_t" + functionContext.nextTempVariableId(), type);
+        var.isInternal = true;
         assign.type = type;
         assign.leftValue = var;
         assign.value = expr;

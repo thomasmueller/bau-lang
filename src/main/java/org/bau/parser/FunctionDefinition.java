@@ -69,12 +69,12 @@ public class FunctionDefinition {
         }
         buff.append(' ');
         if (module != null) {
-            buff.append(module.replace(".", "_") + "_");
+            buff.append(Program.esc(module.replace(".", "_")) + "_");
         }
         if (callType != null) {
             buff.append(callType.idC()).append('_');
         }
-        buff.append(name + "_");
+        buff.append(nameC() + "_");
         if (varArgs) {
             buff.append("var");
         } else {
@@ -92,7 +92,7 @@ public class FunctionDefinition {
             } else {
                 buff.append(v.type().toC());
                 buff.append(' ');
-                buff.append(v.name);
+                buff.append(v.nameC());
             }
         }
         buff.append(")");
@@ -140,13 +140,13 @@ public class FunctionDefinition {
         if (varArgs) {
             buff.append(Statement.indent("va_list _vaList;\n"));
             Variable v = parameters.get(parameters.size() - 1);
-            buff.append(Statement.indent(v.type().nameC() + "* " + v.name + " = " + v.type().nameC() + "_new(_vaCount);\n"));
+            buff.append(Statement.indent(v.type().nameC() + "* " + v.nameC() + " = " + v.type().nameC() + "_new(_vaCount);\n"));
             buff.append(Statement.indent("va_start(_vaList, _vaCount);\n"));
             buff.append(Statement.indent("for (int _vaI = 0; _vaI < _vaCount; _vaI++) {\n"));
             if (v.type().baseType().isNumber() && v.type().baseType().sizeOf() <= 1) {
-                buff.append("    " + Statement.indent(v.name + "->data[_vaI] = (" + v.type().baseType().toC() + ") va_arg(_vaList, int);\n"));
+                buff.append("    " + Statement.indent(v.nameC() + "->data[_vaI] = (" + v.type().baseType().toC() + ") va_arg(_vaList, int);\n"));
             } else {
-                buff.append("    " + Statement.indent(v.name + "->data[_vaI] = va_arg(_vaList, " + v.type().baseType().toC() + ");\n"));
+                buff.append("    " + Statement.indent(v.nameC() + "->data[_vaI] = va_arg(_vaList, " + v.type().baseType().toC() + ");\n"));
             }
             buff.append(Statement.indent("}\n"));
             buff.append(Statement.indent("va_end(_vaList);\n"));
@@ -330,6 +330,10 @@ public class FunctionDefinition {
         if (exceptionType != null) {
             exceptionType.used(program);
         }
+    }
+
+    public String nameC() {
+        return Program.esc(name);
     }
 
 }

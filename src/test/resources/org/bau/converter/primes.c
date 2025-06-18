@@ -339,9 +339,7 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    {
-        randomSeed = 0;
-    }
+    randomSeed = 0;
     int64_t _t0 = primeSum_1(100);
     printf("%lld\n", (long long)_t0);
     _end();

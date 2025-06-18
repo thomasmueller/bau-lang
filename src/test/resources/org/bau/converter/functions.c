@@ -340,9 +340,7 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const(" ", 1);
     string_1001 = str_const("ascii of \"0\" is ", 16);
     string_1003 = str_const(" = ", 3);
-    {
-        randomSeed = 0;
-    }
+    randomSeed = 0;
     int64_t _t0 = square_1(2);
     int64_t _t1 = square_2(2, 3);
     printf("%lld %lld\n", (long long)_t0, (long long)_t1);

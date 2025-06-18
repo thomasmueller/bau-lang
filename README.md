@@ -59,7 +59,9 @@ Identifiers contain letters, digits, and `_`.
     x := 10
     x += 1    # shortcut for x = x + 1
 
-A variable without value requires a type:
+Variables need to be defined before they are used.
+Variables are at the top level (without indentation) are global.
+Variables without value require a type:
 
     x int
 
@@ -159,6 +161,10 @@ Integer `+` `-` `*` wrap around on over- / underflow.
 shift right, and logical shift right: the leftmost bits become `0`.
 
 ### Functions
+
+A program starts with a `main` function.
+If `main` is not defined, top-level statements 
+(outside any function) are executed instead.
 
 `fun` starts a function. It may `return` a value.
 `..` means variable number of arguments.

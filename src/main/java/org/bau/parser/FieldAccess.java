@@ -111,9 +111,9 @@ public class FieldAccess implements Expression, LeftValue {
             }
             return base.toC() + "->len";
         } else if (base.type().isPointer()) {
-            return base.toC() + "->" + fieldName;
+            return base.toC() + "->" + Program.esc(fieldName);
         } else {
-            return base.toC() + "." + fieldName;
+            return base.toC() + "." + Program.esc(fieldName);
         }
     }
 
@@ -142,9 +142,9 @@ public class FieldAccess implements Expression, LeftValue {
                 throw new IllegalStateException("Only 'len' is supported");
             }
         } else if (base.type().isPointer()) {
-            return base.toC() + "->" + fieldName;
+            return base.toC() + "->" + Program.esc(fieldName);
         } else {
-            return base.toC() + "." + fieldName;
+            return base.toC() + "." + Program.esc(fieldName);
         }
     }
 

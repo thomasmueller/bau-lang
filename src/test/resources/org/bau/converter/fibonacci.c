@@ -315,9 +315,7 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const(", ticks: ", 9);
     string_1002 = str_const("fibonacci(20) iterative: ", 25);
     string_1003 = str_const("fibonacci(20) const:     ", 25);
-    {
-        ticks = 0;
-    }
+    ticks = 0;
     ticks = 0;
     int64_t _t0 = fibonacciRecursive_1(20);
     printf("fibonacci(20) recursive: %lld, ticks: %lld\n", (long long)_t0, (long long)ticks);

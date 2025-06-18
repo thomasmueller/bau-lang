@@ -1326,16 +1326,14 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1016 = str_const(" : ", 3);
     string_1017 = str_const("dummy: ", 7);
-    {
-        I32_MIN_VALUE = -2147483648;
-        I32_MAX_VALUE = 4294967295;
-        INT_MIN_VALUE = (-9223372036854775807LL-1LL);
-        tmp1 = org_bau_BigInt_newBigInt_1(0);
-        tmp2 = org_bau_BigInt_newBigInt_1(0);
-        acc = org_bau_BigInt_newBigInt_1(0);
-        den = org_bau_BigInt_newBigInt_1(1);
-        num = org_bau_BigInt_newBigInt_1(1);
-    }
+    I32_MIN_VALUE = -2147483648;
+    I32_MAX_VALUE = 4294967295;
+    INT_MIN_VALUE = (-9223372036854775807LL-1LL);
+    tmp1 = org_bau_BigInt_newBigInt_1(0);
+    tmp2 = org_bau_BigInt_newBigInt_1(0);
+    acc = org_bau_BigInt_newBigInt_1(0);
+    den = org_bau_BigInt_newBigInt_1(1);
+    num = org_bau_BigInt_newBigInt_1(1);
     int64_t n = 100;
     int64_t i = 0;
     int64_t k = 0;

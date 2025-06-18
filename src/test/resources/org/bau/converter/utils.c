@@ -518,18 +518,16 @@ int main(int _argc, char *_argv[]) {
     string_1003 = str_const("-", 1);
     string_1008 = str_const(" ", 1);
     string_1009 = str_const(":", 1);
-    {
-        randomSeed = 0;
-        POS_INFINITY = (1.0 / 0.0);
-        NEG_INFINITY = (-1.0 / 0.0);
-        NOT_A_NUMBER = (0.0 / 0.0);
-        PI = 3.141592653589793;
-        E = 2.718281828459045;
-        LOG10 = 2.302585092994046;
-        LOG2 = 0.6931471805599453;
-        MIN_INT = 0x8000000000000000;
-        MAX_INT = 0x7fffffffffffffff;
-    }
+    randomSeed = 0;
+    POS_INFINITY = (1.0 / 0.0);
+    NEG_INFINITY = (-1.0 / 0.0);
+    NOT_A_NUMBER = (0.0 / 0.0);
+    PI = 3.141592653589793;
+    E = 2.718281828459045;
+    LOG10 = 2.302585092994046;
+    LOG2 = 0.6931471805599453;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
     int64_t a = org_bau_Utils_getNanoTime_0();
     printf("%lld\n", (long long)a);
     int64_t b = org_bau_Utils_getNanoTime_0();

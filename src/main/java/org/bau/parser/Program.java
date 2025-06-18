@@ -1,6 +1,8 @@
 package org.bau.parser;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +24,7 @@ import org.bau.std.Std;
 
 public class Program {
 
-    public final static boolean TM_MALLOC = false;
+    public final static boolean TM_MALLOC = true;
     private final static boolean TRACE_REF_COUNTS = false;
 
     public final static boolean SIMPLE_REF_COUNTING = true;
@@ -528,8 +530,8 @@ public class Program {
                     buff.append(Statement.indent("int32_t len;\n"));
                     buff.append(Statement.indent(t.baseType().toC() + "* data;\n"));
                 } else {
-                    for(Variable f : t.fields) {
-                        buff.append(Statement.indent(f.type().toC() + " " + f.name + ";\n"));
+                    for (Variable f : t.fields) {
+                        buff.append(Statement.indent(f.type().toC() + " " + f.nameC() + ";\n"));
                     }
                 }
                 if (t.memoryType() == MemoryType.REF_COUNT) {
@@ -556,7 +558,7 @@ public class Program {
                     }
                     for (Variable f : t.fields) {
                         if (f.type().isNumber() || !f.type().isCopyType()) {
-                            buff.append(Statement.indent("result->" + f.name + " = 0;\n"));
+                            buff.append(Statement.indent("result->" + f.assignmentC() + " = 0;\n"));
                         }
                     }
                     buff.append(Statement.indent("return result;\n"));
@@ -564,8 +566,8 @@ public class Program {
                 } else if (!t.isArray()) {
                     buff.append(t.nameC() + " " + t.nameC() + "_new() {\n");
                     buff.append(Statement.indent(t.nameC() + " result;\n"));
-                    for(Variable f : t.fields) {
-                        buff.append(Statement.indent("result." + f.name + " = 0;\n"));
+                    for (Variable f : t.fields) {
+                        buff.append(Statement.indent("result." + f.assignmentC() + " = 0;\n"));
                     }
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
@@ -660,20 +662,20 @@ public class Program {
                         for (Variable f : t.fields) {
                             if (f.type().needIncDec()) {
                                 if (f.type().memoryType() == MemoryType.REF_COUNT) {
-                                    buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.name + ", " + f.type().nameC() + ");\n"));
+                                    buff.append(Statement.indent(Free.DEC_USE + "(x->" + f.nameC() + ", " + f.type().nameC() + ");\n"));
                                 } else {
-                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent("if (x->" + f.nameC() + ") " + f.type().nameC() + "_free(x->" + f.nameC() + ");\n"));
                                 }
                             } else if (f.type().needFree()) {
                                 if (f.type().isCopyType()) {
-                                    buff.append(Statement.indent(f.type().nameC() + "_free(&x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent(f.type().nameC() + "_free(&x->" + f.nameC() + ");\n"));
                                 } else {
-                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_free(x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent("if (x->" + f.nameC() + ") " + f.type().nameC() + "_free(x->" + f.nameC() + ");\n"));
                                 }
                             }
                         }
                         if (t.autoClose != null) {
-                            buff.append(Statement.indent(t.nameC() + "_close_1(x);\n"));
+                            buff.append(Statement.indent(t.nameC() + "_" + esc("close") + "_1(x);\n"));
                             buff.append(Statement.indent("if (x->_refCount) { fprintf(stdout, \"Object re-referenced in the close method\"); exit(1); }\n"));
                         }
                         if (t.needIncDec()) {
@@ -693,12 +695,12 @@ public class Program {
                         for (Variable f : t.fields) {
                             if (f.type().needIncDec()) {
                                 if (f.type().memoryType() == MemoryType.REF_COUNT) {
-                                    buff.append(Statement.indent(Free.INC_USE + "(x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent(Free.INC_USE + "(x->" + f.nameC() + ");\n"));
                                 } else {
-                                    buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_copy(x->" + f.name + ");\n"));
+                                    buff.append(Statement.indent("if (x->" + f.nameC() + ") " + f.type().nameC() + "_copy(x->" + f.nameC() + ");\n"));
                                 }
                             } else if (f.type().needFree()) {
-                                buff.append(Statement.indent("if (x->" + f.name + ") " + f.type().nameC() + "_copy(x->" + f.name + ");\n"));
+                                buff.append(Statement.indent("if (x->" + f.nameC() + ") " + f.type().nameC() + "_copy(x->" + f.nameC() + ");\n"));
                             }
                         }
                         buff.append("}\n");
@@ -714,8 +716,8 @@ public class Program {
             }
         }
         if (hasStringConstants) {
-            buff.append("i8_array* str_const(char* data, uint32_t len) {\n");
-            buff.append(Statement.indent("i8_array* result = _malloc(sizeof(i8_array));\n"));
+            buff.append(esc("i8_array") + "* str_const(char* data, uint32_t len) {\n");
+            buff.append(Statement.indent(esc("i8_array") +"* result = _malloc(sizeof(" + esc("i8_array") + "));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -724,13 +726,13 @@ public class Program {
             buff.append("}\n");
             for (long id: stringConstantsMap.keySet()) {
                 if (stringConstantsMap.get(id).isUsed()) {
-                    buff.append("i8_array* string_" + id + ";\n");
+                    buff.append(esc("i8_array") + "* string_" + id + ";\n");
                 }
             }
         }
         if (!arrayConstantsMap.isEmpty()) {
-            buff.append("int_array* int_array_const(int64_t* data, uint32_t len) {\n");
-            buff.append(Statement.indent("int_array* result = _malloc(sizeof(int_array));\n"));
+            buff.append(esc("int_array") + "* int_array_const(int64_t* data, uint32_t len) {\n");
+            buff.append(Statement.indent(esc("int_array") + "* result = _malloc(sizeof(" + esc("int_array") + "));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -738,12 +740,12 @@ public class Program {
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
             for (long id: arrayConstantsMap.keySet()) {
-                buff.append("int_array* array_" + id + ";\n");
+                buff.append(esc("int_array") + "* array_" + id + ";\n");
             }
         }
         for (Variable var : globalVariables.values()) {
             if (var.isUsed()) {
-                buff.append(var.type().toC() + " " + var.name + ";\n");
+                buff.append(var.type().toC() + " " + var.nameC() + ";\n");
             }
         }
         for (FunctionDefinition def : functions.values()) {
@@ -802,11 +804,11 @@ public class Program {
         }
         if (!initList.isEmpty()) {
             StringBuilder buff3 = new StringBuilder();
-            buff3.append("{\n");
+            // buff3.append("{\n");
             for (Statement s : initList) {
-                buff3.append(Statement.indent(s.toC()));
+                buff3.append(s.toC());
             }
-            buff3.append("}\n");
+            // buff3.append("}\n");
             buff2.append(Statement.indent(buff3.toString()));
         }
         for (Statement s : mainList) {
@@ -973,10 +975,17 @@ Testing.
         if (m != null) {
             return m;
         }
-        String fileName = name.replace('.', '/');
-        InputStream in = getClass().getResourceAsStream("/" + fileName + ".bau");
+        String fileName = name.replace('.', '/') + ".bau";
+        InputStream in = getClass().getResourceAsStream("/" + fileName);
         if (in != null) {
             return readFromInputStream(in);
+        }
+        if (new File(fileName).exists()) {
+            try (FileInputStream f = new FileInputStream(fileName)) {
+                return readFromInputStream(f);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed reading from input stream: " + e);
+            }
         }
         return null;
     }
@@ -1104,6 +1113,59 @@ Testing.
 
     public FunctionDefinition getFunctionById(String functionId) {
         return functions.get(functionId);
+    }
+
+    public static String esc(String identifier) {
+        if (identifier.length() == 1) {
+            return identifier;
+        }
+        if (identifier.indexOf('_') > 0) {
+            return identifier;
+        }
+        if (identifier.startsWith("_")) {
+            if (identifier.charAt(1) <= 'Z') {
+                return identifier;
+            }
+            if (identifier.equals("_next")) {
+                return identifier;
+            }
+            return "_u" + identifier;
+        }
+        return identifier;
+        // TODO this needs some more work
+        /*
+        switch (identifier) {
+        case "code":
+        case "copyLen":
+        case "data":
+        case "dateTime":
+        case "day":
+        case "exceptionType":
+        case "File":
+        case "filePointer":
+        case "hour":
+        case "idx":
+        case "index":
+        case "i32":
+        case "i32_array":
+        case "len":
+        case "mode":
+        case "month":
+        case "minute":
+        case "millis":
+        case "newLen":
+        case "name":
+        case "pos":
+        case "result":
+        case "second":
+        case "shiftLeft":
+        case "shiftRight":
+        case "this":
+        case "year":
+            return identifier;
+        }
+        return "b_" + identifier;
+        */
     }
 
 }

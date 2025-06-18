@@ -5,6 +5,22 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
+REPL; local vs global variables: see Scala
+https://github.com/thomasmueller/bau-lang/issues/3
+https://onecompiler.com/scala/43n4ew98z
+println("Hello, World!")
+if (true) {
+  var x = 10
+  x = 20
+  println("Hello, World! " + x)
+  sayHi()
+}
+def sayHi(): Unit = {
+   val name = "Scala"
+   println(s"Hi, $name " + x)
+}
+
+bug: user defined modules
 
 bug:
 https://github.com/thomasmueller/bau-lang/issues/3#issuecomment-2978557241
