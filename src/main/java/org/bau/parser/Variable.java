@@ -322,7 +322,7 @@ public class Variable implements Expression, LeftValue {
 
     public String nameC() {
         if (isInternal) {
-            return name;
+            return "_" + name.substring(1);
         }
         return Program.esc(name);
     }

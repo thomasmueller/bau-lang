@@ -19,13 +19,11 @@ func fannkuch(n int) int {
    perm := make([]int, n)
    count := make([]int, n)      
    f, i, k, r, flips, nperm, checksum := 0, 0, 0, 0, 0, 0, 0
-      
    r = n
    for r > 0 {
       i = 0
       for r != 1 { count[r-1] = r; r -= 1 }
       for i < n { perm[i] = perm1[i]; i += 1 }
-
       // Count flips and update max  and checksum
       f = 0
       k = perm[0]
@@ -40,7 +38,6 @@ func fannkuch(n int) int {
       }
       if f>flips { flips = f }
       if (nperm & 0x1) == 0 { checksum += f } else { checksum -= f }
-
       // Use incremental change to generate another permutation
       var more = true
       for more {
@@ -69,6 +66,5 @@ func main() {
    flag.Parse()
    n := 7   
    if flag.NArg() > 0 { n,_ = strconv.Atoi(flag.Arg(0)) }   
-   
    fmt.Printf("Pfannkuchen(%d) = %d\n", n, fannkuch(n))    
 }

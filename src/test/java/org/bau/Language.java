@@ -5,33 +5,6 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
-REPL; local vs global variables: see Scala
-https://github.com/thomasmueller/bau-lang/issues/3
-https://onecompiler.com/scala/43n4ew98z
-println("Hello, World!")
-if (true) {
-  var x = 10
-  x = 20
-  println("Hello, World! " + x)
-  sayHi()
-}
-def sayHi(): Unit = {
-   val name = "Scala"
-   println(s"Hi, $name " + x)
-}
-
-bug: user defined modules
-
-bug:
-https://github.com/thomasmueller/bau-lang/issues/3#issuecomment-2978557241
-##
-fun add1(x int) int
-  return x + 1
-_t0 := 3
-add1(_t0)
-##
-
-
 bug:
 ##
 fun sql(condition int) macro
@@ -95,6 +68,25 @@ fun  macro query select(x column..) query
     for i := range(x.len)
         this.addColumns(#x[i])
     return this
+this kind of works:
+fun from(T type) i8[]
+    println('from ' T.name)
+    return T.name
+fun where(condition int) macro
+    if condition
+        println('select * from where ' condition.source)
+    else
+        println('select * from where ' condition.source)
+fun select(x T..) macro
+    println('len ' x.len)
+type address
+    id int
+    name i8[]
+fun main()
+    a : address('me')
+    from(address)
+    where(a.id > 10 and a.name.len < 2)
+
 
 Text editor
 https://news.ycombinator.com/item?id=44034459
@@ -142,6 +134,23 @@ TODO converter from Java or C or Rust to Bau
 TODO 100% code coverage, for parser at least
 
 TODO mark loop functions as "loop macro" or so (make sure they can not be called)
+
+TODO REPL, similar to Scala
+REPL; local vs global variables: see Scala
+https://github.com/thomasmueller/bau-lang/issues/3
+https://onecompiler.com/scala/43n4ew98z
+println("Hello, World!")
+if (true) {
+  var x = 10
+  x = 20
+  println("Hello, World! " + x)
+  sayHi()
+}
+def sayHi(): Unit = {
+   val name = "Scala"
+   println(s"Hi, $name " + x)
+}
+
 
 org.bau.Memory
   copy

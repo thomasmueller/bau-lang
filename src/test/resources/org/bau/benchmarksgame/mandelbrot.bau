@@ -1,14 +1,19 @@
+import org.bau.Env
 import org.bau.File
     putchar
+import org.bau.Math
 
 # See:
 # https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-2.html
 # Usage:
 # gcc -O3 demo.c
-# ./a.out > test.tiff
+# ./a.out 200 > test.tiff
 fun main()
-    w: 200
-    h: 200
+    n := 200
+    if Env.argCount() > 1
+        n = Math.parseInt(Env.arg(1))
+    w: n
+    h: n
     iter: 50
     limit: 2.0
     bitNum := 0
@@ -23,7 +28,7 @@ fun main()
             Cr := 2.0 * x / w - 1.5
             Ci := 2.0 * y / h - 1.0
             for i := until(iter)
-                break Tr + Ti >= limit * limit
+                break Tr + Ti > limit * limit
                 Zi = 2.0 * Zr * Zi + Ci
                 Zr = Tr - Ti + Cr
                 Tr = Zr * Zr
@@ -41,5 +46,3 @@ fun main()
                 File.putchar(byteAcc)
                 byteAcc = 0
                 bitNum = 0
-
-main()

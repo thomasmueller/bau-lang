@@ -1119,17 +1119,22 @@ Testing.
         if (identifier.length() == 1) {
             return identifier;
         }
-        if (identifier.indexOf('_') > 0) {
-            return identifier;
+        if (identifier.startsWith("0")) {
+            return "_" + identifier.substring(1);
         }
         if (identifier.startsWith("_")) {
             if (identifier.charAt(1) <= 'Z') {
+                // uppercase
                 return identifier;
             }
             if (identifier.equals("_next")) {
                 return identifier;
             }
+            // user defined
             return "_u" + identifier;
+        }
+        if (identifier.indexOf('_') > 0) {
+            return identifier;
         }
         return identifier;
         // TODO this needs some more work

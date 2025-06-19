@@ -16,33 +16,25 @@
 
 mpz_t n1, n2, d, u, v, w;
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     int k = 1, k2, i = 0;
     int n = atoi(argv[1]);
-
     mpz_init(u);
     mpz_init(v);
-
     mpz_init_set_si(w, 0);
     mpz_init_set_si(n1, 4);
     mpz_init_set_si(n2, 3);
     mpz_init_set_si(d, 1);
-
-    for (;;)
-    {
+    for (;;) {
         mpz_tdiv_q(u, n1, d);
         mpz_tdiv_q(v, n2, d);
-
-        if (mpz_cmp(u, v) == 0)
-        {
+        if (mpz_cmp(u, v) == 0) {
             putchar('0' + mpz_get_si(u));
             i++;
             if (i % 10 == 0)
                 printf("\t:%d\n", i);
             if (i == n)
                 break;
-
             // extract
             mpz_mul_si(u, u, -10);
             mpz_mul(u, d, u);
@@ -50,9 +42,7 @@ int main(int argc, char **argv)
             mpz_add(n1, n1, u);
             mpz_mul_si(n2, n2, 10);
             mpz_add(n2, n2, u);
-        }
-        else 
-        {
+        } else {
             // produce
             k2 = k * 2;
             mpz_mul_si(u, n1, k2 - 1);
@@ -65,7 +55,6 @@ int main(int argc, char **argv)
             k++;
         }
     }
-
     if (i % 10 != 0)
         printf("%*s\t:%d\n", 10 - n % 10, "", n);
     return 0;

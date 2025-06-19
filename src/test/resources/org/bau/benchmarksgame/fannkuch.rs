@@ -63,7 +63,6 @@ fn fannkuch(n: usize) -> i32 {
                 i += 1;
             }
             perm1[r] = p0;
-
             count[r] -= 1;
             if count[r] > 0 {
                 more = false;

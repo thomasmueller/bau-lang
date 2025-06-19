@@ -18,7 +18,7 @@ import (
 var n = 0
 
 type Node struct {
-     left, right   *Node
+     left, right *Node
 }
 
 func  bottomUpTree(depth int) *Node {
@@ -40,22 +40,17 @@ const minDepth = 4
 func main() {
    flag.Parse()
    if flag.NArg() > 0 { n,_ = strconv.Atoi( flag.Arg(0) ) }
-
    maxDepth := n
    if minDepth + 2 > n {
       maxDepth = minDepth + 2
    }
    stretchDepth := maxDepth + 1
-
    check := bottomUpTree(stretchDepth).itemCheck()
    fmt.Printf("stretch tree of depth %d\t check: %d\n", stretchDepth, check)
-
    longLivedTree := bottomUpTree(maxDepth)
-
    for depth := minDepth; depth <= maxDepth; depth+=2 {
       iterations := 1 << uint(maxDepth - depth + minDepth)
       check = 0
-
       for i := 1; i <= iterations; i++ {
          check += bottomUpTree(depth).itemCheck()
       }
@@ -63,4 +58,3 @@ func main() {
    }
    fmt.Printf("long lived tree of depth %d\t check: %d\n", maxDepth, longLivedTree.itemCheck())
 }
-  

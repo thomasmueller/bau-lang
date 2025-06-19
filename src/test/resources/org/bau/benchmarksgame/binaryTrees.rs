@@ -9,15 +9,11 @@ fn main() {
     if args.len() > 1 {
         n = args[1].parse::<i32>().unwrap_or(10);
     }
-
     let min_depth = 4;
     let max_depth = if min_depth + 2 > n { min_depth + 2 } else { n };
     let stretch_depth = max_depth + 1;
-
     stretch(stretch_depth);
-
     let mut long_lived_tree = Tree::with(max_depth);
-
     for depth in (min_depth..=max_depth).step_by(2) {
         let iterations = 1 << (max_depth - depth + min_depth);
         let mut sum = 0;
@@ -26,7 +22,6 @@ fn main() {
         }
         println!("{iterations}\t trees of depth {depth}\t check: {sum}");
     }
-
     let count = long_lived_tree.node_count();
     long_lived_tree.clear();
     println!("long lived tree of depth {max_depth}\t check: {count}");
@@ -81,7 +76,6 @@ impl Tree {
             l.clear();
         }
         self.left = None;
-
         if let Some(ref mut r) = self.right {
             r.clear();
         }

@@ -1856,7 +1856,11 @@ public class Parser {
             throw syntaxError("The function declared to not return a value");
         }
         if (!b.expr.isSimple()) {
-            String constId = "_r" + nextConstantId++;
+            // this is converted to "_r", but we can not use "_r" internally
+            // because this can conflict with user-defined variable names.
+            // user defined names can not start with a number
+            // (same as "0t")
+            String constId = "0r" + nextConstantId++;
             Assignment ret = new Assignment();
             ret.initial = true;
             ret.isConstant = true;
@@ -3090,7 +3094,11 @@ public class Parser {
         Assignment assign = new Assignment();
         assign.initial = true;
         assign.isConstant = true;
-        Variable var = new Variable("_t" + functionContext.nextTempVariableId(), type);
+        // this is converted to "_t", but we can not use "_t" internally
+        // because this can conflict with user-defined variable names.
+        // user defined names can not start with a number
+        // (same as "0r")
+        Variable var = new Variable("0t" + functionContext.nextTempVariableId(), type);
         var.isInternal = true;
         assign.type = type;
         assign.leftValue = var;
