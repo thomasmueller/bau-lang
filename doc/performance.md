@@ -5,7 +5,7 @@ Performance and efficiency have multiple aspects: ease of learning and usage
 
 This language transpiles to C, which has a highly optimized toolchain, and is available
 for embedded systems and server usage. This added step does slow down compilation a bit,
-compared to pure C.
+compared to pure C. Compilation is still much faster than with Rust.
 
 Startup time is significantly faster than that of virtual machine-based languages like Java or C#, 
 as there is no VM or runtime to initialize.
@@ -39,157 +39,20 @@ by running the same test 3 times inside the same JVM
 
 | Benchmark              |  Bau |   C  |  Go  | Java |Python| Rust |
 |------------------------|------|------|------|------|------|------|
-| #1 Binary Trees        |  5.2 |  5.1 |  5.6 |  3.3 | 10.7 |  5.5 |
-| #2 Fannkuch Redux      |  1.9 |  1.9 |  2.2 |  2.3 |  9.7 |  1.9 |
-| #3 SpeedTest           |  1.8 |  1.8 |  3.2 |  4.4 |270.0 |  1.7 |
-| #4 Pi Digits           |  3.0 |  0.3 |  0.9 |  3.5 |  5.1 |  1.4 |
-| #5 Mandelbrot          | 14.1 | 14.1 | 13.7 |  9.5 |432.0 |  8.1 |
+| Binary Trees           |  5.2 |  5.1 |  5.6 |  3.3 | 10.7 |  5.5 |
+| Fannkuch Redux         |  1.9 |  1.9 |  2.2 |  2.3 |  9.7 |  1.9 |
+| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 |270.0 |  1.7 |
+| Pi Digits              |  3.0 |  0.3 |  0.9 |  3.5 |  5.1 |  1.4 |
+| Mandelbrot             | 14.1 | 14.1 | 13.7 |  9.5 |432.0 |  8.1 |
+| Compilation            |  2.2 |  0.6 |  0.5 |  1.6 |  0.0 | 11.3 |
+
+<img src="performance.png" width=50% height=50%>
 
 So in summary, for these benchmarks, Bau has a similar performance
 then other popular programming languages, specially C.
 Which makes sense, because it is transpiled to C.
 It is sometimes slower, and sometimes faster than Java.
-
-## Compilation Times
-
-Bau requires transpilation and compilation.
-Transpilation is currently done via Java.
-But, compared to Rust, it is still a lot faster.
-
-| Benchmark              |  Bau |   C  |  Go  | Java |Python| Rust |
-|------------------------|------|------|------|------|------|------|
-| #1 Binary Trees        |  0.5 |  0.2 |  0.1 |  0.4 |  0.0 |  2.7 |
-| #2 Fannkuch Redux      |  0.4 |  0.1 |  0.1 |  0.3 |  0.0 |  2.1 |
-| #3 SpeedTest           |  0.4 |  0.1 |  0.1 |  0.3 |  0.0 |  2.1 |
-| #4 Pi Digits           |  0.5 |  0.1 |  0.1 |  0.3 |  0.0 |  2.1 |
-| #5 Mandelbrot          |  0.4 |  0.1 |  0.1 |  0.3 |  0.0 |  2.3 |
-
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#87CEEB"
----
-xychart-beta
-    title "Bau"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [5.2, 1.9, 1.8, 3.0, 14.1]
-```
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#00599C"
----
-xychart-beta
-    title "C"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [5.1, 1.9, 1.8, 0.3, 14.1]
-```
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#ED8B00"
----
-xychart-beta
-    title "Java"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [3.3, 2.3, 4.4, 3.5, 9.5]
-```
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#ED8B00"
----
-xychart-beta
-    title "Go"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [5.6, 2.2, 3.2, 0.9, 13.7]
-```
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#FFD43B"
----
-xychart-beta
-    title "Python"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [10.7, 9.7,270, 5.1, 432]
-```
-```mermaid
----
-config:
-    xyChart:
-        titleFontSize: 16
-        width: 500
-        height: 200
-        plotReservedSpacePercent: 80
-        yAxis: { showLabel: false, showTick: false, showAxisLine: false }
-        chartOrientation: "horizontal"
-    themeVariables:
-        xyChart:
-            titleColor: "#000000"
-            plotColorPalette: "#5A2A00"
----
-xychart-beta
-    title "Rust"
-    x-axis [#1, #2, #3, #4, #5]
-    y-axis "Seconds" 0 --> 20
-    bar [5.5, 1.9, 1.7, 1.4, 8.1]
-```
+Compilation (including transpilation) is faster than with Rust.
 
 ### Binary Trees
 
