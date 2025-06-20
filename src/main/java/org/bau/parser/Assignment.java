@@ -121,14 +121,8 @@ public class Assignment implements Statement {
     public String toC() {
         StringBuilder buff = new StringBuilder();
         if (!(value instanceof NullValue)) {
-            if (Program.SIMPLE_REF_COUNTING) {
-                if (!(value instanceof Call || value instanceof New)) {
-                    buff.append(Variable.incrementRefCountC(value.toC(), value.type()));
-                }
-            } else {
-                if (!(value instanceof Call)) {
-                    buff.append(Variable.incrementRefCountC(value.toC(), value.type()));
-                }
+            if (!(value instanceof Call || value instanceof New)) {
+                buff.append(Variable.incrementRefCountC(value.toC(), value.type()));
             }
         }
         if (!initial) {
@@ -147,7 +141,7 @@ public class Assignment implements Statement {
         } else {
             result = value.toC();
         }
-        if (initial && !isGlobalScope) {
+        if (initial && !isGlobalScope && !(leftValue instanceof FieldAccess)) {
             buff.append(type.toC());
             buff.append(' ');
         }

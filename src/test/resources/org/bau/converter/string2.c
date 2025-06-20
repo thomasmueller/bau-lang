@@ -274,8 +274,6 @@ org_bau_String_StringBuilder* org_bau_String_StringBuilder_new() {
     org_bau_String_StringBuilder* result = _malloc(sizeof(org_bau_String_StringBuilder));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->data = 0;
-    result->len = 0;
     return result;
 }
 struct org_bau_List_List_org_bau_String_string {
@@ -287,8 +285,6 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     org_bau_List_List_org_bau_String_string* result = _malloc(sizeof(org_bau_List_List_org_bau_String_string));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
     return result;
 }
 /* exception types */
@@ -369,7 +365,6 @@ int64_t idx_2(int64_t x, int64_t len) {
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_1(org_bau_String_string_array* array) {
     org_bau_List_List_org_bau_String_string* _t0 = org_bau_List_List_org_bau_String_string_new();
     _incUseStack(array);
-    _decUse(_t0->array, org_bau_String_string_array);
     _t0->array = array;
     _t0->size = 0;
     return _t0;
@@ -418,7 +413,6 @@ org_bau_String_string org_bau_List_List_org_bau_String_string_get_2(org_bau_List
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
     org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
     _incUseStack(data);
-    _decUse(_t1->data, i8_array);
     _t1->data = data;
     _t1->len = 0;
     return _t1;
@@ -550,7 +544,6 @@ org_bau_String_string org_bau_String_str_1(i8_array* s) {
 org_bau_String_string org_bau_String_string_1(i8_array* data) {
     org_bau_String_string _t0 = org_bau_String_string_new();
     _incUseStack(data);
-    _decUse(_t0.data, i8_array);
     _t0.data = data;
     return _t0;
 }

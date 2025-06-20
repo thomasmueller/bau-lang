@@ -69,7 +69,7 @@ public class FunctionDefinition {
         }
         buff.append(' ');
         if (module != null) {
-            buff.append(Program.esc(module.replace(".", "_")) + "_");
+            buff.append(Program.esc(module).replace(".", "_") + "_");
         }
         if (callType != null) {
             buff.append(callType.idC()).append('_');
@@ -333,7 +333,7 @@ public class FunctionDefinition {
     }
 
     public String nameC() {
-        return Program.esc(name);
+        return name;
     }
 
 }

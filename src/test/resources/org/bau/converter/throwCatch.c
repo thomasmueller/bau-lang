@@ -339,7 +339,6 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
     _t0.exceptionType = 0;
     _incUseStack(message);
-    _decUse(_t0.message, i8_array);
     _t0.message = message;
     return _t0;
 }

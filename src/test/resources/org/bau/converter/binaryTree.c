@@ -262,8 +262,6 @@ Tree* Tree_new() {
     Tree* result = _malloc(sizeof(Tree));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->left = 0;
-    result->right = 0;
     return result;
 }
 /* exception types */
@@ -307,10 +305,8 @@ i8_array* string_1003;
 Tree* Tree_2(Tree* left, Tree* right) {
     Tree* _t0 = Tree_new();
     _incUseStack(left);
-    _decUse(_t0->left, Tree);
     _t0->left = left;
     _incUseStack(right);
-    _decUse(_t0->right, Tree);
     _t0->right = right;
     return _t0;
 }

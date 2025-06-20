@@ -307,6 +307,7 @@ int main(int _argc, char *_argv[]) {
             break;
         }
     }
+    _decUseStack(cache, int_array);
     _end();
     return 0;
 }

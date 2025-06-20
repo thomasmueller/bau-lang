@@ -245,8 +245,6 @@ List_int* List_int_new() {
     List_int* result = _malloc(sizeof(List_int));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
     return result;
 }
 /* exception types */
@@ -271,7 +269,6 @@ void List_int_free(List_int* x) {
 List_int* List_int_1(int_array* array) {
     List_int* _t0 = List_int_new();
     _incUseStack(array);
-    _decUse(_t0->array, int_array);
     _t0->array = array;
     _t0->size = 0;
     return _t0;

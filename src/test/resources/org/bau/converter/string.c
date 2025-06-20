@@ -327,7 +327,6 @@ string str_1(i8_array* s) {
 string string_1(i8_array* data) {
     string _t0 = string_new();
     _incUseStack(data);
-    _decUse(_t0.data, i8_array);
     _t0.data = data;
     return _t0;
 }

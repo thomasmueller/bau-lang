@@ -260,8 +260,6 @@ struct Entry_owned {
 Entry_owned* Entry_owned_new() {
     Entry_owned* result = _malloc(sizeof(Entry_owned));
     _traceMalloc(result);
-    result->key = 0;
-    result->value = 0;
     return result;
 }
 /* exception types */

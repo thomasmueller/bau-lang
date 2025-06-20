@@ -9,7 +9,6 @@ import java.util.List;
 
 import org.bau.parser.Bounds.ApplyType;
 import org.bau.parser.Bounds.CompareResult;
-import org.bau.parser.SpecialOperation.SpecialOperationType;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueArray;
 import org.bau.runtime.Value.ValueException;
@@ -356,9 +355,12 @@ public class Parser {
         New n = new New(type, null);
         Variable result = assignTempVariable(def.list, n);
         for (Variable var : type.fields) {
+//            if (var.type().isCopyType() && var.type().isNumber()) {
+//                continue;
+//            }
             Assignment assign = new Assignment();
             assign.type = var.type();
-            assign.initial = false;
+            assign.initial = true;
             assign.leftValue = new FieldAccess(result, var.name, var.type());
             if (var.type().isCopyType() && var.type().isNumber()) {
                 assign.value = var.type().nullExpression();
@@ -997,8 +999,6 @@ public class Parser {
                     }
                 }
                 v.constantValue = constValue;
-                if (v.constantValue instanceof Value.ValueRef) {
-                }
                 s.leftValue = v;
                 s.setConstantBounds(v);
                 s.type = s.value.type();
@@ -1058,9 +1058,16 @@ public class Parser {
                     }
                     type = rangeType;
                 }
-                Variable v = new Variable(module, identifier, global, type);
+                if (targetType != null && targetType != s.value.type()) {
+                    if (targetType.isNullable() && type.orNull() == targetType) {
+                        type = targetType;
+                    } else {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                }
+                s.type = type;
+                Variable v = new Variable(module, identifier, global, s.type);
                 s.leftValue = v;
-                s.type = s.value.type();
                 if (global) {
                     program.addGlobalVariable(v);
                 } else {
@@ -1095,6 +1102,9 @@ public class Parser {
                     readEndOfStatement();
                     target.add(new NativeCode(s + "\n"));
                     return;
+                }
+                if (m == null) {
+                    m = program.getImportEntry(identifier);
                 }
                 Call call = new Call();
                 call.statement = true;
@@ -2389,10 +2399,9 @@ public class Parser {
         }
         ArrayList<String> list = functionContext.newVariablesList(stackPos);
         String exceptString = except == null ? "" : except.toString();
-        Variable lastFreedVar = null;
         for (String name : list) {
             // do not close if we return it
-            if (program.simpleRefCount && name.equals(exceptString)) {
+            if (name.equals(exceptString)) {
                 continue;
             }
             Variable var = functionContext.getVariable(null, name);
@@ -2400,26 +2409,11 @@ public class Parser {
                 throw syntaxError("Variable not found: '" + name + "'");
             }
             if (var.type().needFree()) {
-                lastFreedVar = var;
                 Free free = new Free(var);
                 autoClose.add(free);
             }
         }
         Collections.reverse(autoClose);
-        if (!program.simpleRefCount && except != null) {
-            // we need to assign so that we get a _incUseStack
-            assignTempVariable(autoClose, except);
-            if (autoClose.size() == 2) {
-                // ignore pair of decStack & incStack of the same variable
-                if (except == lastFreedVar) {
-                    autoClose.clear();
-                }
-            }
-        }
-        if (!program.simpleRefCount && autoClose.size() > 0) {
-            SpecialOperation op = new SpecialOperation(SpecialOperationType.ZERO_COUNT_TABLE_GC);
-            autoClose.add(op);
-        }
         return autoClose;
     }
 

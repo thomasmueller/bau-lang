@@ -261,7 +261,6 @@ File* File_new() {
     File* result = _malloc(sizeof(File));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->fp = 0;
     return result;
 }
 /* exception types */

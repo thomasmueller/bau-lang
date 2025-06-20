@@ -49,7 +49,7 @@ fun copyOf(a i32[], newLen int) i32[]
     native(```
         #include <stdio.h>
         i32_array* result1 = _malloc(sizeof(i32_array));
-        _traceMalloc(array);
+        _traceMalloc(result1);
         result1->len = newLen;
         result1->data = _malloc(sizeof(int32_t) * newLen);
         if (newLen > copyLen) {

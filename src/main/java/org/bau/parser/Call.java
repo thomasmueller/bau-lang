@@ -191,7 +191,7 @@ public class Call implements Statement, Expression, LeftValue {
     public String callToC() {
         StringBuilder buff = new StringBuilder();
         if (def.module != null) {
-            buff.append(Program.esc(def.module.replace('.', '_')) + "_");
+            buff.append(Program.esc(def.module).replace('.', '_') + "_");
         }
         if (def.callType != null) {
             buff.append(def.callType.idC()).append('_');

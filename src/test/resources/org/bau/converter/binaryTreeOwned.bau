@@ -6,8 +6,9 @@ fun main()
     stretchDepth : maxDepth + 1
     stretch Tree+? := with(stretchDepth)
     println('ownership / borrowing')
-    println('stretch tree of depth ' stretchDepth ' check: ' stretch.nodeCount())
-    stretch = with(0)
+    if stretch
+        println('stretch tree of depth ' stretchDepth ' check: ' stretch.nodeCount())
+    stretch = null
     longLived := with(maxDepth)
     depth := minDepth
     while depth <= maxDepth

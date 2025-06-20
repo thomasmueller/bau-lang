@@ -303,6 +303,9 @@ int main(int _argc, char *_argv[]) {
     _decUseStack(f, i8_array);
     _decUseStack(e, i8_array);
     _decUseStack(d, i8_array);
+    _decUseStack(d, i8_array);
+    _decUseStack(e, i8_array);
+    _decUseStack(f, i8_array);
     _end();
     return 0;
 }

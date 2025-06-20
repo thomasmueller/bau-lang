@@ -227,7 +227,6 @@ Value* Value_new() {
     Value* result = _malloc(sizeof(Value));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->data = 0;
     return result;
 }
 /* exception types */

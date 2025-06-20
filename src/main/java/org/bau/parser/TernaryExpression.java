@@ -102,6 +102,7 @@ public class TernaryExpression implements Expression {
                     new NullValue(type);
             result = parser.assignTempVariable(target, init, type);
         }
+        condition = condition.writeStatements(parser, assignment, target);
         If ifStatement = new If();
         ifStatement.conditions.add(condition);
         ifStatement.listList.add(ifTrueStatements);

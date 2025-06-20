@@ -261,7 +261,6 @@ org_bau_File_File* org_bau_File_File_new() {
     org_bau_File_File* result = _malloc(sizeof(org_bau_File_File));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->filePointer = 0;
     return result;
 }
 /* exception types */

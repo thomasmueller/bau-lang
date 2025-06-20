@@ -367,12 +367,15 @@ void eliminateDigit_1(int64_t d) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_multiplyInt_2(den, d);
     org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_subtract_2(acc, _t0);
     org_bau_BigInt_bigInt_copy(&_t1);
+    org_bau_BigInt_bigInt_free(&acc);
     acc = _t1;
     org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_multiplyInt_2(acc, 10);
     org_bau_BigInt_bigInt_copy(&_t2);
+    org_bau_BigInt_bigInt_free(&acc);
     acc = _t2;
     org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiplyInt_2(num, 10);
     org_bau_BigInt_bigInt_copy(&_t3);
+    org_bau_BigInt_bigInt_free(&num);
     num = _t3;
     org_bau_BigInt_bigInt_free(&_t3);
     org_bau_BigInt_bigInt_free(&_t2);
@@ -382,12 +385,15 @@ void eliminateDigit_1(int64_t d) {
 int64_t extractDigit_1(int64_t nth) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_multiplyInt_2(num, nth);
     org_bau_BigInt_bigInt_copy(&_t0);
+    org_bau_BigInt_bigInt_free(&tmp1);
     tmp1 = _t0;
     org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_add_2(tmp1, acc);
     org_bau_BigInt_bigInt_copy(&_t1);
+    org_bau_BigInt_bigInt_free(&tmp2);
     tmp2 = _t1;
     org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_divide_2(tmp2, den);
     org_bau_BigInt_bigInt_copy(&_t2);
+    org_bau_BigInt_bigInt_free(&tmp1);
     tmp1 = _t2;
     int64_t _t3 = org_bau_BigInt_bigInt_intValue_1(tmp1);
     org_bau_BigInt_bigInt_free(&_t2);
@@ -414,15 +420,19 @@ void nextTerm_1(int64_t k) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_shiftLeft_2(num, 1);
     org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_add_2(acc, _t0);
     org_bau_BigInt_bigInt_copy(&_t1);
+    org_bau_BigInt_bigInt_free(&acc);
     acc = _t1;
     org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_multiplyInt_2(acc, ( k * 2 ) + 1);
     org_bau_BigInt_bigInt_copy(&_t2);
+    org_bau_BigInt_bigInt_free(&acc);
     acc = _t2;
     org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiplyInt_2(den, ( k * 2 ) + 1);
     org_bau_BigInt_bigInt_copy(&_t3);
+    org_bau_BigInt_bigInt_free(&den);
     den = _t3;
     org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_multiplyInt_2(num, k);
     org_bau_BigInt_bigInt_copy(&_t4);
+    org_bau_BigInt_bigInt_free(&num);
     num = _t4;
     org_bau_BigInt_bigInt_free(&_t4);
     org_bau_BigInt_bigInt_free(&_t3);
@@ -483,7 +493,6 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_new();
     _t0.negative = 0;
     _incUseStack(data);
-    _decUse(_t0.data, i32_array);
     _t0.data = data;
     return _t0;
 }
@@ -505,7 +514,7 @@ i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen) {
         copyLen = a->len;
     }
     i32_array* result1 = _malloc(sizeof(i32_array));
-    _traceMalloc(array);
+    _traceMalloc(result1);
     result1->len = newLen;
     result1->data = _malloc(sizeof(int32_t) * newLen);
     if (newLen > copyLen) {
@@ -1368,6 +1377,11 @@ int main(int _argc, char *_argv[]) {
     printf("dummy: %lld\n", (long long)dummy);
     _decUseStack(buff, i8_array);
     _decUseStack(_t0, i8_array);
+    org_bau_BigInt_bigInt_free(&tmp1);
+    org_bau_BigInt_bigInt_free(&tmp2);
+    org_bau_BigInt_bigInt_free(&acc);
+    org_bau_BigInt_bigInt_free(&den);
+    org_bau_BigInt_bigInt_free(&num);
     _end();
     return 0;
 }

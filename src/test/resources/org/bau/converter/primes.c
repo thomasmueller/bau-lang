@@ -246,7 +246,6 @@ BitField* BitField_new() {
     BitField* result = _malloc(sizeof(BitField));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->data = 0;
     return result;
 }
 /* exception types */
@@ -277,7 +276,6 @@ int64_t randomSeed;
 BitField* BitField_1(int_array* data) {
     BitField* _t0 = BitField_new();
     _incUseStack(data);
-    _decUse(_t0->data, int_array);
     _t0->data = data;
     return _t0;
 }

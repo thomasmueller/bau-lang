@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -24,11 +25,8 @@ import org.bau.std.Std;
 
 public class Program {
 
-    public final static boolean TM_MALLOC = true;
-    private final static boolean TRACE_REF_COUNTS = false;
-
-    public final static boolean SIMPLE_REF_COUNTING = true;
-    public boolean simpleRefCount = SIMPLE_REF_COUNTING;
+    private boolean useTmMalloc = true;
+    private boolean traceRefCounts = false;
 
     ArrayList<Statement> initList = new ArrayList<>();
     ArrayList<Statement> mainList = new ArrayList<>();
@@ -155,6 +153,14 @@ public class Program {
             throw new IllegalArgumentException(name);
         }
         return def;
+    }
+
+    public void traceRefCounts() {
+        this.traceRefCounts = true;
+    }
+
+    public void useTmMalloc() {
+        this.useTmMalloc = true;
     }
 
     public Expression cast(Expression expr, DataType target) {
@@ -355,13 +361,13 @@ public class Program {
                 includes.addAll(def.includes);
             }
         }
-        if (TM_MALLOC) {
+        if (useTmMalloc) {
             includes.addAll(List.of(StandardLib.TM_MALLOC_INCLUDE.split("\n")));
         }
         for(String i : includes) {
             buff.append("#include " + i + "\n");
         }
-        if (TM_MALLOC) {
+        if (useTmMalloc) {
             buff.append(StandardLib.TM_MALLOC);
             buff.append("#define _malloc(a)      tmmalloc(a)\n");
             buff.append("#define _free(a)        tmfree(a)\n");
@@ -369,7 +375,7 @@ public class Program {
             buff.append("#define _malloc(a)      malloc(a)\n");
             buff.append("#define _free(a)        free(a)\n");
         }
-        if (TRACE_REF_COUNTS) {
+        if (traceRefCounts) {
             buff.append("int __globalObjects = 0;\n");
             buff.append("int __refCountUpdates = 0;\n");
             buff.append("int __refCountStackUpdates = 0;\n");
@@ -387,125 +393,12 @@ public class Program {
             buff.append("#define _traceMalloc(a)\n");
             buff.append("#define _traceFree(a)\n");
         }
-        if (SIMPLE_REF_COUNTING) {
-            // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
-            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
-            buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}\n");
-            // buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if((a)->_refCount < 0) PRINT(\"################ DOUBLE FREE ################\\n\"); if(--((a)->_refCount) == 0)type##_free(a);}}\n");
-            buff.append("#define _incUseStack(a)       _incUse(a)\n");
-            buff.append("#define _decUseStack(a, type) _decUse(a, type)\n");
-        } else {
-            // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
-            buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
-            buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0){_addPossiblyFree((void*)a,type##_freeIfUnused);_zeroCountTableGC();}}}\n");
-            buff.append("#define _incUseStack(a)       {REF_COUNT_STACK_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"+s  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0);_pushStack(&(a)->_refCount);}}\n");
-            buff.append("#define _decUseStack(a, type) {REF_COUNT_STACK_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"-s  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(_popStack()==0)_addPossiblyFree((void*)a,type##_freeIfUnused);}}\n");
-        }
-        if (!SIMPLE_REF_COUNTING) {
-            buff.append("const int _stackReferenceTableSize = 1000;\n"
-                    + "const int _zeroCountTableSize = 100;\n"
-                    + "const int _zeroCountTableLimit = _zeroCountTableSize - 20;\n"
-                    + "int _stackReferenceTableIndex = 0;\n"
-                    + "int _zeroCountTableIndex = 0;\n"
-                    + "typedef struct _stackReference _stackReference;\n"
-                    + "struct _stackReference {\n"
-                    + "    int32_t applied;\n"
-                    + "    int32_t* refCount;\n"
-                    + "};\n"
-                    + "_stackReference* _stackReferenceTable;\n"
-                    + "typedef struct _zeroCountTableEntry _zeroCountTableEntry;\n"
-                    + "struct _zeroCountTableEntry {\n"
-                    + "    void* object;\n"
-                    + "    int(*freeIfUnused)(void*);\n"
-                    + "};\n"
-                    + "_zeroCountTableEntry* _zeroCountTable;\n"
-                    + "void _initRefCount() {\n"
-                    + "    _zeroCountTable = malloc(_zeroCountTableSize * sizeof(_zeroCountTableEntry));\n"
-                    + "    _stackReferenceTable = malloc(_stackReferenceTableSize * sizeof(_stackReference));\n"
-                    + "    PRINT(\"== initRefCount\\n\");\n"
-                    + "}\n"
-                    + "void _applyStackIncrements() {\n"
-                    + "    PRINT(\"== applyStackIncrements\\n\");\n"
-                    + "    for (int i = 0; i < _stackReferenceTableIndex; i++) {\n"
-                    + "        _stackReference* ref = &_stackReferenceTable[i];\n"
-                    + "        if (ref->applied == 0) {\n"
-                    + "            PRINT(\"== ++ %p\\n\", ref->refCount);\n"
-                    + "            ref->applied = 1;\n"
-                    + "            (*ref->refCount)++;\n"
-                    + "        }\n"
-                    + "    }\n"
-                    + "}\n"
-                    + "int _compareZeroCountTableEntries(const void* a, const void* b) {\n"
-                    + "    _zeroCountTableEntry* entryA = (struct _zeroCountTableEntry*)a;\n"
-                    + "    _zeroCountTableEntry* entryB = (struct _zeroCountTableEntry*)b;\n"
-                    + "    if (entryA->object < entryB->object) return -1;\n"
-                    + "    if (entryA->object > entryB->object) return 1;\n"
-                    + "    return 0;\n"
-                    + "}\n"
-                    + "void _systemGC() {\n"
-                    + "    PRINT(\"== systemGC\\n\");\n"
-                    + "    _applyStackIncrements();\n"
-                    + "    if (_zeroCountTableIndex == 0) {\n"
-                    + "        return;\n"
-                    + "    }\n"
-                    + "    qsort(_zeroCountTable, _zeroCountTableIndex, sizeof(_zeroCountTableEntry), _compareZeroCountTableEntries);\n"
-                    + "    int target = 0;\n"
-                    + "    PRINT(\"== retain %i %p\\n\", 0, _zeroCountTable[0].object);\n"
-                    + "    for (int i = 1; i < _zeroCountTableIndex; i++) {\n"
-                    + "        if (_zeroCountTable[i].object != _zeroCountTable[target].object) {\n"
-                    + "            target++;\n"
-                    + "            _zeroCountTable[target] = _zeroCountTable[i];\n"
-                    + "            PRINT(\"== retain %i %p\\n\", i, _zeroCountTable[i].object);\n"
-                    + "        } else {\n"
-                    + "            PRINT(\"== ignore duplicate %i %p\\n\", i, _zeroCountTable[i].object);\n"
-                    + "        }\n"
-                    + "    }\n"
-                    + "    _zeroCountTableIndex = target + 1;\n"
-                    + "    for (int i = 0; i < _zeroCountTableIndex; i++) {\n"
-                    + "        PRINT(\"== freeIfUnused %p [%d]\\n\", _zeroCountTable[i].object, i);\n"
-                    + "        if (!_zeroCountTable[i].freeIfUnused(_zeroCountTable[i].object)) {\n"
-                    + "            PRINT(\"== retain %p\\n\", _zeroCountTable[i].object);\n"
-                    + "        } else {\n"
-                    + "            PRINT(\"== freed %p\\n\", _zeroCountTable[i].object);\n"
-                    + "        }\n"
-                    + "    }\n"
-                    + "    _zeroCountTableIndex = 0;\n"
-                    + "}\n"
-                    + "void _zeroCountTableGC() {\n"
-                    + "    if (_zeroCountTableIndex >= _zeroCountTableLimit) {\n"
-                    + "        if (_zeroCountTableIndex >= _zeroCountTableSize) {\n"
-                    + "            fprintf(stdout, \"Zero count table overflow\");\n"
-                    + "            exit(1);\n"
-                    + "        }\n"
-                    + "        _systemGC();\n"
-                    + "    }\n"
-                    + "}\n"
-                    + "void _addPossiblyFree(void* object, int(*freeIfUnused)(void*)) {\n"
-                    + "    PRINT(\"== addPossiblyFree %p\\n\", object);\n"
-                    + "    _zeroCountTableEntry* e = &_zeroCountTable[_zeroCountTableIndex++];\n"
-                    + "    e->object = object;\n"
-                    + "    e->freeIfUnused = freeIfUnused;\n"
-                    + "}\n"
-                    + "void _pushStack(int* refCount) {\n"
-                    + "    _stackReference* ref = &_stackReferenceTable[_stackReferenceTableIndex];\n"
-                    + "    ref->applied = 0;\n"
-                    + "    ref->refCount = refCount;\n"
-                    + "    PRINT(\"== pushStack[%d] count=%d\\n\", _stackReferenceTableIndex, *ref->refCount);\n"
-                    + "    _stackReferenceTableIndex++;\n"
-                    + "}\n"
-                    + "int _popStack() {\n"
-                    + "    _stackReferenceTableIndex--;\n"
-                    + "    PRINT(\"== popStack[%d]\\n\", _stackReferenceTableIndex);\n"
-                    + "    _stackReference* ref = &_stackReferenceTable[_stackReferenceTableIndex];\n"
-                    + "    PRINT(\"== popStack[%d] applied=%d count=%d\\n\", _stackReferenceTableIndex, ref->applied, *ref->refCount);\n"
-                    + "    if (ref->applied == 1) {\n"
-                    + "        ref->applied = 0;\n"
-                    + "        (*(ref->refCount))--;\n"
-                    + "        PRINT(\"== popStack[%d] applied=%d count=%d (dec)\\n\", _stackReferenceTableIndex, ref->applied, *ref->refCount);\n"
-                    + "    }\n"
-                    + "    return *(ref->refCount);\n"
-                    + "}");
-        }
+        // note: __builtin_assume((a)->_refCount > 0) doesn't seem to have an effect
+        buff.append("#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"++  %p line %d, from %d\\n\", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}\n");
+        buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}\n");
+        // buff.append("#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT(\"--  %p line %d, from %d\\n\", a, __LINE__, (a)->_refCount);if((a)->_refCount < 0) PRINT(\"################ DOUBLE FREE ################\\n\"); if(--((a)->_refCount) == 0)type##_free(a);}}\n");
+        buff.append("#define _incUseStack(a)       _incUse(a)\n");
+        buff.append("#define _decUseStack(a, type) _decUse(a, type)\n");
         buff.append("int64_t arrayOutOfBounds(int64_t x, int64_t len) {\n"
                 + "    fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
                 + "    exit(1);\n"
@@ -546,7 +439,7 @@ public class Program {
                     buff.append(Statement.indent("result->data = _malloc(sizeof(" + t.baseType().toC() + ") * len);\n"));
                     buff.append(Statement.indent("memset(result->data, 0, sizeof(" + t.baseType().toC() + ") * len);\n"));
                     buff.append(Statement.indent("_traceMalloc(result->data);\n"));
-                    buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
+                    buff.append(Statement.indent("result->_refCount = 1;\n"));
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
                 } else if (t.isPointer()) {
@@ -554,13 +447,13 @@ public class Program {
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
                     if (t.memoryType() == MemoryType.REF_COUNT) {
-                        buff.append(Statement.indent("result->_refCount = " + (SIMPLE_REF_COUNTING ? "1" : "0") + ";\n"));
+                        buff.append(Statement.indent("result->_refCount = 1;\n"));
                     }
-                    for (Variable f : t.fields) {
-                        if (f.type().isNumber() || !f.type().isCopyType()) {
-                            buff.append(Statement.indent("result->" + f.assignmentC() + " = 0;\n"));
-                        }
-                    }
+//                    for (Variable f : t.fields) {
+//                        if (f.type().isNumber()) {
+//                            buff.append(Statement.indent("result->" + f.assignmentC() + " = 0;\n"));
+//                        }
+//                    }
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
                 } else if (!t.isArray()) {
@@ -633,9 +526,6 @@ public class Program {
             if (t.isUsed()) {
                 if (t.isArray() || t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x);\n");
-                    if (!SIMPLE_REF_COUNTING) {
-                        buff.append("int " + t.nameC() + "_freeIfUnused(void* x);\n");
-                    }
                     if (t.isCopyType() && !t.isArray()) {
                         buff.append("void " + t.nameC() + "_copy(" + t.nameC() + "* x);\n");
                     }
@@ -684,12 +574,6 @@ public class Program {
                         }
                         buff.append("}\n");
                     }
-                    if (!SIMPLE_REF_COUNTING) {
-                        buff.append("int " + t.nameC() + "_freeIfUnused(void* x) {\n");
-                        buff.append(Statement.indent("PRINT(\"== freeIfUnused %p count=%d\\n\", x, ((" + t.nameC() + "*)x)->_refCount);\n"));
-                        buff.append(Statement.indent("if (((" + t.nameC() + "*)x)->_refCount == 0) { _free(x); _traceFree(x); return 1; } return 0;\n"));
-                        buff.append("}\n");
-                    }
                     if (t.isCopyType() && !t.isArray()) {
                         buff.append("void " + t.nameC() + "_copy(" + t.nameC() + "* x) {\n");
                         for (Variable f : t.fields) {
@@ -716,8 +600,8 @@ public class Program {
             }
         }
         if (hasStringConstants) {
-            buff.append(esc("i8_array") + "* str_const(char* data, uint32_t len) {\n");
-            buff.append(Statement.indent(esc("i8_array") +"* result = _malloc(sizeof(" + esc("i8_array") + "));\n"));
+            buff.append(esc("i8") + "_array* str_const(char* data, uint32_t len) {\n");
+            buff.append(Statement.indent(esc("i8") + "_array* result = _malloc(sizeof(" + esc("i8") + "_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -726,13 +610,13 @@ public class Program {
             buff.append("}\n");
             for (long id: stringConstantsMap.keySet()) {
                 if (stringConstantsMap.get(id).isUsed()) {
-                    buff.append(esc("i8_array") + "* string_" + id + ";\n");
+                    buff.append(esc("i8") + "_array* string_" + id + ";\n");
                 }
             }
         }
         if (!arrayConstantsMap.isEmpty()) {
-            buff.append(esc("int_array") + "* int_array_const(int64_t* data, uint32_t len) {\n");
-            buff.append(Statement.indent(esc("int_array") + "* result = _malloc(sizeof(" + esc("int_array") + "));\n"));
+            buff.append(esc("int") + "_array* int_array_const(int64_t* data, uint32_t len) {\n");
+            buff.append(Statement.indent(esc("int") + "_array* result = _malloc(sizeof(" + esc("int") + "_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -740,7 +624,7 @@ public class Program {
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
             for (long id: arrayConstantsMap.keySet()) {
-                buff.append(esc("int_array") + "* array_" + id + ";\n");
+                buff.append(esc("int") + "_array* array_" + id + ";\n");
             }
         }
         for (Variable var : globalVariables.values()) {
@@ -757,10 +641,7 @@ public class Program {
             }
         }
         buff.append("int main(int _argc, char *_argv[]) {\n");
-        if (!SIMPLE_REF_COUNTING) {
-            buff.append(Statement.indent("_initRefCount();\n"));
-        }
-        if (TM_MALLOC) {
+        if (useTmMalloc) {
             buff.append(Statement.indent("tmmalloc_init();\n"));
         }
         buff.append(Statement.indent("__argc = _argc;\n"));
@@ -804,11 +685,9 @@ public class Program {
         }
         if (!initList.isEmpty()) {
             StringBuilder buff3 = new StringBuilder();
-            // buff3.append("{\n");
             for (Statement s : initList) {
                 buff3.append(s.toC());
             }
-            // buff3.append("}\n");
             buff2.append(Statement.indent(buff3.toString()));
         }
         for (Statement s : mainList) {
@@ -828,8 +707,17 @@ public class Program {
                 buff.append(Statement.indent(s.toC()));
             }
         }
-        if (!SIMPLE_REF_COUNTING) {
-            buff.append(Statement.indent("_systemGC();\n"));
+        // free contants (to avoid memory leaks)
+        for (Statement s : initList) {
+            if (s instanceof Assignment) {
+                LeftValue lv = ((Assignment) s).leftValue;
+                if (lv instanceof Variable) {
+                    if (lv.type().needIncDec() || lv.type().needFree()) {
+                        Free free = new Free((Variable) lv);
+                        buff.append(Statement.indent(free.toC()));
+                    }
+                }
+            }
         }
         buff.append(Statement.indent("_end();\n"));
         buff.append(Statement.indent("return 0;\n"));
@@ -1121,6 +1009,14 @@ Testing.
         }
         if (identifier.startsWith("0")) {
             return "_" + identifier.substring(1);
+        }
+        int underscoreIndex = identifier.indexOf('_', 1);
+        if (underscoreIndex > 0) {
+            if (identifier.toUpperCase(Locale.ENGLISH).equals(identifier)) {
+                // constants
+                return identifier;
+            }
+            identifier = identifier.replaceAll("_", "__");
         }
         if (identifier.startsWith("_")) {
             if (identifier.charAt(1) <= 'Z') {

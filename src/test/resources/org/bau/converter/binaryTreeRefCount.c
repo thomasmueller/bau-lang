@@ -263,8 +263,6 @@ Tree* Tree_new() {
     Tree* result = _malloc(sizeof(Tree));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->left = 0;
-    result->right = 0;
     return result;
 }
 /* exception types */
@@ -308,10 +306,8 @@ int64_t randomSeed;
 Tree* Tree_2(Tree* left, Tree* right) {
     Tree* _t0 = Tree_new();
     _incUseStack(left);
-    _decUse(_t0->left, Tree);
     _t0->left = left;
     _incUseStack(right);
-    _decUse(_t0->right, Tree);
     _t0->right = right;
     return _t0;
 }
@@ -361,12 +357,12 @@ int main(int _argc, char *_argv[]) {
     int64_t stretchDepth = 4;
     Tree* stretch = with_1(4);
     printf("ref count\n");
-    int64_t _t0 = Tree_nodeCount_1(stretch);
-    printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
-    Tree* _t1 = with_1(0);
-    _incUseStack(_t1);
+    if (stretch != NULL) {
+        int64_t _t0 = Tree_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+    }
     _decUseStack(stretch, Tree);
-    stretch = _t1;
+    stretch = NULL;
     Tree* longLived = with_1(3);
     int64_t depth = 1;
     while (depth <= 3) {
@@ -382,10 +378,9 @@ int main(int _argc, char *_argv[]) {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t2 = Tree_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t2);
+    int64_t _t1 = Tree_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t1);
     _decUseStack(longLived, Tree);
-    _decUseStack(_t1, Tree);
     _decUseStack(stretch, Tree);
     _end();
     return 0;

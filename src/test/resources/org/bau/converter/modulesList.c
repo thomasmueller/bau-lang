@@ -245,8 +245,6 @@ org_bau_List_List_int* org_bau_List_List_int_new() {
     org_bau_List_List_int* result = _malloc(sizeof(org_bau_List_List_int));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
     return result;
 }
 /* exception types */
@@ -275,7 +273,6 @@ int64_t idx_2(int64_t x, int64_t len) {
 org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
     org_bau_List_List_int* _t0 = org_bau_List_List_int_new();
     _incUseStack(array);
-    _decUse(_t0->array, int_array);
     _t0->array = array;
     _t0->size = 0;
     return _t0;

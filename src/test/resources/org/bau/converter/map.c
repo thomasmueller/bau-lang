@@ -293,10 +293,6 @@ HashMap_int_int* HashMap_int_int_new() {
     HashMap_int_int* result = _malloc(sizeof(HashMap_int_int));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->size = 0;
-    result->keys = 0;
-    result->values = 0;
-    result->hashes = 0;
     return result;
 }
 struct HashMap_str_str {
@@ -310,10 +306,6 @@ HashMap_str_str* HashMap_str_str_new() {
     HashMap_str_str* result = _malloc(sizeof(HashMap_str_str));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->size = 0;
-    result->keys = 0;
-    result->values = 0;
-    result->hashes = 0;
     return result;
 }
 /* exception types */
@@ -396,13 +388,10 @@ HashMap_int_int* HashMap_int_int_3(int_array* keys, int_array* values, int_array
     HashMap_int_int* _t0 = HashMap_int_int_new();
     _t0->size = 0;
     _incUseStack(keys);
-    _decUse(_t0->keys, int_array);
     _t0->keys = keys;
     _incUseStack(values);
-    _decUse(_t0->values, int_array);
     _t0->values = values;
     _incUseStack(hashes);
-    _decUse(_t0->hashes, int_array);
     _t0->hashes = hashes;
     return _t0;
 }
@@ -558,13 +547,10 @@ HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array
     HashMap_str_str* _t0 = HashMap_str_str_new();
     _t0->size = 0;
     _incUseStack(keys);
-    _decUse(_t0->keys, str_array);
     _t0->keys = keys;
     _incUseStack(values);
-    _decUse(_t0->values, str_array);
     _t0->values = values;
     _incUseStack(hashes);
-    _decUse(_t0->hashes, int_array);
     _t0->hashes = hashes;
     return _t0;
 }
@@ -755,7 +741,6 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
 str str_1(i8_array* value) {
     str _t0 = str_new();
     _incUseStack(value);
-    _decUse(_t0.value, i8_array);
     _t0.value = value;
     return _t0;
 }

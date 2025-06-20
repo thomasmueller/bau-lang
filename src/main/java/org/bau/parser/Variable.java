@@ -121,6 +121,8 @@ public class Variable implements Expression, LeftValue {
             } else {
                 return empty;
             }
+        } else if (type.needFree()) {
+            return type.nameC() + "_free(&" + expr + ");\n";
         }
         return empty;
     }

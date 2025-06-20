@@ -270,11 +270,6 @@ org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_new() {
     org_bau_compress_Lz4_XXHash* result = _malloc(sizeof(org_bau_compress_Lz4_XXHash));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->v1 = 0;
-    result->v2 = 0;
-    result->v3 = 0;
-    result->v4 = 0;
-    result->total = 0;
     return result;
 }
 struct org_bau_compress_Lz4_LZ4Compress {
@@ -285,7 +280,6 @@ org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_new() {
     org_bau_compress_Lz4_LZ4Compress* result = _malloc(sizeof(org_bau_compress_Lz4_LZ4Compress));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->hashTable = 0;
     return result;
 }
 struct org_bau_File_File {
@@ -296,7 +290,6 @@ org_bau_File_File* org_bau_File_File_new() {
     org_bau_File_File* result = _malloc(sizeof(org_bau_File_File));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->filePointer = 0;
     return result;
 }
 /* exception types */
@@ -467,7 +460,6 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable) {
     org_bau_compress_Lz4_LZ4Compress* _t2 = org_bau_compress_Lz4_LZ4Compress_new();
     _incUseStack(hashTable);
-    _decUse(_t2->hashTable, int_array);
     _t2->hashTable = hashTable;
     return _t2;
 }

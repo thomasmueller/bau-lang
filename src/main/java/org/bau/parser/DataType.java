@@ -173,7 +173,7 @@ public class DataType {
     }
 
     public String idC() {
-        String n = Program.esc(name);
+        String n = name;
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             n += "_owned";
         }
@@ -262,14 +262,14 @@ public class DataType {
             s = "int64_t";
         } else {
             String n = name;
+            if (module != null) {
+                s = Program.esc(module).replace(".", "_") + "_" + n;
+            } else {
+                s = n;
+            }
             if (isArray()) {
                 // replace "[]" with "_array"
-                n = n.substring(0, n.length() - 2) + "_array";
-            }
-            if (module != null) {
-                s = Program.esc(module.replace(".", "_")) + "_" + Program.esc(n);
-            } else {
-                s = Program.esc(n);
+                s = s.substring(0, s.length() - 2) + "_array";
             }
         }
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {

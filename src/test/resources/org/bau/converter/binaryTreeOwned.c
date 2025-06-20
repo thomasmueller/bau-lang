@@ -261,8 +261,6 @@ struct Tree_owned {
 Tree_owned* Tree_owned_new() {
     Tree_owned* result = _malloc(sizeof(Tree_owned));
     _traceMalloc(result);
-    result->left = 0;
-    result->right = 0;
     return result;
 }
 /* exception types */
@@ -318,10 +316,8 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
 }
 Tree_owned* Tree_owned_2(Tree_owned* left, Tree_owned* right) {
     Tree_owned* _t1 = Tree_owned_new();
-    Tree_owned_free(_t1->left);
     _t1->left = left;
     left = NULL;
-    Tree_owned_free(_t1->right);
     _t1->right = right;
     right = NULL;
     return _t1;
@@ -358,12 +354,12 @@ int main(int _argc, char *_argv[]) {
     int64_t stretchDepth = 4;
     Tree_owned* stretch = with_1(4);
     printf("ownership / borrowing\n");
-    int64_t _t0 = Tree_owned_nodeCount_1(stretch);
-    printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
-    Tree_owned* _t1 = with_1(0);
+    if (stretch != NULL) {
+        int64_t _t0 = Tree_owned_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+    }
     Tree_owned_free(stretch);
-    stretch = _t1;
-    _t1 = NULL;
+    stretch = NULL;
     Tree_owned* longLived = with_1(3);
     int64_t depth = 1;
     while (depth <= 3) {
@@ -379,10 +375,9 @@ int main(int _argc, char *_argv[]) {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t2 = Tree_owned_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t2);
+    int64_t _t1 = Tree_owned_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t1);
     Tree_owned_free(longLived);
-    Tree_owned_free(_t1);
     Tree_owned_free(stretch);
     _end();
     return 0;

@@ -284,10 +284,6 @@ Token* Token_new() {
     Token* result = _malloc(sizeof(Token));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->ttype = 0;
-    result->data = 0;
-    result->min = 0;
-    result->max = 0;
     return result;
 }
 struct Token_array {
@@ -314,8 +310,6 @@ org_bau_List_List_i8* org_bau_List_List_i8_new() {
     org_bau_List_List_i8* result = _malloc(sizeof(org_bau_List_List_i8));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
     return result;
 }
 struct match {
@@ -337,8 +331,6 @@ org_bau_List_List_Token* org_bau_List_List_Token_new() {
     org_bau_List_List_Token* result = _malloc(sizeof(org_bau_List_List_Token));
     _traceMalloc(result);
     result->_refCount = 1;
-    result->array = 0;
-    result->size = 0;
     return result;
 }
 /* exception types */
@@ -476,7 +468,6 @@ Token* Token_1(org_bau_List_List_i8* data) {
     Token* _t0 = Token_new();
     _t0->ttype = 0;
     _incUseStack(data);
-    _decUse(_t0->data, org_bau_List_List_i8);
     _t0->data = data;
     _t0->min = 0;
     _t0->max = 0;
@@ -713,14 +704,12 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
     _t0.exceptionType = 0;
     _incUseStack(message);
-    _decUse(_t0.message, i8_array);
     _t0.message = message;
     return _t0;
 }
 org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
     org_bau_List_List_Token* _t0 = org_bau_List_List_Token_new();
     _incUseStack(array);
-    _decUse(_t0->array, Token_array);
     _t0->array = array;
     _t0->size = 0;
     return _t0;
@@ -728,7 +717,6 @@ org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
 org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
     org_bau_List_List_i8* _t0 = org_bau_List_List_i8_new();
     _incUseStack(array);
-    _decUse(_t0->array, i8_array);
     _t0->array = array;
     _t0->size = 0;
     return _t0;
