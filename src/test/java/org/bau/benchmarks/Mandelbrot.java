@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class Mandelbrot {
+
     public static void main(String[] args) throws IOException {
         int w, h, bitNum = 0;
         int iter = 50;

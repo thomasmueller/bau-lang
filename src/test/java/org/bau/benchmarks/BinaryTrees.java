@@ -1,26 +1,20 @@
-package org.bau.benchmarks;
-
-// https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/binarytrees-java-8.html
-
 /* The Computer Language Benchmarks Game
 https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-
-contributed by Isaac Gouy
 */
+package org.bau.benchmarks;
+
 public class BinaryTrees {
 
     public static void main(String[] args) {
         int n = 10;
-        if (args.length > 0)
+        if (args.length > 0) {
             n = Integer.parseInt(args[0]);
-
+        }
         int minDepth = 4;
         int maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n;
         int stretchDepth = maxDepth + 1;
-
         stretch(stretchDepth);
         var longLivedTree = Tree.buildTree(maxDepth);
-
         for (int depth = minDepth; depth <= maxDepth; depth += 2) {
             int iterations = 1 << (maxDepth - depth + minDepth);
             int sum = 0;
@@ -30,7 +24,6 @@ public class BinaryTrees {
             System.out.println(iterations + "\t trees of depth " + depth + "\t check: " + sum);
         }
         int count = longLivedTree.nodeCount();
-        longLivedTree.clear();
         System.out.println("long lived tree of depth " + maxDepth + "\t check: " + count);
     }
 
@@ -39,10 +32,7 @@ public class BinaryTrees {
     }
 
     static int count(int depth) {
-        var t = Tree.buildTree(depth);
-        int c = t.nodeCount();
-        t.clear();
-        return c;
+        return Tree.buildTree(depth).nodeCount();
     }
 
     final static class Tree {
@@ -54,9 +44,10 @@ public class BinaryTrees {
         }
 
         static Tree buildTree(int depth) {
-            return (depth == 0) ?
-                new Tree(null, null) :
-                new Tree(buildTree(depth - 1), buildTree(depth - 1));
+            if (depth == 0) {
+                return new Tree(null, null);
+            }
+            return new Tree(buildTree(depth - 1), buildTree(depth - 1));
         }
 
         int nodeCount() {
@@ -70,14 +61,6 @@ public class BinaryTrees {
             return result;
         }
 
-        void clear() {
-            if (left != null) {
-                left.clear();
-                left = null;
-                right.clear();
-                right = null;
-            }
-        }
     }
 
 }

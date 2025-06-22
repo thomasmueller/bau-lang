@@ -7,8 +7,8 @@ This language transpiles to C, which has a highly optimized toolchain, and is av
 for embedded systems, desktops, and servers.
 Startup time is significantly faster than that of virtual machine-based languages like Java or C#, 
 as there is no VM or runtime to initialize.
-Runtime performance: this language aims to be in the same category as high-performance languages
-such as C, Rust, Go, Java, and Swift.
+Runtime performance: this language aims to be in the same category as 
+high-performance languages such as C, Rust, Go, Java, and Swift.
 To ensure low memory usage and to avoid GC pauses, it does not use tracing garbage collection.
 
 Memory safety results in runtime overhead from reference counting and array bounds checking.
@@ -22,13 +22,15 @@ which results in simple code and high productivity.
 
 <img src="performance.png">
 
-| Benchmark              |  Bau |   C  |  Go  | Java |Python| Rust |
+| Benchmark              |  Bau |   C  |  Go  | Java | PyPy | Rust |
 |------------------------|------|------|------|------|------|------|
-| Binary Trees           |  5.1 |  5.0 |  5.6 |  3.7 | 10.5 |  5.8 |
-| Fannkuch Redux         |  1.9 |  1.9 |  2.2 |  2.0 |  9.7 |  1.9 |
-| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.5 |270.0 |  1.7 |
-| Pi Digits              |  2.9 |  0.3 |  1.0 |  3.5 |  5.1 |  1.4 |
-| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.6 |108.0 |  3.8 |
+| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.4 |  5.9 |
+| Fannkuch Redux         |  2.0 |  2.2 |  2.2 |  2.0 |  5.2 |  1.9 |
+| SpeedTest              |  1.9 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |
+| Pi Digits              |  2.6 |  0.3 |  1.0 |  3.5 |  2.3 |  1.5 |
+| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.6 | 14.9 |  3.8 |
+
+(For Python, PyPy is used; CPython is around 50 times slower.)
 
 Only a small number of benchmarks are implemented so far, most of them are based on
 the microbenchmarks from <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The Computer Language Benchmarks Game</a>.
@@ -62,6 +64,7 @@ Bau includes a faster malloc implementation, which would brings performance clos
 This test simulates
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html#fannkuchredux">flipping pancakes</a>.
 This test uses many array accesses. For Bau, no attempt was made to eliminate bound checks.
+It unclear why the C version is a little bit slower then the C version created from Bau.
 
 #### SpeedTest
 
@@ -108,14 +111,14 @@ Compiling and Running the C, Java, and Bau versions:
 
     # Bau
     cp src/test/resources/org/bau/benchmarks/*.bau target/benchmarks
-    for i in {1..2}; do time java -jar target/bau.jar -O3 target/benchmarks/*.bau; done
+    for i in {1..2}; do time java -jar target/bau.jar -O3 -useTmMalloc false target/benchmarks/*.bau; done
     for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
     for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
     for i in {1..3}; do time target/benchmarks/fannkuch 11; done
     for i in {1..3}; do time target/benchmarks/munchausen; done
     for i in {1..3}; do time target/benchmarks/piDigits > out.txt; done
     for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
-    java -jar target/bau.jar -useTmMalloc -O3 target/benchmarks/*.bau
+    java -jar target/bau.jar -useTmMalloc true -O3 target/benchmarks/*.bau
     for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
     for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
 
@@ -129,7 +132,7 @@ Compiling and Running the C, Java, and Bau versions:
         gcc -O3 target/benchmarks/mandelbrot.c -o target/benchmarks/mandelbrot
     ); done
     for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time target/benchmarks/fannkuch 11; done    
+    for i in {1..3}; do time target/benchmarks/fannkuch 11; done
     for i in {1..3}; do time target/benchmarks/munchausen; done
     for i in {1..3}; do time target/benchmarks/piDigits 10000 > out.txt; done
     for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
@@ -144,9 +147,9 @@ Compiling and Running the C, Java, and Bau versions:
         go build -ldflags="-s -w" target/benchmarks/mandelbrot.go
     ); done
     for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
-    for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
     # Java
@@ -162,12 +165,12 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
     
-    # Python
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
+    # PyPy
+    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
+    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
+    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/munchausen.py; done
+    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
     
     # Rust
     cp src/test/resources/org/bau/benchmarks/*.rs target/benchmarks
@@ -178,14 +181,21 @@ Compiling and Running the C, Java, and Bau versions:
         cd target/benchmarks/rust
         cargo build --release
         cd ../../..
-        rustc -C opt-level=3 -C strip=symbols target/benchmarks/binaryTrees.rs
-        rustc -C opt-level=3 -C strip=symbols target/benchmarks/fannkuch.rs
-        rustc -C opt-level=3 -C strip=symbols target/benchmarks/munchausen.rs
-        rustc -C opt-level=3 -C strip=symbols target/benchmarks/mandelbrot.rs
+        rustc -C opt-level=3 target/benchmarks/binaryTrees.rs
+        rustc -C opt-level=3 target/benchmarks/fannkuch.rs
+        rustc -C opt-level=3 target/benchmarks/munchausen.rs
+        rustc -C opt-level=3 target/benchmarks/mandelbrot.rs
     ); done
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
-    for i in {1..3}; do time target/benchmarks/rust/target/release/piDigits > out.txt; done
+    for i in {1..3}; do time target/benchmarks/rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+
+    # Python
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
 

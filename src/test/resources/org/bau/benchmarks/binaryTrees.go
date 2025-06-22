@@ -1,21 +1,17 @@
 /* The Computer Language Benchmarks Game
  * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- *
- * contributed by The Go Authors.
- * based on C program by Kevin Carson
- * flag.Arg hack by Isaac Gouy
- * *reset*
  */
-
 package main
 
 import (
     "flag"
     "fmt"
+    "runtime"
     "strconv"
 )
 
 func main() {
+    runtime.GOMAXPROCS(1)
     n := 10
     flag.Parse()
     if flag.NArg() > 0 { 
@@ -28,7 +24,7 @@ func main() {
     }
     stretchDepth := maxDepth + 1
     stretch(stretchDepth)
-    longLivedTree := buildTree(maxDepth)
+    longLived := buildTree(maxDepth)
     for depth := minDepth; depth <= maxDepth; depth += 2 {
         iterations := 1 << uint(maxDepth - depth + minDepth)
         sum := 0
@@ -37,7 +33,7 @@ func main() {
         }
         fmt.Printf("%d\t trees of depth %d\t check: %d\n", iterations, depth, sum)
     }
-    count := longLivedTree.nodeCount()
+    count := longLived.nodeCount()
     fmt.Printf("long lived tree of depth %d\t check: %d\n", maxDepth, count)
 }
 

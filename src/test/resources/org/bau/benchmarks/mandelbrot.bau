@@ -3,11 +3,6 @@ import org.bau.File
     putchar
 import org.bau.Math
 
-# See:
-# https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/mandelbrot-gcc-2.html
-# Usage:
-# gcc -O3 demo.c
-# ./a.out 200 > test.tiff
 fun main()
     n := 200
     if Env.argCount() > 1

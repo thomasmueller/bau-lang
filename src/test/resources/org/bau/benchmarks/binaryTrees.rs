@@ -7,7 +7,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut n = 10;
     if args.len() > 1 {
-        n = args[1].parse::<i32>().unwrap_or(10);
+        n = args[1].parse::<i32>().unwrap();
     }
     let min_depth = 4;
     let max_depth = if min_depth + 2 > n { 
@@ -17,7 +17,7 @@ fn main() {
     };
     let stretch_depth = max_depth + 1;
     stretch(stretch_depth);
-    let mut long_lived_tree = Tree::build_tree(max_depth);
+    let mut long_lived = Tree::build_tree(max_depth);
     for depth in (min_depth ..= max_depth).step_by(2) {
         let iterations = 1 << (max_depth - depth + min_depth);
         let mut sum = 0;
@@ -26,9 +26,9 @@ fn main() {
         }
         println!("{iterations}\t trees of depth {depth}\t check: {sum}");
     }
-    let count = long_lived_tree.node_count();
+    let count = long_lived.node_count();
     println!("long lived tree of depth {max_depth}\t check: {count}");
-    long_lived_tree.clear();
+    long_lived.clear();
 }
 
 fn stretch(depth: i32) {

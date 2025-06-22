@@ -5,13 +5,6 @@ fun main()
         if isMunchausen(i)
             println(i)
 
-fun getCache() const int[]
-    result : int[10]
-    result[0] = 0
-    for i := range(1, 10)
-        result[i] = int(Math.pow(i, i))
-    return result
-
 fun isMunchausen(number int) int
     n := number
     total := 0
@@ -22,6 +15,12 @@ fun isMunchausen(number int) int
             return 0
         n /= 10
     return total = number
+
+fun getCache() const int[]
+    result : int[10]
+    for i := range(1, 10)
+        result[i] = int(Math.pow(i, i))
+    return result
 
 LIMIT : 440_000_000
 cache : getCache()

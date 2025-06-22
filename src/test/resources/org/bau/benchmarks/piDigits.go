@@ -10,8 +10,27 @@ import (
     "strconv"
 )
 
-var n = 10000
-var silent = false
+func main() {
+    runtime.GOMAXPROCS(1)
+    w := bufio.NewWriter(os.Stdout)
+    defer w.Flush()
+    line := make([]byte, 0, 10)
+    var d, k int64
+    var n = 10000
+    flag.Parse()
+    if flag.NArg() > 0 {
+        n, _ = strconv.Atoi(flag.Arg(0))
+    }
+    for i := 1; i <= n; i++ {
+        d, k = next_digit(k)
+        line = append(line, byte(d) + '0')
+        if len(line) == 10 {
+            fmt.Fprintf(w, "%s\t:%d\n", string(line), i)
+            line = line[:0]
+        }
+        eliminate_digit(d)
+    }
+}
 
 var (
     tmp1  = big.NewInt(0)
@@ -31,13 +50,11 @@ func next_term(k int64) int64 {
         k++
         y2.SetInt64(k*2 + 1)
         bigk.SetInt64(k)
-
         tmp1.Lsh(numer, 1)
         accum.Add(accum, tmp1)
         accum.Mul(accum, y2)
         denom.Mul(denom, y2)
         numer.Mul(numer, bigk)
-
         if accum.Cmp(numer) > 0 {
             return k
         }
@@ -67,33 +84,4 @@ func eliminate_digit(d int64) {
     accum.Sub(accum, tmp1.Mul(denom, tmp1))
     accum.Mul(accum, ten)
     numer.Mul(numer, ten)
-}
-
-func init() {
-    runtime.GOMAXPROCS(1)
-    flag.Parse()
-    if flag.NArg() > 0 {
-        n, _ = strconv.Atoi(flag.Arg(0))
-    }
-}
-
-func main() {
-    w := bufio.NewWriter(os.Stdout)
-    defer w.Flush()
-    line := make([]byte, 0, 10)
-    var d, k int64
-    for i := 1; i <= n; i++ {
-        d, k = next_digit(k)
-        line = append(line, byte(d)+'0')
-        if len(line) == 10 {
-            if silent != true {
-                fmt.Fprintf(w, "%s\t:%d\n", string(line), i)
-            }
-            line = line[:0]
-        }
-        eliminate_digit(d)
-    }
-    if len(line) > 0 && silent != true {
-        fmt.Fprintf(w, "%-10s\t:%d\n", string(line), n)
-    }
 }

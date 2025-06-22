@@ -25,7 +25,7 @@ import org.bau.std.Std;
 
 public class Program {
 
-    private boolean useTmMalloc = true;
+    private boolean useTmMalloc = false;
     private boolean traceRefCounts = false;
 
     ArrayList<Statement> initList = new ArrayList<>();

@@ -58,6 +58,10 @@ public class DataType {
     public String template;
     public int lineOffset;
 
+    public boolean isFunctionPointer;
+    public ArrayList<DataType> functionPointerArgs;
+    public DataType functionPointerReturnType;
+
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
                 token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
@@ -77,7 +81,7 @@ public class DataType {
     }
 
     public static DataType newEmptyType(String module, String name) {
-        return newNonArray(module, name, 0,MemoryType.REF_COUNT);
+        return newNonArray(module, name, 0, MemoryType.REF_COUNT);
     }
 
     public static DataType newRegularType(String module, String name, int sizeOf, MemoryType memoryType) {
@@ -92,6 +96,14 @@ public class DataType {
             throw new IllegalArgumentException();
         }
         return new DataType(module, name, sizeOf, false, null, null, false, memoryType);
+    }
+
+    public static DataType newFunctioPointer(String module, ArrayList<DataType> params, DataType returnType) {
+        DataType r = newNonArray(module, "fun", 0, MemoryType.COPY);
+        r.isFunctionPointer = true;
+        r.functionPointerArgs = params;
+        r.functionPointerReturnType = returnType;
+        return r;
     }
 
     public Expression nullExpression() {
@@ -223,6 +235,20 @@ public class DataType {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
+        if (isFunctionPointer) {
+            buff.append("fun(");
+            for (int i = 0; i < functionPointerArgs.size(); i++) {
+                if (i > 0) {
+                    buff.append(", ");
+                }
+                buff.append(functionPointerArgs.get(i).toString());
+            }
+            buff.append(")");
+            if (functionPointerReturnType != null) {
+                buff.append(' ').append(functionPointerReturnType);
+            }
+            return buff.toString();
+        }
         buff.append(name);
         if (parameters != null) {
             buff.append('(');
@@ -279,6 +305,23 @@ public class DataType {
     }
 
     public String toC() {
+        if (isFunctionPointer) {
+            StringBuffer buff = new StringBuffer();
+            if (functionPointerReturnType == null) {
+                buff.append("void ");
+            } else {
+                buff.append(functionPointerReturnType.toC());
+            }
+            buff.append(" (*functionPtr)(");
+            for (int i = 0; i < functionPointerArgs.size(); i++) {
+                if (i > 0) {
+                    buff.append(", ");
+                }
+                buff.append(functionPointerArgs.get(i).toC());
+            }
+            buff.append(")");
+            return buff.toString();
+        }
         String s = nameC();
         return (isPointer() || isArray()) ? s + "*" : s;
     }

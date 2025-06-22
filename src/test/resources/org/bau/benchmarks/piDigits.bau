@@ -1,9 +1,13 @@
 import org.bau.BigInt
     bigInt
     newBigInt
+import org.bau.Math
+import org.bau.Env
 
 fun main()
     n := 10_000
+    if Env.argCount() > 1
+        n = Math.parseInt(Env.arg(1))
     k := 0
     buff : i8[10]
     i := 0

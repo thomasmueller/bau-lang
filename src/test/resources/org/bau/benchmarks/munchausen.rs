@@ -1,4 +1,14 @@
+// https://github.com/jabbalaci/SpeedTests
 const N: i32 = 440_000_000;
+
+fn main() {
+    let cache = get_cache();
+    for n in 0..N {
+        if is_munchausen(n, &cache) {
+            println!("{}", n);
+        }
+    }
+}
 
 fn is_munchausen(number: i32, cache: &[i32; 10]) -> bool {
     let mut n = number;
@@ -20,13 +30,4 @@ fn get_cache() -> [i32; 10] {
         cache[n] = (n as i32).pow(n as u32);
     }
     cache
-}
-
-fn main() {
-    let cache = get_cache();
-    for n in 0..N {
-        if is_munchausen(n, &cache) {
-            println!("{}", n);
-        }
-    }
 }

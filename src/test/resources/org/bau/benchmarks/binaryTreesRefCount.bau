@@ -1,4 +1,3 @@
-import org.bau.Utils
 import org.bau.Math
 import org.bau.Env
 
@@ -8,28 +7,32 @@ fun main()
     if Env.argCount() > 1
         maxDepth = Math.parseInt(Env.arg(1))
     stretchDepth : maxDepth + 1
-    stretch Tree? := buildTree(stretchDepth)
-    println('ref count')
-    if stretch
-        println('stretch tree of depth ' stretchDepth '\t check: ' stretch.nodeCount())
-    stretch = null
-    longLived := buildTree(maxDepth)
+    stretch(stretchDepth)
+    longLived : buildTree(maxDepth)
     depth := minDepth
     while depth <= maxDepth
         iterations := 1 << (maxDepth - depth + minDepth)
-        check := 0;
-        i := 1
-        while i <= iterations
-            t := buildTree(depth)
-            check += t.nodeCount()
-            i += 1
-        println(iterations '\t trees of depth ' depth '\t check: ' check)
+        sum := 0;
+        for i := until(iterations)
+            sum += count(depth)
+        println(iterations '\t trees of depth ' depth '\t check: ' sum)
         depth += 2
     println('long lived tree of depth ' maxDepth '\t check: ' longLived.nodeCount())
+
+fun stretch(depth int)
+    println('stretch tree of depth ' depth '\t check: ' count(depth))
+
+fun count(depth int) int
+    return buildTree(depth).nodeCount()
 
 type Tree
     left Tree?
     right Tree?
+
+fun buildTree(depth int) Tree
+    if depth = 0
+        return Tree(null, null)
+    return Tree(buildTree(depth - 1), buildTree(depth - 1))
 
 fun Tree nodeCount() int
     result := 1
@@ -40,24 +43,3 @@ fun Tree nodeCount() int
     if r
         result += r.nodeCount()
     return result
-
-fun stretch(depth int)
-    c := count(depth)
-    println('stretch tree of depth ' depth '; check: ' c)
-
-fun count(depth int) int
-    t := buildTree(depth)
-    c := t.nodeCount()
-    return c
-
-fun buildTree(depth int) Tree
-    if depth = 0
-        return Tree(null, null)
-    return Tree(buildTree(depth - 1), buildTree(depth - 1))
-
-## Expected
-ref count
-stretch tree of depth 4  check: 31
-8    trees of depth 1    check: 24
-2    trees of depth 3    check: 30
-long lived tree of depth 3   check: 15

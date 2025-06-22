@@ -1,5 +1,3 @@
-package org.bau.benchmarks;
-
 /* The Computer Language Benchmarks Game
     https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
@@ -8,6 +6,8 @@ package org.bau.benchmarks;
  */
 
 // https://benchmarksgame-team.pages.debian.net/benchmarksgame/program/fannkuchredux-java-8.html
+
+package org.bau.benchmarks;
 
 public final class FannkuchRedux {
 

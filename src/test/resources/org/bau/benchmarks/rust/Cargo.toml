@@ -1,1 +1,6 @@
-workspace = { members = ["piDigits"] }
+workspace = { members = ["pi_digits"] }
+
+[profile.release]
+opt-level = 3
+strip = true
+panic = "abort"

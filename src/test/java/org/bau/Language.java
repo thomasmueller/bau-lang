@@ -5,15 +5,55 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
 https://github.com/NicoNex/tau
 
-bug:
 ##
-fun sql(condition int) macro
-    println('where ' condition)
+Function pointer syntax
+atExit(callback fun())
+signal(code int, callback fun(int))
 
-id int
-sql(id > 10)
+# Rust
+https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
+type Callback = fn();
+Rust allows variables with the same name,
+but the local variable shadow the function then
+use std::cmp::Ordering;
+fn custom_compare(a: &i32, b: &i32) -> Ordering {
+    if a < b { Ordering::Less }
+    else if a > b { Ordering::Greater }
+    else { Ordering::Equal }
+}
+fn main() {
+    let mut arr = vec![5, 2, 9, 1, 5, 6];
+    arr.sort_by(|&a, &b| {
+        if a < b { Ordering::Less }
+        else if a > b { Ordering::Greater }
+        else { Ordering::Equal }
+    });
+    arr.sort_by(|&a, &b| custom_compare(&a, &b));
+    arr.sort_by(custom_compare);
+    println!("Sorted array: {:?}", arr);
+}
+
+# Go
+Go allows variables with the same name as well;
+they shadow the function
+package main
+import (
+    "cmp"
+    "fmt"
+    "slices"
+)
+func customCompare(a, b int) int {
+    return cmp.Compare(a, b)
+}
+func main() {
+    ints := []int{7, 2, 4}
+    slices.SortFunc(ints, customCompare)
+    slices.SortFunc(ints, func(a, b int) int {
+        return cmp.Compare(a, b)
+    })
+    fmt.Println("Ints: ", ints)
+}
 ##
-
 
 Performance:
 https://github.com/smarr/are-we-fast-yet
@@ -862,10 +902,6 @@ structs
 https://www.lua.org/manual/5.4/
 https://ziglang.org/learn/overview/ - no memory safety
 
-Garbage Collection
-Weak References
-Coroutines
-
 String Literals
 - escape
 
@@ -884,24 +920,6 @@ fun sort(a u8[], compare fun(a u8, b u8))
 fun sort(a u8[8], compare fun(a u8, b u8))
 fun sort(a [u8], compare fun(a u8, b u8))
 fun sort(a [type], compare fun(a type, b type))
-
-if x = 1
-  print('one')
-else x = 2
-  print('two')
-else
-  print('tree')
-
-
-array and map init
-
-kirk: u8[100]
-kirk u8: 10
-kirk: 10
-kirk: u8[1, 2, 3]
-kirk: person(1, 2, 3)
-kirk: [1, 2, 3]
-
 
 Variables
 - global
@@ -974,199 +992,11 @@ https://en.wikipedia.org/wiki/Foreach_loop
 Lua:    for index, value in pairs(array) do
 Python: for i, item in enumerate(seq):
 
-
-for a, :1, <10, +:1
-
 if x = 1
   print "one"
 elif x = 2
   print "two"
 
-
-macro for A, B, C
-  D
-
-
-
-
-
-
-
-// gcc -O3 test.c; ls -al; ./a.out
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-int main() {
-    size_t num_bytes = 16 * 1024 * 1024;
-    size_t* buffer = (size_t*)malloc(num_bytes * sizeof(size_t));
-    if (buffer == NULL) {
-        perror("Error allocating memory");
-        return 1;
-    }
-    for (size_t i = 0; i < num_bytes; ++i) {
-        buffer[i] = rand() & (num_bytes - 1);
-    }
-    for (size_t test = 0; test < 10; test++) {
-    unsigned long long sum = 0;
-    for (size_t i = 0; i < num_bytes; ++i) {
-        sum += buffer[i];
-    }
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    size_t j = 0;
-    for (size_t repeat = 0; repeat < 10; repeat++) {
-        for (size_t i = 0; i < num_bytes; ++i) {
-            j = buffer[i];
-            // size_t z = j & (num_bytes - 1);
-            size_t z = j;
-            // size_t z = j < num_bytes ? j : 0;
-            if (z >= num_bytes) {
-                printf("z too large \n");
-                exit(1);
-            }
-
-            sum += buffer[z];
-        }
-    }
-    // 33656 634021000 100%  z = j
-    // 33656 659459000 104%  z = j & (num_bytes - 1)
-    // 33736 671090000 106%  "if"
-    // 33656 699629000 110%  j < num_bytes ? j : 0
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    unsigned long long elapsed_ns = (end.tv_sec - start.tv_sec) * 1000000000 + (end.tv_nsec - start.tv_nsec);
-    printf("Elapsed time: %llu nanoseconds Sum of %zu bytes: %llu\n", elapsed_ns, num_bytes, sum);
-
-    }
-    free(buffer);
-    return 0;
-}
-
-
-
-
-
-grep -R --include="*.java" "<<" . | wc -l
-grep -E -R --include="*.java" " \(int\) " .
-
-
-56138 "^ + [A-Za-z<>]+ [a-zA-Z0-9]+ = " (initial assignment)
-17627 "^ + [a-zA-Z0-9]+ = "             (re-assign)
-3081  "\+\+"                            (increment by one)
-2020  "  for.*\+\+"                     (increment by one in 'for' loop)
-660   "^ + [a-zA-Z0-9]+ \+= "           (increment)
-1570  "\-\-"
-772   "\+="
-53    "\-="
-49    "\*="
-8     ">>="
-116   "\|="
-11    "\&="
-11    "\/="
-
-87832 "\""
-2197  "'.'"
-268   "'\\\\.'"
-
-
-5708  " == "
-5073  " != "
-2869  " < "
-1679  " > "
-575   " >= "
-463   " <= "
-4095  "\![^=]"
-2556  " && "
-1304  " || "
-325   " & "
-413   " | "
-191   " << "
-58    " >> "
-50    " >>> "
-45    " ^ "
-55    " ~" / 34:  grep -R --include="*.java" "~" . | grep -v "//" | grep -v "lucene" | grep -v "/test/" | wc -l
-200   " \(int\) "
-
-886   "//.*\-\-" (comments)
-
-29820 "  return "
-18966 "  if ?\("
-4009  " else \{"
-1723  " else if"
-1207  " \? .* : "
-264   "  switch"
-1241  "  case"
-263   "  default"
-
-7313  "  for ?\("
-5114  "  for ?\(.*:"
-2188  "  for ?\(.*;.*;"
-2019  "  for ?\(.*;.*;.*\+\+"
-
-2005  "  for ?\( ?String.*:"
-2098  "  for ?\( ?int"
-264   "  for ?\( ?Map.*:"
-250   "forEach"
-1158  "  while ?\("
-126   " while \(true\)"
-54    "  do {"
-52    "} while ?\("
-972   "  break"
-2     "  break " (with goto)
-368   "  continue"
-3     "  continue " (with goto)
-
-4181  "!= null"
-2969  "== null"
-1786  " = null"
-
-1900  "log\."
-620   "log\.info"
-373   "log\.warn"
-
-6468  "class "
-838   "interface "
-133   "enum "
-
-4928  "static final "
-108   "final static "
-
-3243  "toString"
-2785  "equals"
-
-9635  "  String"
-3299  "  int"
-3127  "  int "
-2726  "  long"
-2675  "  long "
-2146  "  boolean"
-633   "  byte"
-40    "  byte "
-112   "  char"
-4     "  short"
-174   "  double "
-2     "  BigDecimal "
-4     "  BigInteger "
-53    "  ByteBuffer"
-5502  "\[\]"
-2989  "ArrayList"
-1752  "HashSet"
-1447  "HashMap"
-
-74485 "^import "
-5218  "^package "
-
-64    "  assert "
-
-4346  '\\'    (total escapes)
-2613  '\\"'   ( \" )
- 345  '\\\\'  ( \\ )
- 150  "\\\\'" ( \' )
-1543  '\\n'
- 161  '\\t'
-  83  '\\u'
-  43  '\\r'
-  10  '\\f'
-  20  '\\b'
 
  */
 public class Language {

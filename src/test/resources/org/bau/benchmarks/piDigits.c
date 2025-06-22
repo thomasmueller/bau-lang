@@ -55,7 +55,5 @@ int main(int argc, char **argv) {
             k++;
         }
     }
-    if (i % 10 != 0)
-        printf("%*s\t:%d\n", 10 - n % 10, "", n);
     return 0;
 }

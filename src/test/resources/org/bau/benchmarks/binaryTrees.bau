@@ -43,4 +43,3 @@ fun Tree+ nodeCount() int
     if r
         result += r.nodeCount()
     return result
-

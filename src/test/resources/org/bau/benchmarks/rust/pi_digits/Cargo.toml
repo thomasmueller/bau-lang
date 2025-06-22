@@ -1,0 +1,7 @@
+[package]
+name = "pi_digits"
+version = "1.0.0"
+
+[dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"

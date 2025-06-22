@@ -25,7 +25,7 @@ int fannkuch(int n) {
     }
     int r = n;
     while (1) {
-        while (r > 1) {
+        while (r != 1) {
             count[r - 1] = r;
             r -= 1;
         }
@@ -33,18 +33,15 @@ int fannkuch(int n) {
             perm[i] = perm1[i];
         }
         int f = 0;
-        int k = perm[0];
-        while (k != 0) {
-            for (int i = 0; i < n; i++) {
-                if (2 * i >= k) {
-                    break;
-                }
-                int t = perm[i];
-                perm[i] = perm[k - i];
-                perm[k - i] = t;
+        int k;
+        while ( !((k = perm[0]) == 0) ) {
+            int k2 = (k + 1) >> 1;
+            for (i = 0; i< k2; i++) {
+                int temp = perm[i]; 
+                perm[i] = perm[k - i]; 
+                perm[k - i] = temp;
             }
-            k = perm[0];
-            f++;
+            f += 1;
         }
         if (f > flips) { 
             flips = f; 
@@ -68,7 +65,7 @@ int fannkuch(int n) {
                 i = j;
             }
             perm1[r] = perm0;
-            count[r]--;
+            count[r] = count[r] - 1;
             if (count[r] > 0) {
                 break;
             }

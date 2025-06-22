@@ -1,10 +1,7 @@
 /* The Computer Language Benchmarks Game
  * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-
-   contributed by Greg Buchholz
-*/
-
-#include<stdio.h>
+ */
+#include <stdio.h>
 #include <stdlib.h>
 
 int main(int argc, char **argv) {

@@ -1,9 +1,11 @@
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let n: usize = if args.len() > 1 {
-        args[1].parse().unwrap_or(12)
+        args[1].parse().unwrap()
     } else {
         12
     };

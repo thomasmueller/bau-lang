@@ -15,11 +15,12 @@ public class Transpile {
         ArrayList<String> gccOptions = new ArrayList<>();
         boolean useTmMalloc = false;
         boolean traceRefCounts = false;
-        for (String a : args) {
+        for (int i = 0; i < args.length; i++) {
+            String a = args[i];
             if (a.equals("-useTmMalloc")) {
-                useTmMalloc = true;
+                useTmMalloc = Boolean.parseBoolean(args[++i]);
             } else if (a.equals("-traceRefCounts")) {
-                traceRefCounts = true;
+                traceRefCounts = Boolean.parseBoolean(args[++i]);
             } else if (a.startsWith("-")) {
                 gccOptions.add(a);
             } else if (a.endsWith("*.bau")) {

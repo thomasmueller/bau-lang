@@ -30,7 +30,7 @@ fun fannkuch(n int) int
         k = perm[0]
         while k <> 0
             for i := until(perm.len)
-                break (2*i) >= k
+                break 2 * i >= k
                 t := perm[i]
                 perm[i] = perm[k - i]
                 perm[k - i] = t

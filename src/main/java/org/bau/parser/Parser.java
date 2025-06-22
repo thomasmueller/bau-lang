@@ -780,6 +780,30 @@ public class Parser {
         if (DataType.TYPE.equals(token)) {
             throw syntaxError("Type '" + token + "' may not be used here");
         }
+        if ("fun".equals(token)) {
+            read();
+            if (!matchOp("(")) {
+                throw syntaxError("Expected '('");
+            }
+            ArrayList<DataType> params = new ArrayList<>();
+            if (!matchOp(")")) {
+                while (true) {
+                    DataType t = readType(false, true);
+                    params.add(t);
+                    if (matchOp(",")) {
+                        // next
+                    } else if (!matchOp(")")) {
+                        throw syntaxError("Expected ')'");
+                    }
+                }
+            }
+            DataType returnType = null;
+            if (type == TokenType.IDENTIFIER) {
+                returnType = readType(false, true);
+            }
+            DataType fp = DataType.newFunctioPointer(module, params, returnType);
+            return fp;
+        }
         if ("0".equals(token)) {
             read();
             if (matchOp("..")) {
