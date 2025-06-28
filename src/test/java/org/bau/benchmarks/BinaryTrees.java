@@ -1,15 +1,14 @@
-/* The Computer Language Benchmarks Game
-https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 package org.bau.benchmarks;
 
 public class BinaryTrees {
 
     public static void main(String[] args) {
         int n = 10;
-        if (args.length > 0) {
+        if (args.length > 0)
             n = Integer.parseInt(args[0]);
-        }
         int minDepth = 4;
         int maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n;
         int stretchDepth = maxDepth + 1;
@@ -18,9 +17,8 @@ public class BinaryTrees {
         for (int depth = minDepth; depth <= maxDepth; depth += 2) {
             int iterations = 1 << (maxDepth - depth + minDepth);
             int sum = 0;
-            for (int i = 1; i <= iterations; i++) {
+            for (int i = 1; i <= iterations; i++)
                 sum += count(depth);
-            }
             System.out.println(iterations + "\t trees of depth " + depth + "\t check: " + sum);
         }
         int count = longLivedTree.nodeCount();
@@ -35,7 +33,7 @@ public class BinaryTrees {
         return Tree.buildTree(depth).nodeCount();
     }
 
-    final static class Tree {
+    static class Tree {
         Tree left, right;
 
         Tree(Tree left, Tree right) {
@@ -44,20 +42,17 @@ public class BinaryTrees {
         }
 
         static Tree buildTree(int depth) {
-            if (depth == 0) {
+            if (depth == 0)
                 return new Tree(null, null);
-            }
             return new Tree(buildTree(depth - 1), buildTree(depth - 1));
         }
 
         int nodeCount() {
             int result = 1;
-            if (left != null) {
+            if (left != null)
                 result += left.nodeCount();
-            }
-            if (right != null) {
+            if (right != null)
                 result += right.nodeCount();
-            }
             return result;
         }
 

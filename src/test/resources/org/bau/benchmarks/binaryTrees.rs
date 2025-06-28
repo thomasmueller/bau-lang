@@ -10,10 +10,10 @@ fn main() {
         n = args[1].parse::<i32>().unwrap();
     }
     let min_depth = 4;
-    let max_depth = if min_depth + 2 > n { 
-        min_depth + 2 
-    } else { 
-        n 
+    let max_depth = if min_depth + 2 > n {
+        min_depth + 2
+    } else {
+        n
     };
     let stretch_depth = max_depth + 1;
     stretch(stretch_depth);

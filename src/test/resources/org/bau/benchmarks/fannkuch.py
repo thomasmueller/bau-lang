@@ -1,9 +1,10 @@
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 import sys
 
 def main():
-    n = 7
+    n = 4
     if len(sys.argv) > 1:
         n = int(sys.argv[1])
     print(f"Pfannkuchen({n}) = {fannkuch(n)}")
@@ -14,14 +15,11 @@ def fannkuch(n):
     perm = [0] * n
     flips, max_flips, checksum, nperm = 0, 0, 0, 0
     r = n
-
     while True:
         while r != 1:
             count[r - 1] = r
             r -= 1
-
         perm[:] = perm1[:]
-
         # Count flips and update max and checksum
         f = 0
         k = perm[0]
@@ -32,15 +30,13 @@ def fannkuch(n):
                 i += 1
             k = perm[0]
             f += 1
-
         if f > max_flips:
             max_flips = f
         if nperm % 2 == 0:
             checksum += f
         else:
             checksum -= f
-
-        # Generate next permutation
+        # Use incremental change to generate another permutation
         while True:
             if r == n:
                 print(checksum)
@@ -53,7 +49,6 @@ def fannkuch(n):
             if count[r] > 0:
                 break
             r += 1
-
         nperm += 1
 
 main()

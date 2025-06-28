@@ -1,4 +1,5 @@
 // https://github.com/jabbalaci/SpeedTests
+
 const N: i32 = 440_000_000;
 
 fn main() {

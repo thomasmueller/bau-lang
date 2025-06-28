@@ -1,9 +1,5 @@
-/* The Computer Language Benchmarks Game
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- *
- * contributed by chaishushan
- * Based on spectral-norm.go by The Go Authors.
- */
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 package main
 
@@ -14,7 +10,6 @@ import (
    "strconv"
 )
 
-// var n = flag.Int("n", 2000, "count")
 var n = 0
 
 func evalA(i, j int) int { return ((i+j)*(i+j+1)/2 + i + 1) }

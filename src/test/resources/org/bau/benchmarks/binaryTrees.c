@@ -1,6 +1,6 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +13,10 @@ long nodeCount(treeNode* tree);
 void clear(treeNode* tree);
 
 int main(int argc, char* argv[]) {
-    int n = argc > 1 ? atol(argv[1]) : 20;
+    int n = 10;
+    if (argc > 1) {
+        n = atol(argv[1]);
+    }
     int minDepth = 4;
     int maxDepth = n;
     if (minDepth + 2 > n)
@@ -25,24 +28,17 @@ int main(int argc, char* argv[]) {
         long i, iterations, check;
         iterations = pow(2, maxDepth - depth + minDepth);
         check = 0;
-        for (i = 1; i <= iterations; i++) {
+        for (i = 1; i <= iterations; i++)
             check += count(depth);
-        }
-        printf("%li\t trees of depth %u\t check: %li\n",
-            iterations, depth, check
-        );
+        printf("%li\t trees of depth %u\t check: %li\n", iterations, depth, check);
     }
-    printf("long lived tree of depth %u\t check: %li\n",
-        maxDepth, nodeCount(longLived)
-    );
+    printf("long lived tree of depth %u\t check: %li\n", maxDepth, nodeCount(longLived));
     clear(longLived);
     return 0;
 }
 
 void stretch(int depth) {
-    printf("stretch tree of depth %u\t check: %li\n",
-        depth, count(depth)
-    );
+    printf("stretch tree of depth %u\t check: %li\n", depth, count(depth));
 }
 
 long count(int depth) {
@@ -71,22 +67,18 @@ treeNode* buildTree(unsigned depth) {
 
 long nodeCount(treeNode* tree) {
     long result = 1;
-    if (tree->left != NULL) {
+    if (tree->left != NULL)
         result += nodeCount(tree->left);
-    }
-    if (tree->right != NULL) {
+    if (tree->right != NULL)
         result += nodeCount(tree->right);
-    }
     return result;
 }
 
 void clear(treeNode* tree) {
-    if (tree->left != NULL) {
+    if (tree->left != NULL)
         clear(tree->left);
-    }
-    if (tree->right != NULL) {
+    if (tree->right != NULL)
         clear(tree->right);
-    }
     free(tree);
 }
 

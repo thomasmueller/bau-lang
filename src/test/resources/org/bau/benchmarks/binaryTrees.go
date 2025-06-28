@@ -1,6 +1,6 @@
-/* The Computer Language Benchmarks Game
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- */
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 package main
 
 import (
@@ -14,8 +14,8 @@ func main() {
     runtime.GOMAXPROCS(1)
     n := 10
     flag.Parse()
-    if flag.NArg() > 0 { 
-        n, _ = strconv.Atoi(flag.Arg(0)) 
+    if flag.NArg() > 0 {
+        n, _ = strconv.Atoi(flag.Arg(0))
     }
     minDepth := 4
     maxDepth := n

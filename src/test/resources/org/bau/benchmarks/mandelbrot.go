@@ -1,6 +1,5 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 package main
 
@@ -16,7 +15,7 @@ import (
 func main() {
     runtime.GOMAXPROCS(1)
     flag.Parse()
-    n := 0
+    n := 200
     if flag.NArg() > 0 { n, _ = strconv.Atoi( flag.Arg(0) ) }
     out := bufio.NewWriter(os.Stdout)
     defer out.Flush()

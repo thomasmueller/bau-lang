@@ -1,3 +1,6 @@
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 import sys
 
 class Node:

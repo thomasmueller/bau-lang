@@ -1,3 +1,6 @@
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 package main
 
 import (
@@ -37,42 +40,40 @@ var (
     tmp2  = big.NewInt(0)
     y2    = big.NewInt(1)
     bigk  = big.NewInt(0)
-    accum = big.NewInt(0)
-    denom = big.NewInt(1)
-    numer = big.NewInt(1)
+    acc = big.NewInt(0)
+    den = big.NewInt(1)
+    num = big.NewInt(1)
     ten   = big.NewInt(10)
-    three = big.NewInt(3)
-    four  = big.NewInt(4)
 )
 
 func next_term(k int64) int64 {
     for {
         k++
-        y2.SetInt64(k*2 + 1)
+        y2.SetInt64(k * 2 + 1)
         bigk.SetInt64(k)
-        tmp1.Lsh(numer, 1)
-        accum.Add(accum, tmp1)
-        accum.Mul(accum, y2)
-        denom.Mul(denom, y2)
-        numer.Mul(numer, bigk)
-        if accum.Cmp(numer) > 0 {
+        tmp1.Lsh(num, 1)
+        acc.Add(acc, tmp1)
+        acc.Mul(acc, y2)
+        den.Mul(den, y2)
+        num.Mul(num, bigk)
+        if acc.Cmp(num) > 0 {
             return k
         }
     }
 }
 
 func extract_digit(nth *big.Int) int64 {
-    tmp1.Mul(nth, numer)
-    tmp2.Add(tmp1, accum)
-    tmp1.Div(tmp2, denom)
+    tmp1.Mul(nth, num)
+    tmp2.Add(tmp1, acc)
+    tmp1.Div(tmp2, den)
     return tmp1.Int64()
 }
 
 func next_digit(k int64) (int64, int64) {
     for {
         k = next_term(k)
-        d3 := extract_digit(three)
-        d4 := extract_digit(four)
+        d3 := extract_digit(big.NewInt(3))
+        d4 := extract_digit(big.NewInt(4))
         if d3 == d4 {
             return d3, k
         }
@@ -81,7 +82,7 @@ func next_digit(k int64) (int64, int64) {
 
 func eliminate_digit(d int64) {
     tmp1.SetInt64(d)
-    accum.Sub(accum, tmp1.Mul(denom, tmp1))
-    accum.Mul(accum, ten)
-    numer.Mul(numer, ten)
+    acc.Sub(acc, tmp1.Mul(den, tmp1))
+    acc.Mul(acc, ten)
+    num.Mul(num, ten)
 }

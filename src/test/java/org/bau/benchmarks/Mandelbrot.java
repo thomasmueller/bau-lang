@@ -1,6 +1,6 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 package org.bau.benchmarks;
 
 import java.io.BufferedOutputStream;
@@ -14,7 +14,10 @@ public class Mandelbrot {
         int iter = 50;
         double limit = 2.0;
         byte byteAcc = 0;
-        w = h = Integer.parseInt(args[0]);
+        int n = 200;
+        if (args.length > 0)
+            n = Integer.parseInt(args[0]);
+        w = h = n;
         OutputStream out = new BufferedOutputStream(System.out);
         out.write(("P4\n" + w + " " + h + "\n").getBytes());
         for (int y = 0; y < h; y++) {
@@ -23,7 +26,7 @@ public class Mandelbrot {
                 double Cr = (2.0 * x / w - 1.5);
                 double Ci = (2.0 * y / h - 1.0);
                 int i = 0;
-                while (i < iter && (Tr + Ti <= limit * limit)) {
+                while (i < iter && Tr + Ti <= limit * limit) {
                     Zi = 2.0 * Zr * Zi + Ci;
                     Zr = Tr - Ti + Cr;
                     Tr = Zr * Zr;
@@ -31,9 +34,8 @@ public class Mandelbrot {
                     i++;
                 }
                 byteAcc <<= 1;
-                if (Tr + Ti <= limit * limit) {
-                    byteAcc |= 1;
-                }
+                if (Tr + Ti <= limit * limit)
+                    byteAcc |= 0x01;
                 bitNum++;
                 if (bitNum == 8) {
                     out.write(byteAcc);

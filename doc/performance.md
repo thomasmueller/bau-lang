@@ -24,13 +24,13 @@ which results in simple code and high productivity.
 
 | Benchmark              |  Bau |   C  |  Go  | Java | PyPy | Rust |
 |------------------------|------|------|------|------|------|------|
-| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.4 |  5.9 |
-| Fannkuch Redux         |  2.0 |  2.2 |  2.2 |  2.0 |  5.2 |  1.9 |
-| SpeedTest              |  1.9 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |
-| Pi Digits              |  2.6 |  0.3 |  1.0 |  3.5 |  2.3 |  1.5 |
-| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.6 | 14.9 |  3.8 |
+| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.5 |  5.9 |
+| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  5.2 |  2.0 |
+| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |
+| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 |  2.3 |  1.5 |
+| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 | 14.9 |  3.8 |
 
-(For Python, PyPy is used; CPython is around 50 times slower.)
+(Runtime; lower is better. For Python, PyPy is used; CPython is around 50 times slower.)
 
 Only a small number of benchmarks are implemented so far, most of them are based on
 the microbenchmarks from <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The Computer Language Benchmarks Game</a>.
@@ -59,7 +59,7 @@ when limiting memory to 100 MB, it does collect garbage, but in a different thre
 For Bau, the ownership variant is used; the reference counted variant is a bit slower.
 Bau includes a faster malloc implementation, which would brings performance close to Java.
 
-#### Fannkuch Redux
+#### Fannkuch
 
 This test simulates
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html#fannkuchredux">flipping pancakes</a>.
@@ -155,12 +155,12 @@ Compiling and Running the C, Java, and Bau versions:
     # Java
     for i in {1..2}; do time javac src/test/java/org/bau/benchmarks/*.java -d target/benchmarks; done
     java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.FannkuchRedux 11
+    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
     java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
     java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
     java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.FannkuchRedux 11; done
+    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
     for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done

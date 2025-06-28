@@ -1,5 +1,6 @@
 // The Computer Language Benchmarks Game
 // https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 use std::env;
 
 fn main() {
@@ -7,7 +8,7 @@ fn main() {
     let n: usize = if args.len() > 1 {
         args[1].parse().unwrap()
     } else {
-        12
+        4
     };
     println!("Pfannkuchen({}) = {}", n, fannkuch(n));
 }
@@ -31,7 +32,7 @@ fn fannkuch(n: usize) -> i32 {
         for i in 0..n {
             perm[i] = perm1[i];
         }
-        // Count flips
+        // Count flips and update max and checksum
         let mut f = 0;
         let mut k = perm[0];
         while k != 0 {
@@ -51,9 +52,8 @@ fn fannkuch(n: usize) -> i32 {
         } else {
             checksum -= f;
         }
-        // Generate next permutation
-        let mut more = true;
-        while more {
+        // Use incremental change to generate another permutation
+        loop {
             if r == n {
                 println!("{}", checksum);
                 return flips;
@@ -67,10 +67,9 @@ fn fannkuch(n: usize) -> i32 {
             perm1[r] = p0;
             count[r] -= 1;
             if count[r] > 0 {
-                more = false;
-            } else {
-                r += 1;
+                break;
             }
+            r += 1;
         }
         nperm += 1;
     }

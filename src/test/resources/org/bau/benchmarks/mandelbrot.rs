@@ -6,9 +6,12 @@ use std::io::{self, Write};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let size: usize = args[1].parse().expect("Please provide a valid integer");
-    let w = size;
-    let h = size;
+    let mut n = 200;
+    if args.len() > 1 {
+        n = args[1].parse().unwrap();
+    }
+    let w = n;
+    let h = n;
     let limit = 2.0;
     let iter = 50;
     let mut stdout = io::stdout().lock();

@@ -1,4 +1,5 @@
 # https://github.com/jabbalaci/SpeedTests
+
 N = 440_000_000
 
 def main():
@@ -19,6 +20,6 @@ def is_munchausen(number: int, cache: list[int]) -> bool:
     return total == number
 
 def get_cache() -> list[int]:
-    return [0] + [i**i for i in range(1, 9 + 1)]
+    return [0] + [i ** i for i in range(1, 10)]
 
 main()

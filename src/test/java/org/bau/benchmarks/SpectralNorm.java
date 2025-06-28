@@ -1,10 +1,6 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
- contributed by Java novice Jarkko Miettinen
- modified ~3 lines of the original C#-version
- by Isaac Gouy
- */
 package org.bau.benchmarks;
 
 import java.text.DecimalFormat;
@@ -12,7 +8,7 @@ import java.text.NumberFormat;
 
 public class SpectralNorm {
 
-    private static final NumberFormat formatter = new DecimalFormat("#.000000000");
+    static final NumberFormat formatter = new DecimalFormat("#.000000000");
 
     public static void main(String[] args) {
         int n = 100;
@@ -22,7 +18,7 @@ public class SpectralNorm {
         System.out.println(formatter.format(new SpectralNorm().Approximate(n)));
     }
 
-    private final double Approximate(int n) {
+    double Approximate(int n) {
         // create unit vector
         double[] u = new double[n];
         for (int i = 0; i < n; i++)

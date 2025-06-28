@@ -2,10 +2,10 @@
 
 A programming language for everyone.
 
-<a href="https://thomasmueller.github.io/bau-lang/">Try it out in the browser.</a>
+<a href="https://thomasmueller.github.io/bau-lang/">Playground: Try it out in the browser.</a>
 
 * <a href="doc/performance.md">High performance and efficiency</a>.
-* Easy to learn with a concise syntax inspired by Python.
+* <a href="doc/conciseSyntax.md">Easy to learn with a concise syntax inspired by Python.</a>
 * Memory-safe. Automatic memory management using reference counting by default.
 * As fast as Rust where needed, using single ownership and borrowing.
 * Low memory usage; no GC pauses.

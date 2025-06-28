@@ -1,6 +1,5 @@
-/* The Computer Language Benchmarks Game
-   https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-*/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 package main
 
@@ -8,63 +7,62 @@ import (
     "flag"
     "fmt"
     "runtime"
-    "strconv"    
+    "strconv"
 )
 
 func main() {
     runtime.GOMAXPROCS(1)
     flag.Parse()
-    n := 7   
-    if flag.NArg() > 0 { n,_ = strconv.Atoi(flag.Arg(0)) }   
-    fmt.Printf("Pfannkuchen(%d) = %d\n", n, fannkuch(n))    
+    n := 4
+    if flag.NArg() > 0 { n,_ = strconv.Atoi(flag.Arg(0)) }
+    fmt.Printf("Pfannkuchen(%d) = %d\n", n, fannkuch(n))
 }
 
 func fannkuch(n int) int {
     perm1 := make([]int, n)
-    for i := 0; i < n; i++ { 
-        perm1[i] = i 
-    }   
+    for i := 0; i < n; i++ {
+        perm1[i] = i
+    }
     perm := make([]int, n)
-    count := make([]int, n)      
+    count := make([]int, n)
     f, i, k, r, flips, nperm, checksum := 0, 0, 0, 0, 0, 0, 0
     r = n
     for r > 0 {
         i = 0
         for r != 1 {
             count[r - 1] = r
-            r -= 1 
+            r--
         }
         for i < n {
             perm[i] = perm1[i]
-            i += 1 
+            i++
         }
-        // Count flips and update max  and checksum
+        // Count flips and update max and checksum
         f = 0
         k = perm[0]
         for k != 0 {
             i = 0
             for 2 * i < k {
-                t := perm[i] 
+                t := perm[i]
                 perm[i] = perm[k - i]
                 perm[k - i] = t
-                i += 1
+                i++
             }
             k = perm[0]
-            f += 1
+            f++
         }
-        if f > flips { 
-            flips = f 
+        if f > flips {
+            flips = f
         }
-        if (nperm & 1) == 0 { 
-            checksum += f 
-        } else { 
-            checksum -= f 
+        if (nperm & 1) == 0 {
+            checksum += f
+        } else {
+            checksum -= f
         }
         // Use incremental change to generate another permutation
-        var more = true
-        for more {
-             if r == n {   
-                fmt.Println(checksum)             
+        for {
+             if r == n {
+                fmt.Println(checksum)
                 return flips
              }
              p0 := perm1[0]
@@ -75,14 +73,13 @@ func fannkuch(n int) int {
                 i = j
             }
             perm1[r] = p0
-            count[r] -= 1
-            if count[r] > 0 { 
-                more = false 
-            } else { 
-                r += 1 
+            count[r]--
+            if count[r] > 0 {
+                break;
             }
-        } 
-        nperm += 1
+            r++
+        }
+        nperm++
     }
     return flips
 }

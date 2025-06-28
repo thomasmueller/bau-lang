@@ -1,5 +1,5 @@
-//! The Computer Language Benchmarks Game
-//! https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 extern crate num_bigint;
 extern crate num_traits;

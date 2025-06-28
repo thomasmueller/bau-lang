@@ -1,3 +1,6 @@
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 package org.bau.benchmarks;
 
 import java.math.BigInteger;
@@ -6,24 +9,24 @@ public class PiDigits {
 
     public static void main(String... args) {
         int n = 10_000;
+        if (args.length > 0) {
+            n = Integer.parseInt(args[0]);
+        }
         int k = 0;
         int i = 0;
         while (i < n) {
             k++;
             nextTerm(k);
-            if (num.compareTo(acc) > 0) {
+            if (num.compareTo(acc) > 0)
                 continue;
-            }
             int d = extractDigit(3);
-            if (d != extractDigit(4)) {
+            if (d != extractDigit(4))
                 continue;
-            }
             eliminateDigit(d);
             System.out.print((char) ('0' + d));
             i++;
-            if (i % 10 == 0) {
+            if (i % 10 == 0)
                 System.out.println(" : " + i);
-            }
         }
     }
 

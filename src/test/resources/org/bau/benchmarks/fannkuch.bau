@@ -1,3 +1,6 @@
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 import org.bau.Math
 import org.bau.Env
 
@@ -6,7 +9,7 @@ fun main()
     if Env.argCount() > 1
         n = Math.parseInt(Env.arg(1))
     println('Pfannkuchen(' n ') is ' fannkuch(n))
-    
+
 fun fannkuch(n int) int
     perm1 : int[n]
     for i := until(n)
@@ -20,7 +23,7 @@ fun fannkuch(n int) int
     k := 0
     r := n
     while r > 0
-        while r > 1 
+        while r > 1
             count[r - 1] = r
             r -= 1
         for i := until(n)
@@ -40,11 +43,10 @@ fun fannkuch(n int) int
             flips = f
         if (nperm & 1) = 0
             checksum += f
-        else 
+        else
             checksum -= f
         # Use incremental change to generate another permutation
-        more := 1
-        while more
+        while
             if r = n
                 println(checksum)
                 return flips
@@ -56,9 +58,7 @@ fun fannkuch(n int) int
                 i = j
             perm1[r] = p0
             count[r] -= 1
-            if count[r] > 0
-                more = 0
-            else 
-                r += 1
+            break count[r] > 0
+            r += 1
         nperm += 1
     return flips

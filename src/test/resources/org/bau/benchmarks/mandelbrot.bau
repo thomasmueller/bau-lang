@@ -1,3 +1,6 @@
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
 import org.bau.Env
 import org.bau.File
     putchar
@@ -28,7 +31,7 @@ fun main()
                 Zr = Tr - Ti + Cr
                 Tr = Zr * Zr
                 Ti = Zi * Zi
-            byteAcc <<= 1 
+            byteAcc <<= 1
             if Tr + Ti <= limit * limit
                 byteAcc |= 0x01
             bitNum += 1

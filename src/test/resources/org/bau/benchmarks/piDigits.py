@@ -1,14 +1,13 @@
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
-#
-# Translated from Mr Ledrug's C program by Jeremy Zerfas.
-# Transliterated from GMP to built-in by Isaac Gouy
 
-from sys import argv
+import sys
 
 def main():
     global tmp1, tmp2, acc, den, num
-    n = int(argv[1])
+    n = 10000
+    if len(sys.argv) > 1:
+        n = int(sys.argv[1])
     tmp1 = 0
     tmp2 = 0
     acc = 0
@@ -24,7 +23,7 @@ def main():
         d = extract_Digit(3)
         if d != extract_Digit(4):
             continue
-        print(chr(48 + d), end = "")
+        print(chr(ord('0') + d), end = "")
         i += 1
         if i % 10 == 0:
             print("\t:%d" % i)

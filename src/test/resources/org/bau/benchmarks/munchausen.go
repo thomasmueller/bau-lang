@@ -1,4 +1,5 @@
 // https://github.com/jabbalaci/SpeedTests
+
 package main
 
 import (
