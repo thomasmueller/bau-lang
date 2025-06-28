@@ -306,6 +306,7 @@ public class TestCompare {
         String expected = readResource(file + ".c");
         String expectedMarkdown = readResource(file + ".md");
         Program p = new Parser(source).parse();
+        p.useTmMalloc();
         String c = p.toC();
         String md = p.toMarkdown();
         new File("got").mkdir();
