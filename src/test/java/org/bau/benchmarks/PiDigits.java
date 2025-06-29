@@ -9,9 +9,8 @@ public class PiDigits {
 
     public static void main(String... args) {
         int n = 10_000;
-        if (args.length > 0) {
+        if (args.length > 0)
             n = Integer.parseInt(args[0]);
-        }
         int k = 0;
         int i = 0;
         while (i < n) {

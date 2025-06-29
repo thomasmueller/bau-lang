@@ -37,13 +37,14 @@ public class SyntaxStats {
     }
 
     public static void main(String... args) throws IOException {
-        String[] languages = { "Python:py", "Bau:bau", "C:c", "Go:go", "Java:java", "Rust:rs" };
+        String[] languages = { "Python:py", "Bau:bau", "Swift:swift", "Kotlin:kt", "C:c", "Go:go", "Java:java", "Rust:rs" };
         String[] files = { "BinaryTrees", "Fannkuch", "Mandelbrot", "Munchausen", "PiDigits" };
 
         LinkedHashMap<String, Stats> stats = new LinkedHashMap<>();
         for (String file : files) {
             String origFile = file;
             for (String l : languages) {
+                file = origFile;
                 String[] l2 = l.split(":");
                 Stats s = stats.get(l);
                 if (s == null) {
@@ -53,13 +54,17 @@ public class SyntaxStats {
                     stats.put(l, s);
                 }
                 String dir = "src/test/resources/org/bau/benchmarks/";
-                if (s.language.equals("Java")) {
+                if (s.language.equals("Java") || s.language.equals("Kotlin")) {
                     dir = "src/test/java/org/bau/benchmarks/";
                 } else {
                     file = Character.toLowerCase(file.charAt(0)) + file.substring(1);
                 }
-                if (s.language.equals("Rust") && file.equals("piDigits")) {
-                    file = "rust/pi_digits/src/main";
+                if (file.equals("piDigits")) {
+                    if (s.language.equals("Rust")) {
+                        file = "rust/pi_digits/src/main";
+                    } else if (s.language.equals("Swift")) {
+                        file = "swift/piDigits/Sources/main";
+                    }
                 }
                 File f = new File(dir + file + "." + s.suffix);
                 if (!f.exists()) {
@@ -111,7 +116,7 @@ public class SyntaxStats {
                                     identifierStart = true;
                                 }
                                 alphaNumeric++;
-                            } else if ("+\\\"'-(){}[]|&.,#*/%=<>!?!:;,.".indexOf(c) >= 0) {
+                            } else if ("+\\\"'-(){}[]|&.,#*/%=<>!?!:;,.$@".indexOf(c) >= 0) {
                                 identifier = identifierStart = false;
                                 special++;
                             } else {

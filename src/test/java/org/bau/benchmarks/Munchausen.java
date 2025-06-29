@@ -20,14 +20,13 @@ public class Munchausen {
             total += cache[digit];
             if (total > number)
                 return false;
-            n = n / 10;
+            n /= 10;
         }
         return total == number;
     }
 
     static int[] getCache() {
         int[] cache = new int[10];
-        cache[0] = 0;
         for (int i = 1; i <= 9; ++i)
             cache[i] = (int) Math.pow(i, i);
         return cache;

@@ -23,7 +23,7 @@ to make large number more readable.
 There is no trailing whitespace in the examples, 
 and the comments are exactly the same.
 The comparison is not perfect, but shows a clear trend:
-Bau is very similar to Python, and the other languages are about 30% to 40% more verbose.
+Bau is very similar to Python, and the other languages are about 20% to 40% more verbose.
 
 Conciseness and simplicity are important for multiple reasons: 
 when writing programs, but it is even more important when reading the source code.

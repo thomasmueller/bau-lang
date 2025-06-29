@@ -25,7 +25,7 @@ int is_munchausen(int number) {
         total += cache[digit];
         if (total > number)
             return 0;
-        n = n / 10;
+        n /= 10;
     }
     return total == number;
 }

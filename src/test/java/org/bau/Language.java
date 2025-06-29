@@ -2,7 +2,7 @@ package org.bau;
 
 /**
 
-Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma
+Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2)
 https://github.com/NicoNex/tau
 
 ##

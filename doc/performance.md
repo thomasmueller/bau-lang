@@ -22,13 +22,13 @@ which results in simple code and high productivity.
 
 <img src="performance.png">
 
-| Benchmark              |  Bau |   C  |  Go  | Java | PyPy | Rust |
-|------------------------|------|------|------|------|------|------|
-| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.5 |  5.9 |
-| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  5.2 |  2.0 |
-| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |
-| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 |  2.3 |  1.5 |
-| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 | 14.9 |  3.8 |
+| Benchmark              |  Bau |   C  |  Go  | Java | PyPy | Rust | Swift|
+|------------------------|------|------|------|------|------|------|------|
+| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.5 |  5.9 | 12.0 |
+| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  5.2 |  2.0 |  2.3 |
+| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |  1.9 |
+| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 |  2.3 |  1.5 |  7.7 |
+| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 | 14.9 |  3.8 | 17.0 |
 
 (Runtime; lower is better. For Python, PyPy is used; CPython is around 50 times slower.)
 
@@ -79,6 +79,7 @@ This uses a big integer library that computes
 Performance depends mostly on the big integer library.
 The big integer library of Go, for example, is highly optimized, and using platform-specific assembly.
 The Rust library is highly optimized as well, but the C "gmp" library is the fastest.
+The Swift library "attaswift/BigInt" is used.
 The Bau bigint library is around 400 lines of code, modelled after the Java library,
 without platform-specific code.
 Bau could easily use the "gmp" library as well.
@@ -198,4 +199,22 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
+    
+    # Swift
+    cp src/test/resources/org/bau/benchmarks/*.swift target/benchmarks
+    mkdir -p target/benchmarks/swift
+    cp -R src/test/resources/org/bau/benchmarks/swift target/benchmarks
+    cd target/benchmarks/swift/piDigits
+    swift build -c release
+    cp .build/arm64-apple-macosx/release/piDigits ../..
+    cd ../../../..
+    swiftc -O target/benchmarks/binaryTrees.swift -o target/benchmarks/binaryTrees
+    swiftc -O target/benchmarks/fannkuch.swift -o target/benchmarks/fannkuch
+    swiftc -O target/benchmarks/munchausen.swift -o target/benchmarks/munchausen
+    swiftc -O target/benchmarks/mandelbrot.swift -o target/benchmarks/mandelbrot
+    for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
+    for i in {1..3}; do time target/benchmarks/fannkuch 11; done
+    for i in {1..3}; do time target/benchmarks/munchausen; done
+    for i in {1..3}; do time target/benchmarks/piDigits 10000 > out.txt; done
+    for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
 

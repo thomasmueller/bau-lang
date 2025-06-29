@@ -29,7 +29,7 @@ func is_munchausen(number int, cache *[10]int) bool {
         if total > number {
             return false
         }
-        n = n / 10
+        n /= 10
     }
     return total == number
 }
