@@ -10,6 +10,14 @@ Function pointer syntax
 atExit(callback fun())
 signal(code int, callback fun(int))
 
+fun abc()
+    println('hello')
+fun callMe(x fun())
+    x()
+fun main()
+    callMe(fun abc)
+
+
 # Rust
 https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
 type Callback = fn();

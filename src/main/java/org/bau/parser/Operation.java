@@ -653,6 +653,9 @@ public class Operation implements Expression {
                 return val;
             }
         }
+        if (targetType.isFunctionPointer && val instanceof Value.ValueFunctionPointer) {
+            return val;
+        }
         throw new IllegalStateException("Unsupported target type " + targetType + " for " + val);
     }
 

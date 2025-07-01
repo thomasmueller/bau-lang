@@ -410,7 +410,22 @@ is equivalent to:
         while x < 30
             println('even: ' x)
             x += 2
-        
+
+### Function Pointers
+
+Function pointers are variables that point to a function.
+They allow to call a function indirectly,
+which is useful for callbacks. Example:
+
+    fun log(x int)
+        println('value is ' x)
+
+    fun count(to int, callback fun(int))
+        for i := until(to)
+            callback(i)
+
+    count(5, log)
+
 ### Tour
 
 #### Hello World
@@ -609,6 +624,35 @@ is equivalent to:
                 return 0
             i += 2
         return 1
+
+#### Function Pointer Callback
+
+    fun compareAbsolute(a int, b int) int
+        if a < 0
+            a = -a
+        if b < 0
+            b = -b
+        return a - b
+
+    fun insertionSort(a int[], comp fun(int, int) int)
+        for i := range(1, a.len)
+            t := a[i]
+            j := i - 1
+            while j >= 0 and comp(a[j], t) > 0
+                a[j + 1] = a[j]
+                j -= 1
+            a[j + 1] = t
+
+    fun main()
+        array : int[5]
+        array[0] = -5
+        array[1] = 6
+        array[2] = 2
+        array[3] = -10
+        array[4] = 1
+        insertionSort(array, compareAbsolute)
+        for i := until(array.len)
+            println(i ': ' array[i])
 
 ### Comparison
 

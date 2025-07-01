@@ -108,6 +108,48 @@ public class FunctionContext {
         }
     }
 
+    public FunctionDefinition getFunctionIfExists(String name) {
+        Variable var = variables.get(name);
+        if (var != null && "fun".equals(var.type().name())) {
+            FunctionDefinition def = new FunctionDefinition(0);
+            def.isFunctionPointer = true;
+            def.name = name;
+            def.returnType = var.type().functionPointerReturnType;
+            int paramId = 0;
+            for (DataType pt : var.type().functionPointerArgs) {
+                Variable v = new Variable("p" + paramId++, pt);
+                def.parameters.add(v);
+            }
+            return def;
+        }
+        for (int i = 0; i < 10; i++) {
+            FunctionDefinition def = program.getFunctionIfExists(null, null, null, name, i);
+            if (def != null) {
+                return def;
+            }
+        }
+        return null;
+    }
+
+    public FunctionDefinition getFunctionIfExists(DataType type, FunctionDefinition calledFrom, String module, String name, int parameterCount) {
+        if (type == null && module == null) {
+            Variable var = variables.get(name);
+            if (var != null && "fun".equals(var.type().name())) {
+                FunctionDefinition def = new FunctionDefinition(0);
+                def.isFunctionPointer = true;
+                def.name = name;
+                def.returnType = var.type().functionPointerReturnType;
+                int paramId = 0;
+                for (DataType pt : var.type().functionPointerArgs) {
+                    Variable v = new Variable("p" + paramId++, pt);
+                    def.parameters.add(v);
+                }
+                return def;
+            }
+        }
+        return program.getFunctionIfExists(type, calledFrom, module, name, parameterCount);
+    }
+
     public Variable getVariable(String module, String name) {
         Variable var = null;
         var = variables.get(name);

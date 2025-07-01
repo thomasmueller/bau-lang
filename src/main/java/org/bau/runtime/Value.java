@@ -281,6 +281,20 @@ public class Value {
         }
     }
 
+    public static class ValueFunctionPointer extends Value {
+        private final String functionId;
+
+        public ValueFunctionPointer(String functionId) {
+            this.functionId = functionId;
+        }
+        public String toString() {
+            return functionId;
+        }
+        public String getId() {
+            return functionId;
+        }
+    }
+
     public static class ValueI32Array extends Value {
         final int[] array;
         public ValueI32Array(int size) {

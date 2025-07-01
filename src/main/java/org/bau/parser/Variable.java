@@ -81,6 +81,31 @@ public class Variable implements Expression, LeftValue {
         return name;
     }
 
+    public String declarationToC() {
+        StringBuilder buff = new StringBuilder();
+        DataType t = type();
+        if (t.isFunctionPointer) {
+            if (t.functionPointerReturnType == null) {
+                buff.append("void ");
+            } else {
+                buff.append(t.functionPointerReturnType.toC());
+            }
+            buff.append(" (*" + nameC() + "_" + t.functionPointerArgs.size() + ")(");
+            for (int i = 0; i < t.functionPointerArgs.size(); i++) {
+                if (i > 0) {
+                    buff.append(", ");
+                }
+                buff.append(t.functionPointerArgs.get(i).toC());
+            }
+            buff.append(")");
+            return buff.toString();
+        }
+        buff.append(type().toC());
+        buff.append(' ');
+        buff.append(nameC());
+        return buff.toString();
+    }
+
     public String toC() {
         if (constantValue != null && type.isNumber() && !type.isArray()) {
             StringBuilder buff = new StringBuilder();

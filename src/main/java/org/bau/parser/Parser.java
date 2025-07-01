@@ -792,7 +792,9 @@ public class Parser {
                     params.add(t);
                     if (matchOp(",")) {
                         // next
-                    } else if (!matchOp(")")) {
+                    } else if (matchOp(")")) {
+                        break;
+                    } else {
                         throw syntaxError("Expected ')'");
                     }
                 }
@@ -1735,7 +1737,7 @@ public class Parser {
             for(String t : templateParams) {
                 fullName += "_" + t.replace('.', '_').replace("[]", "_array");
             }
-            call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
+            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
             if (call.def == null) {
                 String code = template.template;
                 code = Templates.convertTemplate(code, templateNames, templateParams);
@@ -1748,13 +1750,13 @@ public class Parser {
                     Parser p = new Parser(program, module, code, template.lineOffset);
                     p.read();
                     p.parseFunctionDefinition(module);
-                    call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
+                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
                 } catch (IllegalStateException e) {
                     throw syntaxError("Error parsing template: " + e.getMessage(), e);
                 }
             }
         } else {
-            call.def = program.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
+            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
         }
         if (call.def == null) {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
@@ -2673,6 +2675,12 @@ public class Parser {
                     if (type != null) {
                         var = new FieldAccess(thisVar, n, type);
                     }
+                }
+                FunctionDefinition def = functionContext.getFunctionIfExists(n);
+                if (def != null) {
+                    FunctionPointer fp = new FunctionPointer();
+                    fp.function = def;
+                    return fp;
                 }
                 if (var == null) {
                     throw syntaxError("Variable or constant not found: '" + n + "'");

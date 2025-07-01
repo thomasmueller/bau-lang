@@ -296,7 +296,7 @@ int main(int _argc, char *_argv[]) {
             while (1) {
                 int64_t _t0 = isMunchausen_1(i);
                 if (_t0) {
-                    printf("%lld\n", i);
+                    printf("%lld\n", (long long)i);
                 }
                 int64_t _next = i + 1;
                 if (_next >= 4400) {

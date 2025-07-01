@@ -31,6 +31,7 @@ public class FunctionDefinition {
     private HashSet<DataType> borrowedTypes = null;
     final int lineOffset;
     public boolean isConstructor;
+    public boolean isFunctionPointer;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;
@@ -90,9 +91,7 @@ public class FunctionDefinition {
                 buff.append("int _vaCount,...");
                 break;
             } else {
-                buff.append(v.type().toC());
-                buff.append(' ');
-                buff.append(v.nameC());
+                buff.append(v.declarationToC());
             }
         }
         buff.append(")");

@@ -766,7 +766,7 @@ void test_0() {
                     ;
                 }
                 int64_t _t2 = HashMap_int_int_get_2(map, i);
-                printf("int map[%lld]=%lld\n", i, (long long)_t2);
+                printf("int map[%lld]=%lld\n", (long long)i, (long long)_t2);
                 int64_t _next = i + 1;
                 if (_next >= 20) {
                     break;

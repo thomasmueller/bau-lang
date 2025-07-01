@@ -130,6 +130,11 @@ public class TestCompare {
     }
 
     @Test
+    public void functionPointer() throws IOException {
+        test("functionPointer");
+    }
+
+    @Test
     public void functions() throws IOException {
         test("functions");
     }

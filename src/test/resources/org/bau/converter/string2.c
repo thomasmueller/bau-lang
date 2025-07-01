@@ -678,7 +678,7 @@ void test_0() {
             int64_t i = 0;
             while (1) {
                 org_bau_String_string s = org_bau_List_List_org_bau_String_string_get_2(list, i);
-                printf("#%lld: %.*s\n", i, s.data->len, s.data->data);
+                printf("#%lld: %.*s\n", (long long)i, s.data->len, s.data->data);
                 int64_t _next = i + 1;
                 if (_next >= list->size) {
                     org_bau_String_string_free(&s);

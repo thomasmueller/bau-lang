@@ -306,21 +306,7 @@ public class DataType {
 
     public String toC() {
         if (isFunctionPointer) {
-            StringBuffer buff = new StringBuffer();
-            if (functionPointerReturnType == null) {
-                buff.append("void ");
-            } else {
-                buff.append(functionPointerReturnType.toC());
-            }
-            buff.append(" (*functionPtr)(");
-            for (int i = 0; i < functionPointerArgs.size(); i++) {
-                if (i > 0) {
-                    buff.append(", ");
-                }
-                buff.append(functionPointerArgs.get(i).toC());
-            }
-            buff.append(")");
-            return buff.toString();
+            throw new IllegalStateException();
         }
         String s = nameC();
         return (isPointer() || isArray()) ? s + "*" : s;

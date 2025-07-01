@@ -317,7 +317,7 @@ int main(int _argc, char *_argv[]) {
                 }
                 _incUseStack(_t0);
                 i8_array* x = _t0;
-                printf("%lld: %.*s\n", i, x->len, x->data);
+                printf("%lld: %.*s\n", (long long)i, x->len, x->data);
                 if (!(( i < 1 ))) {
                     printf("assertion failed\n");
                     exit_1(1);

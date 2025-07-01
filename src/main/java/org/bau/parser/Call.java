@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
+import org.bau.runtime.Value.ValueFunctionPointer;
 import org.bau.runtime.Value.ValuePanic;
 import org.bau.std.Std;
 
@@ -22,6 +23,22 @@ public class Call implements Statement, Expression, LeftValue {
 
     @Override
     public Value eval(Memory m) {
+        if (def.isFunctionPointer) {
+            String name = def.name;
+            if (m == null) {
+                return null;
+            }
+            Value val = m.getLocal(name);
+            if (val == null || !(val instanceof ValueFunctionPointer)) {
+                return null;
+            }
+            ValueFunctionPointer fp = (ValueFunctionPointer) val;
+            FunctionDefinition def = m.getFunction(fp.getId());
+            Call c = new Call();
+            c.args.addAll(args);
+            c.def = def;
+            return c.eval(m);
+        }
         if (def.list == null) {
             // it was replaced, for example declared with just a name,
             // and then later a concrete implementation was set
@@ -77,7 +94,12 @@ public class Call implements Statement, Expression, LeftValue {
                 m.setLocal(e.getKey().name, e.getValue());
             }
         }
-        StatementResult r = Program.runSequence(m, def.list);
+        StatementResult r;
+        if (def.isFunctionPointer) {
+            r = null;
+        } else {
+            r = Program.runSequence(m, def.list);
+        }
         if (def.cCode != null) {
             Value result = Std.eval(def.name, m);
             m.setGlobal(Memory.RESULT, result);
@@ -245,7 +267,9 @@ public class Call implements Statement, Expression, LeftValue {
         buff.append("printf(");
         StringBuilder b2 = new StringBuilder();
         b2.append("\"");
-        for (Expression a : args) {
+        boolean[] isLong = new boolean[args.size()];
+        for (int i = 0; i < args.size(); i++) {
+            Expression a = args.get(i);
             if (a instanceof StringLiteral) {
                 String s = ((StringLiteral) a).value;
                 s = s.replaceAll("%", "%%");
@@ -258,6 +282,7 @@ public class Call implements Statement, Expression, LeftValue {
                     b2.append("%d");
                     break;
                 case "int":
+                    isLong[i] = true;
                     b2.append("%lld");
                     break;
                 case "f32":
@@ -271,9 +296,11 @@ public class Call implements Statement, Expression, LeftValue {
                     break;
                 default:
                     if (a.type().enumValues != null) {
+                        isLong[i] = true;
                         b2.append("%lld");
                         break;
                     } else if (a.type().name().startsWith("0..")) {
+                        isLong[i] = true;
                         b2.append("%lld");
                         break;
                     } else {
@@ -285,7 +312,8 @@ public class Call implements Statement, Expression, LeftValue {
         }
         b2.append("\\n\"");
         buff.append(b2.toString());
-        for (Expression a : args) {
+        for (int i = 0; i < args.size(); i++) {
+            Expression a = args.get(i);
             if (a instanceof StringLiteral) {
                 continue;
             }
@@ -296,7 +324,7 @@ public class Call implements Statement, Expression, LeftValue {
                 buff.append(a.toC()).append("->data");
             } else  {
                 buff.append(", ");
-                if ("int".equals(a.type().name())) {
+                if (isLong[i]) {
                     buff.append("(long long)");
                 }
                 buff.append(a.toC());
@@ -380,7 +408,11 @@ public class Call implements Statement, Expression, LeftValue {
 
     @Override
     public void used(Program program) {
-        program.getFunctionById(def.getFunctionId()).used(program);
+        if (def.isFunctionPointer) {
+            // ignore
+        } else {
+            program.getFunctionById(def.getFunctionId()).used(program);
+        }
         for (Expression e : args) {
             e.used(program);
         }

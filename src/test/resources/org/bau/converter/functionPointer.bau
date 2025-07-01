@@ -1,0 +1,14 @@
+fun abc(name i8[]) int
+    println('hello ' name)
+    return 1
+
+fun callMe(x fun(i8[]) int)
+    a : x('you')
+    println('returned ' a)
+
+fun main()
+    callMe(abc)
+
+## Expected
+hello you
+returned 1
