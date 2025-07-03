@@ -293,6 +293,7 @@ int64_t odd_1(int64_t x) {
     int64_t _t0 = even_1(x - 1);
     return _t0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -301,6 +302,10 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("even(10)=", 9);
     string_1002 = str_const("odd(11)=", 8);
     string_1003 = str_const("even(11)=", 9);
+    _main();
+    return 0;
+}
+void _main() {
     int64_t _t0 = odd_1(10);
     printf("odd(10)=%lld\n", (long long)_t0);
     int64_t _t1 = even_1(10);
@@ -310,5 +315,4 @@ int main(int _argc, char *_argv[]) {
     int64_t _t3 = even_1(11);
     printf("even(11)=%lld\n", (long long)_t3);
     _end();
-    return 0;
 }

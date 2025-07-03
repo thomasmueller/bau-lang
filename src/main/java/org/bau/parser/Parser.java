@@ -67,7 +67,7 @@ public class Parser {
 
     public Parser(Program program, String module, String text, int lineOffset) {
         this.program = program;
-        this.functionContext = new FunctionContext(program);
+        this.functionContext = new FunctionContext(program, "main");
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
@@ -103,7 +103,7 @@ public class Parser {
                 if (def.code != null) {
                     String f = def.toString();
                     Parser p = new Parser(program, def.module, f, def.lineOffset);
-                    functionContext.reset();
+                    functionContext.reset(def.name);
                     p.functionContext = functionContext;
                     p.scanPhase = false;
                     p.parse();
@@ -116,7 +116,7 @@ public class Parser {
                 if (def.code != null) {
                     String f = def.toString();
                     Parser p = new Parser(program, def.module, f, def.lineOffset);
-                    functionContext.reset();
+                    functionContext.reset(def.name);
                     p.functionContext = functionContext;
                     p.scanPhase = false;
                     p.parse();
@@ -355,9 +355,6 @@ public class Parser {
         New n = new New(type, null);
         Variable result = assignTempVariable(def.list, n);
         for (Variable var : type.fields) {
-//            if (var.type().isCopyType() && var.type().isNumber()) {
-//                continue;
-//            }
             Assignment assign = new Assignment();
             assign.type = var.type();
             assign.initial = true;
@@ -803,7 +800,7 @@ public class Parser {
             if (type == TokenType.IDENTIFIER) {
                 returnType = readType(false, true);
             }
-            DataType fp = DataType.newFunctioPointer(module, params, returnType);
+            DataType fp = DataType.newFunctionPointer(module, params, returnType);
             return fp;
         }
         if ("0".equals(token)) {
@@ -1430,11 +1427,11 @@ public class Parser {
     }
 
     private void verifyBounds(Assignment s) {
-        if (!s.leftValue.type().isNumber() && s.leftValue.type() != s.value.type()) {
+        if (!s.leftValue.type().isNumber() && !s.leftValue.type().equals(s.value.type())) {
             if (s.value.type() == null) {
                 throw syntaxError("The type of the variable is different than the type of the expression");
             }
-            if (s.value.type().orNull() == s.leftValue.type()) {
+            if (s.value.type().orNull().equals(s.leftValue.type())) {
                 // setting a not-null value to a nullable variable is ok
             } else {
                 throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1757,6 +1754,12 @@ public class Parser {
             }
         } else {
             call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
+            if (call.def == null) {
+                call.def = functionContext.getFunctionIfExists(module, identifier);
+            }
+            if (call.def == null) {
+                call.def = functionContext.getFunctionIfExists(null, identifier);
+            }
         }
         if (call.def == null) {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
@@ -1850,6 +1853,9 @@ public class Parser {
                         && (expr.type().isNumber() || expr.type().isFloatingPoint())
                         && call.def.name.equals(targetType.toString())) {
                     // explicit cast
+                    continue;
+                }
+                if (expr.type() != null && expr.type().equals(targetType)) {
                     continue;
                 }
                 Expression cast = program.cast(expr, targetType);
@@ -2676,10 +2682,18 @@ public class Parser {
                         var = new FieldAccess(thisVar, n, type);
                     }
                 }
-                FunctionDefinition def = functionContext.getFunctionIfExists(n);
+                FunctionDefinition def = functionContext.getFunctionIfExists(null, n);
+                if (def == null) {
+                    def = functionContext.getFunctionIfExists(m, n);
+                }
                 if (def != null) {
-                    FunctionPointer fp = new FunctionPointer();
-                    fp.function = def;
+                    if (def.exceptionType != null) {
+                        throw syntaxError("Function throws an exception; this is not supported");
+                    }
+                    if (def.varArgs) {
+                        throw syntaxError("Function has a variable number of arguments; this is not supported");
+                    }
+                    FunctionPointer fp = new FunctionPointer(def);
                     return fp;
                 }
                 if (var == null) {
@@ -2988,6 +3002,9 @@ public class Parser {
                     case 'n':
                         buff.append('\n');
                         break;
+                    case 'r':
+                        buff.append('\r');
+                        break;
                     case 't':
                         buff.append('\t');
                         break;
@@ -3009,7 +3026,7 @@ public class Parser {
                         break;
                     }
                     default:
-                        throw syntaxError("Expected '\\n', '\\t', '\\'', '\\\\', or '\\x'; got '" + c + "'");
+                        throw syntaxError("Expected '\\n', '\\r', '\\t', '\\'', '\\\\', or '\\x'; got '" + c + "'");
                     }
                 } else {
                     if (c > 127) {

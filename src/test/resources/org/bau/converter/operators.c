@@ -266,10 +266,15 @@ int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     i64v = 1;
     i32v = 1;
     i16v = 1;
@@ -281,5 +286,4 @@ int main(int _argc, char *_argv[]) {
     c = idiv_2(a, b);
     d = imod_2(a, b);
     _end();
-    return 0;
 }

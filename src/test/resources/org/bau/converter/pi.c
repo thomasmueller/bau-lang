@@ -1329,12 +1329,17 @@ int32_t shiftRight_i32_2(int32_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     string_1016 = str_const(" : ", 3);
     string_1017 = str_const("dummy: ", 7);
+    _main();
+    return 0;
+}
+void _main() {
     I32_MIN_VALUE = -2147483648;
     I32_MAX_VALUE = 4294967295;
     INT_MIN_VALUE = (-9223372036854775807LL-1LL);
@@ -1347,21 +1352,21 @@ int main(int _argc, char *_argv[]) {
     int64_t i = 0;
     int64_t k = 0;
     int64_t L = 10;
-    i8_array* _t0 = i8_array_new(10);
-    _incUseStack(_t0);
-    i8_array* buff = _t0;
+    i8_array* _t2 = i8_array_new(10);
+    _incUseStack(_t2);
+    i8_array* buff = _t2;
     int64_t j = 0;
     int64_t dummy = 0;
     while (i < n) {
         k += 1;
         nextTerm_1(k);
-        int64_t _t1 = org_bau_BigInt_bigInt_compareTo_2(num, acc);
-        if (_t1 > 0) {
+        int64_t _t3 = org_bau_BigInt_bigInt_compareTo_2(num, acc);
+        if (_t3 > 0) {
             continue;
         }
         int64_t d = extractDigit_1(3);
-        int64_t _t2 = extractDigit_1(4);
-        if (d != _t2) {
+        int64_t _t4 = extractDigit_1(4);
+        if (d != _t4) {
             continue;
         }
         eliminateDigit_1(d);
@@ -1376,14 +1381,13 @@ int main(int _argc, char *_argv[]) {
     }
     printf("dummy: %lld\n", (long long)dummy);
     _decUseStack(buff, i8_array);
-    _decUseStack(_t0, i8_array);
+    _decUseStack(_t2, i8_array);
     org_bau_BigInt_bigInt_free(&tmp1);
     org_bau_BigInt_bigInt_free(&tmp2);
     org_bau_BigInt_bigInt_free(&acc);
     org_bau_BigInt_bigInt_free(&den);
     org_bau_BigInt_bigInt_free(&num);
     _end();
-    return 0;
 }
 /*
 

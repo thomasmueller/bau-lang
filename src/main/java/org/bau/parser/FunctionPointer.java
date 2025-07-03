@@ -7,8 +7,18 @@ import org.bau.runtime.Value;
 
 public class FunctionPointer implements Expression {
 
-    DataType functionPointerType;
-    FunctionDefinition function;
+    private final FunctionDefinition function;
+    private final DataType functionPointerType;
+
+    FunctionPointer(FunctionDefinition function) {
+        this.function = function;
+        ArrayList<DataType> argTypes = new ArrayList<>();
+        for (int i = 0; i < function.parameters.size(); i++) {
+            Variable v = function.parameters.get(i);
+            argTypes.add(v.type());
+        }
+        this.functionPointerType = DataType.newFunctionPointer(function.module, argTypes, function.returnType);
+    }
 
     @Override
     public Value eval(Memory memory) {
@@ -37,7 +47,15 @@ public class FunctionPointer implements Expression {
 
     @Override
     public String toC() {
-        return function.nameC() + "_" + function.parameters.size();
+        StringBuilder buff = new StringBuilder();
+        if (function.module != null) {
+            buff.append(Program.esc(function.module).replace(".", "_"));
+            buff.append("_");
+        }
+        buff.append(function.nameC());
+        buff.append("_");
+        buff.append(function.parameters.size());
+        return buff.toString();
     }
 
     @Override
@@ -64,9 +82,13 @@ public class FunctionPointer implements Expression {
         return this;
     }
 
+    public String toString() {
+        return function.toString();
+    }
+
     @Override
     public void used(Program program) {
-        function.used(program);
+        program.getFunctionById(function.getFunctionId()).used(program);
     }
 
 }

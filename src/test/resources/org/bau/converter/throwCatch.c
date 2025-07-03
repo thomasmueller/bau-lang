@@ -342,6 +342,7 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     _t0.message = message;
     return _t0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -350,14 +351,18 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("Factorial of ", 13);
     string_1002 = str_const(" is ", 4);
     string_1003 = str_const(" resulted in ", 13);
+    _main();
+    return 0;
+}
+void _main() {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     int64_t i = 0;
     while (i <= 30) {
         _x0 = factorial_1(i);
         if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
-        int64_t _t0 = _x0.result;
-        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t0);
+        int64_t _t1 = _x0.result;
+        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t1);
         goto skip0;
         catch0:;
         org_bau_Exception_exception e = _lastException;
@@ -367,7 +372,6 @@ int main(int _argc, char *_argv[]) {
         i += 1;
     }
     _end();
-    return 0;
 }
 /*
 

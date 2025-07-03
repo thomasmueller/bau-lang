@@ -90,7 +90,7 @@ public class Variable implements Expression, LeftValue {
             } else {
                 buff.append(t.functionPointerReturnType.toC());
             }
-            buff.append(" (*" + nameC() + "_" + t.functionPointerArgs.size() + ")(");
+            buff.append(" (*" + nameC() + ")(");
             for (int i = 0; i < t.functionPointerArgs.size(); i++) {
                 if (i > 0) {
                     buff.append(", ");
@@ -348,6 +348,9 @@ public class Variable implements Expression, LeftValue {
     }
 
     public String nameC() {
+        if (type.isFunctionPointer) {
+            return Program.esc(name) + "_" + type.functionPointerArgs.size();
+        }
         if (isInternal) {
             return "_" + name.substring(1);
         }

@@ -292,6 +292,7 @@ int64_t call_2(i8_array* name, int64_t x) {
     printf("  called %.*s=%lld\n", name->len, name->data, (long long)x);
     return x;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -310,6 +311,10 @@ int main(int _argc, char *_argv[]) {
     string_1011 = str_const("  dec a", 7);
     string_1012 = str_const("  dec b", 7);
     string_1013 = str_const("testing or loop", 15);
+    _main();
+    return 0;
+}
+void _main() {
     int64_t a = 1;
     int64_t b = 2;
     printf("testing or: call first\n");
@@ -414,5 +419,4 @@ int main(int _argc, char *_argv[]) {
         }
     }
     _end();
-    return 0;
 }

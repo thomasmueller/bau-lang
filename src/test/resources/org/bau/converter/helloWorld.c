@@ -274,12 +274,16 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1000;
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Hello World", 11);
+    _main();
+    return 0;
+}
+void _main() {
     printf("Hello World\n");
     _end();
-    return 0;
 }

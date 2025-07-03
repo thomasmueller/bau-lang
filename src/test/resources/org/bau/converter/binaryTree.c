@@ -351,6 +351,7 @@ Tree* with_1(int64_t depth) {
     _decUseStack(_t1, Tree);
     return _t3;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -359,6 +360,10 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("; check: ", 9);
     string_1002 = str_const(" trees of depth ", 16);
     string_1003 = str_const("long lived tree of depth ", 25);
+    _main();
+    return 0;
+}
+void _main() {
     int64_t n = 10;
     int64_t minDepth = 4;
     int64_t maxDepth = 10;
@@ -381,5 +386,4 @@ int main(int _argc, char *_argv[]) {
     printf("long lived tree of depth %lld; check: %lld\n", (long long)10, (long long)count);
     _decUseStack(longLivedTree, Tree);
     _end();
-    return 0;
 }

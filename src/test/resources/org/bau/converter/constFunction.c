@@ -244,12 +244,16 @@ void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     printf("%lld\n", (long long)6);
     printf("%.9f\n", 6.6);
     _end();
-    return 0;
 }

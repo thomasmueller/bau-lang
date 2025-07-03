@@ -44,7 +44,7 @@ public class FunctionDefinition {
 
     public static String getFunctionId(DataType type, String module, String name, int parameterCount) {
         if (module != null && type != null && type.getModule() != null && !type.getModule().equals(module)) {
-            throw new IllegalStateException("Module does not match type module");
+            throw new IllegalStateException("Module does not match the module of the type");
         }
         StringBuilder buff = new StringBuilder();
         if (type != null) {

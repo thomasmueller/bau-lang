@@ -54,6 +54,9 @@ type StringBuilder
     data i8[]
     len int
 
+fun StringBuilder append(b i8[])
+    append(b, 0, b.len)
+
 fun StringBuilder append(b i8[], start int, end int)
     add : end - start
     if start >= b.len or end < start or end > b.len
@@ -96,7 +99,7 @@ fun replaceAll(s i8[], before i8[], after i8[]) i8[]
     index := 0
     while
         buff.append(s, index, next)
-        buff.append(after, 0, after.len)
+        buff.append(after)
         index = next + before.len
         next = indexOf(s, before, index)
         break next < 0

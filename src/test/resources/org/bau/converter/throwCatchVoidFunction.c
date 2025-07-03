@@ -332,6 +332,7 @@ _or_exception print_1(int64_t x) {
     catch0:
     return exception_or_exception(_lastException);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -339,6 +340,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("Value too large", 15);
     string_1001 = str_const("x = ", 4);
     string_1002 = str_const("Error: ", 7);
+    _main();
+    return 0;
+}
+void _main() {
     org_bau_Exception_exception _lastException;
     _or_exception _x0;
     int64_t i = 0;
@@ -354,7 +359,6 @@ int main(int _argc, char *_argv[]) {
         i += 1;
     }
     _end();
-    return 0;
 }
 /*
 

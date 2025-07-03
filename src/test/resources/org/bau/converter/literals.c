@@ -283,6 +283,7 @@ i8_array* d;
 i8_array* e;
 i8_array* f;
 double g;
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -290,6 +291,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("String literal", 14);
     string_1001 = str_const("Raw string", 10);
     string_1002 = str_const("Two-line\nraw string with `", 26);
+    _main();
+    return 0;
+}
+void _main() {
     a = 1000000;
     b = 3.1415;
     c = 0xcafe;
@@ -307,5 +312,4 @@ int main(int _argc, char *_argv[]) {
     _decUseStack(e, i8_array);
     _decUseStack(f, i8_array);
     _end();
-    return 0;
 }

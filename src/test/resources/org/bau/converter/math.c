@@ -547,17 +547,17 @@ double org_bau_Math_cos_1(double x) {
 }
 double org_bau_Math_exp_1(double x) {
     return exp(x);
-    int64_t _t0 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t1 = _t0;
-    if (!(_t1)) {
-        int64_t _t2 = x == (1.0 / 0.0);
-        _t1 = _t2;
+    int64_t _t8 = org_bau_Math_isNotANumber_1(x);
+    int64_t _t9 = _t8;
+    if (!(_t9)) {
+        int64_t _t10 = x == (1.0 / 0.0);
+        _t9 = _t10;
     }
-    if (_t1) {
+    if (_t9) {
         return x;
     } else if (x < 0) {
-        double _t3 = org_bau_Math_exp_1(- x);
-        double _r0 = 1 / _t3;
+        double _t11 = org_bau_Math_exp_1(- x);
+        double _r0 = 1 / _t11;
         return _r0;
     }
     if (x > 2) {
@@ -580,44 +580,44 @@ double org_bau_Math_exp_1(double x) {
 }
 double org_bau_Math_floor_1(double x) {
     return floor(x);
-    int64_t _t0 = x <= (-9223372036854775807LL-1LL);
-    if (!(_t0)) {
-        int64_t _t1 = x >= 9223372036854775807;
-        _t0 = _t1;
+    int64_t _t26 = x <= (-9223372036854775807LL-1LL);
+    if (!(_t26)) {
+        int64_t _t27 = x >= 9223372036854775807;
+        _t26 = _t27;
     }
-    int64_t _t2 = _t0;
-    if (!(_t2)) {
-        int64_t _t3 = org_bau_Math_isNotANumber_1(x);
-        _t2 = _t3;
+    int64_t _t28 = _t26;
+    if (!(_t28)) {
+        int64_t _t29 = org_bau_Math_isNotANumber_1(x);
+        _t28 = _t29;
     }
-    int64_t _t4 = _t2;
-    if (!(_t4)) {
-        int64_t _t5 = x == 0;
-        _t4 = _t5;
+    int64_t _t30 = _t28;
+    if (!(_t30)) {
+        int64_t _t31 = x == 0;
+        _t30 = _t31;
     }
-    if (_t4) {
+    if (_t30) {
         return x;
     }
     int64_t i = int_1(x);
     double d = float_1(i);
-    int64_t _t6 = d == x;
-    if (!(_t6)) {
-        int64_t _t7 = x >= 0;
-        _t6 = _t7;
+    int64_t _t32 = d == x;
+    if (!(_t32)) {
+        int64_t _t33 = x >= 0;
+        _t32 = _t33;
     }
-    if (_t6) {
+    if (_t32) {
         return d;
     }
     double _r0 = d - 1;
     return _r0;
 }
 int64_t org_bau_Math_isNegativeZero_1(double x) {
-    int64_t _t0 = (x == 0.0);
-    if (_t0) {
-        int64_t _t1 = (( 1.0 / x ) == (-1.0 / 0.0));
-        _t0 = _t1;
+    int64_t _t15 = (x == 0.0);
+    if (_t15) {
+        int64_t _t16 = (( 1.0 / x ) == (-1.0 / 0.0));
+        _t15 = _t16;
     }
-    return _t0;
+    return _t15;
 }
 int64_t org_bau_Math_isNotANumber_1(double x) {
     return isnan(x);
@@ -626,26 +626,26 @@ int64_t org_bau_Math_isNotANumber_1(double x) {
 }
 double org_bau_Math_log_1(double x) {
     return log(x);
-    int64_t _t0 = x <= 0;
-    if (!(_t0)) {
-        int64_t _t1 = org_bau_Math_isNotANumber_1(x);
-        _t0 = _t1;
+    int64_t _t4 = x <= 0;
+    if (!(_t4)) {
+        int64_t _t5 = org_bau_Math_isNotANumber_1(x);
+        _t4 = _t5;
     }
     if (x == 0) {
         return (-1.0 / 0.0);
     } else if (x == (1.0 / 0.0)) {
         return x;
-    } else if (_t0) {
+    } else if (_t4) {
         return (0.0 / 0.0);
     }
     if (x < 0.7) {
-        double _t2 = org_bau_Math_log_1(2 * x);
-        double _r0 = _t2 - 0.6931471805599453;
+        double _t6 = org_bau_Math_log_1(2 * x);
+        double _r0 = _t6 - 0.6931471805599453;
         return _r0;
     }
     if (x >= 1.5) {
-        double _t3 = org_bau_Math_log_1(x / 2);
-        double _r1 = _t3 + 0.6931471805599453;
+        double _t7 = org_bau_Math_log_1(x / 2);
+        double _r1 = _t7 + 0.6931471805599453;
         return _r1;
     }
     double base = x - 1;
@@ -672,21 +672,21 @@ double org_bau_Math_log10_1(double x) {
 }
 double org_bau_Math_max_2(double a, double b) {
     return fmax(a, b);
-    int64_t _t0 = org_bau_Math_isNotANumber_1(a);
-    if (_t0) {
+    int64_t _t14 = org_bau_Math_isNotANumber_1(a);
+    if (_t14) {
         return a;
     }
-    int64_t _t1 = a == b;
-    if (_t1) {
-        int64_t _t2 = a == 0;
-        _t1 = _t2;
+    int64_t _t17 = a == b;
+    if (_t17) {
+        int64_t _t18 = a == 0;
+        _t17 = _t18;
     }
-    int64_t _t3 = _t1;
-    if (_t3) {
-        int64_t _t4 = org_bau_Math_isNegativeZero_1(a);
-        _t3 = _t4;
+    int64_t _t19 = _t17;
+    if (_t19) {
+        int64_t _t20 = org_bau_Math_isNegativeZero_1(a);
+        _t19 = _t20;
     }
-    if (_t3) {
+    if (_t19) {
         return b;
     }
     if (a >= b) {
@@ -696,21 +696,21 @@ double org_bau_Math_max_2(double a, double b) {
 }
 double org_bau_Math_min_2(double a, double b) {
     return fmin(a, b);
-    int64_t _t0 = org_bau_Math_isNotANumber_1(a);
-    if (_t0) {
+    int64_t _t21 = org_bau_Math_isNotANumber_1(a);
+    if (_t21) {
         return a;
     }
-    int64_t _t1 = a == b;
-    if (_t1) {
-        int64_t _t2 = a == 0;
-        _t1 = _t2;
+    int64_t _t22 = a == b;
+    if (_t22) {
+        int64_t _t23 = a == 0;
+        _t22 = _t23;
     }
-    int64_t _t3 = _t1;
-    if (_t3) {
-        int64_t _t4 = org_bau_Math_isNegativeZero_1(b);
-        _t3 = _t4;
+    int64_t _t24 = _t22;
+    if (_t24) {
+        int64_t _t25 = org_bau_Math_isNegativeZero_1(b);
+        _t24 = _t25;
     }
-    if (_t3) {
+    if (_t24) {
         return b;
     }
     if (a <= b) {
@@ -833,24 +833,24 @@ int64_t org_bau_Math_powInt_2(int64_t base, int64_t exponent) {
     while (exponent > 0) {
         if ((exponent & 1) == 1) {
             result *= b;
-            int64_t _t0 = result > 2147483648;
-            if (!(_t0)) {
-                int64_t _t1 = result < -2147483648;
-                _t0 = _t1;
+            int64_t _t34 = result > 2147483648;
+            if (!(_t34)) {
+                int64_t _t35 = result < -2147483648;
+                _t34 = _t35;
             }
-            if (_t0) {
+            if (_t34) {
                 return -1;
             }
         }
         exponent >>= 1;
         if (exponent > 0) {
             b *= b;
-            int64_t _t2 = b > 2147483648;
-            if (!(_t2)) {
-                int64_t _t3 = b < -2147483648;
-                _t2 = _t3;
+            int64_t _t36 = b > 2147483648;
+            if (!(_t36)) {
+                int64_t _t37 = b < -2147483648;
+                _t36 = _t37;
             }
-            if (_t2) {
+            if (_t36) {
                 return -1;
             }
         }
@@ -942,9 +942,9 @@ double org_bau_Math_sqrt_1(double x) {
             return exact;
         }
     }
-    double _t2 = org_bau_Math_log_1(x);
-    double _t3 = org_bau_Math_exp_1(_t2 / 2);
-    return _t3;
+    double _t12 = org_bau_Math_log_1(x);
+    double _t13 = org_bau_Math_exp_1(_t12 / 2);
+    return _t13;
 }
 int64_t org_bau_Math_sqrtInt_1(int64_t x) {
     if (x < 0) {
@@ -954,12 +954,12 @@ int64_t org_bau_Math_sqrtInt_1(int64_t x) {
     int64_t c = g;
     while (1) {
         int64_t t = g * g;
-        int64_t _t0 = t > x;
-        if (!(_t0)) {
-            int64_t _t1 = t < 0;
-            _t0 = _t1;
+        int64_t _t2 = t > x;
+        if (!(_t2)) {
+            int64_t _t3 = t < 0;
+            _t2 = _t3;
         }
-        if (_t0) {
+        if (_t2) {
             g ^= c;
         }
         c >>= 1;
@@ -983,6 +983,7 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -1014,6 +1015,10 @@ int main(int _argc, char *_argv[]) {
     string_1032 = str_const("pow ", 4);
     string_1033 = str_const("min ", 4);
     string_1034 = str_const("max ", 4);
+    _main();
+    return 0;
+}
+void _main() {
     POS_INFINITY = (1.0 / 0.0);
     NEG_INFINITY = (-1.0 / 0.0);
     NOT_A_NUMBER = (0.0 / 0.0);
@@ -1030,66 +1035,65 @@ int main(int _argc, char *_argv[]) {
     double x = -1.0;
     x = -1;
     while (x <= 1) {
-        double _t0 = org_bau_Math_signum_1(x);
-        printf("signum %.9f = %.9f\n", x, _t0);
-        double _t1 = org_bau_Math_abs_1(x);
-        printf("abs    %.9f = %.9f\n", x, _t1);
-        double _t2 = org_bau_Math_floor_1(x);
-        printf("floor  %.9f = %.9f\n", x, _t2);
-        double _t3 = org_bau_Math_ceil_1(x);
-        printf("ceil   %.9f = %.9f\n", x, _t3);
-        double _t4 = org_bau_Math_round_1(x);
-        printf("round  %.9f = %.9f\n", x, _t4);
-        double _t5 = org_bau_Math_exp_1(x);
-        printf("exp    %.9f = %.9f\n", x, _t5);
-        double _t6 = org_bau_Math_log_1(x);
-        printf("log    %.9f = %.9f\n", x, _t6);
-        double _t7 = org_bau_Math_log10_1(x);
-        printf("log10  %.9f = %.9f\n", x, _t7);
-        double _t8 = org_bau_Math_sqrt_1(x);
-        printf("sqrt   %.9f = %.9f\n", x, _t8);
-        double _t9 = org_bau_Math_sin_1(x);
-        printf("sin    %.9f = %.9f\n", x, _t9);
-        double _t10 = org_bau_Math_cos_1(x);
-        printf("cos    %.9f = %.9f\n", x, _t10);
-        double _t11 = org_bau_Math_tan_1(x);
-        printf("tan    %.9f = %.9f\n", x, _t11);
-        double _t12 = org_bau_Math_atan_1(x);
-        printf("atan   %.9f = %.9f\n", x, _t12);
-        double _t13 = org_bau_Math_asin_1(x);
-        printf("asin   %.9f = %.9f\n", x, _t13);
-        double _t14 = org_bau_Math_acos_1(x);
-        printf("acos   %.9f = %.9f\n", x, _t14);
+        double _t38 = org_bau_Math_signum_1(x);
+        printf("signum %.9f = %.9f\n", x, _t38);
+        double _t39 = org_bau_Math_abs_1(x);
+        printf("abs    %.9f = %.9f\n", x, _t39);
+        double _t40 = org_bau_Math_floor_1(x);
+        printf("floor  %.9f = %.9f\n", x, _t40);
+        double _t41 = org_bau_Math_ceil_1(x);
+        printf("ceil   %.9f = %.9f\n", x, _t41);
+        double _t42 = org_bau_Math_round_1(x);
+        printf("round  %.9f = %.9f\n", x, _t42);
+        double _t43 = org_bau_Math_exp_1(x);
+        printf("exp    %.9f = %.9f\n", x, _t43);
+        double _t44 = org_bau_Math_log_1(x);
+        printf("log    %.9f = %.9f\n", x, _t44);
+        double _t45 = org_bau_Math_log10_1(x);
+        printf("log10  %.9f = %.9f\n", x, _t45);
+        double _t46 = org_bau_Math_sqrt_1(x);
+        printf("sqrt   %.9f = %.9f\n", x, _t46);
+        double _t47 = org_bau_Math_sin_1(x);
+        printf("sin    %.9f = %.9f\n", x, _t47);
+        double _t48 = org_bau_Math_cos_1(x);
+        printf("cos    %.9f = %.9f\n", x, _t48);
+        double _t49 = org_bau_Math_tan_1(x);
+        printf("tan    %.9f = %.9f\n", x, _t49);
+        double _t50 = org_bau_Math_atan_1(x);
+        printf("atan   %.9f = %.9f\n", x, _t50);
+        double _t51 = org_bau_Math_asin_1(x);
+        printf("asin   %.9f = %.9f\n", x, _t51);
+        double _t52 = org_bau_Math_acos_1(x);
+        printf("acos   %.9f = %.9f\n", x, _t52);
         x += 0.5;
     }
     x = -1;
     while (x <= 1) {
-        int64_t _t15 = org_bau_Math_isNotANumber_1(x);
-        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t15);
-        int64_t _t16 = org_bau_Math_isNegativeZero_1(x);
-        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t16);
-        int64_t _t17 = org_bau_Math_convertDoubleToLongBits_1(x);
-        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t17);
-        double _t18 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
-        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t18);
+        int64_t _t53 = org_bau_Math_isNotANumber_1(x);
+        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t53);
+        int64_t _t54 = org_bau_Math_isNegativeZero_1(x);
+        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t54);
+        int64_t _t55 = org_bau_Math_convertDoubleToLongBits_1(x);
+        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t55);
+        double _t56 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
+        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t56);
         x += 0.5;
     }
     x = -1;
     while (x <= 1) {
         double y = -1.0;
         while (y <= 1) {
-            double _t19 = org_bau_Math_pow_2(x, y);
-            printf("pow %.9f\n", _t19);
-            double _t20 = org_bau_Math_min_2(x, y);
-            printf("min %.9f\n", _t20);
-            double _t21 = org_bau_Math_max_2(x, y);
-            printf("max %.9f\n", _t21);
+            double _t57 = org_bau_Math_pow_2(x, y);
+            printf("pow %.9f\n", _t57);
+            double _t58 = org_bau_Math_min_2(x, y);
+            printf("min %.9f\n", _t58);
+            double _t59 = org_bau_Math_max_2(x, y);
+            printf("max %.9f\n", _t59);
             y += 0.5;
         }
         x += 0.5;
     }
     _end();
-    return 0;
 }
 /*
 

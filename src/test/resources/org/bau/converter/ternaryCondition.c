@@ -295,6 +295,7 @@ int64_t int_then_int_3(int64_t this, int64_t a, int64_t b) {
 i8_array* typeName_int_1(int64_t a) {
     return string_1003;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -303,6 +304,10 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const(")= ", 3);
     string_1002 = str_const("typeName: ", 10);
     string_1003 = str_const("int", 3);
+    _main();
+    return 0;
+}
+void _main() {
     while (1 == 1) {
         int64_t i = -1;
         while (i < 2) {
@@ -318,5 +323,4 @@ int main(int _argc, char *_argv[]) {
         break;
     }
     _end();
-    return 0;
 }

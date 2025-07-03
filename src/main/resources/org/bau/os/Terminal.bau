@@ -1,0 +1,158 @@
+module org.bau.os.Terminal
+
+import org.bau.Env
+import org.bau.os.Signal
+
+type termIos
+    data i8[]
+
+type windowSize
+    rows int
+    columns int
+
+enum keyCode
+    CTRL_C: 3
+    CTRL_D: 4
+    CTRL_F: 6
+    CTRL_H: 8
+    TAB: 9
+    CTRL_L: 12
+    ENTER: 13
+    CTRL_Q: 17
+    CTRL_S: 19
+    CTRL_U: 21
+    ESC: 27
+    BACKSPACE: 127
+    ARROW_LEFT: 1000
+    ARROW_RIGHT
+    ARROW_UP
+    ARROW_DOWN
+    DEL_KEY
+    HOME_KEY
+    END_KEY
+    PAGE_UP
+    PAGE_DOWN
+
+oldTermIos := termIos(i8[0])
+
+fun doNothing()
+
+refreshScreenCallback := doNothing
+
+fun writeToTerminal(data i8[], len int)
+    native(`#include <stdio.h>
+        write(1, data->data, len);
+    `)
+
+fun windowSizeChanged(x i32)
+    refreshScreenCallback()
+
+fun isTerminal() int
+    native(`#include <unistd.h>
+        return isatty(0);
+    `)
+    return 0
+
+fun disableRawMode()
+    native(`#include <termios.h>
+        struct termios old;
+        memcpy(&old, oldTermIos.data, sizeof(struct termios));
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &old);
+    `)
+
+fun enableRawMode(refreshScreen fun())
+    refreshScreenCallback = refreshScreen
+    Env.atExit(disableRawMode)
+    size := 0
+    native(`#include <termios.h>
+        size = sizeof(struct termios);
+    `)
+    oldTermIos = termIos(i8[size])
+    native(`#include <termios.h>
+        struct termios old;
+        if (tcgetattr(0, &old) == -1) return;
+        memcpy(oldTermIos.data, &old, size);
+        struct termios raw;
+        raw = old;
+        raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+        raw.c_oflag &= ~(OPOST);
+        raw.c_cflag |= (CS8);
+        raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+        raw.c_cc[VMIN] = 0;
+        raw.c_cc[VTIME] = 1;
+        if (tcsetattr(0, TCSAFLUSH, &raw) < 0) return;
+    `)
+    Signal.signal(signalId.SIGWINCH, windowSizeChanged)
+    windowSizeChanged(0)
+
+fun getWindowSize() windowSize
+    size: windowSize()
+    native(`#include <sys/ioctl.h>
+        struct winsize ws;
+        ioctl(1, TIOCGWINSZ, &ws);
+        size.rows = ws.ws_row;
+        size.columns = ws.ws_col;
+    `)
+    return size
+
+fun readByte() int
+    x i8
+    native(`#include <stdio.h>
+        read(0, &x, 1);
+        return x;
+    `)
+    return 0
+
+fun readKey() int
+    while
+        n : readByte()
+        if n
+            return n
+
+fun readEditorKey() int
+    while
+        key : readKey()
+        if key < 0
+            Env.exit(1)
+        if key <> keyCode.ESC
+            return key
+        e0 : readKey()
+        if e0 = 0
+            return key
+        e1 : readKey()
+        if e1 = 0
+            return key
+        if e0 = ord('O')
+            if e1 = ord('H')
+                return keyCode.HOME_KEY
+            elif e1 = ord('F')
+                return keyCode.END_KEY
+            return key
+        if e0 <> ord('[')
+            return key
+        if e1 >= ord('0') and e1 <= ord('9')
+            e2 : readKey()
+            if e2 <> ord('~')
+                return key
+            switch e1
+            case ord('3')
+                return keyCode.DEL_KEY
+            case ord('5')
+                return keyCode.PAGE_UP
+            case ord('6')
+                return keyCode.PAGE_DOWN
+            return key
+        switch e1
+        case ord('A')
+            return keyCode.ARROW_UP
+        case ord('B')
+            return keyCode.ARROW_DOWN
+        case ord('C')
+            return keyCode.ARROW_RIGHT
+        case ord('D')
+            return keyCode.ARROW_LEFT
+        case ord('F')
+            return keyCode.END_KEY
+        case ord('H')
+            return keyCode.HOME_KEY
+        return key

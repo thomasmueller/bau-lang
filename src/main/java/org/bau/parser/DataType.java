@@ -98,12 +98,24 @@ public class DataType {
         return new DataType(module, name, sizeOf, false, null, null, false, memoryType);
     }
 
-    public static DataType newFunctioPointer(String module, ArrayList<DataType> params, DataType returnType) {
+    public static DataType newFunctionPointer(String module, ArrayList<DataType> params, DataType returnType) {
         DataType r = newNonArray(module, "fun", 0, MemoryType.COPY);
         r.isFunctionPointer = true;
         r.functionPointerArgs = params;
         r.functionPointerReturnType = returnType;
         return r;
+    }
+
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    public boolean equals(DataType other) {
+        if (this == other) {
+            return true;
+        }
+        // function pointer types are not equal
+        return this.toString().equals(other.toString());
     }
 
     public Expression nullExpression() {
@@ -323,6 +335,9 @@ public class DataType {
     }
 
     public boolean needFree() {
+        if (isFunctionPointer) {
+            return false;
+        }
         return !isNumber;
     }
 

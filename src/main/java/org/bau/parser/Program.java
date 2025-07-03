@@ -64,6 +64,8 @@ public class Program {
 
     HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
 
+    private int nextTempVariableIdGlobalScopeId;
+
     {
         FunctionDefinition f = new FunctionDefinition(0);
         // TODO move println to std
@@ -90,6 +92,10 @@ public class Program {
     public void addFunctionTemplate(DataType type, String module, String name, FunctionDefinition def) {
         String id = FunctionDefinition.getFunctionId(type, module, name, 0);
         functionTemplates.put(id, def);
+    }
+
+    public int nextTempVariableIdGlobalScope() {
+        return nextTempVariableIdGlobalScopeId++;
     }
 
     /**
@@ -169,14 +175,14 @@ public class Program {
                 if (expr instanceof NullValue) {
                     return new NullValue(target);
                 }
-            } else if (expr.type().orNull() == target) {
+            } else if (expr.type().orNull().equals(target)) {
                 return expr;
             }
         }
         DataType source = expr.type();
         if (source == null) {
             return expr;
-        } else if (source == target) {
+        } else if (source.equals(target)) {
             return null;
         } else if (source.isRange()) {
             return expr;
@@ -343,10 +349,10 @@ public class Program {
     }
 
     public String toC() {
-        for(Statement s : initList) {
+        for (Statement s : initList) {
             s.used(this);
         }
-        for(Statement s : mainList) {
+        for (Statement s : mainList) {
             s.used(this);
         }
         ProgramContext context = new ProgramContext();
@@ -449,11 +455,6 @@ public class Program {
                     if (t.memoryType() == MemoryType.REF_COUNT) {
                         buff.append(Statement.indent("result->_refCount = 1;\n"));
                     }
-//                    for (Variable f : t.fields) {
-//                        if (f.type().isNumber()) {
-//                            buff.append(Statement.indent("result->" + f.assignmentC() + " = 0;\n"));
-//                        }
-//                    }
                     buff.append(Statement.indent("return result;\n"));
                     buff.append("}\n");
                 } else if (!t.isArray()) {
@@ -629,7 +630,7 @@ public class Program {
         }
         for (Variable var : globalVariables.values()) {
             if (var.isUsed()) {
-                buff.append(var.type().toC() + " " + var.nameC() + ";\n");
+                buff.append(var.declarationToC() + ";\n");
             }
         }
         for (FunctionDefinition def : functions.values()) {
@@ -640,6 +641,7 @@ public class Program {
                 buff.append(def.toC(context));
             }
         }
+        buff.append("void _main();\n");
         buff.append("int main(int _argc, char *_argv[]) {\n");
         if (useTmMalloc) {
             buff.append(Statement.indent("tmmalloc_init();\n"));
@@ -671,6 +673,10 @@ public class Program {
             buff.append(Statement.indent(
                     "array_" + id + " = int_array_const(array_const_" + id + ", " + data.len().intValue() + ");\n"));
         }
+        buff.append(Statement.indent("_main();\n"));
+        buff.append(Statement.indent("return 0;\n"));
+        buff.append("}\n");
+        buff.append("void _main() {\n");
         context.nextFunction();
         FunctionDefinition main = new FunctionDefinition(0);
         main.list = mainList;
@@ -720,7 +726,6 @@ public class Program {
             }
         }
         buff.append(Statement.indent("_end();\n"));
-        buff.append(Statement.indent("return 0;\n"));
         if (context.needToCatch != null) {
             throw new IllegalStateException("Possible exception is not caught at " + buff.toString());
         }

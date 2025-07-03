@@ -284,12 +284,17 @@ int64_t factorial_1(int64_t x) {
     int64_t _r0 = x * _t0;
     return _r0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Factorial of ", 13);
     string_1001 = str_const(" = ", 3);
+    _main();
+    return 0;
+}
+void _main() {
     int64_t i = 0;
     while (i <= 10) {
         int64_t _t0 = factorial_1(i);
@@ -297,5 +302,4 @@ int main(int _argc, char *_argv[]) {
         i += 1;
     }
     _end();
-    return 0;
 }

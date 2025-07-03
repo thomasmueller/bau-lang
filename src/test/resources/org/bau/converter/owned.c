@@ -303,6 +303,7 @@ Entry_owned* Entry_owned_0() {
     _t1->value = 0;
     return _t1;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -310,6 +311,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("key: ", 5);
     string_1001 = str_const(" value: ", 8);
     string_1003 = str_const("end", 3);
+    _main();
+    return 0;
+}
+void _main() {
     Entry_owned* x = Entry_owned_0();
     x->key = 1;
     x->value = 100;
@@ -321,5 +326,4 @@ int main(int _argc, char *_argv[]) {
     Entry_owned_free(y);
     Entry_owned_free(x);
     _end();
-    return 0;
 }

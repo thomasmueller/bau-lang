@@ -307,6 +307,7 @@ int64_t fibonacciRecursive_1(int64_t n) {
     int64_t _r0 = _t0 + _t1;
     return _r0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -315,6 +316,10 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const(", ticks: ", 9);
     string_1002 = str_const("fibonacci(20) iterative: ", 25);
     string_1003 = str_const("fibonacci(20) const:     ", 25);
+    _main();
+    return 0;
+}
+void _main() {
     ticks = 0;
     ticks = 0;
     int64_t _t0 = fibonacciRecursive_1(20);
@@ -325,5 +330,4 @@ int main(int _argc, char *_argv[]) {
     ticks = 0;
     printf("fibonacci(20) const:     %lld, ticks: %lld\n", (long long)6765, (long long)ticks);
     _end();
-    return 0;
 }

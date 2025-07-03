@@ -315,12 +315,12 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     return result;
 }
 Tree_owned* Tree_owned_2(Tree_owned* left, Tree_owned* right) {
-    Tree_owned* _t1 = Tree_owned_new();
-    _t1->left = left;
+    Tree_owned* _t2 = Tree_owned_new();
+    _t2->left = left;
     left = NULL;
-    _t1->right = right;
+    _t2->right = right;
     right = NULL;
-    return _t1;
+    return _t2;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -339,6 +339,7 @@ Tree_owned* with_1(int64_t depth) {
     Tree_owned_free(_t1);
     return _t3;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -348,6 +349,10 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const(" check: ", 8);
     string_1003 = str_const(" trees of depth ", 16);
     string_1004 = str_const("long lived tree of depth ", 25);
+    _main();
+    return 0;
+}
+void _main() {
     randomSeed = 0;
     int64_t minDepth = 1;
     int64_t maxDepth = 3;
@@ -355,8 +360,8 @@ int main(int _argc, char *_argv[]) {
     Tree_owned* stretch = with_1(4);
     printf("ownership / borrowing\n");
     if (stretch != NULL) {
-        int64_t _t0 = Tree_owned_nodeCount_1(stretch);
-        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+        int64_t _t3 = Tree_owned_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t3);
     }
     Tree_owned_free(stretch);
     stretch = NULL;
@@ -375,12 +380,11 @@ int main(int _argc, char *_argv[]) {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t1 = Tree_owned_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t1);
+    int64_t _t4 = Tree_owned_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t4);
     Tree_owned_free(longLived);
     Tree_owned_free(stretch);
     _end();
-    return 0;
 }
 /*
 

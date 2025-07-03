@@ -316,6 +316,7 @@ File* openFile_1(int64_t fp) {
     printf("opening %lld\n", (long long)f->fp);
     return f;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -324,6 +325,10 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("use ", 4);
     string_1002 = str_const("opening ", 8);
     string_1003 = str_const("opened ", 7);
+    _main();
+    return 0;
+}
+void _main() {
     int64_t i = 0;
     while (i < 10) {
         File* f = openFile_1(i);
@@ -337,5 +342,4 @@ int main(int _argc, char *_argv[]) {
         _decUseStack(f, File);
     }
     _end();
-    return 0;
 }

@@ -292,6 +292,7 @@ i8_array* expensiveCalc_1(i8_array* a) {
     printf("expensive calculation with param: %.*s\n", a->len, a->data);
     return a;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -303,6 +304,10 @@ int main(int _argc, char *_argv[]) {
     string_1008 = str_const("assertion failed", 16);
     string_1010 = str_const("next", 4);
     string_1011 = str_const("end", 3);
+    _main();
+    return 0;
+}
+void _main() {
     if (2 > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -339,5 +344,4 @@ int main(int _argc, char *_argv[]) {
     }
     printf("end\n");
     _end();
-    return 0;
 }

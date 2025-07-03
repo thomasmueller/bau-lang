@@ -411,6 +411,7 @@ void testReturn_0() {
         }
     }
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -422,10 +423,13 @@ int main(int _argc, char *_argv[]) {
     string_1004 = str_const("testIf", 6);
     string_1005 = str_const(") = null", 8);
     string_1006 = str_const("testReturn", 10);
+    _main();
+    return 0;
+}
+void _main() {
     testIf_0();
     testReturn_0();
     testContinue_0();
     testBreak_0();
     _end();
-    return 0;
 }

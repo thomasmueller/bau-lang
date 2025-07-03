@@ -286,6 +286,7 @@ void callMe_1(int64_t (*x_1)(i8_array*)) {
     int64_t a = x_1(string_1001);
     printf("returned %lld\n", (long long)a);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -293,7 +294,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("hello ", 6);
     string_1001 = str_const("you", 3);
     string_1002 = str_const("returned ", 9);
+    _main();
+    return 0;
+}
+void _main() {
     callMe_1(abc_1);
     _end();
-    return 0;
 }

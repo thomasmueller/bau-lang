@@ -465,13 +465,13 @@ i8_array* string_1020;
 i8_array* string_1021;
 i8_array* string_1022;
 Token* Token_1(org_bau_List_List_i8* data) {
-    Token* _t0 = Token_new();
-    _t0->ttype = 0;
+    Token* _t3 = Token_new();
+    _t3->ttype = 0;
     _incUseStack(data);
-    _t0->data = data;
-    _t0->min = 0;
-    _t0->max = 0;
-    return _t0;
+    _t3->data = data;
+    _t3->min = 0;
+    _t3->max = 0;
+    return _t3;
 }
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos) {
     org_bau_Exception_exception _lastException;
@@ -595,10 +595,10 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 match match_0() {
-    match _t2 = match_new();
-    _t2.start = 0;
-    _t2.end = 0;
-    return _t2;
+    match _t5 = match_new();
+    _t5.start = 0;
+    _t5.end = 0;
+    return _t5;
 }
 match match_2(int64_t start, int64_t end) {
     match m = match_0();
@@ -708,18 +708,18 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     return _t0;
 }
 org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
-    org_bau_List_List_Token* _t0 = org_bau_List_List_Token_new();
+    org_bau_List_List_Token* _t6 = org_bau_List_List_Token_new();
     _incUseStack(array);
-    _t0->array = array;
-    _t0->size = 0;
-    return _t0;
+    _t6->array = array;
+    _t6->size = 0;
+    return _t6;
 }
 org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
-    org_bau_List_List_i8* _t0 = org_bau_List_List_i8_new();
+    org_bau_List_List_i8* _t1 = org_bau_List_List_i8_new();
     _incUseStack(array);
-    _t0->array = array;
-    _t0->size = 0;
-    return _t0;
+    _t1->array = array;
+    _t1->size = 0;
+    return _t1;
 }
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T) {
     Token_array* _t0 = Token_array_new(4);
@@ -948,6 +948,7 @@ void test_0() {
         org_bau_Exception_exception_free(&e);
     skip0:;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -960,9 +961,12 @@ int main(int _argc, char *_argv[]) {
     string_1020 = str_const("hello world", 11);
     string_1021 = str_const("hell[o-z] world", 15);
     string_1022 = str_const("exception ", 10);
+    _main();
+    return 0;
+}
+void _main() {
     test_0();
     _end();
-    return 0;
 }
 /*
 

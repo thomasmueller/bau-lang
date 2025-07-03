@@ -13,6 +13,24 @@ fun openFile(name i8[], mode i8[]) File
         ```)
     return File()
 
+fun File seek(pos int)
+    native(```
+        FILE* fp = (FILE*) (this->filePointer);
+        fseek(fp, pos, SEEK_SET);
+        ```)
+
+fun File length() int
+    native(```
+        #include <sys/stat.h>
+        FILE* fp = (FILE*) (this->filePointer);
+        struct stat st;
+        if (fstat(fileno(fp), &st) == -1) {
+            return -1;
+        }
+        return st.st_size;
+        ```)
+    return -1
+
 fun File read(data i8[], pos int, len int) int
     native(```
         FILE* fp = (FILE*) (this->filePointer);

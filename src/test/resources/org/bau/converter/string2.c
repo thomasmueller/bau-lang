@@ -306,6 +306,7 @@ org_bau_String_string org_bau_String_str_1(i8_array* s);
 org_bau_String_string org_bau_String_string_1(i8_array* data);
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start);
 i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end);
+void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b);
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end);
 void test_0();
 void i8_array_free(i8_array* x);
@@ -363,11 +364,11 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_1(org_bau_String_string_array* array) {
-    org_bau_List_List_org_bau_String_string* _t0 = org_bau_List_List_org_bau_String_string_new();
+    org_bau_List_List_org_bau_String_string* _t3 = org_bau_List_List_org_bau_String_string_new();
     _incUseStack(array);
-    _t0->array = array;
-    _t0->size = 0;
-    return _t0;
+    _t3->array = array;
+    _t3->size = 0;
+    return _t3;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
     org_bau_String_string_array* _t0 = org_bau_String_string_array_new(4);
@@ -482,7 +483,7 @@ i8_array* org_bau_String_replaceAll_3(i8_array* s, i8_array* before, i8_array* a
     int64_t index = 0;
     while (1) {
         org_bau_String_StringBuilder_append_4(buff, s, index, next);
-        org_bau_String_StringBuilder_append_4(buff, after, 0, after->len);
+        org_bau_String_StringBuilder_append_2(buff, after);
         index = next + before->len;
         int64_t _t3 = org_bau_String_indexOf_3(s, before, index);
         next = _t3;
@@ -606,6 +607,9 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     _decUseStack(s, i8_array);
     return result;
 }
+void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
+    org_bau_String_StringBuilder_append_4(this, b, 0, b->len);
+}
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end) {
     int64_t add = end - start;
     int64_t _t0 = start >= b->len;
@@ -696,6 +700,7 @@ void test_0() {
     _decUseStack(_t1, i8_array);
     _decUseStack(x, i8_array);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -714,9 +719,12 @@ int main(int _argc, char *_argv[]) {
     string_1011 = str_const(",", 1);
     string_1012 = str_const("#", 1);
     string_1013 = str_const(": ", 2);
+    _main();
+    return 0;
+}
+void _main() {
     test_0();
     _end();
-    return 0;
 }
 /*
 

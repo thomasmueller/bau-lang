@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <sys/stat.h>
 // malloc =============================
 #define ASSERT(A)   
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
@@ -338,13 +339,17 @@ void test_0() {
     _decUseStack(_t0, i8_array);
     _decUseStack(file, org_bau_File_File);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("hello.txt", 9);
     string_1001 = str_const("r", 1);
+    _main();
+    return 0;
+}
+void _main() {
     test_0();
     _end();
-    return 0;
 }

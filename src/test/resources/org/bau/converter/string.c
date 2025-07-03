@@ -330,6 +330,7 @@ string string_1(i8_array* data) {
     _t0.data = data;
     return _t0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -338,24 +339,27 @@ int main(int _argc, char *_argv[]) {
     string_1001 = str_const("world", 5);
     string_1002 = str_const("!", 1);
     string_1003 = str_const(" ", 1);
-    string_array* _t0 = string_array_new(3);
-    _incUseStack(_t0);
-    string_array* x = _t0;
-    string _t1 = str_1(string_1000);
-    string_copy(&_t1);
-    x->data[0] = _t1;
-    string _t2 = str_1(string_1001);
+    _main();
+    return 0;
+}
+void _main() {
+    string_array* _t1 = string_array_new(3);
+    _incUseStack(_t1);
+    string_array* x = _t1;
+    string _t2 = str_1(string_1000);
     string_copy(&_t2);
-    x->data[1] = _t2;
-    string _t3 = str_1(string_1002);
+    x->data[0] = _t2;
+    string _t3 = str_1(string_1001);
     string_copy(&_t3);
-    x->data[2] = _t3;
+    x->data[1] = _t3;
+    string _t4 = str_1(string_1002);
+    string_copy(&_t4);
+    x->data[2] = _t4;
     printf("%.*s %.*s %.*s\n", x->data[0].data->len, x->data[0].data->data, x->data[1].data->len, x->data[1].data->data, x->data[2].data->len, x->data[2].data->data);
+    string_free(&_t4);
     string_free(&_t3);
     string_free(&_t2);
-    string_free(&_t1);
     _decUseStack(x, string_array);
-    _decUseStack(_t0, string_array);
+    _decUseStack(_t1, string_array);
     _end();
-    return 0;
 }

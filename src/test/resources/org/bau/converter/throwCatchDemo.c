@@ -332,11 +332,16 @@ _int64_t_or_exception square_1(int64_t x) {
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Too large", 9);
+    _main();
+    return 0;
+}
+void _main() {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _x0 = square_1(3000000001);
@@ -350,7 +355,6 @@ int main(int _argc, char *_argv[]) {
         org_bau_Exception_exception_free(&e);
     skip0:;
     _end();
-    return 0;
 }
 /*
 

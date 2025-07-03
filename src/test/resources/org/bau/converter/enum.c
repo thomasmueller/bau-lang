@@ -261,6 +261,7 @@ int64_t get_1(int64_t a) {
     printf("day %lld\n", (long long)a);
     return a;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -270,6 +271,10 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const("...is monday", 12);
     string_1003 = str_const("...is tuesday or wednesday", 26);
     string_1004 = str_const("...is some other day", 20);
+    _main();
+    return 0;
+}
+void _main() {
     if (7 > 0) {
         while (1 == 1) {
             int64_t a = 0;
@@ -294,5 +299,4 @@ int main(int _argc, char *_argv[]) {
         }
     }
     _end();
-    return 0;
 }

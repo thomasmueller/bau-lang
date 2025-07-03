@@ -274,10 +274,10 @@ void BitField_free(BitField* x) {
 }
 int64_t randomSeed;
 BitField* BitField_1(int_array* data) {
-    BitField* _t0 = BitField_new();
+    BitField* _t1 = BitField_new();
     _incUseStack(data);
-    _t0->data = data;
-    return _t0;
+    _t1->data = data;
+    return _t1;
 }
 int64_t BitField_get_2(BitField* this, int64_t index) {
     int64_t _r0 = ( shiftRight_int_2(this->data->data[idx_2(shiftRight_int_2(index, 6), this->data->len)], (index & 63)) ) & 1;
@@ -333,15 +333,19 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    randomSeed = 0;
-    int64_t _t0 = primeSum_1(100);
-    printf("%lld\n", (long long)_t0);
-    _end();
+    _main();
     return 0;
+}
+void _main() {
+    randomSeed = 0;
+    int64_t _t3 = primeSum_1(100);
+    printf("%lld\n", (long long)_t3);
+    _end();
 }
 /*
 

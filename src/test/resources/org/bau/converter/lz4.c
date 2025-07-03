@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/stat.h>
 // malloc =============================
 #define ASSERT(A)   
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
@@ -411,9 +412,9 @@ int64_t org_bau_Env_argCount_0() {
     return 0;
 }
 org_bau_File_File* org_bau_File_File_0() {
-    org_bau_File_File* _t0 = org_bau_File_File_new();
-    _t0->filePointer = 0;
-    return _t0;
+    org_bau_File_File* _t4 = org_bau_File_File_new();
+    _t4->filePointer = 0;
+    return _t4;
 }
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
     // TODO verify strings
@@ -1249,36 +1250,36 @@ int64_t org_bau_compress_Lz4Tool_main_0() {
     }
     i8_array* a1 = org_bau_Env_arg_1(1);
     i8_array* a2 = org_bau_Env_arg_1(2);
-    int64_t _t0 = args == 4;
-    if (_t0) {
-        int64_t _t1 = org_bau_compress_Lz4Tool_is_2(a1, string_1008);
-        _t0 = _t1;
+    int64_t _t6 = args == 4;
+    if (_t6) {
+        int64_t _t7 = org_bau_compress_Lz4Tool_is_2(a1, string_1008);
+        _t6 = _t7;
     }
-    int64_t _t4 = args == 4;
-    if (_t4) {
-        int64_t _t5 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
-        _t4 = _t5;
+    int64_t _t10 = args == 4;
+    if (_t10) {
+        int64_t _t11 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
+        _t10 = _t11;
     }
-    int64_t _t8 = args == 3;
-    if (_t8) {
-        int64_t _t9 = org_bau_compress_Lz4Tool_is_2(a1, string_1013);
-        _t8 = _t9;
+    int64_t _t14 = args == 3;
+    if (_t14) {
+        int64_t _t15 = org_bau_compress_Lz4Tool_is_2(a1, string_1013);
+        _t14 = _t15;
     }
-    if (_t0) {
-        i8_array* _t2 = org_bau_Env_arg_1(3);
-        int64_t _t3 = org_bau_compress_Lz4Tool_decompressFile_2(a2, _t2);
-        printf("Decompressed %lld bytes\n", (long long)_t3);
-        _decUseStack(_t2, i8_array);
-    } else if (_t4) {
-        i8_array* _t6 = org_bau_Env_arg_1(3);
-        int64_t _t7 = org_bau_compress_Lz4Tool_compressFile_3(a2, _t6, 1);
-        printf("Compressed %lld bytes\n", (long long)_t7);
-        _decUseStack(_t6, i8_array);
-    } else if (_t8) {
-        int64_t _t10 = org_bau_compress_Lz4Tool_xxhashFile_1(a2);
-        i8_array* _t11 = org_bau_compress_Lz4Tool_hex_2(_t10, 8);
-        printf("%.*s\n", _t11->len, _t11->data);
-        _decUseStack(_t11, i8_array);
+    if (_t6) {
+        i8_array* _t8 = org_bau_Env_arg_1(3);
+        int64_t _t9 = org_bau_compress_Lz4Tool_decompressFile_2(a2, _t8);
+        printf("Decompressed %lld bytes\n", (long long)_t9);
+        _decUseStack(_t8, i8_array);
+    } else if (_t10) {
+        i8_array* _t12 = org_bau_Env_arg_1(3);
+        int64_t _t13 = org_bau_compress_Lz4Tool_compressFile_3(a2, _t12, 1);
+        printf("Compressed %lld bytes\n", (long long)_t13);
+        _decUseStack(_t12, i8_array);
+    } else if (_t14) {
+        int64_t _t16 = org_bau_compress_Lz4Tool_xxhashFile_1(a2);
+        i8_array* _t17 = org_bau_compress_Lz4Tool_hex_2(_t16, 8);
+        printf("%.*s\n", _t17->len, _t17->data);
+        _decUseStack(_t17, i8_array);
     }
     _decUseStack(a2, i8_array);
     _decUseStack(a1, i8_array);
@@ -1325,6 +1326,7 @@ int8_t shiftRight_i8_2(int8_t a, int64_t b) {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -1339,16 +1341,19 @@ int main(int _argc, char *_argv[]) {
     string_1011 = str_const("-1", 2);
     string_1012 = str_const("Compressed ", 11);
     string_1013 = str_const("-h", 2);
+    _main();
+    return 0;
+}
+void _main() {
     BLOCK_SIZE = 4194304;
     PRIME1 = 2654435761;
     PRIME2 = 2246822519;
     PRIME3 = 3266489917;
     PRIME4 = 668265263;
     PRIME5 = 374761393;
-    int64_t _t0 = org_bau_compress_Lz4Tool_main_0();
+    int64_t _t18 = org_bau_compress_Lz4Tool_main_0();
     ;
     _end();
-    return 0;
 }
 /*
 

@@ -311,10 +311,15 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     this->array->data[idx_2(this->size, this->array->len)] = x;
     this->size += 1;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     org_bau_List_List_int* list = org_bau_List_newList_int_1(0);
     org_bau_List_List_int_add_2(list, 100);
     org_bau_List_List_int_add_2(list, 80);
@@ -322,7 +327,6 @@ int main(int _argc, char *_argv[]) {
     printf("%lld\n", (long long)list->array->data[idx_2(0, list->array->len)]);
     _decUseStack(list, org_bau_List_List_int);
     _end();
-    return 0;
 }
 /*
 

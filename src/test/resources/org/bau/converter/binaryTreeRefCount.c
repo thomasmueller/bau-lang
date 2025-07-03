@@ -304,12 +304,12 @@ i8_array* string_1003;
 i8_array* string_1004;
 int64_t randomSeed;
 Tree* Tree_2(Tree* left, Tree* right) {
-    Tree* _t0 = Tree_new();
+    Tree* _t1 = Tree_new();
     _incUseStack(left);
-    _t0->left = left;
+    _t1->left = left;
     _incUseStack(right);
-    _t0->right = right;
-    return _t0;
+    _t1->right = right;
+    return _t1;
 }
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;
@@ -342,6 +342,7 @@ Tree* with_1(int64_t depth) {
     _decUseStack(_t1, Tree);
     return _t3;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -351,6 +352,10 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const(" check: ", 8);
     string_1003 = str_const(" trees of depth ", 16);
     string_1004 = str_const("long lived tree of depth ", 25);
+    _main();
+    return 0;
+}
+void _main() {
     randomSeed = 0;
     int64_t minDepth = 1;
     int64_t maxDepth = 3;
@@ -358,8 +363,8 @@ int main(int _argc, char *_argv[]) {
     Tree* stretch = with_1(4);
     printf("ref count\n");
     if (stretch != NULL) {
-        int64_t _t0 = Tree_nodeCount_1(stretch);
-        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t0);
+        int64_t _t3 = Tree_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t3);
     }
     _decUseStack(stretch, Tree);
     stretch = NULL;
@@ -378,12 +383,11 @@ int main(int _argc, char *_argv[]) {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t1 = Tree_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t1);
+    int64_t _t4 = Tree_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t4);
     _decUseStack(longLived, Tree);
     _decUseStack(stretch, Tree);
     _end();
-    return 0;
 }
 /*
 

@@ -1,0 +1,39 @@
+module org.bau.os.Signal
+
+enum signalId
+    SIGHUP: 1
+    SIGINT 
+    SIGQUIT
+    SIGILL 
+    SIGTRAP
+    SIGABRT
+    SIGEMT 
+    SIGFPE 
+    SIGKILL
+    SIGBUS 
+    SIGSEGV
+    SIGSYS 
+    SIGPIPE
+    SIGALRM
+    SIGTERM
+    SIGURG 
+    SIGSTOP
+    SIGTSTP
+    SIGCONT
+    SIGCHLD
+    SIGTTIN
+    SIGTTOU
+    SIGIO 
+    SIGXCPU
+    SIGXFSZ
+    SIGVTALRM
+    SIGPROF
+    SIGWINCH
+    SIGINFO
+    SIGUSR1
+    SIGUSR2
+
+fun signal(signalId int, callback fun(i32))
+    native(`#include <signal.h>
+        signal(signalId, callback_1);
+    `)

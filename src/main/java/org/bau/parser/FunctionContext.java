@@ -12,16 +12,24 @@ public class FunctionContext {
     private final HashMap<String, Variable> variables = new HashMap<>();
     private final LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
     private int nextTempVariableId;
+    private String currentFunctionName;
 
-    public FunctionContext(Program program) {
+    public FunctionContext(Program program, String functionName) {
         this.program = program;
+        this.currentFunctionName = functionName;
     }
 
     public int nextTempVariableId() {
+        if ("main".equals(currentFunctionName)) {
+System.out.println("nextGlobal");
+            return program.nextTempVariableIdGlobalScope();
+        }
+System.out.println("nextLocal " + currentFunctionName);
         return nextTempVariableId++;
     }
 
-    public void reset() {
+    public void reset(String functionName) {
+        currentFunctionName = functionName;
         nextTempVariableId = 0;
     }
 
@@ -108,8 +116,11 @@ public class FunctionContext {
         }
     }
 
-    public FunctionDefinition getFunctionIfExists(String name) {
+    public FunctionDefinition getFunctionIfExists(String module, String name) {
         Variable var = variables.get(name);
+        if (var == null) {
+            var = program.getGlobalVariable(module, name);
+        }
         if (var != null && "fun".equals(var.type().name())) {
             FunctionDefinition def = new FunctionDefinition(0);
             def.isFunctionPointer = true;
@@ -123,7 +134,7 @@ public class FunctionContext {
             return def;
         }
         for (int i = 0; i < 10; i++) {
-            FunctionDefinition def = program.getFunctionIfExists(null, null, null, name, i);
+            FunctionDefinition def = program.getFunctionIfExists(null, module, name, i);
             if (def != null) {
                 return def;
             }

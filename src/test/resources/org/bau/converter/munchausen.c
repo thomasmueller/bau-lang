@@ -281,12 +281,17 @@ int64_t isMunchausen_1(int64_t number) {
     int64_t _r0 = total == number;
     return _r0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
     int64_t array_const_1000[] = {0, 1, 4, 27, 256, 3125, 46656, 823543, 16777216, 387420489};
     array_1000 = int_array_const(array_const_1000, 10);
+    _main();
+    return 0;
+}
+void _main() {
     LIMIT = 4400;
     _incUseStack(array_1000);
     cache = array_1000;
@@ -294,8 +299,8 @@ int main(int _argc, char *_argv[]) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t0 = isMunchausen_1(i);
-                if (_t0) {
+                int64_t _t2 = isMunchausen_1(i);
+                if (_t2) {
                     printf("%lld\n", (long long)i);
                 }
                 int64_t _next = i + 1;
@@ -309,5 +314,4 @@ int main(int _argc, char *_argv[]) {
     }
     _decUseStack(cache, int_array);
     _end();
-    return 0;
 }

@@ -386,6 +386,7 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 int32_t shiftRight_i32_2(int32_t a, int64_t b) {
     return ((uint32_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -395,6 +396,10 @@ int main(int _argc, char *_argv[]) {
     string_1003 = str_const("test", 4);
     string_1004 = str_const("Hello, world!", 13);
     string_1005 = str_const("The quick brown fox jumps over the lazy dog", 43);
+    _main();
+    return 0;
+}
+void _main() {
     int32_t _t0 = murmur3_32_1(string_1002);
     i8_array* _t1 = hex_2(_t0, 8);
     printf("%.*s\n", _t1->len, _t1->data);
@@ -416,7 +421,6 @@ int main(int _argc, char *_argv[]) {
     _decUseStack(_t3, i8_array);
     _decUseStack(_t1, i8_array);
     _end();
-    return 0;
 }
 /*
 

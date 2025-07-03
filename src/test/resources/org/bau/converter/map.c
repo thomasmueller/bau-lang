@@ -385,15 +385,15 @@ i8_array* string_1003;
 i8_array* string_1004;
 i8_array* string_1005;
 HashMap_int_int* HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes) {
-    HashMap_int_int* _t0 = HashMap_int_int_new();
-    _t0->size = 0;
+    HashMap_int_int* _t1 = HashMap_int_int_new();
+    _t1->size = 0;
     _incUseStack(keys);
-    _t0->keys = keys;
+    _t1->keys = keys;
     _incUseStack(values);
-    _t0->values = values;
+    _t1->values = values;
     _incUseStack(hashes);
-    _t0->hashes = hashes;
-    return _t0;
+    _t1->hashes = hashes;
+    return _t1;
 }
 int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key) {
     int64_t hash = int_hashCode_1(key);
@@ -544,15 +544,15 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
     return 1;
 }
 HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes) {
-    HashMap_str_str* _t0 = HashMap_str_str_new();
-    _t0->size = 0;
+    HashMap_str_str* _t3 = HashMap_str_str_new();
+    _t3->size = 0;
     _incUseStack(keys);
-    _t0->keys = keys;
+    _t3->keys = keys;
     _incUseStack(values);
-    _t0->values = values;
+    _t3->values = values;
     _incUseStack(hashes);
-    _t0->hashes = hashes;
-    return _t0;
+    _t3->hashes = hashes;
+    return _t3;
 }
 str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     str_copy(&key);
@@ -788,6 +788,7 @@ void test_0() {
     _decUseStack(map2, HashMap_str_str);
     _decUseStack(map, HashMap_int_int);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -798,9 +799,12 @@ int main(int _argc, char *_argv[]) {
     string_1003 = str_const("]=", 2);
     string_1004 = str_const("h", 1);
     string_1005 = str_const("str map[", 8);
+    _main();
+    return 0;
+}
+void _main() {
     test_0();
     _end();
-    return 0;
 }
 /*
 

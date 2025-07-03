@@ -296,11 +296,15 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
     }
     _decUseStack(array, int_array);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     bubbleSort_int_var(0, /* argCount */ 3, 1, 3, 2);
     _end();
-    return 0;
 }

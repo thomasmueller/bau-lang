@@ -244,10 +244,15 @@ void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     while (1 == 1) {
         int64_t a = 0;
         while (a < 10) {
@@ -264,5 +269,4 @@ int main(int _argc, char *_argv[]) {
         break;
     }
     _end();
-    return 0;
 }

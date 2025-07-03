@@ -270,10 +270,15 @@ int64_t org_bau_Utils_random_0() {
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     randomSeed = 0;
     POS_INFINITY = (1.0 / 0.0);
     NEG_INFINITY = (-1.0 / 0.0);
@@ -284,14 +289,13 @@ int main(int _argc, char *_argv[]) {
     LOG2 = 0.6931471805599453;
     MIN_INT = 0x8000000000000000;
     MAX_INT = 0x7fffffffffffffff;
-    int64_t _t0 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t0);
+    int64_t _t39 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t39);
     printf("%.9f\n", 3.141592653589793);
-    int64_t _t1 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t1);
+    int64_t _t40 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t40);
     printf("%.9f\n", 3.141592653589793);
     _end();
-    return 0;
 }
 /*
 

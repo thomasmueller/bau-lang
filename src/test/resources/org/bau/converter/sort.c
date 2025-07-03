@@ -397,14 +397,18 @@ void test_0() {
     _decUseStack(x, int_array);
     _decUseStack(_t0, int_array);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     randomSeed = 0;
     test_0();
     _end();
-    return 0;
 }
 /*
 

@@ -296,15 +296,19 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
+    _main();
+    return 0;
+}
+void _main() {
     i8_array* _t0 = hex_2(0x12fea234, 8);
     printf("%.*s\n", _t0->len, _t0->data);
     _decUseStack(_t0, i8_array);
     _end();
-    return 0;
 }
 /*
 

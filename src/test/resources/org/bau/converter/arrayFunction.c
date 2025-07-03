@@ -373,6 +373,7 @@ int64_t i8_array_len_1(i8_array* this) {
     int32_t _r0 = this->len;
     return _r0;
 }
+void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
@@ -380,6 +381,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("len ", 4);
     string_1001 = str_const("len of hello is ", 16);
     string_1002 = str_const("hello", 5);
+    _main();
+    return 0;
+}
+void _main() {
     int_array* _t0 = int_array_new(16);
     _incUseStack(_t0);
     int_array* data = _t0;
@@ -472,5 +477,4 @@ int main(int _argc, char *_argv[]) {
     _decUseStack(data, int_array);
     _decUseStack(_t0, int_array);
     _end();
-    return 0;
 }

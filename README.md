@@ -132,8 +132,9 @@ Numbers start with a digit. `_` is ignored.
 `.` is floating point, `0x` hexadecimal. 
 
 Strings starting with `'` 
-may contain `\n` newline, `\t` tab, `\'` single quote, 
-`\\` backslash, `\x00` byte. UTF-8 is used.
+may contain `\n` newline, `\r` return, `\t` tab, 
+`\'` single quote,  `\\` backslash, `\x00` byte. 
+UTF-8 is used.
 
 Raw strings don't have escapes 
 and start and end with one or more `` ` ``.
