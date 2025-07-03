@@ -21,10 +21,8 @@ public class FunctionContext {
 
     public int nextTempVariableId() {
         if ("main".equals(currentFunctionName)) {
-System.out.println("nextGlobal");
             return program.nextTempVariableIdGlobalScope();
         }
-System.out.println("nextLocal " + currentFunctionName);
         return nextTempVariableId++;
     }
 

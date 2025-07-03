@@ -396,7 +396,7 @@ public class Parser {
             return "";
         }
         while (true) {
-            if ("\n".equals(token)) {
+            if (type == TokenType.OPERATOR && "\n".equals(token)) {
                 readSpaces();
             }
             if (type == TokenType.END || indent <= defIndent) {
@@ -731,7 +731,7 @@ public class Parser {
         int start = lastPos;
         // read to end of the line
         while (true) {
-            if ("\n".equals(token)) {
+            if (type == TokenType.OPERATOR && "\n".equals(token)) {
                 readSpaces();
                 break;
             }
@@ -2375,7 +2375,7 @@ public class Parser {
         While oldLoop = currentLoop;
         While loop = new While();
         currentLoop = loop;
-        if (type == TokenType.OPERATOR && "\n".equals(token) || "{".equals(token)) {
+        if (type == TokenType.OPERATOR && ("\n".equals(token) || "{".equals(token))) {
             loop.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
         } else {
             loop.condition = parseCondition(loop.list);
