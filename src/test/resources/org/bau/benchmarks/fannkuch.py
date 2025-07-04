@@ -13,10 +13,10 @@ def fannkuch(n):
     perm1 = list(range(n))
     count = [0] * n
     perm = [0] * n
-    flips, max_flips, checksum, nperm = 0, 0, 0, 0
+    flips, flips, checksum, nperm = 0, 0, 0, 0
     r = n
-    while True:
-        while r != 1:
+    while r > 0:
+        while r > 1:
             count[r - 1] = r
             r -= 1
         perm[:] = perm1[:]
@@ -30,8 +30,8 @@ def fannkuch(n):
                 i += 1
             k = perm[0]
             f += 1
-        if f > max_flips:
-            max_flips = f
+        if f > flips:
+            flips = f
         if nperm % 2 == 0:
             checksum += f
         else:
@@ -40,7 +40,7 @@ def fannkuch(n):
         while True:
             if r == n:
                 print(checksum)
-                return max_flips
+                return flips
             p0 = perm1[0]
             for i in range(r - 1):
                 perm1[i] = perm1[i + 1]
@@ -50,5 +50,6 @@ def fannkuch(n):
                 break
             r += 1
         nperm += 1
+    return flips
 
 main()

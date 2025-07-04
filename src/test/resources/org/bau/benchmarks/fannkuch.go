@@ -28,11 +28,11 @@ func fannkuch(n int) int {
     f, i, k, r, flips, nperm, checksum := 0, 0, 0, 0, 0, 0, 0
     r = n
     for r > 0 {
-        i = 0
-        for r != 1 {
+        for r > 1 {
             count[r - 1] = r
             r--
         }
+        i = 0
         for i < n {
             perm[i] = perm1[i]
             i++
