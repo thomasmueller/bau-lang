@@ -34,6 +34,14 @@ which results in simple code and high productivity.
 For Python, PyPy is used; CPython is around 50 times slower.
 Measured on an Apple MacBook Pro M1.)
 
+### Disclaimer
+
+These benchmarks are not designed to show a language is "better" than another language.
+Performance depends on many factors such as the algorithm used,
+the developer, how much time is spend on optimizations, etc.
+Also, measurements vary with hardware, compiler, or operating system.
+These benchmarks explicitly only try to measure single-threaded behavior.
+
 Only a small number of benchmarks are implemented so far, most of them are based on
 the microbenchmarks from <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The Computer Language Benchmarks Game</a>.
 
@@ -47,8 +55,8 @@ and the just-in-time compiler is pre-warmed
 by running the same test 3 times inside the same JVM 
 (which is arguably not quite fair).
 
-So in summary, for these benchmarks, Bau has a similar performance
-then other popular programming languages, specially C.
+What this page tries to show is that, for these limitted benchmarks, 
+Bau has a similar performance then other popular programming languages, specially C.
 Which makes sense, because it is transpiled to C.
 It is sometimes slower, and sometimes faster, than Java, Go, and Rust.
 
