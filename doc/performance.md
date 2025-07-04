@@ -30,7 +30,9 @@ which results in simple code and high productivity.
 | Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 |  2.3 |  1.5 |  7.7 |
 | Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 | 14.9 |  3.8 | 17.0 |
 
-(Runtime; lower is better. For Python, PyPy is used; CPython is around 50 times slower.)
+(Runtime in seconds; lower is better. 
+For Python, PyPy is used; CPython is around 50 times slower.
+Measured on an Apple MacBook Pro M1.)
 
 Only a small number of benchmarks are implemented so far, most of them are based on
 the microbenchmarks from <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The Computer Language Benchmarks Game</a>.
@@ -58,6 +60,8 @@ The Java version is very fast if given enough memory, because it doesn't collect
 when limiting memory to 100 MB, it does collect garbage, but in a different thread.
 For Bau, the ownership variant is used; the reference counted variant is a bit slower.
 Bau includes a faster malloc implementation, which would brings performance close to Java.
+The command line argument 20 is used instead of 21 as in the original test,
+to speed up running the test; however the relative performance is unaffected.
 
 #### Fannkuch
 
@@ -65,12 +69,16 @@ This test simulates
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html#fannkuchredux">flipping pancakes</a>.
 This test uses many array accesses. For Bau, no attempt was made to eliminate bound checks.
 It unclear why the C version is a little bit slower then the C version created from Bau.
+The command line argument 11 is used instead of 12 as in the original test,
+to speed up running the test; however the relative performance is unaffected.
+
 
 #### SpeedTest
 
 This test is about the <a href="https://github.com/jabbalaci/SpeedTests">Münchausen numbers problem</a>.
 This is a very fast loop with a lot of array access. 
 (Standard) Python is particularly slow here because it is interpreted and doesn't use a JIT compiler.
+The same settings are used as in the original benchmark.
 
 #### Pi Digits
 
@@ -83,11 +91,14 @@ The Swift library "attaswift/BigInt" is used.
 The Bau bigint library is around 400 lines of code, modelled after the Java library,
 without platform-specific code.
 Bau could easily use the "gmp" library as well.
+The same settings are used as in the original benchmark.
 
 #### Mandelbrot
 
 This test computes the
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/mandelbrot.html#mandelbrot">Mandelbrot set</a>.
+Only 8'000 by 8'000 pixels are calculated, versus 16'000 by 16'000 as in the original test,
+to speed up running the test; however the relative performance is unaffected.
 It is mostly testing floating point performance.
 
 ## Building and Running the Tests
