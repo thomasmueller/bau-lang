@@ -301,6 +301,9 @@ public class Program {
             parameterCount = 0;
         }
         String id = FunctionDefinition.getFunctionId(type, module, name, parameterCount);
+        if (id == null) {
+            return null;
+        }
         FunctionDefinition fd = functions.get(id);
         if (fd != null) {
             return fd;

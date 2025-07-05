@@ -25,28 +25,24 @@ func fannkuch(n int) int {
     }
     perm := make([]int, n)
     count := make([]int, n)
-    f, i, k, r, flips, nperm, checksum := 0, 0, 0, 0, 0, 0, 0
+    f, k, r, flips, nperm, checksum := 0, 0, 0, 0, 0, 0
     r = n
     for r > 0 {
         for r > 1 {
             count[r - 1] = r
             r--
         }
-        i = 0
-        for i < n {
+        for i := 0; i < n; i++ {
             perm[i] = perm1[i]
-            i++
         }
         // Count flips and update max and checksum
         f = 0
         k = perm[0]
         for k != 0 {
-            i = 0
-            for 2 * i < k {
+            for i := 0; 2 * i < k; i++ {
                 t := perm[i]
                 perm[i] = perm[k - i]
                 perm[k - i] = t
-                i++
             }
             k = perm[0]
             f++
@@ -66,8 +62,7 @@ func fannkuch(n int) int {
                 return flips
              }
              p0 := perm1[0]
-             i = 0
-             for i < r {
+             for i := 0; i < r; {
                 j := i + 1
                 perm1[i] = perm1[j]
                 i = j

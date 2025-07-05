@@ -11,7 +11,7 @@ void set_cache();
 
 int main() {
     set_cache();
-    for (int i = 0; i < MAX; ++i)
+    for (int i = 0; i < MAX; i++)
         if (is_munchausen(i))
             printf("%d\n", i);
     return 0;

@@ -1431,7 +1431,7 @@ public class Parser {
             if (s.value.type() == null) {
                 throw syntaxError("The type of the variable is different than the type of the expression");
             }
-            if (s.value.type().orNull().equals(s.leftValue.type())) {
+            if (s.leftValue.type().equals(s.value.type().orNull())) {
                 // setting a not-null value to a nullable variable is ok
             } else {
                 throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1663,12 +1663,20 @@ public class Parser {
                 if (DataType.TYPE.equals(token)) {
                     throw syntaxError("Type '" + token + "' may not be used here");
                 }
+
+
+                DataType t = this.readType(false, true);
+
+/*
                 String name = readIdentifier();
                 DataType t = functionContext.getType(module, name);
                 if (t == null) {
                     t = functionContext.getType(this.module, name);
                 }
                 if (t == null) {
+; int test;
+    t = functionContext.getType(this.module, name);
+
                     throw syntaxError("Type '" + name + "' not found when reading a type");
                 }
             	if (matchOp("[")) {
@@ -1677,6 +1685,9 @@ public class Parser {
                     }
                     t = t.arrayType();
             	}
+*/
+
+
                 String pName = template.parameters.get(pi).name;
                 if (pName.startsWith("_")) {
                     pName = pName.substring(1);

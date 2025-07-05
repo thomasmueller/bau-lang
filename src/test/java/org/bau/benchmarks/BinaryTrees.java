@@ -13,16 +13,15 @@ public class BinaryTrees {
         int maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n;
         int stretchDepth = maxDepth + 1;
         stretch(stretchDepth);
-        var longLivedTree = Tree.buildTree(maxDepth);
+        var longLived = Tree.buildTree(maxDepth);
         for (int depth = minDepth; depth <= maxDepth; depth += 2) {
             int iterations = 1 << (maxDepth - depth + minDepth);
             int sum = 0;
-            for (int i = 1; i <= iterations; i++)
+            for (int i = 0; i < iterations; i++)
                 sum += count(depth);
             System.out.println(iterations + "\t trees of depth " + depth + "\t check: " + sum);
         }
-        int count = longLivedTree.nodeCount();
-        System.out.println("long lived tree of depth " + maxDepth + "\t check: " + count);
+        System.out.println("long lived tree of depth " + maxDepth + "\t check: " + longLived.nodeCount());
     }
 
     static void stretch(int depth) {

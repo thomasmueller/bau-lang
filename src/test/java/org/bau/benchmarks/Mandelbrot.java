@@ -23,15 +23,13 @@ public class Mandelbrot {
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 double Zr = 0.0, Zi = 0.0, Tr = 0.0, Ti = 0.0;
-                double Cr = (2.0 * x / w - 1.5);
-                double Ci = (2.0 * y / h - 1.0);
-                int i = 0;
-                while (i < iter && Tr + Ti <= limit * limit) {
+                double Cr = 2.0 * x / w - 1.5;
+                double Ci = 2.0 * y / h - 1.0;
+                for (int i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
                     Zi = 2.0 * Zr * Zi + Ci;
                     Zr = Tr - Ti + Cr;
                     Tr = Zr * Zr;
                     Ti = Zi * Zi;
-                    i++;
                 }
                 byteAcc <<= 1;
                 if (Tr + Ti <= limit * limit)

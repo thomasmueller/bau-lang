@@ -7,24 +7,20 @@ func fannkuch(_ n: Int) -> Int {
     var perm1 = Array(0..<n)
     var perm = Array(repeating: 0, count: n)
     var count = Array(repeating: 0, count: n)
-    
     var flips = 0
     var nperm = 0
     var checksum = 0
     var r = n
-
     while r > 0 {
         var i = 0
         while r != 1 {
             count[r - 1] = r
             r -= 1
         }
-
         for i in 0..<n {
             perm[i] = perm1[i]
         }
-
-        // Count flips
+        // Count flips and update max and checksum
         var f = 0
         var k = perm[0]
         while k != 0 {
@@ -38,11 +34,9 @@ func fannkuch(_ n: Int) -> Int {
             k = perm[0]
             f += 1
         }
-
         flips = max(flips, f)
         checksum += (nperm % 2 == 0) ? f : -f
-
-        // Generate next permutation
+        // Use incremental change to generate another permutation
         var more = true
         while more {
             if r == n {
@@ -61,10 +55,8 @@ func fannkuch(_ n: Int) -> Int {
                 r += 1
             }
         }
-
         nperm += 1
     }
-
     return flips
 }
 

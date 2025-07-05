@@ -19,5 +19,11 @@ fun List(T) add(x T)
     array[size] = x
     size += 1
 
+fun List(T) remove(pos int)
+    while pos < size - 1
+        array[pos] = array[pos + 1]
+        pos += 1
+    array[pos] = null
+
 fun List(T) get(x int) T?
     return array[x]

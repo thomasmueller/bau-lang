@@ -16,29 +16,23 @@ public class Fannkuch {
             perm1[i] = i;
         var perm = new int[n];
         var count = new int[n];
-        int f = 0, flips = 0, nperm = 0, checksum = 0;
-        int i, k, r;
+        int f = 0, k, r, flips = 0, nperm = 0, checksum = 0;
         r = n;
         while (r > 0) {
-            i = 0;
             while (r != 1) {
                 count[r - 1] = r;
                 r--;
             }
-            while (i < n) {
+            for (int i = 0; i < n; i++)
                 perm[i] = perm1[i];
-                i++;
-            }
             // Count flips and update max and checksum
             f = 0;
             k = perm[0];
             while (k != 0) {
-                i = 0;
-                while (2 * i < k) {
+                for (int i = 0; 2 * i < k; i++) {
                     int t = perm[i];
                     perm[i] = perm[k - i];
                     perm[k - i] = t;
-                    i++;
                 }
                 k = perm[0];
                 f++;
@@ -57,8 +51,7 @@ public class Fannkuch {
                     return flips;
                 }
                 int p0 = perm1[0];
-                i = 0;
-                while (i < r) {
+                for (int i = 0; i < r;) {
                     int j = i + 1;
                     perm1[i] = perm1[j];
                     i = j;

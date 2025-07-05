@@ -1,12 +1,12 @@
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-import sys
+import sys, struct
 
 def main():
     cout = sys.stdout.buffer.write
     n = 200
-    if sys.argv > 1
+    if len(sys.argv) > 1:
         n = int(sys.argv[1])
     w = h = n
     Iter = 50
@@ -18,8 +18,8 @@ def main():
         byte_acc = 0
         for x in range(w):
             Zr = Zi = Tr = Ti = Zero
-            Cr = (2 * x / w - 1.5)
-            Ci = (2 * y / h - 1.0)
+            Cr = 2 * x / w - 1.5
+            Ci = 2 * y / h - 1.0
             i = 0
             while i < Iter and (Tr + Ti) <= Limit * Limit:
                 Zi = 2 * Zr * Zi + Ci
@@ -36,7 +36,7 @@ def main():
                 bit_num = 0
                 byte_acc = 0
             elif x == w - 1:
-                byte_acc <<= (8 - (w % 8))
+                byte_acc <<= 8 - (w % 8)
                 sys.stdout.buffer.write(struct.pack('B', byte_acc))
                 bit_num = 0
                 byte_acc = 0

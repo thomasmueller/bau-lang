@@ -44,15 +44,11 @@ func main() {
     if CommandLine.arguments.count > 1, let arg = Int(CommandLine.arguments[1]) {
         n = arg
     }
-
     let minDepth = 4
     let maxDepth = (minDepth + 2 > n) ? minDepth + 2 : n
     let stretchDepth = maxDepth + 1
-
     stretch(stretchDepth)
-
     let longLivedTree = Tree.buildTree(maxDepth)
-
     for depth in stride(from: minDepth, through: maxDepth, by: 2) {
         let iterations = 1 << (maxDepth - depth + minDepth)
         var sum = 0
@@ -61,7 +57,6 @@ func main() {
         }
         print("\(iterations)\t trees of depth \(depth)\t check: \(sum)")
     }
-
     let count = longLivedTree.nodeCount()
     print("long lived tree of depth \(maxDepth)\t check: \(count)")
 }

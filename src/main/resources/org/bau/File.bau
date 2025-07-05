@@ -19,7 +19,7 @@ fun File seek(pos int)
         fseek(fp, pos, SEEK_SET);
         ```)
 
-fun File length() int
+fun File len() int
     native(```
         #include <sys/stat.h>
         FILE* fp = (FILE*) (this->filePointer);

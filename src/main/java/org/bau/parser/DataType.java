@@ -114,6 +114,9 @@ public class DataType {
         if (this == other) {
             return true;
         }
+        if (other == null) {
+            return false;
+        }
         // function pointer types are not equal
         return this.toString().equals(other.toString());
     }

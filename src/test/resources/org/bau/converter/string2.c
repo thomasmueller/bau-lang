@@ -734,6 +734,9 @@ List
 fun List(T) add(x T)
 Add an entry to the list
 
+fun List(T) remove(pos int)
+Add an entry to the list
+
 fun List(T) get(x int) T?
 Add an entry to the list
 

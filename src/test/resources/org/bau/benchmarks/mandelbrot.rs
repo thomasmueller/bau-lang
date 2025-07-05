@@ -22,8 +22,8 @@ fn main() {
         for x in 0..w {
             let mut zr = 0.0;
             let mut zi = 0.0;
-            let cr = (2.0 * x as f64 / w as f64) - 1.5;
-            let ci = (2.0 * y as f64 / h as f64) - 1.0;
+            let cr = 2.0 * x as f64 / w as f64 - 1.5;
+            let ci = 2.0 * y as f64 / h as f64 - 1.0;
             let mut tr = 0.0;
             let mut ti = 0.0;
             let mut i = 0;

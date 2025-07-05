@@ -25,8 +25,7 @@ def count(depth):
     return build_tree(depth).node_count()
 
 def stretch(depth):
-    c = count(depth)
-    print(f"stretch tree of depth {depth}\t check: {c}")
+    print(f"stretch tree of depth {depth}\t check: {count(depth)}")
 
 def main():
     n = 10
@@ -41,11 +40,10 @@ def main():
     long_lived = build_tree(max_depth)
     for depth in range(min_depth, max_depth + 1, 2):
         iterations = 1 << (max_depth - depth + min_depth)
-        total = 0
+        sum = 0
         for _ in range(iterations):
-            total += count(depth)
-        print(f"{iterations}\t trees of depth {depth}\t check: {total}")
-    count2 = long_lived.node_count()
-    print(f"long lived tree of depth {max_depth}\t check: {count2}")
+            sum += count(depth)
+        print(f"{iterations}\t trees of depth {depth}\t check: {sum}")
+    print(f"long lived tree of depth {max_depth}\t check: {long_lived.node_count()}")
 
 main()

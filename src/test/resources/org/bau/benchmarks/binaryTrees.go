@@ -28,18 +28,16 @@ func main() {
     for depth := minDepth; depth <= maxDepth; depth += 2 {
         iterations := 1 << uint(maxDepth - depth + minDepth)
         sum := 0
-        for i := 1; i <= iterations; i++ {
+        for i := 0; i < iterations; i++ {
             sum += count(depth)
         }
         fmt.Printf("%d\t trees of depth %d\t check: %d\n", iterations, depth, sum)
     }
-    count := longLived.nodeCount()
-    fmt.Printf("long lived tree of depth %d\t check: %d\n", maxDepth, count)
+    fmt.Printf("long lived tree of depth %d\t check: %d\n", maxDepth, longLived.nodeCount())
 }
 
 func stretch(depth int) {
-    c := count(depth)
-    fmt.Printf("stretch tree of depth %d\t check: %d\n", depth, c)
+    fmt.Printf("stretch tree of depth %d\t check: %d\n", depth, count(depth))
 }
 
 func count(depth int) int {

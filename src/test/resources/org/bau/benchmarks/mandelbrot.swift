@@ -34,8 +34,7 @@ func mandelbrot(n: Int) {
                 bitNum = 0
                 byteAcc = 0
             } else if x == w - 1 {
-                let shift = UInt8(8 - (w % 8))
-                byteAcc <<= shift
+                byteAcc <<= 8 - (w % 8)
                 FileHandle.standardOutput.write(Data([byteAcc]))
                 bitNum = 0
                 byteAcc = 0

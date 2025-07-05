@@ -3,6 +3,7 @@
 import Foundation
 
 let LIMIT = 440_000_000
+
 let cache: [Int] = {
     var result = [Int](repeating: 0, count: 10)
     for i in 1...9 {

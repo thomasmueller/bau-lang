@@ -71,7 +71,7 @@ For all languages, a very simple single-threaded implementation is used
 Memory usage  is not currently measured.
 The tests are run 3 times, and the best time is used.
 Benchmark results in seconds (lower is better).
-For Java, memory is limited to 100 MB by using `-mx100m`, 
+For Java, memory is limited to 100 MB by using `-Xmx100m`, 
 and the just-in-time compiler is pre-warmed
 by running the same test 3 times inside the same JVM.
 
@@ -194,16 +194,16 @@ Compiling and Running the C, Java, and Bau versions:
 
     # Java
     for i in {1..2}; do time javac src/test/java/org/bau/benchmarks/*.java -d target/benchmarks; done
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
-    java -cp target/benchmarks -mx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
-    for i in {1..3}; do time java -mx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
+    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
+    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
+    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
+    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
+    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
+    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
+    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
+    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
+    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
+    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
     
     # PyPy
     for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
