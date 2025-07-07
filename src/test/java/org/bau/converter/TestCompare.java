@@ -260,6 +260,11 @@ public class TestCompare {
     }
 
     @Test
+    public void textEditor() throws IOException {
+        test("textEditor");
+    }
+
+    @Test
     public void throwCatch() throws IOException {
         test("throwCatch");
     }

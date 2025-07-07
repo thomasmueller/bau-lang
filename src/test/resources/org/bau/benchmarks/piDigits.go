@@ -9,12 +9,10 @@ import (
     "fmt"
     "math/big"
     "os"
-    "runtime"
     "strconv"
 )
 
 func main() {
-    runtime.GOMAXPROCS(1)
     w := bufio.NewWriter(os.Stdout)
     defer w.Flush()
     line := make([]byte, 0, 10)

@@ -173,6 +173,8 @@ TODO integrate C compiler in the browser, once 'goto' is available:
      npm run build-assets && gulp
      open http://192.168.45.88:3000/
 
+TODO reduce number of lines, maybe by supporting "a, b, c := 0"
+
 TODO No panic mode: https://blog.reverberate.org/2025/02/03/no-panic-rust.html
 
 TODO test fully qualified package access (types,...)

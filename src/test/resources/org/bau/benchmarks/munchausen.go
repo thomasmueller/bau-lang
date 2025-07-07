@@ -5,13 +5,11 @@ package main
 import (
     "fmt"
     "math"
-    "runtime"
 )
 
 const MAX = 440_000_000
 
 func main() {
-    runtime.GOMAXPROCS(1)
     cache := get_cache()
     for i := 0; i < MAX; i++ {
         if is_munchausen(i, &cache) {

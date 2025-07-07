@@ -974,13 +974,16 @@ type List(T)
 List
 
 fun List(T) add(x T)
-Add an entry to the list
+Append an entry to the list
+
+fun List(T) add(index int, x T)
+Insert an entry to the list at the given index
 
 fun List(T) remove(pos int)
-Add an entry to the list
+Insert an entry to the list at the given index
 
 fun List(T) get(x int) T?
-Add an entry to the list
+Insert an entry to the list at the given index
 
 type exception
 An exception

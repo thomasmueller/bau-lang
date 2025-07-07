@@ -7,13 +7,11 @@ import (
     "bufio"
     "flag"
     "fmt"
-    "runtime"
     "os"
     "strconv"
 )
 
 func main() {
-    runtime.GOMAXPROCS(1)
     flag.Parse()
     n := 200
     if flag.NArg() > 0 { n, _ = strconv.Atoi( flag.Arg(0) ) }

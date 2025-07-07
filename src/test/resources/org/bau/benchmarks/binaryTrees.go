@@ -6,12 +6,10 @@ package main
 import (
     "flag"
     "fmt"
-    "runtime"
     "strconv"
 )
 
 func main() {
-    runtime.GOMAXPROCS(1)
     n := 10
     flag.Parse()
     if flag.NArg() > 0 {

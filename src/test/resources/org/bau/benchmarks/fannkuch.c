@@ -10,8 +10,7 @@ int fannkuch(int n) {
         perm1[i] = i;
     int perm[n];
     int count[n];
-    int flips = 0, nperm = 0;
-    int checksum = 0, k = 0, i = 0;
+    int flips = 0, nperm = 0, checksum = 0, k = 0, i = 0;
     int r = n;
     while (r > 0) {
         while (r > 1) {

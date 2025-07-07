@@ -98,28 +98,26 @@ fun getWindowSize() windowSize
 fun readByte() int
     x i8
     native(`#include <stdio.h>
-        read(0, &x, 1);
+        int size = read(0, &x, 1);
+        if (!size)
+            return 0;
         return x;
     `)
     return 0
 
-fun readKey() int
-    while
-        n : readByte()
-        if n
-            return n
-
 fun readEditorKey() int
     while
-        key : readKey()
+        key : readByte()
+        if key = 0
+            continue
         if key < 0
             Env.exit(1)
         if key <> keyCode.ESC
             return key
-        e0 : readKey()
+        e0 : readByte()
         if e0 = 0
             return key
-        e1 : readKey()
+        e1 : readByte()
         if e1 = 0
             return key
         if e0 = ord('O')
@@ -131,7 +129,7 @@ fun readEditorKey() int
         if e0 <> ord('[')
             return key
         if e1 >= ord('0') and e1 <= ord('9')
-            e2 : readKey()
+            e2 : readByte()
             if e2 <> ord('~')
                 return key
             switch e1

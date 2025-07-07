@@ -1,0 +1,324 @@
+import org.bau.Env
+import org.bau.File
+import org.bau.List
+    newList
+import org.bau.Math
+    intToString
+import org.bau.String
+    string
+    StringBuilder
+    substring
+    indexOf
+import org.bau.os.Terminal
+    getWindowSize
+    writeToTerminal
+
+type fileContent
+    fileName i8[]
+    data i8[]
+    lines List(string)
+    modified int
+
+enum editMode
+    normal
+    quitAgain
+    find  
+
+fun refreshScreen()
+    buff := StringBuilder(i8[32])
+    currentWindowSize = getWindowSize()
+    # hide cursor, go home
+    buff.append('\x1b[?25l\x1b[H')
+    curX := cursorX
+    curY := cursorY
+    buff.append('\x1b[7m')
+    if mode = editMode.quitAgain
+        buff.append('File is modified. Quit without saving with Ctrl-Q')
+    elif mode = editMode.find
+        buff.append('Find (Esc/Up/Down/Enter): ')
+        buff.append(findText.data)
+        curX = 27 + findText.data.len
+        curY = 1
+        buff.append(' ')
+    else
+        buff.append('Find Ctrl-F | Save Ctrl-S | Quit Ctrl-Q | File: ')
+        buff.append(currentFile.fileName)
+        buff.append(' | Line ')
+        buff.append(intToString(cursorY + offsetY - 1))
+    buff.append('\x1b[0m')
+    # clear line from cursor right; newline
+    buff.append('\x1b[0K\r\n')
+    pos := 0
+    remainingHighlight := 0
+    lines : currentFile.lines
+    for y := until(currentWindowSize.rows - 2)
+        if y + offsetY < lines.size
+            line : lines.array[y + offsetY]
+            for x := until(currentWindowSize.columns)
+                break x + offsetX >= line.data.len
+                c := line.data[x + offsetX]
+                break c = ord('\n')
+                if findText.data.len > 0 and findText.data[0] = c and remainingHighlight = 0
+                    if line.data.len - x - offsetX >= findText.data.len
+                        found := 1
+                        for i := until(findText.data.len)
+                            if findText.data[i] <> line.data[x + offsetX + i]
+                                found = 0
+                                break
+                        if found
+                            buff.append('\x1b[47m')
+                            remainingHighlight = findText.data.len
+                if c < ord(' ')
+                    c = ord('?')
+                ch : i8[1]
+                ch[0] = c
+                buff.append(ch)
+                if remainingHighlight > 0
+                    remainingHighlight -= 1
+                    if remainingHighlight = 0
+                        buff.append('\x1b[0m')
+        buff.append('\x1b[0m')
+        buff.append('\x1b[0K\r\n')
+    # position cursor
+    buff.append('\x1b[')
+    buff.append(intToString(curY))
+    buff.append(';')
+    buff.append(intToString(curX))
+    buff.append('H')
+    # show cursor
+    buff.append('\x1b[?25h')
+    writeToTerminal(buff.data, buff.len)
+
+fun insertNewline()
+    currentFile.modified = 1
+    y : cursorY + offsetY - 2
+    lines : currentFile.lines
+    line : lines.array[y]
+    x := cursorX + offsetX - 1
+    if x >= line.data.len
+        x = line.data.len
+    line1 : string(substring(line.data, 0, x))
+    line2 : string(substring(line.data, x, line.data.len))
+    lines.add(y, line1)
+    lines.array[y + 1] = line2
+    indent := 0
+    while line1.data.len > indent and line1.data[indent] = ord(' ')
+        indent += 1
+    cursorX = 1 + indent
+    if cursorY < currentWindowSize.rows - 1
+        cursorY += 1
+    elif cursorY + offsetY < currentFile.lines.size
+        offsetY += 1
+
+fun insertByte(add i8)
+    currentFile.modified = 1
+    y : cursorY + offsetY - 2
+    lines : currentFile.lines
+    line : lines.array[y]
+    x : cursorX + offsetX - 1
+    if line.data.len <= x
+        new : i8[x + 1]
+        for i := until(x)
+            new[i] = ord(' ')
+        for i := until(line.data.len)
+            new[i] = line.data[i]
+        new[x] = add
+        lines.array[y] = string(new)
+    else
+        new : i8[line.data.len + 1]
+        for i := until(line.data.len)
+            new[i + 1] = line.data[i]
+        for i := until(x)
+            new[i] = line.data[i]
+        new[x] = add          
+        lines.array[y] = string(new)
+
+fun removeByte()
+    currentFile.modified = 1
+    y : cursorY + offsetY - 2
+    lines : currentFile.lines
+    line : lines.array[y]
+    x : cursorX + offsetX - 1
+    if line.data.len < x
+        return
+    if x = 0 
+        if y = 0
+            return
+        # combine lines
+        last : lines.array[y - 1]
+        new : i8[line.data.len + last.data.len]
+        for i := until(last.data.len)
+            new[i] = last.data[i]
+        for i := until(line.data.len)
+            new[i + last.data.len] = line.data[i]
+        if cursorY > 2
+            cursorY -= 1
+        elif offsetY > 0
+            offsetY -= 1
+        cursorX += last.data.len + 1
+        while cursorX >= currentWindowSize.columns
+            cursorX -= 1
+            offsetX += 1
+        lines.array[y - 1] = string(new)
+        lines.remove(y)
+        return
+    new : i8[line.data.len - 1]
+    for i := until(line.data.len)
+        if i > 0
+            new[i - 1] = line.data[i]
+    for i := until(x - 1)
+        new[i] = line.data[i]
+    lines.array[y] = string(new)
+
+fun find()
+    mode = editMode.find
+    while
+        refreshScreen()
+        key := Terminal.readEditorKey()
+        break key < 0
+        switch key
+        case keyCode.CTRL_C, keyCode.CTRL_Q, keyCode.ESC, keyCode.ENTER
+            break
+        case keyCode.BACKSPACE, keyCode.CTRL_H, keyCode.DEL_KEY
+            if findText.data.len > 0
+                new : i8[findText.data.len - 1]
+                for i := until(new.len)
+                    new[i] = findText.data[i]
+                findText = string(new)
+        case keyCode.ARROW_DOWN
+            foundX = 10
+            foundY = 10
+        else
+            if key >= ord(' ') and key <= 255 and findText.data.len < 100
+                new : i8[findText.data.len + 1]
+                for i := until(findText.data.len)
+                    new[i] = findText.data[i]
+                new[new.len - 1] = key
+                findText = string(new)
+    mode = editMode.normal
+
+fun up()
+    if cursorY > 2
+        cursorY -= 1
+    elif offsetY > 0
+        offsetY -= 1
+
+fun down()
+    if cursorY < currentWindowSize.rows - 1
+        cursorY += 1
+    elif cursorY + offsetY < currentFile.lines.size
+        offsetY += 1
+
+fun save()
+    lines : currentFile.lines
+    size := lines.size
+    for i := until(lines.size)
+        size += lines.array[i].data.len
+    data : StringBuilder(i8[size])
+    for i := until(lines.size)
+        data.append(lines.array[i].data)
+        data.append('\n')
+    f : File.openFile(currentFile.fileName, 'w')
+    f.write(data.data, 0, size)
+    f.close()
+    currentFile.modified = 0 
+    
+fun main()
+    if not Terminal.isTerminal()
+        println('Not a terminal')
+        return
+    if Env.argCount() <> 2
+        println('Usage: ' Env.arg(0) ' <fileName>')
+        return
+    fileName : Env.arg(1)
+    f : File.openFile(fileName, 'r')
+    fileData : i8[f.len()]
+    f.readFully(fileData, 0, f.len())
+    f.close()
+    lines : String.split(fileData, '\n')
+    currentFile = fileContent(fileName, fileData, lines)
+    Terminal.enableRawMode(refreshScreen)
+    while
+        refreshScreen()
+        key := Terminal.readEditorKey()
+        break key < 0
+        switch key
+        case keyCode.CTRL_C, keyCode.CTRL_Q
+            if not currentFile.modified
+                break
+            mode = editMode.quitAgain
+            refreshScreen()
+            key = Terminal.readEditorKey()
+            if key = keyCode.CTRL_Q
+                break
+            mode = editMode.normal
+        case keyCode.ENTER
+            insertNewline()
+        case keyCode.CTRL_S
+            save()
+        case keyCode.CTRL_F
+            find()
+        case keyCode.BACKSPACE, keyCode.CTRL_H, keyCode.DEL_KEY
+            removeByte()
+            if cursorX > 1
+                cursorX -= 1
+            elif offsetX > 0
+                offsetX -= 1
+        case keyCode.PAGE_UP
+            for i := until(currentWindowSize.rows)
+                up()
+        case keyCode.PAGE_DOWN
+            for i := until(currentWindowSize.rows)
+                down()
+        case keyCode.ARROW_UP
+            up()
+        case keyCode.ARROW_DOWN
+            down()
+        case keyCode.ARROW_LEFT
+            if cursorX > 1
+                cursorX -= 1
+            elif offsetX > 0
+                offsetX -= 1
+            elif cursorY > 2 or offsetY > 0
+                if cursorY > 2
+                    cursorY -= 1
+                elif offsetY > 0
+                    offsetY -= 1
+                y : cursorY + offsetY - 2
+                line : lines.array[y]
+                cursorX = line.data.len + 1
+                while cursorX >= currentWindowSize.columns
+                    cursorX -= 1
+                    offsetX += 1
+        case keyCode.ARROW_RIGHT
+            x : cursorX + offsetX - 1
+            y : cursorY + offsetY - 2
+            line : lines.array[y]
+            if x < line.data.len
+                if cursorX < currentWindowSize.columns
+                    cursorX += 1
+                else
+                    offsetX += 1
+            elif y < lines.size
+                cursorX = 1
+                offsetX = 0
+                if cursorY < currentWindowSize.rows - 1
+                    cursorY += 1
+                elif cursorY + offsetY < currentFile.lines.size
+                    offsetY += 1
+        else
+            insertByte(i8(key))
+            if cursorX < currentWindowSize.columns
+                cursorX += 1
+            else
+                offsetX += 1
+
+cursorY := 2; cursorX := 1
+offsetY := 0; offsetX := 0
+foundX := 0 ; foundY := 0
+findText := string(i8[0])
+mode := editMode.normal
+currentWindowSize := getWindowSize()
+currentFile := fileContent(i8[0], i8[0], newList(string))
+
+## Expected
