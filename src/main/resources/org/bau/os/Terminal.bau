@@ -10,6 +10,8 @@ type windowSize
     rows int
     columns int
 
+queueByte := i8(0)
+
 enum keyCode
     CTRL_C: 3
     CTRL_D: 4
@@ -95,7 +97,25 @@ fun getWindowSize() windowSize
     `)
     return size
 
+fun keyboardHit() int
+    native(`#include <fcntl.h>
+        int oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+        fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+    `)
+    x : readByte()
+    native(`#include <fcntl.h>
+        fcntl(STDIN_FILENO, F_SETFL, oldf);
+    `)
+    if x
+        queueByte = x
+        return 1
+    return 0
+
 fun readByte() int
+    if queueByte
+        result : queueByte
+        queueByte = 0
+        return result
     x i8
     native(`#include <stdio.h>
         int size = read(0, &x, 1);
@@ -108,8 +128,6 @@ fun readByte() int
 fun readEditorKey() int
     while
         key : readByte()
-        if key = 0
-            continue
         if key < 0
             Env.exit(1)
         if key <> keyCode.ESC

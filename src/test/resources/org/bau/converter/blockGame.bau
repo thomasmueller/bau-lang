@@ -1,0 +1,140 @@
+import org.bau.Env
+import org.bau.Math
+import org.bau.String
+import org.bau.os.Terminal
+import org.bau.os.Sleep
+import org.bau.Utils
+
+fun updateBlock(draw int)
+    for y := until(4)
+        for x := until(4)
+            c : shapes[y * 21 * 6 + rotation * 6 + x]
+            continue c <> ord('X')
+            offset : y * width + x
+            field[position + offset] = (1 + blockType) * draw
+
+fun canPlace(pos int, rot int) int
+    for y := until(4)
+        for x := until(4)
+            c : shapes[y * 21 * 6 + rot * 6 + x]
+            continue c <> ord('X')
+            offset : y * width + x
+            if field[pos + offset]
+                return 0
+    return 1
+
+fun refreshScreen()
+    buff := String.StringBuilder(i8[32])
+    # hide cursor, go home
+    buff.append('\x1b[?25l\x1b[H\x1b[0m')
+    # clear line from cursor right; newline
+    buff.append('\x1b[0K\r\n')
+    buff.append('  Score: ')
+    buff.append(Math.intToString(score))
+    buff.append(' High: ')
+    buff.append(Math.intToString(highScore))
+    buff.append('\x1b[0K\r\n\x1b[0K\r\n')
+    for y := until(height)
+        for x := until(width)
+            c := field[x + width * y]
+            if c
+                c2 : i8[1]
+                c2[0] = ord('0') + c - 1
+                buff.append('\x1b[4')
+                buff.append(c2)
+                buff.append('m')
+            buff.append('  \x1b[0m')
+        buff.append('\x1b[0m\x1b[0K\r\n')
+    Terminal.writeToTerminal(buff.data, buff.len)
+
+fun main()
+    if not Terminal.isTerminal()
+        println('Not a terminal')
+        return
+    Utils.setRandomSeed(Utils.getNanoTimeUTC())
+    Terminal.enableRawMode(refreshScreen)
+    while
+        refreshScreen()
+        score = 0
+        rotation = 0
+        position = width + width / 2 - 1
+        running = 1
+        blockType = 1
+        for i := until(width * height)
+            field[i] = 0
+        for y := until(height)
+            field[width * y] = 1
+            field[width - 1 + width * y] = 1
+        for x := until(width)
+            field[x + width * (height - 1)] = 1
+        refreshScreen()
+        while
+            updateBlock(0)
+            loop := 16
+            while loop > 0 and running
+                loop -= 1
+                Sleep.sleep(14)
+                continue not Terminal.keyboardHit()
+                tempRot := rotation
+                tempPos := position
+                key := Terminal.readEditorKey()
+                switch key
+                case keyCode.ARROW_LEFT
+                    tempPos -= 1
+                case keyCode.ARROW_RIGHT
+                    tempPos += 1
+                case ord(' '), keyCode.ARROW_UP
+                    tempRot = rotated[rotation] - ord('A')
+                case keyCode.ESC
+                    Env.exit(0)
+                case keyCode.ARROW_DOWN
+                    running = 0
+                if canPlace(tempPos, tempRot)
+                    position = tempPos
+                    rotation = tempRot
+                    updateBlock(1)
+                    refreshScreen()
+                    updateBlock(0)
+            if canPlace(position + width, rotation)
+                position += width
+                updateBlock(1)
+                refreshScreen()
+                continue
+            updateBlock(1)
+            i := height - 2
+            while i > 0
+                found := 1
+                for j := until(width)
+                    if field[i * width + j] = 0
+                        found = 0
+                        break
+                if found
+                    i += 1
+                    score += 1
+                    if score > highScore
+                        highScore = score
+                    k := i * width - width
+                    while k >= 0
+                        field[k + width] = field[k]
+                        k -= 1
+                i -= 1
+            refreshScreen()
+            rotation = Utils.random(7)
+            blockType = rotation + 1
+            break position < width * 2
+            position = width + width / 2 - 1
+            running = 1
+
+width : 14
+height : 24
+score, highScore, position, rotation, running, blockType := 0
+field : i8[width * height]
+#      A0123 B0123 C0123 D0123 E0123 F0123 G0123 H0123 I0123 J0123 K0123 L0123 M0123 N0123 O0123 P0123 Q0123 R0123 S0123 T0123 U0123
+shapes: ``
+        ......       X     X      X    X           X     X     X           X                      XX      X   X      XX         .....
+        .XX...XXXX  XXX    XX    XX    X    X X    X     X     XX   XXX   XX     XX   XX    XXX    X    XXX   XXX    X    XXX   XXX..
+        .XX...              X    X     XX   XXX   XX     X     X     X     X    XX     XX   X      X                 X      X   X.X..
+        ......                                           X                                                                      ......
+        ``
+#          ABCDEFGHIJKLMNOPQRSTU
+rotated : 'AIJMNOURBKLCDEPQFSTFG'

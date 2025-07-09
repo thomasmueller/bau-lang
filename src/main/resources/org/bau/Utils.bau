@@ -78,3 +78,14 @@ fun random() int
   z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
   z = (z ^ (z >> 27)) * 0x94d049bb133111eb
   return z ^ (z >> 31)
+
+# Pseudo-random number between 0 and smallerThan (excluding).
+fun random(smallerThan int) int
+    max : smallerThan - 1
+    if (smallerThan & (max - 1)) = 0
+        return random() & max
+    while
+        x : random() >> 1
+        result : x % smallerThan
+        #if result >= x + max
+        return result

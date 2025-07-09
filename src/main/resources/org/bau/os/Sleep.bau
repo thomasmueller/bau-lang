@@ -1,0 +1,15 @@
+module org.bau.os.Sleep
+
+fun sleep(millis int)
+    if millis < 0
+        return
+    native(`#include <time.h>
+      #include <errno.h> 
+      struct timespec ts;
+      ts.tv_sec = millis / 1000;
+      ts.tv_nsec = (millis % 1000) * 1000000;
+      int res;
+      do {
+          res = nanosleep(&ts, &ts);
+      } while (res && errno == EINTR);
+    `)
