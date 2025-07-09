@@ -7,9 +7,11 @@ import (
     "flag"
     "fmt"
     "strconv"
+    "runtime"
 )
 
 func main() {
+    runtime.GOMAXPROCS(1)
     n := 10
     flag.Parse()
     if flag.NArg() > 0 {

@@ -970,50 +970,118 @@ public class Parser {
                 isGlobalScope = previousGlobal;
             }
             String m = module;
-            String identifier = readIdentifier();
-            // TODO this is duplicate source code
-            // if there is no variable with this name, and
-            // no function with this name, and
-            // no this.field with this name,
-            // then it could be a fully qualified module name
-            Variable thisVar = functionContext.getVariable(null, "this");
-            if (functionContext.getVariable(null, identifier) == null &&
-                    functionContext.getType(m, identifier) == null &&
-                    (thisVar == null || thisVar.type().getFieldDataType(identifier) == null)) {
-                while (matchOp(".")) {
-                    m = m == module ? identifier : m + "." + identifier;
-                    identifier = readIdentifier();
+            ArrayList<String> identifierList = new ArrayList<>();
+            while (true) {
+                String identifier1 = readIdentifier();
+                // TODO this is duplicate source code
+                // if there is no variable with this name, and
+                // no function with this name, and
+                // no this.field with this name,
+                // then it could be a fully qualified module name
+                Variable thisVar = functionContext.getVariable(null, "this");
+                if (functionContext.getVariable(null, identifier1) == null &&
+                        functionContext.getType(m, identifier1) == null &&
+                        (thisVar == null || thisVar.type().getFieldDataType(identifier1) == null)) {
+                    while (matchOp(".")) {
+                        m = m == module ? identifier1 : m + "." + identifier1;
+                        identifier1 = readIdentifier();
+                    }
+                    String m2 = program.getImport(m);
+                    if (m2 != null) {
+                        m = m2;
+                    }
                 }
-                String m2 = program.getImport(m);
-                if (m2 != null) {
-                    m = m2;
+                identifierList.add(identifier1);
+                if (!matchOp(",")) {
+                    break;
                 }
             }
+
             DataType targetType = null;
             if (type == TokenType.IDENTIFIER) {
                 targetType = readType(true);
+            }
+            if (matchOp(":=")) {
+                if (m != module && !m.equals(module)) {
+                    throw syntaxError("Can not create a new variable in a different module");
+                }
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, true, target);
+                if (expr instanceof NullValue) {
+                    if (targetType == null) {
+                        throw syntaxError("Can only assign null if the type is known");
+                    }
+                    expr = new NullValue(targetType);
+                }
+                DataType type = expr.type();
+                if (type.isArray()) {
+                    throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
+                }
+                boolean global = isGlobalScope;
+                if (matchOp("..")) {
+                    if (global) {
+                        throw syntaxError("Global ranges are not allowed; they need to be in a function");
+                    }
+                    if (!"0".equals(expr.toString())) {
+                        throw syntaxError("Range needs to start from 0: '" + expr + "'");
+                    }
+                    Expression upperBound = parseExpression();
+                    if (upperBound.canThrowException() != null) {
+                        throw syntaxError("May not throw an exception here");
+                    }
+                    String rangeTypeName = "0.." + upperBound.toString();
+                    DataType rangeType = functionContext.getType(null, rangeTypeName);
+                    if (rangeType == null) {
+                        rangeType = DataType.newNumberType(rangeTypeName, 8);
+                        rangeType.maxValue = upperBound;
+                        functionContext.addTemporaryType(rangeType);
+                    }
+                    type = rangeType;
+                }
+                for (String identifier : identifierList) {
+                    Assignment s = new Assignment();
+                    s.initial = true;
+                    s.isGlobalScope = global;
+                    // no need for temp variables as it's just an assignment
+                    s.value = expr;
+                    if (targetType != null && targetType != s.value.type()) {
+                        if (targetType.isNullable() && type.orNull() == targetType) {
+                            type = targetType;
+                        } else {
+                            throw syntaxError("The type of the variable is different than the type of the expression");
+                        }
+                    }
+                    s.type = type;
+                    Variable v = new Variable(module, identifier, global, s.type);
+                    s.leftValue = v;
+                    if (global) {
+                        program.addGlobalVariable(v);
+                    } else {
+                        if (functionContext.getVariable(module, v.name) != null) {
+                            throw syntaxError("Variable '" + v.name + "' already exists");
+                        }
+                        functionContext.addVariable(v);
+                    }
+                    verifyBounds(s);
+                    s.setBounds(getScope(0));
+                    target.add(s);
+                }
+                readEndOfStatement();
+                return;
             }
             if (matchOp(":")) {
                 if (m != module && !m.equals(module)) {
                     throw syntaxError("Can not define a constant in a different module");
                 }
-                Assignment s = new Assignment();
-                s.isConstant = true;
-                s.isGlobalScope = isGlobalScope;
-                s.initial = true;
-                // no need for temp variables as it's just an assignment
-                s.value = parseExpression();
-                if (s.type == null && s.value instanceof NullValue) {
+                Expression expr = parseExpression();
+                if (expr instanceof NullValue) {
                     if (targetType == null) {
                         throw syntaxError("Can only assign null if the type is known");
                     }
-                    s.value = new NullValue(targetType);
+                    expr = new NullValue(targetType);
                 }
-                s.value = s.value.writeStatements(this, true, target);
-                boolean global = isGlobalScope;
-                Variable v = new Variable(module, identifier, global, s.value.type());
-                v.isConstant = true;
-                Value constValue = eval(s.value, true);
+                expr = expr.writeStatements(this, true, target);
+                Value constValue = eval(expr, true);
                 if (constValue != null) {
                     if (constValue.isArray() || constValue instanceof Value.ValueRef) {
                         // the value would be in the heap, but we don't retain the heap
@@ -1021,6 +1089,18 @@ public class Parser {
                         constValue = null;
                     }
                 }
+                if (identifierList.size() != 1) {
+                    throw syntaxError("Constant lists are not supported");
+                }
+                String identifier = identifierList.get(0);
+                Assignment s = new Assignment();
+                s.isConstant = true;
+                s.isGlobalScope = isGlobalScope;
+                s.initial = true;
+                s.value = expr;
+                boolean global = isGlobalScope;
+                Variable v = new Variable(module, identifier, global, s.value.type());
+                v.isConstant = true;
                 v.constantValue = constValue;
                 s.leftValue = v;
                 s.setConstantBounds(v);
@@ -1040,72 +1120,12 @@ public class Parser {
                 readEndOfStatement();
                 target.add(s);
                 return;
-            } else if (matchOp(":=")) {
-                if (m != module && !m.equals(module)) {
-                    throw syntaxError("Can not create a new variable in a different module");
-                }
-                Assignment s = new Assignment();
-                s.initial = true;
-                boolean global = isGlobalScope;
-                s.isGlobalScope = global;
-                // no need for temp variables as it's just an assignment
-                s.value = parseExpression();
-                s.value = s.value.writeStatements(this, true, target);
-                if (s.type == null && s.value instanceof NullValue) {
-                    if (targetType == null) {
-                        throw syntaxError("Can only assign null if the type is known");
-                    }
-                    s.value = new NullValue(targetType);
-                }
-                DataType type = s.value.type();
-                if (type.isArray()) {
-                    throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
-                }
-                if (matchOp("..")) {
-                    if (global) {
-                        throw syntaxError("Global ranges are not allowed; they need to be in a function");
-                    }
-                    if (!"0".equals(s.value.toString())) {
-                        throw syntaxError("Range needs to start from 0: '"+s+"'");
-                    }
-                    Expression upperBound = parseExpression();
-                    if (upperBound.canThrowException() != null) {
-                        throw syntaxError("May not throw an exception here");
-                    }
-                    String rangeTypeName = "0.." + upperBound.toString();
-                    DataType rangeType = functionContext.getType(null, rangeTypeName);
-                    if (rangeType == null) {
-                        rangeType = DataType.newNumberType(rangeTypeName, 8);
-                        rangeType.maxValue = upperBound;
-                        functionContext.addTemporaryType(rangeType);
-                    }
-                    type = rangeType;
-                }
-                if (targetType != null && targetType != s.value.type()) {
-                    if (targetType.isNullable() && type.orNull() == targetType) {
-                        type = targetType;
-                    } else {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
-                    }
-                }
-                s.type = type;
-                Variable v = new Variable(module, identifier, global, s.type);
-                s.leftValue = v;
-                if (global) {
-                    program.addGlobalVariable(v);
-                } else {
-                    if (functionContext.getVariable(module, v.name) != null) {
-                        throw syntaxError("Variable '" + v.name + "' already exists");
-                    }
-                    functionContext.addVariable(v);
-                }
-                verifyBounds(s);
-                s.setBounds(getScope(0));
-                readEndOfStatement();
-                target.add(s);
-                return;
             } else if (matchOp("(")) {
                 matchOp("\n");
+                if (identifierList.size() != 1) {
+                    throw syntaxError("Function lists are not supported");
+                }
+                String identifier = identifierList.get(0);
                 if ("native".equals(identifier)) {
                     String s = token;
                     read();
@@ -1139,15 +1159,19 @@ public class Parser {
                 }
                 return;
             } else if (matchOp("\n") && targetType != null) {
+                if (identifierList.size() != 1) {
+                    throw syntaxError("Declaration lists are not supported");
+                }
+                String identifier = identifierList.get(0);
                 Assignment s = new Assignment();
                 s.initial = true;
-                Expression value;
+                Expression expr;
                 if (targetType.isNumber()) {
-                    value = new NumberValue(Value.ValueInt.ZERO, targetType, false);
+                    expr = new NumberValue(Value.ValueInt.ZERO, targetType, false);
                 } else {
-                    value = new NullValue(targetType);
+                    expr = new NullValue(targetType);
                 }
-                s.value = value;
+                s.value = expr;
                 boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, targetType);
                 s.leftValue = v;
@@ -1168,21 +1192,27 @@ public class Parser {
                 target.add(s);
                 return;
             }
+            if (identifierList.size() != 1) {
+                throw syntaxError("Lists are currently not supported");
+            }
+            String identifier = identifierList.get(0);
             LeftValue left = functionContext.getVariable(module, identifier);
             if (left == null) {
                 left = functionContext.getVariable(null, "this");
                 if (left == null) {
-                    throw syntaxError("Variable not found: '"+identifier+"' \n"+
-                            "(constants are declared with ':', " +
-                            "new variable are declared with ':=')");
+                    throw syntaxError("Variable not found: '" + identifier
+                            + "' \n"
+                            + "(constants are declared with ':', "
+                            + "new variable are declared with ':=')");
                 }
                 verifyNullAccess(left);
                 DataType vt = left.type();
                 DataType type = vt.getFieldDataType(identifier);
                 if (type == null) {
-                    throw syntaxError("Variable not found: '" + identifier + "' \n"
-                            + "(constants are declared with ':', " +
-                            "new variable are declared with ':=')");
+                    throw syntaxError("Variable not found: '" + identifier
+                            + "' \n"
+                            + "(constants are declared with ':', "
+                            + "new variable are declared with ':=')");
                 }
                 left = new FieldAccess(left, identifier, type);
             }
@@ -1244,10 +1274,12 @@ public class Parser {
                 throw syntaxError("Can not modify contants: " + left);
             }
             if (matchOp("=")) {
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+
+                s.value = expr;
                 // this possibly updates the reference,
                 // and so it's important we have a temp variable
-                s.value = s.value.writeStatements(this, false, target);
                 s.type = s.value.type();
                 if (targetType != null && targetType != s.value.type()) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1264,7 +1296,8 @@ public class Parser {
                 readEndOfStatement();
                 target.add(s);
                 return;
-            } else if (matchOp("*=")) {
+            }
+            if (matchOp("*=")) {
                 s.modify = "*";
                 s.value = parseExpression();
                 s.type = s.value.type();
@@ -2124,11 +2157,9 @@ public class Parser {
                 }
                 parseStatements(list);
             }
-            if (!list.isEmpty()) {
-                ifStatement.listList.add(list);
-                ifStatement.autoClose(autoClose(stackPos, null));
-                functionContext.rewindStack(stackPos);
-            }
+            ifStatement.listList.add(list);
+            ifStatement.autoClose(autoClose(stackPos, null));
+            functionContext.rewindStack(stackPos);
             if (elsePart) {
                 break;
             }

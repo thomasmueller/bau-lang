@@ -16,10 +16,7 @@ fun fannkuch(n int) int
         perm1[i] = i
     perm : int[n]
     count : int[n]
-    flips := 0
-    nperm := 0
-    checksum := 0
-    k := 0
+    flips, nperm, checksum, k := 0
     r := n
     while r > 0
         while r > 1

@@ -13,7 +13,7 @@ public class RandTest {
         for (int i = 0; i < 1_000_000; i++) {
             groups[(int) (r.nextLong() >>> (60))]++;
         }
-        for(int n : groups) {
+        for (int n : groups) {
             assertTrue(n >= 61000);
         }
         groups = new int[16];
@@ -22,7 +22,7 @@ public class RandTest {
             long result = r.nextLong(max);
             groups[(int) ((double) groups.length * result / max)]++;
         }
-        for(int n : groups) {
+        for (int n : groups) {
             assertTrue(n >= 61000);
         }
         groups = new int[16];
@@ -31,7 +31,7 @@ public class RandTest {
             assertTrue(d >= 0 && d < 1.0);
             groups[(int) (d * groups.length)]++;
         }
-        for(int n : groups) {
+        for (int n : groups) {
             assertTrue(n >= 61000);
         }
         long x = -1 & ((1L << 53) - 1);

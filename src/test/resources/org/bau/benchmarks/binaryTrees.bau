@@ -18,7 +18,7 @@ fun main()
     depth := minDepth
     while depth <= maxDepth
         iterations := 1 << (maxDepth - depth + minDepth)
-        sum := 0;
+        sum := 0
         for i := until(iterations)
             sum += count(depth)
         println(iterations '\t trees of depth ' depth '\t check: ' sum)

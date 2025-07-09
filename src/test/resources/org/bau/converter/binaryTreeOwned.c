@@ -406,6 +406,9 @@ Get the random seed.
 fun random() int
 Pseudo-random number generated using the Splitmix64 algorithm.
 
+fun random(smallerThan int) int
+Pseudo-random number between 0 and smallerThan (excluding).
+
 fun setRandomSeed(seed int)
 Set the random seed.
 

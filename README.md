@@ -65,6 +65,10 @@ Variables without value require a type:
 
     x int
 
+A list of variables can be declared and initialized:
+
+    x, y := 0
+
 ### Built-In Types
 
 The built-in types are `int` `i32` `i16` `i8` (signed integer),

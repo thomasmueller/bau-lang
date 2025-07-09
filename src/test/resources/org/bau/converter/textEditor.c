@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <math.h>
 #include <signal.h>
@@ -526,6 +527,7 @@ double LOG10;
 double LOG2;
 int64_t MIN_INT;
 int64_t MAX_INT;
+int8_t queueByte;
 org_bau_os_Terminal_termIos oldTermIos;
 void  (*refreshScreenCallback_0)();
 int64_t cursorY;
@@ -1286,6 +1288,11 @@ int64_t org_bau_os_Terminal_isTerminal_0() {
     return 0;
 }
 int64_t org_bau_os_Terminal_readByte_0() {
+    if (queueByte) {
+        int8_t result = queueByte;
+        queueByte = 0;
+        return result;
+    }
     int8_t x = 0;
     int size = read(0, &x, 1);
             if (!size)
@@ -1296,9 +1303,6 @@ int64_t org_bau_os_Terminal_readByte_0() {
 int64_t org_bau_os_Terminal_readEditorKey_0() {
     while (1) {
         int64_t key = org_bau_os_Terminal_readByte_0();
-        if (key == 0) {
-            continue;
-        }
         if (key < 0) {
             org_bau_Env_exit_1(1);
         }
@@ -1721,6 +1725,7 @@ void _main() {
     LOG2 = 0.6931471805599453;
     MIN_INT = 0x8000000000000000;
     MAX_INT = 0x7fffffffffffffff;
+    queueByte = 0;
     i8_array* _t47 = i8_array_new(0);
     oldTermIos = org_bau_os_Terminal_termIos_1(_t47);
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;

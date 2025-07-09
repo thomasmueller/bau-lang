@@ -18,11 +18,11 @@ def main():
         byte_acc = 0
         for x in range(w):
             Zr = Zi = Tr = Ti = Zero
-            Cr = 2 * x / w - 1.5
-            Ci = 2 * y / h - 1.0
+            Cr = 2.0 * x / w - 1.5
+            Ci = 2.0 * y / h - 1.0
             i = 0
             while i < Iter and (Tr + Ti) <= Limit * Limit:
-                Zi = 2 * Zr * Zi + Ci
+                Zi = 2.0 * Zr * Zi + Ci
                 Zr = Tr - Ti + Cr
                 Tr = Zr * Zr
                 Ti = Zi * Zi

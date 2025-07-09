@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     printf("P4\n%d %d\n", w, h);
     for (y = 0; y < h; y++) {
         for (x = 0; x < w; x++) {
-            Zr = Zi = Tr = Ti = 0.0;
+            Zr = Zi = Tr = Ti = 0;
             Cr = 2.0 * x / w - 1.5; 
             Ci = 2.0 * y / h - 1.0;
             for (i = 0; i < iter && Tr + Ti <= limit * limit; i++) {

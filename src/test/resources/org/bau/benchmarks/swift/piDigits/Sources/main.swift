@@ -23,7 +23,7 @@ func eliminateDigit(_ d: Int) {
 
 @MainActor
 func nextTerm(_ k: Int) {
-    acc += num << 1 // equivalent to num * 2
+    acc += num << 1
     let k2p1 = BigInt(k * 2 + 1)
     acc *= k2p1
     den *= k2p1

@@ -12,7 +12,7 @@ public class Mandelbrot {
     public static void main(String[] args) throws IOException {
         int w, h, bitNum = 0;
         int iter = 50;
-        double limit = 2.0;
+        double limit = 2;
         byte byteAcc = 0;
         int n = 200;
         if (args.length > 0)
@@ -22,9 +22,9 @@ public class Mandelbrot {
         out.write(("P4\n" + w + " " + h + "\n").getBytes());
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                double Zr = 0.0, Zi = 0.0, Tr = 0.0, Ti = 0.0;
+                double Zr = 0, Zi = 0, Tr = 0, Ti = 0;
                 double Cr = 2.0 * x / w - 1.5;
-                double Ci = 2.0 * y / h - 1.0;
+                double Ci = 2.0 * y / h - 1;
                 for (int i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
                     Zi = 2.0 * Zr * Zi + Ci;
                     Zr = Tr - Ti + Cr;

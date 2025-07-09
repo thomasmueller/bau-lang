@@ -86,6 +86,8 @@ This test
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/binarytrees.html#binarytrees">generates binary trees and counts the nodes</a>.
 The Java version is very fast if given enough memory, because it doesn't collect garbage;
 when limiting memory to 100 MB, it does collect garbage, but in a different thread.
+The Go garbage collector is limited to one thread using "runtime.GOMAXPROCS(1)",
+and so it is slower than Java, which can not be limited to one thread (which is arguably not fair).
 For Bau, the ownership variant is used; the reference counted variant is a bit slower.
 Bau includes a faster malloc implementation, which would brings performance close to Java.
 The command line argument 20 is used instead of 21 as in the original test,
@@ -194,11 +196,11 @@ Compiling and Running the C, Java, and Bau versions:
 
     # Java
     for i in {1..2}; do time javac src/test/java/org/bau/benchmarks/*.java -d target/benchmarks; done
-    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
-    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
-    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
-    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
-    java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
+    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
+    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
+    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
+    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
+    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
     for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
     for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
     for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
@@ -232,13 +234,6 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time target/benchmarks/rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
-    # Python
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
-    
     # Swift
     cp src/test/resources/org/bau/benchmarks/*.swift target/benchmarks
     mkdir -p target/benchmarks/swift
@@ -257,3 +252,10 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time target/benchmarks/piDigits 10000 > out.txt; done
     for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
 
+    # Python
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
+    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
+    
