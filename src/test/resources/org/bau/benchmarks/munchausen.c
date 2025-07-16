@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define MAX 440000000
+#define LIMIT 440000000
 
 int cache[10];
 int is_munchausen(int number);
@@ -11,7 +11,7 @@ void set_cache();
 
 int main() {
     set_cache();
-    for (int i = 0; i < MAX; i++)
+    for (int i = 0; i < LIMIT; i++)
         if (is_munchausen(i))
             printf("%d\n", i);
     return 0;

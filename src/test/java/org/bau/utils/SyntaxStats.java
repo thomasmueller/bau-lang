@@ -77,6 +77,7 @@ public class SyntaxStats {
                 int lineCount = 1;
                 int whitespace = 0;
                 int underscore = 0;
+                int underscoreInIdentifier = 0;
                 s.rawBytes += fileData.length;
                 int alphaNumeric = 0;
                 int special = 0;
@@ -106,6 +107,13 @@ public class SyntaxStats {
                             break;
                         case '_':
                             underscore++;
+                            if (i > 0 && i < lineData.length - 1) {
+                                char last = (char) lineData[i - 1];
+                                char next = (char) lineData[i + 1];
+                                if (Character.isAlphabetic(last) && Character.isAlphabetic(next)) {
+                                    underscoreInIdentifier++;
+                                }
+                            }
                             if (!identifier) {
                                 identifierStart = true;
                             }
@@ -131,18 +139,18 @@ public class SyntaxStats {
                 }
                 s.lines += lineCount;
                 s.whitespace += whitespace;
-                s.underscore += underscore;
+                s.underscoreInIdentifier += underscoreInIdentifier;
                 s.alphaNumeric += alphaNumeric;
                 s.special += special;
+                s.special += underscore - underscoreInIdentifier;
                 System.out.printf("%-8s %-20s %s\n", s.language, origFile, s.identifiers);
                 s.identifiers.clear();
             }
-
         }
-        System.out.println("Language Lines Bytes Whitespace Alphanumeric Special");
+        System.out.println("Language Lines Bytes Whitespace Alphanumeric Special Underscore");
         for (Stats s : stats.values()) {
-            System.out.printf("%-8s %5d %5d %10d %12d %7d\n", s.language, s.lines, s.rawBytes, s.whitespace,
-                    s.alphaNumeric, s.special);
+            System.out.printf("%-8s %5d %5d %10d %12d %7d %10d\n", s.language, s.lines, s.rawBytes, s.whitespace,
+                    s.alphaNumeric, s.special, s.underscoreInIdentifier);
         }
     }
 
@@ -188,7 +196,7 @@ public class SyntaxStats {
         int lines;
         int rawBytes;
         int whitespace;
-        int underscore;
+        int underscoreInIdentifier;
 
         int alphaNumeric;
         int special;

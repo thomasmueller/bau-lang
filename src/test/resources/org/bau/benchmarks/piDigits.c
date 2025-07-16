@@ -8,7 +8,7 @@
 
 mpz_t ten, acc, den, num;
 
-void extract_digit(int nth, int *result) {
+void extractDigit(int nth, int *result) {
     mpz_t t1, t2;
     mpz_inits(t1, t2, NULL);
     mpz_mul_si(t1, num, nth);
@@ -18,7 +18,7 @@ void extract_digit(int nth, int *result) {
     mpz_clears(t1, t2, NULL);
 }
 
-void eliminate_digit(int d) {
+void eliminateDigit(int d) {
     mpz_t t1, t2;
     mpz_inits(t1, t2, NULL);
     mpz_mul_si(t1, den, d);
@@ -28,7 +28,7 @@ void eliminate_digit(int d) {
     mpz_clears(t1, t2, NULL);
 }
 
-void next_term(int k) {
+void nextTerm(int k) {
     mpz_t k2p1, t;
     mpz_inits(k2p1, t, NULL);
     mpz_mul_ui(t, num, 2);
@@ -53,15 +53,15 @@ int main(int argc, char *argv[]) {
     mpz_set_ui(num, 1);
     while (i < n) {
         k++;
-        next_term(k);
+        nextTerm(k);
         if (mpz_cmp(num, acc) > 0)
             continue;
         int d3, d4;
-        extract_digit(3, &d3);
-        extract_digit(4, &d4);
+        extractDigit(3, &d3);
+        extractDigit(4, &d4);
         if (d3 != d4)
             continue;
-        eliminate_digit(d3);
+        eliminateDigit(d3);
         putchar('0' + d3);
         i++;
         if (i % 10 == 0)

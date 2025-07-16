@@ -5,6 +5,21 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+/* builtin */
+static inline int _ctzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_ctzll(x);
+#else
+    if (!x) return 64; int c = 0; while (!(x & 1)) { x >>= 1; c++; } return c;
+#endif
+}
+static inline int _clzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_clzll(x);
+#else
+    if (!x) return 64; int c = 0; uint64_t m = (uint64_t)1 << 63; while (!(x & m)) { m >>= 1; c++; } return c;
+#endif
+}
 // malloc =============================
 #define ASSERT(A)   
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
@@ -21,12 +36,12 @@ void tmfree(void* ptr);
 void tmmalloc_insertIntoFreeBlocksMap(uint64_t* block, uint64_t size);
 void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index);
 int tmmalloc_sizeClass(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int result = 2 * log2 + (int) (((size) << 1 >> log2) ^ 2);
     return result > 63 ? 63 : result;
 }
 int tmmalloc_sizeClassRoundUp(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int64_t twoBits = (size >> (log2 - 1)) << (log2 - 1);
     int result = 2 * log2 + (int) ((size << 1 >> log2) ^ 2);
     int64_t mask = (twoBits - (int64_t) size) >> 63;
@@ -123,11 +138,11 @@ void* tmmalloc(size_t sizeBytes) {
 }
 void* tmmalloc_larger(int size, int index0) {
     uint64_t mask = tmmalloc_levelBitmap & (~0ULL << index0);
-    int index = __builtin_ctzll(mask);
+    int index = _ctzll(mask);
     if (index >= 64) {
         tmmalloc_addMemory();
         mask = tmmalloc_levelBitmap & (~0ULL << index0);
-        index = __builtin_ctzll(mask);
+        index = _ctzll(mask);
         if (index >= 64) {
             printf("Out of memory trying to allocate %d; levels %llx\n", size, tmmalloc_levelBitmap) ; 
             exit(0);
@@ -477,6 +492,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
+    do {
     if (pos >= text->len) {
         return ok_int64_t_or_exception(0);
     }
@@ -536,6 +552,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
         _x1 = exception_int64_t_or_exception(_t6); _lastException = _x1.exception; goto catch0;
         org_bau_Exception_exception_free(&_t6);
     }
+    } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
@@ -544,8 +561,9 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
     _org_bau_List_List_Token_or_exception _x0;
     _int64_t_or_exception _x1;
     _int64_t_or_exception _x2;
+    do {
     _x0 = parse_1(regex);
-    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
     org_bau_List_List_Token* list = _x0.result;
     if (list->size > 0) {
         _incUseStack(list->array->data[idx_2(0, list->array->len)]);
@@ -553,7 +571,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         if (e != NULL) {
             if (e->ttype == 0) {
                 _x1 = matchHere_4(list, 1, text, 0);
-                if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+                if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
                 int64_t end = _x1.result;
                 if (end >= 0) {
                     match _t0 = match_2(0, end);
@@ -572,7 +590,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
     int64_t tp = 0;
     while (1) {
         _x2 = matchHere_4(list, 0, text, tp);
-        if (_x2.exception.exceptionType != -1) { _lastException = _x2.exception; goto catch0; };
+        if (_x2.exception.exceptionType != -1) { _lastException = _x2.exception; goto catch0; }
         int64_t end = _x2.result;
         if (end >= 0) {
             match _t2 = match_2(tp, end);
@@ -587,6 +605,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
     match _t3 = match_2(-1, -1);
     _decUseStack(list, org_bau_List_List_Token);
     return ok_match_or_exception(_t3);
+    } while(0);
     catch0:
     return exception_match_or_exception(_lastException);
 }
@@ -610,6 +629,7 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
+    do {
     if (rp >= list->size) {
         return ok_int64_t_or_exception(tp);
     }
@@ -632,7 +652,7 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
             int64_t i = 0;
             while (1) {
                 _x0 = Token_matchChar_3(t, text, tp);
-                if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+                if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
                 int64_t _t0 = _x0.result;
                 if (!(_t0)) {
                     _decUseStack(t, Token);
@@ -649,10 +669,11 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
         }
     }
     _x1 = matchStar_6(t, list, rp + 1, text, tp, t->max - t->min);
-    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
     int64_t _t1 = _x1.result;
     _decUseStack(t, Token);
     return ok_int64_t_or_exception(_t1);
+    } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
@@ -660,16 +681,17 @@ _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
+    do {
     int64_t result = -1;
     while (1) {
         _x0 = matchHere_4(list, rp, text, tp);
-        if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+        if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
         int64_t end = _x0.result;
         if (end >= 0) {
             result = end;
         }
         _x1 = Token_matchChar_3(t, text, tp);
-        if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+        if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
         int64_t r = _x1.result;
         tp += 1;
         if (r == 0) {
@@ -681,14 +703,16 @@ _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64
         max -= 1;
     }
     return ok_int64_t_or_exception(result);
+    } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
 _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
     org_bau_Exception_exception _lastException;
     _match_or_exception _x0;
+    do {
     _x0 = find_2(text, regex);
-    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
     match result = _x0.result;
     int64_t _t0 = result.start == 0;
     if (_t0) {
@@ -697,6 +721,7 @@ _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
     }
     match_free(&result);
     return ok_int64_t_or_exception(_t0);
+    } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
@@ -796,6 +821,7 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
 _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
     org_bau_Exception_exception _lastException;
     _org_bau_List_List_Token_or_exception _x0;
+    do {
     org_bau_List_List_Token* result = org_bau_List_newList_Token_1(0);
     int64_t i = 0;
     while (i < regex->len) {
@@ -926,6 +952,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         _decUseStack(_t0, org_bau_List_List_i8);
     }
     return ok_org_bau_List_List_Token_or_exception(result);
+    } while(0);
     catch0:
     return exception_org_bau_List_List_Token_or_exception(_lastException);
 }
@@ -933,19 +960,22 @@ void test_0() {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
+    do { do {
     _x0 = matches_2(string_1018, string_1019);
-    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
     int64_t _t0 = _x0.result;
     printf("%lld\n", (long long)_t0);
     _x1 = matches_2(string_1020, string_1021);
-    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
     int64_t _t1 = _x1.result;
     printf("%lld\n", (long long)_t1);
     goto skip0;
+    } while(0);
     catch0:;
     org_bau_Exception_exception e = _lastException;
         printf("exception %.*s\n", e.message->len, e.message->data);
         org_bau_Exception_exception_free(&e);
+    } while(0);
     skip0:;
 }
 void _main();

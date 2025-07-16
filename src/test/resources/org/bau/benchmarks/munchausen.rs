@@ -1,10 +1,10 @@
 // https://github.com/jabbalaci/SpeedTests
 
-const N: i32 = 440_000_000;
+const LIMIT: i32 = 440_000_000;
 
 fn main() {
     let cache = get_cache();
-    for n in 0..N {
+    for n in 0 .. LIMIT {
         if is_munchausen(n, &cache) {
             println!("{}", n);
         }

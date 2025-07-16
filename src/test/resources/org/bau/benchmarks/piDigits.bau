@@ -2,7 +2,7 @@
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 import org.bau.BigInt
-    newBigInt
+    bigInt
 import org.bau.Math
 import org.bau.Env
 
@@ -15,7 +15,7 @@ fun main()
     while i < n
         k += 1
         nextTerm(k)
-        continue num.compareTo(acc) > 0
+        continue num.compare(acc) > 0
         d : extractDigit(3)
         continue d <> extractDigit(4)
         eliminateDigit(d)
@@ -24,20 +24,19 @@ fun main()
         if i % 10 = 0
             println(buff ' : ' i)
 
-acc := newBigInt(0)
-den := newBigInt(1)
-num := newBigInt(1)
+acc bigInt := 0
+den, num bigInt := 1
 
 fun extractDigit(nth int) int
-    return num.multiplyInt(nth).add(acc).divide(den).intValue()
+    return num.mul(nth).add(acc).div(den).toInt()
 
 fun eliminateDigit(d int)
-    acc = acc.subtract(den.multiplyInt(d))
-    acc = acc.multiplyInt(10)
-    num = num.multiplyInt(10)
+    acc = acc.sub(den.mul(d))
+    acc = acc.mul(10)
+    num = num.mul(10)
 
 fun nextTerm(k int)
     acc = acc.add(num.shiftLeft(1))
-    acc = acc.multiplyInt(k * 2 + 1)
-    den = den.multiplyInt(k * 2 + 1)
-    num = num.multiplyInt(k)
+    acc = acc.mul(k * 2 + 1)
+    den = den.mul(k * 2 + 1)
+    num = num.mul(k)

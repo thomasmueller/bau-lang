@@ -133,7 +133,7 @@ public class Assignment implements Statement {
             Call c = (Call) value;
             if (c.def.exceptionType != null) {
                 buff.append(exceptionVar + " = " + value.toC() + ";\n");
-                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
+                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; }\n");
                 result = exceptionVar + ".result";
             } else {
                 result = value.toC();

@@ -1,10 +1,10 @@
 # https://github.com/jabbalaci/SpeedTests
 
-N = 440_000_000
+LIMIT = 440_000_000
 
 def main():
     cache: list[int] = get_cache()
-    for n in range(0, N):
+    for n in range(0, LIMIT):
         if is_munchausen(n, cache):
             print(n)
 

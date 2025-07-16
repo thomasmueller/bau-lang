@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     for (y = 0; y < h; y++) {
         for (x = 0; x < w; x++) {
             Zr = Zi = Tr = Ti = 0;
-            Cr = 2.0 * x / w - 1.5; 
+            Cr = 2.0 * x / w - 1.5;
             Ci = 2.0 * y / h - 1.0;
             for (i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
                 Zi = 2.0 * Zr * Zi + Ci;
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
                 Ti = Zi * Zi;
             }
             byte_acc <<= 1;
-            if (Tr + Ti <= limit * limit) 
+            if (Tr + Ti <= limit * limit)
                 byte_acc |= 0x01;
             bit_num++;
             if (bit_num == 8) {

@@ -162,11 +162,12 @@ public class FunctionDefinition {
             }
         }
         StringBuilder buff2 = new StringBuilder();
-        boolean hasReturn = false;
+        boolean hasReturn = Program.hasReturn(list);
+        boolean hasCatch = Program.hasCatch(list);
+        if (hasCatch) {
+            buff2.append(Statement.indent("do { do {\n"));
+        }
         for (Statement s : list) {
-            if (s instanceof Return) {
-                hasReturn = true;
-            }
             buff2.append(Statement.indent(s.toC()));
         }
         if (!context.delareList.isEmpty()) {
@@ -175,6 +176,8 @@ public class FunctionDefinition {
             }
         }
         if (context.needToCatch != null) {
+            buff.append(Statement.indent("do {\n"));
+            buff2.append(Statement.indent("} while(0);\n"));
             buff2.append(Statement.indent(catchLabel + ":\n"));
             buff2.append(Statement.indent("return exception" + context.function.getExceptionStruct() + "(_lastException);\n"));
         }

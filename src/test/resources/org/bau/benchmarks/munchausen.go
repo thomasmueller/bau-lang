@@ -7,18 +7,18 @@ import (
     "math"
 )
 
-const MAX = 440_000_000
+const LIMIT = 440_000_000
 
 func main() {
-    cache := get_cache()
-    for i := 0; i < MAX; i++ {
-        if is_munchausen(i, &cache) {
+    cache := getCache()
+    for i := 0; i < LIMIT; i++ {
+        if isMunchausen(i, &cache) {
             fmt.Println(i)
         }
     }
 }
 
-func is_munchausen(number int, cache *[10]int) bool {
+func isMunchausen(number int, cache *[10]int) bool {
     n := number
     total := 0
     for n > 0 {
@@ -32,7 +32,7 @@ func is_munchausen(number int, cache *[10]int) bool {
     return total == number
 }
 
-func get_cache() [10]int {
+func getCache() [10]int {
     var result [10]int
     for i := 1; i <= 9; i++ {
         result[i] = int(math.Pow(float64(i), float64(i)))

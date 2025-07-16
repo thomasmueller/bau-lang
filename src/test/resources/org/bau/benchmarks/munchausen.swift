@@ -27,7 +27,7 @@ func isMunchausen(_ number: Int) -> Bool {
 }
 
 func main() {
-    for i in 0..<LIMIT {
+    for i in 0 ..< LIMIT {
         if isMunchausen(i) {
             print(i)
         }

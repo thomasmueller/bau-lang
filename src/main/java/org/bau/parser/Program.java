@@ -187,10 +187,16 @@ public class Program {
         } else if (source.isRange()) {
             return expr;
         }
-
         // 'convertIntToString(int x) org.bau.String'
         String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();
         FunctionDefinition fromFunction = getFunctionIfExists(null, source.module, convertFunctionName, 1);
+        if (fromFunction != null) {
+            Call call = new Call();
+            call.args.add(expr);
+            call.def = fromFunction;
+            return call;
+        }
+        fromFunction = getFunctionIfExists(null, target.module, convertFunctionName, 1);
         if (fromFunction != null) {
             Call call = new Call();
             call.args.add(expr);
@@ -342,10 +348,10 @@ public class Program {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
-        for(Statement s : initList) {
+        for (Statement s : initList) {
             buff.append(s);
         }
-        for(Statement s : mainList) {
+        for (Statement s : mainList) {
             buff.append(s);
         }
         return buff.toString();
@@ -376,6 +382,21 @@ public class Program {
         for(String i : includes) {
             buff.append("#include " + i + "\n");
         }
+        buff.append("/* builtin */\n");
+        buff.append("static inline int _ctzll(uint64_t x) {\n");
+        buff.append("#if defined(__GNUC__) || defined(__clang__)\n");
+        buff.append("    return __builtin_ctzll(x);\n");
+        buff.append("#else\n");
+        buff.append("    if (!x) return 64; int c = 0; while (!(x & 1)) { x >>= 1; c++; } return c;\n");
+        buff.append("#endif\n");
+        buff.append("}\n");
+        buff.append("static inline int _clzll(uint64_t x) {\n");
+        buff.append("#if defined(__GNUC__) || defined(__clang__)\n");
+        buff.append("    return __builtin_clzll(x);\n");
+        buff.append("#else\n");
+        buff.append("    if (!x) return 64; int c = 0; uint64_t m = (uint64_t)1 << 63; while (!(x & m)) { m >>= 1; c++; } return c;\n");
+        buff.append("#endif\n");
+        buff.append("}\n");
         if (useTmMalloc) {
             buff.append(StandardLib.TM_MALLOC);
             buff.append("#define _malloc(a)      tmmalloc(a)\n");
@@ -699,6 +720,10 @@ public class Program {
             }
             buff2.append(Statement.indent(buff3.toString()));
         }
+        boolean hasCatch = Program.hasCatch(mainList);
+        if (hasCatch) {
+            buff2.append(Statement.indent("do { do {\n"));
+        }
         for (Statement s : mainList) {
             buff2.append(Statement.indent(s.toC()));
         }
@@ -902,6 +927,24 @@ Testing.
         } catch (IOException e) {
             throw new RuntimeException("Failed reading from input stream: " + e);
         }
+    }
+
+    public static boolean hasCatch(ArrayList<Statement> list) {
+        for (Statement s : list) {
+            if (s instanceof Catch) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasReturn(ArrayList<Statement> list) {
+        for (Statement s : list) {
+            if (s instanceof Return) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static StatementResult runSequence(Memory m, List<Statement> list) {

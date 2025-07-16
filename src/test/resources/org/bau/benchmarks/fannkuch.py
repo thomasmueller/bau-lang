@@ -13,7 +13,7 @@ def fannkuch(n):
     perm1 = list(range(n))
     count = [0] * n
     perm = [0] * n
-    flips, flips, checksum, nperm = 0, 0, 0, 0
+    flips, checksum, nperm = 0, 0, 0
     r = n
     while r > 0:
         while r > 1:

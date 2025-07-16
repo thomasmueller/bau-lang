@@ -221,7 +221,7 @@ fun hash5Slow(data i8[], pos int) i32
     return i32(((x << 24) * prime5bytes) >> (64 - 12))
 
 fun countTrailingZeros(x int) int
-    native('return __builtin_ctz(x);')
+    native('return _ctzll(x);')
     return 0
 
 fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..data.len - 7) int

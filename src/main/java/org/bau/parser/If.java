@@ -106,11 +106,12 @@ public class If implements Statement {
                 buff.append(conditions.get(i).toC()).append(") {\n");
             }
             ArrayList<Statement> list = listList.get(i);
-            boolean hasReturn = false;
+            boolean hasReturn = Program.hasReturn(list);
+            boolean hasCatch = Program.hasCatch(list);
+            if (hasCatch) {
+                buff.append(Statement.indent("do { do {\n"));
+            }
             for (Statement s : list) {
-                if (s instanceof Return) {
-                    hasReturn = true;
-                }
                 buff.append(Statement.indent(s.toC()));
             }
             if (!hasReturn) {
@@ -123,11 +124,8 @@ public class If implements Statement {
         if (listList.size() > conditions.size()) {
             buff.append("} else {\n");
             ArrayList<Statement> list = listList.get(listList.size() - 1);
-            boolean hasReturn = false;
+            boolean hasReturn = Program.hasReturn(list);
             for (Statement s : list) {
-                if (s instanceof Return) {
-                    hasReturn = true;
-                }
                 buff.append(Statement.indent(s.toC()));
             }
             if (!hasReturn) {

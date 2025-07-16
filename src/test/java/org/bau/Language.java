@@ -2,8 +2,17 @@ package org.bau;
 
 /**
 
-Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2)
+Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
+
+https://benbridle.com/projects/bedrock.html
+
+wasm
+make wcc
+./wcc -o hello.wasm hello.c
+wasmtime hello.wasm
+wasm2wat hello.wasm
+wasm-objdump -d hello.wasm
 
 ##
 Function pointer syntax

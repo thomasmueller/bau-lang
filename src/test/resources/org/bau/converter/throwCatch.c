@@ -5,6 +5,21 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+/* builtin */
+static inline int _ctzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_ctzll(x);
+#else
+    if (!x) return 64; int c = 0; while (!(x & 1)) { x >>= 1; c++; } return c;
+#endif
+}
+static inline int _clzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_clzll(x);
+#else
+    if (!x) return 64; int c = 0; uint64_t m = (uint64_t)1 << 63; while (!(x & m)) { m >>= 1; c++; } return c;
+#endif
+}
 // malloc =============================
 #define ASSERT(A)   
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
@@ -21,12 +36,12 @@ void tmfree(void* ptr);
 void tmmalloc_insertIntoFreeBlocksMap(uint64_t* block, uint64_t size);
 void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index);
 int tmmalloc_sizeClass(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int result = 2 * log2 + (int) (((size) << 1 >> log2) ^ 2);
     return result > 63 ? 63 : result;
 }
 int tmmalloc_sizeClassRoundUp(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int64_t twoBits = (size >> (log2 - 1)) << (log2 - 1);
     int result = 2 * log2 + (int) ((size << 1 >> log2) ^ 2);
     int64_t mask = (twoBits - (int64_t) size) >> 63;
@@ -123,11 +138,11 @@ void* tmmalloc(size_t sizeBytes) {
 }
 void* tmmalloc_larger(int size, int index0) {
     uint64_t mask = tmmalloc_levelBitmap & (~0ULL << index0);
-    int index = __builtin_ctzll(mask);
+    int index = _ctzll(mask);
     if (index >= 64) {
         tmmalloc_addMemory();
         mask = tmmalloc_levelBitmap & (~0ULL << index0);
-        index = __builtin_ctzll(mask);
+        index = _ctzll(mask);
         if (index >= 64) {
             printf("Out of memory trying to allocate %d; levels %llx\n", size, tmmalloc_levelBitmap) ; 
             exit(0);
@@ -319,6 +334,7 @@ _int64_t_or_exception factorial_1(int64_t x) {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
+    do {
     if (x > 20) {
         org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1000);
         _x0 = exception_int64_t_or_exception(_t0); _lastException = _x0.exception; goto catch0;
@@ -328,10 +344,11 @@ _int64_t_or_exception factorial_1(int64_t x) {
         return ok_int64_t_or_exception(1);
     }
     _x1 = factorial_1(x - 1);
-    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; };
+    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
     int64_t f = _x1.result;
     int64_t _r0 = x * f;
     return ok_int64_t_or_exception(_r0);
+    } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
@@ -359,15 +376,18 @@ void _main() {
     _int64_t_or_exception _x0;
     int64_t i = 0;
     while (i <= 30) {
+        do { do {
         _x0 = factorial_1(i);
-        if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; };
+        if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
         int64_t _t1 = _x0.result;
         printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t1);
         goto skip0;
+        } while(0);
         catch0:;
         org_bau_Exception_exception e = _lastException;
             printf("Factorial of %lld resulted in %.*s\n", (long long)i, e.message->len, e.message->data);
             org_bau_Exception_exception_free(&e);
+        } while(0);
         skip0:;
         i += 1;
     }

@@ -16,7 +16,7 @@ fun fannkuch(n int) int
         perm1[i] = i
     perm : int[n]
     count : int[n]
-    flips, nperm, checksum, k := 0
+    flips, checksum, nperm := 0
     r := n
     while r > 0
         while r > 1
@@ -26,7 +26,7 @@ fun fannkuch(n int) int
             perm[i] = perm1[i]
         # Count flips and update max and checksum
         f := 0
-        k = perm[0]
+        k := perm[0]
         while k <> 0
             for i := until(perm.len)
                 break 2 * i >= k

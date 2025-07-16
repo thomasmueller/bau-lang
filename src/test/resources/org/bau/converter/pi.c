@@ -4,9 +4,26 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+/* builtin */
+static inline int _ctzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_ctzll(x);
+#else
+    if (!x) return 64; int c = 0; while (!(x & 1)) { x >>= 1; c++; } return c;
+#endif
+}
+static inline int _clzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_clzll(x);
+#else
+    if (!x) return 64; int c = 0; uint64_t m = (uint64_t)1 << 63; while (!(x & m)) { m >>= 1; c++; } return c;
+#endif
+}
 // malloc =============================
 #define ASSERT(A)   
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
@@ -23,12 +40,12 @@ void tmfree(void* ptr);
 void tmmalloc_insertIntoFreeBlocksMap(uint64_t* block, uint64_t size);
 void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index);
 int tmmalloc_sizeClass(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int result = 2 * log2 + (int) (((size) << 1 >> log2) ^ 2);
     return result > 63 ? 63 : result;
 }
 int tmmalloc_sizeClassRoundUp(uint64_t size) {
-    int log2 = 63 - __builtin_clzll(size);
+    int log2 = 63 - _clzll(size);
     int64_t twoBits = (size >> (log2 - 1)) << (log2 - 1);
     int result = 2 * log2 + (int) ((size << 1 >> log2) ^ 2);
     int64_t mask = (twoBits - (int64_t) size) >> 63;
@@ -125,11 +142,11 @@ void* tmmalloc(size_t sizeBytes) {
 }
 void* tmmalloc_larger(int size, int index0) {
     uint64_t mask = tmmalloc_levelBitmap & (~0ULL << index0);
-    int index = __builtin_ctzll(mask);
+    int index = _ctzll(mask);
     if (index >= 64) {
         tmmalloc_addMemory();
         mask = tmmalloc_levelBitmap & (~0ULL << index0);
-        index = __builtin_ctzll(mask);
+        index = _ctzll(mask);
         if (index >= 64) {
             printf("Out of memory trying to allocate %d; levels %llx\n", size, tmmalloc_levelBitmap) ; 
             exit(0);
@@ -292,34 +309,38 @@ int64_t extractDigit_1(int64_t nth);
 int32_t i32_1(int64_t x);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
+int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 void nextTerm_1(int64_t k);
 org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b);
 int64_t org_bau_BigInt_arithmeticRightShift_2(int64_t x, int64_t n);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data);
 int64_t org_bau_BigInt_compareUnsigned_2(int64_t a, int64_t b);
+org_bau_BigInt_bigInt org_bau_BigInt_convertIntToBigInt_1(int64_t value);
 i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen);
 i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to);
-int64_t org_bau_BigInt_divideUnsigned_2(int64_t dividend, int64_t divisor);
-org_bau_BigInt_bigInt org_bau_BigInt_multiply_2(i32_array* a, i32_array* b);
-org_bau_BigInt_bigInt org_bau_BigInt_multiplyBig_2(i32_array* a, i32_array* b);
-org_bau_BigInt_bigInt org_bau_BigInt_multiplySmall_2(int32_t a, i32_array* b);
+int64_t org_bau_BigInt_divUnsigned_2(int64_t divnd, int64_t divisor);
+org_bau_BigInt_bigInt org_bau_BigInt_mul_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_mulBig_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value);
 org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t negative);
 int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x);
-org_bau_BigInt_bigInt org_bau_BigInt_subtract_2(i32_array* a, i32_array* b);
+org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
-int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o);
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
-int64_t org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt this);
+int64_t org_bau_BigInt_bigInt_compare_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
 int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this);
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiplyInt_2(org_bau_BigInt_bigInt this, int64_t value);
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_bigInt this);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_mul_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_neg_1(org_bau_BigInt_bigInt this);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftLeft_2(org_bau_BigInt_bigInt this, int64_t n);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt this, int64_t n);
 int64_t org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_bigInt this);
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_sub_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
+int64_t org_bau_BigInt_bigInt_toInt_1(org_bau_BigInt_bigInt this);
+i8_array* org_bau_Env_arg_1(int64_t index);
+int64_t org_bau_Env_argCount_0();
+int64_t org_bau_Math_parseInt_1(i8_array* value);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -353,53 +374,58 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1016;
-i8_array* string_1017;
+i8_array* string_1024;
 int64_t I32_MIN_VALUE;
 int64_t I32_MAX_VALUE;
 int64_t INT_MIN_VALUE;
-org_bau_BigInt_bigInt tmp1;
-org_bau_BigInt_bigInt tmp2;
+double POS_INFINITY;
+double NEG_INFINITY;
+double NOT_A_NUMBER;
+double PI;
+double E;
+double LOG10;
+double LOG2;
+int64_t MIN_INT;
+int64_t MAX_INT;
 org_bau_BigInt_bigInt acc;
 org_bau_BigInt_bigInt den;
 org_bau_BigInt_bigInt num;
 void eliminateDigit_1(int64_t d) {
-    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_multiplyInt_2(den, d);
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_subtract_2(acc, _t0);
-    org_bau_BigInt_bigInt_copy(&_t1);
-    org_bau_BigInt_bigInt_free(&acc);
-    acc = _t1;
-    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_multiplyInt_2(acc, 10);
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_convertIntToBigInt_1(d);
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_mul_2(den, _t0);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_sub_2(acc, _t1);
     org_bau_BigInt_bigInt_copy(&_t2);
     org_bau_BigInt_bigInt_free(&acc);
     acc = _t2;
-    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiplyInt_2(num, 10);
-    org_bau_BigInt_bigInt_copy(&_t3);
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_convertIntToBigInt_1(10);
+    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_mul_2(acc, _t3);
+    org_bau_BigInt_bigInt_copy(&_t4);
+    org_bau_BigInt_bigInt_free(&acc);
+    acc = _t4;
+    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_convertIntToBigInt_1(10);
+    org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_mul_2(num, _t5);
+    org_bau_BigInt_bigInt_copy(&_t6);
     org_bau_BigInt_bigInt_free(&num);
-    num = _t3;
+    num = _t6;
+    org_bau_BigInt_bigInt_free(&_t6);
+    org_bau_BigInt_bigInt_free(&_t5);
+    org_bau_BigInt_bigInt_free(&_t4);
     org_bau_BigInt_bigInt_free(&_t3);
     org_bau_BigInt_bigInt_free(&_t2);
     org_bau_BigInt_bigInt_free(&_t1);
     org_bau_BigInt_bigInt_free(&_t0);
 }
 int64_t extractDigit_1(int64_t nth) {
-    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_multiplyInt_2(num, nth);
-    org_bau_BigInt_bigInt_copy(&_t0);
-    org_bau_BigInt_bigInt_free(&tmp1);
-    tmp1 = _t0;
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_add_2(tmp1, acc);
-    org_bau_BigInt_bigInt_copy(&_t1);
-    org_bau_BigInt_bigInt_free(&tmp2);
-    tmp2 = _t1;
-    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_divide_2(tmp2, den);
-    org_bau_BigInt_bigInt_copy(&_t2);
-    org_bau_BigInt_bigInt_free(&tmp1);
-    tmp1 = _t2;
-    int64_t _t3 = org_bau_BigInt_bigInt_intValue_1(tmp1);
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_convertIntToBigInt_1(nth);
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_mul_2(num, _t0);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_add_2(_t1, acc);
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_div_2(_t2, den);
+    int64_t _t4 = org_bau_BigInt_bigInt_toInt_1(_t3);
+    org_bau_BigInt_bigInt_free(&_t3);
     org_bau_BigInt_bigInt_free(&_t2);
     org_bau_BigInt_bigInt_free(&_t1);
     org_bau_BigInt_bigInt_free(&_t0);
-    return _t3;
+    return _t4;
 }
 int32_t i32_1(int64_t x) {
     return x;
@@ -413,6 +439,10 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
+int64_t imod_2(int64_t a, int64_t b) {
+    if (b != 0) return a % b;
+    return 0;
+}
 int64_t int_1(int64_t x) {
     return x;
 }
@@ -422,18 +452,24 @@ void nextTerm_1(int64_t k) {
     org_bau_BigInt_bigInt_copy(&_t1);
     org_bau_BigInt_bigInt_free(&acc);
     acc = _t1;
-    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_multiplyInt_2(acc, ( k * 2 ) + 1);
-    org_bau_BigInt_bigInt_copy(&_t2);
-    org_bau_BigInt_bigInt_free(&acc);
-    acc = _t2;
-    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiplyInt_2(den, ( k * 2 ) + 1);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_convertIntToBigInt_1(( k * 2 ) + 1);
+    org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_mul_2(acc, _t2);
     org_bau_BigInt_bigInt_copy(&_t3);
+    org_bau_BigInt_bigInt_free(&acc);
+    acc = _t3;
+    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_convertIntToBigInt_1(( k * 2 ) + 1);
+    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_mul_2(den, _t4);
+    org_bau_BigInt_bigInt_copy(&_t5);
     org_bau_BigInt_bigInt_free(&den);
-    den = _t3;
-    org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_multiplyInt_2(num, k);
-    org_bau_BigInt_bigInt_copy(&_t4);
+    den = _t5;
+    org_bau_BigInt_bigInt _t6 = org_bau_BigInt_convertIntToBigInt_1(k);
+    org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_mul_2(num, _t6);
+    org_bau_BigInt_bigInt_copy(&_t7);
     org_bau_BigInt_bigInt_free(&num);
-    num = _t4;
+    num = _t7;
+    org_bau_BigInt_bigInt_free(&_t7);
+    org_bau_BigInt_bigInt_free(&_t6);
+    org_bau_BigInt_bigInt_free(&_t5);
     org_bau_BigInt_bigInt_free(&_t4);
     org_bau_BigInt_bigInt_free(&_t3);
     org_bau_BigInt_bigInt_free(&_t2);
@@ -507,6 +543,10 @@ int64_t org_bau_BigInt_compareUnsigned_2(int64_t a, int64_t b) {
     }
     return 1;
 }
+org_bau_BigInt_bigInt org_bau_BigInt_convertIntToBigInt_1(int64_t value) {
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_newBigInt_1(value);
+    return _t0;
+}
 i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen) {
     _incUseStack(a);
     int64_t copyLen = newLen;
@@ -568,30 +608,30 @@ i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from
     _decUseStack(a, i32_array);
     return x;
 }
-int64_t org_bau_BigInt_divideUnsigned_2(int64_t dividend, int64_t divisor) {
+int64_t org_bau_BigInt_divUnsigned_2(int64_t divnd, int64_t divisor) {
     if (divisor < 0) {
-        int64_t _r0 = shiftRight_int_2((dividend & ( ~ (dividend - divisor) )), 63);
+        int64_t _r0 = shiftRight_int_2((divnd & ( ~ (divnd - divisor) )), 63);
         return _r0;
     }
-    int64_t q = shiftLeft_2((idiv_2((shiftRight_int_2(dividend, 1)), divisor)), 1);
-    int64_t r = dividend - (q * divisor);
+    int64_t q = shiftLeft_2((idiv_2((shiftRight_int_2(divnd, 1)), divisor)), 1);
+    int64_t r = divnd - (q * divisor);
     int64_t _r1 = q + (shiftRight_int_2((r | ( ~ (r - divisor) )), 63));
     return _r1;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_multiply_2(i32_array* a, i32_array* b) {
+org_bau_BigInt_bigInt org_bau_BigInt_mul_2(i32_array* a, i32_array* b) {
     if (a->len < b->len) {
-        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_multiply_2(b, a);
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_mul_2(b, a);
         return _t0;
     }
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_multiplyBig_2(a, b);
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_mulBig_2(a, b);
     return _t1;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_multiplyBig_2(i32_array* a, i32_array* b) {
+org_bau_BigInt_bigInt org_bau_BigInt_mulBig_2(i32_array* a, i32_array* b) {
     if (a->len == 1) {
-        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_multiplySmall_2(a->data[idx_2(0, a->len)], b);
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_mulSmall_2(a->data[idx_2(0, a->len)], b);
         return _t0;
     } else if (b->len == 1) {
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_multiplySmall_2(b->data[idx_2(0, b->len)], a);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_mulSmall_2(b->data[idx_2(0, b->len)], a);
         return _t1;
     }
     i32_array* _t2 = i32_array_new(a->len + b->len);
@@ -644,7 +684,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_multiplyBig_2(i32_array* a, i32_array* b) {
     _decUseStack(_t2, i32_array);
     return _t5;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_multiplySmall_2(int32_t a, i32_array* b) {
+org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b) {
     if (a == 1) {
         org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_1(b);
         return _t0;
@@ -763,7 +803,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t
     return result;
 }
 int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x) {
-    return x == 0 ? 64 : __builtin_clzll(x);
+    return x == 0 ? 64 : _clzll(x);
     if (x <= 0) {
         int64_t _t0 = 0;
         if (x == 0) {
@@ -784,7 +824,7 @@ int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x) {
     }
     return n;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_subtract_2(i32_array* a, i32_array* b) {
+org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b) {
     i32_array* result = org_bau_BigInt_copyOf_2(a, a->len);
     int64_t carry = 0;
     if (a->len > 0) {
@@ -826,15 +866,15 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, or
     if (this.negative) {
         if (other.negative) {
             org_bau_BigInt_bigInt _t0 = org_bau_BigInt_add_2(this.data, other.data);
-            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(_t0);
+            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(_t0);
             org_bau_BigInt_bigInt_free(&_t0);
             org_bau_BigInt_bigInt_free(&other);
             org_bau_BigInt_bigInt_free(&this);
             return _t1;
         }
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(this);
-        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_subtract_2(_t2, other);
-        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(_t3);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_neg_1(this);
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_sub_2(_t2, other);
+        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(_t3);
         org_bau_BigInt_bigInt_free(&_t3);
         org_bau_BigInt_bigInt_free(&_t2);
         org_bau_BigInt_bigInt_free(&other);
@@ -842,8 +882,8 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, or
         return _t4;
     }
     if (other.negative) {
-        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_negate_1(other);
-        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_subtract_2(this, _t5);
+        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_neg_1(other);
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_sub_2(this, _t5);
         org_bau_BigInt_bigInt_free(&_t5);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
@@ -854,7 +894,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, or
     org_bau_BigInt_bigInt_free(&this);
     return _t7;
 }
-int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o) {
+int64_t org_bau_BigInt_bigInt_compare_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o) {
     if (this.negative != o.negative) {
         int64_t _t0 = 0;
         if (this.negative) {
@@ -865,9 +905,9 @@ int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_Bi
         return _t0;
     }
     if (this.negative) {
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(this);
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(o);
-        int64_t _t3 = org_bau_BigInt_bigInt_compareTo_2(_t1, _t2);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(this);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_neg_1(o);
+        int64_t _t3 = org_bau_BigInt_bigInt_compare_2(_t1, _t2);
         int64_t _r0 = - _t3;
         org_bau_BigInt_bigInt_free(&_t2);
         org_bau_BigInt_bigInt_free(&_t1);
@@ -901,7 +941,7 @@ int64_t org_bau_BigInt_bigInt_compareTo_2(org_bau_BigInt_bigInt this, org_bau_Bi
     }
     return 0;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
     org_bau_BigInt_bigInt_copy(&this);
     org_bau_BigInt_bigInt_copy(&other);
     if (other.data->len == 0) {
@@ -910,25 +950,25 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this,
         org_bau_BigInt_bigInt_free(&this);
         return _t0;
     } else if (this.negative != other.negative) {
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(other);
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_divide_2(this, _t1);
-        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_negate_1(_t2);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(other);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_div_2(this, _t1);
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_neg_1(_t2);
         org_bau_BigInt_bigInt_free(&_t2);
         org_bau_BigInt_bigInt_free(&_t1);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t3;
     } else if (this.negative) {
-        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(this);
-        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_negate_1(other);
-        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_divide_2(_t4, _t5);
+        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(this);
+        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_neg_1(other);
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_div_2(_t4, _t5);
         org_bau_BigInt_bigInt_free(&_t5);
         org_bau_BigInt_bigInt_free(&_t4);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t6;
     }
-    int64_t cmp = org_bau_BigInt_bigInt_compareTo_2(this, other);
+    int64_t cmp = org_bau_BigInt_bigInt_compare_2(this, other);
     if (cmp < 0) {
         org_bau_BigInt_bigInt _t7 = org_bau_BigInt_newBigInt_1(0);
         org_bau_BigInt_bigInt_free(&other);
@@ -948,10 +988,10 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this,
     if (_t9) {
         int64_t _t11 = org_bau_BigInt_bigInt_len_1(other);
         org_bau_BigInt_bigInt _t12 = org_bau_BigInt_bigInt_shiftRight_2(this, _t11 - 16);
-        int64_t x = org_bau_BigInt_bigInt_intValue_1(_t12);
+        int64_t x = org_bau_BigInt_bigInt_toInt_1(_t12);
         int64_t _t13 = org_bau_BigInt_bigInt_len_1(other);
         org_bau_BigInt_bigInt _t14 = org_bau_BigInt_bigInt_shiftRight_2(other, _t13 - 16);
-        int64_t y = org_bau_BigInt_bigInt_intValue_1(_t14);
+        int64_t y = org_bau_BigInt_bigInt_toInt_1(_t14);
         int64_t z = idiv_2(x, y);
         int64_t _t15 = z == ( idiv_2(x, (y + 1)) );
         if (_t15) {
@@ -993,7 +1033,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this,
     while (j >= 0) {
         int64_t aa = ((un->data[idx_2(j + n, un->len)] & 4294967295) * 4294967296) + (un->data[idx_2(( j + n ) - 1, un->len)] & 4294967295);
         int64_t bb = vn->data[n - 1] & 4294967295;
-        int64_t qhat = org_bau_BigInt_divideUnsigned_2(aa, bb);
+        int64_t qhat = org_bau_BigInt_divUnsigned_2(aa, bb);
         int64_t rhat = aa - ( qhat * bb );
         while (1 == 1) {
             int64_t _t21 = qhat >= 4294967296;
@@ -1075,17 +1115,6 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_divide_2(org_bau_BigInt_bigInt this,
     org_bau_BigInt_bigInt_free(&this);
     return _t29;
 }
-int64_t org_bau_BigInt_bigInt_intValue_1(org_bau_BigInt_bigInt this) {
-    int64_t _t0 = org_bau_BigInt_bigInt_signum_1(this);
-    int64_t _t1 = 0;
-    if (this.data->len == 0) {
-        _t1 = 0;
-    } else {
-        _t1 = this.data->data[idx_2(0, this.data->len)] & 4294967295;
-    }
-    int64_t _r0 = _t0 * _t1;
-    return _r0;
-}
 int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this) {
     if (this.data->len == 0) {
         return 0;
@@ -1095,7 +1124,7 @@ int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this) {
     int64_t _r0 = (this.data->len - 1) * 32 + lastLen;
     return _r0;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_mul_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
     org_bau_BigInt_bigInt_copy(&this);
     org_bau_BigInt_bigInt_copy(&other);
     int64_t thisLen = org_bau_BigInt_bigInt_len_1(this);
@@ -1108,9 +1137,9 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt thi
         return other;
     }
     if (this.negative != other.negative) {
-        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_negate_1(other);
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_multiply_2(this, _t0);
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_negate_1(_t1);
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_neg_1(other);
+        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_mul_2(this, _t0);
+        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_neg_1(_t1);
         org_bau_BigInt_bigInt_free(&_t1);
         org_bau_BigInt_bigInt_free(&_t0);
         org_bau_BigInt_bigInt_free(&other);
@@ -1118,13 +1147,13 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt thi
         return _t2;
     }
     if (thisLen > otherLen) {
-        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiply_2(other, this);
+        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_mul_2(other, this);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t3;
     } else if (thisLen == 1) {
         if (this.negative) {
-            org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(other);
+            org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(other);
             org_bau_BigInt_bigInt_free(&other);
             org_bau_BigInt_bigInt_free(&this);
             return _t4;
@@ -1132,59 +1161,12 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiply_2(org_bau_BigInt_bigInt thi
         org_bau_BigInt_bigInt_free(&this);
         return other;
     }
-    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_multiply_2(this.data, other.data);
+    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_mul_2(this.data, other.data);
     org_bau_BigInt_bigInt_free(&other);
     org_bau_BigInt_bigInt_free(&this);
     return _t5;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_multiplyInt_2(org_bau_BigInt_bigInt this, int64_t value) {
-    org_bau_BigInt_bigInt_copy(&this);
-    int64_t _t0 = value >= 2147483648;
-    if (!(_t0)) {
-        int64_t _t1 = value <= -2147483648;
-        _t0 = _t1;
-    }
-    if ((_t0)) {
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_newBigInt_1(value);
-        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_multiply_2(this, _t2);
-        org_bau_BigInt_bigInt_free(&_t2);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t3;
-    }
-    int32_t other = i32_1(value);
-    int64_t thisLen = org_bau_BigInt_bigInt_len_1(this);
-    if (thisLen == 0) {
-        return this;
-    } else if (other == 0) {
-        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_newBigInt_1(other);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t4;
-    }
-    int64_t otherNegative = other < 0;
-    if (this.negative != otherNegative) {
-        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_multiplyInt_2(this, - other);
-        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_negate_1(_t5);
-        org_bau_BigInt_bigInt_free(&_t5);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t6;
-    } else if (thisLen == 1) {
-        if (this.negative) {
-            org_bau_BigInt_bigInt _t7 = org_bau_BigInt_newBigInt_1(- other);
-            org_bau_BigInt_bigInt_free(&this);
-            return _t7;
-        }
-        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_newBigInt_1(other);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t8;
-    }
-    if (otherNegative) {
-        other = - other;
-    }
-    org_bau_BigInt_bigInt _t9 = org_bau_BigInt_multiplySmall_2(other, this.data);
-    org_bau_BigInt_bigInt_free(&this);
-    return _t9;
-}
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_negate_1(org_bau_BigInt_bigInt this) {
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_neg_1(org_bau_BigInt_bigInt this) {
     org_bau_BigInt_bigInt_copy(&this);
     if (this.data->len == 0) {
         return this;
@@ -1264,11 +1246,11 @@ int64_t org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_bigInt this) {
     }
     return 1;
 }
-org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
+org_bau_BigInt_bigInt org_bau_BigInt_bigInt_sub_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
     org_bau_BigInt_bigInt_copy(&this);
     org_bau_BigInt_bigInt_copy(&other);
     if (this.data->len == 0) {
-        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_neg_1(other);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t0;
@@ -1278,19 +1260,19 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt thi
     }
     if (this.negative) {
         if (!(other.negative)) {
-            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_negate_1(this);
+            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(this);
             org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_add_2(_t1, other);
-            org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_negate_1(_t2);
+            org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_neg_1(_t2);
             org_bau_BigInt_bigInt_free(&_t2);
             org_bau_BigInt_bigInt_free(&_t1);
             org_bau_BigInt_bigInt_free(&other);
             org_bau_BigInt_bigInt_free(&this);
             return _t3;
         }
-        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_negate_1(this);
-        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_negate_1(other);
-        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_subtract_2(_t4, _t5);
-        org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_negate_1(_t6);
+        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(this);
+        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_neg_1(other);
+        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_sub_2(_t4, _t5);
+        org_bau_BigInt_bigInt _t7 = org_bau_BigInt_bigInt_neg_1(_t6);
         org_bau_BigInt_bigInt_free(&_t6);
         org_bau_BigInt_bigInt_free(&_t5);
         org_bau_BigInt_bigInt_free(&_t4);
@@ -1299,26 +1281,87 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_subtract_2(org_bau_BigInt_bigInt thi
         return _t7;
     }
     if (other.negative) {
-        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_bigInt_negate_1(other);
+        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_bigInt_neg_1(other);
         org_bau_BigInt_bigInt _t9 = org_bau_BigInt_bigInt_add_2(this, _t8);
         org_bau_BigInt_bigInt_free(&_t8);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t9;
     }
-    int64_t _t10 = org_bau_BigInt_bigInt_compareTo_2(this, other);
+    int64_t _t10 = org_bau_BigInt_bigInt_compare_2(this, other);
     if (_t10 < 0) {
-        org_bau_BigInt_bigInt _t11 = org_bau_BigInt_bigInt_subtract_2(other, this);
-        org_bau_BigInt_bigInt _t12 = org_bau_BigInt_bigInt_negate_1(_t11);
+        org_bau_BigInt_bigInt _t11 = org_bau_BigInt_bigInt_sub_2(other, this);
+        org_bau_BigInt_bigInt _t12 = org_bau_BigInt_bigInt_neg_1(_t11);
         org_bau_BigInt_bigInt_free(&_t11);
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t12;
     }
-    org_bau_BigInt_bigInt _t13 = org_bau_BigInt_subtract_2(this.data, other.data);
+    org_bau_BigInt_bigInt _t13 = org_bau_BigInt_sub_2(this.data, other.data);
     org_bau_BigInt_bigInt_free(&other);
     org_bau_BigInt_bigInt_free(&this);
     return _t13;
+}
+int64_t org_bau_BigInt_bigInt_toInt_1(org_bau_BigInt_bigInt this) {
+    int64_t _t0 = org_bau_BigInt_bigInt_signum_1(this);
+    int64_t _t1 = 0;
+    if (this.data->len == 0) {
+        _t1 = 0;
+    } else {
+        _t1 = this.data->data[idx_2(0, this.data->len)] & 4294967295;
+    }
+    int64_t _r0 = _t0 * _t1;
+    return _r0;
+}
+i8_array* org_bau_Env_arg_1(int64_t index) {
+    int64_t _t0 = index < 0;
+    if (!(_t0)) {
+        int64_t _t1 = index >= org_bau_Env_argCount_0();
+        _t0 = _t1;
+    }
+    if (_t0) {
+        i8_array* _t2 = i8_array_new(0);
+        return _t2;
+    }
+    int64_t len = 0;
+    len = strlen(__argv[index]);
+    i8_array* _t3 = i8_array_new(len);
+    _incUseStack(_t3);
+    i8_array* result = _t3;
+    strncpy((char*) result->data, __argv[index], len);
+    _decUseStack(_t3, i8_array);
+    return result;
+}
+int64_t org_bau_Env_argCount_0() {
+    return __argc;
+    return 0;
+}
+int64_t org_bau_Math_parseInt_1(i8_array* value) {
+    int64_t x = 0;
+    int64_t sign = 1;
+    if (value->len) {
+        int64_t i = 0;
+        if (value->data[idx_2(0, value->len)] == 45) {
+            sign = -1;
+            i += 1;
+        }
+        while (i < value->len) {
+            int8_t n = value->data[i];
+            int64_t _t0 = n >= 48;
+            if (_t0) {
+                int64_t _t1 = n <= 57;
+                _t0 = _t1;
+            }
+            if (_t0) {
+                x *= 10;
+                x += n - 48;
+            }
+            i += 1;
+        }
+        int64_t _r0 = sign * x;
+        return _r0;
+    }
+    return 0;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -1334,8 +1377,7 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1016 = str_const(" : ", 3);
-    string_1017 = str_const("dummy: ", 7);
+    string_1024 = str_const(" : ", 3);
     _main();
     return 0;
 }
@@ -1343,47 +1385,52 @@ void _main() {
     I32_MIN_VALUE = -2147483648;
     I32_MAX_VALUE = 4294967295;
     INT_MIN_VALUE = (-9223372036854775807LL-1LL);
-    tmp1 = org_bau_BigInt_newBigInt_1(0);
-    tmp2 = org_bau_BigInt_newBigInt_1(0);
-    acc = org_bau_BigInt_newBigInt_1(0);
-    den = org_bau_BigInt_newBigInt_1(1);
-    num = org_bau_BigInt_newBigInt_1(1);
+    POS_INFINITY = (1.0 / 0.0);
+    NEG_INFINITY = (-1.0 / 0.0);
+    NOT_A_NUMBER = (0.0 / 0.0);
+    PI = 3.141592653589793;
+    E = 2.718281828459045;
+    LOG10 = 2.302585092994046;
+    LOG2 = 0.6931471805599453;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
+    acc = org_bau_BigInt_convertIntToBigInt_1(0);
+    den = org_bau_BigInt_convertIntToBigInt_1(1);
+    num = org_bau_BigInt_convertIntToBigInt_1(1);
     int64_t n = 100;
-    int64_t i = 0;
+    int64_t _t40 = org_bau_Env_argCount_0();
+    if (_t40 > 1) {
+        i8_array* _t41 = org_bau_Env_arg_1(1);
+        int64_t _t42 = org_bau_Math_parseInt_1(_t41);
+        n = _t42;
+        _decUseStack(_t41, i8_array);
+    }
     int64_t k = 0;
-    int64_t L = 10;
-    i8_array* _t2 = i8_array_new(10);
-    _incUseStack(_t2);
-    i8_array* buff = _t2;
-    int64_t j = 0;
-    int64_t dummy = 0;
+    int64_t i = 0;
+    i8_array* _t43 = i8_array_new(10);
+    _incUseStack(_t43);
+    i8_array* buff = _t43;
     while (i < n) {
         k += 1;
         nextTerm_1(k);
-        int64_t _t3 = org_bau_BigInt_bigInt_compareTo_2(num, acc);
-        if (_t3 > 0) {
+        int64_t _t44 = org_bau_BigInt_bigInt_compare_2(num, acc);
+        if (_t44 > 0) {
             continue;
         }
         int64_t d = extractDigit_1(3);
-        int64_t _t4 = extractDigit_1(4);
-        if (d != _t4) {
+        int64_t _t45 = extractDigit_1(4);
+        if (d != _t45) {
             continue;
         }
         eliminateDigit_1(d);
-        dummy += d;
-        buff->data[j] = 48 + d;
-        j += 1;
+        buff->data[idx_2(imod_2(i, 10), buff->len)] = 48 + d;
         i += 1;
-        if (j == 10) {
+        if (( imod_2(i, 10) ) == 0) {
             printf("%.*s : %lld\n", buff->len, buff->data, (long long)i);
-            j = 0;
         }
     }
-    printf("dummy: %lld\n", (long long)dummy);
     _decUseStack(buff, i8_array);
-    _decUseStack(_t2, i8_array);
-    org_bau_BigInt_bigInt_free(&tmp1);
-    org_bau_BigInt_bigInt_free(&tmp2);
+    _decUseStack(_t43, i8_array);
     org_bau_BigInt_bigInt_free(&acc);
     org_bau_BigInt_bigInt_free(&den);
     org_bau_BigInt_bigInt_free(&num);
@@ -1400,25 +1447,22 @@ create a new bigInt
 fun bigInt add(other bigInt) bigInt
 addition
 
-fun bigInt compareTo(o bigInt) int
+fun bigInt compare(o bigInt) int
 compare to another value
 
-fun bigInt divide(other bigInt) bigInt
+fun bigInt div(other bigInt) bigInt
 division
-
-fun bigInt intValue() int
-get the int value (at most 32 bits)
 
 fun bigInt len() int
 length in bits
 
-fun bigInt multiply(other bigInt) bigInt
+fun bigInt mul(other bigInt) bigInt
 multiplication
 
-fun bigInt multiplyInt(value int) bigInt
-multiply by an integer
+fun bigInt mulInt(value int) bigInt
+mul by an integer
 
-fun bigInt negate() bigInt
+fun bigInt neg() bigInt
 negate
 
 fun bigInt shiftLeft(n int) bigInt
@@ -1430,8 +1474,11 @@ right shift
 fun bigInt signum() int
 get the signum
 
-fun bigInt subtract(other bigInt) bigInt
-subtraction
+fun bigInt sub(other bigInt) bigInt
+subion
+
+fun bigInt toInt() int
+get the int value (at most 32 bits)
 
 fun bigInt toStr() i8[]
 convert to string

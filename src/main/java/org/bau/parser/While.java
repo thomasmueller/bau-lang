@@ -12,9 +12,6 @@ public class While implements Statement {
     List<Statement> autoClose;
     Expression condition;
 
-    private boolean continueIdUsed;
-    private int continueId;
-
     @Override
     public Statement replace(Variable old, Expression with) {
         While c = new While();
@@ -24,16 +21,6 @@ public class While implements Statement {
             c.list.add(s.replace(old, with));
         }
         return c;
-    }
-
-
-    public void setContinueId(int continueId) {
-        this.continueId = continueId;
-    }
-
-    int getContinueIdAndMarkUsed() {
-        continueIdUsed = true;
-        return continueId;
     }
 
     @Override
@@ -89,11 +76,12 @@ public class While implements Statement {
     public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("while (" + condition.toC() + ") {\n");
-        boolean hasReturn = false;
+        boolean hasReturn = Program.hasReturn(list);
+        boolean hasCatch = Program.hasCatch(list);
+        if (hasCatch) {
+            buff.append(Statement.indent("do { do {\n"));
+        }
         for (Statement s : list) {
-            if (s instanceof Return) {
-                hasReturn = true;
-            }
             buff.append(Statement.indent(s.toC()));
         }
         StringBuilder buffContinue = new StringBuilder();
@@ -104,9 +92,6 @@ public class While implements Statement {
             for (Statement s : autoClose) {
                 buffContinue.append(Statement.indent(s.toC()));
             }
-        }
-        if (continueIdUsed) {
-            buff.append(Statement.indent("continue" + continueId + ":;\n"));
         }
         if (buffContinue.length() > 0) {
             buff.append(buffContinue);

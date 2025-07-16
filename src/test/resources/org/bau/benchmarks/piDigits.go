@@ -34,14 +34,14 @@ func main() {
 }
 
 var (
-    tmp1  = big.NewInt(0)
-    tmp2  = big.NewInt(0)
-    y2    = big.NewInt(1)
-    bigk  = big.NewInt(0)
+    tmp1 = big.NewInt(0)
+    tmp2 = big.NewInt(0)
+    y2 = big.NewInt(1)
+    bigk = big.NewInt(0)
     acc = big.NewInt(0)
     den = big.NewInt(1)
     num = big.NewInt(1)
-    ten   = big.NewInt(10)
+    ten = big.NewInt(10)
 )
 
 func next_term(k int64) int64 {

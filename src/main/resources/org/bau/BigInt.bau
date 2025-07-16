@@ -13,7 +13,7 @@ fun arithmeticRightShift(x int, n int) int
     return (x >> n) | ((0 - (x < 0)) << (64 - n))
     
 fun numberOfLeadingZeros(x int) int
-    native(`return x == 0 ? 64 : __builtin_clzll(x);`)
+    native(`return x == 0 ? 64 : _clzll(x);`)
     if x <= 0
         return if(x = 0, 64, 0)
     n := 63
@@ -25,12 +25,12 @@ fun numberOfLeadingZeros(x int) int
         shift >>= 1
     return n
 
-fun divideUnsigned(dividend int, divisor int) int
+fun divUnsigned(divnd int, divisor int) int
     # From Hacker's Delight
     if divisor < 0
-        return (dividend & ~(dividend - divisor)) >> 63
-    q : ((dividend >> 1) / divisor) << 1
-    r : dividend - (q * divisor)
+        return (divnd & ~(divnd - divisor)) >> 63
+    q : ((divnd >> 1) / divisor) << 1
+    r : divnd - (q * divisor)
     return q + ((r | ~(r - divisor)) >> 63)
 
 fun compareUnsigned(a int, b int) int
@@ -91,6 +91,9 @@ fun newBigIntShorten(data i32[], negative int) bigInt
     result.negative = negative
     return result
 
+fun convertIntToBigInt(value int) bigInt
+    return newBigInt(value)
+
 # create a new bigInt
 fun newBigInt(value int) bigInt
     if value = 0 
@@ -125,7 +128,7 @@ fun newBigInt(value int) bigInt
             return x
 
 # negate
-fun bigInt negate() bigInt
+fun bigInt neg() bigInt
     if data.len = 0
         return this
     x : bigInt(data)
@@ -182,11 +185,11 @@ fun if(cond int, a T, b T) macro T
         return b
 
 # compare to another value
-fun bigInt compareTo(o bigInt) int
+fun bigInt compare(o bigInt) int
     if negative <> o.negative
         return if(negative, -1, 1)
     if negative
-        return - negate().compareTo(o.negate())
+        return - neg().compare(o.neg())
     len : len()
     oLen : o.len()
     if len <> oLen
@@ -208,10 +211,10 @@ fun bigInt add(other bigInt) bigInt
         return this
     if negative
         if other.negative
-            return add(data, other.data).negate()
-        return negate().subtract(other).negate()
+            return add(data, other.data).neg()
+        return neg().sub(other).neg()
     if other.negative
-        return subtract(other.negate())
+        return sub(other.neg())
     return add(data, other.data)
 
 fun add(a i32[], b i32[]) bigInt
@@ -231,23 +234,23 @@ fun add(a i32[], b i32[]) bigInt
     r2[r2.len - 1] = 1
     return bigInt(r2)
 
-# subtraction
-fun bigInt subtract(other bigInt) bigInt
+# subion
+fun bigInt sub(other bigInt) bigInt
     if data.len = 0
-        return other.negate()
+        return other.neg()
     elif other.data.len = 0
         return this
     if negative
         if not other.negative
-            return negate().add(other).negate()
-        return negate().subtract(other.negate()).negate()
+            return neg().add(other).neg()
+        return neg().sub(other.neg()).neg()
     if other.negative
-        return add(other.negate())
-    if compareTo(other) < 0
-        return other.subtract(this).negate()
-    return subtract(data, other.data)
+        return add(other.neg())
+    if compare(other) < 0
+        return other.sub(this).neg()
+    return sub(data, other.data)
 
-fun subtract(a i32[], b i32[]) bigInt
+fun sub(a i32[], b i32[]) bigInt
     result : copyOf(a, a.len)
     carry := 0
     for i := until(a.len)
@@ -261,11 +264,11 @@ fun subtract(a i32[], b i32[]) bigInt
     return newBigIntShorten(result, 0)
 
 # get the int value (at most 32 bits)
-fun bigInt intValue() int
+fun bigInt toInt() int
     return signum() * if(data.len = 0, 0, data[0] & 0xffffffff)
 
 # multiplication
-fun bigInt multiply(other bigInt) bigInt
+fun bigInt mul(other bigInt) bigInt
     thisLen : len()
     otherLen : other.len()
     if thisLen = 0
@@ -273,20 +276,20 @@ fun bigInt multiply(other bigInt) bigInt
     elif otherLen = 0
         return other
     if negative <> other.negative
-        return multiply(other.negate()).negate()
+        return mul(other.neg()).neg()
     if thisLen > otherLen
-        return other.multiply(this)
+        return other.mul(this)
     elif thisLen = 1
-        # multiply by 1 / -1
+        # mul by 1 / -1
         if negative
-            return other.negate()
+            return other.neg()
         return other
-    return multiply(data, other.data)
+    return mul(data, other.data)
 
-# multiply by an integer
-fun bigInt multiplyInt(value int) bigInt
+# mul by an integer
+fun bigInt mulInt(value int) bigInt
     if (value >= 1 << 31 or value <= -(1 << 31))
-        return multiply(newBigInt(value))
+        return mul(newBigInt(value))
     other := i32(value)
     thisLen : len()
     if thisLen = 0
@@ -295,23 +298,23 @@ fun bigInt multiplyInt(value int) bigInt
         return newBigInt(other)
     otherNegative : other < 0
     if negative <> otherNegative
-        return multiplyInt(-other).negate()
+        return mulInt(-other).neg()
     elif thisLen = 1
-        # multiply by 1 / -1
+        # mul by 1 / -1
         if negative
             return newBigInt(-other)
         return newBigInt(other)
     if otherNegative
         other = -other
-    return multiplySmall(other, data)
+    return mulSmall(other, data)
 
-fun multiply(a i32[], b i32[]) bigInt
+fun mul(a i32[], b i32[]) bigInt
     if a.len < b.len
-        return multiply(b, a)
+        return mul(b, a)
     # now a.len >= b.len
-    return multiplyBig(a, b)
+    return mulBig(a, b)
 
-fun multiplySmall(a i32, b i32[]) bigInt
+fun mulSmall(a i32, b i32[]) bigInt
     if a = 1
         return bigInt(b)
     newSize := b.len
@@ -329,11 +332,11 @@ fun multiplySmall(a i32, b i32[]) bigInt
         result[result.len - 1] = carry
     return newBigIntShorten(result, 0)
 
-fun multiplyBig(a i32[], b i32[]) bigInt
+fun mulBig(a i32[], b i32[]) bigInt
     if a.len = 1
-        return multiplySmall(a[0], b)
+        return mulSmall(a[0], b)
     elif b.len = 1
-        return multiplySmall(b[0], a)
+        return mulSmall(b[0], a)
     result : i32[a.len + b.len]
     for ai := until(a.len)
         ax : a[ai] & 0xffffffff
@@ -353,24 +356,24 @@ fun multiplyBig(a i32[], b i32[]) bigInt
     return newBigIntShorten(result, 0)
 
 # division
-fun bigInt divide(other bigInt) bigInt
+fun bigInt div(other bigInt) bigInt
     if other.data.len = 0
         # TODO division by zero: currently we return 0
         # throw exception instead?
         return newBigInt(0)
     elif negative <> other.negative
-        return divide(other.negate()).negate()
+        return div(other.neg()).neg()
     elif negative
-        return negate().divide(other.negate())
-    cmp : compareTo(other)
+        return neg().div(other.neg())
+    cmp : compare(other)
     if cmp < 0
         return newBigInt(0)
     elif cmp = 0
         return newBigInt(1)
     if data.len > 2 and len() - other.len() < 16
         # optimization for very small results
-        x : shiftRight(other.len() - 16).intValue()
-        y : other.shiftRight(other.len() - 16).intValue()
+        x : shiftRight(other.len() - 16).toInt()
+        y : other.shiftRight(other.len() - 16).toInt()
         z : x / y
         if z = x / (y + 1) and z = x / (y - 1)
             return newBigInt(z)
@@ -391,7 +394,7 @@ fun bigInt divide(other bigInt) bigInt
     while j >= 0
         aa : ((un[j + n] & 0xffffffff) * b) + (un[j + n - 1] & 0xffffffff)
         bb : vn[n - 1] & 0xffffffff
-        qhat := divideUnsigned(aa, bb)
+        qhat := divUnsigned(aa, bb)
         rhat := aa - qhat * bb
         while qhat >= b or compareUnsigned(qhat * (vn[n - 2] & 0xffffffff), (rhat * b) + (un[j + n - 2] & 0xffffffff)) > 0
             qhat -= 1
@@ -434,13 +437,13 @@ fun bigInt toStr() i8[]
     if negative
         buff.data[0] = ord('-')
         start = 1
-        n = n.negate()
+        n = n.neg()
     i := start
     group := newBigInt(1_000_000_000)
     while
-        next := n.divide(group)
-        remainder := n.subtract(next.multiply(group))
-        val : remainder.intValue()
+        next := n.div(group)
+        remainder := n.sub(next.mul(group))
+        val : remainder.toInt()
         if i + 9 >= buff.data.len
             buff = str(copyOfRange(buff.data, 0, buff.data.len * 2))
         i = intToStr(val, buff.data, i, 9)

@@ -7,8 +7,9 @@ import org.bau.runtime.Memory;
 
 public class Continue implements Statement {
     Expression condition;
-    int continuedId;
+    // int continuedId;
     List<Statement> autoClose;
+    While loop;
 
     @Override
     public Statement replace(Variable old, Expression with) {
@@ -55,7 +56,11 @@ public class Continue implements Statement {
             }
         }
         if (condition != null) {
-            buff.append(Statement.indent("goto continue" + continuedId + ";\n"));
+            for(Statement s : loop.listContinue) {
+                buff.append(Statement.indent(s.toC()));
+            }
+            buff.append(Statement.indent("continue;\n"));
+            // buff.append(Statement.indent("goto continue" + continuedId + ";\n"));
             buff.append("}\n");
         } else {
             buff.append("continue;\n");

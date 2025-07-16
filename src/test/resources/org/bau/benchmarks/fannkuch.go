@@ -12,7 +12,7 @@ import (
 func main() {
     flag.Parse()
     n := 4
-    if flag.NArg() > 0 { n,_ = strconv.Atoi(flag.Arg(0)) }
+    if flag.NArg() > 0 { n, _ = strconv.Atoi(flag.Arg(0)) }
     fmt.Printf("Pfannkuchen(%d) = %d\n", n, fannkuch(n))
 }
 

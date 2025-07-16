@@ -200,7 +200,7 @@ public class Call implements Statement, Expression, LeftValue {
                 StringBuilder buff = new StringBuilder();
                 buff.append(exceptionVar + " = ");
                 buff.append(callToC());
-                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; };\n");
+                buff.append("if (" + exceptionVar + ".exception.exceptionType != -1) { _lastException = " + exceptionVar + ".exception; goto " + catchLabel + "; }\n");
                 return buff.toString();
             } else {
                 return callToC();

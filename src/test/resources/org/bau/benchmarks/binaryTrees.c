@@ -52,7 +52,7 @@ typedef struct tn {
 
 treeNode* buildTree(int depth) {
     treeNode* new = (treeNode*) malloc(sizeof(treeNode));
-    if (depth <= 0) {
+    if (depth == 0) {
         new->left = NULL;
         new->right = NULL;
         return new;

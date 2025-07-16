@@ -57,6 +57,7 @@ public class Catch implements Statement {
     public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("goto " + nextSkipLabel + ";\n");
+        buff.append("} while(0);\n");
         buff.append(catchLabel + ":;\n");
         buff.append(var.type().toC() + " " + var.nameC() + " = _lastException;\n");
         for(Statement s : list) {
@@ -67,6 +68,7 @@ public class Catch implements Statement {
                 buff.append(Statement.indent(s.toC()));
             }
         }
+        buff.append("} while(0);\n");
         buff.append(nextSkipLabel + ":;\n");
         return buff.toString();
     }

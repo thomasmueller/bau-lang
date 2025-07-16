@@ -54,7 +54,7 @@ public class Break implements Statement {
             buff.append("if (" + condition.toC() + ") {\n");
         }
         if (autoClose != null) {
-            for(Statement s : autoClose) {
+            for (Statement s : autoClose) {
                 buff.append(Statement.indent(s.toC()));
             }
         }

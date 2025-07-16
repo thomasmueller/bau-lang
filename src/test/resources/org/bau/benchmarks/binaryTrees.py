@@ -4,7 +4,7 @@
 import sys
 
 class Node:
-    def __init__(self, left=None, right=None):
+    def __init__(self, left = None, right = None):
         self.left = left
         self.right = right
 
@@ -17,7 +17,7 @@ class Node:
         return result
 
 def build_tree(depth):
-    if depth <= 0:
+    if depth == 0:
         return Node()
     return Node(build_tree(depth - 1), build_tree(depth - 1))
 

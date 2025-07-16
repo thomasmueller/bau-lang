@@ -49,7 +49,7 @@ type Node struct {
 }
 
 func buildTree(depth int) *Node {
-    if depth <= 0 {
+    if depth == 0 {
         return &Node{}
     }
     return &Node{ buildTree(depth-1), buildTree(depth-1) }
