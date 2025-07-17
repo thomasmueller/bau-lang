@@ -239,14 +239,38 @@ for i:= range(0 20)
             <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
             <div class="result">&nbsp;</div>  
             <div class="result"><b>Output:</b></div>  
-            <div class="result"><pre id="result" translate="no"></pre></div>
+            <textarea id="cOutput" cols="80" readonly
+            style="border-style: none; border-color: transparent;" 
+            autocorrect="off" autocomplete="off" autocapitalize="off"
+            spellcheck="false" aria-label="Try Bau" wrap="off" translate="no"
+            placeholder=""></textarea>
             <div class="result"><b>Generated C Source Code:</b></div>
             <div class="result"><pre id="csource" translate="no"></pre></div>
             <!-- <div class="result"><b>Ticks of Last Run:</b></div> -->
             <!-- <div class="result"><pre id="ticks" translate="no"></pre></div> -->
         </div>
+        <div id="cCompiler" style="display: none;">
+                <button id="cRunButton" class="btn">Run</button>
+                <textarea id="cSourceCode" placeholder="">// Write your C code here and click Run
+				
+				#include <stdio.h>
+				
+				int main() {
+				    printf("Hello, World!\n");
+				    return 0;
+				}</textarea>
+                <div id="status" class="status hidden"></div>
+                
+                <!-- output of compiled -->
+                <textarea id="cOutputOld" class="output" readonly placeholder="Program output will appear here..."></textarea>
+                
+                <!-- output of interpreted -->
+                <div class="result"><pre id="result" translate="no"></pre></div>
+                
+	    </div>
 
 <script src="codemirror/lib/codemirror.js"></script>
 <script src="codemirror/mode/bau.js"></script>
 <script src="codemirror/initCodeMirror.js"></script>
+<script type="text/javascript" charset="utf-8" src="simple.js"></script>
 </body></html>
