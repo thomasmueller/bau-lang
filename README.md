@@ -3,6 +3,7 @@
 A programming language for everyone.
 
 <a href="https://thomasmueller.github.io/bau-lang/">Playground: Try it out in the browser.</a>
+<a href="https://thomasmueller.github.io/bau-lang/convert-java-to-bau.html">Conversion tool: Java to Bau.</a>
 
 * <a href="doc/performance.md">High performance and efficiency</a>.
 * <a href="doc/conciseSyntax.md">Easy to learn with a concise syntax inspired by Python.</a>
@@ -12,7 +13,6 @@ A programming language for everyone.
 * Runs everwhere: transpiles to C. No runtime library needed.
 * Null safety: Null pointer errors are prevented at compile time.
 * Ability to avoid runtime array bound checks using static analysis.
-
 
 <br>
 <a href="doc/transpile.md">Transpile on the command line.</a>

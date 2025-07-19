@@ -5,50 +5,19 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+interfaces (trait), like in Rust
+for interfaces, support instanceof and cast
+
+
 https://benbridle.com/projects/bedrock.html
 
+== XCC docs / Wasm docs
 wasm
 make wcc
 ./wcc -o hello.wasm hello.c
 wasmtime hello.wasm
 wasm2wat hello.wasm
 wasm-objdump -d hello.wasm
-
-##
-Function pointer syntax
-atExit(callback fun())
-signal(code int, callback fun(int))
-
-fun abc()
-    println('hello')
-fun callMe(x fun())
-    x()
-fun main()
-    callMe(fun abc)
-
-
-# Rust
-https://stackoverflow.com/questions/41081240/idiomatic-callbacks-in-rust
-type Callback = fn();
-Rust allows variables with the same name,
-but the local variable shadow the function then
-use std::cmp::Ordering;
-fn custom_compare(a: &i32, b: &i32) -> Ordering {
-    if a < b { Ordering::Less }
-    else if a > b { Ordering::Greater }
-    else { Ordering::Equal }
-}
-fn main() {
-    let mut arr = vec![5, 2, 9, 1, 5, 6];
-    arr.sort_by(|&a, &b| {
-        if a < b { Ordering::Less }
-        else if a > b { Ordering::Greater }
-        else { Ordering::Equal }
-    });
-    arr.sort_by(|&a, &b| custom_compare(&a, &b));
-    arr.sort_by(custom_compare);
-    println!("Sorted array: {:?}", arr);
-}
 
 # Go
 Go allows variables with the same name as well;
@@ -75,6 +44,7 @@ func main() {
 Performance:
 https://github.com/smarr/are-we-fast-yet
 
+Document
 auto-conversion:
 convert<type>To<type>
 vs
@@ -100,12 +70,6 @@ combine array length, refcount, array data
 maybe support something line __LINE__ and __FILE__ -- see https://stackoverflow.com/questions/2849832/c-c-line-number
 
 type.name, id, size,... (fields or functions)
-
-function pointers (for callbacks; eg. sort), or
-interfaces (trait), like in Rust
-for interfaces, support instanceof and cast
-
-ord('a') => code('a')?
 
 faster itoa
 
