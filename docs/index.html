@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="styles.css">
         <link rel="stylesheet" href="codemirror/lib/codemirror.css">
         <script type="text/javascript" charset="utf-8" src="teavm/classes.js"></script>
+        <script type="text/javascript" src="examples.js"></script>
         <script>
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' && e.shiftKey) {
@@ -16,214 +17,19 @@
                     }
                 }
             });
-            function example(obj) {
-                var text = '';
-                if (obj.value == 'factorial') {
-                    text = 
-`fun factorial(x int) int
-    if x <= 1
-        return 1
-    return x * factorial(x - 1)
-
-for i:= range(0 20)
-    println(factorial(i))
-`;
-                } else if (obj.value == 'conditionsLoops') {
-                    text = 
-`a := 1
-if a = 0
-    println('zero')
-elif a = 1
-    println('one')
-else
-    println('many')
-    
-# prints 1 to 4
-for i := range(0 10)
-    break i = 5
-    println(i)
-`;
-                } else if (obj.value == 'switch') {
-                    text = 
-`import org.bau.Utils
-
-for i := range(1, 10)
-    switch Utils.random() & 7
-    case 0
-        println('zero')
-    case 1
-        println('one')
-    case 2, 3
-        println('2 or 3')
-    else  
-        println('other') 
-`;
-                } else if (obj.value == 'typesAndConstants') {
-                    text = 
-`PI : 3.1415
-println('Pi: ' PI)
-
-a := 10_000_000
-b := 3
-println('integer a/b: ', a / b)
-println('float   a/b: ', float(a) / b)
-`;
-                } else if (obj.value == 'functionsOnTypes') {
-                    text = 
-`fun int square() int
-    return this * this
-
-println(12.square())
-`;
-                } else if (obj.value == 'types') {
-                    text = 
-`type point
-    x int
-    y int
-
-p := point()
-p.x = 10
-p.y = 20
-println('x=' p.x ' y=' p.y)
-`;
-                } else if (obj.value == 'arrays') {
-                    text = 
-`data : i8[10]
-if data.len
-    i := 0..data.len
-    while
-        data[i]! = i * i
-        next : i + 1
-        break next >= data.len
-        i = next
- for j := until(data.len)
-    println('#' j ' = ' data[j])
-`;
-                } else if (obj.value == 'list') {
-                    text = 
-`import org.bau.List
-    List
-    newList
-
-list := newList(int)
-list.add(100)
-list.add(80)
-println('size: ' list.size)
-println('[0]:  ' list.array[0])
-`;
-                } else if (obj.value == 'enum') {
-                    text = 
-`enum weekday
-    sunday
-    monday
-    tuesday
-    wednesday
-    thursday
-    friday
-    saturday
-
-for a := until(weekday.saturday + 1)
-    switch a
-    case weekday.sunday
-        println('sunday')
-    case weekday.monday
-        println('monday')
-    else
-        println('some other day: #' a)
-`;
-                } else if (obj.value == 'exceptions') {
-                    text = 
-`import org.bau.Exception
-    exception
-
-fun square(x int) int throws exception
-    if x > 3_000_000_000
-        throw exception('Too big')
-    return x * x
-    
-for i := range(2_999_999_999, 3_000_000_002)
-    x := square(i)
-    println(i '^2 = ' x)
-    catch e
-      println(i '^2 = ' e.message)
-`;
-                } else if (obj.value == 'macros') {
-                    text = 
-`fun if(cond int, a T, b T) macro T
-    if cond
-        return a
-    else
-        return b
-
-fun processMessage(a i8[]) i8[]
-    println('process message: ' a)
-    return a
-
-for i := until(2)
-    x : if(i, processMessage('not zero'), processMessage('zero'))
-    println(i ': ' x)
-`;
-                } else if (obj.value == 'sort') {
-                    text = 
-`fun insertionSort(a T[])
-    for i := range(1, a.len)
-        t := a[i]
-        j := i - 1
-        while j >= 0 and a[j] > t
-            a[j + 1] = a[j]
-            j -= 1
-        a[j + 1] = t
-
-import org.bau.Utils
-x : int[10]
-for i := until(x.len)
-    x[i] = Utils.random()
-insertionSort(x)
-for i := until(x.len)
-    println('x[' i '] = ' x[i])
-
-y : float[10]
-for i := until(y.len)
-    y[i] = float(Utils.random()) / 1_000_000_000_000
-insertionSort(y)
-for i := until(y.len)
-    println('y[' i '] = ' y[i])
-`;
-                }
-                var source = document.getElementById("source");
-                source.value = text;
-                var width = (window.innerWidth > 0) ? window.innerWidth : document.documentElement.clientWidth;
-                if (width > 900) {
-                    document.querySelector('.CodeMirror').CodeMirror.setValue(text);
-                }
-            }
+            // Example function is now defined in examples.js
     </script>
     </head>
-    <body onload="main()">
+    <body onload="populateExamples(); main();">
         <div class="top">
-            <h1>Bau Playground</h1>
-            <div style="width: 100%">
-                <p style="display: inline-block;">
-                    Run and transpile your <a href="https://github.com/thomasmueller/bau-lang">
-                    Bau program</a> <a href="https://github.com/thomasmueller/bau-lang/blob/main/doc/playground.md">in the browser</a>.
-                </p>
-                &nbsp;&nbsp;&nbsp;&nbsp;Example:
-                <span style="display: inline-block;">
-                    <select name="example" id="example" onchange="example(this);">
-                        <option value="factorial"          >Factorial             </option>
-                        <option value="conditionsLoops"    >Conditions and Loops  </option>
-                        <option value="switch"             >Switch                </option>
-                        <option value="typesAndConstants"  >Types and Constants   </option>
-                        <option value="functionsOnTypes"   >Functions on Types    </option>
-                        <option value="types"              >Types                 </option>
-                        <option value="arrays"             >Arrays                </option>
-                        <option value="list"               >List                  </option>
-                        <option value="enum"               >Enums                 </option>
-                        <option value="exceptions"         >Exceptions            </option>
-                        <option value="macros"             >Macros                </option>
-                        <option value="sort"               >Sort with Templates   </option>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+                <h1 style="margin: 0;"><a href="https://github.com/thomasmueller/bau-lang" style="text-decoration: none; color: inherit;">Bau Playground</a></h1>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
+                    <select name="example" id="example" onchange="example(this);" style="font-size: 14px;">
+                        <!-- Options will be populated dynamically by examples.js -->
                     </select>
-                </span>
+                </div>
             </div>
             <textarea id="source" cols="80"
             autocorrect="off" autocomplete="off" autocapitalize="off"
@@ -235,10 +41,8 @@ for i := until(y.len)
 for i:= range(0 20)
     println(factorial(i))
 </textarea>
-            <div class="result">&nbsp;</div>
-            <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
             <div class="result">&nbsp;</div>  
-            <div class="result"><b>Output:</b></div>  
+            <div class="result"><b>Output:</b> <span style="float: right;"><a href="https://github.com/thomasmueller/bau-lang/blob/main/doc/playground.md" style="font-weight: normal;">about</a></span></div>  
             <textarea id="cOutput" cols="80" readonly
             style="border-style: none; border-color: transparent;" 
             autocorrect="off" autocomplete="off" autocapitalize="off"
