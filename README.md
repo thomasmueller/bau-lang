@@ -2,20 +2,22 @@
 
 A programming language for everyone.
 
-<a href="https://thomasmueller.github.io/bau-lang/">Playground: Try it out in the browser.</a>
-<a href="https://thomasmueller.github.io/bau-lang/convert-java-to-bau.html">Conversion tool: Java to Bau.</a>
+## Tools
 
-* <a href="doc/performance.md">High performance and efficiency</a>.
-* <a href="doc/conciseSyntax.md">Easy to learn with a concise syntax inspired by Python.</a>
+* <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
+* <a href="https://thomasmueller.github.io/bau-lang/convert-java-to-bau.html">Java to Bau Conversion</a>
+* <a href="doc/transpile.md">Transpiler</a>
+
+## Highlights
+
+* <a href="doc/performance.md">High performance</a>.
+* <a href="doc/conciseSyntax.md">Easy to learn. Concise syntax inspired by Python.</a>
 * Memory-safe. Automatic memory management using reference counting by default.
 * As fast as Rust where needed, using single ownership and borrowing.
 * Low memory usage; no GC pauses.
 * Runs everwhere: transpiles to C. No runtime library needed.
-* Null safety: Null pointer errors are prevented at compile time.
-* Ability to avoid runtime array bound checks using static analysis.
-
-<br>
-<a href="doc/transpile.md">Transpile on the command line.</a>
+* Null safety.
+* Avoid runtime array bound checks using static analysis.
 
 ## Example
 
