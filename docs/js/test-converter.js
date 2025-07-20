@@ -4,18 +4,18 @@
  */
 
 // Import the converter functions
-let convertJavaToBau, convertLine, convertBauType;
+let convertJavaToBau, convertJavaLine, convertBauType;
 
 if (typeof require !== 'undefined') {
     // Node.js environment
     const converter = require('./java-to-bau-converter.js');
     convertJavaToBau = converter.convertJavaToBau;
-    convertLine = converter.convertLine;
+    convertJavaLine = converter.convertJavaLine;
     convertBauType = converter.convertBauType;
 } else if (typeof window !== 'undefined') {
     // Browser environment - functions are globally available
     convertJavaToBau = window.convertJavaToBau;
-    convertLine = window.convertLine;
+    convertJavaLine = window.convertJavaLine;
     convertBauType = window.convertBauType;
 }
 
@@ -158,8 +158,8 @@ function testConvertBauType() {
     });
 }
 
-function testConvertLine() {
-    console.log('\n=== Testing convertLine ===');
+function testConvertJavaLine() {
+    console.log('\n=== Testing convertJavaLine ===');
     const lineTests = [
         ['int x = 10;', 'x := 10'],
         ['final int MAX = 100;', 'MAX: 100'],
@@ -182,7 +182,7 @@ function testConvertLine() {
     ];
     
     lineTests.forEach(([input, expected]) => {
-        const result = convertLine(input);
+                    const result = convertJavaLine(input);
         const status = result === expected ? '✓' : '✗';
         console.log(`${status} Input:    ${input}`);
         console.log(`  Result:   ${result}`);
@@ -196,7 +196,7 @@ function runAllTests() {
     
     // Test individual functions
     testConvertBauType();
-    testConvertLine();
+    testConvertJavaLine();
     
     // Test full conversion
     console.log('\n=== Testing Full Conversion ===');
@@ -231,7 +231,7 @@ if (typeof window !== 'undefined') {
     window.testConverter = {
         runAllTests,
         testConvertBauType,
-        testConvertLine,
+        testConvertJavaLine,
         testCases
     };
 } 

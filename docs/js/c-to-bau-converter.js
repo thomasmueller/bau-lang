@@ -1,12 +1,12 @@
 /**
- * Java to Bau Language Converter
- * Converts Java source code to Bau language syntax
+ * C to Bau Language Converter
+ * Converts C source code to Bau language syntax
  */
 
 // Shared post-processing utility access (no global variables to avoid conflicts)
 
-function convertJavaToBau(javaCode) {
-    const lines = javaCode.split('\n');
+function convertCToBau(cCode) {
+    const lines = cCode.split('\n');
     const result = [];
     let lastLineWasEmpty = false;
     
@@ -27,7 +27,7 @@ function convertJavaToBau(javaCode) {
         const originalIndent = originalLine.match(/^ */)[0];
         
         // Convert line individually
-        line = convertJavaLine(line);
+        line = convertCLine(line);
         
         // Skip if line becomes empty after conversion
         if (line === '') {
@@ -52,13 +52,13 @@ function convertJavaToBau(javaCode) {
             line = line.slice(0, -1).trim();
         }
         
-        // Reduce indentation by 4 spaces
-        const newIndent = originalIndent.length >= 4 ? originalIndent.slice(4) : '';
+        // Preserve original indentation (C doesn't have class wrapper like Java)
+        const newIndent = originalIndent;
         result.push(newIndent + line);
         lastLineWasEmpty = false;
-            }
-        
-        const rawResult = result.join('\n');
+    }
+    
+    const rawResult = result.join('\n');
     
     // Apply shared post-processing to clean up the output
     if (typeof window !== 'undefined' && window.cleanupBauCode) {
@@ -78,29 +78,29 @@ function convertJavaToBau(javaCode) {
     return rawResult;
 }
 
-function convertJavaLine(line) {
-    // Skip class declarations
-    if (line.match(/^public\s+class\s+\w+/)) {
+function convertCLine(line) {
+    // Skip include statements
+    if (line.match(/^#include/)) {
         return '';
     }
     
-    // Convert main method
-    if (line.match(/public\s+static\s+void\s+main/)) {
+    // Convert main function
+    if (line.match(/int\s+main\s*\(\s*\)|int\s+main\s*\(\s*void\s*\)/)) {
         return 'fun main()';
     }
-    
-    // Convert package to module
-    line = line.replace(/\bpackage\s+/g, 'module ');
+    if (line.match(/int\s+main\s*\(\s*int\s+argc\s*,\s*char\s*\*\*argv\s*\)/)) {
+        return 'fun main()';
+    }
     
     // Convert comments (only first occurrence of // to preserve URLs)
     line = line.replace(/\/\//, '#');
     
-    // Remove access modifiers
-    line = line.replace(/\b(public|private|protected|static)\s+/g, '');
+    // Remove common C patterns
+    line = line.replace(/return\s+0\s*;?\s*$/, ''); // Remove return 0
     
-    // Convert System.out.println/print
-    line = line.replace(/System\.out\.println\s*\(/g, 'println(');
-    line = line.replace(/System\.out\.print\s*\(/g, 'print(');
+    // Convert printf/scanf functions
+    line = line.replace(/printf\s*\(/g, 'print(');
+    line = line.replace(/scanf\s*\(/g, 'input(');
     
     // Convert for loops FIRST (before variable declarations)
     // Handle loops starting from 0 with until()
@@ -120,16 +120,14 @@ function convertJavaLine(line) {
     // Convert double quotes to single quotes
     line = line.replace(/"/g, "'");
     
-    // Convert boolean literals (Bau uses int instead of boolean)
+    // Convert boolean-like values
     line = line.replace(/\btrue\b/g, '1');
     line = line.replace(/\bfalse\b/g, '0');
     
-    // Convert method declarations with parameters FIRST (before variable declarations)
-    line = line.replace(/(?:static\s+|final\s+)*(\w+)\s+(\w+)\s*\(([^)]*)\)/g, function(match, returnType, methodName, params) {
-        // Convert return type
+    // Convert function declarations
+    line = line.replace(/(int|float|double|char|void)\s+(\w+)\s*\(([^)]*)\)/g, function(match, returnType, funcName, params) {
         const convertedReturnType = convertBauType(returnType);
         
-        // Convert parameters
         let convertedParams = '';
         if (params.trim()) {
             const paramList = params.split(',').map(param => {
@@ -144,40 +142,43 @@ function convertJavaLine(line) {
             convertedParams = paramList.join(', ');
         }
         
-        // Add return type only if not void
         const returnTypePart = convertedReturnType ? ' ' + convertedReturnType : '';
-        return 'fun ' + methodName + '(' + convertedParams + ')' + returnTypePart;
+        return 'fun ' + funcName + '(' + convertedParams + ')' + returnTypePart;
     });
     
     // Convert variable declarations (after function declarations)
-    // Multi-variable declarations: int w, h, bitNum = 0; -> w, h, bitNum := 0
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $3, $4 := $5');
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $3 := $4');
-    // Multi-variable assignment: w = h = n; -> w = h = n (keep as is)
-    // Multi-variable declarations: double Zr = 0, Zi = 0, Tr = 0, Ti = 0;
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*=\s*([^,;]+)\s*,\s*(\w+)\s*=\s*([^,;]+)\s*,\s*(\w+)\s*=\s*([^,;]+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $4, $6, $8 := $3');
-    // Handle case where all variables have same value
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0);?/g, '$2, $4, $6, $8 := $3');
-    // Array declarations: var perm1 = new int[n]; -> perm1 : int[n]
-    line = line.replace(/\bvar\s+(\w+)\s*=\s*new\s+(\w+)\[([^\]]+)\]\s*;?/g, function(match, varName, javaType, size) {
-        const bauType = convertBauType(javaType);
+    // Multi-variable declarations: int w, h, bit_num = 0; -> w, h, bit_num := 0
+    line = line.replace(/\b(int|float|double|char)\s+(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $3, $4 := $5');
+    line = line.replace(/\b(int|float|double|char)\s+(\w+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $3 := $4');
+    // Multi-variable declarations: int i, iter = 50; -> i, iter := 50
+    line = line.replace(/\b(int|float|double|char)\s+(\w+)\s*,\s*(\w+)\s*=\s*([^;]+);?/g, '$2, $3 := $4');
+    // Multi-variable declarations with multiple types: double Zr, Zi, Cr, Ci, Tr, Ti;
+    line = line.replace(/\b(int|float|double|char)\s+(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*,\s*(\w+)\s*;?/g, '$2, $3, $4, $5, $6, $7 float');
+    // Array declarations: int arr[10]; -> arr : int[10]
+    line = line.replace(/\b(int|float|double|char)\s+(\w+)\[([^\]]+)\]\s*;?/g, function(match, cType, varName, size) {
+        const bauType = convertBauType(cType);
         return varName + ' : ' + bauType + '[' + size + ']';
     });
-    // Handle Java 'var' keyword (type inferred): var x = 10; -> x := 10
-    line = line.replace(/\bvar\s+(\w+)\s*=\s*([^;]+);?/g, '$1 := $2');
+    // Const variables (always constants in C)
+    line = line.replace(/\bconst\s+(int|float|double|char|long|short|unsigned)\s+(\w+)\s*=\s*([^;]+);?/g, '$2: $3');
     
-    // Final variables (constants) - handle both with and without type
-    line = line.replace(/\bfinal\s+\w+\s+(\w+)\s*=\s*([^;]+);?/g, '$1: $2');
+    // Assignment to multiple variables: Zr = Zi = Tr = Ti = 0; -> Zr, Zi, Tr, Ti := 0
+    line = line.replace(/(\w+)\s*=\s*(\w+)\s*=\s*(\w+)\s*=\s*(\w+)\s*=\s*([^;]+);?/g, '$1, $2, $3, $4 := $5');
     
     // Constants (simple literal values only): int x = 50; -> x: 50 (pure literals without operators)
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*=\s*(\d+(?:\.\d+)?|true|false|'[^']*'|"[^"]*")\s*;?\s*$/g, '$2: $3');
+    line = line.replace(/\b(int|float|double|char|long|short|unsigned)\s+(\w+)\s*=\s*(\d+(?:\.\d+)?)\s*;?\s*$/g, '$2: $3');
     
     // Regular variables with initialization (non-literal expressions): int x = getValue(); -> x := getValue()
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*=\s*([^;]+);?/g, '$2 := $3');
+    line = line.replace(/\b(int|float|double|char|long|short|unsigned)\s+(\w+)\s*=\s*([^;]+);?/g, '$2 := $3');
     
     // Variables without initialization: int x; -> x int (keep type when no initial value)
-    line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*;?/g, function(match, javaType, varName) {
-        const bauType = convertBauType(javaType);
+    // Handle multi-word types first: unsigned long, unsigned int, etc.
+    line = line.replace(/\bunsigned\s+(long|int|short|char)\s+(\w+)\s*;?/g, function(match, baseType, varName) {
+        const bauType = convertBauType('unsigned');
+        return varName + ' ' + bauType;
+    });
+    line = line.replace(/\b(int|float|double|char|long|short)\s+(\w+)\s*;?/g, function(match, cType, varName) {
+        const bauType = convertBauType(cType);
         return varName + ' ' + bauType;
     });
     
@@ -187,10 +188,6 @@ function convertJavaLine(line) {
     // Convert if statements - remove parentheses
     line = line.replace(/if\s*\(\s*([^)]+)\s*\)/g, 'if $1');
     line = line.replace(/else\s*if\s*\(\s*([^)]+)\s*\)/g, 'elif $1');
-    
-    // Fix string concatenation - convert to space-separated args
-    line = line.replace(/'([^']*)'\s*\+\s*([^,);]+)/g, "'$1' $2");
-    line = line.replace(/([^,);(]+)\s*\+\s*'([^']*)'/g, "$1 '$2'");
     
     // Convert increment/decrement (handles variables and array access)
     line = line.replace(/(\w+(?:\[[^\]]+\])*)\+\+/g, '$1 += 1');
@@ -202,41 +199,35 @@ function convertJavaLine(line) {
     return line;
 }
 
-function convertBauType(javaType) {
-    switch (javaType) {
-        case 'long':
+function convertBauType(cType) {
+    switch (cType) {
         case 'int':
+        case 'long':
+        case 'short':
+        case 'unsigned':
             return 'int';
-        case 'double':
-            return 'float';
         case 'float':
             return 'f32';
+        case 'double':
+            return 'float';
         case 'char':
             return 'int';
-        case 'byte':
-            return 'i8';
-        case 'boolean':
-            return 'int';
-        case 'String':
-            return 'string';
         case 'void':
             return '';
         default:
-            return javaType; // Keep unknown types as-is
+            return cType;
     }
 }
 
 // Export functions for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    // Node.js environment
     module.exports = {
-        convertJavaToBau,
-        convertJavaLine,
+        convertCToBau,
+        convertCLine,
         convertBauType
     };
 } else if (typeof window !== 'undefined') {
-    // Browser environment - make functions globally available
-    window.convertJavaToBau = convertJavaToBau;
-    window.convertJavaLine = convertJavaLine;
-    window.convertBauType = convertBauType;
+    window.convertCToBau = convertCToBau;
+    window.convertCLine = convertCLine;
+    window.convertCBauType = convertBauType;
 } 

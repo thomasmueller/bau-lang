@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert to Bau</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+            color: black;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: white;
+            color: black;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: black;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            color: black;
+        }
+        
+        .panels {
+            display: flex;
+            height: 70vh;
+        }
+        
+        .panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .panel-header {
+            background-color: white;
+            color: black;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .left-panel .panel-header {
+            background-color: white;
+        }
+        
+        .right-panel .panel-header {
+            background-color: white;
+        }
+        
+        textarea {
+            flex: 1;
+            border: none;
+            padding: 20px;
+            font-family: Monaco, Menlo, 'SF Mono', Consolas, 'Roboto Mono', 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            background-color: white;
+            color: black;
+        }
+        
+        #javaInput {
+            background-color: white;
+        }
+        
+        #bauOutput {
+            background-color: white;
+            cursor: not-allowed;
+        }
+        
+        .divider {
+            width: 0;
+        }
+        
+        .info {
+            padding: 20px;
+            background-color: white;
+            font-size: 14px;
+            color: black;
+        }
+        
+        .info h3 {
+            margin-top: 0;
+            color: black;
+        }
+        
+        .info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .info li {
+            margin: 5px 0;
+        }
+        
+        .rules-toggle {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+        
+        .rules-toggle:hover {
+            color: #666;
+        }
+        
+        .rules-content {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+            max-height: 500px;
+            opacity: 1;
+        }
+        
+        .rules-content.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        @media (max-width: 600px) {
+            .panels {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .panel {
+                min-height: 40vh;
+            }
+            
+            .divider {
+                width: 100%;
+                height: 1px;
+                background-color: black;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            textarea {
+                min-height: 300px;
+                padding: 15px;
+                font-size: 13px;
+            }
+            
+            .info {
+                padding: 15px;
+            }
+        }
+        
+        .panel-header select {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Convert to Bau</h1>
+            <p>Semi-automatically convert code to Bau language syntax (best effort conversion)</p>
+        </div>
+        
+        <div class="panels">
+            <div class="panel left-panel">
+                <div class="panel-header">
+                    <select id="sourceLanguage" onchange="updateLanguageSelection()">
+                        <option value="java">Java</option>
+                        <option value="c">C</option>
+                        <option value="go">Go</option>
+                        <option value="kotlin">Kotlin</option>
+                        <option value="python">Python</option>
+                        <option value="rust">Rust</option>
+                        <option value="swift">Swift</option>
+                    </select>
+                </div>
+                <textarea id="sourceInput" placeholder="Enter your Java code here...">// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+package org.bau.benchmarks;
+
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class Mandelbrot {
+
+    public static void main(String[] args) throws IOException {
+        int w, h, bitNum = 0;
+        int iter = 50;
+        double limit = 2;
+        byte byteAcc = 0;
+        int n = 200;
+        if (args.length > 0)
+            n = Integer.parseInt(args[0]);
+        w = h = n;
+        OutputStream out = new BufferedOutputStream(System.out);
+        out.write(("P4\n" + w + " " + h + "\n").getBytes());
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                double Zr = 0, Zi = 0, Tr = 0, Ti = 0;
+                double Cr = 2.0 * x / w - 1.5;
+                double Ci = 2.0 * y / h - 1;
+                for (int i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
+                    Zi = 2.0 * Zr * Zi + Ci;
+                    Zr = Tr - Ti + Cr;
+                    Tr = Zr * Zr;
+                    Ti = Zi * Zi;
+                }
+                byteAcc <<= 1;
+                if (Tr + Ti <= limit * limit)
+                    byteAcc |= 0x01;
+                bitNum++;
+                if (bitNum == 8) {
+                    out.write(byteAcc);
+                    byteAcc = 0;
+                    bitNum = 0;
+                } else if (x == w - 1) {
+                    byteAcc <<= (8 - (w % 8));
+                    out.write(byteAcc);
+                    byteAcc = 0;
+                    bitNum = 0;
+                }
+            }
+        }
+        out.flush();
+    }
+}</textarea>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <div class="panel right-panel">
+                <div class="panel-header">Bau</div>
+                <textarea id="bauOutput" readonly placeholder="Converted Bau code will appear here..."></textarea>
+            </div>
+        </div>
+        
+        <div class="info">
+            <h3 class="rules-toggle" onclick="toggleRules()">Conversion Rules ▼</h3>
+            <ul id="conversionRules" class="rules-content hidden">
+                <li><strong>Common Rules (All Languages):</strong></li>
+                <li>Remove curly braces {} and use indentation (except Python)</li>
+                <li>Remove parentheses from if, while, for conditions</li>
+                <li>Convert variable declarations to Bau syntax: <code>x := 5</code></li>
+                <li>Convert constants: <code>MAX: 100</code></li>
+                <li>Replace operators: <code>!=</code> → <code>&lt;&gt;</code>, <code>&amp;&amp;</code> → <code>and</code>, <code>||</code> → <code>or</code></li>
+                <li>Convert comments: <code>//</code> → <code>#</code> (first occurrence only)</li>
+                <li>Convert for loops to <code>for i := until(n)</code> or <code>for i := range(a, b)</code></li>
+                <li>Convert boolean literals: <code>true</code>/<code>false</code> → <code>1</code>/<code>0</code></li>
+                <li>Convert double quotes to single quotes</li>
+                <li>Remove import/include statements</li>
+                <li>Reduce indentation by 4 spaces</li>
+                <li><strong>Language-Specific:</strong></li>
+                <li><strong>Java:</strong> Convert <code>System.out.println()</code>, remove access modifiers</li>
+                <li><strong>C:</strong> Convert <code>printf()</code>, remove <code>#include</code> and <code>return 0</code></li>
+                <li><strong>Go:</strong> Convert <code>fmt.Printf()</code>, remove <code>package</code>/<code>import</code></li>
+                <li><strong>Kotlin:</strong> Convert <code>fun</code> declarations, handle <code>val</code>/<code>var</code>, string interpolation</li>
+                <li><strong>Python:</strong> Convert <code>print()</code>, <code>def</code> → <code>fun</code>, preserve indentation</li>
+                <li><strong>Rust:</strong> Convert <code>println!()</code>, <code>fn</code> → <code>fun</code>, remove <code>let</code>/<code>mut</code></li>
+                <li><strong>Swift:</strong> Convert <code>print()</code>, <code>func</code> → <code>fun</code>, handle string interpolation</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/shared-post-processor.js"></script>
+    <script src="js/java-to-bau-converter.js"></script>
+    <script src="js/c-to-bau-converter.js"></script>
+    <script src="js/go-to-bau-converter.js"></script>
+    <script src="js/python-to-bau-converter.js"></script>
+    <script src="js/rust-to-bau-converter.js"></script>
+    <script src="js/swift-to-bau-converter.js"></script>
+    <script src="js/kotlin-to-bau-converter.js"></script>
+    <script>
+        const sourceInput = document.getElementById('sourceInput');
+        const bauOutput = document.getElementById('bauOutput');
+        const sourceLanguageSelect = document.getElementById('sourceLanguage');
+        
+        function updateConversion() {
+            const sourceCode = sourceInput.value;
+            const selectedLanguage = sourceLanguageSelect.value;
+            
+            let bauCode = '';
+            
+            try {
+                switch (selectedLanguage) {
+                    case 'java':
+                        bauCode = convertJavaToBau(sourceCode);
+                        break;
+                    case 'c':
+                        bauCode = convertCToBau(sourceCode);
+                        break;
+                    case 'go':
+                        bauCode = convertGoToBau(sourceCode);
+                        break;
+                    case 'kotlin':
+                        bauCode = convertKotlinToBau(sourceCode);
+                        break;
+                    case 'python':
+                        bauCode = convertPythonToBau(sourceCode);
+                        break;
+                    case 'rust':
+                        bauCode = convertRustToBau(sourceCode);
+                        break;
+                    case 'swift':
+                        bauCode = convertSwiftToBau(sourceCode);
+                        break;
+                    default:
+                        bauCode = `# ${selectedLanguage.toUpperCase()} to Bau conversion not yet implemented`;
+                }
+                bauOutput.value = bauCode;
+            } catch (error) {
+                bauOutput.value = `# Error during conversion: ${error.message}\n# Please check your ${selectedLanguage} code syntax`;
+            }
+        }
+        
+        function updateLanguageSelection() {
+            const selectedLanguage = sourceLanguageSelect.value;
+            const languageName = selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1);
+            
+            // Update placeholder
+            sourceInput.placeholder = `Enter your ${languageName} code here...`;
+            
+            // Update example code based on language
+            updateExampleCode(selectedLanguage);
+            
+            // Update conversion
+            updateConversion();
+        }
+        
+        function updateExampleCode(language) {
+            const examples = {
+                java: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+package org.bau.benchmarks;
+
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
+public class Mandelbrot {
+
+    public static void main(String[] args) throws IOException {
+        int w, h, bitNum = 0;
+        int iter = 50;
+        double limit = 2;
+        byte byteAcc = 0;
+        int n = 200;
+        if (args.length > 0)
+            n = Integer.parseInt(args[0]);
+        w = h = n;
+        OutputStream out = new BufferedOutputStream(System.out);
+        out.write(("P4\\n" + w + " " + h + "\\n").getBytes());
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                double Zr = 0, Zi = 0, Tr = 0, Ti = 0;
+                double Cr = 2.0 * x / w - 1.5;
+                double Ci = 2.0 * y / h - 1;
+                for (int i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
+                    Zi = 2.0 * Zr * Zi + Ci;
+                    Zr = Tr - Ti + Cr;
+                    Tr = Zr * Zr;
+                    Ti = Zi * Zi;
+                }
+                byteAcc <<= 1;
+                if (Tr + Ti <= limit * limit)
+                    byteAcc |= 0x01;
+                bitNum++;
+                if (bitNum == 8) {
+                    out.write(byteAcc);
+                    byteAcc = 0;
+                    bitNum = 0;
+                } else if (x == w - 1) {
+                    byteAcc <<= (8 - (w % 8));
+                    out.write(byteAcc);
+                    byteAcc = 0;
+                    bitNum = 0;
+                }
+            }
+        }
+        out.flush();
+    }
+}`,
+                c: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char **argv) {
+    int w, h, bit_num = 0;
+    int i, iter = 50;
+    char byte_acc = 0;
+    double x, y, limit = 2.0;
+    double Zr, Zi, Cr, Ci, Tr, Ti;
+    int n = 200;
+    if (argc > 1)
+        n = atoi(argv[1]);
+    w = h = n;
+    printf("P4\\n%d %d\\n", w, h);
+    for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x++) {
+            Zr = Zi = Tr = Ti = 0;
+            Cr = 2.0 * x / w - 1.5;
+            Ci = 2.0 * y / h - 1.0;
+            for (i = 0; i < iter && Tr + Ti <= limit * limit; i++) {
+                Zi = 2.0 * Zr * Zi + Ci;
+                Zr = Tr - Ti + Cr;
+                Tr = Zr * Zr;
+                Ti = Zi * Zi;
+            }
+            byte_acc <<= 1;
+            if (Tr + Ti <= limit * limit)
+                byte_acc |= 0x01;
+            bit_num++;
+            if (bit_num == 8) {
+                putc(byte_acc, stdout);
+                byte_acc = 0;
+                bit_num = 0;
+            } else if (x == w - 1) {
+                byte_acc <<= 8 - w % 8;
+                putc(byte_acc, stdout);
+                byte_acc = 0;
+                bit_num = 0;
+            }
+        }
+    }
+}`,
+                go: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+package main
+
+import (
+    "bufio"
+    "flag"
+    "fmt"
+    "os"
+    "strconv"
+)
+
+func main() {
+    flag.Parse()
+    n := 200
+    if flag.NArg() > 0 {
+        n, _ = strconv.Atoi(flag.Arg(0))
+    }
+    out := bufio.NewWriter(os.Stdout)
+    defer out.Flush()
+    w := n
+    h := n
+    bitNum := 0
+    byteAcc := byte(0)
+    iter := 50
+    const z = 0.0
+    const limit = 2.0
+    fmt.Fprintf(out, "P4\\n%d %d\\n", w, h)
+    for y := 0; y < h; y++ {
+        for x := 0; x < w; x++ {
+            Zr, Zi, Tr, Ti := z, z, z, z
+            Cr := 2 * float64(x) / float64(w) - 1.5
+            Ci := 2 * float64(y) / float64(h) - 1
+            for i := 0; i < iter && Tr + Ti <= limit * limit; i++ {
+                Zi = 2 * Zr * Zi + Ci
+                Zr = Tr - Ti + Cr
+                Tr = Zr * Zr
+                Ti = Zi * Zi
+            }
+            byteAcc <<= 1
+            if Tr + Ti <= limit * limit {
+                byteAcc |= 0x01
+            }
+            bitNum++
+            if bitNum == 8 {
+                out.WriteByte(byteAcc)
+                byteAcc = 0
+                bitNum = 0
+            } else if x == w - 1 {
+                byteAcc <<= 8 - w % 8
+                out.WriteByte(byteAcc)
+                byteAcc = 0
+                bitNum = 0
+            }
+        }
+    }
+}`,
+                kotlin: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+package org.bau.benchmarks
+
+import java.io.BufferedOutputStream
+import java.io.OutputStream
+
+fun main(args: Array<String>) {
+    val w: Int
+    val h: Int
+    var bitNum = 0
+    val iter = 50
+    val limit = 2.0
+    var byteAcc: Byte = 0
+    var n = 200
+    if (args.isNotEmpty())
+        n = args[0].toInt()
+    h = n
+    w = h
+    val out: OutputStream = BufferedOutputStream(System.out)
+    out.write("P4\\n\$w \$h\\n".toByteArray())
+    for (y in 0 until h) {
+        for (x in 0 until w) {
+            var Zr = 0.0
+            var Zi = 0.0
+            var Tr = 0.0
+            var Ti = 0.0
+            val Cr = (2.0 * x / w - 1.5)
+            val Ci = (2.0 * y / h - 1.0)
+            var i = 0
+            while (i < iter && Tr + Ti <= limit * limit) {
+                Zi = 2.0 * Zr * Zi + Ci
+                Zr = Tr - Ti + Cr
+                Tr = Zr * Zr
+                Ti = Zi * Zi
+                i++
+            }
+            byteAcc = (byteAcc.toInt() shl 1).toByte()
+            if (Tr + Ti <= limit * limit)
+                byteAcc = (byteAcc.toInt() or 0x01).toByte()
+            bitNum++
+            if (bitNum == 8) {
+                out.write(byteAcc.toInt())
+                byteAcc = 0
+                bitNum = 0
+            } else if (x == w - 1) {
+                byteAcc = (byteAcc.toInt() shl (8 - (w % 8))).toByte()
+                out.write(byteAcc.toInt())
+                byteAcc = 0
+                bitNum = 0
+            }
+        }
+    }
+    out.flush()
+}`,
+                python: `# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+import sys, struct
+
+def main():
+    cout = sys.stdout.buffer.write
+    n = 200
+    if len(sys.argv) > 1:
+        n = int(sys.argv[1])
+    w = h = n
+    Iter = 50
+    Limit = 2.0
+    sys.stdout.buffer.write(f'P4\\n{w} {h}\\n'.encode())
+    for y in range(h):
+        bit_num, byte_acc = 0, 0
+        for x in range(w):
+            Zr = Zi = Tr = Ti = 0.0
+            Cr = 2.0 * x / w - 1.5
+            Ci = 2.0 * y / h - 1.0
+            i = 0
+            while i < Iter and Tr + Ti <= Limit * Limit:
+                Zi = 2.0 * Zr * Zi + Ci
+                Zr = Tr - Ti + Cr
+                Tr = Zr * Zr
+                Ti = Zi * Zi
+                i += 1
+            byte_acc <<= 1
+            if Tr + Ti <= Limit * Limit:
+                byte_acc |= 0x01
+            bit_num += 1
+            if bit_num == 8:
+                sys.stdout.buffer.write(struct.pack('B', byte_acc))
+                bit_num = 0
+                byte_acc = 0
+            elif x == w - 1:
+                byte_acc <<= 8 - (w % 8)
+                sys.stdout.buffer.write(struct.pack('B', byte_acc))
+                bit_num = 0
+                byte_acc = 0
+
+main()`,
+                rust: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+use std::env;
+use std::io::{self, Write};
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let mut n = 200;
+    if args.len() > 1 {
+        n = args[1].parse().unwrap();
+    }
+    let w = n;
+    let h = n;
+    let limit = 2.0;
+    let iter = 50;
+    let mut stdout = io::stdout().lock();
+    writeln!(stdout, "P4\\n{} {}", w, h).unwrap();
+    let mut byte_acc: u8 = 0;
+    let mut bit_num = 0;
+    for y in 0..h {
+        for x in 0..w {
+            let mut zr = 0.0;
+            let mut zi = 0.0;
+            let cr = 2.0 * x as f64 / w as f64 - 1.5;
+            let ci = 2.0 * y as f64 / h as f64 - 1.0;
+            let mut tr = 0.0;
+            let mut ti = 0.0;
+            let mut i = 0;
+            while i < iter && (tr + ti <= limit * limit) {
+                zi = 2.0 * zr * zi + ci;
+                zr = tr - ti + cr;
+                tr = zr * zr;
+                ti = zi * zi;
+                i += 1;
+            }
+            byte_acc <<= 1;
+            if tr + ti <= limit * limit {
+                byte_acc |= 0x01;
+            }
+            bit_num += 1;
+            if bit_num == 8 {
+                stdout.write_all(&[byte_acc]).unwrap();
+                byte_acc = 0;
+                bit_num = 0;
+            } else if x == w - 1 {
+                byte_acc <<= 8 - (w % 8);
+                stdout.write_all(&[byte_acc]).unwrap();
+                byte_acc = 0;
+                bit_num = 0;
+            }
+        }
+    }
+}`,
+                swift: `// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+import Foundation
+
+func mandelbrot(n: Int) {
+    let w = n
+    let h = n
+    let iter = 50
+    let limit = 2.0
+    var bitNum = 0
+    var byteAcc: UInt8 = 0
+    FileHandle.standardOutput.write("P4\\n\\(w) \\(h)\\n".data(using: .ascii)!)
+    for y in 0..<h {
+        for x in 0..<w {
+            var Zr = 0.0, Zi = 0.0, Tr = 0.0, Ti = 0.0
+            let Cr = 2.0 * Double(x) / Double(w) - 1.5
+            let Ci = 2.0 * Double(y) / Double(h) - 1.0
+            var i = 0
+            while i < iter && (Tr + Ti) <= limit * limit {
+                Zi = 2.0 * Zr * Zi + Ci
+                Zr = Tr - Ti + Cr
+                Tr = Zr * Zr
+                Ti = Zi * Zi
+                i += 1
+            }
+            byteAcc <<= 1
+            if Tr + Ti <= limit * limit {
+                byteAcc |= 0x01
+            }
+            bitNum += 1
+            if bitNum == 8 {
+                FileHandle.standardOutput.write(Data([byteAcc]))
+                bitNum = 0
+                byteAcc = 0
+            } else if x == w - 1 {
+                byteAcc <<= 8 - (w % 8)
+                FileHandle.standardOutput.write(Data([byteAcc]))
+                bitNum = 0
+                byteAcc = 0
+            }
+        }
+    }
+    fflush(stdout)
+}
+
+let n = CommandLine.arguments.count > 1 ? Int(CommandLine.arguments[1]) ?? 200 : 200
+mandelbrot(n: n)`
+            };
+            
+            sourceInput.value = examples[language] || '';
+        }
+        
+        // Convert on input
+        sourceInput.addEventListener('input', updateConversion);
+        
+        // Debug function to test converters
+        function debugConverters() {
+            console.log('=== Converter Debug Info ===');
+            console.log('Java "int iter = 50;" →', window.convertJavaToBau ? window.convertJavaToBau('int iter = 50;') : 'NOT FOUND');
+            console.log('C "int n = 200;" →', window.convertCToBau ? window.convertCToBau('int n = 200;') : 'NOT FOUND');
+            console.log('Available functions:', {
+                convertJavaToBau: typeof window.convertJavaToBau,
+                convertCToBau: typeof window.convertCToBau,
+                convertJavaLine: typeof window.convertJavaLine,
+                convertCLine: typeof window.convertCLine,
+                convertGoLine: typeof window.convertGoLine,
+                convertPythonLine: typeof window.convertPythonLine,
+                convertRustLine: typeof window.convertRustLine,
+                convertSwiftLine: typeof window.convertSwiftLine,
+                convertKotlinLine: typeof window.convertKotlinLine
+            });
+        }
+        
+        // Make debug function available globally
+        window.debugConverters = debugConverters;
+        
+        // Initial conversion
+        updateConversion();
+        
+        // Run debug on load
+        setTimeout(debugConverters, 100);
+        
+        // Toggle rules visibility
+        function toggleRules() {
+            const rulesContent = document.getElementById('conversionRules');
+            const toggle = document.querySelector('.rules-toggle');
+            
+            rulesContent.classList.toggle('hidden');
+            
+            if (rulesContent.classList.contains('hidden')) {
+                toggle.textContent = 'Conversion Rules ▶';
+            } else {
+                toggle.textContent = 'Conversion Rules ▼';
+            }
+        }
+    </script>
+</body>
+</html> 

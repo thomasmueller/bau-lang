@@ -29,6 +29,7 @@ public class SyntaxStats {
             "until", "uint", "unwrap", "use",
             "void", "var",
             "while", "write", "Write"};
+    final static boolean EACH_FILE_SEPARATELY = false;
     final static HashSet<String> LANGUAGE_WORDS_MAP = new HashSet<>();
     static {
         for(String k : LANGUAGE_WORDS) {
@@ -145,6 +146,15 @@ public class SyntaxStats {
                 s.special += underscore - underscoreInIdentifier;
                 System.out.printf("%-8s %-20s %s\n", s.language, origFile, s.identifiers);
                 s.identifiers.clear();
+            }
+            if (EACH_FILE_SEPARATELY) {
+                System.out.println("File: " + file);
+                System.out.println("Language Lines Bytes Whitespace Alphanumeric Special Underscore");
+                for (Stats s : stats.values()) {
+                    System.out.printf("%-8s %5d %5d %10d %12d %7d %10d\n", s.language, s.lines, s.rawBytes, s.whitespace,
+                            s.alphaNumeric, s.special, s.underscoreInIdentifier);
+                }
+                stats.clear();
             }
         }
         System.out.println("Language Lines Bytes Whitespace Alphanumeric Special Underscore");

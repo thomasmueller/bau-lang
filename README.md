@@ -5,7 +5,7 @@ A programming language for everyone.
 ## Tools
 
 * <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
-* <a href="https://thomasmueller.github.io/bau-lang/convert-java-to-bau.html">Java to Bau Conversion</a>
+* <a href="https://thomasmueller.github.io/bau-lang/convert-to-bau.html">Convert to Bau</a>
 * <a href="doc/transpile.md">Transpiler</a>
 
 ## Highlights
