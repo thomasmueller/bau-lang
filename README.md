@@ -667,7 +667,7 @@ which is useful for callbacks. Example:
 |----------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
 |Memory Safety         |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
 |Easy to Learn and Use |&check;|&check;|       |       |&check;|&check;|&check;|       |&check;|
-|Concise Syntax        |&check;|&check;|       |       |       |       |&check;|       |&check;|
+|Concise Syntax        |&check;|&check;|       |       |       |       |       |       |       |
 |Vendor Independent    |&check;|&check;|&check;|&check;|       |       |       |&check;|       |
 |Strongly Typed        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Fast Execution        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
@@ -680,6 +680,19 @@ which is useful for callbacks. Example:
 |Null Safety           |&check;|       |       |       |       |&check;|&check;|&check;|&check;|
 |Array Bounds Checks   |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
 |Compile-Time Execution|&check;|       |       |&check;|       |       |       |&check;|&check;|
+|Custom "For" Loops    |&check;|&check;|       |&check;|&check;|&check;|       |&check;|&check;|
+|Function Pointers     |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
+|Indentation-Based     |&check;|&check;|       |       |       |       |       |       |       |
+|Interfaces            |  TODO |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
+|Multiple Threads      |  TODO |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
+|Reflection            |       |&check;|       |       |&check;|&check;|       |       |&check;|
+|Multiple Inheritance  |       |&check;|       |&check;|       |       |       |       |       |
+|High-Order Functions  |       |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
+|Map, Filter           |       |&check;|       |&check;|&check;|&check;|       |&check;|&check;|
+|Tail-call Optimiztion |       |       |       |       |       |       |       |       |       |
+|Coroutines            |       |&check;|       |&check;|       |&check;|&check;|&check;|&check;|
+|Goto                  |       |       |&check;|&check;|       |&check;|&check;|       |       |
+|String Interpolation  |       |&check;|       |       |       |&check;|       |&check;|&check;|
 
 ### Non-Features
 
@@ -698,7 +711,6 @@ which is useful for callbacks. Example:
 * `goto` and labels are not supported.
 * String interpolation is not supported to simplify the language. 
   Instead, use an arrays of strings. As commas are optional, this is short.
-* Dynamic dispatch is not supported.
 
 ### Syntax
 
