@@ -1,33 +1,46 @@
 package org.bau.stdlib.util;
 
-public class Rand {
+public class Rand2 {
 
     private static long globalSeed = (long) (Math.random() * Long.MAX_VALUE);
 
-    private long seed;
+    private long s0, s1, s2, s3;
 
-    public Rand() {
-        seed = globalSeed;
+    public Rand2() {
+        this(globalSeed);
     }
 
-    public Rand(long seed) {
-        this.seed = seed;
+    public Rand2(long seed) {
+        setSeed(seed);
     }
 
-    public void setSeed(long seed) {
-        this.seed = seed;
-    }
-
-    public long getSeed() {
-        return seed;
-    }
-
-    public long nextLong() {
-        seed += 0x9e3779b97f4a7c15L;
-        long z = seed;
+    private static long splitMix(long z) {
         z = (z ^ (z >>> 30)) * 0xbf58476d1ce4e5b9L;
         z = (z ^ (z >>> 27)) * 0x94d049bb133111ebL;
         return z ^ (z >>> 31);
+    }
+
+    public void setSeed(long seed) {
+        s0 = seed;
+        s1 = splitMix(seed + 1);
+        s2 = splitMix(seed + 2);
+        s3 = splitMix(seed + 3);
+    }
+
+    public long getSeed() {
+        return s0;
+    }
+
+    public long nextLong() {
+        long result = s0 + s3;
+        long t = s1 << 17;
+        s2 ^= s0;
+        s3 ^= s1;
+        s1 ^= s2;
+        s0 ^= s3;
+        s2 ^= t;
+        s3 = Long.rotateLeft(s3, 45);
+        return result;
     }
 
     /**

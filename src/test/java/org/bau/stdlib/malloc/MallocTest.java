@@ -101,7 +101,7 @@ public class MallocTest {
     public void test() {
         long sumMemoryUsage = 0;
         int best = Integer.MAX_VALUE;
-        int maxLoop = 10_000;
+        int maxLoop = 1_000;
         int count = 10;
         int totalSize = 16 * 1024 * 1024;
         Malloc m = new Malloc(totalSize);

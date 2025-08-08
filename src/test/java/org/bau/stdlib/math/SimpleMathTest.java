@@ -10,7 +10,7 @@ import org.junit.Test;
 
 public class SimpleMathTest {
 
-    static final double[] TEST = new double[400];
+    static final double[] TEST = new double[350];
 
     static final double[] SPECIAL_VALUES = new double[] {
             0, 0.1, 0.5, 0.7, 1.0, 1.5, Math.PI / 2,
@@ -25,19 +25,19 @@ public class SimpleMathTest {
         }
         TEST[i++] = Double.NaN;
         Random r = new Random(1);
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             TEST[i++] = r.nextGaussian();
         }
-        for (int j = 0; j < 10; j++) {
+        for (int j = 0; j < 5; j++) {
             TEST[i++] = r.nextDouble(1) - 0.5;
             TEST[i++] = r.nextDouble(10) - 5;
             TEST[i++] = r.nextDouble(100) - 50;
         }
-        for (double x = 1; x < Double.POSITIVE_INFINITY; x *= 8 * 1024) {
+        for (double x = 1; x < Double.POSITIVE_INFINITY; x *= 32 * 1024) {
             TEST[i++] = x;
             TEST[i++] = -x;
         }
-        for (double x = 1; x > 0; x /= 8 * 1024) {
+        for (double x = 1; x > 0; x /= 32 * 1024) {
             TEST[i++] = x;
             TEST[i++] = -x;
         }

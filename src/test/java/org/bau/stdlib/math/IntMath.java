@@ -94,4 +94,11 @@ public class IntMath {
         return y;
     }
 
+    public static long nextPowerOf2(long x) {
+        if (x <= 1) {
+            return 1;
+        }
+        return (-1L >>> Long.numberOfLeadingZeros(x - 1)) + 1;
+    }
+
 }

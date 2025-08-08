@@ -116,6 +116,29 @@ public class IntMathTest {
         }
     }
 
+    @Test
+    public void nextPowerOf2Test() {
+        for (int i = -10; i < 10; i++) {
+            long x = i;
+            assertEquals(nextPowerOf2Loop(x), IntMath.nextPowerOf2(x));
+            x = Long.MAX_VALUE + x;
+            assertEquals(nextPowerOf2Loop(x), IntMath.nextPowerOf2(x));
+        }
+        Random r = new Random(0);
+        for (int i = 0; i < 10_000; i++) {
+            long x = r.nextLong();
+            assertEquals(nextPowerOf2Loop(x), IntMath.nextPowerOf2(x));
+        }
+    }
+
+    private static long nextPowerOf2Loop(long x) {
+        long result = 1;
+        while (result > 0 && result < x) {
+            result += result;
+        }
+        return result;
+    }
+
     public static short multiplyHighShortSigned(short x, short y) {
         short xh = (short) (x >> 8);
         short xl = (short) (x & 0xff);

@@ -5,11 +5,55 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-interfaces (trait), like in Rust
-for interfaces, support instanceof and cast
+
+https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
+
+
+
+documentation on how to run the playground by downloading the files and run using a browser.
+
+https://news.ycombinator.com/item?id=44767508
+Efficiently Generating a Number in a Range
+uint32_t bounded_rand(rng_t& rng, uint32_t range) {
+    uint32_t t = (-range) % range;
+    do {
+        uint32_t x = rng();
+        uint64_t m = uint64_t(x) * uint64_t(range);
+        uint32_t l = uint32_t(m);
+    } while (l < t);
+    return m >> 32;
+}
+uint32_t bounded_rand(rng_t& rng, uint32_t range) {
+    uint32_t r = rng();
+    if (r < range) {
+        uint32_t t = (-range) % range;
+        while (r < t)
+            r = rng();
+    }
+    return r % range;
+}
+uint32_t bounded_rand(rng_t& rng, uint32_t range) {
+    uint32_t mask = ~uint32_t(0);
+    --range;
+    mask >>= __builtin_clz(range|1);
+    uint32_t x;
+    do {
+        x = rng() & mask;
+    } while (x > range);
+    return x;
+}
+
+
 
 
 https://benbridle.com/projects/bedrock.html
+Bedrock is a compact and portable 8-bit computer system that runs anywhere.
+
+== Markdown: Pandoc
+
+brew install pandoc
+pandoc conciseSyntax.md -f gfm -t html -s -o conciseSyntax.html --css=github-styles.css
+
 
 == XCC docs / Wasm docs
 wasm

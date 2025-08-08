@@ -1,10 +1,57 @@
 package org.bau.stdlib.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+import java.util.SplittableRandom;
 
 import org.junit.Test;
 
 public class RandTest {
+
+    public static void main(String... args) {
+        for (int test = 0; test < 10; test++) {
+            SplittableRandom r = new SplittableRandom(test);
+            long sum = 0;
+            int count = 100_000_000;
+            long start = System.nanoTime();
+            for (int i = 0; i < count; i++) {
+                sum += r.nextLong();
+            }
+            long time = System.nanoTime() - start;
+            System.out.println(((double) time / count) + " ns/entry sum=" + sum);
+            // Rand
+            // 0.793035 ns/entry sum=8360924715103292710
+            // 1.36748125 ns/entry sum=4356514589549280216
+
+            // Rand2
+            // 1.09636209 ns/entry sum=-6322780007203548443
+            // 3.4024175 ns/entry sum=-6824676324516211852
+
+            // SplittableRandom
+            // 0.81550625 ns/entry sum=8360924715103292710
+            // 1.24596 ns/entry sum=4356514589549280216
+
+            // Random
+            // 16.40278375 ns/entry sum=8773587155106358783
+        }
+    }
+
+    @Test
+    public void minMax() {
+        Rand r = new Rand(1);
+        assertEquals(0, r.nextLong(1));
+        assertEquals(0, r.nextLong(0));
+        assertEquals(0, r.nextLong(-1));
+        for (int smallerThan = 1; smallerThan < 16; smallerThan++) {
+            for (int i = 0; i < 1000; i++) {
+                long result = r.nextLong(smallerThan);
+                assertTrue(result >= 0);
+                assertTrue(result < smallerThan);
+            }
+        }
+    }
 
     @Test
     public void uniform() {
@@ -20,6 +67,8 @@ public class RandTest {
         long max = (long) (Long.MAX_VALUE * 0.75);
         for (int i = 0; i < 1_000_000; i++) {
             long result = r.nextLong(max);
+            assertTrue(result >= 0);
+            assertTrue(result < max);
             groups[(int) ((double) groups.length * result / max)]++;
         }
         for (int n : groups) {
