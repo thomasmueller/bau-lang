@@ -46,6 +46,8 @@ public class Program {
     // global variables (or constants) in modules
     LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
 
+    TreeMap<String, Trait> traits = new TreeMap<>();
+
     TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
 
     TreeSet<String> includes = new TreeSet<>();

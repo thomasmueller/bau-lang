@@ -183,6 +183,9 @@ public class Parser {
             } else if (parseTypeDefinition(module)) {
                 mainStatements = true;
                 // ok
+            } else if (parseTraitDefinition(module)) {
+                mainStatements = true;
+                // ok
             } else if (parseImport()) {
                 mainStatements = true;
                 // ok
@@ -268,6 +271,41 @@ public class Parser {
                 throw syntaxError("Error parsing module: " + e.getMessage(), e);
             }
         }
+        return true;
+    }
+
+    private boolean parseTraitDefinition(String targetModule) {
+        if (!match("trait")) {
+            return false;
+        }
+        int stackPos = functionContext.getStackPos();
+        int defIndent = indent;
+        String comment = lastComment;
+        String name = readIdentifier();
+        if (functionContext.getType(targetModule, name) != null) {
+            throw syntaxError("Type '" + name + "' was already defined");
+        }
+        readEndOfStatement();
+        functionContext.rewindStack(stackPos);
+        MemoryType memoryType = MemoryType.REF_COUNT;
+        DataType type = DataType.newRegularType(targetModule, name, 0, memoryType);
+        program.addComment("trait " + type.toString(), comment);
+        lastComment = null;
+        ArrayList<FunctionDefinition> functions = new ArrayList<>();
+        while (indent > defIndent) {
+            if (!matchOp("\n")) {
+                FunctionDefinition def = new FunctionDefinition(getLine(lastPos));
+                def.name = readIdentifier();
+                def.callType = type;
+                matchOp("(");
+                boolean template = parseFunctionDeclaration(targetModule, def);
+                if (template) {
+                    throw syntaxError("Template are not supported in traits");
+                }
+                functions.add(def);
+            }
+        }
+        functionContext.rewindStack(stackPos);
         return true;
     }
 
@@ -534,9 +572,102 @@ public class Parser {
             def.parameters.add(var);
             functionContext.addVariable(var);
         }
+        boolean template = parseFunctionDeclaration(targetModule, def);
+        FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
+        if (scanPhase && !def.macro) {
+            if (old != null) {
+                throw syntaxError("Function '" + def.name + "' already exists");
+            }
+            if (template) {
+                parseFunctionTemplate(defIndent, def);
+                functionContext.rewindStack(stackPos);
+                currentFunctionDefinition = null;
+                return true;
+            }
+            int startCode = lastPos;
+            String s = parseBlock(defIndent);
+            String header = text.substring(startParse, startCode).trim() + "\n";
+            if (comment != null) {
+                header = "##\n" + comment + "\n##\n" + header;
+            }
+            def.header = header;
+            def.code = s;
+            def.comment = comment;
+            program.addFunction(def);
+            functionContext.rewindStack(stackPos);
+            currentFunctionDefinition = null;
+            return true;
+        }
+        if (old != null) {
+            if (old.list.isEmpty()) {
+                program.removeFunction(old);
+                // this ensures it is not called
+                old.list = null;
+            } else {
+                throw syntaxError("Function '" + def.name + "' already has an implementation");
+            }
+        }
+        program.addComment(def.toString(), comment);
+        program.addFunction(def);
+        addBlockCondition(null);
+        while (true) {
+            if (indent <= defIndent) {
+                break;
+            }
+            parseStatements(def.list);
+        }
+        if (def.exceptionType != null && def.returnType == null) {
+            def.list.add(new Return(null));
+        }
+        List<Statement> autoClose = autoClose(stackPosFunction, null);
+        List<Statement> ownedParameters = new ArrayList<>();
+        autoClose.addAll(ownedParameters);
+        // we don't need to increment + decrement the function arguments,
+        // if the function doesn't return this type
+        for (int i = 0; i < autoClose.size(); i++) {
+            Statement s = autoClose.get(i);
+            if (s instanceof Free) {
+                Free free = (Free) s;
+                if (free.var.type() == def.returnType) {
+                    continue;
+                }
+                for (int j = 0; j < def.parameters.size(); j++) {
+                    if (def.varArgs && j == def.parameters.size() - 1) {
+                        // var arg array needs to be freed
+                        continue;
+                    }
+                    if (def.parameters.get(j) == free.var) {
+                        if (free.var.reassignCount == 0) {
+                            free.var.skipIncrementDecrementRefCount = true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        def.autoClose(autoClose);
+        functionContext.rewindStack(stackPos);
+        currentLoop = null;
+        undoLastBlockCondition();
+        if (!blockConditions.isEmpty()) {
+            throw new IllegalStateException();
+        }
+        if (currentFunctionDefinition.returnType != null) {
+            if (!Program.doesReturn(currentFunctionDefinition.list)) {
+                throw syntaxError("Function does not return or throw");
+            }
+        }
+        currentFunctionDefinition = null;
+        if (def.macro) {
+            Templates.checkMacroFunction(def);
+            program.addFunctionTemplate(null, module, def.name, def);
+        }
+        return true;
+    }
+
+    private boolean parseFunctionDeclaration(String targetModule, FunctionDefinition def) {
         boolean varArgs = false;
         boolean template = false;
-        List<Statement> ownedParameters = new ArrayList<>();
         if (!matchOp(")")) {
             while (true) {
                 String name = readIdentifier();
@@ -634,95 +765,7 @@ public class Parser {
             }
             readEndOfStatement();
         }
-        FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
-        if (scanPhase && !def.macro) {
-            if (old != null) {
-                throw syntaxError("Function '" + def.name + "' already exists");
-            }
-            if (template) {
-                parseFunctionTemplate(defIndent, def);
-                functionContext.rewindStack(stackPos);
-                currentFunctionDefinition = null;
-                return true;
-            }
-            int startCode = lastPos;
-            String s = parseBlock(defIndent);
-            String header = text.substring(startParse, startCode).trim() + "\n";
-            if (comment != null) {
-                header = "##\n" + comment + "\n##\n" + header;
-            }
-            def.header = header;
-            def.code = s;
-            def.comment = comment;
-            program.addFunction(def);
-            functionContext.rewindStack(stackPos);
-            currentFunctionDefinition = null;
-            return true;
-        }
-        if (old != null) {
-            if (old.list.isEmpty()) {
-                program.removeFunction(old);
-                // this ensures it is not called
-                old.list = null;
-            } else {
-                throw syntaxError("Function '" + def.name + "' already has an implementation");
-            }
-        }
-        program.addComment(def.toString(), comment);
-        program.addFunction(def);
-        addBlockCondition(null);
-        while (true) {
-            if (indent <= defIndent) {
-                break;
-            }
-            parseStatements(def.list);
-        }
-        if (def.exceptionType != null && def.returnType == null) {
-            def.list.add(new Return(null));
-        }
-        List<Statement> autoClose = autoClose(stackPosFunction, null);
-        autoClose.addAll(ownedParameters);
-        // we don't need to increment + decrement the function arguments,
-        // if the function doesn't return this type
-        for (int i = 0; i < autoClose.size(); i++) {
-            Statement s = autoClose.get(i);
-            if (s instanceof Free) {
-                Free free = (Free) s;
-                if (free.var.type() == def.returnType) {
-                    continue;
-                }
-                for (int j = 0; j < def.parameters.size(); j++) {
-                    if (def.varArgs && j == def.parameters.size() - 1) {
-                        // var arg array needs to be freed
-                        continue;
-                    }
-                    if (def.parameters.get(j) == free.var) {
-                        if (free.var.reassignCount == 0) {
-                            free.var.skipIncrementDecrementRefCount = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        def.autoClose(autoClose);
-        functionContext.rewindStack(stackPos);
-        currentLoop = null;
-        undoLastBlockCondition();
-        if (!blockConditions.isEmpty()) {
-            throw new IllegalStateException();
-        }
-        if (currentFunctionDefinition.returnType != null) {
-            if (!Program.doesReturn(currentFunctionDefinition.list)) {
-                throw syntaxError("Function does not return or throw");
-            }
-        }
-        currentFunctionDefinition = null;
-        if (def.macro) {
-            Templates.checkMacroFunction(def);
-            program.addFunctionTemplate(null, module, def.name, def);
-        }
-        return true;
+        return template;
     }
 
     private void parseTypeFunctionTemplate(int defIndent, DataType t) {
