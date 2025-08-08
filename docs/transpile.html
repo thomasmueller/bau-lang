@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>transpile</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="transpile">Transpile</h1>
+<p>Download and build the latest version:</p>
+<pre><code>git clone git@github.com:thomasmueller/bau-lang.git
+cd bau-lang</code></pre>
+<p>Using Maven:</p>
+<pre><code>mvn -DskipTests clean install</code></pre>
+<p>Alternatively, using the Make:</p>
+<pre><code>make jar</code></pre>
+<p>Create a <code>demo.bau</code> file, transpile it, compile, and
+run:</p>
+<pre><code>echo &quot;println(&#39;Hello World&#39;)&quot; &gt; hello.bau
+java -jar target/*.jar hello.bau
+gcc -O3 hello.c -o hello
+./hello</code></pre>
+<h2 id="c-compiler-and-toolchain">C Compiler and Toolchain</h2>
+<p>The generated source code is relatively simple and readable C code.
+The following features are needed:</p>
+<ul>
+<li><code>goto</code> is used for <code>continue</code> and exception
+handling</li>
+<li><code>varargs</code> are used for functions with a variable number
+of arguments.</li>
+<li>Functions that may throw an exception return a struct.</li>
+<li>The standard library is used by default.</li>
+</ul>
+<p>The regular C tools may be used. As an exception, to analyze
+performance on Mac OS, use the following command:</p>
+<pre><code>xctrace record --template &#39;Time Profiler&#39; --launch a.out</code></pre>
+</body>
+</html>

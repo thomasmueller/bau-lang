@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>playground-about</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="playground">Playground</h1>
+<p>The
+<a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
+allows to transpile and run Bau programs in the browser.</p>
+<h2 id="run-locally">Run Locally</h2>
+<p>To run the playground locally, clone the git repository, and then
+open docs/playground.html with a browser. The browser needs to support
+Javascript and WASM. There is no need to install any other software.</p>
+<h2 id="technical-implementation-details">Technical Implementation
+Details</h2>
+<p>The playground is a static web app. All processing (transpilation,
+compilation, running the generated program) is done in the browser. The
+playground can be downloaded and used offline. It consists of:</p>
+<ul>
+<li>Source code editor:
+<a href="https://codemirror.net/">CodeMirror</a>, implemented in
+JavaScript. For mobile clients, a HTML "textarea" is used.</li>
+<li>Transpiler: <a href="https://teavm.org/">TeaVM</a>, ahead-of-time
+compiler for Java bytecode. JavaScript is used.</li>
+<li>C compiler and runtime:
+<a href="https://github.com/tyfkda/xcc">XCC</a>, a very small C
+compiler. WASM is used here.</li>
+</ul>
+</body>
+</html>

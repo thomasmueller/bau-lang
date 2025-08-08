@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>features</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="features">Features</h1>
+<h2 id="feature-comparison">Feature Comparison</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Bau</th>
+<th>Python</th>
+<th>C</th>
+<th>C++</th>
+<th>Java</th>
+<th>C#</th>
+<th>Go</th>
+<th>Rust</th>
+<th>Swift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory Safety</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Easy to Learn and Use</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Concise Syntax</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Vendor Independent</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Strongly Typed</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Fast Execution</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>No GC Pauses</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Low Memory Usage</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Runs Everywhere</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td></td>
+</tr>
+<tr>
+<td>Generics / Templates</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Macros</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Exception Support</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Null Safety</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Array Bounds Checks</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Compile-Time Execution</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Custom "For" Loops</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Function Pointers</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Indentation-Based</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Interfaces</td>
+<td>TODO</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Multiple Threads</td>
+<td>TODO</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Reflection</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>High-Order Functions</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Map, Filter</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Coroutines</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>String Interpolation</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Goto</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Multiple Inheritance</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Tail-Call Optimization</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="non-features">Non-Features</h2>
+<ul>
+<li>Many concepts of object-oriented programming languages are not
+supported, for example inheritance, method overloading, polymorphism,
+and more complex encapsulation.</li>
+<li>Many concepts of functional programming languages are not supported,
+for example high-order functions, functional composition, closures.</li>
+<li><code>map</code>, <code>filter</code>, etc are not supported. One
+problem here is exception handling.</li>
+<li>Reflection is not supported.</li>
+<li>Tail calls are only optimized by the C compiler.</li>
+<li>Multi-threading support is limited to what C supports.</li>
+<li>Coroutines are not supported; however, custom <code>for</code> loops
+are supported that work like macros.</li>
+<li><code>goto</code> and labels are not supported.</li>
+<li>String interpolation is not supported to simplify the language.
+Instead, use an arrays of strings. As commas are optional, this is
+short.</li>
+</ul>
+<h3 id="syntax">Syntax</h3>
+<ul>
+<li>Spaces (indentation) is used to group statements. This reduces the
+number of lines. Tabs are not supported. The reason is that spaces are
+more common, and tabs do not mix well with spaces. By disallowing tabs,
+problems are detected early.</li>
+<li>Commas in parameter lists are optional, if parameters are simple
+values. The same as in shell scripts or Lisp. This also makes 'print'
+statements more readable (without string interpolation).</li>
+<li>There is no <code>boolean</code> data type to simplify the syntax.
+Instead, <code>true</code> is <code>1</code> and <code>false</code> is
+<code>0</code>. The common pitfalls, e.g. comparing the result of a
+comparison, requires parenthesis (eg. <code>a &gt; b &lt; c</code> is
+not allowed).</li>
+<li>Constants and variables are defined in a different way
+(<code>:</code> vs <code>:=</code>) so that it's easier to see for a
+reader if it may change later. But there is no keyword like "var",
+"val", "const", or "final" to shorten the code.</li>
+<li>Definition of a variables is distinct from updating it
+(<code>:=</code> vs <code>=</code>) to quickly detect if a variable was
+already defined, and to detect typos.</li>
+<li><code>break</code> and <code>continue</code> can have a condition,
+to avoid a separate line with <code>if</code>.</li>
+<li>Labels for <code>break</code> and <code>continue</code> are not
+supported to simplify the language. If needed, the function can return
+from inside the loop, or throw an exception (such exceptions are very
+fast).</li>
+<li>Comments are only a single character (<code>#</code>) to save some
+typing. Block comments (<code>##</code>) are useful if the editor
+doesn't support commenting a block. To support eg. Markdown inside of
+block comments, the delimiters can be variable length.</li>
+<li>Raw strings are useful, to avoid escaping problems: <a
+href="https://xkcd.com/1638/">https://xkcd.com/1638/</a></li>
+<li>Multi-line strings are always raw strings, as escape sequences don't
+seem useful for this (tabs are supported here).</li>
+<li>Dangling <code>,</code> are supported to e.g. simplify re-ordering
+entries.</li>
+<li>Bit operations <code>|</code>, <code>&amp;</code>, <code>^</code>,
+<code>~</code> have a higher order of precedence than comparison. This
+is different from other programming languages. It seems the reason why
+it is different in other languages is historical reasons only.</li>
+<li>Instead of <code>&amp;&amp;</code> <code>||</code> <code>!</code> we
+use the keywords <code>and</code>, <code>or</code> and <code>not</code>,
+to make these common cases easier to understand for new developers, and
+in case of <code>not</code> to make it easier to read.</li>
+<li>There are no separate unsigned data types, to simplify the
+language.</li>
+<li>Bitwise shift to the right (<code>&gt;&gt;</code>) is a logical
+shift, that means for negative values, a number of zeros are added to
+the left. The arithmetic shift is not supported by the language itself,
+but can be supported by a library function (same as eg. rotation). The
+reason is that logical shifts are more common.</li>
+<li>A main method is not needed. However, if there is no main method,
+then the variables before the first function (if any) are global
+variables, and those after a function are local variables.</li>
+</ul>
+<h2 id="safety">Safety</h2>
+<ul>
+<li>There is no way to write unsafe code, except by calling C
+methods.</li>
+<li>Array bounds are check, except if array access is guaranteed to be
+inside the bounds. This is implemented using dependent types.</li>
+</ul>
+<h2 id="memory-management">Memory Management</h2>
+<ul>
+<li>Reference counting is used for reference types.</li>
+<li>Mark-and-sweep garbage collection is not used to avoid pauses.</li>
+<li>Borrow checking is not used to simplify writing code.</li>
+<li>The plan is to use reference counting only where cycles are not
+possible.</li>
+<li>The plan is to support weak references.</li>
+<li>The plan is to support unique pointers, and arrays of pre-allocated
+objects accessed via handlers and a generation</li>
+</ul>
+<h2 id="exceptions-and-panic">Exceptions and Panic</h2>
+<ul>
+<li>Exceptions need to be handled using <code>catch</code>, or
+re-thrown.</li>
+<li>There is no <code>try</code> keyword: <code>catch</code> will catch
+all exceptions in the same scope. This is to simplify the code, and
+reduce the need of indentation. Ruby supports a similar syntax:
+<code>begin</code> is not needed.</li>
+<li>Custom exception types are allowed, with some restrictions:
+Exception types need to have an integer field <code>exceptionType</code>
+that may not have a negative value (because internally, this field is
+used to to flag whether the method was successful or not, and a negative
+value is used to indicate success).</li>
+<li>Possible null references need to be handled. There is no way that
+null references can throw an exception or panic.</li>
+<li>Integer division (<code>/</code>) by zero, the same as floating
+point division by zero, doesn't throw an exception. Instead, it returns
+the highest / lowest value (if dividing positive or negative numbers),
+or zero (for zero by zero). This is to be more consistent with the
+floating point division, and to avoid panic for cases were it was used
+for "unimportant" operations such as calculating the number of
+instructions per second, for zero seconds. Modulo by zero always returns
+zero.</li>
+<li>Where array bound checks are needed, and the index is out of bounds,
+the program panics.</li>
+<li>If a type has a <code>close()</code> function, it is called when the
+memory is freed. If this function re-adds a reference to the object,
+then the program panics.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>conciseSyntax</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="concise-syntax">Concise Syntax</h1>
+<p>Bau attempts to be easy to learn, with clear, simple, and concise
+syntax. It is inspired by Python, a language widely regarded for its
+readability and simplicity. The following diagram compares the
+surface-level conciseness of the programming languages, using the source
+code of the benchmark implementations.</p>
+<img src="syntaxMetrics.png">
+
+<p>(Comparison to Python; lower means more concise)</p>
+<p>We compare the number of lines, bytes, whitespace characters,
+alphanumeric characters, and special character against Python. Python is
+considered both concise and highly readable, and, arguably, this
+reputation is one of the reasons for its popularity.</p>
+<p>For all languages, the same algorithms, variable names, and
+indentation rules (4 space characters) are used. The <code>_</code>
+character (underscore / underline) is excluded from the comparison,
+because some languages use camelCase and some use snake_case, and also
+because some (but not all) languages support <code>_</code> to make
+large number more readable. There is no trailing whitespace in the
+examples, and the comments are exactly the same. The comparison is not
+perfect, but shows a clear trend: Bau is very similar to Python (and
+even more concise in some aspects), and the other languages are about
+20% to 40% more verbose.</p>
+<p>Conciseness and simplicity are important for multiple reasons: when
+writing programs, but it is even more important when reading the source
+code.</p>
+</body>
+</html>

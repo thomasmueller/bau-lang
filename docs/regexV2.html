@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>regexV2</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h2 id="regular-expression-version-2">Regular Expression Version 2</h2>
+<h3 id="problems">Problems</h3>
+<p>Regular expressions are powerful, flexible, and concise - but they
+are notoriously difficult to read and write correctly due to complex
+escaping rules.</p>
+<p>Many characters have special meanings in regular expressions and must
+be escaped to be matched literally: <code>\</code> <code>{</code>
+<code>}</code> <code>(</code> <code>)</code> <code>[</code>
+<code>]</code> <code>|</code> <code>*</code> <code>+</code>
+<code>?</code> <code>^</code> <code>$</code> <code>.</code>. Inside
+square brackets <code>[...]</code> the escaping rules differ: only the
+backslash <code>\</code> always requires escaping, while characters like
+: <code>[</code> <code>]</code> <code>^</code> <code>:</code> and
+<code>-</code> only sometimes need escaping, depending on their
+position.</p>
+<p>These inconsistencies make the rules hard to memorize. It is easy to
+make mistakes.</p>
+<p>The problem becomes even worse when regular expressions are embedded
+in host languages like Java or C. In these cases, double escaping is
+often required, making the expressions even harder to read and
+maintain.</p>
+<p>For example, the regular expression to match a decimal number -
+<code>^\d*\.\d+$</code> - must be written in Java as:
+<code>s.matches("\\d*\\.\\d");</code>. Searching for "not a backslash"
+is <code>"[^\\\\]"</code>.</p>
+<h3 id="regular-expression-version-2-syntax">Regular Expression Version
+2 Syntax</h3>
+<p>Escaping can almost completely be eliminated using a sligtly
+different syntax. In short, literals are quoted as in SQL, and escaping
+backslash are removed. This also allows using spaces to improve
+readability.</p>
+<table>
+<thead>
+<tr>
+<th>RegEx V2</th>
+<th>Matches</th>
+<th>RegEx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>'text'</code></td>
+<td>Exactly <code>text</code></td>
+<td><code>text</code></td>
+</tr>
+<tr>
+<td><code>'x''y'</code></td>
+<td>Exactly <code>x'y</code></td>
+<td><code>x'y</code></td>
+</tr>
+<tr>
+<td><code>['ab']</code></td>
+<td>Character <code>a</code> or <code>b</code></td>
+<td><code>[ab]</code></td>
+</tr>
+<tr>
+<td><code>['0-9_']</code></td>
+<td>Digit, or <code>_</code></td>
+<td><code>[0-9_]</code></td>
+</tr>
+<tr>
+<td><code>['0-9a-f']</code></td>
+<td>Hex digit</td>
+<td><code>[0-9a-f]</code></td>
+</tr>
+<tr>
+<td><code>[^'a']</code></td>
+<td>Not the character <code>a</code></td>
+<td><code>[^a]</code></td>
+</tr>
+<tr>
+<td><code>('19'|'20')</code></td>
+<td>One or the other</td>
+<td><code>(19|20)</code></td>
+</tr>
+<tr>
+<td><code>d</code></td>
+<td>A digit (<code>0</code>-<code>9</code>)</td>
+<td><code>\d</code></td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td>A word boundary</td>
+<td><code>\b</code></td>
+</tr>
+<tr>
+<td><code>s</code></td>
+<td>A whitespace character</td>
+<td><code>\s</code></td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>Tab character</td>
+<td><code>\t</code></td>
+</tr>
+<tr>
+<td><code>n</code></td>
+<td>Newline</td>
+<td><code>\n</code></td>
+</tr>
+<tr>
+<td><code>w</code></td>
+<td>Word character</td>
+<td><code>\w</code></td>
+</tr>
+<tr>
+<td><code>^</code></td>
+<td>Beginning of the text</td>
+<td><code>^</code></td>
+</tr>
+<tr>
+<td><code>$</code></td>
+<td>End of text</td>
+<td><code>$</code></td>
+</tr>
+<tr>
+<td><code>.</code></td>
+<td>Any character</td>
+<td><code>.</code></td>
+</tr>
+<tr>
+<td><code>d?</code></td>
+<td>Zero or one digit</td>
+<td><code>\d?</code></td>
+</tr>
+<tr>
+<td><code>d+</code></td>
+<td>One or more digits</td>
+<td><code>\d+</code></td>
+</tr>
+<tr>
+<td><code>d*</code></td>
+<td>Any number of digits</td>
+<td><code>\d*</code></td>
+</tr>
+<tr>
+<td><code>d{4}</code></td>
+<td>Exactly 4 digits</td>
+<td><code>\d{4}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Examples:</p>
+<table>
+<thead>
+<tr>
+<th>RegEx V2</th>
+<th>Matches</th>
+<th>RegEx</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>^d*('.'d+)?$</code></td>
+<td>Decimal number</td>
+<td><code>^\d*(\.\d+)?$</code></td>
+</tr>
+<tr>
+<td><code>^['-+']?d+$</code></td>
+<td>Positive or negative number</td>
+<td><code>^[-+]?\d+$</code></td>
+</tr>
+<tr>
+<td><code>^dddd'-'dd'-'dd$</code></td>
+<td>Date</td>
+<td><code>^\d{4}-\d{2}-\d{2}$</code></td>
+</tr>
+<tr>
+<td><code>^dddd'-'dd'-'dd'T'dd':'dd':'dd$</code></td>
+<td>Timestamp</td>
+<td><code>^\d{4}-\d{2}-\d{2}T$\d{2}:\d{2}:\d{2}$</code></td>
+</tr>
+<tr>
+<td><code>^[' 't]+|[' 't]+$</code></td>
+<td>Whitespace at the beginning or end</td>
+<td><code>^[ \t]+|[ \t]+$</code></td>
+</tr>
+<tr>
+<td><code>[^x00-x7f]</code></td>
+<td>Find non-ASCII characters</td>
+<td><code>[^\x00-\x7F]</code></td>
+</tr>
+<tr>
+<td><code>b'variable'b</code></td>
+<td>Find a variable</td>
+<td><code>\bvariable\b</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="comparison">Comparison</h2>
+<p>In most cases, the version 2 syntax is only slightly longer than the
+original. There are many cases where version 2 is shorter, for example
+to match decimal numbers and timestamps (see above). In some cases,
+version 2 is shoter; in many cases it is a bit longer, but arguably
+easier to read. This is specially the case when the expression is
+embedded in a host language such as Java, where backslashes need to be
+escaped. As an example:</p>
+<pre><code>timestampV1 = &quot;^\\d{4}-\\d{2}-\\d{2}T$\\d{2}:\\d{2}:\\d{2}$&quot;;
+timestampV2 = &quot;^dddd&#39;-&#39;dd&#39;-&#39;dd&#39;T&#39;dd&#39;:&#39;dd&#39;:&#39;dd$&quot;;</code></pre>
+<p>Version 2 allows to use spaces for grouping, to make the expression
+better readble. Existing regular expression syntax do not have this
+ability:</p>
+<pre><code>timestampV2 = &quot;^ dddd&#39;-&#39;dd&#39;-&#39;dd &#39;T&#39; dd&#39;:&#39;dd&#39;:&#39;dd $&quot;;</code></pre>
+<h2 id="related-work">Related Work</h2>
+<p>Many regular expression implementations already support a way to
+quote a literal, by enclosing the literal between <code>\Q</code> and
+<code>\E</code>. This mechanism increases the length of the expression.
+Also, there is a special rule on how to escape <code>\E</code> inside
+such a block: it needs to be written as <code>\E\\E\Q</code>.</p>
+<h2 id="migration">Migration</h2>
+<p>Switching to the version 2 syntax is very easy, because the operators
+and abbreviations are the same as in the existing syntax: only quotes
+have to be added, and backslashes have to be removed. People that are
+familar with the exsting syntax will have no problem with the
+change.</p>
+<p>If existing regular expression libraries want to support both the old
+as well as the new version 2 syntax, the prefix <code>(?2)</code> can be
+used. This is compatible with the existing flag syntax; eg.
+<code>(?i)</code> enabled the case insensitive mode in many
+implementations.</p>
+</body>
+</html>

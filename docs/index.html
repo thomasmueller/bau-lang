@@ -25,7 +25,6 @@
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 20px;">
                 <h1 style="margin: 0;"><a href="https://github.com/thomasmueller/bau-lang" style="text-decoration: none; color: inherit;">Bau Playground</a></h1>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
                     <select name="example" id="example" onchange="example(this);" style="font-size: 14px;">
                         <!-- Options will be populated dynamically by examples.js -->
                     </select>
@@ -41,8 +40,9 @@
 for i:= range(0 20)
     println(factorial(i))
 </textarea>
+            <button id="run" tabindex="2">Run &nbsp;&nbsp; &#x21e7; &#x23ce;</button>
             <div class="result">&nbsp;</div>  
-            <div class="result"><b>Output:</b> <span style="float: right;"><a href="https://github.com/thomasmueller/bau-lang/blob/main/doc/playground.md" style="font-weight: normal;">about</a></span></div>  
+            <div class="result"><b>Output:</b> <span style="float: right;"><a href="playground-about.html" style="font-weight: normal;">about</a></span></div>  
             <textarea id="cOutput" cols="80" readonly
             style="border-style: none; border-color: transparent;" 
             autocorrect="off" autocomplete="off" autocapitalize="off"

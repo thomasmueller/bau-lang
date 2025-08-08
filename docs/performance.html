@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>performance</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="performance-and-efficiency">Performance and Efficiency</h1>
+<p>Performance and efficiency have multiple aspects: ease of learning
+and usage (developer productivity), compilation speed, startup time,
+runtime performance, and memory usage.</p>
+<p>This language transpiles to C, which has a highly optimized
+toolchain, and is available for embedded systems, desktops, and servers.
+Startup time is significantly faster than that of virtual machine-based
+languages like Java or C#, as there is no VM or runtime to initialize.
+Runtime performance: this language aims to be in the same category as
+high-performance languages such as C, Rust, Go, Java, and Swift. To
+ensure low memory usage and to avoid GC pauses, it does not use tracing
+garbage collection.</p>
+<p>Memory safety results in runtime overhead from reference counting and
+array bounds checking. However, for performance-critical sections, this
+overhead can be mitigated: The language supports ownership semantics for
+references, and range-restricted index variables, so that the compiler
+can eliminate these checks where applicable. The complexity of these
+features is however not needed in the majority of the cases, which
+results in simple code and high productivity.</p>
+<h2 id="benchmarks">Benchmarks</h2>
+<img src="performance.png">
+
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>Bau</th>
+<th>C</th>
+<th>Go</th>
+<th>Java</th>
+<th>PyPy</th>
+<th>Rust</th>
+<th>Swift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binary Trees</td>
+<td>5.1</td>
+<td>5.1</td>
+<td>11.0</td>
+<td>3.4</td>
+<td>8.5</td>
+<td>5.9</td>
+<td>12.0</td>
+</tr>
+<tr>
+<td>Fannkuch</td>
+<td>2.1</td>
+<td>2.2</td>
+<td>2.2</td>
+<td>2.1</td>
+<td>5.2</td>
+<td>2.0</td>
+<td>2.3</td>
+</tr>
+<tr>
+<td>SpeedTest</td>
+<td>1.8</td>
+<td>1.8</td>
+<td>3.2</td>
+<td>4.4</td>
+<td>15.4</td>
+<td>1.8</td>
+<td>1.9</td>
+</tr>
+<tr>
+<td>Pi Digits</td>
+<td>2.6</td>
+<td>0.5</td>
+<td>1.0</td>
+<td>3.5</td>
+<td>2.3</td>
+<td>1.5</td>
+<td>7.7</td>
+</tr>
+<tr>
+<td>Mandelbrot</td>
+<td>3.5</td>
+<td>3.5</td>
+<td>3.5</td>
+<td>3.8</td>
+<td>14.9</td>
+<td>3.8</td>
+<td>17.0</td>
+</tr>
+</tbody>
+</table>
+<p>(Runtime in seconds; lower is better. For Python, PyPy is used;
+CPython is around 50 times slower. Measured on an Apple MacBook Pro
+M1.)</p>
+<h3 id="disclaimer">Disclaimer</h3>
+<p>These benchmarks are not designed to show a language is "better" than
+another language. Performance depends on many factors such as the
+algorithm used, the developer, how much time is spend on optimizations,
+etc. Also, measurements vary with hardware, compiler, or operating
+system.</p>
+<p>Why then publish these benchmarks? Performance is an important aspect
+when selecting a programming language. It is true that benchmarks are
+often used to mislead: cherry-picking, comparing old version of
+competitors, not specifying the details (compiler flags etc.). However,
+not doing any benchmarks is not a solution either. Computer science
+papers, for example, are often required to include benchmarks. It is
+expected that performance is measured. So it is a double-edged sword:
+many like to see benchmarks results, but many will criticise the result
+- no matter how the benchmarks are done or what the results show. In the
+field of database engines, the "DeWitt Clause" is used, which prevents
+people (competitors) from publishing benchmark results. These clauses
+were included in licenses of databases because DeWitt, a researcher,
+conducted benchmark studies showed performance issues in popular
+databases. But for programming languages, very few (commercial)
+languages use such licenses.</p>
+<p>Only a small number of benchmarks are implemented so far, most of
+them are based on the microbenchmarks from
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The
+Computer Language Benchmarks Game</a>.</p>
+<p>For all languages, a very simple single-threaded implementation is
+used (without inline assembly etc.). Memory usage is not currently
+measured. The tests are run 3 times, and the best time is used.
+Benchmark results in seconds (lower is better). For Java, memory is
+limited to 100 MB by using <code>-Xmx100m</code>, and the just-in-time
+compiler is pre-warmed by running the same test 3 times inside the same
+JVM.</p>
+<p>What this page tries to show is that, for these limited benchmarks,
+Bau has a similar performance then other popular programming languages,
+specially C. Which makes sense, because it is transpiled to C. It is
+sometimes slower, and sometimes faster, than Java, Go, and Rust.</p>
+<h4 id="binary-trees">Binary Trees</h4>
+<p>This test
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/binarytrees.html#binarytrees">generates
+binary trees and counts the nodes</a>. The Java version is very fast if
+given enough memory, because it doesn't collect garbage; when limiting
+memory to 100 MB, it does collect garbage, but in a different thread.
+The Go garbage collector is limited to one thread using
+"runtime.GOMAXPROCS(1)", and so it is slower than Java, which can not be
+limited to one thread (which is arguably not fair). For Bau, the
+ownership variant is used; the reference counted variant is a bit
+slower. Bau includes a faster malloc implementation, which would brings
+performance close to Java. The command line argument 20 is used instead
+of 21 as in the original test, to speed up running the test; however the
+relative performance is unaffected.</p>
+<h4 id="fannkuch">Fannkuch</h4>
+<p>This test simulates
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/fannkuchredux.html#fannkuchredux">flipping
+pancakes</a>. This test uses many array accesses. For Bau, no attempt
+was made to eliminate bound checks. It unclear why the C version is a
+little bit slower then the C version created from Bau. The command line
+argument 11 is used instead of 12 as in the original test, to speed up
+running the test; however the relative performance is unaffected.</p>
+<h4 id="speedtest">SpeedTest</h4>
+<p>This test is about the
+<a href="https://github.com/jabbalaci/SpeedTests">Münchausen numbers
+problem</a>. This is a very fast loop with a lot of array access.
+(Standard) Python is particularly slow here because it is interpreted
+and doesn't use a JIT compiler. The same settings are used as in the
+original benchmark.</p>
+<h4 id="pi-digits">Pi Digits</h4>
+<p>This uses a big integer library that computes
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/pidigits.html#pidigits">10'000
+digits of Pi</a>. Performance depends mostly on the big integer library.
+The big integer library of Go, for example, is highly optimized, and
+using platform-specific assembly. The Rust library is highly optimized
+as well, but the C "gmp" library is the fastest. The Swift library
+"attaswift/BigInt" is used. The Bau bigint library is around 400 lines
+of code, modelled after the Java library, without platform-specific
+code. Bau could easily use the "gmp" library as well. The same settings
+are used as in the original benchmark.</p>
+<h4 id="mandelbrot">Mandelbrot</h4>
+<p>This test computes the
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/mandelbrot.html#mandelbrot">Mandelbrot
+set</a>. Only 8'000 by 8'000 pixels are calculated, versus 16'000 by
+16'000 as in the original test, to speed up running the test; however
+the relative performance is unaffected. It is mostly testing floating
+point performance.</p>
+<h2 id="building-and-running-the-tests">Building and Running the
+Tests</h2>
+<p>Download and build the latest version:</p>
+<pre><code>git clone git@github.com:thomasmueller/bau-lang.git
+cd bau-lang</code></pre>
+<p>Using Maven:</p>
+<pre><code>mvn -DskipTests clean install</code></pre>
+<p>Using Make:</p>
+<pre><code>make jar</code></pre>
+<p>Compiling and Running the C, Java, and Bau versions:</p>
+<pre><code>rm -rf target/benchmarks
+mkdir -p target/benchmarks
+
+# Bau
+cp src/test/resources/org/bau/benchmarks/*.bau target/benchmarks
+for i in {1..2}; do time java -jar target/bau.jar -O3 -useTmMalloc false target/benchmarks/*.bau; done
+for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
+for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
+for i in {1..3}; do time target/benchmarks/fannkuch 11; done
+for i in {1..3}; do time target/benchmarks/munchausen; done
+for i in {1..3}; do time target/benchmarks/piDigits &gt; out.txt; done
+for i in {1..3}; do time target/benchmarks/mandelbrot 8000 &gt; out.tiff; done
+java -jar target/bau.jar -useTmMalloc true -O3 target/benchmarks/*.bau
+for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
+for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
+
+# C
+cp src/test/resources/org/bau/benchmarks/*.c target/benchmarks
+for i in {1..2}; do time (
+    gcc -O3 target/benchmarks/binaryTrees.c -o target/benchmarks/binaryTrees
+    gcc -O3 target/benchmarks/fannkuch.c -o target/benchmarks/fannkuch
+    gcc -O3 target/benchmarks/munchausen.c -o target/benchmarks/munchausen
+    gcc -O3 target/benchmarks/piDigits.c -o target/benchmarks/piDigits -I/opt/homebrew/include -L/opt/homebrew/lib -lgmp
+    gcc -O3 target/benchmarks/mandelbrot.c -o target/benchmarks/mandelbrot
+); done
+for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
+for i in {1..3}; do time target/benchmarks/fannkuch 11; done
+for i in {1..3}; do time target/benchmarks/munchausen; done
+for i in {1..3}; do time target/benchmarks/piDigits 10000 &gt; out.txt; done
+for i in {1..3}; do time target/benchmarks/mandelbrot 8000 &gt; out.tiff; done
+
+# Go
+cp src/test/resources/org/bau/benchmarks/*.go target/benchmarks
+for i in {1..2}; do time (
+    go build -ldflags=&quot;-s -w&quot; target/benchmarks/binaryTrees.go
+    go build -ldflags=&quot;-s -w&quot; target/benchmarks/fannkuch.go
+    go build -ldflags=&quot;-s -w&quot; target/benchmarks/munchausen.go
+    go build -ldflags=&quot;-s -w&quot; target/benchmarks/piDigits.go
+    go build -ldflags=&quot;-s -w&quot; target/benchmarks/mandelbrot.go
+); done
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..3}; do time ./fannkuch 11; done
+for i in {1..3}; do time ./munchausen; done
+for i in {1..3}; do time ./piDigits &gt; out.txt; done
+for i in {1..3}; do time ./mandelbrot 8000 &gt; out.tiff; done
+
+# Java
+for i in {1..2}; do time javac src/test/java/org/bau/benchmarks/*.java -d target/benchmarks; done
+time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
+time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
+time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
+time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
+time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
+for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
+for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
+for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
+for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 &gt; out.txt; done
+for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 &gt; out.tiff; done
+
+# PyPy
+for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
+for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
+for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/munchausen.py; done
+for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/piDigits.py 10000 &gt; out.txt; done
+for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 &gt; out.tiff; done
+
+# Rust
+cp src/test/resources/org/bau/benchmarks/*.rs target/benchmarks
+rm -rf target/benchmarks/rust
+mkdir -p target/benchmarks/rust
+cp -R src/test/resources/org/bau/benchmarks/rust target/benchmarks
+for i in {1..2}; do time (
+    cd target/benchmarks/rust
+    cargo build --release
+    cd ../../..
+    rustc -C opt-level=3 target/benchmarks/binaryTrees.rs
+    rustc -C opt-level=3 target/benchmarks/fannkuch.rs
+    rustc -C opt-level=3 target/benchmarks/munchausen.rs
+    rustc -C opt-level=3 target/benchmarks/mandelbrot.rs
+); done
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..3}; do time ./fannkuch 11; done
+for i in {1..3}; do time ./munchausen; done
+for i in {1..3}; do time target/benchmarks/rust/target/release/pi_digits &gt; out.txt; done
+for i in {1..3}; do time ./mandelbrot 8000 &gt; out.tiff; done
+
+# Swift
+cp src/test/resources/org/bau/benchmarks/*.swift target/benchmarks
+mkdir -p target/benchmarks/swift
+cp -R src/test/resources/org/bau/benchmarks/swift target/benchmarks
+cd target/benchmarks/swift/piDigits
+swift build -c release
+cp .build/arm64-apple-macosx/release/piDigits ../..
+cd ../../../..
+swiftc -O target/benchmarks/binaryTrees.swift -o target/benchmarks/binaryTrees
+swiftc -O target/benchmarks/fannkuch.swift -o target/benchmarks/fannkuch
+swiftc -O target/benchmarks/munchausen.swift -o target/benchmarks/munchausen
+swiftc -O target/benchmarks/mandelbrot.swift -o target/benchmarks/mandelbrot
+for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
+for i in {1..3}; do time target/benchmarks/fannkuch 11; done
+for i in {1..3}; do time target/benchmarks/munchausen; done
+for i in {1..3}; do time target/benchmarks/piDigits 10000 &gt; out.txt; done
+for i in {1..3}; do time target/benchmarks/mandelbrot 8000 &gt; out.tiff; done
+
+# Python
+for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
+for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
+for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 &gt; out.txt; done
+for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
+for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 &gt; out.tiff; done</code></pre>
+</body>
+</html>
