@@ -1,11 +1,11 @@
-# Bau
+# The Bau Language
 
-A programming language for everyone.
+Simplicity, speed, and safety - redefined.
 
 ## Highlights
 
-* <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * <a href="doc/conciseSyntax.md">Easy to learn. Concise syntax inspired by Python.</a>
+* <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * Memory-safe. Automatic memory management using reference counting by default.
 * Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
@@ -433,4 +433,36 @@ which is useful for callbacks. Example:
             callback(i)
 
     count(5, log)
+
+### Traits
+
+Note: The trait implementation is work-in-progress.
+
+Traits (in other languages called interfaces, mixin, or prototype)
+contain a list of functions.
+
+    trait Reader
+        read() int
+        size() int
+
+If a type implements the trait, it needs to declares these function,
+unless if the trait already has a default implementation.
+
+    fun Reader size()
+        return -1
+
+    type Memory : Reader
+        array int[]
+        pos int
+    
+    fun Memory read()
+    
+Traits can require other traits; such traits inherit the functions
+of the required traits.
+
+    trait Writer : Reader
+        write(x int)
+
+Types can implement multiple traits, 
+and multiple types can implement the same trait.
 

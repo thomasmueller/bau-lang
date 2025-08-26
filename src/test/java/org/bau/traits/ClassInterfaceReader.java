@@ -18,24 +18,6 @@ import java.util.TreeMap;
 
 public class ClassInterfaceReader {
 
-    private static void addAllFromJar(Set<String> target, String jarFileName) {
-        try {
-            Iterator<String> classIterator = JarReader.getClassFileIterator(jarFileName);
-            while (classIterator.hasNext()) {
-                String className = classIterator.next();
-                if (className.startsWith("jdk.")) {
-                    continue;
-                }
-                if (className.startsWith("sun.")) {
-                    continue;
-                }
-                target.add(className);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void main(String[] args) throws ClassNotFoundException {
         TreeMap<String, TypeOrTrait> classMap = new TreeMap<>();
 
@@ -48,6 +30,8 @@ public class ClassInterfaceReader {
         addAllFromJar(discoveredClasses, "/Library/Java/JavaVirtualMachines/jdk-22.jdk/Contents/Home/lib/src.zip");
 
         Set<String> processedClasses = new HashSet<>();
+
+        int[] slotIdUsage = new int[100];
 
         System.out
                 .println("Starting recursive class discovery with " + discoveredClasses.size() + " initial classes...");
@@ -106,7 +90,6 @@ public class ClassInterfaceReader {
                         }
                     }
                 }
-
                 TypeOrTrait classInfo = new TypeOrTrait(clazz, className, isInterface, methods, superInterfaces,
                         implementedInterfaceMethods);
                 classMap.put(className, classInfo);
@@ -145,6 +128,19 @@ public class ClassInterfaceReader {
                 }
             }
         }
+        // add inherited interfaces
+        for (Map.Entry<String, TypeOrTrait> entry : classMap.entrySet()) {
+            String name = entry.getKey();
+            TypeOrTrait ci = entry.getValue();
+            if (ci.isInterface) {
+                Trait t = typeList.traits.get(name);
+                for (String s : ci.superInterfaces) {
+                    Trait st = typeList.traits.get(s);
+                    t.inherited.add(st);
+                }
+            }
+        }
+
         for (Map.Entry<String, TypeOrTrait> entry : classMap.entrySet()) {
             String name = entry.getKey();
             TypeOrTrait ci = entry.getValue();
@@ -212,6 +208,7 @@ public class ClassInterfaceReader {
                 maxSlot = i;
             }
             trait.slot = i;
+            slotIdUsage[i]++;
             // ----------------------
 
             if (trait.name.startsWith("java.util.")) {
@@ -219,8 +216,15 @@ public class ClassInterfaceReader {
             }
         }
         int usedSlotCount = 0, freeSlotCount = 0;
+        int maxTc = 0;
         for (Type t : typeList.types.values()) {
-            System.out.println("type " + t.name);
+            HashSet<String> nonMarkerTraits = new HashSet<String>();
+            t.collectAllNonMarkerTraits(nonMarkerTraits);
+            if (nonMarkerTraits.size() > maxTc) {
+                maxTc = nonMarkerTraits.size();
+                System.out.println("RECORD " + t.name + " " + nonMarkerTraits);
+            }
+//            System.out.println("type " + t.name + " tc: " + nonMarkerTraits.size());
             BitSet usedSlots = new BitSet();
             int maxSlotId = 0;
             int slotsUsed = 0;
@@ -229,7 +233,7 @@ public class ClassInterfaceReader {
                     continue;
                 }
                 slotsUsed++;
-                System.out.println("    trait slot=" + trait.slot + " name=" + trait.name + " functions=" + trait.functionList.size());
+//                System.out.println("    trait slot=" + trait.slot + " name=" + trait.name + " functions=" + trait.functionList.size());
                 if (trait.slot < 0) {
                     throw new IllegalStateException();
                 }
@@ -244,8 +248,32 @@ public class ClassInterfaceReader {
             usedSlotCount += slotsUsed;
             freeSlotCount += maxSlotId + 1 - slotsUsed;
         }
+        System.out.println("max non-marker trait count: " + maxTc);
         System.out.println("used slots = " + usedSlotCount);
         System.out.println("free slots = " + freeSlotCount);
+        for (int i = 0; i < slotIdUsage.length; i++) {
+            if (slotIdUsage[i] != 0) {
+                System.out.println("slot " + i + ": " + slotIdUsage[i] + " traits");
+            }
+        }
+    }
+
+    private static void addAllFromJar(Set<String> target, String jarFileName) {
+        try {
+            Iterator<String> classIterator = JarReader.getClassFileIterator(jarFileName);
+            while (classIterator.hasNext()) {
+                String className = classIterator.next();
+                if (className.startsWith("jdk.")) {
+                    continue;
+                }
+                if (className.startsWith("sun.")) {
+                    continue;
+                }
+                target.add(className);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static Set<String> init(String packageName) {

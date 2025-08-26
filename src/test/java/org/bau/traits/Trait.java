@@ -1,6 +1,7 @@
 package org.bau.traits;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 class Trait {
@@ -14,6 +15,8 @@ class Trait {
     // list of functions
     final ArrayList<TraitFunction> functionList = new ArrayList<>();
 
+    final ArrayList<Trait> inherited = new ArrayList<>();
+
     // which types use it
     final ArrayList<Type> usedIn = new ArrayList<>();
 
@@ -26,9 +29,22 @@ class Trait {
         this.functionList.addAll(l2);
     }
 
+    public void collectAllNonMarkerTraits(HashSet<String> target) {
+        if (functionList.size() != 0) {
+            target.add(name);
+        }
+        for(Trait t : inherited) {
+            t.collectAllNonMarkerTraits(target);
+        }
+    }
+
     public String toString() {
         StringBuilder buff = new StringBuilder();
-        buff.append("trait slot=" + slot + " name=" + name + " methods=" + functionList.size() + " (");
+        buff.append("trait slot=" + slot + " name=" + name);
+        if (inherited.size() > 0) {
+            buff.append(" inherited=" + inherited);
+        }
+        buff.append(" methods=" + functionList.size() + " (");
         int i=0;
         for(TraitFunction f : functionList) {
             if (i++ > 0) {

@@ -1,15 +1,76 @@
 package org.bau.stdlib.string.regex;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.junit.Test;
 
 public class RegexTest {
+
+    @Test
+    public void timeout() {
+        assertMatches("1,2,3,4,5", "^.*,.*,.*,.*,.*$");
+        assertMatches("1,2,3,4,5,6", "^.*,.*,.*,.*,.*,.*$");
+        assertMatches("1,2,3,4,5,6,7", "^.*,.*,.*,.*,.*,.*,.*$");
+        assertMatches("1,2,3,4,5,6,7,8", "^.*,.*,.*,.*,.*,.*,.*,.*$");
+        try {
+            assertMatches("1,2,3,4,5,6,7,8,9", "^.*,.*,.*,.*,.*,.*,.*,.*,.*$");
+            fail();
+        } catch (IllegalStateException e) {
+            // expected: timeout
+        }
+    }
+
+    @Test
+    public void anchors() {
+        assertMatches("ab", "^a|z$");
+        assertMatches("az", "^a|b$");
+        assertMatches("bz", "^a|b$");
+        assertMatches("zb", "^a|b$");
+        assertMatches("ba", "^a|b$");
+    }
+
+    @Test
+    public void minMax() {
+        assertMatches("1", "[0-9]{2}");
+        assertMatches("12", "[0-9]{2}");
+        assertMatches("123", "[0-9]{2}");
+        assertMatches("1", "[0-9]{2,3}");
+        assertMatches("12", "[0-9]{2,3}");
+        assertMatches("123", "[0-9]{2,3}");
+        assertMatches("1234", "[0-9]{2,3}");
+        assertMatches("1", "[0-9]{2,}");
+        assertMatches("12", "[0-9]{2,}");
+        assertMatches("123", "[0-9]{2,}");
+        assertMatches("1234", "[0-9]{2,}");
+        assertTrue(Regex.matches("", "[0-9]{0,2}"));
+        assertTrue(Regex.matches("1", "[0-9]{,2}"));
+        assertTrue(Regex.matches("12", "[0-9]{,2}"));
+        assertFalse(Regex.matches("123", "[0-9]{,2}"));
+        assertTrue(Regex.matches("123", "[0-9]{,}"));
+    }
+
+    @Test
+    public void replaceAll() {
+        assertEquals("X", "".replaceAll("b?", "X"));
+        assertEquals("", Regex.replaceAll("", "b?", "X"));
+        assertEquals("XdXXX", "dbb".replaceAll("b?", "X"));
+        assertEquals("dXX", Regex.replaceAll("dbb", "b?", "X"));
+    }
+
+    @Test
+    public void escape() {
+        // '-' can be included if it's the first or last
+        assertMatches("a-a-", "[a-]+");
+        assertMatches("a-a-", "[-a]+");
+        // ']' can be included if it's the first in the list
+        assertMatches("]]]", "[]a]+");
+    }
 
     @Test
     public void matches() {
@@ -38,20 +99,11 @@ public class RegexTest {
     }
 
     private static void assertMatches(String text, String regex) {
-        boolean expected = text.matches(regex);
         boolean got = Regex.matches(text, regex);
+        boolean expected = text.matches(regex);
         if (expected != got) {
             fail("Regex.matches(\"" + text + "\", \"" + regex + "\"); // expected: " + expected + " got: " + got);
         }
-    }
-
-    private String parseAndConvert(String regex) {
-        ArrayList<Token> list = RegexParser.parse(regex);
-        StringBuilder buff = new StringBuilder();
-        for (Token t : list) {
-            buff.append(t.toString());
-        }
-        return buff.toString();
     }
 
     @Test
@@ -62,7 +114,6 @@ public class RegexTest {
 
     @Test
     public void group() {
-        assertEquals("(a)b", parseAndConvert("(a)b"));
         assertMatches("lalala", "(la)+");
         assertMatches("lalalax", "(la)+");
     }
@@ -79,10 +130,8 @@ public class RegexTest {
                 for (int i = 0; i < count; i++) {
                     String regex = "^" + randomRegex(r, 10, false) + "$";
                     if (m == 0) {
-                        // ArrayList<Token> list = RegexParser.parse(regex);
                         matchCount += Regex.matches(s, regex) ? 1 : 0;
                     } else {
-                        // Pattern p = Pattern.compile(regex);
                         matchCount += s.matches(regex) ? 1 : 0;
                     }
                 }
@@ -107,6 +156,52 @@ public class RegexTest {
     public void split() {
         assertEquals("[a, b, c]", Arrays.toString("a, b,   c".split(", *")));
         assertEquals("[a, b, c]", Arrays.toString(Regex.split("a, b,   c", ", *")));
+    }
+
+    @Test
+    public void parseError() {
+        try {
+            Regex.find("a", "a{0,");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            Regex.find("a", "a{0(");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            Regex.find("a", "(abc](");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            Regex.find("a", "(abc");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            Regex.find("a", "[abc");
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            assertMatches("$test", "test", false);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+        try {
+            assertMatches("test^", "test", false);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
     }
 
     public static String randomRegex(Random r, int maxLen, boolean groups) {
@@ -229,10 +324,6 @@ public class RegexTest {
                 regex += "$";
             }
 
-            // tokenization
-            String r2 = parseAndConvert(regex);
-            assertEquals(r2, regex);
-
             // matches
             boolean expected = text.matches(regex);
             boolean got;
@@ -277,6 +368,157 @@ public class RegexTest {
         if (timeout > count * 0.01) {
             fail();
         }
+    }
+
+    @Test
+    public void testSimpleLiteralMatching() {
+        assertMatches("hello", "hello", true);
+        assertMatches("hello", "world", false);
+        assertFind("hello", "hello world", true);
+        assertMatches("abc", "abc", true);
+        assertMatches("abc", "def", false);
+        assertFind("test", "this is a test", true);
+    }
+
+    @Test
+    public void testDotWildcard() {
+        assertMatches("h.llo", "hello", true);
+        assertMatches("h.llo", "hallo", true);
+        assertMatches("h.llo", "hillo", true);
+        assertMatches("h.llo", "h", false);
+        assertMatches(".", "a", true);
+        assertMatches(".", "", false);
+        assertMatches("a.c", "abc", true);
+        assertMatches("a.c", "axc", true);
+        assertMatches("a.c", "ac", false);
+    }
+
+    @Test
+    public void testStartAnchor() {
+        assertFind("^hello", "hello world", true);
+        assertMatches("^hello", "say hello", false);
+        assertMatches("^test", "test", true);
+        assertMatches("^test", "pretest", false);
+    }
+
+    @Test
+    public void testEndAnchor() {
+        assertFind("world$", "hello world", true);
+        assertFind("world$", "world peace", false);
+        assertMatches("test$", "test", true);
+        assertFind("test$", "testing", false);
+    }
+
+    @Test
+    public void testBothAnchors() {
+        assertMatches("^hello$", "hello", true);
+        assertMatches("^hello$", "hello world", false);
+        assertMatches("^hello$", "say hello", false);
+        assertMatches("^test$", "test", true);
+        assertMatches("^test$", "testing", false);
+    }
+
+    @Test
+    public void testQuestionMarkQuantifier() {
+        assertMatches("colou?r", "color", true);
+        assertMatches("colou?r", "colour", true);
+        assertMatches("colou?r", "colouur", false);
+        assertMatches("ab?c", "ac", true);
+        assertMatches("ab?c", "abc", true);
+        assertMatches("ab?c", "abbc", false);
+    }
+
+    @Test
+    public void testStarQuantifier() {
+        assertMatches("ab*c", "ac", true);
+        assertMatches("ab*c", "abc", true);
+        assertMatches("ab*c", "abbc", true);
+        assertMatches("ab*c", "abbbc", true);
+         assertMatches("a*", "", true);
+        assertMatches("a*", "aaa", true);
+        assertMatches("a*b", "b", true);
+        assertMatches("a*b", "aaab", true);
+    }
+
+    @Test
+    public void testPlusQuantifier() {
+        assertMatches("ab+c", "ac", false);
+        assertMatches("ab+c", "abc", true);
+        assertMatches("ab+c", "abbc", true);
+        assertMatches("ab+c", "abbbc", true);
+        assertMatches("a+", "a", true);
+        assertMatches("a+", "aaa", true);
+        assertMatches("a+", "", false);
+    }
+
+    @Test
+    public void testCombinedPatterns() {
+        assertMatches("^h.*o$", "hello", true);
+        assertMatches("^h.*o$", "hero", true);
+        assertMatches("^h.*o$", "hello world", false);
+        assertMatches("a.+b", "axxxb", true);
+        assertMatches("a.+b", "ab", false);
+        assertMatches("^test.*$", "test123", true);
+        assertMatches("^test.*$", "pretest", false);
+    }
+
+    @Test
+    public void testEmptyAndEdgeCases() {
+        assertMatches(".*", "anything", true);
+        assertMatches("^$", "", true);
+        assertMatches("^$", "a", false);
+    }
+
+    @Test
+    public void testCharacterSets() {
+        assertMatches("[abc]", "a", true);
+        assertMatches("[abc]", "b", true);
+        assertMatches("[abc]", "c", true);
+        assertMatches("[abc]", "d", false);
+        assertMatches("[abc]def", "adef", true);
+        assertMatches("[abc]def", "bdef", true);
+        assertMatches("[abc]def", "ddef", false);
+        assertMatches("[^abc]", "d", true);
+        assertMatches("[^abc]", "a", false);
+        assertMatches("[^abc]", "b", false);
+        assertMatches("[a-z]", "m", true);
+        assertMatches("[a-z]", "A", false);
+        assertMatches("[0-9]", "5", true);
+        assertMatches("[0-9]", "a", false);
+    }
+
+    @Test
+    public void testEscapedCharacters() {
+        assertMatches("\\.", ".", true);
+        assertMatches("\\.", "a", false);
+        assertMatches("\\*", "*", true);
+        assertMatches("\\+", "+", true);
+        assertMatches("\\?", "?", true);
+        assertMatches("\\(", "(", true);
+        assertMatches("\\)", ")", true);
+        assertMatches("\\[", "[", true);
+        assertMatches("\\]", "]", true);
+        assertMatches("\\{", "{", true);
+        assertMatches("\\}", "}", true);
+        assertFind("\\\n", "\n", true);
+        assertFind("\\\t", "\t", true);
+        assertFind("\\\r", "\r", true);
+        assertMatches("line1\\\nline2", "line1\nline2", true);
+    }
+
+    @Test
+    public void testConvenienceMethods() {
+        assertTrue("Simple matches should work", Regex.find("hello world", "hello") != null);
+        assertFalse("Non-matching should return false", Regex.matches("hello world", "xyz"));
+    }
+
+
+    private void assertMatches(String pattern, String input, boolean shouldMatch) {
+        assertEquals(shouldMatch, Regex.matches(input, pattern));
+    }
+
+    private void assertFind(String pattern, String input, boolean shouldMatch) {
+        assertEquals(shouldMatch, Regex.find(input, pattern) != null);
     }
 
 }

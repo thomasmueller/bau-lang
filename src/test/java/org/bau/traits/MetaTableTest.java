@@ -7,8 +7,76 @@ import org.junit.Test;
 
 /*
 
-* Most classes implement no or few interfaces (0 - 4). At most 7 in Oak.
-* Most interfaces have few methods. Many have none: marker interfaces. 1% has more than 32, at most 174 in Oak.
+A (Possibly New?) Approach to Dynamic Dispatch via Traits
+
+In my language, I want to support dynamic dispatch through traits
+(think: interfaces in Java, protocols in Swift, prototypes in JS).
+I’ll call them "traits" here.
+
+From real-world code I care about, I’ve observed:
+
+* Most traits are small — very few have > 32 methods,
+  though some rare ones have up to 200.
+  We can ignore "marker traits".
+
+* Most types implement few traits — often none; the distribution is Zipf-like.
+  In one large project (Apache Jackrabbit Oak), the max is 7 traits per type.
+
+* I want fast instanceof checks for both traits and concrete types.
+
+* Traits can require/extend other traits
+  (e.g., ReaderWriter requires Reader).
+
+== My Dispatch Plan
+
+I’d like feedback on this idea — does anyone see pitfalls?
+
+1. Compile-time slot assignment
+
+   * Each trait gets a unique ID and a slot number.
+   * Two traits can share the same slot unless they appear together on a type.
+   * Most traits end up in slot 0 (in Java’s JDK: ~78% in slot 0, 13% in slot 1, max slot = 17).
+   * Downside: all types/traits must be known at compile-time — acceptable for my use case.
+
+2. Object layout
+
+   * Every object has a pointer to type metadata
+     as the first field
+     (no fat pointers to avoids concurrency issues).
+
+3. Type metadata layout
+
+    Contains:
+    * One vtable with all trait functions, grouped / ordered by trait slot.
+    * An “offset” array to locate the first function for a trait slot.
+      Simulations show ~66% fill rate for the offset array.
+
+== How Calls Work
+
+At compile time, both the slot and traitFunctionId are known.
+
+  * Trait slot 0 (~78%): vtable[traitFunctionId]
+  * Trait slot >0: vtable[offset[slot] + traitFunctionId]
+
+Most calls hit slot 0, so dispatch is very simple —
+potentially competitive with Java/C++.
+
+This is similar to Argentum’s approach but a bit simpler (no perfect hash tables).
+https://aglang.org/how-the-argentum-language-makes-fast-dynamic_cast-and-method-dispatch-with-just-four-processor-instructions/
+
+instanceof / Trait Casting
+
+A secondary structure holds an array of trait ID for each slot.
+Check: slot < traitIdArray.length && traitIdArray[slot] == traitId.
+
+
+Question: Am I overlooking obvious issues here —
+either in performance characteristics or in edge cases with trait inheritance?
+Are there other languages you know that use this or a similar approach?
+
+------------------
+
+
 
 Classes implementing 0 interfaces with methods: 83.4% (4,882 classes)
 Classes implementing at most 1 interface with methods: 97.0% (5,677 classes)
