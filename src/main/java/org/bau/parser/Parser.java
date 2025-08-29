@@ -285,26 +285,39 @@ public class Parser {
         if (functionContext.getType(targetModule, name) != null) {
             throw syntaxError("Type '" + name + "' was already defined");
         }
+        DataType type = DataType.newTraitType(targetModule, name);
+        type.traitDefinition = new Trait(targetModule, name);
+        if (matchOp(":")) {
+            while (true) {
+                String t = readIdentifier();
+                type.traitDefinition.required.add(t);
+                if (!matchOp(",")) {
+                    break;
+                }
+            }
+        }
         readEndOfStatement();
         functionContext.rewindStack(stackPos);
-        MemoryType memoryType = MemoryType.REF_COUNT;
-        DataType type = DataType.newRegularType(targetModule, name, 0, memoryType);
         program.addComment("trait " + type.toString(), comment);
         lastComment = null;
-        ArrayList<FunctionDefinition> functions = new ArrayList<>();
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 FunctionDefinition def = new FunctionDefinition(getLine(lastPos));
                 def.name = readIdentifier();
                 def.callType = type;
                 matchOp("(");
+                Variable var = new Variable("this", type);
+                var.isConstant = false;
+                def.parameters.add(var);
                 boolean template = parseFunctionDeclaration(targetModule, def);
                 if (template) {
                     throw syntaxError("Template are not supported in traits");
                 }
-                functions.add(def);
+                type.traitDefinition.functions.add(def);
+                program.addFunction(def);
             }
         }
+        program.addType(type);
         functionContext.rewindStack(stackPos);
         return true;
     }
@@ -345,6 +358,16 @@ public class Parser {
             }
         }
         int sizeOf = 0;
+        ArrayList<String> traits = new ArrayList<>();
+        if (matchOp(":")) {
+            while (true) {
+                String t = readIdentifier();
+                traits.add(t);
+                if (!matchOp(",")) {
+                    break;
+                }
+            }
+        }
         readEndOfStatement();
         functionContext.rewindStack(stackPos);
         if (template) {
@@ -373,6 +396,7 @@ public class Parser {
             type.parameters = parameters;
         }
         functionContext.rewindStack(stackPos);
+        type.traits.addAll(traits);
         defineConstructor(type);
         if (!type.isCopyType()) {
             defineConstructor(type.ownerType());
@@ -1746,31 +1770,7 @@ public class Parser {
                 if (DataType.TYPE.equals(token)) {
                     throw syntaxError("Type '" + token + "' may not be used here");
                 }
-
-
-                DataType t = this.readType(false, true);
-
-/*
-                String name = readIdentifier();
-                DataType t = functionContext.getType(module, name);
-                if (t == null) {
-                    t = functionContext.getType(this.module, name);
-                }
-                if (t == null) {
-; int test;
-    t = functionContext.getType(this.module, name);
-
-                    throw syntaxError("Type '" + name + "' not found when reading a type");
-                }
-            	if (matchOp("[")) {
-                    if (!matchOp("]")) {
-                    	throw syntaxError("Expected ']', got '" + token + "' when reading type");
-                    }
-                    t = t.arrayType();
-            	}
-*/
-
-
+                DataType t = readType(false, true);
                 String pName = template.parameters.get(pi).name;
                 if (pName.startsWith("_")) {
                     pName = pName.substring(1);
@@ -1859,7 +1859,7 @@ public class Parser {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
             String notFound = "Function '" + identifier + "' not found";
             if (didYouMean != null) {
-                notFound += "; did you mean " + didYouMean.name + " with " + didYouMean.parameters.size() + " parameter(s)?";
+                notFound += "; did you mean " + didYouMean.toString() + " ?";
             }
             throw syntaxError(notFound);
         }

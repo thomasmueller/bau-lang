@@ -12,6 +12,7 @@ import org.bau.String
 import org.bau.os.Terminal
     getWindowSize
     writeToTerminal
+    keyCode
 
 type fileContent
     fileName i8[]

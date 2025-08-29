@@ -5,7 +5,9 @@ import java.util.ArrayList;
 public class Trait {
     private final String module;
     private final String name;
-    private final ArrayList<FunctionDefinition> functions = new ArrayList<>();
+    final ArrayList<FunctionDefinition> functions = new ArrayList<>();
+    public final ArrayList<String> required = new ArrayList<>();
+    private int slot;
 
     public Trait(String module, String name) {
         this.module = module;

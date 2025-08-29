@@ -2,6 +2,7 @@ import org.bau.Env
 import org.bau.Math
 import org.bau.String
 import org.bau.os.Terminal
+    keyCode
 import org.bau.os.Sleep
 import org.bau.Utils
 

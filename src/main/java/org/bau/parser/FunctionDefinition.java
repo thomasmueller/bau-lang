@@ -134,6 +134,25 @@ public class FunctionDefinition {
         StringBuilder buff = new StringBuilder();
         buff.append(headerToC());
         buff.append(" {\n");
+
+        if (this.callType != null && callType.traitDefinition != null) {
+            buff.append(Statement.indent("// indirect call\n"));
+            buff.append(Statement.indent("printf(\"" + name + " called with type=%s\\n\", this->_type->typeName);\n"));
+
+            int test;
+            // TODO if list.isEmpty(), then call the virtual function.
+            // if not, then check if there is a virtual function, and call it,
+            // else continue
+            if (list.isEmpty()) {
+                // TODO verify that each implementation implements this function
+                buff.append("}\n");
+                return buff.toString();
+            }
+
+        }
+
+
+
         if (cCode != null) {
             buff.append(Statement.indent(cCode));
         }

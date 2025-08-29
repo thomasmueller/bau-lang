@@ -61,11 +61,17 @@ public class DataType {
     public boolean isFunctionPointer;
     public ArrayList<DataType> functionPointerArgs;
     public DataType functionPointerReturnType;
+    public ArrayList<String> traits = new ArrayList<>();
+    public Trait traitDefinition;
 
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
                 token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
                 token.toUpperCase().equals(token);
+    }
+
+    public static DataType newTraitType(String module, String name) {
+        return new DataType(module, name, 0, false, null, null, false, MemoryType.REF_COUNT);
     }
 
     public static DataType newNumberType(String name, int sizeOf) {
@@ -77,7 +83,7 @@ public class DataType {
     }
 
     public static DataType newEnumType(String module, String name) {
-        return new DataType(null, name, 8, true, null, null, false, MemoryType.COPY);
+        return new DataType(module, name, 8, true, null, null, false, MemoryType.COPY);
     }
 
     public static DataType newEmptyType(String module, String name) {
@@ -250,6 +256,10 @@ public class DataType {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
+        if (traitDefinition != null) {
+            buff.append(name);
+            return buff.toString();
+        }
         if (isFunctionPointer) {
             buff.append("fun(");
             for (int i = 0; i < functionPointerArgs.size(); i++) {

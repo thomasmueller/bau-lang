@@ -181,6 +181,14 @@ public class Program {
                 return expr;
             }
         }
+        if (target.traitDefinition != null) {
+            for (String t : expr.type().traits) {
+                if (t.equals(target.name())) {
+                    // type has this trait
+                    return new Cast(expr, target);
+                }
+            }
+        }
         DataType source = expr.type();
         if (source == null) {
             return expr;
@@ -435,12 +443,32 @@ public class Program {
                 + "    fprintf(stdout, \"Array index %lld is out of bounds for the array length %lld\\n\", x, len);\n"
                 + "    exit(1);\n"
                 + "}\n");
+        boolean hasTraits = false;
+        for (DataType t : dataTypeMap.values()) {
+            if (t.isUsed() && !t.traits.isEmpty()) {
+                hasTraits = true;
+            }
+        }
+        if (hasTraits) {
+            buff.append("/* traits */\n");
+            buff.append("typedef struct _typeMetaData _typeMetaData;\n");
+            buff.append("typedef void (*_func)(void);\n");
+            buff.append("struct _typeMetaData {\n");
+            buff.append(Statement.indent("const char* typeName;\n"));
+            buff.append(Statement.indent("void (*vtable[])();\n"));
+            buff.append("};\n");
+            for (DataType t : dataTypeMap.values()) {
+                if (t.isUsed() && !t.traits.isEmpty()) {
+                    buff.append("static _typeMetaData *_typeMeta" + t.nameC() + ";\n");
+                }
+            }
+        }
         buff.append("/* types */\n");
         for (DataType t : dataTypeMap.values()) {
             if (t.enumValues != null) {
                 continue;
             }
-            if (!t.isNumber() && t.isUsed()) {
+            if (t.isUsed() && !t.isNumber()) {
                 buff.append("typedef struct " + t.nameC() + " " + t.nameC() + ";\n");
                 buff.append("struct ").append(t.nameC()).append(";\n");
             }
@@ -453,14 +481,20 @@ public class Program {
                 buff.append("struct ").append(t.nameC()).append(" {\n");
                 if (t.isArray()) {
                     buff.append(Statement.indent("int32_t len;\n"));
+                    if (t.memoryType() == MemoryType.REF_COUNT) {
+                        buff.append(Statement.indent("int32_t _refCount;\n"));
+                    }
                     buff.append(Statement.indent(t.baseType().toC() + "* data;\n"));
                 } else {
+                    if (!t.traits.isEmpty() || t.traitDefinition != null) {
+                        buff.append(Statement.indent("_typeMetaData* _type;\n"));
+                    }
+                    if (t.memoryType() == MemoryType.REF_COUNT) {
+                        buff.append(Statement.indent("int32_t _refCount;\n"));
+                    }
                     for (Variable f : t.fields) {
                         buff.append(Statement.indent(f.type().toC() + " " + f.nameC() + ";\n"));
                     }
-                }
-                if (t.memoryType() == MemoryType.REF_COUNT) {
-                    buff.append(Statement.indent("int32_t _refCount;\n"));
                 }
                 buff.append("};\n");
                 if (t.isArray()) {
@@ -479,6 +513,9 @@ public class Program {
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
                     if (t.memoryType() == MemoryType.REF_COUNT) {
+                        if (!t.traits.isEmpty()) {
+                            buff.append(Statement.indent("result->_type = _typeMeta" + t.nameC() + ";\n"));
+                        }
                         buff.append(Statement.indent("result->_refCount = 1;\n"));
                     }
                     buff.append(Statement.indent("return result;\n"));
@@ -667,10 +704,29 @@ public class Program {
                 buff.append(def.toC(context));
             }
         }
+        if (hasTraits) {
+            buff.append("/* traits */\n");
+            buff.append("void _traitInit() {\n");
+            for (DataType t : dataTypeMap.values()) {
+                if (t.isUsed() && !t.traits.isEmpty()) {
+                    int n = 3;
+                    String name = "_typeMeta" + t.nameC();
+                    buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + n + " * sizeof(int));\n"));
+                    buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
+                    for (int i = 0; i < n; i++) {
+                        buff.append(Statement.indent(name + "->vtable[" + i + "] = _traitInit;\n"));
+                    }
+                }
+            }
+            buff.append("}\n");
+        }
         buff.append("void _main();\n");
         buff.append("int main(int _argc, char *_argv[]) {\n");
         if (useTmMalloc) {
             buff.append(Statement.indent("tmmalloc_init();\n"));
+        }
+        if (hasTraits) {
+            buff.append(Statement.indent("_traitInit();\n"));
         }
         buff.append(Statement.indent("__argc = _argc;\n"));
         buff.append(Statement.indent("__argv = _argv;\n"));

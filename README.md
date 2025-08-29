@@ -1,16 +1,25 @@
 # The Bau Language
 
 Simplicity, speed, and safety - redefined.
+Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>.
 
 ## Highlights
 
-* <a href="doc/conciseSyntax.md">Easy to learn. Concise syntax inspired by Python.</a>
+* Easy to learn and use.
+* <a href="doc/conciseSyntax.md">Concise syntax inspired by Python.</a>
 * <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * Memory-safe. Automatic memory management using reference counting by default.
 * Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
 * Avoid runtime array bound checks using static analysis.
 * Null safety: null pointer errors are prevented at compile time.
+
+## Why
+
+Our <a href="doc/why.md">vision</a> is:
+We want to have a language as easy and concise as Python,
+with the speed and ability to run really everywhere like C,
+and the safety of Rust and Java.
 
 ## Tools and Documentation
 

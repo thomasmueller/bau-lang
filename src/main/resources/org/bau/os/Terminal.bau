@@ -2,6 +2,7 @@ module org.bau.os.Terminal
 
 import org.bau.Env
 import org.bau.os.Signal
+    signalId
 
 type termIos
     data i8[]
