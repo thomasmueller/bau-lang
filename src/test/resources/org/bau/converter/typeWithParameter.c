@@ -238,8 +238,8 @@ typedef struct List_int List_int;
 struct List_int;
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -252,9 +252,9 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 struct List_int {
+    int32_t _refCount;
     int_array* array;
     int64_t size;
-    int32_t _refCount;
 };
 List_int* List_int_new() {
     List_int* result = _malloc(sizeof(List_int));

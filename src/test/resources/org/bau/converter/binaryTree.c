@@ -240,8 +240,8 @@ typedef struct Tree Tree;
 struct Tree;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -255,8 +255,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -269,9 +269,9 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 struct Tree {
+    int32_t _refCount;
     Tree* left;
     Tree* right;
-    int32_t _refCount;
 };
 Tree* Tree_new() {
     Tree* result = _malloc(sizeof(Tree));

@@ -241,8 +241,8 @@ typedef struct org_bau_File_File org_bau_File_File;
 struct org_bau_File_File;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -256,8 +256,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -270,8 +270,8 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 struct org_bau_File_File {
-    int64_t filePointer;
     int32_t _refCount;
+    int64_t filePointer;
 };
 org_bau_File_File* org_bau_File_File_new() {
     org_bau_File_File* result = _malloc(sizeof(org_bau_File_File));

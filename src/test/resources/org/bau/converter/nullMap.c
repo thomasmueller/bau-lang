@@ -235,8 +235,8 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
 typedef struct Value Value;
 struct Value;
 struct Value {
-    int64_t data;
     int32_t _refCount;
+    int64_t data;
 };
 Value* Value_new() {
     Value* result = _malloc(sizeof(Value));

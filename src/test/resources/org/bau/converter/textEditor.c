@@ -264,8 +264,8 @@ typedef struct fileContent fileContent;
 struct fileContent;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -279,8 +279,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -293,8 +293,8 @@ int_array* int_array_new(uint32_t len) {
     return result;
 }
 struct org_bau_File_File {
-    int64_t filePointer;
     int32_t _refCount;
+    int64_t filePointer;
 };
 org_bau_File_File* org_bau_File_File_new() {
     org_bau_File_File* result = _malloc(sizeof(org_bau_File_File));
@@ -312,8 +312,8 @@ org_bau_String_string org_bau_String_string_new() {
 }
 struct org_bau_String_string_array {
     int32_t len;
-    org_bau_String_string* data;
     int32_t _refCount;
+    org_bau_String_string* data;
 };
 org_bau_String_string_array* org_bau_String_string_array_new(uint32_t len) {
     org_bau_String_string_array* result = _malloc(sizeof(org_bau_String_string_array));
@@ -326,9 +326,9 @@ org_bau_String_string_array* org_bau_String_string_array_new(uint32_t len) {
     return result;
 }
 struct org_bau_String_StringBuilder {
+    int32_t _refCount;
     i8_array* data;
     int64_t len;
-    int32_t _refCount;
 };
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_new() {
     org_bau_String_StringBuilder* result = _malloc(sizeof(org_bau_String_StringBuilder));
@@ -337,9 +337,9 @@ org_bau_String_StringBuilder* org_bau_String_StringBuilder_new() {
     return result;
 }
 struct org_bau_List_List_org_bau_String_string {
+    int32_t _refCount;
     org_bau_String_string_array* array;
     int64_t size;
-    int32_t _refCount;
 };
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_new() {
     org_bau_List_List_org_bau_String_string* result = _malloc(sizeof(org_bau_List_List_org_bau_String_string));

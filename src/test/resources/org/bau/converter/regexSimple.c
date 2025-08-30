@@ -250,8 +250,8 @@ typedef struct org_bau_List_List_Token org_bau_List_List_Token;
 struct org_bau_List_List_Token;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -265,8 +265,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -289,11 +289,11 @@ org_bau_Exception_exception org_bau_Exception_exception_new() {
     return result;
 }
 struct Token {
+    int32_t _refCount;
     int64_t ttype;
     org_bau_List_List_i8* data;
     int64_t min;
     int64_t max;
-    int32_t _refCount;
 };
 Token* Token_new() {
     Token* result = _malloc(sizeof(Token));
@@ -303,8 +303,8 @@ Token* Token_new() {
 }
 struct Token_array {
     int32_t len;
-    Token** data;
     int32_t _refCount;
+    Token** data;
 };
 Token_array* Token_array_new(uint32_t len) {
     Token_array* result = _malloc(sizeof(Token_array));
@@ -317,9 +317,9 @@ Token_array* Token_array_new(uint32_t len) {
     return result;
 }
 struct org_bau_List_List_i8 {
+    int32_t _refCount;
     i8_array* array;
     int64_t size;
-    int32_t _refCount;
 };
 org_bau_List_List_i8* org_bau_List_List_i8_new() {
     org_bau_List_List_i8* result = _malloc(sizeof(org_bau_List_List_i8));
@@ -338,9 +338,9 @@ match match_new() {
     return result;
 }
 struct org_bau_List_List_Token {
+    int32_t _refCount;
     Token_array* array;
     int64_t size;
-    int32_t _refCount;
 };
 org_bau_List_List_Token* org_bau_List_List_Token_new() {
     org_bau_List_List_Token* result = _malloc(sizeof(org_bau_List_List_Token));

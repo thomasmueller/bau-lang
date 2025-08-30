@@ -240,8 +240,8 @@ typedef struct float_array float_array;
 struct float_array;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -255,8 +255,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -270,8 +270,8 @@ int_array* int_array_new(uint32_t len) {
 }
 struct float_array {
     int32_t len;
-    double* data;
     int32_t _refCount;
+    double* data;
 };
 float_array* float_array_new(uint32_t len) {
     float_array* result = _malloc(sizeof(float_array));

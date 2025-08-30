@@ -246,8 +246,8 @@ typedef struct HashMap_str_str HashMap_str_str;
 struct HashMap_str_str;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -261,8 +261,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -284,8 +284,8 @@ str str_new() {
 }
 struct str_array {
     int32_t len;
-    str* data;
     int32_t _refCount;
+    str* data;
 };
 str_array* str_array_new(uint32_t len) {
     str_array* result = _malloc(sizeof(str_array));
@@ -298,11 +298,11 @@ str_array* str_array_new(uint32_t len) {
     return result;
 }
 struct HashMap_int_int {
+    int32_t _refCount;
     int64_t size;
     int_array* keys;
     int_array* values;
     int_array* hashes;
-    int32_t _refCount;
 };
 HashMap_int_int* HashMap_int_int_new() {
     HashMap_int_int* result = _malloc(sizeof(HashMap_int_int));
@@ -311,11 +311,11 @@ HashMap_int_int* HashMap_int_int_new() {
     return result;
 }
 struct HashMap_str_str {
+    int32_t _refCount;
     int64_t size;
     str_array* keys;
     str_array* values;
     int_array* hashes;
-    int32_t _refCount;
 };
 HashMap_str_str* HashMap_str_str_new() {
     HashMap_str_str* result = _malloc(sizeof(HashMap_str_str));

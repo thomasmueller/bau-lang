@@ -242,8 +242,8 @@ typedef struct string_array string_array;
 struct string_array;
 struct i8_array {
     int32_t len;
-    int8_t* data;
     int32_t _refCount;
+    int8_t* data;
 };
 i8_array* i8_array_new(uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -257,8 +257,8 @@ i8_array* i8_array_new(uint32_t len) {
 }
 struct int_array {
     int32_t len;
-    int64_t* data;
     int32_t _refCount;
+    int64_t* data;
 };
 int_array* int_array_new(uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
@@ -280,8 +280,8 @@ string string_new() {
 }
 struct string_array {
     int32_t len;
-    string* data;
     int32_t _refCount;
+    string* data;
 };
 string_array* string_array_new(uint32_t len) {
     string_array* result = _malloc(sizeof(string_array));
