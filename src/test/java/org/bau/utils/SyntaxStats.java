@@ -38,7 +38,8 @@ public class SyntaxStats {
     }
 
     public static void main(String... args) throws IOException {
-        String[] languages = { "Python:py", "Bau:bau", "Swift:swift", "Kotlin:kt", "C:c", "Go:go", "Java:java", "Rust:rs" };
+        String[] languages = { "Python:py", "Bau:bau", "Nim:nim", "Swift:swift",
+                "Vlang:v", "Kotlin:kt", "Go:go", "C:c", "Java:java", "Rust:rs", "Zig:zig" };
         String[] files = { "BinaryTrees", "Fannkuch", "Mandelbrot", "Munchausen", "PiDigits" };
 
         LinkedHashMap<String, Stats> stats = new LinkedHashMap<>();
@@ -125,7 +126,7 @@ public class SyntaxStats {
                                     identifierStart = true;
                                 }
                                 alphaNumeric++;
-                            } else if ("+\\\"'-(){}[]|&.,#*/%=<>!?!:;,.$@".indexOf(c) >= 0) {
+                            } else if ("+\\\"'-(){}[]|&.,#*/%=<>!?!:;,.$@^`".indexOf(c) >= 0) {
                                 identifier = identifierStart = false;
                                 special++;
                             } else {

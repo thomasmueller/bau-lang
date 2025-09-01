@@ -5,10 +5,14 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-
 https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
 
+Stack Traces
+Rust: https://news.ycombinator.com/item?id=45032898
 
+Compare with other languages: Nim, Zig, V
+
+CBOR = Concise Binary Object Representation (binary json)
 
 documentation on how to run the playground by downloading the files and run using a browser.
 

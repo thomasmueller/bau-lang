@@ -709,12 +709,29 @@ public class Program {
             buff.append("void _traitInit() {\n");
             for (DataType t : dataTypeMap.values()) {
                 if (t.isUsed() && !t.traits.isEmpty()) {
-                    int n = 3;
+                    ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
+                    for (String tr : t.traits) {
+                        Trait trait = dataTypeMap.get(tr).traitDefinition;
+                        for (FunctionDefinition def : trait.functions) {
+                            traitFunctions.add(def);
+                        }
+                    }
+                    int todo;
+                    // sort by slot and function id
                     String name = "_typeMeta" + t.nameC();
-                    buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + n + " * sizeof(int));\n"));
+                    buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + traitFunctions.size() + " * sizeof(int));\n"));
                     buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
-                    for (int i = 0; i < n; i++) {
-                        buff.append(Statement.indent(name + "->vtable[" + i + "] = _traitInit;\n"));
+                    int i = 0;
+                    for (FunctionDefinition tf : traitFunctions) {
+                        FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                        String n;
+                        if (f2 == null) {
+                            n = "null";
+                        } else {
+                            n = "(void (*)())" + f2.functionNameC();
+                        }
+                        buff.append(Statement.indent(name + "->vtable[" + i + "] = " + n + ";\n"));
+                        i++;
                     }
                 }
             }

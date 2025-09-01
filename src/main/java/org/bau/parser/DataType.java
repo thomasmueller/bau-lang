@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -62,7 +63,9 @@ public class DataType {
     public ArrayList<DataType> functionPointerArgs;
     public DataType functionPointerReturnType;
     public ArrayList<String> traits = new ArrayList<>();
+    public ArrayList<DataType> traitTypes = new ArrayList<>();
     public Trait traitDefinition;
+    public HashSet<DataType> implementingTypes = new HashSet<>();
 
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
@@ -173,6 +176,17 @@ public class DataType {
             throw new IllegalStateException();
         }
         this.used = true;
+        if (!traits.isEmpty()) {
+            if (traitTypes.isEmpty()) {
+                for (String t : traits) {
+                    int todo;
+                    // traits can be in modules...
+                    DataType tm = program.getType(null, t);
+                    tm.implementingTypes .add(this);
+                    traitTypes.add(tm);
+                }
+            }
+        }
         if (isArray()) {
             arrayBaseType.used(program);
         }

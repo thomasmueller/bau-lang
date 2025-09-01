@@ -32,6 +32,7 @@ public class FunctionDefinition {
     final int lineOffset;
     public boolean isConstructor;
     public boolean isFunctionPointer;
+    private int functionId;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;
@@ -57,6 +58,23 @@ public class FunctionDefinition {
         return buff.toString();
     }
 
+    public String functionNameC() {
+        StringBuilder buff = new StringBuilder();
+        if (module != null) {
+            buff.append(Program.esc(module).replace(".", "_") + "_");
+        }
+        if (callType != null) {
+            buff.append(callType.idC()).append('_');
+        }
+        buff.append(nameC() + "_");
+        if (varArgs) {
+            buff.append("var");
+        } else {
+            buff.append(parameters.size());
+        }
+        return buff.toString();
+    }
+
     public String headerToC() {
         StringBuilder buff = new StringBuilder();
         if (builtIn) {
@@ -70,18 +88,7 @@ public class FunctionDefinition {
             buff.append(returnType.toC());
         }
         buff.append(' ');
-        if (module != null) {
-            buff.append(Program.esc(module).replace(".", "_") + "_");
-        }
-        if (callType != null) {
-            buff.append(callType.idC()).append('_');
-        }
-        buff.append(nameC() + "_");
-        if (varArgs) {
-            buff.append("var");
-        } else {
-            buff.append(parameters.size());
-        }
+        buff.append(functionNameC());
         buff.append('(');
         int i = 0;
         for (Variable v : parameters) {
@@ -127,6 +134,34 @@ public class FunctionDefinition {
         }
     }
 
+    private String getFunctionPointerDeclaration(String name) {
+        StringBuilder buff2 = new StringBuilder();
+        if (exceptionType != null) {
+            buff2.append(getExceptionStruct());
+        } else if (returnType == null) {
+            buff2.append("void");
+        } else {
+            buff2.append(returnType.toC());
+        }
+        buff2.append(" (*");
+        buff2.append(name);
+        buff2.append(")(");
+        int i = 0;
+        for (Variable v : parameters) {
+            if (i++ > 0) {
+                buff2.append(", ");
+            }
+            if (varArgs && i == parameters.size()) {
+                buff2.append("int,...");
+                break;
+            } else {
+                buff2.append(v.type().toC());
+            }
+        }
+        buff2.append(")");
+        return buff2.toString();
+    }
+
     public String toC(ProgramContext context) {
         if (builtIn) {
             return "";
@@ -134,11 +169,33 @@ public class FunctionDefinition {
         StringBuilder buff = new StringBuilder();
         buff.append(headerToC());
         buff.append(" {\n");
-
-        if (this.callType != null && callType.traitDefinition != null) {
-            buff.append(Statement.indent("// indirect call\n"));
-            buff.append(Statement.indent("printf(\"" + name + " called with type=%s\\n\", this->_type->typeName);\n"));
-
+        if (callType != null && callType.traitDefinition != null) {
+            // todo functionId needs to be set
+            int todo;
+            StringBuilder buff2 = new StringBuilder();
+            buff2.append(getFunctionPointerDeclaration("_"));
+            buff2.append(" = (");
+            buff2.append(getFunctionPointerDeclaration(""));
+            buff2.append(") this->_type->vtable[" + functionId + "];\n");
+            buff.append(Statement.indent(buff2.toString()));
+            buff2 = new StringBuilder();
+            buff2.append(Statement.indent("if (_) {\n"));
+            StringBuilder buff3 = new StringBuilder();
+            if (exceptionType != null || returnType != null) {
+                buff3.append("return ");
+            }
+            buff3.append("_(");
+            int i = 0;
+            for (Variable v : parameters) {
+                if (i++ > 0) {
+                    buff3.append(", ");
+                }
+                buff3.append(v.nameC());
+            }
+            buff3.append(");\n");
+            buff2.append(Statement.indent(buff3.toString()));
+            buff.append(Statement.indent(buff2.toString()));
+            buff.append(Statement.indent("}\n"));
             int test;
             // TODO if list.isEmpty(), then call the virtual function.
             // if not, then check if there is a virtual function, and call it,
@@ -148,11 +205,7 @@ public class FunctionDefinition {
                 buff.append("}\n");
                 return buff.toString();
             }
-
         }
-
-
-
         if (cCode != null) {
             buff.append(Statement.indent(cCode));
         }
@@ -323,6 +376,12 @@ public class FunctionDefinition {
             return;
         }
         used = true;
+        if (callType != null) {
+            for (DataType t : callType.implementingTypes) {
+                FunctionDefinition fd = program.getFunctionIfExists(t, t.module, name, parameters.size());
+                fd.used(program);
+            }
+        }
         if (macro) {
             throw new IllegalStateException();
         }

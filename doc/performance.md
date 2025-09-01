@@ -23,17 +23,17 @@ which results in simple code and high productivity.
 
 <img src="performance.png">
 
-| Benchmark              |  Bau |   C  |  Go  | Java | PyPy | Rust | Swift|
-|------------------------|------|------|------|------|------|------|------|
-| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  8.5 |  5.9 | 12.0 |
-| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  5.2 |  2.0 |  2.3 |
-| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 | 15.4 |  1.8 |  1.9 |
-| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 |  2.3 |  1.5 |  7.7 |
-| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 | 14.9 |  3.8 | 17.0 |
+| Benchmark              |  Bau |   C  |  Go  | Java |  Nim | PyPy | Rust | Swift| Vlang|  Zig |
+|------------------------|------|------|------|------|------|------|------|------|------|------|
+| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  5.2 |  8.5 |  5.9 | 12.0 |  7.5 |  6.6 |
+| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  2.3 |  5.2 |  2.0 |  2.3 |  2.1 |  2.1 |
+| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 |  2.5 | 15.4 |  1.8 |  1.9 |  1.8 |  1.6 |
+| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 | 32.0 |  2.3 |  1.5 |  7.7 |  5.3 |  5.7 |
+| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 |  3.5 | 14.9 |  3.8 | 17.0 |  3.6 | 15.7 |
 
 (Runtime in seconds; lower is better. 
-For Python, PyPy is used; CPython is around 50 times slower.
 Measured on an Apple MacBook Pro M1.)
+For Python, PyPy is used; CPython is around 50 times slower.
 
 ### Disclaimer
 
@@ -80,6 +80,20 @@ Bau has a similar performance then other popular programming languages, speciall
 Which makes sense, because it is transpiled to C.
 It is sometimes slower, and sometimes faster, than Java, Go, and Rust.
 
+### Languages
+
+ * C: The default C compiler of the environment is used, which is Apple clang version 16.0.0 currently.
+ * Go: Version 1.24.4 darwin/arm64 is use.
+ * Java: OpenJDK version 24.0.2 is used.
+ * Nim: Version 2.2.4 is used.
+ * Python: PyPy is used; CPython is around 50 times slower. The version used is PyPy 7.3.19 with GCC Apple LLVM 16.0.0.
+ * Rust: RustC version 1.75.0 is used.
+ * Swift: Apple Swift version 6.0.3 is used.
+ * Vlang: Version 0.4.11 is used. Notice that V used the <a href="https://en.wikipedia.org/wiki/Boehm_garbage_collector">Boehm GC library</a>.
+ * Zig: Version 0.15.1. Note that Zig is not a memory-safe language, similar to C.
+
+### Benchmarks
+
 #### Binary Trees
 
 This test 
@@ -102,7 +116,6 @@ It unclear why the C version is a little bit slower then the C version created f
 The command line argument 11 is used instead of 12 as in the original test,
 to speed up running the test; however the relative performance is unaffected.
 
-
 #### SpeedTest
 
 This test is about the <a href="https://github.com/jabbalaci/SpeedTests">Münchausen numbers problem</a>.
@@ -114,14 +127,15 @@ The same settings are used as in the original benchmark.
 
 This uses a big integer library that computes
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/pidigits.html#pidigits">10'000 digits of Pi</a>.
+The same settings are used as in the original benchmark.
+
 Performance depends mostly on the big integer library.
 The big integer library of Go, for example, is highly optimized, and using platform-specific assembly.
 The Rust library is highly optimized as well, but the C "gmp" library is the fastest.
 The Swift library "attaswift/BigInt" is used.
-The Bau bigint library is around 400 lines of code, modelled after the Java library,
-without platform-specific code.
-Bau could easily use the "gmp" library as well.
-The same settings are used as in the original benchmark.
+For Nim, nim-lang/bigints is used, where multiplication and division are not optimized for performance.
+The Bau bigint library is around 400 lines of code, modelled after the Java library, without platform-specific code.
+Bau, as well as other languages, could easily use the "gmp" library as well.
 
 #### Mandelbrot
 
@@ -207,6 +221,21 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
     for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
     
+    # Nim
+    cp src/test/resources/org/bau/benchmarks/*.nim target/benchmarks
+    for i in {1..2}; do time (
+        nim c -d:release target/benchmarks/binaryTrees.nim
+        nim c -d:release target/benchmarks/fannkuch.nim
+        nim c -d:release target/benchmarks/munchausen.nim
+        nim c -d:release target/benchmarks/piDigits.nim
+        nim c -d:release target/benchmarks/mandelbrot.nim
+    ); done
+    for i in {1..3}; do time ./target/benchmarks/binaryTrees 20; done
+    for i in {1..3}; do time ./target/benchmarks/fannkuch 11; done
+    for i in {1..3}; do time ./target/benchmarks/munchausen; done
+    for i in {1..3}; do time ./target/benchmarks/piDigits 10000 > out.txt; done
+    for i in {1..3}; do time ./target/benchmarks/mandelbrot 8000 > out.tiff; done
+    
     # PyPy
     for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
     for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
@@ -258,4 +287,34 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
     for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
+    
+    # Vlang
+    cp src/test/resources/org/bau/benchmarks/*.v target/benchmarks
+    for i in {1..2}; do time (
+        ./v -prod -force-bounds-checking target/benchmarks/binaryTrees.v
+        ./v -prod -force-bounds-checking target/benchmarks/fannkuch.v
+        ./v -prod -force-bounds-checking target/benchmarks/munchausen.v
+        ./v -prod -force-bounds-checking -enable-globals target/benchmarks/piDigits.v
+        ./v -prod -force-bounds-checking target/benchmarks/mandelbrot.v
+    ); done
+    for i in {1..3}; do time ./target/benchmarks/binaryTrees 20; done
+    for i in {1..3}; do time ./target/benchmarks/fannkuch 11; done
+    for i in {1..3}; do time ./target/benchmarks/munchausen; done
+    for i in {1..3}; do time ./target/benchmarks/piDigits > out.txt; done
+    for i in {1..3}; do time ./target/benchmarks/mandelbrot 8000 > out.tiff; done
+
+    # Zig
+    cp src/test/resources/org/bau/benchmarks/*.zig target/benchmarks
+    for i in {1..2}; do time (
+        zig build-exe -O ReleaseSafe target/benchmarks/binaryTrees.zig
+        zig build-exe -O ReleaseSafe target/benchmarks/fannkuch.zig
+        zig build-exe -O ReleaseSafe target/benchmarks/munchausen.zig
+        zig build-exe -O ReleaseSafe target/benchmarks/piDigits.zig
+        zig build-exe -O ReleaseSafe target/benchmarks/mandelbrot.zig
+    ); done
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./piDigits > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
     

@@ -101,7 +101,6 @@ public class Assignment implements Statement {
                 set.add(type);
             }
         }
-        int test;
         if (memoryType == MemoryType.OWNER) {
             // re-assignment of owned variable
             if (!initial) {
