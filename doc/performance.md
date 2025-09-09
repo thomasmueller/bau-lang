@@ -162,159 +162,158 @@ Using Make:
 
 Compiling and Running the C, Java, and Bau versions:
 
-    rm -rf target/benchmarks
-    mkdir -p target/benchmarks
+    mkdir -p target
+    cd target
 
-    # Bau
-    cp src/test/resources/org/bau/benchmarks/*.bau target/benchmarks
-    for i in {1..2}; do time java -jar target/bau.jar -O3 -useTmMalloc false target/benchmarks/*.bau; done
-    for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
-    for i in {1..3}; do time target/benchmarks/fannkuch 11; done
-    for i in {1..3}; do time target/benchmarks/munchausen; done
-    for i in {1..3}; do time target/benchmarks/piDigits > out.txt; done
-    for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
-    java -jar target/bau.jar -useTmMalloc true -O3 target/benchmarks/*.bau
-    for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time target/benchmarks/binaryTreesRefCount 20; done
+    echo "== Bau ============"
+    cp ../src/test/resources/org/bau/benchmarks/bau/* .
+    find . -type f ! -name "*.?*" -delete
+    java -jar bau.jar -O3 -useTmMalloc false *.bau
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./binaryTreesRefCount 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./piDigits > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    java -jar bau.jar -useTmMalloc true -O3 *.bau
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./binaryTreesRefCount 20; done
 
-    # C
-    cp src/test/resources/org/bau/benchmarks/*.c target/benchmarks
-    for i in {1..2}; do time (
-        gcc -O3 target/benchmarks/binaryTrees.c -o target/benchmarks/binaryTrees
-        gcc -O3 target/benchmarks/fannkuch.c -o target/benchmarks/fannkuch
-        gcc -O3 target/benchmarks/munchausen.c -o target/benchmarks/munchausen
-        gcc -O3 target/benchmarks/piDigits.c -o target/benchmarks/piDigits -I/opt/homebrew/include -L/opt/homebrew/lib -lgmp
-        gcc -O3 target/benchmarks/mandelbrot.c -o target/benchmarks/mandelbrot
-    ); done
-    for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time target/benchmarks/fannkuch 11; done
-    for i in {1..3}; do time target/benchmarks/munchausen; done
-    for i in {1..3}; do time target/benchmarks/piDigits 10000 > out.txt; done
-    for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
+    echo "== C ============"
+    cp ../src/test/resources/org/bau/benchmarks/c/* .
+    find . -type f ! -name "*.?*" -delete
+    gcc -O3 binaryTrees.c -o binaryTrees
+    gcc -O3 fannkuch.c -o fannkuch
+    gcc -O3 munchausen.c -o munchausen
+    gcc -O3 piDigits.c -o piDigits -I/opt/homebrew/include -L/opt/homebrew/lib -lgmp
+    gcc -O3 mandelbrot.c -o mandelbrot
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./piDigits 10000 > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
-    # Go
-    cp src/test/resources/org/bau/benchmarks/*.go target/benchmarks
-    for i in {1..2}; do time (
-        go build -ldflags="-s -w" target/benchmarks/binaryTrees.go
-        go build -ldflags="-s -w" target/benchmarks/fannkuch.go
-        go build -ldflags="-s -w" target/benchmarks/munchausen.go
-        go build -ldflags="-s -w" target/benchmarks/piDigits.go
-        go build -ldflags="-s -w" target/benchmarks/mandelbrot.go
-    ); done
+    echo "== Go ============"
+    cp ../src/test/resources/org/bau/benchmarks/go/* .
+    find . -type f ! -name "*.?*" -delete
+    go build -ldflags="-s -w" binaryTrees.go
+    go build -ldflags="-s -w" fannkuch.go
+    go build -ldflags="-s -w" munchausen.go
+    go build -ldflags="-s -w" piDigits.go
+    go build -ldflags="-s -w" mandelbrot.go
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
-    # Java
-    for i in {1..2}; do time javac src/test/java/org/bau/benchmarks/*.java -d target/benchmarks; done
-    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
-    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
-    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
-    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
-    time java -cp target/benchmarks -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
-    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.BinaryTrees 20; done
-    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Fannkuch 11; done
-    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Munchausen; done
-    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.PiDigits 10000 > out.txt; done
-    for i in {1..3}; do time java -Xmx100m -cp target/benchmarks org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
+    echo "== Java ============"
+    javac ../src/test/java/org/bau/benchmarks/*.java -d .
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Fannkuch 11
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.BinaryTrees 20; done
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Fannkuch 11; done
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Munchausen; done
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.PiDigits 10000 > out.txt; done
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
     
-    # Nim
-    cp src/test/resources/org/bau/benchmarks/*.nim target/benchmarks
-    for i in {1..2}; do time (
-        nim c -d:release target/benchmarks/binaryTrees.nim
-        nim c -d:release target/benchmarks/fannkuch.nim
-        nim c -d:release target/benchmarks/munchausen.nim
-        nim c -d:release target/benchmarks/piDigits.nim
-        nim c -d:release target/benchmarks/mandelbrot.nim
-    ); done
-    for i in {1..3}; do time ./target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time ./target/benchmarks/fannkuch 11; done
-    for i in {1..3}; do time ./target/benchmarks/munchausen; done
-    for i in {1..3}; do time ./target/benchmarks/piDigits 10000 > out.txt; done
-    for i in {1..3}; do time ./target/benchmarks/mandelbrot 8000 > out.tiff; done
-    
-    # PyPy
-    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
-    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
-    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/munchausen.py; done
-    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
-    for i in {1..3}; do time pypy3.10 src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
-    
-    # Rust
-    cp src/test/resources/org/bau/benchmarks/*.rs target/benchmarks
-    rm -rf target/benchmarks/rust
-    mkdir -p target/benchmarks/rust
-    cp -R src/test/resources/org/bau/benchmarks/rust target/benchmarks
-    for i in {1..2}; do time (
-        cd target/benchmarks/rust
-        cargo build --release
-        cd ../../..
-        rustc -C opt-level=3 target/benchmarks/binaryTrees.rs
-        rustc -C opt-level=3 target/benchmarks/fannkuch.rs
-        rustc -C opt-level=3 target/benchmarks/munchausen.rs
-        rustc -C opt-level=3 target/benchmarks/mandelbrot.rs
-    ); done
+    echo "== Nim ============"
+    cp ../src/test/resources/org/bau/benchmarks/nim/* .
+    find . -type f ! -name "*.?*" -delete
+    nim c -d:release binaryTrees.nim
+    nim c -d:release fannkuch.nim
+    nim c -d:release munchausen.nim
+    nim c -d:release piDigits.nim
+    nim c -d:release mandelbrot.nim
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
-    for i in {1..3}; do time target/benchmarks/rust/target/release/pi_digits > out.txt; done
+    for i in {1..3}; do time ./piDigits 10000 > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    
+    echo "== Python via PyPy ============"
+    cp ../src/test/resources/org/bau/benchmarks/python/* .
+    for i in {1..3}; do time pypy3.10 binaryTrees.py 20; done
+    for i in {1..3}; do time pypy3.10 fannkuch.py 11; done
+    for i in {1..3}; do time pypy3.10 munchausen.py; done
+    for i in {1..3}; do time pypy3.10 piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time pypy3.10 mandelbrot.py 8000 > out.tiff; done
+    
+    echo "== Rust ============"
+    cp ../src/test/resources/org/bau/benchmarks/rust/*.rs .
+    find . -type f ! -name "*.?*" -delete
+    rm -rf rust
+    mkdir -p rust
+    cp -R ../src/test/resources/org/bau/benchmarks/rust .
+    cd rust
+    cargo build --release
+    cd ..
+    rustc -C opt-level=3 binaryTrees.rs
+    rustc -C opt-level=3 fannkuch.rs
+    rustc -C opt-level=3 munchausen.rs
+    rustc -C opt-level=3 mandelbrot.rs
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
-    # Swift
-    cp src/test/resources/org/bau/benchmarks/*.swift target/benchmarks
-    mkdir -p target/benchmarks/swift
-    cp -R src/test/resources/org/bau/benchmarks/swift target/benchmarks
-    cd target/benchmarks/swift/piDigits
+    echo "== Swift ============"
+    cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .
+    find . -type f ! -name "*.?*" -delete
+    mkdir -p swift
+    cp -R ../src/test/resources/org/bau/benchmarks/swift .
+    cd swift/piDigits
     swift build -c release
     cp .build/arm64-apple-macosx/release/piDigits ../..
-    cd ../../../..
-    swiftc -O target/benchmarks/binaryTrees.swift -o target/benchmarks/binaryTrees
-    swiftc -O target/benchmarks/fannkuch.swift -o target/benchmarks/fannkuch
-    swiftc -O target/benchmarks/munchausen.swift -o target/benchmarks/munchausen
-    swiftc -O target/benchmarks/mandelbrot.swift -o target/benchmarks/mandelbrot
-    for i in {1..3}; do time target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time target/benchmarks/fannkuch 11; done
-    for i in {1..3}; do time target/benchmarks/munchausen; done
-    for i in {1..3}; do time target/benchmarks/piDigits 10000 > out.txt; done
-    for i in {1..3}; do time target/benchmarks/mandelbrot 8000 > out.tiff; done
+    cd ../..
+    swiftc -O binaryTrees.swift -o binaryTrees
+    swiftc -O fannkuch.swift -o fannkuch
+    swiftc -O munchausen.swift -o munchausen
+    swiftc -O mandelbrot.swift -o mandelbrot
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./piDigits 10000 > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
-    # Python
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/binaryTrees.py 20; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/fannkuch.py 11; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/piDigits.py 10000 > out.txt; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/munchausen.py; done
-    for i in {1..3}; do time python src/test/resources/org/bau/benchmarks/mandelbrot.py 8000 > out.tiff; done
-    
-    # Vlang
-    cp src/test/resources/org/bau/benchmarks/*.v target/benchmarks
-    for i in {1..2}; do time (
-        ./v -prod -force-bounds-checking target/benchmarks/binaryTrees.v
-        ./v -prod -force-bounds-checking target/benchmarks/fannkuch.v
-        ./v -prod -force-bounds-checking target/benchmarks/munchausen.v
-        ./v -prod -force-bounds-checking -enable-globals target/benchmarks/piDigits.v
-        ./v -prod -force-bounds-checking target/benchmarks/mandelbrot.v
-    ); done
-    for i in {1..3}; do time ./target/benchmarks/binaryTrees 20; done
-    for i in {1..3}; do time ./target/benchmarks/fannkuch 11; done
-    for i in {1..3}; do time ./target/benchmarks/munchausen; done
-    for i in {1..3}; do time ./target/benchmarks/piDigits > out.txt; done
-    for i in {1..3}; do time ./target/benchmarks/mandelbrot 8000 > out.tiff; done
-
-    # Zig
-    cp src/test/resources/org/bau/benchmarks/*.zig target/benchmarks
-    for i in {1..2}; do time (
-        zig build-exe -O ReleaseSafe target/benchmarks/binaryTrees.zig
-        zig build-exe -O ReleaseSafe target/benchmarks/fannkuch.zig
-        zig build-exe -O ReleaseSafe target/benchmarks/munchausen.zig
-        zig build-exe -O ReleaseSafe target/benchmarks/piDigits.zig
-        zig build-exe -O ReleaseSafe target/benchmarks/mandelbrot.zig
-    ); done
+    echo "== Vlang ============"
+    cp ../src/test/resources/org/bau/benchmarks/v/* .
+    find . -type f ! -name "*.?*" -delete
+    ./v -prod -force-bounds-checking binaryTrees.v
+    ./v -prod -force-bounds-checking fannkuch.v
+    ./v -prod -force-bounds-checking munchausen.v
+    ./v -prod -force-bounds-checking -enable-globals piDigits.v
+    ./v -prod -force-bounds-checking mandelbrot.v
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+
+    echo "== Zig ============"
+    cp ../src/test/resources/org/bau/benchmarks/zig/* .
+    find . -type f ! -name "*.?*" -delete
+    zig build-exe -O ReleaseSafe binaryTrees.zig
+    zig build-exe -O ReleaseSafe fannkuch.zig
+    zig build-exe -O ReleaseSafe munchausen.zig
+    zig build-exe -O ReleaseSafe piDigits.zig
+    zig build-exe -O ReleaseSafe mandelbrot.zig
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..3}; do time ./fannkuch 11; done
+    for i in {1..3}; do time ./munchausen; done
+    for i in {1..3}; do time ./piDigits > out.txt; done
+    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+
+    echo "== Python (CPython) ============"
+    cp ../src/test/resources/org/bau/benchmarks/python/* .
+    for i in {1..3}; do time python binaryTrees.py 20; done
+    for i in {1..3}; do time python fannkuch.py 11; done
+    for i in {1..3}; do time python piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time python munchausen.py; done
+    for i in {1..3}; do time python mandelbrot.py 8000 > out.tiff; done
     
+    cd ..

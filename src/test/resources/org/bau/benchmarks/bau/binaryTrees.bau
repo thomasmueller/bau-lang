@@ -1,0 +1,51 @@
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+import org.bau.Math
+import org.bau.Env
+
+fun main()
+    n := 10
+    if Env.argCount() > 1
+        n = Math.parseInt(Env.arg(1))
+    minDepth : 4
+    maxDepth := n
+    if minDepth + 2 > n
+        maxDepth = minDepth + 2
+    stretchDepth : maxDepth + 1
+    stretch(stretchDepth)
+    longLived : buildTree(maxDepth)
+    depth := minDepth
+    while depth <= maxDepth
+        iterations := 1 << (maxDepth - depth + minDepth)
+        sum := 0
+        for i := until(iterations)
+            sum += count(depth)
+        println(iterations '\t trees of depth ' depth '\t check: ' sum)
+        depth += 2
+    println('long lived tree of depth ' maxDepth '\t check: ' longLived.nodeCount())
+
+fun stretch(depth int)
+    println('stretch tree of depth ' depth '\t check: ' count(depth))
+
+fun count(depth int) int
+    return buildTree(depth).nodeCount()
+
+type Tree
+    left Tree+?
+    right Tree+?
+
+fun buildTree(depth int) Tree+
+    if depth = 0
+        return Tree+(null, null)
+    return Tree+(buildTree(depth - 1), buildTree(depth - 1))
+
+fun Tree+ nodeCount() int
+    result := 1
+    l : &left
+    if l
+        result += l.nodeCount()
+    r : &right
+    if r
+        result += r.nodeCount()
+    return result

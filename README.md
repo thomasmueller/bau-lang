@@ -6,19 +6,19 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 ## Highlights
 
 * Easy to learn and use.
-* <a href="doc/conciseSyntax.md">Concise syntax inspired by Python.</a>
+* <a href="doc/conciseSyntax.md">Concise syntax inspired by Python</a>.
 * <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * Memory-safe. Automatic memory management using reference counting by default.
 * Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
-* Avoid runtime array bound checks using static analysis.
+* Avoid runtime array bounds checks using static analysis.
 * Null safety: null pointer errors are prevented at compile time.
 
 ## Why
 
 Our <a href="doc/why.md">vision</a> is:
 We want to have a language as easy and concise as Python,
-with the speed and ability to run really everywhere like C,
+with the speed and ability to run really everywhere like C
 and the safety of Rust and Java.
 
 ## Tools and Documentation
@@ -26,8 +26,8 @@ and the safety of Rust and Java.
 * <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 * <a href="https://thomasmueller.github.io/bau-lang/convert-to-bau.html">Convert to Bau</a>
 * <a href="doc/transpile.md">Transpiler</a>
-* <a href="doc/features.md">Features and Non-Features</a>.
-* <a href="doc/tour.md">Tour</a>.
+* <a href="doc/features.md">Features and Non-Features</a>
+* <a href="doc/tour.md">Tour</a>
 
 ## Example
 
@@ -47,7 +47,7 @@ Control flow
 * `throw` `catch` `switch` `case`
 
 Assignment, comparison, operations
-* `:` constant, `:=`  variable
+* `:` constant, `:=` variable
 * `=` `+=` `-=` `*=` `/=` etc. update
 * `=` `<` `>` `<=` `>=` `<>`
 * `and` `or` `not` `+` `-` `*` `/` `%`
@@ -72,12 +72,13 @@ Identifiers contain letters, digits, and `_`.
     x += 1    # shortcut for x = x + 1
 
 Variables need to be defined before they are used.
-Variables are at the top level (without indentation) are global.
+Variables outside of functions (without indentation) are global.
 Variables without value require a type:
 
     x int
 
-A list of variables can be declared and initialized:
+A list of variables can be declared and initialized.
+Here, zero is assigned to both variables:
 
     x, y := 0
 
@@ -85,8 +86,8 @@ A list of variables can be declared and initialized:
 
 The built-in types are `int` `i32` `i16` `i8` (signed integer),
 and `float` `f32` (floating point).
-`int` can be restricted to a range using `0..`.
-Defaults are `int` and `float`; both are 64 bit.
+Defaults are `int` and `float`; both are 64-bit.
+`int` can be restricted to a range using `0..n`.
 Conversion functions change the type, and may truncate.
 
     c := i8(10)
@@ -96,6 +97,7 @@ Conversion functions change the type, and may truncate.
 `if` starts a condition.
 Spaces group statements into blocks.
 `elif` (else if) and `else` are optional.
+At expression level, `=` compares values.
 
     if a = 0
         println('zero')
@@ -103,6 +105,14 @@ Spaces group statements into blocks.
         println('one')
     else
         println('many')
+
+Non-zero numbers are considered true,
+and zero is considered false.
+For references, `null` is considered false,
+and not `null` is considered true.
+
+    if a
+        println('a is not zero')
 
 ### Loops
 
@@ -130,14 +140,24 @@ They may have a condition:
 
 ### Comments
 
-`#` starts a line comments; 
-two or more start and end a block comment.
+`#` starts a line comment.
 
     # Line comment
-    
+
+Two or more `#` start and end a block comment.
+
     ##
     Block comment
     ##
+
+Nesting is supported: commends started with multiple `#`
+end with the same count of `#`:
+
+    ###
+    Nested block comment
+    ##
+    more comments
+    ###
 
 Comments before types and functions are
 converted to documentation.
@@ -167,15 +187,40 @@ and may be indented.
         raw string with `
         ``
 
+### Optional Commas
+
+Commas are optional if expressions are simple.
+There is no string interpolation.
+
+    println('Hello ' name '!')
+    
+If expressions are complex, then `,` or `()` are needed:
+
+    println('Time: ' (millis / 1000) ' seconds')
+
 ### Operators
 
 `=` `<` `>` `<=` `>=` `<>` compare two values and return `1` or `0`.
-`not` inverses a comparison. `and` `or` combines comparisons;
+`not` inverts a comparison. `and` `or` combine comparisons;
 the right side is only evaluated when needed.
 Integer `+` `-` `*` wrap around on over- / underflow.
-`/` division by 0 returns max, min, or 0; `%` by 0 return 0.
+Integer `/` division by 0 returns max, min, or 0, for positive, negative,
+and 0 divisors, respectively. `%` by 0 returns 0.
 `&` `|` `^` `~` `<<` `>>` are bitwise and, or, xor, not, 
-shift right, and logical shift right: the leftmost bits become `0`.
+shift left, and logical shift right: the leftmost bits become `0`.
+For arithmetic shift right, unsigned division, and other operations,
+use the standard library, e.g. `org.bau.Math` and `org.bau.BigInt`.
+For floating point operations, the IEEE 754 standard is used.
+
+The operator precedence is:
+
+* `or`
+* `and`
+* `=` `<>` `<=` `>=` `<` `>`
+* `^` `&` `|`
+* `<<` `>>`
+* `+` `-`
+* `*` `/` `%`
 
 ### Functions
 
@@ -199,14 +244,15 @@ if the arguments are constants.
             sum += x[i]
         return sum
 
-    println('sum: ' sum(1 2 3))
+    println('sum: ' sum(1, 2, 3))
     for i := until(5)
         println(square(i))
 
 ### Template Functions
 
 Types can be passed as parameters, or implicitly.
-Internally, this functions are templates.
+Template type names use capital letters only (for example, `T`).
+Internally, these functions are templates.
 
     fun main()
         a : arrayOf(i8, 0, 1, 2, 3)
@@ -246,7 +292,7 @@ using `.source`:
     for i := until(10)
         assert(i < 5)
 
-### Arrays Access
+### Array Access
 
 To create a new array and then access it, use:
 
@@ -254,9 +300,9 @@ To create a new array and then access it, use:
     data[0] = 10
 
 Bounds are checked where needed.
-Access without runtime checks require that the compiler verifies correctness.
+Access without runtime checks requires that the compiler verifies correctness.
 Index variables with range restrictions allow this.
-For performance-critical code, use `[` `]!` to ensure
+For performance-critical code, use `[..]!` to ensure
 no runtime checks are done.
 The conditional `break` guarantees that `i` is within the bounds.
 
@@ -290,11 +336,45 @@ For each type, a constructor is automatically added,
 which has the non-nullable fields as arguments.
 
 Functions on built-in types, and arrays, are allowed.
+Functions on foreign types are only visible within
+the module where they are defined.
 
     fun int square() int
         return this * this
 
     println(12.square())
+
+### Enums
+
+Enums simplify defining unique constants.
+The first value starts with 0.
+
+    enum weekday
+        sunday
+        monday
+        tuesday
+        wednesday
+        thursday
+        friday
+        saturday
+        
+    for a := until(weekday.saturday + 1)
+        switch a
+        case weekday.sunday
+            println('sunday')
+        case weekday.monday
+            println('monday')
+        else
+            println('some other day: #' a)
+
+Values can be set:
+
+    enum month
+        january: 1
+        february
+        march
+
+Entries may have gaps.
 
 ### Template Types
 
@@ -303,6 +383,9 @@ Types can have parameters. Such types are called templates:
     type List(T)
         array T[]
         size int
+
+The following `List(T)(T[0])` is the constructor
+of `List(T)`, with an empty array of `T` as parameter. 
 
     fun newList(T type) List(T)
         return List(T)(T[0])
@@ -328,7 +411,8 @@ For value types and numbers, `null` means zero.
 ### Memory Management
 
 Objects are reference counted by default.
-To avoid cycles, explicitly set fields to `null`.
+To avoid cycles, explicitly set fields to `null`
+(there is no garbage collection).
 
     type Tree
         left Tree?
@@ -364,8 +448,10 @@ by adding `+` to the type, and borrow with `&`.
 ### Exceptions
 
 `throw` throws an exception. `catch` is needed,
-or the method needs `throws`.
+or the function needs `throws`.
 Custom exception types are allowed.
+Unlike in other languages, there is no explicit 
+`try`: the scope of `catch` is the preceding block.
 
     import org.bau.Exception
         exception
@@ -405,6 +491,7 @@ The name needs to match the file path, here `org/bau/Math.bau`:
 ### Custom Loops
 
 Libraries and users can define their own `for` loops using user-defined functions.
+There are two built-in loop functions: `until` and `range`.
 Such functions work like macros, as they are expanded at compile time.
 The loop is replaced during compilation with the function body.
 The variable `_` represents the current iteration value.
@@ -432,7 +519,10 @@ is equivalent to:
 
 Function pointers are variables that point to a function.
 They allow to call a function indirectly,
-which is useful for callbacks. Example:
+which is useful for callbacks.
+The syntax for function pointers matches the function declaration, 
+where the name of the function is replaced with `fun` and the
+parameter names are removed. Example:
 
     fun log(x int)
         println('value is ' x)
@@ -447,15 +537,15 @@ which is useful for callbacks. Example:
 
 Note: The trait implementation is work-in-progress.
 
-Traits (in other languages called interfaces, mixin, or prototype)
+Traits (in other languages called interfaces, mixins, or prototypes)
 contain a list of functions.
 
     trait Reader
         read() int
         size() int
 
-If a type implements the trait, it needs to declares these function,
-unless if the trait already has a default implementation.
+Types that implement a trait needs to declares all trait functions
+if the trait does not have a default implementation.
 
     fun Reader size()
         return -1
@@ -464,7 +554,10 @@ unless if the trait already has a default implementation.
         array int[]
         pos int
     
-    fun Memory read()
+    fun Memory read() int
+        x : array[pos]
+        pos += 1
+        return x
     
 Traits can require other traits; such traits inherit the functions
 of the required traits.

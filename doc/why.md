@@ -18,12 +18,9 @@ with no boilerplate slowing you down.
 ## Safety and Robustness
 
 Safety is built in from the ground up.
-Our design enforces memory safety at compile time,
-without any garbage collector or runtime.
-We use automatic reference counting by default 
-(eliminating unpredictable GC pauses)
-and static analysis so that null-pointer 
-or out-of-bounds errors are caught
+Our design enforces memory safety at compile time.
+Static analysis prevents null-pointer
+and out-of-bounds errors at compile time,
 before the program ever runs.
 
 The language provides compile-time null-safety (in the spirit of Kotlin)
@@ -39,3 +36,14 @@ We draw inspiration from Python’s emphasis on readability,
 Rust’s approach to memory safety and zero-cost abstractions,
 and modern features like compile-time null safety,
 aiming to unite them into one language.
+
+## Portability and Predictability
+
+The language does not require a runtime,
+a just-in-time compiler that is slow to start up,
+or a garbage collector.
+We use automatic reference counting by default 
+(eliminating unpredictable GC pauses).
+The generated C code does not require special
+libraries, and can be run easily
+and on any platform.

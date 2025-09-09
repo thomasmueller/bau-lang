@@ -300,6 +300,7 @@ public class Parser {
         functionContext.rewindStack(stackPos);
         program.addComment("trait " + type.toString(), comment);
         lastComment = null;
+        int id = 0;
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 FunctionDefinition def = new FunctionDefinition(getLine(lastPos));
@@ -313,6 +314,7 @@ public class Parser {
                 if (template) {
                     throw syntaxError("Template are not supported in traits");
                 }
+                def.traitFunctionId = id++;
                 type.traitDefinition.functions.add(def);
                 program.addFunction(def);
             }

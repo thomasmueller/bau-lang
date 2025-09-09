@@ -32,7 +32,7 @@ public class FunctionDefinition {
     final int lineOffset;
     public boolean isConstructor;
     public boolean isFunctionPointer;
-    private int functionId;
+    int traitFunctionId;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;
@@ -176,7 +176,7 @@ public class FunctionDefinition {
             buff2.append(getFunctionPointerDeclaration("_"));
             buff2.append(" = (");
             buff2.append(getFunctionPointerDeclaration(""));
-            buff2.append(") this->_type->vtable[" + functionId + "];\n");
+            buff2.append(") this->_type->vtable[" + traitFunctionId + "];\n");
             buff.append(Statement.indent(buff2.toString()));
             buff2 = new StringBuilder();
             buff2.append(Statement.indent("if (_) {\n"));

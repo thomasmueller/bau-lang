@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -450,6 +453,7 @@ public class Program {
             }
         }
         if (hasTraits) {
+            assignTraitSlots();
             buff.append("/* traits */\n");
             buff.append("typedef struct _typeMetaData _typeMetaData;\n");
             buff.append("typedef void (*_func)(void);\n");
@@ -716,8 +720,36 @@ public class Program {
                             traitFunctions.add(def);
                         }
                     }
-                    int todo;
-                    // sort by slot and function id
+                    for (FunctionDefinition tf : traitFunctions) {
+                        FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                        if (f2 != null) {
+                            tf.traitFunctionId = f2.traitFunctionId;
+                        }
+                    }
+                    Collections.sort(traitFunctions, new Comparator<FunctionDefinition>() {
+
+                        @Override
+                        public int compare(FunctionDefinition o1, FunctionDefinition o2) {
+                            if (o1 == o2) {
+                                return 0;
+                            }
+                            DataType t1 = o1.callType;
+                            DataType t2 = o2.callType;
+                            int result = Integer.compare(t1.traitSlot, t2.traitSlot);
+                            if (result != 0) {
+                                return result;
+                            }
+                            result = Integer.compare(o1.traitFunctionId, o2.traitFunctionId);
+                            if (result != 0) {
+                                return result;
+                            }
+                            if (o1.toString().equals(o2.toString())) {
+                                return 0;
+                            }
+                            throw new IllegalStateException("Same function id for different functions: " + o1.toString() + " " + o2.toString());
+                        }
+
+                    });
                     String name = "_typeMeta" + t.nameC();
                     buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + traitFunctions.size() + " * sizeof(int));\n"));
                     buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
@@ -730,9 +762,11 @@ public class Program {
                         } else {
                             n = "(void (*)())" + f2.functionNameC();
                         }
+System.out.println(tf.getFunctionId() + " " + tf.toString());
                         buff.append(Statement.indent(name + "->vtable[" + i + "] = " + n + ";\n"));
                         i++;
                     }
+                    int todoSlotOffsets;
                 }
             }
             buff.append("}\n");
@@ -849,6 +883,55 @@ public class Program {
             buff.append("\n*/\n");
         }
         return buff.toString();
+    }
+
+    private void assignTraitSlots() {
+        HashSet<DataType> traitsWithFunctions = new HashSet<>();
+        HashSet<DataType> typesWithTraitFunctions = new HashSet<>();
+        for (DataType t : dataTypeMap.values()) {
+            if (t.isUsed() && !t.traits.isEmpty()) {
+                for (DataType trait : t.traitTypes) {
+                    if (trait.isUsed() && !trait.traitDefinition.functions.isEmpty()) {
+                        typesWithTraitFunctions.add(t);
+                        traitsWithFunctions.add(trait);
+                    }
+                }
+            }
+        }
+        ArrayList<DataType> traitList = new ArrayList<>(traitsWithFunctions);
+        Collections.sort(traitList, new Comparator<DataType>() {
+            @Override
+            public int compare(DataType o1, DataType o2) {
+                int result = Integer.compare(
+                        o1.implementingTypes.size(),
+                        o2.implementingTypes.size());
+                if (result != 0) {
+                    return result;
+                }
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
+        // TODO this takes O(n^3) time,
+        // which might be too slow if there are many traits and types
+        for(DataType trait : traitList) {
+            BitSet usedSlots = new BitSet();
+            for (DataType t : trait.implementingTypes) {
+                for (DataType t2 : t.traitTypes) {
+                    if (t2.traitSlot < 0) {
+                        continue;
+                    }
+                    if (t2 == trait) {
+                        continue;
+                    }
+                    usedSlots.set(t2.traitSlot);
+                }
+            }
+            int i = 0;
+            while (usedSlots.get(i)) {
+                i++;
+            }
+            trait.traitSlot = i;
+        }
     }
 
     public String toMarkdown() {

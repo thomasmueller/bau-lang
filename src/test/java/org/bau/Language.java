@@ -7,10 +7,40 @@ https://github.com/NicoNex/tau
 
 https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
 
+
+Mini-Bau
+x: [0] # array length 1, one integer 0? or empty array?
+x[100]: 0 # array size 100 with value 0?
+fun sum(x: [0])
+fun factorial(x: 0)
+    if x <= 1
+        return 1
+    return x * factorial(x - 1)
+
+
+int value = 0
+b = a.get("x")
+if (b != null)
+  c = b.get("y")
+  if (c != null)
+    d = c.get("z")
+    if (d != null)
+      value = d.get()
+
+int value = 0
+loop
+  b = a.get("x")
+  break not b
+  c = b.get("y")
+  break not c
+  d = c.get("z")
+  break not d
+  value = d.get()
+  break
+value
+
 Stack Traces
 Rust: https://news.ycombinator.com/item?id=45032898
-
-Compare with other languages: Nim, Zig, V
 
 CBOR = Concise Binary Object Representation (binary json)
 

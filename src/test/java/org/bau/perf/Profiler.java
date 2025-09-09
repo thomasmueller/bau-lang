@@ -37,20 +37,14 @@ public class Profiler implements Runnable {
     private int pid;
 
     private final String[] ignoreLines = (
-            "java," +
-            "sun," +
-            "com.sun.," +
-            "com.google.common.," +
-            "com.mongodb.," +
-            "org.bson.,"
+            "java.," +
+            "sun.," +
+            "com.sun."
             ).split(",");
     private final String[] ignorePackages = (
-            "java," +
-            "sun," +
-            "com.sun.," +
-            "com.google.common.," +
-            "com.mongodb.," +
-            "org.bson"
+            "java.," +
+            "sun.," +
+            "com.sun."
             ).split(",");
     private final String[] ignoreThreads = (
             "java.lang.Object.wait," +
@@ -63,14 +57,12 @@ public class Profiler implements Runnable {
             "java.net.PlainSocketImpl.socketAccept," +
             "java.net.SocketInputStream.socketRead," +
             "java.net.SocketOutputStream.socketWrite," +
-            "org.eclipse.jetty.io.nio.SelectorManager$SelectSet.doSelect," +
             "sun.awt.windows.WToolkit.eventLoop," +
             "sun.misc.Unsafe.park," +
             "sun.nio.ch.EPollArrayWrapper.epollWait," +
             "sun.nio.ch.KQueueArrayWrapper.kevent0," +
             "sun.nio.ch.ServerSocketChannelImpl.accept," +
-            "dalvik.system.VMStack.getThreadStackTrace," +
-            "dalvik.system.NativeStart.run"
+            "sun.nio.ch.SocketDispatcher.read0"
             ).split(",");
 
     private volatile boolean stop;
@@ -338,9 +330,19 @@ public class Profiler implements Runnable {
         processList(list);
     }
 
+    private static final String removeModule(String s) {
+        int index = s.lastIndexOf('/');
+        if (index < 0) {
+            return s;
+        }
+        return s.substring(index + 1);
+    }
+
     private void processList(List<Object[]> list) {
         for (Object[] dump : list) {
-            if (startsWithAny(dump[0].toString(), ignoreThreads)) {
+            String el = dump[0].toString();
+            el = removeModule(el);
+            if (startsWithAny(el, ignoreThreads)) {
                 continue;
             }
             StringBuilder buff = new StringBuilder();
@@ -348,7 +350,8 @@ public class Profiler implements Runnable {
             String last = null;
             boolean packageCounts = false;
             for (int j = 0, i = 0; i < dump.length && j < depth; i++) {
-                String el = dump[i].toString();
+                el = dump[i].toString();
+                el = removeModule(el);
                 if (!el.equals(last) && !startsWithAny(el, ignoreLines)) {
                     last = el;
                     buff.append("at ").append(el).append(LINE_SEPARATOR);

@@ -66,6 +66,7 @@ public class DataType {
     public ArrayList<DataType> traitTypes = new ArrayList<>();
     public Trait traitDefinition;
     public HashSet<DataType> implementingTypes = new HashSet<>();
+    public int traitSlot = -1;
 
     public static boolean isGenericTypeName(String token) {
         return token != null && !token.isEmpty() &&
@@ -182,7 +183,7 @@ public class DataType {
                     int todo;
                     // traits can be in modules...
                     DataType tm = program.getType(null, t);
-                    tm.implementingTypes .add(this);
+                    tm.implementingTypes.add(this);
                     traitTypes.add(tm);
                 }
             }
