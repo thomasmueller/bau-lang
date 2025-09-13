@@ -1,0 +1,59 @@
+# The Computer Language Benchmarks Game
+# https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+fun fannkuch(n int) int
+    perm1: int[n]
+    for i < n
+        perm1[i]: i
+    perm: int[n]
+    count: int[n]
+    flips: 0
+    checksum: 0
+    nperm: 0
+    r: n
+    loop r > 0
+        loop r > 1
+            count[r - 1]: r
+            r +: -1
+        for i < n
+            perm[i]: perm1[i]
+        # Count flips and update max and checksum
+        f: 0
+        k: perm[0]
+        loop k <> 0
+            for i < perm.len
+                if 2 * i >= k
+                    exit
+                t: perm[i]
+                perm[i]: perm[k - i]
+                perm[k - i]: t
+            k: perm[0]
+            f +: 1
+        if f > flips
+            flips: f
+        if (nperm & 1) = 0
+            checksum +: f
+        else
+            checksum +: -f
+        # Use incremental change to generate another permutation
+        loop 1 = 1
+            if r = n
+                println(checksum)
+                ret flips
+            p0: perm1[0]
+            i: 0
+            loop i < r
+                j: i + 1
+                perm1[i]: perm1[j]
+                i: j
+            perm1[r]: p0
+            count[r] +: -1
+            if count[r] > 0
+                exit
+            r +: 1
+        nperm +: 1
+    ret flips
+
+fun main()
+    n: 10
+    println('Pfannkuchen(', n, ') is ', fannkuch(n))

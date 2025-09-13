@@ -1,7 +1,12 @@
-# The Bau Language
+# The Bau Programming Language
 
 Simplicity, speed, and safety - redefined.
 Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>.
+
+## News
+
+There is now a new "cousin" minimal, 
+tiny programming language named <a href="src/test/java/org/bau/ena/test/Ena.md">Ena</a>.
 
 ## Highlights
 
