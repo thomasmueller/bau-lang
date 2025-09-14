@@ -13,7 +13,7 @@
 
 typedef enum {
   OP_NOP, OP_MOV, OP_LOADI, OP_LOADR, OP_LOADS, OP_CONCAT, OP_LOAD, OP_STORE, OP_ALOADI, OP_ASTOREI, OP_ALOADT, OP_ALOADS, OP_ASTORET, OP_ASTORES, OP_ALOADR, OP_ASTORER,
-  OP_JMP, OP_JMPIF, OP_CALL, OP_RET, OP_NEWARR, OP_LENI, OP_LENF, OP_LENT, OP_LENS, OP_PRINT, OP_I2R, OP_I2S, OP_R2S, OP_NEWOBJ, OP_GETF, OP_SETF,
+  OP_JMP, OP_JMPIF, OP_CALL, OP_RET, OP_NEWARR, OP_LENI, OP_LENF, OP_LENT, OP_LENS, OP_PRINT, OP_I2R, OP_I2S, OP_R2S, OP_NEWOBJ, OP_GETF, OP_SETF, OP_ISNULL,
   OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD, OP_AND, OP_OR, OP_BAND, OP_BOR, OP_XOR, OP_SHL, OP_SHR, OP_EQ, OP_NE, OP_LT, OP_LE, OP_GT, OP_GE, OP_NEG,
   OP_FADD, OP_FSUB, OP_FMUL, OP_FDIV, OP_FNEG,
   OP_FCMP, OP_TCMP
@@ -72,7 +72,7 @@ static int load_bytecode(const char *path, Bytecode *bc){
 #define CHECK_TAG(V,T) ((V).tag == (T))
 #else
 #define SET_TAG(V,T) ((void)0)
-#define CHECK_TAG(V,T)    (1==1)
+#define CHECK_TAG(V,T)    (0)  /* never trust tag comparisons in no-tag mode */
 #endif
 
 
@@ -114,13 +114,13 @@ static Value run(Bytecode *bc, const char *entry){
 static Value *G = NULL; static int Glen = 0;
 static Value get_global(int idx){
   if (idx<0) {
-    Value v; return v;
+    Value v; SET_TAG(v, VT_NULL); v.u.i = 0; return v;
   }
   if (idx>=Glen){
     int newLen = idx+1;
     G = (Value*)realloc(G, newLen*sizeof(Value));
     for (int i=Glen;i<newLen;i++){
-      G[i].u.i=0;
+      G[i].u.i=0; SET_TAG(G[i], VT_NULL);
     }
     Glen=newLen;
   }
@@ -158,18 +158,19 @@ static void arr_dec_i(int id){ IntArr *ia = getIA(id); if (!ia) return; if (--ia
 static void arr_inc_r(int id){ RealArr *ra = getRA(id); if (ra) ra->rc++; }
 static void arr_dec_r(int id){ RealArr *ra = getRA(id); if (!ra) return; if (--ra->rc == 0){ if (ra->data) free(ra->data); ra->data=NULL; ra->len=0; g_heap_objects--; } }
 
+#ifndef REGVM_NO_TAGS
 static void clear_value(Value *v){
   if (!v) return;
   if (CHECK_TAG(*v, VT_TEXT) && v->u.s){ str_dec(v->u.s); }
-  else if (CHECK_TAG(*v, VT_ARRI)) { int id = (int)(intptr_t)v->u.p; arr_dec_i(id); }
-  else if (CHECK_TAG(*v, VT_ARRR)) { int id = (int)(intptr_t)v->u.p; arr_dec_r(id); }
+  else if (CHECK_TAG(*v, VT_ARRI)) { int id = (int)(intptr_t)v->u.p; if (id) arr_dec_i(id); }
+  else if (CHECK_TAG(*v, VT_ARRR)) { int id = (int)(intptr_t)v->u.p; if (id) arr_dec_r(id); }
   v->u.i = 0; SET_TAG((*v), VT_NULL);
 }
 
 static void retain_value(Value v){
   if (CHECK_TAG(v, VT_TEXT) && v.u.s) { str_inc(v.u.s); }
-  else if (CHECK_TAG(v, VT_ARRI)) { int id = (int)(intptr_t)v.u.p; arr_inc_i(id); }
-  else if (CHECK_TAG(v, VT_ARRR)) { int id = (int)(intptr_t)v.u.p; arr_inc_r(id); }
+  else if (CHECK_TAG(v, VT_ARRI)) { int id = (int)(intptr_t)v.u.p; if (id) arr_inc_i(id); }
+  else if (CHECK_TAG(v, VT_ARRR)) { int id = (int)(intptr_t)v.u.p; if (id) arr_inc_r(id); }
 }
 
 static void assign_value(Value *dst, Value src){
@@ -177,6 +178,12 @@ static void assign_value(Value *dst, Value src){
   *dst = src;
   retain_value(*dst);
 }
+#else
+// In no-tag mode, skip reference counting to avoid interpreting registers as wrong kinds
+static void clear_value(Value *v){ if (!v) return; v->u.i = 0; }
+static void retain_value(Value v){ (void)v; }
+static void assign_value(Value *dst, Value src){ *dst = src; }
+#endif
 
 static void set_global(int idx, Value v){
   if (idx<0) return;
@@ -222,7 +229,8 @@ static Value exec(Bytecode *bc, int fidx, Value *args, int argc){
     [OP_FADD]=&&L_FADD, [OP_FSUB]=&&L_FSUB, [OP_FMUL]=&&L_FMUL, [OP_FDIV]=&&L_FDIV, [OP_FNEG]=&&L_FNEG,
     [OP_FCMP]=&&L_FCMP, [OP_TCMP]=&&L_TCMP, [OP_CONCAT]=&&L_CONCAT,
     [OP_PRINT]=&&L_PRINT, [OP_JMP]=&&L_JMP, [OP_JMPIF]=&&L_JMPIF, [OP_CALL]=&&L_CALL, [OP_RET]=&&L_RET,
-    [OP_I2S]=&&L_I2S, [OP_R2S]=&&L_R2S,
+    [OP_I2R]=&&L_I2R, [OP_I2S]=&&L_I2S, [OP_R2S]=&&L_R2S,
+    [OP_ISNULL]=&&L_ISNULL,
   };
   DISPATCH();
 L_NOP: { /* no-op */ } DISPATCH();
@@ -258,7 +266,13 @@ L_LENF: { int id = (int)(intptr_t)R[in.b].u.p; RealArr *ra = getRA(id); clear_va
 L_LENT: { const char *s = R[in.b].u.s; clear_value(&R[in.a]); SET_TAG(R[in.a], VT_INT); R[in.a].u.i = s ? (int)strlen(s) : 0; } DISPATCH();
 L_LENS: { SET_TAG(R[in.a], VT_INT); R[in.a].u.i=0; } DISPATCH();
 L_LOADR: { SET_TAG(R[in.a], VT_REAL); R[in.a].u.r=bc->reals[in.imm]; } DISPATCH();
-L_LOADS: { clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(bc->texts[in.imm]); } DISPATCH();
+L_LOADS: {
+#ifdef REGVM_NO_TAGS
+    R[in.a].u.s = bc->texts[in.imm];
+#else
+    clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(bc->texts[in.imm]);
+#endif
+  } DISPATCH();
 L_LOAD: { Value tmp = get_global(in.b); assign_value(&R[in.a], tmp); } DISPATCH();
 L_STORE: { set_global(in.a, R[in.b]); } DISPATCH();
 L_MUL: { R[in.a].u.i = R[in.b].u.i * R[in.c].u.i; } DISPATCH();
@@ -289,19 +303,35 @@ L_CONCAT: {
     const char *sa = (CHECK_TAG(R[in.b], VT_TEXT) && R[in.b].u.s)? R[in.b].u.s : "";
     const char *sb = (CHECK_TAG(R[in.c], VT_TEXT) && R[in.c].u.s)? R[in.c].u.s : "";
     size_t la=strlen(sa), lb=strlen(sb);
-    char *s=str_new_copy("");
-    // allocate exact size
-    StrHdr *h = str_hdr_from_data(s);
-    free(h); // discard small alloc
     StrHdr *h2 = (StrHdr*)malloc(sizeof(StrHdr)+la+lb+1);
     h2->rc=1; h2->len=(int32_t)(la+lb);
     memcpy(h2->data, sa, la); memcpy(h2->data+la, sb, lb); h2->data[la+lb]='\0';
     g_heap_objects++;
     clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=h2->data;
   } DISPATCH();
-L_PRINT: { printf("%s\n", R[in.a].u.s ? R[in.a].u.s : ""); } DISPATCH();
-L_I2S: { char buf[32]; snprintf(buf,sizeof(buf),"%lld", (long long)R[in.b].u.i); clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(buf); } DISPATCH();
-L_R2S: { char buf[32]; snprintf(buf,sizeof(buf),"%g", R[in.b].u.r); clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(buf); } DISPATCH();
+L_PRINT: {
+#ifdef REGVM_NO_TAGS
+    if (R[in.a].u.s) printf("%s\n", R[in.a].u.s); else printf("%lld\n", (long long)R[in.a].u.i);
+#else
+    printf("%s\n", R[in.a].u.s ? R[in.a].u.s : "");
+#endif
+  } DISPATCH();
+L_I2R: { clear_value(&R[in.a]); SET_TAG(R[in.a], VT_REAL); R[in.a].u.r = (double)R[in.b].u.i; } DISPATCH();
+L_I2S: {
+#ifdef REGVM_NO_TAGS
+    static char buf[32]; snprintf(buf,sizeof(buf),"%lld", (long long)R[in.b].u.i); R[in.a].u.s = buf;
+#else
+    char buf[32]; snprintf(buf,sizeof(buf),"%lld", (long long)R[in.b].u.i); clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(buf);
+#endif
+  } DISPATCH();
+L_R2S: {
+#ifdef REGVM_NO_TAGS
+    static char buf[32]; snprintf(buf,sizeof(buf),"%g", R[in.b].u.r); R[in.a].u.s = buf;
+#else
+    char buf[32]; snprintf(buf,sizeof(buf),"%g", R[in.b].u.r); clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(buf);
+#endif
+  } DISPATCH();
+L_ISNULL: { clear_value(&R[in.a]); SET_TAG(R[in.a], VT_INT); int isnull = (CHECK_TAG(R[in.b], VT_NULL) || (CHECK_TAG(R[in.b], VT_INT) && R[in.b].u.i==0)); R[in.a].u.i = isnull ? 1 : 0; } DISPATCH();
 L_CALL: { Value *argv=(Value*)calloc(in.c, sizeof(Value)); for (int i=0;i<in.c;i++) argv[i]=R[i+1]; Value rv=exec(bc, in.b, argv, in.c); free(argv); assign_value(&R[in.a], rv); } DISPATCH();
 L_RET: {
     int retIdx = (in.a==0) ? -1 : in.a;
@@ -437,8 +467,16 @@ L_RET: {
       case OP_R2S: {
         char buf[32]; snprintf(buf,sizeof(buf),"%g", R[in.b].u.r); clear_value(&R[in.a]); SET_TAG(R[in.a], VT_TEXT); R[in.a].u.s=str_new_copy(buf); }
         break;
+      case OP_I2R: {
+        clear_value(&R[in.a]); SET_TAG(R[in.a], VT_REAL); R[in.a].u.r = (double)R[in.b].u.i;
+      } break;
       case OP_JMP: pc = in.a; break;
       case OP_JMPIF: if (R[in.a].u.i != 0) pc = in.b; break;
+      case OP_ISNULL: {
+        clear_value(&R[in.a]); SET_TAG(R[in.a], VT_INT);
+        int isnull = (CHECK_TAG(R[in.b], VT_NULL) || (CHECK_TAG(R[in.b], VT_INT) && R[in.b].u.i==0));
+        R[in.a].u.i = isnull ? 1 : 0;
+      } break;
       case OP_CALL: {
         Value *argv=(Value*)calloc(in.c, sizeof(Value));
         for (int i=0;i<in.c;i++) argv[i]=R[i+1];
@@ -477,7 +515,9 @@ int main(int argc, char **argv){
   Bytecode bc; if (!load_bytecode(argv[1], &bc)){ fprintf(stderr, "failed to load %s\n", argv[1]); return 1; }
   run(&bc, "main");
   cleanup_globals();
+  #ifndef REGVM_NO_TAGS
   if (g_heap_objects != 0){ fprintf(stderr, "memory leak: %zu objects still alive\n", g_heap_objects); return 2; }
+  #endif
   return 0;
 }
 //#endif

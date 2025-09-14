@@ -580,7 +580,8 @@ To run Ena programs on a C implementation of the Register VM, we provide:
   - Class: `org.bau.ena.RegCompileTool`
   - Usage:
 
-        java -cp target/classes org.bau.ena.RegCompileTool program.ena program.rbvm
+    javac -d target/build -sourcepath src/test/java src/test/java/org/bau/ena/RegCompileTool.java
+    java -cp target/build org.bau.ena.RegCompileTool program.ena program.rbvm
 
 - A reference C VM that loads and executes the RB bytecode: `src/test/resources/org/bau/ena/regvm.c`.
 
@@ -598,7 +599,7 @@ Build and run the C VM (macOS/Linux):
     java -cp target/classes org.bau.ena.tools.RegCompileTool src/test/resources/org/bau/ena/demo.ena out.rbvm
 
     # 3) Build the C VM
-    cc -O2 -std=c11 -DREGVM_MAIN -o regvm src/test/resources/org/bau/ena/regvm.c
+    gcc -O3 -std=c11 -DREGVM_MAIN -o regvm src/test/resources/org/bau/ena/regvm.c
 
     # 4) Run
     ./regvm out.rbvm

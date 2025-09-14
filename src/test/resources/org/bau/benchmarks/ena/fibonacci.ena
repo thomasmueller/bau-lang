@@ -1,0 +1,7 @@
+fun fibonacci(n int) int
+    if n<3
+        ret 1
+    else
+        ret fibonacci(n-1) + fibonacci(n-2)
+
+println(fibonacci(10))

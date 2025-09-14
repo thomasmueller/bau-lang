@@ -71,6 +71,22 @@ public class BenchmarkTest {
     }
 
     @Test
+    public void testFibonacci() {
+        String src = """
+                fun fibonacci(n int) int
+                    if n<3
+                        ret 1
+                    else
+                        ret fibonacci(n-1) + fibonacci(n-2)
+
+                println(fibonacci(10))
+                """;
+        String expected = "55\n"
+                + "";
+        assertAllBackends(src, expected);
+    }
+
+    @Test
     public void testBinaryTrees() {
         String src = """
         type Node(left Node, right Node)
