@@ -1173,6 +1173,12 @@ public class Parser {
                 s.isConstant = true;
                 s.isGlobalScope = isGlobalScope;
                 s.initial = true;
+                if (targetType != null && !targetType.equals(expr.type())) {
+                    expr = program.cast(expr, targetType);
+                    if (expr == null) {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                }
                 s.value = expr;
                 boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, s.value.type());
@@ -1187,9 +1193,6 @@ public class Parser {
                 functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
-                }
-                if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
@@ -1247,6 +1250,12 @@ public class Parser {
                 } else {
                     expr = new NullValue(targetType);
                 }
+                if (targetType != null && !targetType.equals(expr.type())) {
+                    expr = program.cast(expr, targetType);
+                    if (expr == null) {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                }
                 s.value = expr;
                 boolean global = isGlobalScope;
                 Variable v = new Variable(module, identifier, global, targetType);
@@ -1258,9 +1267,6 @@ public class Parser {
                 functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
-                }
-                if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
                 // already read
@@ -1352,14 +1358,16 @@ public class Parser {
             if (matchOp("=")) {
                 Expression expr = parseExpression();
                 expr = expr.writeStatements(this, false, target);
-
+                if (targetType != null && !targetType.equals(expr.type())) {
+                    expr = program.cast(expr, targetType);
+                    if (expr == null) {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                }
                 s.value = expr;
                 // this possibly updates the reference,
                 // and so it's important we have a temp variable
                 s.type = s.value.type();
-                if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
-                }
                 if (s.leftValue instanceof Variable && s.type != null && s.type.isArray()) {
                     throw syntaxError("Arrays can not be re-assigned to simplify array-bound verification");
                 }

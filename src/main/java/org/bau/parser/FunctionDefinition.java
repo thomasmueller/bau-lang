@@ -193,6 +193,9 @@ public class FunctionDefinition {
                 buff3.append(v.nameC());
             }
             buff3.append(");\n");
+            if (exceptionType == null && returnType == null) {
+                buff3.append("return;\n");
+            }
             buff2.append(Statement.indent(buff3.toString()));
             buff.append(Statement.indent(buff2.toString()));
             buff.append(Statement.indent("}\n"));
@@ -202,9 +205,18 @@ public class FunctionDefinition {
             // else continue
             if (list.isEmpty()) {
                 // TODO verify that each implementation implements this function
+                buff.append(Statement.indent("fprintf(stdout, \"Function %s not implemented for type %s\\n\", \""+ name +"\", this->_type->typeName);\n"));
+                buff.append(Statement.indent("exit(1);\n"));
+                if (exceptionType != null || returnType != null) {
+                    buff.append(Statement.indent("return 0;\n"));
+                }
                 buff.append("}\n");
                 return buff.toString();
             }
+
+//            int todoPanic;
+//
+
         }
         if (cCode != null) {
             buff.append(Statement.indent(cCode));
@@ -379,7 +391,9 @@ public class FunctionDefinition {
         if (callType != null) {
             for (DataType t : callType.implementingTypes) {
                 FunctionDefinition fd = program.getFunctionIfExists(t, t.module, name, parameters.size());
-                fd.used(program);
+                if (fd != null) {
+                    fd.used(program);
+                }
             }
         }
         if (macro) {

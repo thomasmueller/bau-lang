@@ -467,6 +467,8 @@ public class Program {
                 }
             }
         }
+        StringBuilder traitsBuff = new StringBuilder();
+        initTraits(traitsBuff);
         buff.append("/* types */\n");
         for (DataType t : dataTypeMap.values()) {
             if (t.enumValues != null) {
@@ -709,67 +711,7 @@ public class Program {
             }
         }
         if (hasTraits) {
-            buff.append("/* traits */\n");
-            buff.append("void _traitInit() {\n");
-            for (DataType t : dataTypeMap.values()) {
-                if (t.isUsed() && !t.traits.isEmpty()) {
-                    ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
-                    for (String tr : t.traits) {
-                        Trait trait = dataTypeMap.get(tr).traitDefinition;
-                        for (FunctionDefinition def : trait.functions) {
-                            traitFunctions.add(def);
-                        }
-                    }
-                    for (FunctionDefinition tf : traitFunctions) {
-                        FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
-                        if (f2 != null) {
-                            tf.traitFunctionId = f2.traitFunctionId;
-                        }
-                    }
-                    Collections.sort(traitFunctions, new Comparator<FunctionDefinition>() {
-
-                        @Override
-                        public int compare(FunctionDefinition o1, FunctionDefinition o2) {
-                            if (o1 == o2) {
-                                return 0;
-                            }
-                            DataType t1 = o1.callType;
-                            DataType t2 = o2.callType;
-                            int result = Integer.compare(t1.traitSlot, t2.traitSlot);
-                            if (result != 0) {
-                                return result;
-                            }
-                            result = Integer.compare(o1.traitFunctionId, o2.traitFunctionId);
-                            if (result != 0) {
-                                return result;
-                            }
-                            if (o1.toString().equals(o2.toString())) {
-                                return 0;
-                            }
-                            throw new IllegalStateException("Same function id for different functions: " + o1.toString() + " " + o2.toString());
-                        }
-
-                    });
-                    String name = "_typeMeta" + t.nameC();
-                    buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + traitFunctions.size() + " * sizeof(int));\n"));
-                    buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
-                    int i = 0;
-                    for (FunctionDefinition tf : traitFunctions) {
-                        FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
-                        String n;
-                        if (f2 == null) {
-                            n = "null";
-                        } else {
-                            n = "(void (*)())" + f2.functionNameC();
-                        }
-System.out.println(tf.getFunctionId() + " " + tf.toString());
-                        buff.append(Statement.indent(name + "->vtable[" + i + "] = " + n + ";\n"));
-                        i++;
-                    }
-                    int todoSlotOffsets;
-                }
-            }
-            buff.append("}\n");
+            buff.append(traitsBuff);
         }
         buff.append("void _main();\n");
         buff.append("int main(int _argc, char *_argv[]) {\n");
@@ -883,6 +825,73 @@ System.out.println(tf.getFunctionId() + " " + tf.toString());
             buff.append("\n*/\n");
         }
         return buff.toString();
+    }
+
+    private void initTraits(StringBuilder buff) {
+        buff.append("/* traits */\n");
+        buff.append("void _traitInit() {\n");
+        for (DataType t : dataTypeMap.values()) {
+            if (t.isUsed() && !t.traits.isEmpty()) {
+                ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
+                for (String tr : t.traits) {
+                    Trait trait = dataTypeMap.get(tr).traitDefinition;
+                    for (FunctionDefinition def : trait.functions) {
+                        traitFunctions.add(def);
+                    }
+                }
+                for (FunctionDefinition tf : traitFunctions) {
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                    if (f2 != null) {
+                        tf.traitFunctionId = f2.traitFunctionId;
+                    }
+                }
+                Collections.sort(traitFunctions, new Comparator<FunctionDefinition>() {
+
+                    @Override
+                    public int compare(FunctionDefinition o1, FunctionDefinition o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
+                        DataType t1 = o1.callType;
+                        DataType t2 = o2.callType;
+                        int result = Integer.compare(t1.traitSlot, t2.traitSlot);
+                        if (result != 0) {
+                            return result;
+                        }
+                        result = Integer.compare(o1.traitFunctionId, o2.traitFunctionId);
+                        if (result != 0) {
+                            return result;
+                        }
+                        if (o1.toString().equals(o2.toString())) {
+                            return 0;
+                        }
+                        throw new IllegalStateException("Same function id for different functions: " + o1.toString() + " " + o2.toString());
+                    }
+
+                });
+                String name = "_typeMeta" + t.nameC();
+                buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + traitFunctions.size() + " * sizeof(void(*)(void)));\n"));
+                buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
+                int i = 0;
+                for (FunctionDefinition tf : traitFunctions) {
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                    String n;
+                    if (f2 == null) {
+                        f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                        n = "NULL";
+                    } else {
+                        n = "(void (*)())" + f2.functionNameC();
+                    }
+                    buff.append(Statement.indent(name + "->vtable[" + i + "] = " + n + ";\n"));
+                    tf.traitFunctionId = i;
+                    if (f2 != null) {
+                        f2.traitFunctionId = i;
+                    }
+                    i++;
+                }
+            }
+        }
+        buff.append("}\n");
     }
 
     private void assignTraitSlots() {

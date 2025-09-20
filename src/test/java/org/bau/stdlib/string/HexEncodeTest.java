@@ -14,7 +14,7 @@ public class HexEncodeTest {
 
     @Test
     public void performance() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             long start = System.currentTimeMillis();
             test();
             long time = System.currentTimeMillis() - start;

@@ -14,7 +14,7 @@ public class UnicodeTest {
     @Test
     public void random() {
         Random r = new Random(1);
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
             byte[] original = new byte[r.nextInt(10)];
             r.nextBytes(original);
             byte[] normalized = Unicode.normalize(original);

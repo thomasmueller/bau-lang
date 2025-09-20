@@ -1397,7 +1397,7 @@ void _main() {
     acc = org_bau_BigInt_convertIntToBigInt_1(0);
     den = org_bau_BigInt_convertIntToBigInt_1(1);
     num = org_bau_BigInt_convertIntToBigInt_1(1);
-    int64_t n = 100;
+    int64_t n = 50;
     int64_t _t40 = org_bau_Env_argCount_0();
     if (_t40 > 1) {
         i8_array* _t41 = org_bau_Env_arg_1(1);

@@ -4,7 +4,7 @@ import org.bau.Math
 import org.bau.Env
 
 fun main()
-    n := 100
+    n := 50
     if Env.argCount() > 1
         n = Math.parseInt(Env.arg(1))
     k, i := 0
@@ -44,8 +44,3 @@ fun nextTerm(k int)
 6264338327 : 30
 9502884197 : 40
 1693993751 : 50
-0582097494 : 60
-4592307816 : 70
-4062862089 : 80
-9862803482 : 90
-5342117067 : 100

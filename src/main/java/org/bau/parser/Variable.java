@@ -182,19 +182,11 @@ public class Variable implements Expression, LeftValue {
         // copy of FieldAccess
         if (type.needIncDec()) {
             if (type.memoryType() == MemoryType.REF_COUNT) {
-                // TODO this a hack
-                if (expr.indexOf('(') >= 0 && expr.indexOf("idx_2(") < 0) {
-                    throw new IllegalArgumentException("Can not increment method call: " + expr);
-                }
                 return Free.INC_USE_STACK + "(" + expr + ");\n";
             } else {
                 return "";
             }
         } else if (type.needFree()) {
-            // TODO this a hack
-            if (expr.indexOf('(') >= 0 && expr.indexOf("idx_2(") < 0) {
-                throw new IllegalArgumentException("Can not increment method call: " + expr);
-            }
             return type.toC() + "_copy(&" + expr + ");\n";
         }
         return "";

@@ -1,0 +1,45 @@
+trait Reader
+    read() int
+
+trait Writer : Reader
+    write(x int)
+
+type Memory : Reader, Writer
+    array int[]
+    pos int
+
+fun Memory read() int
+    p : pos
+    if p < 0 or p >= array.len
+        return -1
+    pos += 1
+    return array[p]
+
+fun Memory write(x int)
+    p : pos
+    if p < 0 or p >= array.len
+        println('not writing to pos=' p)
+        return
+    pos += 1
+    println('writing to pos=' p)
+    array[p] = x
+
+fun get(r Reader) int
+    println('reading')
+    return r.read()
+
+fun put(w Writer, x int)
+    println('writing')
+    w.write(x)
+    
+fun main()
+    println('start')
+    mem : Memory(int[10])
+    r Reader : mem
+    # r.read()
+    println('write 10');
+    w Writer : mem
+    put(w, 10)
+    mem.pos = 0
+    x : get(mem)
+    println('read ' x)
