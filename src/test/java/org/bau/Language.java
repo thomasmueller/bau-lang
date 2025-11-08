@@ -7,6 +7,13 @@ https://github.com/NicoNex/tau
 
 https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
 
+Sj.h: A tiny little JSON parsing library in ~150 lines of C99
+https://news.ycombinator.com/item?id=45324349
+https://github.com/rxi/sj.h
+
+JSON Test Suite
+https://github.com/nst/JSONTestSuite
+
 
 Mini-Bau
 x: [0] # array length 1, one integer 0? or empty array?

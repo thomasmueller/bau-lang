@@ -25,15 +25,15 @@ which results in simple code and high productivity.
 
 | Benchmark              |  Bau |   C  |  Go  | Java |  Nim | PyPy | Rust | Swift| Vlang|  Zig |
 |------------------------|------|------|------|------|------|------|------|------|------|------|
-| Binary Trees           |  5.1 |  5.1 | 11.0 |  3.4 |  5.2 |  8.5 |  5.9 | 12.0 |  7.5 |  6.6 |
-| Fannkuch               |  2.1 |  2.2 |  2.2 |  2.1 |  2.3 |  5.2 |  2.0 |  2.3 |  2.1 |  2.1 |
-| SpeedTest              |  1.8 |  1.8 |  3.2 |  4.4 |  2.5 | 15.4 |  1.8 |  1.9 |  1.8 |  1.6 |
-| Pi Digits              |  2.6 |  0.5 |  1.0 |  3.5 | 32.0 |  2.3 |  1.5 |  7.7 |  5.3 |  5.7 |
-| Mandelbrot             |  3.5 |  3.5 |  3.5 |  3.8 |  3.5 | 14.9 |  3.8 | 17.0 |  3.6 | 15.7 |
+| Binary Trees           |  3.4 |  3.3 |  6.7 |  2.0 |  4.0 |  5.5 |  4.1 | 10.8 |  4.5 |  4.5 |
+| Fannkuch               |  1.5 |  1.5 |  1.5 |  1.8 |  1.5 |  3.7 |  1.4 |  1.7 |  1.5 |  1.6 |
+| SpeedTest              |  1.3 |  1.2 |  1.9 |  2.7 |  1.6 | 10.2 |  1.2 |  1.4 |  1.3 |  1.2 |
+| Pi Digits              |  1.3 |  0.4 |  0.6 |  1.9 | 24.0 |  1.4 |  1.0 |  5.0 |  3.2 |  3.1 |
+| Mandelbrot             |  1.8 |  1.8 |  1.8 |  2.1 |  1.9 |  9.8 |  2.0 |  9.8 |  1.8 |  9.4 |
+
 
 (Runtime in seconds; lower is better. 
-Measured on an Apple MacBook Pro M1.)
-For Python, PyPy is used; CPython is around 50 times slower.
+Measured on an Apple MacBook Pro M4.)
 
 ### Disclaimer
 
@@ -52,7 +52,7 @@ Computer science papers, for example,
 are often required to include benchmarks.
 It is expected that performance is measured.
 So it is a double-edged sword: many like to see benchmarks results,
-but many will criticise the result - no matter how the benchmarks are done
+but many will criticize the result - no matter how the benchmarks are done
 or what the results show.
 In the field of database engines, the "DeWitt Clause" is used,
 which prevents people (competitors) from publishing benchmark results.
@@ -63,7 +63,7 @@ But for programming languages,
 very few (commercial) languages use such licenses.
 
 Only a small number of benchmarks are implemented so far, 
-most of them are based on the microbenchmarks from 
+most of them are based on the micro-benchmarks from 
 <a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html">The Computer Language Benchmarks Game</a>.
 
 For all languages, a very simple single-threaded implementation is used 
@@ -71,9 +71,7 @@ For all languages, a very simple single-threaded implementation is used
 Memory usage  is not currently measured.
 The tests are run 3 times, and the best time is used.
 Benchmark results in seconds (lower is better).
-For Java, memory is limited to 100 MB by using `-Xmx100m`, 
-and the just-in-time compiler is pre-warmed
-by running the same test 3 times inside the same JVM.
+For Java, memory is limited to 100 MB by using `-Xmx100m`.
 
 What this page tries to show is that, for these limited benchmarks, 
 Bau has a similar performance then other popular programming languages, specially C.
@@ -82,14 +80,14 @@ It is sometimes slower, and sometimes faster, than Java, Go, and Rust.
 
 ### Languages
 
- * C: The default C compiler of the environment is used, which is Apple clang version 16.0.0 currently.
- * Go: Version 1.24.4 darwin/arm64 is use.
- * Java: OpenJDK version 24.0.2 is used.
+ * C: The default C compiler of the environment is used, which is Apple clang version 17.0.0 currently.
+ * Go: Version 1.25.2 darwin/arm64 is use.
+ * Java: OpenJDK version 25 2025-09-16 is used.
  * Nim: Version 2.2.4 is used.
- * Python: PyPy is used; CPython is around 50 times slower. The version used is PyPy 7.3.19 with GCC Apple LLVM 16.0.0.
- * Rust: RustC version 1.75.0 is used.
- * Swift: Apple Swift version 6.0.3 is used.
- * Vlang: Version 0.4.11 is used. Notice that V used the <a href="https://en.wikipedia.org/wiki/Boehm_garbage_collector">Boehm GC library</a>.
+ * Python: PyPy is used; CPython is around 10 times slower. The version used is PyPy 7.3.17 with GCC Apple LLVM 16.0.0.
+ * Rust: RustC version 1.90.0 is used.
+ * Swift: Apple Swift version 6.1.2 is used.
+ * Vlang: Version 0.4.12 is used. Notice that V used the <a href="https://en.wikipedia.org/wiki/Boehm_garbage_collector">Boehm GC library</a>.
  * Zig: Version 0.15.1. Note that Zig is not a memory-safe language, similar to C.
 
 ### Benchmarks
@@ -221,6 +219,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
     
     echo "== Nim ============"
+    echo "requires: nimble install https://github.com/nim-lang/bigints"
     cp ../src/test/resources/org/bau/benchmarks/nim/* .
     find . -type f ! -name "*.?*" -delete
     nim c -d:release binaryTrees.nim
@@ -283,11 +282,11 @@ Compiling and Running the C, Java, and Bau versions:
     echo "== Vlang ============"
     cp ../src/test/resources/org/bau/benchmarks/v/* .
     find . -type f ! -name "*.?*" -delete
-    ./v -prod -force-bounds-checking binaryTrees.v
-    ./v -prod -force-bounds-checking fannkuch.v
-    ./v -prod -force-bounds-checking munchausen.v
-    ./v -prod -force-bounds-checking -enable-globals piDigits.v
-    ./v -prod -force-bounds-checking mandelbrot.v
+    v -prod -force-bounds-checking binaryTrees.v
+    v -prod -force-bounds-checking fannkuch.v
+    v -prod -force-bounds-checking munchausen.v
+    v -prod -force-bounds-checking -enable-globals piDigits.v
+    v -prod -force-bounds-checking mandelbrot.v
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
@@ -310,10 +309,10 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Python (CPython) ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
-    for i in {1..3}; do time python binaryTrees.py 20; done
-    for i in {1..3}; do time python fannkuch.py 11; done
-    for i in {1..3}; do time python piDigits.py 10000 > out.txt; done
-    for i in {1..3}; do time python munchausen.py; done
-    for i in {1..3}; do time python mandelbrot.py 8000 > out.tiff; done
+    for i in {1..3}; do time python3 binaryTrees.py 20; done
+    for i in {1..3}; do time python3 fannkuch.py 11; done
+    for i in {1..3}; do time python3 piDigits.py 10000 > out.txt; done
+    for i in {1..3}; do time python3 munchausen.py; done
+    for i in {1..3}; do time python3 mandelbrot.py 8000 > out.tiff; done
     
     cd ..

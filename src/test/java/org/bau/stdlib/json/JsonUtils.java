@@ -4,10 +4,25 @@ import org.bau.stdlib.json.Json.TokenType;
 
 public class JsonUtils {
 
+    /**
+     * Try to minify.
+     *
+     * @param json the JSON string
+     * @return the pretty JSON string, or null if parsing fails
+     */
     public static String minify(String json) {
         return format(json, "", "", "");
     }
 
+    /**
+     * Try to pretty-print.
+     *
+     * No validation is made. The indentation is 2 spaces per level; the maximum
+     * indentation is 64 characters.
+     *
+     * @param json the JSON string
+     * @return the pretty JSON string, or null if parsing fails
+     */
     public static String prettyPrint(String json) {
         return format(json, "  ", " ", "\n");
     }
@@ -35,7 +50,10 @@ public class JsonUtils {
                 if (t.matches(TokenType.OBJECT_END)) {
                     buff.append("{}");
                 } else {
-                    linePrefix += indent;
+                    if (linePrefix.length() < 64) {
+                        // prevent out of memory
+                        linePrefix += indent;
+                    }
                     buff.append('{').append(newline).append(linePrefix);
                 }
                 break;
@@ -70,5 +88,80 @@ public class JsonUtils {
         }
     }
 
+    /**
+     * Validate a JSON string.
+     *
+     * Numbers, even if very small or very large, are always considered valid.
+     * Inside of string values, unicode sequences are not verified and always
+     * considered valid (including overlong sequences, errors in surrogate pairs,
+     * truncated sequences etc).
+     *
+     * The maximum nesting level is 2000; deeper nesting is considered invalid.
+     *
+     * @param json the JSON string
+     * @return if the JSON is considered valid.
+     */
+    public static boolean validate(String json) {
+        Json t = new Json(json);
+        return validateJson(t, 0) && t.matches(TokenType.END);
+    }
+
+    private static boolean validateJson(Json t, int level) {
+        if (level > 2000) {
+            return false;
+        }
+        switch (t.getTokenType()) {
+        case STRING:
+            return t.getString() != null;
+        case NUMBER:
+            t.getNumber();
+            return true;
+        case TRUE:
+        case FALSE:
+        case NULL:
+            t.nextToken();
+            return true;
+        case OBJECT:
+            t.nextToken();
+            if (t.matches(TokenType.OBJECT_END)) {
+                return true;
+            }
+            while (true) {
+                if (!t.matches(TokenType.STRING)) {
+                    return false;
+                }
+                if (!t.matches(TokenType.COLON)) {
+                    return false;
+                }
+                if (!validateJson(t, level + 1)) {
+                    return false;
+                }
+                if (t.matches(TokenType.OBJECT_END)) {
+                    return true;
+                }
+                if (!t.matches(TokenType.COMMA)) {
+                    return false;
+                }
+            }
+        case ARRAY:
+            t.nextToken();
+            if (t.matches(TokenType.ARRAY_END)) {
+                return true;
+            }
+            while (true) {
+                if (!validateJson(t, level + 1)) {
+                    return false;
+                }
+                if (t.matches(TokenType.ARRAY_END)) {
+                    return true;
+                }
+                if (!t.matches(TokenType.COMMA)) {
+                    return false;
+                }
+            }
+        default:
+            return false;
+        }
+    }
 
 }

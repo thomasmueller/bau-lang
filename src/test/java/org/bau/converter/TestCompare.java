@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
@@ -285,6 +286,16 @@ public class TestCompare {
     }
 
     @Test
+    public void traits() throws IOException {
+        test("traits");
+    }
+
+    @Test
+    public void traitsSimple() throws IOException {
+        test("traitsSimple");
+    }
+
+    @Test
     public void typeOpenClose() throws IOException {
         test("typeOpenClose");
     }
@@ -320,7 +331,15 @@ public class TestCompare {
         String source = readResource(file + ".bau");
         String expected = readResource(file + ".c");
         String expectedMarkdown = readResource(file + ".md");
-        Program p = new Parser(source).parse();
+        String sourceModule = readResource(file + "Module.bau");
+        Program p;
+        if (sourceModule != null) {
+            HashMap<String, String> modules = new HashMap<>();
+            modules.put(file + "Module", sourceModule);
+            p = new Parser(modules, source).parse();
+        } else {
+            p = new Parser(source).parse();
+        }
         p.useTmMalloc();
         String c = p.toC();
         String md = p.toMarkdown();

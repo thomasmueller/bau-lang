@@ -41,8 +41,8 @@ public class BigIntTest {
         return r.nextInt();
     }
 
-    private static BigInteger randomBigInteger(Random r) {
-        return randomBigInteger(r, 0, r.nextInt(50));
+    private static BigInteger randomBigInteger(Random r, int minLen) {
+        return randomBigInteger(r, minLen, minLen + r.nextInt(50));
     }
 
     private static BigInteger randomBigInteger(Random r, int minSize, int maxSize) {
@@ -72,7 +72,7 @@ public class BigIntTest {
         }
         Random r = new Random(1);
         for (int i = 0; i < 1000; i++) {
-            BigInteger ai = randomBigInteger(r);
+            BigInteger ai = randomBigInteger(r, 0);
             BigInt aa = BigInt.valueOf(ai.toString());
             int shift = r.nextInt(100) - 10;
             if (r.nextBoolean()) {
@@ -85,10 +85,6 @@ public class BigIntTest {
             } else {
                 BigInteger li = ai.shiftLeft(shift);
                 BigInt la = aa.shiftLeft(shift);
-if (!li.toString().equals(la.toString())) {
-    la = aa.shiftLeft(shift);
-}
-
                 assertEquals(li.toString(), la.toString());
                 BigInteger ri = ai.shiftLeft(shift);
                 BigInt ra = aa.shiftLeft(shift);
@@ -171,6 +167,17 @@ if (!li.toString().equals(la.toString())) {
     }
 
     @Test
+	public void longValue() {
+		assertEquals(0, BigInt.valueOf(0).longValue());
+		assertEquals(100, BigInt.valueOf(100).longValue());
+		assertEquals(-100, BigInt.valueOf(-100).longValue());
+		for (long x = 3; x > 0; x *= 2) {
+			assertEquals(x, BigInt.valueOf(x).longValue());
+			assertEquals(-x, BigInt.valueOf(-x).longValue());
+		}
+	}
+
+    @Test
     public void subtract() {
         Random r = new Random(1);
         for (int i = 0; i < 1000; i++) {
@@ -210,6 +217,34 @@ if (!li.toString().equals(la.toString())) {
             BigInt cc = aa.multiply(bb);
             BigInteger test = BigInteger.valueOf(a).multiply(BigInteger.valueOf(b));
             assertEquals(a + "*" + b, test.toString(), cc.toString());
+        }
+    }
+
+    @Test
+    public void divide() {
+        String[] list = new String[] {
+                "450359962737049543037407689509398196724902658048",
+                "100000000000000000000000000000",
+                "45035996273704952605859696210051185143017966149828608",
+                "10000000000000000000000000000000000"
+        };
+        for (int i = 0; i < list.length; i += 2) {
+            BigInteger a = new BigInteger(list[i]);
+            BigInteger b = new BigInteger(list[i + 1]);
+            BigInteger c = a.divide(b);
+            BigInt a1 = BigInt.valueOf(list[i]);
+            BigInt b1 = BigInt.valueOf(list[i + 1]);
+            try {
+                BigInt c1 = a1.divide(b1);
+                assertEquals(c.toString(), c1.toString());
+                BigInt r1 = a1.remainder(b1);
+                BigInt a2 = c1.multiply(b1).add(r1);
+                assertEquals(a1, a2);
+            } catch (Error e) {
+                System.out.println("divide " + a + "/" + b + " expected " + c);
+                a1.divide(b1);
+                throw e;
+            }
         }
     }
 
@@ -262,9 +297,11 @@ if (!li.toString().equals(la.toString())) {
     public void largeOps() {
         Random r = new Random(1);
         for (int i = 0; i < 100; i++) {
-            BigInteger ai = randomBigInteger(r);
-            BigInteger bi = randomBigInteger(r);
+            int minLen = i < 10 ? 1100 : 0;
+            BigInteger ai = randomBigInteger(r, minLen);
+            BigInteger bi = randomBigInteger(r, minLen);
             BigInt aa = BigInt.valueOf(ai.toString());
+            assertEquals(ai.bitLength(), aa.len());
             BigInt bb = BigInt.valueOf(bi.toString());
             assertEquals(ai.toString(), aa.toString());
             assertEquals(bi.toString(), bb.toString());

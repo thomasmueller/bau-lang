@@ -180,7 +180,7 @@ public class FunctionContext {
     }
 
     public DataType getType(String module, String name) {
-        String fullName = DataType.fullName(module, name);
+        String fullName = new FullName(module, name).toString();
         DataType t = dataTypeMap.get(fullName);
         if (t == null && module != null) {
             t = dataTypeMap.get(name);

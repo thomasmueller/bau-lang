@@ -51,7 +51,7 @@ public class SoftFloat {
         int shift = exponent(a) - exponent(b);
         int mantissaA = mantissa(a);
         int mantissaB = mantissa(b);
-        int exponent = 0;
+        int exponent;
         if (shift >= 0) {
             if (shift > 31) {
                 return a;
@@ -65,7 +65,7 @@ public class SoftFloat {
             exponent = exponent(b);
             mantissaA >>>= -shift;
         }
-        int mantissa = 0;
+        int mantissa;
         int sign = sign(a);
         if (sign == sign(b)) {
             mantissa = mantissaA + mantissaB;
@@ -87,8 +87,8 @@ public class SoftFloat {
             return 0;
         }
         int exponent = exponent(a) + exponent(b) - 150;
-        int mantissaA = mantissa(a) | (1 << 23);
-        int mantissaB = mantissa(b) | (1 << 23);
+        int mantissaA = mantissa(a);
+        int mantissaB = mantissa(b);
         long mantissa = (long) mantissaA * (long) mantissaB;
         return normalize(sign(a) ^ sign(b), exponent, mantissa);
     }
@@ -105,11 +105,11 @@ public class SoftFloat {
     }
 
     private static int normalize(int sign, int exponent, long mantissa) {
-        while ((mantissa >= (0x1 << 24))) {
+        while ((mantissa >= (1 << 24))) {
             exponent++;
             mantissa >>>= 1;
         }
-        while (mantissa != 0 && (mantissa & (0x1 << 23)) == 0) {
+        while (mantissa != 0 && (mantissa & (1 << 23)) == 0) {
             exponent--;
             mantissa <<= 1;
         }

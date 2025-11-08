@@ -43,3 +43,10 @@ fun main()
     mem.pos = 0
     x : get(mem)
     println('read ' x)
+
+## Expected
+start
+write 10
+writing
+reading
+read {array=*2, pos=0}

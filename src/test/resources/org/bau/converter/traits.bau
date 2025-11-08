@@ -1,0 +1,14 @@
+import traitsModule
+
+fun test()
+    println('test')
+    
+fun main()
+    println('main')
+    test()
+    traitsModule.testAbc()
+
+## Expected
+main
+test
+testAbc

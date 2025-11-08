@@ -69,6 +69,8 @@ public class Program {
 
     HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
 
+    private File moduleRootPath;
+
     private int nextTempVariableIdGlobalScopeId;
 
     {
@@ -87,6 +89,10 @@ public class Program {
 
     public Program(Map<String, String> modules) {
         this.modules = modules;
+    }
+
+    public Program(String moduleRootPath) {
+        this.moduleRootPath = new File(moduleRootPath);
     }
 
     public FunctionDefinition getFunctionTemplate(DataType type, String module, String name) {
@@ -185,8 +191,8 @@ public class Program {
             }
         }
         if (target.traitDefinition != null) {
-            for (String t : expr.type().traits) {
-                if (t.equals(target.name())) {
+            for (FullName n : expr.type().traitNames) {
+                if (n.equals(target.getFullName())) {
                     // type has this trait
                     return new Cast(expr, target);
                 }
@@ -202,14 +208,14 @@ public class Program {
         }
         // 'convertIntToString(int x) org.bau.String'
         String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();
-        FunctionDefinition fromFunction = getFunctionIfExists(null, source.module, convertFunctionName, 1);
+        FunctionDefinition fromFunction = getFunctionIfExists(null, source.module(), convertFunctionName, 1);
         if (fromFunction != null) {
             Call call = new Call();
             call.args.add(expr);
             call.def = fromFunction;
             return call;
         }
-        fromFunction = getFunctionIfExists(null, target.module, convertFunctionName, 1);
+        fromFunction = getFunctionIfExists(null, target.module(), convertFunctionName, 1);
         if (fromFunction != null) {
             Call call = new Call();
             call.args.add(expr);
@@ -218,7 +224,7 @@ public class Program {
         }
         // 'int toString() org.bau.String'
         String toFunctionName = "to" + target.getCamelCaseName();
-        FunctionDefinition toFunction = getFunctionIfExists(source, target.module, toFunctionName, 1);
+        FunctionDefinition toFunction = getFunctionIfExists(source, target.module(), toFunctionName, 1);
         if (toFunction != null) {
             Call call = new Call();
             call.args.add(expr);
@@ -351,7 +357,7 @@ public class Program {
     }
 
     public DataType getType(String module, String name) {
-        String fullName = DataType.fullName(module, name);
+        String fullName = new FullName(module, name).toString();
         DataType t = dataTypeMap.get(fullName);
         if (t == null && module != null) {
             t = dataTypeMap.get(name);
@@ -448,7 +454,7 @@ public class Program {
                 + "}\n");
         boolean hasTraits = false;
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed() && !t.traits.isEmpty()) {
+            if (t.isUsed() && !t.traitNames.isEmpty()) {
                 hasTraits = true;
             }
         }
@@ -462,7 +468,7 @@ public class Program {
             buff.append(Statement.indent("void (*vtable[])();\n"));
             buff.append("};\n");
             for (DataType t : dataTypeMap.values()) {
-                if (t.isUsed() && !t.traits.isEmpty()) {
+                if (t.isUsed() && !t.traitNames.isEmpty()) {
                     buff.append("static _typeMetaData *_typeMeta" + t.nameC() + ";\n");
                 }
             }
@@ -492,7 +498,7 @@ public class Program {
                     }
                     buff.append(Statement.indent(t.baseType().toC() + "* data;\n"));
                 } else {
-                    if (!t.traits.isEmpty() || t.traitDefinition != null) {
+                    if (!t.traitNames.isEmpty() || t.traitDefinition != null) {
                         buff.append(Statement.indent("_typeMetaData* _type;\n"));
                     }
                     if (t.memoryType() == MemoryType.REF_COUNT) {
@@ -519,7 +525,7 @@ public class Program {
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
                     if (t.memoryType() == MemoryType.REF_COUNT) {
-                        if (!t.traits.isEmpty()) {
+                        if (!t.traitNames.isEmpty()) {
                             buff.append(Statement.indent("result->_type = _typeMeta" + t.nameC() + ";\n"));
                         }
                         buff.append(Statement.indent("result->_refCount = 1;\n"));
@@ -831,16 +837,17 @@ public class Program {
         buff.append("/* traits */\n");
         buff.append("void _traitInit() {\n");
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed() && !t.traits.isEmpty()) {
+            if (t.isUsed() && !t.traitNames.isEmpty()) {
                 ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
-                for (String tr : t.traits) {
-                    Trait trait = dataTypeMap.get(tr).traitDefinition;
+                for (FullName tr : t.traitNames) {
+                    int todoSupportModule;
+                    Trait trait = dataTypeMap.get(tr.name).traitDefinition;
                     for (FunctionDefinition def : trait.functions) {
                         traitFunctions.add(def);
                     }
                 }
                 for (FunctionDefinition tf : traitFunctions) {
-                    FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.name, tf.parameters.size());
                     if (f2 != null) {
                         tf.traitFunctionId = f2.traitFunctionId;
                     }
@@ -874,10 +881,10 @@ public class Program {
                 buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
                 int i = 0;
                 for (FunctionDefinition tf : traitFunctions) {
-                    FunctionDefinition f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.name, tf.parameters.size());
                     String n;
                     if (f2 == null) {
-                        f2 = getFunctionIfExists(t, t.module, tf.name, tf.parameters.size());
+                        f2 = getFunctionIfExists(t, t.module(), tf.name, tf.parameters.size());
                         n = "NULL";
                     } else {
                         n = "(void (*)())" + f2.functionNameC();
@@ -898,7 +905,7 @@ public class Program {
         HashSet<DataType> traitsWithFunctions = new HashSet<>();
         HashSet<DataType> typesWithTraitFunctions = new HashSet<>();
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed() && !t.traits.isEmpty()) {
+            if (t.isUsed() && !t.traitNames.isEmpty()) {
                 for (DataType trait : t.traitTypes) {
                     if (trait.isUsed() && !trait.traitDefinition.functions.isEmpty()) {
                         typesWithTraitFunctions.add(t);
@@ -1068,8 +1075,19 @@ Testing.
         if (in != null) {
             return readFromInputStream(in);
         }
-        if (new File(fileName).exists()) {
-            try (FileInputStream f = new FileInputStream(fileName)) {
+        if (moduleRootPath != null) {
+            File file = new File(moduleRootPath, fileName);
+            if (file.exists()) {
+                try (FileInputStream f = new FileInputStream(file)) {
+                    return readFromInputStream(f);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed reading from input stream: " + e);
+                }
+            }
+        }
+        File file = new File(fileName);
+        if (file.exists()) {
+            try (FileInputStream f = new FileInputStream(file)) {
                 return readFromInputStream(f);
             } catch (IOException e) {
                 throw new RuntimeException("Failed reading from input stream: " + e);

@@ -1,5 +1,10 @@
 package org.bau.stdlib.json;
 
+/**
+ * A simple JSON parser.
+ *
+ * In case of errors, the methods return null or return TokenType.ERROR, but never throw an exception.
+ */
 public class Json {
 
     public enum TokenType {
@@ -79,23 +84,23 @@ public class Json {
         } else if (matches(TokenType.STRING)) {
             return decodeString(lastToken());
         }
-        throw new IllegalStateException();
+        return null;
     }
 
     public String getNumber() {
         if (matches(TokenType.NUMBER)) {
             return lastToken();
         }
-        throw new IllegalStateException();
+        return null;
     }
 
-    public boolean getBoolean() {
+    public Boolean getBoolean() {
         if (matches(TokenType.TRUE)) {
             return Boolean.TRUE;
         } else if (matches(TokenType.FALSE)) {
             return Boolean.FALSE;
         }
-        throw new IllegalStateException();
+        return null;
     }
 
     public int getPos() {
@@ -116,11 +121,11 @@ public class Json {
         return last;
     }
 
-    String getEscapedValue() {
+    public String getEscapedValue() {
         return lastToken();
     }
 
-    boolean matches(TokenType type) {
+    public boolean matches(TokenType type) {
         if (current == type) {
             nextToken();
             return true;
@@ -167,7 +172,7 @@ public class Json {
                 return TokenType.END;
             }
             ch = json.charAt(pos);
-            if (ch > ' ') {
+            if (ch != ' ' && ch != '\r' && ch != '\n' && ch != '\t') {
                 break;
             }
             pos++;
@@ -186,6 +191,8 @@ public class Json {
                     break;
                 } else if (ch == '\\') {
                     pos++;
+                } else if (ch < ' ') {
+                    return TokenType.ERROR;
                 }
             }
             currentTokenStart = start + 1;
@@ -209,6 +216,7 @@ public class Json {
                 return TokenType.ERROR;
             }
             ch = json.charAt(pos);
+            pos++;
             if (ch < '0' || ch > '9') {
                 // lookahead
                 return TokenType.ERROR;
@@ -216,6 +224,12 @@ public class Json {
             // else fall though
         default:
             if (ch >= '0' && ch <= '9') {
+                if (ch == '0' && pos < json.length()) {
+                    ch = json.charAt(pos);
+                    if (ch >= '0' && ch <= '9') {
+                        return TokenType.ERROR;
+                    }
+                }
                 while (pos < json.length()) {
                     ch = json.charAt(pos);
                     if (ch < '0' || ch > '9') {
@@ -224,6 +238,13 @@ public class Json {
                     pos++;
                 }
                 if (ch == '.') {
+                    if (++pos >= json.length()) {
+                        return TokenType.ERROR;
+                    }
+                    ch = json.charAt(pos);
+                    if (ch < '0' || ch > '9') {
+                        return TokenType.ERROR;
+                    }
                     pos++;
                     while (pos < json.length()) {
                         ch = json.charAt(pos);
@@ -234,10 +255,20 @@ public class Json {
                     }
                 }
                 if (ch == 'e' || ch == 'E') {
-                    ch = json.charAt(++pos);
-                    if (ch == '+' || ch == '-') {
-                        ch = json.charAt(++pos);
+                    if (++pos >= json.length()) {
+                        return TokenType.ERROR;
                     }
+                    ch = json.charAt(pos);
+                    if (ch == '+' || ch == '-') {
+                        if (++pos >= json.length()) {
+                            return TokenType.ERROR;
+                        }
+                        ch = json.charAt(pos);
+                    }
+                    if (ch < '0' || ch > '9') {
+                        return TokenType.ERROR;
+                    }
+                    pos++;
                     while (pos < json.length()) {
                         ch = json.charAt(pos);
                         if (ch < '0' || ch > '9') {
@@ -275,7 +306,7 @@ public class Json {
         }
     }
 
-    static String decodeString(String s) {
+    public static String decodeString(String s) {
         if (s.indexOf('\\') < 0) {
             return s;
         }

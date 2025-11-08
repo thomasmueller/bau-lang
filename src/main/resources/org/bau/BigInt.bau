@@ -377,47 +377,41 @@ fun bigInt div(other bigInt) bigInt
         z : x / y
         if z = x / (y + 1) and z = x / (y - 1)
             return newBigInt(z)
-    otherLen : other.len()
-    shift := (32 - otherLen) & 31
-    if otherLen >= 128
-        shift = 32
-    elif otherLen <= 32
-        shift += 32
+    otherLen := other.len()
+    shift := (31 - otherLen) & 31
+    otherLen += shift
+    if otherLen < 3 * 32
+        shift += 3 * 32
     u : this.shiftLeft(shift).data
     vn : other.shiftLeft(shift).data
-    m : u.len
-    n : vn.len
-    q : i32[m - n + 1]
     b : 1 << 32
-    un : copyOf(u, u.len + 1)
+    n : vn.len + 1
+    m : u.len + 1
+    un : copyOf(u, m)
+    q : i32[m - n + 1]
+    vn1 : vn[n - 2] & 0xffffffff
+    vn2 : vn[n - 3] & 0xffffffff
     j := m - n
     while j >= 0
-        aa : ((un[j + n] & 0xffffffff) * b) + (un[j + n - 1] & 0xffffffff)
-        bb : vn[n - 1] & 0xffffffff
-        qhat := divUnsigned(aa, bb)
-        rhat := aa - qhat * bb
-        while qhat >= b or compareUnsigned(qhat * (vn[n - 2] & 0xffffffff), (rhat * b) + (un[j + n - 2] & 0xffffffff)) > 0
+        aa : ((un[j + n - 1] & 0xffffffff) * b) + (un[j + n - 2] & 0xffffffff)
+        qhat := divUnsigned(aa, vn1)
+        rhat := aa - qhat * vn1
+        while
+            if qhat < b
+                unnn : un[j + n - 3] & 0xffffffff
+                break compareUnsigned(qhat * vn2, rhat * b + unnn) <= 0
             qhat -= 1
-            rhat = rhat + (vn[n-1] & 0xffffffff)
+            rhat += vn1
             break rhat >= b
         carry := 0
-        for i := until(n)
+        for i := until(n - 1)
             p : qhat * (vn[i] & 0xffffffff)
             t : (un[i + j] & 0xffffffff) - carry - (p & 0xffffffff)
             un[i + j] = int(t)
             carry = (p >> 32) - arithmeticRightShift(t, 32)
-        t := (un[j + n] & 0xffffffff) - carry
-        un[j + n] = int(t)
+        t : (un[j + n - 1] & 0xffffffff) - carry
+        un[j + n - 1] = int(t)
         q[j] = int(qhat)
-        if t < 0
-            q[j] -= 1
-            break j = 0
-            carry = 0
-            for i := until(n)
-                t = (un[i + j] & 0xffffffff) + (vn[i] & 0xffffffff) + carry
-                un[i + j] = int(t)
-                carry = t >> 32;
-            un[j + n] = int((un[j + n] & 0xffffffff) + carry)
         j -= 1
     return bigInt(q)
 

@@ -295,6 +295,12 @@ public class Int128Test {
             ci = overflow(ci);
             cc = aa.multiply(bb);
             assertEquals(ci.toString(), cc.toString());
+            if (!"0".equals(bi.toString())) {
+                ci = ai.divide(bi);
+                ci = overflow(ci);
+                cc = aa.divide(bb);
+                assertEquals(ci.toString(), cc.toString());
+            }
         }
     }
 

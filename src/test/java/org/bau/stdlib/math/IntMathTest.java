@@ -2,6 +2,7 @@ package org.bau.stdlib.math;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 import org.junit.Test;
@@ -157,6 +158,123 @@ public class IntMathTest {
         short a = (short) (((xl * yl) >>> 8) + (xh * yl));
         short b = (short) ((a & 0xff) + (xl * yh));
         return (short) (((a >>> 8) & 0xff) + ((b >>> 8) & 0xff) + (xh * yh));
+    }
+
+    private static short divide32by16(short x1, short x0, short y) {
+        if (y == 0) {
+            // division by 0
+            return ~0;
+        }
+        if ((y & 0xffff) <= (x1 & 0xffff)) {
+            // overflow
+            return ~0;
+        }
+        if (x1 == 0) {
+            return (short) ((x0 & 0xffff) / y);
+        }
+        int shift = (byte) (IntMath.countLeadingZeros(y & 0xffff) - 48);
+        y <<= shift;
+        short mask = (short) 0xff;
+        short u = (short) (((x1 & 0xffff) << shift) | (x0 >>> (16 - shift)));
+        short un = (short) ((x0 & 0xffff) << shift);
+        short un1 = (short) ((un & 0xffff) >>> 8);
+        short un0 = (short) (un & mask);
+        short y1 = (short) ((y >>> 8) & 0xff);
+        short y0 = (short) (y & mask);
+        short q1 = (short) ((u & 0xffff) / (y1 & 0xff));
+        short rhat = (short) ((u & 0xffff) - ((q1 & 0xffff) * (y1 & 0xff)));
+        while (q1 >>> 8 > 0
+                || (((q1 & 0xffff) * y0) & 0xffff) > (((rhat & 0xffff) << 8) + un1)) {
+            q1--;
+            rhat += y1;
+            if (rhat >>> 8 > 0) {
+                break;
+            }
+        }
+        short v = (short) (((u & 0xffff) << 8) + un1 - (q1 & 0xffff) * (y & 0xffff));
+        short q0 = (short) ((v & 0xffff) / (y1 & 0xff));
+        rhat = (short) ((v & 0xffff) - ((q0 & 0xffff) * (y1 & 0xff)));
+        while (q0 >>> 8 > 0
+                || (((q0 & 0xffff) * y0) & 0xffff) > (((rhat & 0xffff) << 8) + un0)) {
+            q0--;
+            rhat += y1;
+            if (rhat >>> 8 > 0) {
+                break;
+            }
+        }
+        return (short) ((((q1 & 0xffff) << 8) & 0xffff) + (q0 & 0xffff));
+    }
+
+    @Test
+    public void divideHighLowShortTest() {
+        for (int a = 1; a <= Short.MAX_VALUE; a += 311) {
+            // System.out.println("a=" + a);
+            for (int b = 1; b <= Short.MAX_VALUE; b += 311) {
+                for (int c = 1; c <= Short.MAX_VALUE; c += 311) {
+                    int x = (a << 16) | b;
+                    int y = c;
+                    int expected = x / y;
+                    if (expected >= 0x10000) {
+                        expected = -1;
+                    }
+                    short z = divide32by16((short) a, (short) b, (short) c);
+                    assertEquals((short) expected, z);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void divideHighLowTest() {
+        Random r = new Random(1);
+        for (int ai = 0; ai < 50; ai++) {
+            long a = randomLong(r, ai);
+             for (int bi = 0; bi < 50; bi++) {
+                long b = randomLong(r, bi);
+                for (int ci = 0; ci < 50; ci++) {
+                    long c = randomLong(r, ci);
+                    BigInteger xa = BigInteger.valueOf(a >>> 32).shiftLeft(32).add(BigInteger.valueOf(a & 0xffffffffL));
+                    BigInteger xb = BigInteger.valueOf(b >>> 32).shiftLeft(32).add(BigInteger.valueOf(b & 0xffffffffL));
+                    BigInteger x = xa.shiftLeft(64).or(xb);
+                    BigInteger y = BigInteger.valueOf(c >>> 32).shiftLeft(32).add(BigInteger.valueOf(c & 0xffffffffL));
+                    long exp = 0;
+                    if (c == 0) {
+                        exp = ~0;
+                    } else {
+                        BigInteger expected = x.divide(y);
+                        if (expected.bitLength() > 64) {
+                            expected = BigInteger.ONE.negate();
+                        }
+                        exp = expected.longValue();
+                    }
+                    long z = IntMath.divide128Unsigned(a, b, c);
+                    if (exp != z) {
+                        z = IntMath.divide128Unsigned(a, b, c);
+                    }
+                    assertEquals(exp, z);
+                }
+            }
+        }
+    }
+
+    private static long randomLong(Random r, int idx) {
+        switch (idx) {
+        case 0:
+            return 0;
+        case 1:
+            return 1;
+        case 2:
+            return -1;
+        case 3:
+            return Long.MAX_VALUE;
+        case 4:
+            return Long.MIN_VALUE;
+        case 5:
+            return 1L << r.nextInt(63);
+        case 6:
+            return ~(1L << r.nextInt(63));
+        }
+        return r.nextLong();
     }
 
 }

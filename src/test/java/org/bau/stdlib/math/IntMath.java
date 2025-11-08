@@ -13,13 +13,15 @@ public class IntMath {
     }
 
     public static long multiplyHighUnsigned(long x, long y) {
-        long xh = ((x >>> 32) & 0xffffffffL);
-        long yh = ((y >>> 32) & 0xffffffffL);
+        // notice >>> instead of >>
+        // alternatively, use (x >> y) & 0xffffffffL
+        long xh = x >>> 32;
+        long yh = y >>> 32;
         long xl = x & 0xffffffffL;
         long yl = y & 0xffffffffL;
         long a = ((xl * yl) >>> 32) + (xh * yl);
         long b = (a & 0xffffffffL) + (xl * yh);
-        return ((a >>> 32) & 0xffffffffL) + ((b >>> 32) & 0xffffffffL) + (xh * yh);
+        return (a >>> 32) + (b >>> 32) + (xh * yh);
     }
 
     public static long signum(long x) {
@@ -99,6 +101,64 @@ public class IntMath {
             return 1;
         }
         return (-1L >>> Long.numberOfLeadingZeros(x - 1)) + 1;
+    }
+
+    public static long compareUnsigned(long a, long b) {
+        a += 0x8000000000000000L;
+        b += 0x8000000000000000L;
+        if (a == b) {
+            return 0;
+        } else if (a < b) {
+            return -1;
+        }
+        return 1;
+    }
+
+    public static long divide128Unsigned(long x1, long x0, long y) {
+        if (y == 0) {
+            // division by 0
+            return ~0L;
+        }
+        if (Long.compareUnsigned(y, x1) <= 0) {
+            return ~0;
+        }
+        if (x1 == 0) {
+            return Long.divideUnsigned(x0, y);
+        }
+        int shift = Long.numberOfLeadingZeros(y);
+        y <<= shift;
+        long mask = (1L << 32) - 1;
+        long u = (x1 << shift);
+        if (shift != 0) {
+            u |= x0 >>> (64 - shift);
+        }
+        long un = x0 << shift;
+        long un1 = un >>> 32;
+        long un0 = un & mask;
+        long y1 = y >>> 32;
+        long y0 = y & mask;
+        long q1 = Long.divideUnsigned(u, y1);
+        long rhat = u - q1 * y1;
+        while (q1 >>> 32 > 0
+                || Long.compareUnsigned(q1 * y0, (rhat << 32) + un1) > 0) {
+            q1--;
+            rhat += y1;
+            if (rhat >>> 32 > 0) {
+                break;
+            }
+        }
+        long v = (u << 32) + un1 - q1 * y;
+        long q0 = Long.divideUnsigned(v, y1);
+        rhat = v - q0 * y1;
+        while (q0 >>> 32 > 0
+                || Long.compareUnsigned(q0 * y0, (rhat << 32) + un0) > 0) {
+            q0--;
+            rhat += y1;
+            if (rhat >>> 32 > 0) {
+                break;
+            }
+        }
+        return (q1 << 32) + q0;
     }
 
 }

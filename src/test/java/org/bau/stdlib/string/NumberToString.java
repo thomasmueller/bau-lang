@@ -60,7 +60,7 @@ public class NumberToString {
                 n *= 10;
                 e--;
             }
-            return convertDoubleToString(n) + "E" + e;
+            return convertDoubleToString(n) + "e" + e;
         }
         StringBuilder buff = new StringBuilder();
         buff.append(convertLongToString((long) n));

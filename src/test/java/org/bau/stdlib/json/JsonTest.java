@@ -1,6 +1,7 @@
 package org.bau.stdlib.json;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -11,6 +12,151 @@ import org.junit.Test;
 
 public class JsonTest {
 
+//    @Test
+//    public void testSpec() throws IOException {
+//        File dir = new File(System.getProperty("user.home") + "/Downloads/JSONTestSuite/test_parsing");
+//        for(File f : dir.listFiles()) {
+//            RandomAccessFile r = new RandomAccessFile(f, "r");
+//            byte[] data = new byte[(int) r.length()];
+//            r.readFully(data);
+//            String json = new String(data, StandardCharsets.UTF_8);
+//            r.close();
+//            // System.out.println("testing " + f.getName());
+//            String n = JsonUtils.prettyPrint(json);
+//            boolean valid = JsonUtils.validate(json);
+//            if (f.getName().startsWith("i")) {
+//                System.out.println("impl defined: " + valid + " " + f.getName() + " " + json + " => " + n);
+//            }
+//            if (valid) {
+//                if (n == null) {
+//                    JsonUtils.validate(json);
+//                    n = JsonUtils.prettyPrint(json);
+//
+//                    fail(f.getName() +  " valid but null " + json);
+//                }
+//                if (f.getName().startsWith("n")) {
+//                    System.out.println("should fail: " + f.getName() + " " + json + " => " + n);
+//                    JsonUtils.validate(json);
+//                }
+//                String n2 = JsonUtils.prettyPrint(n);
+//                assertEquals(n, n2);
+//            } else {
+//                if (f.getName().startsWith("y")) {
+//                    JsonUtils.validate(json);
+//                    n = JsonUtils.prettyPrint(json);
+//                    fail(f.getName() + " " + json);
+//                }
+//            }
+//        }
+//    }
+
+    @Test
+    public void formatting() {
+        StringBuilder buff = new StringBuilder();
+        for (int i = 0; i < 1000; i++) {
+            buff.append("{\"\":");
+        }
+        buff.append("\"\"");
+        for (int i = 0; i < 1000; i++) {
+            buff.append("}");
+        }
+        assertEquals(72002, JsonUtils.prettyPrint(buff.toString()).length());
+    }
+
+    @Test
+    public void validate() {
+        assertTrue(JsonUtils.validate("null"));
+        assertTrue(JsonUtils.validate("true"));
+        assertTrue(JsonUtils.validate("false"));
+        assertTrue(JsonUtils.validate("\"\""));
+        assertTrue(JsonUtils.validate("[]"));
+        assertTrue(JsonUtils.validate("{}"));
+        assertTrue(JsonUtils.validate("{\"\":1}"));
+        assertTrue(JsonUtils.validate("{\"\":1,\"\":2}"));
+        assertTrue(JsonUtils.validate("[1,2]"));
+        assertTrue(JsonUtils.validate(" \r\n\t1"));
+        assertFalse(JsonUtils.validate("{1:1}"));
+        assertFalse(JsonUtils.validate("{\"\":1,}"));
+        assertFalse(JsonUtils.validate("{\"\" 1}"));
+        assertFalse(JsonUtils.validate("{\"\":1,\"\":}"));
+        assertFalse(JsonUtils.validate("{\"\":1 \"\":2}"));
+        assertFalse(JsonUtils.validate("[1 2]"));
+        assertFalse(JsonUtils.validate("[1,]"));
+        assertFalse(JsonUtils.validate("[1,[]"));
+        assertFalse(JsonUtils.validate("nul"));
+        assertFalse(JsonUtils.validate("]"));
+        assertFalse(JsonUtils.validate("["));
+        assertFalse(JsonUtils.validate("-true"));
+        assertFalse(JsonUtils.validate("{"));
+        assertFalse(JsonUtils.validate("{}end"));
+        assertFalse(JsonUtils.validate("{\"a\":\"b\"}/**/"));
+        assertFalse(JsonUtils.validate("{\"\":"));
+        assertFalse(JsonUtils.validate("{}}"));
+        assertFalse(JsonUtils.validate(" \f1"));
+    }
+
+    @Test
+    public void validateNesting() {
+        StringBuilder buff = new StringBuilder();
+        buff.repeat("[", 2000);
+        buff.append("0");
+        buff.repeat("]", 2000);
+        assertTrue(JsonUtils.validate(buff.toString()));
+        buff = new StringBuilder();
+        buff.repeat("[", 2001);
+        buff.append("0");
+        buff.repeat("]", 2001);
+        assertFalse(JsonUtils.validate(buff.toString()));
+    }
+
+    @Test
+    public void validateStrings() {
+        assertTrue(JsonUtils.validate("\"\""));
+        assertTrue(JsonUtils.validate("\"a\""));
+        assertTrue(JsonUtils.validate("\"\\u0000\""));
+        assertFalse(JsonUtils.validate("\"\\a\""));
+    }
+
+    @Test
+    public void validateNumbers() {
+        assertTrue(JsonUtils.validate("1"));
+        assertTrue(JsonUtils.validate("0"));
+        assertTrue(JsonUtils.validate("-1"));
+        assertTrue(JsonUtils.validate("-0"));
+        assertTrue(JsonUtils.validate("-0.0"));
+        assertTrue(JsonUtils.validate("0.0"));
+        assertTrue(JsonUtils.validate("1e0"));
+        assertTrue(JsonUtils.validate("1e00"));
+        assertTrue(JsonUtils.validate("1e-0"));
+        assertTrue(JsonUtils.validate("1e-00"));
+        assertTrue(JsonUtils.validate("1e1"));
+        assertTrue(JsonUtils.validate("1e-1"));
+        assertTrue(JsonUtils.validate("1e10"));
+        assertTrue(JsonUtils.validate("1e-10"));
+        assertTrue(JsonUtils.validate("0e100"));
+        assertTrue(JsonUtils.validate("0e-100"));
+        assertTrue(JsonUtils.validate("3e1000"));
+        assertTrue(JsonUtils.validate("3e-1000"));
+        assertTrue(JsonUtils.validate("3e999999999999999999999"));
+        assertTrue(JsonUtils.validate("3e-999999999999999999999"));
+        assertTrue(JsonUtils.validate("999999999999999999999"));
+        assertTrue(JsonUtils.validate("-999999999999999999999"));
+
+        assertFalse(JsonUtils.validate(".0"));
+        assertFalse(JsonUtils.validate("0."));
+        assertFalse(JsonUtils.validate("-.0"));
+        assertFalse(JsonUtils.validate("-0."));
+        assertFalse(JsonUtils.validate("--1"));
+        assertFalse(JsonUtils.validate("--0"));
+        assertFalse(JsonUtils.validate("01"));
+        assertFalse(JsonUtils.validate("-00"));
+        assertFalse(JsonUtils.validate("NaN"));
+        assertFalse(JsonUtils.validate("Inf"));
+        assertFalse(JsonUtils.validate("-Inf"));
+        assertFalse(JsonUtils.validate("-Infinity"));
+        assertFalse(JsonUtils.validate("-Infinity"));
+    }
+
     @Test
     public void random() {
         Random r = new Random(1);
@@ -18,7 +164,7 @@ public class JsonTest {
             int len = r.nextInt(10);
             StringBuilder buff = new StringBuilder(len);
             for (int j = 0; j < len; j++) {
-                String chars = "012.utrnfb/:,(){}[]-+\"\\\u1234\n\r\u0001\ud820\udc00";
+                String chars = "012.eutrnfb/:,(){}[]-+\"\\\u1234\n\r\u0001\ud820\udc00";
                 buff.append(chars.charAt(r.nextInt(chars.length())));
             }
             JsonUtils.prettyPrint(buff.toString());
@@ -35,7 +181,7 @@ public class JsonTest {
     @Test
     public void iterateKeys() {
         String json = "{\"a\":10,\"b\":\"hello\",\"c\":null,\"d1\":true,\"d2\":false," +
-                "\"e\":[],\"f\":[1],\"g\":[1,2],\"h\":{},\"i\":{\"i1\":1}}";
+                "\"e\":[],\"f\":[1],\"g\":[1,2],\"h\":{},\"i\":{\"i1\":1},\"j\":[{}],\"k\":1}";
         Json obj = new Json(json);
 
         assertEquals("a", obj.nextKey());
@@ -90,6 +236,10 @@ public class JsonTest {
         val = obj.value();
         assertEquals(TokenType.OBJECT, val.getTokenType());
         assertEquals("i1", val.nextKey());
+
+        assertEquals("j", obj.nextKey());
+        assertEquals("k", obj.nextKey());
+
         assertEquals(null, val.nextKey());
         assertEquals(null, obj.nextKey());
     }
@@ -124,7 +274,7 @@ public class JsonTest {
         assertEquals("/\b\f\n\r\t", array.nextValue().getString());
         assertEquals(null, array.nextValue());
 
-        json = "{\"a\":[\"\\uD83D\\uDE03\",\"Line1\nLine2\"]}";
+        json = "{\"a\":[\"\\uD83D\\uDE03\",\"Line1\\nLine2\"]}";
         obj = new Json(json);
         array = obj.get("a");
         assertEquals("\ud83d\ude03", array.nextValue().getString());

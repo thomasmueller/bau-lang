@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bau.parser.Bounds.ApplyType;
 import org.bau.parser.Bounds.CompareResult;
@@ -59,6 +60,14 @@ public class Parser {
     private While currentLoop;
     private boolean scanPhase = true;
     private final int lineOffset;
+
+    public Parser(String moduleRootPath, String text) {
+        this(new Program(moduleRootPath), null, text, 0);
+    }
+
+    public Parser(Map<String, String> modules, String text) {
+        this(new Program(modules), null, text, 0);
+    }
 
     public Parser(String text) {
         this(new Program(Collections.emptyMap()), null, text, 0);
@@ -286,11 +295,13 @@ public class Parser {
             throw syntaxError("Type '" + name + "' was already defined");
         }
         DataType type = DataType.newTraitType(targetModule, name);
-        type.traitDefinition = new Trait(targetModule, name);
+        FullName traitName = new FullName(targetModule, name);
+        type.traitDefinition = new Trait(traitName);
         if (matchOp(":")) {
             while (true) {
-                String t = readIdentifier();
-                type.traitDefinition.required.add(t);
+                FullName n = readIdentifierWithPossibleModule();
+                int todoImplementVerificationOfRequiredTraits;
+                type.traitDefinition.requiredTraitNames.add(n);
                 if (!matchOp(",")) {
                     break;
                 }
@@ -360,11 +371,11 @@ public class Parser {
             }
         }
         int sizeOf = 0;
-        ArrayList<String> traits = new ArrayList<>();
+        ArrayList<FullName> traitNames = new ArrayList<>();
         if (matchOp(":")) {
             while (true) {
-                String t = readIdentifier();
-                traits.add(t);
+                FullName n = readIdentifierWithPossibleModule();
+                traitNames.add(n);
                 if (!matchOp(",")) {
                     break;
                 }
@@ -398,7 +409,7 @@ public class Parser {
             type.parameters = parameters;
         }
         functionContext.rewindStack(stackPos);
-        type.traits.addAll(traits);
+        type.traitNames.addAll(traitNames);
         defineConstructor(type);
         if (!type.isCopyType()) {
             defineConstructor(type.ownerType());
@@ -408,8 +419,8 @@ public class Parser {
 
     private void defineConstructor(DataType type) {
         FunctionDefinition def = new FunctionDefinition(0);
-        def.module = type.module;
         def.isConstructor = true;
+        def.module = type.module();
         def.name = type.name();
         if (type.memoryType() == MemoryType.OWNER) {
             def.name += "_owned";
@@ -969,7 +980,7 @@ public class Parser {
     private DataType parseTemplatedType(DataType t, ArrayList<DataType> params) {
         String name = t.name();
         String typeId = DataType.getId(name, params);
-        DataType t2 = functionContext.getType(t.module, typeId);
+        DataType t2 = functionContext.getType(t.module(), typeId);
         if (t2 != null) {
             t = t2;
         } else {
@@ -983,11 +994,11 @@ public class Parser {
             try {
                 Parser p = new Parser(program, module, code, t.lineOffset);
                 p.read();
-                p.parseTypeDefinition(t.module);
+                p.parseTypeDefinition(t.module());
                 while (p.type != TokenType.END) {
-                    p.parseFunctionDefinition(t.module);
+                    p.parseFunctionDefinition(t.module());
                 }
-                t = functionContext.getType(t.module, typeId);
+                t = functionContext.getType(t.module(), typeId);
             } catch (IllegalStateException e) {
                 throw syntaxError("Error parsing template: " + e.getMessage(), e);
             }
@@ -1751,8 +1762,8 @@ public class Parser {
     }
 
     private Expression parseCall(DataType type, String module, String identifier, Call call, boolean nonMacroCall) {
-        if (type != null && type.module != null) {
-            module = type.module;
+        if (type != null && type.module() != null) {
+            module = type.module();
         }
         FunctionDefinition template = program.getFunctionTemplate(type, module, identifier);
         if (template == null) {
@@ -2925,9 +2936,23 @@ public class Parser {
         return expr;
     }
 
+    private FullName readIdentifierWithPossibleModule() {
+        String name = readIdentifier();
+        String module = null;
+        while (matchOp(".")) {
+            if (module == null) {
+                module = name;
+            } else {
+                module = module + "." + name;
+            }
+            name = readIdentifier();
+        }
+        return new FullName(module, name);
+    }
+
     private String readIdentifier() {
         if (type != TokenType.IDENTIFIER) {
-            throw syntaxError("Expected an identifier, got '"+token+"'");
+            throw syntaxError("Expected an identifier, got '" + token + "'");
         }
         String name = token;
         read();

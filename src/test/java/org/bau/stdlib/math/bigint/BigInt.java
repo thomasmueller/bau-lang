@@ -3,6 +3,8 @@ package org.bau.stdlib.math.bigint;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.bau.stdlib.math.IntMath;
+
 public class BigInt implements Comparable<BigInt> {
     private final static int KARATSUBA_LIMIT = 100;
     private final int[] data;
@@ -16,7 +18,7 @@ public class BigInt implements Comparable<BigInt> {
             if (value >= Integer.MIN_VALUE) {
                 this.data = new int[] { (int) -value };
             } else if (value > Long.MIN_VALUE) {
-                this.data = new int[] { (int) -value, (int) (-value) >>> 32 };
+                this.data = new int[] { (int) -value, (int) ((-value) >>> 32) };
             } else {
                 this.data = new int[] { 0, 0x80000000 };
             }
@@ -46,7 +48,7 @@ public class BigInt implements Comparable<BigInt> {
         return new BigInt(x);
     }
 
-    private int len() {
+    public int len() {
         if (data.length == 0) {
             return 0;
         }
@@ -297,8 +299,19 @@ public class BigInt implements Comparable<BigInt> {
         return true;
     }
 
+	public long longValue() {
+		if (data.length == 0) {
+			return 0;
+		}
+		long result = data[0] & 0xffffffffL;
+		if (data.length > 1) {
+			result |= (data[1] & 0xffffffffL) << 32;
+		}
+		return signum() * result;
+	}
+
     public int intValue() {
-        return signum() * (data.length == 0 ? 0 : data[0] & 0xffffffff);
+        return signum() * (data.length == 0 ? 0 : data[0]);
     }
 
     public String toString() {
@@ -379,31 +392,6 @@ public class BigInt implements Comparable<BigInt> {
         return subtract(div.multiply(other));
     }
 
-    public static long compareUnsigned(long a, long b) {
-        a += 0x8000000000000000L;
-        b += 0x8000000000000000L;
-        if (a == b) {
-            return 0;
-        } else if (a < b) {
-            return -1;
-        }
-        return 1;
-    }
-
-    public static long arithmeticRightShift(long x, int n) {
-        // return a >> n;
-        return (x >> n) | ((0 - (x < 0 ? 1 : 0)) << (64 - n));
-    }
-
-    int getShiftedValue(int index, int n) {
-        int bitIndex = (index << 5) + n;
-        int ai = (bitIndex - 1) >>> 5;
-        int bi = ai - 1;
-        long a = ai < 0 || ai >= data.length ? 0 : data[ai] & 0xffffffffL;
-        long b = bi < 0 || bi >= data.length ? 0 : data[bi] & 0xffffffffL;
-        return (int) ((b >>> (32 - (n & 31))) | ((a << (n & 31)) & 0xffffffffL));
-    }
-
     public BigInt divide(BigInt other) {
         if (other.data.length == 0) {
             return null;
@@ -425,56 +413,40 @@ public class BigInt implements Comparable<BigInt> {
                 return BigInt.valueOf(x / y);
             }
         }
-        int[] u = data;
-        int[] v = other.data;
-        int s = Integer.numberOfLeadingZeros(v[v.length - 1]);
-        long b = 1L << 32;
-        int m;
-        int n;
-        int[] vn;
-        int[] un;
-        if(v.length > 3) {
-            n = v.length + 1;
-            vn = v;
-            m = u.length + 1;
-            un = new int[m];
-            System.arraycopy(u, 0, un, 0, m - 1);
-        } else {
-            m = u.length + 2;
-            n = v.length + 1;
-            vn = new int[n - 1];
-            long last = v[n - 2] & 0xffffffffL;
-            for (int i = n - 2; i > 0; i--) {
-                long x = v[i - 1] & 0xffffffffL;
-                vn[i] = (int) ((last << s) | ((x >>> (32 - s))));
-                last = x;
-            }
-            vn[0] = (int) (last << s);
-            un = new int[m];
-            last = 0;
-            for (int i = m - 2; i > 0; i--) {
-                long x = u[i - 1] & 0xffffffffL;
-                un[i] = (int) ((last << s) | ((x >>> (32 - s))));
-                last = x;
-            }
-            un[0] = (int) (last << s);
+        int otherLen = other.len();
+        int shift = 31 - (otherLen & 31);
+        otherLen += shift;
+        if (otherLen < 3 * 32) {
+            shift += 3 * 32;
         }
+        if (shift > 0) {
+            // ensure the first bit is set
+            return shiftLeft(shift).divide(other.shiftLeft(shift));
+        }
+        int[] u = data;
+        // vn.length is at least 4
+        int[] vn = other.data;
+        long b = 1L << 32;
+        int n = vn.length + 1;
+        int m = u.length + 1;
+        int[] un = new int[m];
+        System.arraycopy(u, 0, un, 0, m - 1);
         int[] q = new int[m - n + 1];
         long vn1 = vn[n - 2] & 0xffffffffL;
-        long vn2 = n >= 3 ? vn[n - 3] & 0xffffffffL : 0;
+        long vn2 = vn[n - 3] & 0xffffffffL;
         for (int j = m - n; j >= 0; j--) {
             long aa = ((un[j + n - 1] & 0xffffffffL) * b) + (un[j + n - 2] & 0xffffffffL);
             long qhat = Long.divideUnsigned(aa, vn1);
             long rhat = aa - qhat * vn1;
             while (true) {
                 if (qhat < b) {
-                    long unnn = j + n - 3 < 0 ? 0 : un[j + n - 3] & 0xffffffffL;
-                    if (compareUnsigned(qhat * vn2, (rhat * b) + (unnn)) <= 0) {
+                    long unnn = un[j + n - 3] & 0xffffffffL;
+                    if (IntMath.compareUnsigned(qhat * vn2, rhat * b + unnn) <= 0) {
                         break;
                     }
                 }
                 qhat -= 1;
-                rhat = rhat + vn1;
+                rhat += vn1;
                 if (rhat >= b) {
                     break;
                 }
@@ -489,16 +461,6 @@ public class BigInt implements Comparable<BigInt> {
             long t = (un[j + n - 1] & 0xffffffffL) - carry;
             un[j + n - 1] = (int) t;
             q[j] = (int) qhat;
-            if (t < 0) {
-                q[j] -= 1;
-                carry = 0;
-                for (int i = 0; i < n - 1; i++) {
-                    t = (long) (un[i + j] & 0xffffffffL) + (vn[i] & 0xffffffffL) + carry;
-                    un[i + j - 2] = (int) t;
-                    carry = t >>> 32;
-                }
-                un[j + n - 1] = (int) ((un[j + n - 1] & 0xffffffffL) + carry);
-            }
         }
         return new BigInt(q, false);
     }

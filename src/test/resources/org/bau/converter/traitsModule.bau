@@ -1,0 +1,4 @@
+module traitsModule
+
+fun testAbc()
+    println('testAbc')

@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Int128 {
 
+    // x0: lowest, x3: highest
     private final int x0, x1, x2, x3;
 
     public static final Int128 MIN_VALUE = new Int128(0, 0, 0, Integer.MIN_VALUE);
@@ -11,7 +12,7 @@ public class Int128 {
     public static final Int128 ZERO = new Int128(0, 0, 0, 0);
     public static final Int128 ONE = new Int128(1, 0, 0, 0);
 
-    Int128(int x0, int x1, int x2, int x3) {
+    public Int128(int x0, int x1, int x2, int x3) {
         this.x0 = x0;
         this.x1 = x1;
         this.x2 = x2;
@@ -133,8 +134,12 @@ public class Int128 {
                 x3 == o.x3;
     }
 
-    private long longValue() {
+    private long intValue() {
         return sign() == 1 ? -x0 : x0;
+    }
+
+    public long longValue() {
+        return (((long) x1) << 32) | (x0 & 0xffffffffL);
     }
 
     public String toString() {
@@ -151,7 +156,7 @@ public class Int128 {
         do {
             Int128 next = n.divide(group);
             Int128 remainder = n.subtract(next.multiply(group));
-            long val = remainder.longValue();
+            long val = remainder.intValue();
             i = longToString(val, buff, i, 9);
             n = next;
         } while (n.sign() == 1);

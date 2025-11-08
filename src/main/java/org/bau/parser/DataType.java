@@ -24,15 +24,17 @@ public class DataType {
     // TODO this means for int array, this is always set
     public static final DataType INT_TYPE = newNumberType(DataType.INT, 8);
 
-    final String module;
+    private final String module;
     private final String name;
+    private final MemoryType memoryType;
+    private final FullName fullName;
+
     private final int sizeOf;
 
     // int, float, type, enum
     private final boolean isNumber;
     private final boolean isFloatingPoint;
 
-    private final MemoryType memoryType;
 
     private final DataType nullableType;
     private final boolean isNullable;
@@ -62,7 +64,7 @@ public class DataType {
     public boolean isFunctionPointer;
     public ArrayList<DataType> functionPointerArgs;
     public DataType functionPointerReturnType;
-    public ArrayList<String> traits = new ArrayList<>();
+    public ArrayList<FullName> traitNames = new ArrayList<>();
     public ArrayList<DataType> traitTypes = new ArrayList<>();
     public Trait traitDefinition;
     public HashSet<DataType> implementingTypes = new HashSet<>();
@@ -145,11 +147,12 @@ public class DataType {
         this.isNullable = isNullable;
         this.module = module;
         this.name = name;
+        this.memoryType = memoryType;
+        this.fullName = new FullName(module, id());
         this.sizeOf = sizeOf;
         this.isNumber = isNumber;
         this.arrayBaseType = arrayBaseType;
         this.refCountBaseType = refCountBaseType;
-        this.memoryType = memoryType;
         if (isNumber) {
             isFloatingPoint = name.charAt(0) == 'f';
         } else {
@@ -177,12 +180,10 @@ public class DataType {
             throw new IllegalStateException();
         }
         this.used = true;
-        if (!traits.isEmpty()) {
+        if (!traitNames.isEmpty()) {
             if (traitTypes.isEmpty()) {
-                for (String t : traits) {
-                    int todo;
-                    // traits can be in modules...
-                    DataType tm = program.getType(null, t);
+                for (FullName n : traitNames) {
+                    DataType tm = program.getType(n.module, n.name);
                     tm.implementingTypes.add(this);
                     traitTypes.add(tm);
                 }
@@ -209,7 +210,14 @@ public class DataType {
     }
 
     public String fullName() {
-        return fullName(module, id());
+        return fullName.toString();
+//        int todoNamingConflictWithGetFullName;
+//System.out.println("fullName: " + fullName(module, id()));
+//        return fullName(module, id());
+    }
+
+    public FullName getFullName() {
+        return new FullName(module, name);
     }
 
     public String id() {
@@ -241,6 +249,10 @@ public class DataType {
             result = result.substring(0, result.length() - 2) + "Array";
         }
         return result;
+    }
+
+    public String module() {
+        return module;
     }
 
     public String name() {
@@ -440,13 +452,6 @@ public class DataType {
             buff.append(fullName.replace('.', '_').replace("[]", "_array"));
         }
         return buff.toString();
-    }
-
-    public static String fullName(String module, String name) {
-        if (module == null || name.indexOf('.') > 0) {
-            return name;
-        }
-        return module + "." + name;
     }
 
     public DataType resolveEnumType() {
