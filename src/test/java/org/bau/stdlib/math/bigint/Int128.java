@@ -255,6 +255,17 @@ public class Int128 {
         }
     }
 
+    public int numberOfLeadingZeros() {
+        if (x3 != 0) {
+            return Integer.numberOfLeadingZeros(x3);
+        } else if (x2 != 0) {
+            return 32 + Integer.numberOfLeadingZeros(x2);
+        } else if (x1 != 0) {
+            return 64 + Integer.numberOfLeadingZeros(x1);
+        }
+        return 96 + Integer.numberOfLeadingZeros(x0);
+    }
+
     public int compareTo(Int128 other) {
         return subtract(other).signum();
     }

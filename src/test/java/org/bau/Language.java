@@ -11,6 +11,8 @@ Sj.h: A tiny little JSON parsing library in ~150 lines of C99
 https://news.ycombinator.com/item?id=45324349
 https://github.com/rxi/sj.h
 
+Rust: panic unwinding... consider making a "non-panic" mode? what about endless loops?
+
 JSON Test Suite
 https://github.com/nst/JSONTestSuite
 
