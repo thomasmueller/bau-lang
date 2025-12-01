@@ -5,6 +5,225 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+- SQLite database reader
+
+- Linked Hash Map
+
+- Go math/big.Rat
+
+- division by zero: 0 (or -1: Risc-V)
+- modulo: return dividend
+
+- JSON object
+- xml
+- html
+
+- tiny stats
+
+- all calculator functions
+  GCD LCM
+
+- fractions
+- statistics (like python)
+- prime numbers
+- factorial and similar
+- probability functions
+- gcd
+
+- difflib (python)
+
+- logging
+- unit testing
+- assertions
+
+- url
+
+SciPy
+- numerical root-finding methods (Bisection, Secant)
+
+NumPy
+
+- Computer Algebra System (SymPy)
+  - Combining Like Terms
+  - Constant Folding
+  - Applying Identities (+0, *1, x/x where x/0)
+  - Expansion/Factoring
+
+- minesweeper
+
+--------------
+
+I'm writing a new systems programming language.
+I'm trying to write an article about "panic".
+Could you review the article and provide feedback?
+
+# A Programming Language without Panic
+
+I want to build a memory-safe systems language
+that reduces or eliminates panic situations
+and instead provides controlled continuation.
+
+A panic situation is a program error that stops execution.
+In Rust, this is panic / abort, in other languages
+it results in an unchecked exceptions. Typical cases are
+null pointer access, array-out-of-bounds, integer division by zero,
+errors on unwrap, out-of-memory, stack overflow, and similar.
+
+In most programming languages, these trigger either panic or unchecked exceptions.
+My language does not support unchecked exceptions, so this is not an option.
+I would like to reduce or eliminating panic situations as much as possible.
+I'm not trying to prevent all possible bugs, endless loops, etc
+as that is nearly impossible.
+I'm writing a memory-safe language; there is no compromise of the memory safety.
+My language does not have undefined behavior, and even in such cases,
+behavior needs to be well defined.
+
+I argue that, in case of a the above situations, stopping the process
+(or even the whole system) is not always needed, and sometimes worse
+than logging an error and continuing, if this is possible in a controlled way,
+and retaining memory safety and well-defined behavior.
+Memory-safety is preserved, but the program may produce incorrect results,
+and must be designed to tolerate soft errors.
+Fail-soft instead of fail-stop.
+
+Why:
+
+(a) Prevent things like the Cloudflare outage on November 2025 (usage of Rust "unwrap");
+    the Ariane 5 rocket explosion, where an overflow caused a hardware trap;
+    divide by zero causing operating systems to crash (eg. find_busiest_group, get_dirty_limits).
+(b) Be able to use the language for embedded systems,
+    where there are are no panics.
+(c) Simplify analysis of the program.
+
+For Ariane, according to Wikipedia
+https://en.wikipedia.org/wiki/Ariane_flight_V88
+"in the event of any detected exception the processor was to be stopped".
+I'm not trying to say that my proposal would have saved this flight,
+but I think there is more and more agreement now that unexpected state / bugs
+should not just stop the process, operating system, and
+cause eg. a rocket to explode.
+
+# Mitigation
+
+## Panic Callback
+
+My main idea is to have a (configurable) callback
+for the error cases, which can either:
+stop the process, or log an error (like printk_ratelimit in the Linux kernel)
+and continue, or just continue.
+Logging is useful, because just silently ignoring can hide bugs.
+A user-defined callback could be used, but which decides
+what to do depending on problem.
+There are some limitations on what the callback can do,
+these need to be defined.
+
+## Unchecked Exceptions
+
+In Java, Javascript, etc, an unchecked exception is thrown, which can be caught.
+For my language, which is converted to C, this is not really an option.
+Also, this kind of error handling has some runtime complexity and overhead.
+
+## Unwinding like Rust
+
+In Rust, unwinding can be enabled, which means such errors
+can be handled without stopping the process: only the thread is stopped.
+I don't think this behavior is easy to implement in C or in my language;
+there is libunwind, but I would prefer to not depend on it,
+as it is not available everywhere.
+
+# Panic Root Causes
+
+## Null Pointer Access
+
+My language supports nullable, and non-nullable references.
+Nullable references need to be checked using "if x == null",
+So that null pointer access at runtime is not possible.
+
+## Division by Zero
+
+I argue, if integer division by zero (and remainder by zero) needs to be prevented,
+then integer overflow (for addition, multiplication) also need to be prevented.
+My language does not do that for performance reasons.
+I know Rust does it in the debug builds,
+but having different behavior in debug and release builds doesn't feel right to me.
+For regular integers, currently in my language, integer overflow wraps
+(in a well-defined way), just like in Java.
+And integer division by zero works like floating point division by zero:
+division by 0 returns max, min, or 0, for positive, negative,
+and 0 divisors, respectively. Remainder by 0 returns 0.
+If I implement the panic callback (above), then this can be used.
+
+An option might be to support a new data type "safe integer" that does not allow
+overflow, division by zero, and remainder by zero. This data type is then slower.
+
+## Array Index Out Of Bounds
+
+My language support value-dependent types for array indexes.
+By using a  as follows:
+
+    for i := until(data.len)
+        data[i]! = i    <<=== i is guaranteed to be inside the bound
+
+That means, similar to null checks, the array index is guaranteed
+to be within the bound when using the "!" syntax like above.
+I read that this is similar to what ATS, Agda, and SPARK Ada do.
+So for these cases, array-index-out-of-bounds is impossible.
+
+However, in practise, this syntax is not convenient to use:
+unlike possible null pointers, array access is relatively common.
+_requiring_ an explicit bound check for each array access would not be practical in my view.
+
+I'm considering a special syntax such that a zero value is returned for out-of-bounds.
+Example:
+
+    x = buffer[index]?   // zero or null on out-of-bounds
+
+The "?" syntax is already relatively well known, including null-coalescing assignment: e.g.
+
+    val length = user?.name?.length            // null if user or name is null
+    val length: Int = user?.name?.length ?: 0  // zero if null
+
+Similarly, when trying to update, this syntax could mean "ignore":
+
+    index := -1
+    valueOrNull = buffer[index]?  // zero or null on out-of-bounds
+    buffer[index]? = 20           // ignored on out-of-bounds
+
+## Relink in Destructor
+
+My language support a callback method ('close') if an object is freed.
+In Swift, if this callback re-links the object, the program panics.
+In my language, right now, my language also panics for this case currently,
+but I think that's a mistake.
+In other languages (eg. Java), the object will simply not be garbage collected in this case.
+
+## Out of Memory
+
+Memory allocation for embedded systems and operating systems
+is often implemented in a special way, for example,
+using pre-defined buffers, allocate only at start.
+So this leaves regular applications. For 64-bit operating systems,
+if there is a memory leak, typically the process will just
+use more and more memory, and there is often no panic;
+it just gets slower.
+
+## Stack Overflow
+
+This is similar to out-of-memory.
+Static analysis can help here a bit, but not completely.
+GCC -fsplit-stack allows to increase the stack size automatically if needed,
+which then means it just uses more memory.
+This would be ideal for my language,
+but it seems to be only available in GCC, and Go.
+
+## Illegal Cast
+
+This is similar to null pointer exception:
+My language does not allow unchecked casts (similar to null pointer).
+
+
+--------------
+
 https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
 
 Sj.h: A tiny little JSON parsing library in ~150 lines of C99
@@ -96,7 +315,6 @@ Bedrock is a compact and portable 8-bit computer system that runs anywhere.
 
 brew install pandoc
 pandoc conciseSyntax.md -f gfm -t html -s -o conciseSyntax.html --css=github-styles.css
-
 
 == XCC docs / Wasm docs
 wasm
@@ -200,12 +418,12 @@ Text editor
 https://news.ycombinator.com/item?id=44034459
 https://github.com/antirez/kilo
 
-
-more accurate double to ascii, or document
-
 'is' function instead of 'equals'?
 
 support slices as an alternative / addition to range tracking?
+
+in templates, allow iterating over fields of types?
+compile-time reflection
 
 Stdlib:
 - unit testing
