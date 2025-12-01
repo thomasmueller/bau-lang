@@ -98,7 +98,7 @@ public class DateTime {
 
     public static int getDayOfYear(long year, int month, int day) {
         long epochDay = getEpochDay(year, month, day);
-        return (int) (epochDay - getEpochDayOfYear(year)) + 1;
+        return (int) (epochDay - getEpochDay(year, 1, 1)) + 1;
     }
 
     public static boolean isValidDate(long year, int month, int day) {
@@ -130,52 +130,28 @@ public class DateTime {
         info.second = (int) (seconds % 60);
         info.minute = (int) ((seconds / 60) % 60);
         info.hour = (int) ((seconds / 3600) % 24);
-        int absoluteDay = (int) (epochMillis / MILLIS_PER_DAY);
-        long d = absoluteDay + 719_468;
-        long a = 0;
-        if (d < 0) {
-            a = (d + 1) / 146_097 - 1;
-            d -= a * 146_097;
-            a *= 400;
-        }
-        long y = (400 * d + 591) / 146_097;
-        int day = (int) (d - (365 * y + y / 4 - y / 100 + y / 400));
-        if  (day < 0) {
-            y--;
-            day = (int) (d - (365 * y + y / 4 - y / 100 + y / 400));
-        }
-        y += a;
-        int m = (day * 5 + 2) / 153;
-        day -= (m * 306 + 5) / 10 - 1;
-        if (m >= 10) {
-            y++;
-            m -= 12;
-        }
-        info.year = (int) y;
-        info.month = m + 3;
-        info.day = day;
+        // see https://www.benjoffe.com/fast-date
+        int r = (int) (11260485 - epochMillis / MILLIS_PER_DAY);
+        int c = (int) (r * 3853261555L >>> 47);
+        int j = r + c - (c >>> 2);
+        int y = (int) ((j * 3010298776L) >>> 40);
+        int n = 979360 - (j - ((y * 1461) >>> 2)) * 2141;
+        int m = n >>> 16;
+        int b = m > 12 ? 1 : 0;
+        info.year = 32799 - y + b;
+        info.month = b == 1 ? m - 12 : m;
+        info.day = (int)(((n & 0xffff) * 2006057L) >>> 32) + 1;
         return info;
     }
 
     private static long getEpochDay(long y, int m, int d) {
-        long a = getEpochDayOfYear(y) + (367 * m - 362) / 12 + d - 1;
-        if (m > 2) {
-            a--;
-            if (!isLeapYear(y)) {
-                a--;
-            }
-        }
-        return a;
-    }
-
-    private static long getEpochDayOfYear(long y) {
-        long a = 365 * y - 719_528;
-        if (y >= 0) {
-            a += (y + 3) / 4 - (y + 99) / 100 + (y + 399) / 400;
-        } else {
-            a -= y / -4 - y / -100 + y / -400;
-        }
-        return a;
+        long b = m <= 2 ? 1 : 0;
+        y += 5880000 - b;
+        long c = y / 100;
+        long s = b == 1 ? 8829 : -2919;
+        long yd = y * 365 + (y >>> 2) - c + (c >>> 2);
+        long md = (979 * m + s) >>> 5;
+        return yd + md + d - 2148345369L;
     }
 
     public static DateTimeInfo parseDateTime(String data, String format) {

@@ -9,8 +9,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.bau.stdlib.datetime.DateTime.DateTimeInfo;
@@ -18,6 +20,33 @@ import org.bau.stdlib.datetime.DateTime.TimeConvert;
 import org.junit.Test;
 
 public class DateTimeTest {
+
+    public static void main(String... args) {
+        for (int i = 0; i < 5; i++) {
+            performance();
+        }
+    }
+
+    private static void performance() {
+        long start = System.nanoTime();
+        Random r = new Random(1);
+        int count = 10_000_000;
+        long dummy = 0;
+        ZoneId z = ZoneId.of("UTC");
+        for (int i = 0; i < count; i++) {
+            long x = r.nextLong();
+            // 7 ns/op
+            // DateTimeInfo info = DateTime.getDateTimeInfo(x);
+            // dummy += info.day + info.month + info.year;
+
+            // 13 ns/op
+            LocalDateTime t =  LocalDateTime.ofInstant(Instant.ofEpochMilli(x), z);
+            dummy += t.getYear() + t.getMonthValue() + t.getDayOfMonth();
+
+        }
+        long time = System.nanoTime() - start;
+        System.out.println(time / count + " ns/op dummy " + dummy);
+    }
 
     @Test
     public void duration() {
@@ -96,17 +125,16 @@ public class DateTimeTest {
         assertEquals(31, info.day);
         assertEquals(23, info.hour);
         assertEquals(59, info.minute);
-        for(int year = 0; year < 2_500; year++) {
+        for (int year = 0; year < 2_500; year++) {
             assertEquals("year: " + year, DateTime.isLeapYear(year), Year.isLeap(year));
-            for(int month = 0; month <= 13; month++) {
+            for (int month = 0; month <= 13; month++) {
                 if (month >= 1 && month <= 12) {
                     int daysForMonth = YearMonth.of((int) year, month).lengthOfMonth();
                     int got = DateTime.getLengthOfMonth(year, month);
                     assertEquals(daysForMonth, got);
                 }
-                for(int day = -1; day < 34; day++) {
-                    if (day > 0 && month > 0 && month <= 12 &&
-                            YearMonth.of(year, month).isValidDay(day)) {
+                for (int day = -1; day < 34; day++) {
+                    if (day > 0 && month > 0 && month <= 12 && YearMonth.of(year, month).isValidDay(day)) {
                         assertTrue(DateTime.isValidDate(year, month, day));
                     } else {
                         assertFalse(DateTime.isValidDate(year, month, day));
