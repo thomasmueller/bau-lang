@@ -1,6 +1,6 @@
 package org.bau.stdlib.json;
 
-import org.bau.stdlib.json.Json.TokenType;
+import org.bau.stdlib.json.JsonReader.TokenType;
 
 public class JsonUtils {
 
@@ -29,7 +29,7 @@ public class JsonUtils {
 
     private static String format(String json, String indent, String space, String newline) {
         StringBuilder buff = new StringBuilder();
-        Json t = new Json(json);
+        JsonReader t = new JsonReader(json);
         String linePrefix = "";
         boolean inArray = false;
         while (true) {
@@ -102,11 +102,11 @@ public class JsonUtils {
      * @return if the JSON is considered valid.
      */
     public static boolean validate(String json) {
-        Json t = new Json(json);
+        JsonReader t = new JsonReader(json);
         return validateJson(t, 0) && t.matches(TokenType.END);
     }
 
-    private static boolean validateJson(Json t, int level) {
+    private static boolean validateJson(JsonReader t, int level) {
         if (level > 2000) {
             return false;
         }

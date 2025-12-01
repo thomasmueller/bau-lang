@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.bau.stdlib.json.Json.TokenType;
+import org.bau.stdlib.json.JsonReader.TokenType;
 import org.junit.Test;
 
 public class JsonTest {
@@ -168,10 +168,10 @@ public class JsonTest {
                 buff.append(chars.charAt(r.nextInt(chars.length())));
             }
             JsonUtils.prettyPrint(buff.toString());
-            String s2 = Json.decodeString(buff.toString());
+            String s2 = JsonReader.decodeString(buff.toString());
             if (s2 != null) {
                 String s3 = JsonBuilder.encode(s2);
-                Json json = new Json(s3);
+                JsonReader json = new JsonReader(s3);
                 String s4 = json.getString();
                 assertEquals(s2, s4);
             }
@@ -182,10 +182,10 @@ public class JsonTest {
     public void iterateKeys() {
         String json = "{\"a\":10,\"b\":\"hello\",\"c\":null,\"d1\":true,\"d2\":false," +
                 "\"e\":[],\"f\":[1],\"g\":[1,2],\"h\":{},\"i\":{\"i1\":1},\"j\":[{}],\"k\":1}";
-        Json obj = new Json(json);
+        JsonReader obj = new JsonReader(json);
 
         assertEquals("a", obj.nextKey());
-        Json val = obj.value();
+        JsonReader val = obj.value();
         assertEquals(TokenType.NUMBER, val.getTokenType());
         assertEquals("10", val.getNumber());
 
@@ -247,8 +247,8 @@ public class JsonTest {
     @Test
     public void numbers() {
         String json = "{\"a\":[0,-9,-0,12.45,0.1,1e1,-0.3e-1,1e+2,1E-30]}";
-        Json obj = new Json(json);
-        Json array = obj.get("a");
+        JsonReader obj = new JsonReader(json);
+        JsonReader array = obj.get("a");
         assertEquals("0", array.nextValue().getNumber());
         assertEquals("-9", array.nextValue().getNumber());
         assertEquals("-0", array.nextValue().getNumber());
@@ -264,8 +264,8 @@ public class JsonTest {
     @Test
     public void escapeStrings() {
         String json = "{\"a\":[\"\\n\",\"\",\"\\\"\",\"\\\\\",\"\\u1234\",\"\\/\\b\\f\\n\\r\\t\"]}";
-        Json obj = new Json(json);
-        Json array = obj.get("a");
+        JsonReader obj = new JsonReader(json);
+        JsonReader array = obj.get("a");
         assertEquals("\n", array.nextValue().getString());
         assertEquals("", array.nextValue().getString());
         assertEquals("\"", array.nextValue().getString());
@@ -275,7 +275,7 @@ public class JsonTest {
         assertEquals(null, array.nextValue());
 
         json = "{\"a\":[\"\\uD83D\\uDE03\",\"Line1\\nLine2\"]}";
-        obj = new Json(json);
+        obj = new JsonReader(json);
         array = obj.get("a");
         assertEquals("\ud83d\ude03", array.nextValue().getString());
         assertEquals("Line1\nLine2", array.nextValue().getString());
@@ -285,7 +285,7 @@ public class JsonTest {
     @Test
     public void directAccess() {
         String json = "{\"a\":10,\"b\":\"hello\",\"c\":null,\"d\":true,\"e\":[1]}";
-        Json obj = new Json(json);
+        JsonReader obj = new JsonReader(json);
         assertEquals("hello", obj.get("b").value().getString());
         assertTrue(obj.get("d").value().getBoolean());
         assertNull(obj.get("f"));
@@ -294,7 +294,7 @@ public class JsonTest {
     @Test
     public void iterateOverTokens() {
         String json = "{\"a\":10,\"b\":\"hello\",\"c\":null,\"d\":true,\"e\":[1]}";
-        Json reader = new Json(json);
+        JsonReader reader = new JsonReader(json);
         assertEquals(0, reader.getPos());
         assertEquals(TokenType.OBJECT, reader.nextToken());
         assertEquals(null, reader.getEscapedValue());

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import org.bau.stdlib.json.Json;
+import org.bau.stdlib.json.JsonReader;
 
 public class BauLanguageServer {
 
@@ -62,7 +62,7 @@ public class BauLanguageServer {
                  byte[] data2 = in.readNBytes(nextContentLength);
                  logIn.write(data2);
                  String content = new String(data2, StandardCharsets.UTF_8).trim();
-                 Json obj = new Json(content);
+                 JsonReader obj = new JsonReader(content);
                  logIn.write(obj.toString().getBytes(StandardCharsets.UTF_8));
                  String method = obj.get("method").getString();
                  if (method.equals("\"initialize\"")) {

@@ -4,15 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.bau.stdlib.json.Json;
+import org.bau.stdlib.json.JsonReader;
 import org.bau.stdlib.json.JsonBuilder;
 
 public class Shutdown {
-    Json obj;
-    Json response;
+    JsonReader obj;
+    JsonReader response;
     String id;
 
-    public Shutdown(Json obj) {
+    public Shutdown(JsonReader obj) {
         this.obj = obj;
         this.id = obj.get("id").getString();
     }
