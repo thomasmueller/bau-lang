@@ -39,7 +39,6 @@ fun getDateTime() dateTime
     alternative.second = 0
     alternative.millis = 0
     return alternative
-  
 
 # Nanosecons since some undefined point in the past. Never jumps backwards.
 fun getNanoTime() int

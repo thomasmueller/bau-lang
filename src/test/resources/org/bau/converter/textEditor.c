@@ -847,8 +847,21 @@ org_bau_File_File* org_bau_File_File_0() {
     return _t0;
 }
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
-    // TODO verify strings
-    FILE* fp = fopen((char*) name->data, (char*) mode->data);
+    char n[256];
+    for (int i = 0; i < 256; i++) {
+        n[i] = 0;
+        if (i < name->len) {
+            n[i] = name->data[i];
+        }
+    }
+    char m[256];
+    for (int i = 0; i < 256; i++) {
+        m[i] = 0;
+        if (i < mode->len) {
+            m[i] = mode->data[i];
+        }
+    }
+    FILE* fp = fopen(n, m);
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
