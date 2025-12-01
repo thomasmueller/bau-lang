@@ -1,0 +1,79 @@
+module org.bau.DateTime
+
+# Get the seconds since the epoch
+fun timeMillis() int
+    native(```#include <time.h>
+        struct timespec ts;
+        timespec_get(&ts, TIME_UTC);
+        return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    ```)
+    return 0
+
+# Get the current offset between the local time and UTC in seconds.
+fun timeOffset() int
+    native(```#include <time.h>
+        time_t now = time(NULL);
+        struct tm local = *localtime(&now);
+        struct tm utc = *gmtime(&now);
+        return (int) difftime(mktime(&local), mktime(&utc));
+    ```)
+    return 0
+
+# Get the current offset between the local time and UTC in seconds.
+fun timeOffset(year int, month int, day int, hour int, min int, sec int) int
+    native(```#include <time.h>
+        struct tm localTm = {
+          .tm_year = year - 1900,
+          .tm_mon = month - 1,
+          .tm_mday = day,
+          .tm_hour = hour,
+          .tm_min = min,
+          .tm_sec = sec,
+          .tm_wday = 0,
+          .tm_yday = 0,
+          .tm_isdst = -1
+        };
+        time_t local = mktime(&localTm);
+        struct tm utcTm = {
+          .tm_year = year - 1900,
+          .tm_mon = month - 1,
+          .tm_mday = day,
+          .tm_hour = hour,
+          .tm_min = min,
+          .tm_sec = sec,
+          .tm_wday = 0,
+          .tm_yday = 0,
+          .tm_isdst = -1
+        };        
+        time_t utc = timegm(&utcTm);
+        return (int) difftime(utc, local);
+    ```)
+    return 0
+
+# Is daylight saving time active currently.
+fun daylightSaving() int
+    native(```#include <time.h>
+        time_t now = time(NULL);
+        return localtime(&now)->tm_isdst;
+    ```)
+    return 0
+
+# Is daylight saving time active currently.
+fun daylightSaving(year int, month int, day int, hour int, min int, sec int) int
+    native(```#include <time.h>
+        struct tm localTm = {
+          .tm_year = year - 1900,
+          .tm_mon = month - 1,
+          .tm_mday = day,
+          .tm_hour = hour,
+          .tm_min = min,
+          .tm_sec = sec,
+          .tm_wday = 0,
+          .tm_yday = 0,
+          .tm_isdst = -1
+        };
+        time_t local = mktime(&localTm);
+        return localtime(&local)->tm_isdst;
+    ```)
+    return 0
+

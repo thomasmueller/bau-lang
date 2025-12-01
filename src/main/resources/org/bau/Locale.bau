@@ -1,0 +1,47 @@
+module org.bau.Locale
+
+type locale
+    decimalPointChar int
+    groupSeparatorChar int
+    groupSizeSmall int
+    groupSizeLarge int
+
+# Get the current locale name. This is initially 'C' unless the locale is changed
+fun getLocaleName() i8[]
+    result : i8[256]
+    native(```#include <locale.h>
+        char *s = setlocale(LC_ALL, 0);
+        printf("Current locale: %s\n", s);
+        int i = 0;
+        for (; i < 255 && s[i]; i++) {  // stop at 255 so you have room for terminator
+            result->data[i] = (uint8_t)s[i];
+        }
+        result->data[i] = 0;  // NUL terminator
+    ```)
+    return result
+    
+# Sets the locale of this process. When specifying '' (empty string), it uses the environment variables to select the locale.
+fun setLocale(name i8[])
+    native(```#include <locale.h>
+        char s[256];
+        for (int i = 0; i < 256; i++) {
+            s[i] = 0;
+            if (i < name->len) {
+                s[i] = name->data[i];
+            }
+        }
+        setlocale(LC_ALL, s);
+        const char *loc = setlocale(LC_ALL, NULL);
+    ```)
+
+# Get the current locale data.
+fun getLocale() locale
+    result : locale()
+    native(```#include <locale.h>
+        setlocale(LC_ALL, "");
+        struct lconv *lc = localeconv();
+        result.decimalPointChar = lc->decimal_point[0];
+        result.groupSeparatorChar = lc->thousands_sep[0];
+        result.groupSizeSmall = lc->grouping[0];
+    ```)
+    return result
