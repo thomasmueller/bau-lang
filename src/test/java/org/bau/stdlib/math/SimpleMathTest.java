@@ -126,18 +126,9 @@ public class SimpleMathTest {
         for (double x : TEST) {
             long expected = Double.doubleToLongBits(x);
             long got = SimpleMath.convertDoubleToLongBits(x);
-            if (expected != got) {
-                System.out.println("x: " + x);
-                System.out.println(Long.toBinaryString(expected) + " expected");
-                System.out.println(Long.toBinaryString(got) + " got");
-            }
             assertEquals(expected, got);
             double y = SimpleMath.convertLongBitsToDouble(got);
             long got2 = Double.doubleToLongBits(y);
-            if (got2 != got) {
-                System.out.println(Long.toBinaryString(expected) + " expected");
-                y = SimpleMath.convertLongBitsToDouble(got);
-            }
             assertEquals(x + " != " + y, expected, got2);
         }
     }
@@ -232,7 +223,6 @@ public class SimpleMathTest {
             if (diff < 4e-10) {
                 return true;
             }
-            // System.out.println("diff " + diff + " expected " + expected + " got " + got + " for " + forValue);
         }
         return false;
     }
@@ -251,12 +241,6 @@ public class SimpleMathTest {
             for (double y : TEST) {
                 double expected = Math.pow(x, y);
                 double got = SimpleMath.pow(x, y);
-                if (!same(expected, got, x)) {
-                    got = SimpleMath.pow(x, y);
-                }
-                if (!same(expected, got, x)) {
-                    System.out.println("??");
-                }
                 assertTrue(same(expected, got, x));
             }
         }
@@ -295,12 +279,6 @@ public class SimpleMathTest {
 
     @Test
     public void floorCeilSignumRoundTest() {
-        System.out.println(Math.round(-1));
-        System.out.println(Math.round(-0.5));
-        System.out.println(Math.round(0.0));
-        System.out.println(Math.round(0.5));
-        System.out.println(Math.round(1));
-
         for (double x : TEST) {
             assertTrue(exactSame(Math.floor(x), SimpleMath.floor(x)));
             assertTrue(exactSame(Math.ceil(x), SimpleMath.ceil(x)));
