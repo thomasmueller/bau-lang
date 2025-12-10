@@ -96,6 +96,51 @@ public class IntMath {
         return y;
     }
 
+    public static long greatestCommonDivisor(long a, long b) {
+        if (a == 0) {
+            return b;
+        } else if (b == 0) {
+            return a;
+        }
+        if (a < 0) {
+            a = -a;
+        }
+        if (b < 0) {
+            b = -b;
+        }
+        long i = countTrailingZeros(a);
+        a >>>= i;
+        long j = countTrailingZeros(b);
+        b >>>= j;
+        long k = min(i, j);
+        while(true) {
+            if (a > b) {
+                long t = a;
+                a = b;
+                b = t;
+            }
+            b -= a;
+            if (b == 0) {
+                return a << k;
+            }
+            b >>>= countTrailingZeros(b);
+        }
+    }
+
+    public static long leastCommonMultiple(long a, long b) {
+        if (a < 0) {
+            a = -a;
+        }
+        if (b < 0) {
+            b = -b;
+        }
+        long x = greatestCommonDivisor(a, b);
+        if (x == 0) {
+            return 0;
+        }
+        return a * b / x;
+    }
+
     public static long nextPowerOf2(long x) {
         if (x <= 1) {
             return 1;
@@ -159,6 +204,81 @@ public class IntMath {
             }
         }
         return (q1 << 32) + q0;
+    }
+
+    public static long powInt(int base, int exponent) {
+        if (exponent < 0) {
+            return -1;
+        }
+        long result = 1;
+        long b = base;
+        while (exponent > 0) {
+            if ((exponent & 1) == 1) {
+                result *= b;
+                if (result > Integer.MAX_VALUE || result < Integer.MIN_VALUE) {
+                    return -1;
+                }
+            }
+            exponent >>= 1;
+            if (exponent > 0) {
+                b *= b;
+                if (b > Integer.MAX_VALUE || b < Integer.MIN_VALUE) {
+                    return -1;
+                }
+            }
+        }
+        return result;
+    }
+
+    public static long sqrtLong(long x) {
+        if (x < 0) {
+            return 0;
+        }
+        long g = 1L << 31;
+        long c = g;
+        while (true) {
+            long t = g * g;
+            if (t > x || t < 0) {
+                g ^= c;
+            }
+            c >>= 1;
+            if (c == 0) {
+                break;
+            }
+            g |= c;
+        }
+        return g;
+    }
+
+    public static int sqrtInt(int x) {
+        if (x < 0) {
+            return 0;
+        }
+        int g = 1 << 15;
+        int c = g;
+        while (true) {
+            int t = g * g;
+            if (t > x || t < 0) {
+                g ^= c;
+            }
+            c >>= 1;
+            if (c == 0) {
+                break;
+            }
+            g |= c;
+        }
+        return g;
+    }
+
+    public static long factorial(long n) {
+        if (n < 0 || n > 20) {
+            return -1;
+        }
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
     }
 
 }
