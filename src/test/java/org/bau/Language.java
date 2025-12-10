@@ -8,6 +8,98 @@ https://github.com/NicoNex/tau
 - SQLite database reader
 
 - Linked Hash Map
+- Hash map with tombstones
+
+- all calculator functions
+
+matrix
+- Addition and Subtraction: A + B and A - B. (Requires to have the same dimensions).
+- Scalar Multiplication c . A
+- Element-wise Multiplication (Hadamard Product) A o B
+- Element-wise Division A (/) B
+- Matrix Multiplication A x B Requires the number of columns in A to equal the number of rows in B
+- Transpose: A^T (Flips rows and columns)
+- Identity Matrix Creation: Creates an n * n matrix with ones on the main diagonal and zeros elsewhere
+- Determinant det(A) (Calculated for square matrices; key for determining invertibility)
+- Inverse A^-1 For solving systems of linear equations and other advanced tasks
+- Eigenvalues and Eigenvectors Essential for principal component analysis (PCA) and dimensionality reduction
+- Creation/Initialization - Zeros/Ones: Creating matrices filled entirely with 0 or 1
+- Random: Creating matrices with elements drawn from a uniform or normal distribution.
+- Reshaping/Flattening: Changing the dimensions of a matrix (e.g., turning a 2x3 into a 6x1).
+- Slicing/Indexing: Efficiently accessing and modifying sub-matrices, rows, or columns.
+- Concatenation: Combining two matrices horizontally or vertically.
+(Apache Commons Math, EJML) C# System.Numerics; Math.NET Numerics; Python/NumPy
+
+base change (binary, octal, hex, ...)
+fractions (a b/c <-> d/c)
+complex / polar coordinates
+sexagesimal conversion
+
+tinyStats (histogram,...)
+
+decimal 64, 128
+
+logging
+
+assertions
+
+unit tests
+
+processes
+
+images (tiff) drawing methods, writing text (3x5 pixel)
+
+threads: thread creation, locking, mutex, semaphore,...
+
+choices(seq, k, weights=None): Weighted sampling with replacement.
+
+sample()
+pdf(x) probability density function
+pmf(k) probability mass function
+cdf(x) cumulative distribution function
+quantile(p) (inverse CDF)
+
+Normal, Uniform, Exponential, Bernoulli, Binomial, Poisson
+
+Normal(mean, sd)
+Uniform(a, b)
+Exponential(rate)
+Gamma(shape, scale)
+Beta(a, b)
+LogNormal(mean, sd)
+ChiSquare(df)
+StudentT(df)
+Laplace(mu, b)
+
+Bernoulli(p)
+Binomial(n, p)
+Geometric(p)
+Poisson(rate)
+Categorical(weights)
+Multinomial(n, weights)
+
+softmax(values)
+log_sum_exp(values)
+
+odds
+logit
+sigmoid
+
+dirichlet
+multivariate_normal
+
+MarkovChain(transition_matrix)
+next_state(current_state)
+
+monte_carlo(simulation_fn, iterations)
+estimate_integral(fn, domain, samples)
+
+prob/
+    distributions/  # Normal, Binomial, etc.
+    secure/         # cryptographic RNG
+
+- fractions
+- probability functions
 
 - Go math/big.Rat
 
@@ -15,20 +107,10 @@ https://github.com/NicoNex/tau
 - modulo: return dividend
 
 - JSON object
-- xml
-- html
+
+- html parser test
 
 - tiny stats
-
-- all calculator functions
-  GCD LCM
-
-- fractions
-- statistics (like python)
-- prime numbers
-- factorial and similar
-- probability functions
-- gcd
 
 - difflib (python)
 
