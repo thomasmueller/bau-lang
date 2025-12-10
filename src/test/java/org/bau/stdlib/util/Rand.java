@@ -1,5 +1,7 @@
 package org.bau.stdlib.util;
 
+import java.util.Random;
+
 public class Rand {
 
     private static long globalSeed = (long) (Math.random() * Long.MAX_VALUE);
@@ -56,6 +58,16 @@ public class Rand {
     public double nextDouble() {
         long x = nextLong() & ((1L << 53) - 1);
         return (double) x / (1L << 53);
+    }
+
+    // Fisher–Yates shuffle
+    static <T> void shuffle(T[] array, Random random) {
+        for (int i = array.length - 1; i > 0; i--) {
+            int j = random.nextInt(i);
+            T temp = array[j];
+            array[j] = array[i];
+            array[i] = temp;
+        }
     }
 
 }

@@ -3,6 +3,8 @@ package org.bau.stdlib.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Random;
 import java.util.SplittableRandom;
 
 import org.junit.Test;
@@ -85,5 +87,16 @@ public class RandTest {
         long x = -1 & ((1L << 53) - 1);
         double d = (double) x / (1L << 53);
         assertTrue(d < 1.0);
+    }
+
+    @Test
+    public void shuffle() {
+        Random r = new Random(1);
+        Integer[] array = new Integer[10];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = i;
+        }
+        Rand.shuffle(array, r);
+        assertEquals("[9, 5, 7, 2, 8, 4, 3, 1, 0, 6]", Arrays.toString(array));
     }
 }
