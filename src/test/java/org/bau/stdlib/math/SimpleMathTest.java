@@ -3,6 +3,7 @@ package org.bau.stdlib.math;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 import org.junit.Assert;
@@ -64,43 +65,21 @@ public class SimpleMathTest {
     }
 
     @Test
-    public void sqrtIntTest() {
-        for (long x = 0; x <= Integer.MAX_VALUE; x += 1000) {
-            int expected = (int) Math.sqrt(x);
-            int got = SimpleMath.sqrtInt((int) x);
-            if (expected != got) {
-                got = SimpleMath.sqrtInt((int) x);
-                assertEquals("sqrt " + x, expected, got);
-            }
-        }
-        Random r = new Random(1);
-        for (int i = 0; i < 1_000_000; i++) {
-            int x = r.nextInt();
-            int expected = (int) Math.sqrt(x);
-            int got = SimpleMath.sqrtInt((int) x);
-            if (expected != got) {
-                got = SimpleMath.sqrtInt((int) x);
-                assertEquals("sqrt " + x, expected, got);
-            }
-        }
-    }
-
-    @Test
     public void sqrtLongTest() {
         for (long x = 1;; x += 10_000) {
             long s = x * x;
             if (s < 0) {
                 break;
             }
-            long got = SimpleMath.sqrtLong(s);
+            long got = IntMath.sqrtLong(s);
             assertEquals(x, got);
-            got = SimpleMath.sqrtLong(s - 1);
+            got = IntMath.sqrtLong(s - 1);
             assertEquals(x - 1, got);
-            got = SimpleMath.sqrtLong(s + 1);
+            got = IntMath.sqrtLong(s + 1);
             assertEquals(x, got);
         }
         for (long x = 0; x >= 0; x += 10 * Integer.MAX_VALUE) {
-            long got = SimpleMath.sqrtLong(x);
+            long got = IntMath.sqrtLong(x);
             if (got * got < 0 || got * got > x) {
                 Assert.fail();
             }
@@ -113,9 +92,9 @@ public class SimpleMathTest {
         for (int i = 0; i < 1_000_000; i++) {
             long x = r.nextLong();
             long expected = (long) Math.sqrt(x);
-            long got = SimpleMath.sqrtLong(x);
+            long got = IntMath.sqrtLong(x);
             if (expected != got) {
-                got = SimpleMath.sqrtLong(x);
+                got = IntMath.sqrtLong(x);
                 assertEquals("sqrt " + x, expected, got);
             }
         }
@@ -252,7 +231,7 @@ public class SimpleMathTest {
         for (int i = 0; i < 100000; i++) {
             int a = r.nextInt();
             int b = r.nextInt();
-            double got = SimpleMath.powInt(a, b);
+            double got = IntMath.powInt(a, b);
             if (got == -1) {
                 continue;
             }
@@ -321,6 +300,19 @@ public class SimpleMathTest {
             double expected = Math.acos(x);
             double got = SimpleMath.acos(x);
             assertTrue(sameTrig(expected, got, x));
+        }
+    }
+
+    @Test
+    public void factorial() {
+        BigInteger f = BigInteger.ONE;
+        for (int i = 0; i < 171; i++) {
+            if (i > 0) {
+                f = f.multiply(BigInteger.valueOf(i));
+            }
+            double expected = f.doubleValue();
+            double got = SimpleMath.factorial(i);
+            assertEquals(expected, got, expected / 10000000);
         }
     }
 

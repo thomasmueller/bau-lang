@@ -500,4 +500,45 @@ public class BigInt implements Comparable<BigInt> {
         return 1;
     }
 
+    public static BigInt factorial(long n) {
+        if (n < 0) {
+            return BigInt.valueOf(-1);
+        }
+        BigInt result = BigInt.valueOf(1);
+        for (int i = 2; i <= n; i++) {
+            result = result.multiply(BigInt.valueOf(i));
+        }
+        return result;
+    }
+
+    // ways to arrange 'r' items from 'n'
+    // where order does matter (eg. arranging letters).
+    public static BigInt combinations(int n, int r) {
+        // n! / (r!(n-r)!)
+        if (r < 0 || r > n) {
+            return BigInt.valueOf(0);
+        }
+        r = Math.min(r, n - r);
+        BigInt result = BigInt.valueOf(1);
+        for (int i = 1; i <= r; i++) {
+            result = result.multiply(BigInt.valueOf(n - i + 1))
+                           .divide(BigInt.valueOf(i));
+        }
+        return result;
+    }
+
+    // ways to choose 'r' items from 'n'
+    // where order doesn't matter (eg. picking lottery numbers).
+    public static BigInt permutations(int n, int r) {
+        // n! / (n-r)!
+        if (r < 0 || r > n) {
+            return BigInt.valueOf(0);
+        }
+        BigInt result = BigInt.valueOf(1);
+        for (int i = 0; i < r; i++) {
+            result = result.multiply(BigInt.valueOf(n - i));
+        }
+        return result;
+    }
+
 }

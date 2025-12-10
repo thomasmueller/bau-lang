@@ -121,52 +121,12 @@ public class SimpleMath {
     public static double sqrt(double x) {
         long x2 = (long) x;
         if (x2 > 0 && x2 == x) {
-            long exact = sqrtLong(x2);
+            long exact = IntMath.sqrtLong(x2);
             if (exact * exact == x) {
                 return exact;
             }
         }
         return exp(log(x) / 2);
-    }
-
-    public static long sqrtLong(long x) {
-        if (x < 0) {
-            return 0;
-        }
-        long g = 1L << 31;
-        long c = g;
-        while (true) {
-            long t = g * g;
-            if (t > x || t < 0) {
-                g ^= c;
-            }
-            c >>= 1;
-            if (c == 0) {
-                break;
-            }
-            g |= c;
-        }
-        return g;
-    }
-
-    public static int sqrtInt(int x) {
-        if (x < 0) {
-            return 0;
-        }
-        int g = 1 << 15;
-        int c = g;
-        while (true) {
-            int t = g * g;
-            if (t > x || t < 0) {
-                g ^= c;
-            }
-            c >>= 1;
-            if (c == 0) {
-                break;
-            }
-            g |= c;
-        }
-        return g;
     }
 
     public static double log10(double x) {
@@ -177,7 +137,7 @@ public class SimpleMath {
         int x2 = (int) x;
         int y2 = (int) y;
         if (x2 == x && y2 == y) {
-            long r = powInt(x2, y2);
+            long r = IntMath.powInt(x2, y2);
             if (r != -1) {
                 return r;
             }
@@ -227,30 +187,6 @@ public class SimpleMath {
             return POS_INFINITY;
         }
         return NOT_A_NUMBER;
-    }
-
-    public static long powInt(int base, int exponent) {
-        if (exponent < 0) {
-            return -1;
-        }
-        long result = 1;
-        long b = base;
-        while (exponent > 0) {
-            if ((exponent & 1) == 1) {
-                result *= b;
-                if (result > Integer.MAX_VALUE || result < Integer.MIN_VALUE) {
-                    return -1;
-                }
-            }
-            exponent >>= 1;
-            if (exponent > 0) {
-                b *= b;
-                if (b > Integer.MAX_VALUE || b < Integer.MIN_VALUE) {
-                    return -1;
-                }
-            }
-        }
-        return result;
     }
 
     public static double sin(double x) {
@@ -398,6 +334,14 @@ public class SimpleMath {
         }
         long fraction = (long) (x * (1L << 52)) << 11 >>> 11;
         return ((exp + 1022) << 52) + fraction;
+    }
+
+    public static double factorial(int n) {
+        if (n < 21) {
+            return IntMath.factorial(n);
+        }
+        double z = n + 1;
+        return sqrt(2 * PI / z) * pow((z + 1 / (12 * z - (1 / 10 / z))) / E, z);
     }
 
 }

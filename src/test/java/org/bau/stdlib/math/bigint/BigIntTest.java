@@ -12,6 +12,49 @@ import org.junit.Test;
 public class BigIntTest {
 
     @Test
+    public void factorial() {
+        BigInteger f = BigInteger.ONE;
+        for (int i = 0; i < 40; i++) {
+            if (i > 0) {
+                f = f.multiply(BigInteger.valueOf(i));
+            }
+            assertEquals(i + "!", f.toString(), BigInt.factorial(i).toString());
+        }
+    }
+
+    @Test
+    public void combinationsPermutations() {
+        for (int n = 0; n < 100; n += 3) {
+            for (int r = 0; r <= 100; r += 5) {
+                assertEquals(nCr(n, r).toString(), BigInt.combinations(n, r).toString());
+                assertEquals(nPr(n, r).toString(), BigInt.permutations(n, r).toString());
+            }
+        }
+    }
+
+    private static BigInteger nCr(int n, int r) {
+        // nCr = n!/(r!(n-r)!)
+        if (r < 0 || r > n)
+            return BigInteger.ZERO;
+        r = Math.min(r, n - r); // symmetry
+        BigInteger result = BigInteger.ONE;
+        for (int i = 1; i <= r; i++) {
+            result = result.multiply(BigInteger.valueOf(n - i + 1)).divide(BigInteger.valueOf(i));
+        }
+        return result;
+    }
+
+    private static BigInteger nPr(int n, int r) {
+        // nPr = n!/(n-r)!
+        if (r < 0 || r > n) return BigInteger.ZERO;
+        BigInteger result = BigInteger.ONE;
+        for (int i = 0; i < r; i++) {
+            result = result.multiply(BigInteger.valueOf(n - i));
+        }
+        return result;
+    }
+
+    @Test
     public void divideUnsigned() {
         Random r = new Random(1);
         for(int i=0; i<1000; i++) {
