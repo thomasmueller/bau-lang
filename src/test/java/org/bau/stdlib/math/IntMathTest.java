@@ -19,6 +19,43 @@ public class IntMathTest {
     }
 
     @Test
+    public void factorial() {
+        long f = 1;
+        for (int i = 0; i < 70;) {
+            assertEquals(i + "!", f, IntMath.factorial(i));
+            i++;
+            long next = f * i;
+            if (next < f) {
+                f = -1;
+            } else {
+                f = next;
+            }
+        }
+    }
+
+    @Test
+    public void sqrtIntTest() {
+        for (long x = 0; x <= Integer.MAX_VALUE; x += 1000) {
+            int expected = (int) Math.sqrt(x);
+            int got = IntMath.sqrtInt((int) x);
+            if (expected != got) {
+                got = IntMath.sqrtInt((int) x);
+                assertEquals("sqrt " + x, expected, got);
+            }
+        }
+        Random r = new Random(1);
+        for (int i = 0; i < 1_000_000; i++) {
+            int x = r.nextInt();
+            int expected = (int) Math.sqrt(x);
+            int got = IntMath.sqrtInt((int) x);
+            if (expected != got) {
+                got = IntMath.sqrtInt((int) x);
+                assertEquals("sqrt " + x, expected, got);
+            }
+        }
+    }
+
+    @Test
     public void bitOperations() {
         bitOperations(0);
         bitOperations(Long.MAX_VALUE);
@@ -78,6 +115,28 @@ public class IntMathTest {
             long y = r.nextLong();
             twoParameterOperations(x, y);
         }
+    }
+
+    @Test
+    public void greatestCommonDivisor() {
+        Random r = new Random(1);
+        for (int i = 0; i < 1_000; i++) {
+            long x = r.nextLong();
+            long y = r.nextLong();
+            BigInteger x1 = BigInteger.valueOf(x);
+            BigInteger y1 = BigInteger.valueOf(y);
+            BigInteger exp = x1.gcd(y1);
+            long got = IntMath.greatestCommonDivisor(x, y);
+            assertEquals(exp.longValue(), got);
+        }
+    }
+
+    @Test
+    public void leastCommonMultiple() {
+        assertEquals(42, IntMath.leastCommonMultiple(6, 21));
+        assertEquals(42, IntMath.leastCommonMultiple(21, 6));
+        assertEquals(42, IntMath.leastCommonMultiple(6, 21));
+        assertEquals(0, IntMath.leastCommonMultiple(0, 0));
     }
 
     private static void twoParameterOperations(long x, long y) {
