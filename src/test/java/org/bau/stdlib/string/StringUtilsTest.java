@@ -12,17 +12,6 @@ import org.junit.Test;
 
 public class StringUtilsTest {
 
-    // ISO-8859-1 range (Basic Latin and Latin-1 Supplement)
-    // lower, upper, collaction strength 0, 1, 2, 3
-
-    // TODO comparison with different strengths
-
-    // TODO for unicode code points 0..255, support upper, lower, comparison strength 1, 2, 3; types?
-
-    // https://en.wikipedia.org/wiki/Unicode_collation_algorithm
-    // https://github.com/railgunlabs/unicorn
-
-
     @Test
     public void isX() {
         for (int i = 0; i < 256; i++) {
@@ -172,6 +161,18 @@ public class StringUtilsTest {
             String got = StringUtils.replaceAll(original.toString(), replace.toString(), with.toString());
             assertEquals(expected, got);
         }
+    }
+
+    @Test
+    public void repeat() {
+        assertEquals("", StringUtils.repeat((byte) 'b', 0));
+        assertEquals("xxxxxxxxxx", StringUtils.repeat((byte) 'x', 10));
+    }
+
+    @Test
+    public void reverse() {
+        assertEquals("olleh", StringUtils.reverse("hello"));
+        assertEquals("", StringUtils.reverse(""));
     }
 
 }

@@ -1,6 +1,8 @@
 package org.bau.stdlib.string;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class StringUtils {
 
@@ -242,6 +244,22 @@ public class StringUtils {
             return (char) (c ^ 32);
         }
         return c;
+    }
+
+    public static String repeat(byte c, int len) {
+        byte[] buff = new byte[len];
+        Arrays.fill(buff, c);
+        return new String(buff, StandardCharsets.UTF_8);
+    }
+
+    public static String reverse(String s) {
+        char[] buff = s.toCharArray();
+        for (int i = 0, j = buff.length - 1; i < j; i++, j--) {
+            char t = buff[i];
+            buff[i] = buff[j];
+            buff[j] = t;
+        }
+        return new String(buff);
     }
 
 }

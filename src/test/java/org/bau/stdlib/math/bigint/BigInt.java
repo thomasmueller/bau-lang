@@ -380,7 +380,7 @@ public class BigInt implements Comparable<BigInt> {
 
     public static BigInt valueOf(String string) {
         BigInt x = BigInt.valueOf(0);
-        for(char c : string.toCharArray()) {
+        for (char c : string.toCharArray()) {
             x = x.multiply(BigInt.valueOf(10));
             x = x.add(BigInt.valueOf((int) (c - '0')));
         }

@@ -32,7 +32,6 @@ public class ShellSort<T> {
                 a[j + gap] = t;
             }
         } while (gap > 1);
-
     }
 
 }

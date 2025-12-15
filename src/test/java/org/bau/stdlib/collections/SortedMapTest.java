@@ -16,7 +16,7 @@ public class SortedMapTest {
 
     @Test
     public void simple() {
-        SkipList<Integer, String> list = new SkipList<>();
+        SkipList3<Integer, String> list = new SkipList3<>();
         list.put(1, "Hello");
         list.put(2, "World");
         assertEquals("Hello", list.get(1));
@@ -48,6 +48,18 @@ public class SortedMapTest {
     @Test
     public void randomSkipList() {
         SkipList<Integer, Long> myMap = new SkipList<>();
+        randomOps(myMap);
+    }
+
+    @Test
+    public void randomSkipList2() {
+        SkipList2<Integer, Long> myMap = new SkipList2<>();
+        randomOps(myMap);
+    }
+
+    @Test
+    public void randomSkipList3() {
+        SkipList3<Integer, Long> myMap = new SkipList3<>();
         randomOps(myMap);
     }
 
@@ -125,29 +137,38 @@ public class SortedMapTest {
         }
     }
 
-    @Test
+    // @Test
     public void performanceLoop() {
+        long best = Long.MAX_VALUE;
         for (int i = 0; i < 10; i++) {
-            // performance();
+            long time = performance();
+            best = Math.min(best, time);
         }
+        System.out.println("best " + best);
     }
 
-    public void performance() {
+    public long performance() {
         long start = System.currentTimeMillis();
         int dummy = 0;
         Random random = new Random(1);
 
-        // time: 341 ms 317012287
+        // time: 268 ms 317012287
         // ConcurrentSkipListMap<Integer, Long> map = new ConcurrentSkipListMap<>();
 
-        // time: 347 ms 317012287
+        // time: 261 ms 317012287
         // SkipList<Integer, Long> map = new SkipList<>();
 
-        // time: 206 ms 317012287
+        // time: 231 ms 317012287
+        SkipList2<Integer, Long> map = new SkipList2<>();
+
+        // time: 246 ms 317012287
+        // SkipList3<Integer, Long> map = new SkipList3<>();
+
+        // time: 165 ms 317012287
         // TreeMap<Integer, Long> map = new TreeMap<>();
 
-        // time: 194 ms 317012287
-        AVLTree<Integer, Long> map = new AVLTree<>();
+        // time: 166 ms 317012287
+        // AVLTree<Integer, Long> map = new AVLTree<>();
 
         for (int i = 0; i < 1_000_000; i++) {
             int key = random.nextInt(1_000_000);
@@ -169,6 +190,7 @@ public class SortedMapTest {
         }
         long time = System.currentTimeMillis() - start;
         System.out.println("time: " + time + " ms " + dummy);
+        return time;
     }
 
 }

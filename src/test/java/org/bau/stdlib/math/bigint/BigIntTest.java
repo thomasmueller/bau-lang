@@ -26,16 +26,17 @@ public class BigIntTest {
     public void combinationsPermutations() {
         for (int n = 0; n < 100; n += 3) {
             for (int r = 0; r <= 100; r += 5) {
-                assertEquals(nCr(n, r).toString(), BigInt.combinations(n, r).toString());
-                assertEquals(nPr(n, r).toString(), BigInt.permutations(n, r).toString());
+                assertEquals(combinations(n, r).toString(), BigInt.combinations(n, r).toString());
+                assertEquals(permutations(n, r).toString(), BigInt.permutations(n, r).toString());
             }
         }
     }
 
-    private static BigInteger nCr(int n, int r) {
-        // nCr = n!/(r!(n-r)!)
-        if (r < 0 || r > n)
+    private static BigInteger combinations(int n, int r) {
+        // n!/(r!(n-r)!)
+        if (r < 0 || r > n) {
             return BigInteger.ZERO;
+        }
         r = Math.min(r, n - r); // symmetry
         BigInteger result = BigInteger.ONE;
         for (int i = 1; i <= r; i++) {
@@ -44,8 +45,8 @@ public class BigIntTest {
         return result;
     }
 
-    private static BigInteger nPr(int n, int r) {
-        // nPr = n!/(n-r)!
+    private static BigInteger permutations(int n, int r) {
+        // n!/(n-r)!
         if (r < 0 || r > n) return BigInteger.ZERO;
         BigInteger result = BigInteger.ONE;
         for (int i = 0; i < r; i++) {

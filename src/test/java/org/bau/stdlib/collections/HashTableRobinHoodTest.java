@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-public class HashTableTest {
+public class HashTableRobinHoodTest {
 
     public static void main(String... args) {
         memoryUsage();
@@ -20,10 +20,11 @@ public class HashTableTest {
 
     public static void memoryUsage() {
         // -mx1g: i=12000000
+        // -mx2g: i=25000000
         // HashMap<Integer, Long> map = new HashMap<>();
-        // -mx1g: i=16000000 (newCapacity=33554432)
-        // -mx2g: i=33000000
-        HashTable<Integer, Long> map = new HashTable<>();
+        // -mx1g: i=12000000
+        // -mx2g: i=25000000
+        HashTableRobinHood<Integer, Long> map = new HashTableRobinHood<>();
         Random r = new Random();
         for (int i = 0; i < 1_000_000_000; i++) {
             int key = r.nextInt();
@@ -46,11 +47,11 @@ public class HashTableTest {
         int dummy = 0;
         Random random = new Random(1);
 
-        // time: 300 ms -1253345464
+        // time: 291 ms -1253345464
         // HashMap<Integer, Long> map = new HashMap<>();
 
-        // time: 299 ms -1253345464
-        HashTable<Integer, Long> map = new HashTable<>();
+        // time: 250 ms -1253345464
+        HashTableRobinHood<Integer, Long> map = new HashTableRobinHood<>();
 
         for (int i = 0; i < 10_000_000; i++) {
             int key = random.nextInt(1_000_000);
@@ -76,7 +77,7 @@ public class HashTableTest {
 
     @Test
     public void simple() {
-        HashTable<Integer, String> list = new HashTable<>();
+        HashTableRobinHood<Integer, String> list = new HashTableRobinHood<>();
         list.put(1, "Hello");
         list.put(2, "World");
         assertEquals("Hello", list.get(1));
@@ -102,11 +103,11 @@ public class HashTableTest {
 
     @Test
     public void random() {
-        HashTable<Integer, Long> myMap = new HashTable<>();
+        HashTableRobinHood<Integer, Long> myMap = new HashTableRobinHood<>();
         randomOps(myMap);
     }
 
-    public void randomOps(HashTable<Integer, Long> myMap) {
+    public void randomOps(HashTableRobinHood<Integer, Long> myMap) {
         boolean findError = false;
         int smallestIndex = Integer.MAX_VALUE;
         nextSeed: for (int seed = 1; seed <= 1; seed++) {

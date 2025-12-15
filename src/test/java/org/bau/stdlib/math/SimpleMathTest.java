@@ -52,7 +52,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.sqrt(x);
             double got = SimpleMath.sqrt(x);
-            assertTrue(same(expected, got, x));
+            assertTrue(almostSame(expected, got, x));
         }
         for (long x = 0; x < Integer.MAX_VALUE; x += 101) {
             long x2 = x * x;
@@ -118,7 +118,7 @@ public class SimpleMathTest {
             double expected = Math.sin(x);
             double got = SimpleMath.sin(x);
             if (x < 1e7 && x > -1e7) {
-                assertTrue(sameTrig(expected, got, x));
+                assertTrue(almostSameTrig(expected, got, x));
             }
         }
     }
@@ -129,7 +129,7 @@ public class SimpleMathTest {
             double expected = Math.cos(x);
             double got = SimpleMath.cos(x);
             if (x < 1e7 && x > -1e7) {
-                assertTrue(sameTrig(expected, got, x));
+                assertTrue(almostSameTrig(expected, got, x));
             }
         }
     }
@@ -140,7 +140,7 @@ public class SimpleMathTest {
             double expected = Math.tan(x);
             double got = SimpleMath.tan(x);
             if (x < 1e7 && x > -1e7) {
-                assertTrue(sameTrig(expected, got, x));
+                assertTrue(almostSameTrig(expected, got, x));
             }
         }
     }
@@ -150,7 +150,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.log(x);
             double got = SimpleMath.log(x);
-            assertTrue(same(expected, got, x));
+            assertTrue(almostSame(expected, got, x));
         }
     }
 
@@ -159,7 +159,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.exp(x);
             double got = SimpleMath.exp(x);
-            assertTrue(same(expected, got, x));
+            assertTrue(almostSame(expected, got, x));
         }
     }
 
@@ -168,12 +168,12 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.log10(x);
             double got = SimpleMath.log10(x);
-            assertTrue(same(expected, got, x));
+            assertTrue(almostSame(expected, got, x));
         }
     }
 
-    boolean sameTrig(double expected, double got, double forValue) {
-        if (same(expected, got, forValue)) {
+    boolean almostSameTrig(double expected, double got, double forValue) {
+        if (almostSame(expected, got, forValue)) {
             return true;
         }
         if (Math.abs(expected) > 1e16 || Math.abs(got) > 1e16) {
@@ -184,7 +184,7 @@ public class SimpleMathTest {
         return false;
     }
 
-    boolean same(double expected, double got, double forValue) {
+    public static boolean almostSame(double expected, double got, double forValue) {
         if (Double.isNaN(expected) || Double.isNaN(got)) {
             return Double.isNaN(expected) && Double.isNaN(got);
         }
@@ -206,7 +206,7 @@ public class SimpleMathTest {
         return false;
     }
 
-    double diff(double expected, double got) {
+    public static double diff(double expected, double got) {
         double diff = expected - got;
         if (expected == 0) {
             return 1;
@@ -220,7 +220,7 @@ public class SimpleMathTest {
             for (double y : TEST) {
                 double expected = Math.pow(x, y);
                 double got = SimpleMath.pow(x, y);
-                assertTrue(same(expected, got, x));
+                assertTrue(almostSame(expected, got, x));
             }
         }
     }
@@ -236,7 +236,7 @@ public class SimpleMathTest {
                 continue;
             }
             double expected = Math.pow(a, b);
-            assertTrue(same(expected, got, a));
+            assertTrue(almostSame(expected, got, a));
         }
     }
 
@@ -245,7 +245,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.asin(x);
             double got = SimpleMath.asin(x);
-            assertTrue(sameTrig(expected, got, x));
+            assertTrue(almostSameTrig(expected, got, x));
         }
     }
 
@@ -290,7 +290,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.atan(x);
             double got = SimpleMath.atan(x);
-            assertTrue(sameTrig(expected, got, x));
+            assertTrue(almostSameTrig(expected, got, x));
         }
     }
 
@@ -299,7 +299,7 @@ public class SimpleMathTest {
         for (double x : TEST) {
             double expected = Math.acos(x);
             double got = SimpleMath.acos(x);
-            assertTrue(sameTrig(expected, got, x));
+            assertTrue(almostSameTrig(expected, got, x));
         }
     }
 

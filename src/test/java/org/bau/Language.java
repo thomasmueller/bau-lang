@@ -7,10 +7,21 @@ https://github.com/NicoNex/tau
 
 - SQLite database reader
 
-- Linked Hash Map
-- Hash map with tombstones
+hash function with seed parameter
 
-- all calculator functions
+- hash table benchmark
+  https://bluuewhale.github.io/posts/building-a-fast-and-memory-efficient-hash-table-in-java-by-borrowing-the-best-ideas/
+  https://github.com/bluuewhale/hash-smith
+- hash map with tombstones
+- array-backed or doubly-linked hash map
+
+chess program or similar
+
+all calculator functions
+
+base change (binary, octal, hex, ...)
+complex / polar coordinates
+sexagesimal conversion
 
 matrix
 - Addition and Subtraction: A + B and A - B. (Requires to have the same dimensions).
@@ -30,14 +41,7 @@ matrix
 - Concatenation: Combining two matrices horizontally or vertically.
 (Apache Commons Math, EJML) C# System.Numerics; Math.NET Numerics; Python/NumPy
 
-base change (binary, octal, hex, ...)
-fractions (a b/c <-> d/c)
-complex / polar coordinates
-sexagesimal conversion
-
 tinyStats (histogram,...)
-
-decimal 64, 128
 
 logging
 
@@ -47,52 +51,11 @@ unit tests
 
 processes
 
-images (tiff) drawing methods, writing text (3x5 pixel)
+more graphics methods (color images; blur etc)
 
 threads: thread creation, locking, mutex, semaphore,...
 
 choices(seq, k, weights=None): Weighted sampling with replacement.
-
-sample()
-pdf(x) probability density function
-pmf(k) probability mass function
-cdf(x) cumulative distribution function
-quantile(p) (inverse CDF)
-
-Normal, Uniform, Exponential, Bernoulli, Binomial, Poisson
-
-Normal(mean, sd)
-Uniform(a, b)
-Exponential(rate)
-Gamma(shape, scale)
-Beta(a, b)
-LogNormal(mean, sd)
-ChiSquare(df)
-StudentT(df)
-Laplace(mu, b)
-
-Bernoulli(p)
-Binomial(n, p)
-Geometric(p)
-Poisson(rate)
-Categorical(weights)
-Multinomial(n, weights)
-
-softmax(values)
-log_sum_exp(values)
-
-odds
-logit
-sigmoid
-
-dirichlet
-multivariate_normal
-
-MarkovChain(transition_matrix)
-next_state(current_state)
-
-monte_carlo(simulation_fn, iterations)
-estimate_integral(fn, domain, samples)
 
 prob/
     distributions/  # Normal, Binomial, etc.
@@ -117,6 +80,8 @@ prob/
 - logging
 - unit testing
 - assertions
+
+- cordic?
 
 - url
 
@@ -271,7 +236,7 @@ Similarly, when trying to update, this syntax could mean "ignore":
     valueOrNull = buffer[index]?  // zero or null on out-of-bounds
     buffer[index]? = 20           // ignored on out-of-bounds
 
-## Relink in Destructor
+## Re-link in Destructor
 
 My language support a callback method ('close') if an object is freed.
 In Swift, if this callback re-links the object, the program panics.

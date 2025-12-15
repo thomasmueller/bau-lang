@@ -38,10 +38,14 @@ public class StringFormat {
     }
 
     public static String pad(String s, int len) {
+        return pad(s, len, ' ');
+    }
+
+    public static String pad(String s, int len, char ch) {
         if (s.length() >= len) {
             return s;
         }
-        return s + new StringBuilder().repeat(' ', len - s.length());
+        return s + new StringBuilder().repeat(ch, len - s.length());
     }
 
     public static String hex(long x) {
@@ -57,6 +61,10 @@ public class StringFormat {
     }
 
     public static String pad(long x, int len) {
+        return pad(x, len, ' ');
+    }
+
+    public static String pad(long x, int len, char ch) {
         String s = Long.toString(x);
         if (s.length() >= len) {
             return s;
@@ -65,6 +73,10 @@ public class StringFormat {
     }
 
     public static String pad(double x, int len, int precision) {
+        return pad(x, len, precision, ' ');
+    }
+
+    public static String pad(double x, int len, int precision, char ch) {
         StringBuilder buff = new StringBuilder();
         if (x < 0) {
             x = -x;
@@ -89,9 +101,7 @@ public class StringFormat {
         if (s.length() >= len) {
             return s;
         }
-        return new StringBuilder().repeat(' ', len - s.length()) + s;
+        return new StringBuilder().repeat(ch, len - s.length()) + s;
     }
-
-
 
 }

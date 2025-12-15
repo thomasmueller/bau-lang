@@ -3,6 +3,7 @@ package org.bau.stdlib.collections;
 import java.util.ArrayList;
 
 public class PriorityHeap<T extends Comparable<T>> {
+
     private ArrayList<T> list = new ArrayList<>();
 
     public void add(T element) {
