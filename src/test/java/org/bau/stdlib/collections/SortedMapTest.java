@@ -36,12 +36,24 @@ public class SortedMapTest {
     }
 
     private static void log(Object... args) {
-         // System.out.println("    " + Arrays.toString(args));
+        // System.out.println("    " + Arrays.toString(args));
     }
 
     @Test
     public void randomAvlTree() {
         AVLTree<Integer, Long> myMap = new AVLTree<>();
+        randomOps(myMap);
+    }
+
+    @Test
+    public void randomTreap() {
+        Treap<Integer, Long> myMap = new Treap<>();
+        randomOps(myMap);
+    }
+
+    @Test
+    public void randomScapegoatTree() {
+        ScapegoatTree<Integer, Long> myMap = new ScapegoatTree<>();
         randomOps(myMap);
     }
 
@@ -72,6 +84,7 @@ public class SortedMapTest {
             myMap.clear();
             TreeMap<Integer, Long> map = new TreeMap<>();
             for (int i = 0; i < 200_000; i++) {
+                log("size", map.size(), map.size() == myMap.size() ? "=" : "<>", myMap.size());
                 assertEquals(map.size(), myMap.size());
                 int key = random.nextInt(1000);
                 long value = random.nextInt(10_000);
@@ -152,6 +165,8 @@ public class SortedMapTest {
         int dummy = 0;
         Random random = new Random(1);
 
+        // Profiler prof = new Profiler().startCollecting();
+
         // time: 268 ms 317012287
         // ConcurrentSkipListMap<Integer, Long> map = new ConcurrentSkipListMap<>();
 
@@ -159,7 +174,7 @@ public class SortedMapTest {
         // SkipList<Integer, Long> map = new SkipList<>();
 
         // time: 231 ms 317012287
-        SkipList2<Integer, Long> map = new SkipList2<>();
+        // SkipList2<Integer, Long> map = new SkipList2<>();
 
         // time: 246 ms 317012287
         // SkipList3<Integer, Long> map = new SkipList3<>();
@@ -169,6 +184,12 @@ public class SortedMapTest {
 
         // time: 166 ms 317012287
         // AVLTree<Integer, Long> map = new AVLTree<>();
+
+        // time: 187 ms 317012287
+        // ScapegoatTree<Integer, Long> map = new ScapegoatTree<>();
+
+        // time: 217 ms 317012287
+        Treap<Integer, Long> map = new Treap<>();
 
         for (int i = 0; i < 1_000_000; i++) {
             int key = random.nextInt(1_000_000);
@@ -190,6 +211,9 @@ public class SortedMapTest {
         }
         long time = System.currentTimeMillis() - start;
         System.out.println("time: " + time + " ms " + dummy);
+
+//        System.out.println(prof.getTop(10));
+
         return time;
     }
 

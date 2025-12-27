@@ -7,6 +7,14 @@ https://github.com/NicoNex/tau
 
 - SQLite database reader
 
+Ring buffer:
+https://news.ycombinator.com/item?id=46292937
+I've been writing ring buffers wrong all these years
+
+array-backed Treap
+
+better LZ4HC: https://github.com/mattseabrook/LZSS/blob/main/lzss.c
+
 hash function with seed parameter
 
 - hash table benchmark
@@ -15,9 +23,11 @@ hash function with seed parameter
 - hash map with tombstones
 - array-backed or doubly-linked hash map
 
-chess program or similar
+Scapegoat, Treap, simple AVL tree
 
 all calculator functions
+
+sound / mp3 (afplay, aplay, miniaud.io, minimp3)
 
 base change (binary, octal, hex, ...)
 complex / polar coordinates

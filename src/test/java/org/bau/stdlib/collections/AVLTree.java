@@ -40,48 +40,6 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         size++;
     }
 
-    private void balance(TreeNode<K, V> x, boolean isLeft) {
-        while (true) {
-            int sign = isLeft ? 1 : -1;
-            switch (x.balance * sign) {
-            case 1:
-                x.balance = 0;
-                return;
-            case 0:
-                x.balance = -sign;
-                break;
-            case -1:
-                TreeNode<K, V> l = child(x, isLeft);
-                if (l.balance == -sign) {
-                    replace(x, l);
-                    set(x, isLeft, child(l, !isLeft));
-                    set(l, !isLeft, x);
-                    x.balance = 0;
-                    l.balance = 0;
-                } else {
-                    TreeNode<K, V> r = child(l, !isLeft);
-                    replace(x, r);
-                    set(l, !isLeft, child(r, isLeft));
-                    set(r, isLeft, l);
-                    set(x, isLeft, child(r, !isLeft));
-                    set(r, !isLeft, x);
-                    int rb = r.balance;
-                    x.balance = (rb == -sign) ? sign : 0;
-                    l.balance = (rb == sign) ? -sign : 0;
-                    r.balance = 0;
-                }
-                return;
-            default:
-                throw new IllegalStateException("b:" + x.balance * sign);
-            }
-            if (x == root) {
-                return;
-            }
-            isLeft = x.isFromLeft();
-            x = x.parent;
-        }
-    }
-
     private TreeNode<K, V> child(TreeNode<K, V> x, boolean isLeft) {
         return isLeft ? x.left : x.right;
     }
@@ -146,7 +104,6 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
             int b = x.balance;
             x.balance = d.balance;
             d.balance = b;
-
             // set x.parent
             TreeNode<K, V> xp = x.parent;
             TreeNode<K, V> dp = d.parent;
@@ -177,7 +134,6 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
                 x.right = d.right;
                 x.left = d.left;
             }
-
             if (x.right == null) {
                 throw new IllegalStateException("corrupt");
             }
@@ -239,6 +195,48 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
             }
             isLeft = x.isFromLeft();
             n = x.parent;
+        }
+    }
+
+    private void balance(TreeNode<K, V> x, boolean isLeft) {
+        while (true) {
+            int sign = isLeft ? 1 : -1;
+            switch (x.balance * sign) {
+            case 1:
+                x.balance = 0;
+                return;
+            case 0:
+                x.balance = -sign;
+                break;
+            case -1:
+                TreeNode<K, V> l = child(x, isLeft);
+                if (l.balance == -sign) {
+                    replace(x, l);
+                    set(x, isLeft, child(l, !isLeft));
+                    set(l, !isLeft, x);
+                    x.balance = 0;
+                    l.balance = 0;
+                } else {
+                    TreeNode<K, V> r = child(l, !isLeft);
+                    replace(x, r);
+                    set(l, !isLeft, child(r, isLeft));
+                    set(r, isLeft, l);
+                    set(x, isLeft, child(r, !isLeft));
+                    set(r, !isLeft, x);
+                    int rb = r.balance;
+                    x.balance = (rb == -sign) ? sign : 0;
+                    l.balance = (rb == sign) ? -sign : 0;
+                    r.balance = 0;
+                }
+                return;
+            default:
+                throw new IllegalStateException("b:" + x.balance * sign);
+            }
+            if (x == root) {
+                return;
+            }
+            isLeft = x.isFromLeft();
+            x = x.parent;
         }
     }
 
