@@ -47,7 +47,7 @@ public class AnsCompression {
             if (old == 0) {
                 continue;
             }
-            int ideal = (int) (old * total * 256L / sum);
+            int ideal = (int) (old * 256L * total / sum);
             // 1 too high so we can decrement if needed
             int x = 1 + ideal / 256;
             freq[i] = x;

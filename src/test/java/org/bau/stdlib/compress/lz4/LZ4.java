@@ -277,7 +277,7 @@ public class LZ4 {
         return runLen;
     }
 
-    int compressBlock(byte[] inData, int inLen, byte[] outData, int outPos) {
+    public int compressBlock(byte[] inData, int inLen, byte[] outData, int outPos) {
         if (inLen > inData.length) {
             throw new IllegalArgumentException("Buffer too small");
         }
@@ -389,7 +389,7 @@ public class LZ4 {
         data[pos + 3] = (byte) (x >> 24);
     }
 
-    static int decompressBlock(byte[] inData, int inLen, byte[] outData, int outPos) {
+    public static int decompressBlock(byte[] inData, int inLen, byte[] outData, int outPos) {
         if (inLen > inData.length) {
             throw new IllegalArgumentException("Buffer too small");
         }
@@ -411,7 +411,6 @@ public class LZ4 {
             for (int i = 0; i < literalLen; i += 4) {
                 int x = read4(inData, p + i);
                 write4(outData, outPos + i, x);
-                outData[outPos + i] = inData[p + i];
             }
             outPos += literalLen;
             p += literalLen;

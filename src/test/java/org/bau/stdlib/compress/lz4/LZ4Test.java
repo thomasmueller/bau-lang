@@ -15,6 +15,18 @@ import org.junit.Test;
 
 public class LZ4Test {
 
+    public static byte[] compress(byte[] data) {
+        byte[] compressed = new byte[data.length * 2];
+        LZ4 lz = new LZ4();
+        int len = lz.compressBlock(data, data.length, compressed, 0);
+        byte[] test = new byte[data.length * 2];
+        int l2 = LZ4.decompressBlock(compressed, len, test, 0);
+        assertEquals(data.length, l2);
+        test = Arrays.copyOf(test, l2);
+        assertTrue(Arrays.equals(data, test));
+        return Arrays.copyOf(compressed, len);
+    }
+
     @Test
     public void randomFileCompression() throws IOException {
         Random r = new Random(1);
