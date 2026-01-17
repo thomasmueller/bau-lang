@@ -133,6 +133,14 @@ public class ChessUI {
                 } else if ((y + x) % 2 == 1) {
                     System.out.print("\033[30;107m");
                 }
+                if (Chess.isBlack(b)) {
+                    // red
+                    System.out.print("\033[31m");
+                } else {
+                    // blue
+                    System.out.print("\033[94m");
+                }
+                // reset all attributes
                 System.out.print(" " + ch + " \033[0m");
             }
             System.out.println();
