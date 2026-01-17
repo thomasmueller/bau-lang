@@ -3,7 +3,7 @@ module org.bau.File
 type File
     filePointer int
 
-fun openFile(name i8[], mode i8[]) File
+fun openFile(name i8[], mode i8[]) File?
     native(```
         char n[256];
         for (int i = 0; i < 256; i++) {
@@ -20,6 +20,9 @@ fun openFile(name i8[], mode i8[]) File
             }
         }
         FILE* fp = fopen(n, m);
+        if (!fp) {
+            return 0;
+        }
         org_bau_File_File* f = org_bau_File_File_new();
         f->filePointer = (uint64_t) fp;
         return f;

@@ -220,6 +220,9 @@ fun save()
         data.append(lines.array[i].data)
         data.append('\n')
     f : File.openFile(currentFile.fileName, 'w')
+    if not f
+        println('Could not write to ' currentFile.fileName)
+        return
     f.write(data.data, 0, size)
     f.close()
     currentFile.modified = 0 
@@ -233,6 +236,9 @@ fun main()
         return
     fileName : Env.arg(1)
     f : File.openFile(fileName, 'r')
+    if not f
+        println('File not found: ' fileName)
+        return
     fileData : i8[f.len()]
     f.readFully(fileData, 0, f.len())
     f.close()

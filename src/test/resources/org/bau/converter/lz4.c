@@ -447,6 +447,9 @@ org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
         }
     }
     FILE* fp = fopen(n, m);
+    if (!fp) {
+        return 0;
+    }
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
@@ -987,13 +990,13 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
 }
 int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_array* outputFileName, int64_t level) {
     org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
-    if (!(in->filePointer)) {
+    if (!(in)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
         return 0;
     }
     org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1004);
-    if (!(out->filePointer)) {
+    if (!(out)) {
         printf("Could not open file: %.*s\n", outputFileName->len, outputFileName->data);
         _decUseStack(out, org_bau_File_File);
         _decUseStack(in, org_bau_File_File);
@@ -1074,13 +1077,13 @@ int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_arra
 }
 int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_array* outputFileName) {
     org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
-    if (!(in->filePointer)) {
+    if (!(in)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
         return 0;
     }
     org_bau_File_File* out = org_bau_File_openFile_2(outputFileName, string_1004);
-    if (!(out->filePointer)) {
+    if (!(out)) {
         printf("Could not open file: %.*s\n", outputFileName->len, outputFileName->data);
         _decUseStack(out, org_bau_File_File);
         _decUseStack(in, org_bau_File_File);
@@ -1315,7 +1318,7 @@ int64_t org_bau_compress_Lz4Tool_main_0() {
 }
 int64_t org_bau_compress_Lz4Tool_xxhashFile_1(i8_array* inputFileName) {
     org_bau_File_File* in = org_bau_File_openFile_2(inputFileName, string_1002);
-    if (!(in->filePointer)) {
+    if (!(in)) {
         printf("File not found: %.*s\n", inputFileName->len, inputFileName->data);
         _decUseStack(in, org_bau_File_File);
         return 0;

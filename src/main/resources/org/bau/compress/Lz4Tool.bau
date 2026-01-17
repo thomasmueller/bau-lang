@@ -43,7 +43,7 @@ fun hex(x int, len int) i8[]
 
 fun xxhashFile(inputFileName i8[]) int
     in : File.openFile(inputFileName, 'r')
-    if not in.filePointer
+    if not in
         println('File not found: ' inputFileName)
         return 0
     hash : newXXHash(0)
@@ -65,11 +65,11 @@ fun is(a i8[], b i8[]) int
 
 fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     in : File.openFile(inputFileName, 'r')
-    if not in.filePointer
+    if not in
         println('File not found: ' inputFileName)
         return 0
     out : File.openFile(outputFileName, 'w')
-    if not out.filePointer
+    if not out
         println('Could not open file: ' outputFileName)
         return 0
     header : i8[7]
@@ -132,11 +132,11 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
 
 fun compressFile(inputFileName i8[], outputFileName i8[], level int) int
     in : File.openFile(inputFileName, 'r')
-    if not in.filePointer
+    if not in
         println('File not found: ' inputFileName)
         return 0
     out : File.openFile(outputFileName, 'w')
-    if not out.filePointer
+    if not out
         println('Could not open file: ' outputFileName)
         return 0
     header : i8[7]

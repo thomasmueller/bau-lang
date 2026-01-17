@@ -5,9 +5,6 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-https://news.ycombinator.com/item?id=46464270
-https://gist.github.com/attractivechaos/d2efc77cc1db56bbd5fc597987e73338
-
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
@@ -40,9 +37,6 @@ Simplify AVL tree
 all calculator functions
 
 sound / mp3 (afplay, aplay, miniaud.io, minimp3)
-
-complex / polar coordinates
-sexagesimal conversion
 
 matrix
 - Addition and Subtraction: A + B and A - B. (Requires to have the same dimensions).
@@ -125,11 +119,10 @@ I'm writing a new systems programming language.
 I'm trying to write an article about "panic".
 Could you review the article and provide feedback?
 
-# A Programming Language without Panic
+# Preventing and handling Panic Situations
 
 I want to build a memory-safe systems language
-that reduces or eliminates panic situations
-and instead provides controlled continuation.
+that reduces / eliminates panic situations at runtime.
 
 A panic situation is a program error that stops execution.
 In Rust, this is panic / abort, in other languages
@@ -140,7 +133,7 @@ errors on unwrap, out-of-memory, stack overflow, and similar.
 In most programming languages, these trigger either panic or unchecked exceptions.
 My language does not support unchecked exceptions, so this is not an option.
 I would like to reduce or eliminating panic situations as much as possible.
-I'm not trying to prevent all possible bugs, endless loops, etc
+I'm not trying to prevent all possible bugs, endless loops, etc.
 as that is nearly impossible.
 I'm writing a memory-safe language; there is no compromise of the memory safety.
 My language does not have undefined behavior, and even in such cases,
@@ -171,6 +164,32 @@ but I think there is more and more agreement now that unexpected state / bugs
 should not just stop the process, operating system, and
 cause eg. a rocket to explode.
 
+# Prevention
+
+## Null Pointer Access
+
+My language supports nullable, and non-nullable references.
+Nullable references need to be checked using "if x == null",
+So that null pointer access at runtime is not possible.
+
+## Division by Zero
+
+Division by zero could be prevented using compile-time verification
+similar to null pointer access. That means, before dividing
+by a variable, the variable needs to be checked for zero.
+(Division by constants can be checked easily.)
+
+## Illegal Cast
+
+This is similar to null pointer exception:
+My language does not allow unchecked casts (similar to null pointer).
+
+## Unchecked Exceptions
+
+In Java, Javascript, etc, an unchecked exception is thrown, which can be caught.
+For my language, which is converted to C, this is not really an option.
+Also, this kind of error handling has some runtime complexity and overhead.
+
 # Mitigation
 
 ## Panic Callback
@@ -185,12 +204,6 @@ what to do depending on problem.
 There are some limitations on what the callback can do,
 these need to be defined.
 
-## Unchecked Exceptions
-
-In Java, Javascript, etc, an unchecked exception is thrown, which can be caught.
-For my language, which is converted to C, this is not really an option.
-Also, this kind of error handling has some runtime complexity and overhead.
-
 ## Unwinding like Rust
 
 In Rust, unwinding can be enabled, which means such errors
@@ -200,29 +213,6 @@ there is libunwind, but I would prefer to not depend on it,
 as it is not available everywhere.
 
 # Panic Root Causes
-
-## Null Pointer Access
-
-My language supports nullable, and non-nullable references.
-Nullable references need to be checked using "if x == null",
-So that null pointer access at runtime is not possible.
-
-## Division by Zero
-
-I argue, if integer division by zero (and remainder by zero) needs to be prevented,
-then integer overflow (for addition, multiplication) also need to be prevented.
-My language does not do that for performance reasons.
-I know Rust does it in the debug builds,
-but having different behavior in debug and release builds doesn't feel right to me.
-For regular integers, currently in my language, integer overflow wraps
-(in a well-defined way), just like in Java.
-And integer division by zero works like floating point division by zero:
-division by 0 returns max, min, or 0, for positive, negative,
-and 0 divisors, respectively. Remainder by 0 returns 0.
-If I implement the panic callback (above), then this can be used.
-
-An option might be to support a new data type "safe integer" that does not allow
-overflow, division by zero, and remainder by zero. This data type is then slower.
 
 ## Array Index Out Of Bounds
 
@@ -263,7 +253,8 @@ My language support a callback method ('close') if an object is freed.
 In Swift, if this callback re-links the object, the program panics.
 In my language, right now, my language also panics for this case currently,
 but I think that's a mistake.
-In other languages (eg. Java), the object will simply not be garbage collected in this case.
+In other languages (eg. Java), the object will not be garbage collected in this case.
+(in Java, "finalize" is kind of deprecated now AFAIK.)
 
 ## Out of Memory
 
@@ -284,10 +275,30 @@ which then means it just uses more memory.
 This would be ideal for my language,
 but it seems to be only available in GCC, and Go.
 
-## Illegal Cast
 
-This is similar to null pointer exception:
-My language does not allow unchecked casts (similar to null pointer).
+
+
+
+
+
+
+
+## Division by Zero
+
+Arguably, if integer division by zero (and remainder by zero) needs to be prevented,
+then integer overflow (for addition, multiplication) also need to be prevented.
+My language does not do that for performance reasons.
+I know Rust does it in the debug builds,
+but having different behavior in debug and release builds doesn't feel right to me.
+For regular integers, currently in my language, integer overflow wraps
+(in a well-defined way), just like in Java.
+And integer division by zero works like floating point division by zero:
+division by 0 returns max, min, or 0, for positive, negative,
+and 0 divisors, respectively. Remainder by 0 returns 0.
+If I implement the panic callback (above), then this can be used.
+
+An option might be to support a new data type "safe integer" that does not allow
+overflow, division by zero, and remainder by zero. This data type is then slower.
 
 
 --------------

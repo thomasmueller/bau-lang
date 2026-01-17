@@ -533,6 +533,8 @@ i8_array* string_1039;
 i8_array* string_1040;
 i8_array* string_1041;
 i8_array* string_1042;
+i8_array* string_1043;
+i8_array* string_1044;
 double POS_INFINITY;
 double NEG_INFINITY;
 double NOT_A_NUMBER;
@@ -862,6 +864,9 @@ org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
         }
     }
     FILE* fp = fopen(n, m);
+    if (!fp) {
+        return 0;
+    }
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
@@ -1696,6 +1701,10 @@ void save_0() {
         }
     }
     org_bau_File_File* f = org_bau_File_openFile_2(currentFile.fileName, string_1038);
+    if (!(f)) {
+        printf("Could not write to %.*s\n", currentFile.fileName->len, currentFile.fileName->data);
+        return;
+    }
     int64_t _t1 = org_bau_File_File_write_4(f, data->data, 0, size);
     ;
     org_bau_File_File_close_1(f);
@@ -1736,10 +1745,12 @@ int main(int _argc, char *_argv[]) {
     string_1036 = str_const(";", 1);
     string_1037 = str_const("\x1b[?25h", 6);
     string_1038 = str_const("w", 1);
-    string_1039 = str_const("Not a terminal", 14);
-    string_1040 = str_const("Usage: ", 7);
-    string_1041 = str_const(" <fileName>", 11);
-    string_1042 = str_const("r", 1);
+    string_1039 = str_const("Could not write to ", 19);
+    string_1040 = str_const("Not a terminal", 14);
+    string_1041 = str_const("Usage: ", 7);
+    string_1042 = str_const(" <fileName>", 11);
+    string_1043 = str_const("r", 1);
+    string_1044 = str_const("File not found: ", 16);
     _main();
     return 0;
 }
@@ -1783,7 +1794,11 @@ void _main() {
         return;
     }
     i8_array* fileName = org_bau_Env_arg_1(1);
-    org_bau_File_File* f = org_bau_File_openFile_2(fileName, string_1042);
+    org_bau_File_File* f = org_bau_File_openFile_2(fileName, string_1043);
+    if (!(f)) {
+        printf("File not found: %.*s\n", fileName->len, fileName->data);
+        return;
+    }
     int64_t _t56 = org_bau_File_File_len_1(f);
     i8_array* _t57 = i8_array_new(_t56);
     _incUseStack(_t57);

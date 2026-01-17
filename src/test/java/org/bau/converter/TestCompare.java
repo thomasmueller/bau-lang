@@ -96,6 +96,11 @@ public class TestCompare {
     }
 
     @Test
+    public void compressSr3() throws IOException {
+        test("compress-sr3");
+    }
+
+    @Test
     public void constFunction() throws IOException {
         test("constFunction");
     }

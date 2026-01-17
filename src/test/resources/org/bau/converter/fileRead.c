@@ -314,6 +314,7 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
+i8_array* string_1002;
 org_bau_File_File* org_bau_File_File_0() {
     org_bau_File_File* _t0 = org_bau_File_File_new();
     _t0->filePointer = 0;
@@ -335,6 +336,9 @@ org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode) {
         }
     }
     FILE* fp = fopen(n, m);
+    if (!fp) {
+        return 0;
+    }
     org_bau_File_File* f = org_bau_File_File_new();
     f->filePointer = (uint64_t) fp;
     return f;
@@ -356,6 +360,10 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
 }
 void test_0() {
     org_bau_File_File* file = org_bau_File_openFile_2(string_1000, string_1001);
+    if (!(file)) {
+        printf("file not found\n");
+        return;
+    }
     i8_array* _t0 = i8_array_new(16);
     _incUseStack(_t0);
     i8_array* data = _t0;
@@ -374,6 +382,7 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("hello.txt", 9);
     string_1001 = str_const("r", 1);
+    string_1002 = str_const("file not found", 14);
     _main();
     return 0;
 }

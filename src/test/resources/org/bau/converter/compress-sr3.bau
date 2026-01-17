@@ -1,0 +1,233 @@
+import org.bau.File
+    openFile
+import org.bau.Env
+
+type Sr3
+    input i8[]
+    output i8[]
+
+fun main()
+    if Env.argCount() <> 4
+        println('Parameters: c|d input output')
+        return
+    in := openFile(Env.arg(2), 'r')
+    if not in
+        println('Input does not exist')
+        return
+    input : i8[in.len()]
+    in.read(input, 0, input.len)
+    for i := until(state.len)
+        state[i] = 1 << 31
+    in.close()
+    output : i8[input.len * 10]
+    global = Sr3(input, output)
+    if Env.arg(1)[0] = ord('c')
+        output[0] = ord('s')
+        output[1] = ord('R')
+        output[2] = 2
+        output[3] = di1
+        outPos = 4
+        compress()
+    else
+        if input[0] <> ord('s') or 
+               input[1] <> ord('R') or 
+               input[2] <> 2
+            println('Not an SR3 file')
+            return
+        di1 = input[3]
+        inPos = 4
+        decompress()
+    out := openFile(Env.arg(3), 'w')
+    if not out
+        println('Could not open output')
+        return
+    out.write(output, 0, outPos)
+    out.close()
+
+fun probability(cxt int) int
+    return state[cxt] >> 20
+
+fun update(cxt int, bit int)
+    tc := state[cxt]
+    n := tc & 127
+    p := tc >> 9
+    if n < 127
+        tc = (tc + 1) & 0xffffffff
+    delta := ((bit << 23) - p) * DT[n]
+    tc = (tc + (delta & 0xffffff80)) & 0xffffffff
+    state[cxt] = tc
+
+fun writeBit(cxt int, bit int)
+    p := probability(cxt)
+    xmid := (x1 + (((x2 - x1) & 0xffffffff) >> 12) * p) & 0xffffffff
+    if bit = 1
+        x2 = xmid
+    else
+        x1 = (xmid + 1) & 0xffffffff
+    update(cxt, bit)
+    while ((x1 ^ x2) & 0xff000000) = 0
+        global.output[outPos] = x2 >> 24
+        outPos += 1
+        x1 = (x1 << 8) & 0xffffffff
+        x2 = ((x2 << 8) + 255) & 0xffffffff
+
+fun writeByte(cxt int, x int)
+    b := (x >> 4) + 16
+    writeBit(cxt + 1, (b >> 3) & 1)
+    writeBit(cxt + (b >> 3), (b >> 2) & 1)
+    writeBit(cxt + (b >> 2), (b >> 1) & 1)
+    writeBit(cxt + (b >> 1), b & 1)
+    cxt += 15 * (b - 15)
+    b = (x & 15) | 16
+    writeBit(cxt + 1, (b >> 3) & 1)
+    writeBit(cxt + (b >> 3), (b >> 2) & 1)
+    writeBit(cxt + (b >> 2), (b >> 1) & 1)
+    writeBit(cxt + (b >> 1), b & 1)
+
+fun flush()
+    global.output[outPos] = x1 >> 24
+    global.output[outPos + 1] = 0xff
+    global.output[outPos + 2] = 0xff
+    global.output[outPos + 3] = 0xff
+    global.output[outPos + 4] = 0xff
+    outPos += 8
+
+fun initRead()
+    for i := until(4)
+        x = ((x << 8) + (global.input[inPos] & 0xff)) & 0xffffffff
+        inPos += 1
+
+fun readByte(cxt int) int
+    hi := 1
+    lo := 1
+    hi += hi + readBit(cxt + hi)
+    hi += hi + readBit(cxt + hi)
+    hi += hi + readBit(cxt + hi)
+    hi += hi + readBit(cxt + hi)
+    cxt += 15 * (hi - 15)
+    lo += lo + readBit(cxt + lo)
+    lo += lo + readBit(cxt + lo)
+    lo += lo + readBit(cxt + lo)
+    lo += lo + readBit(cxt + lo)
+    return ((hi - 16) << 4) | (lo - 16)
+
+fun readBit(cxt int) int
+    p := probability(cxt)
+    xmid := x1 + ((x2 - x1) >> 12) * p
+    bit := 0
+    if x <= xmid
+        bit = 1
+    if bit = 1
+        x2 = xmid
+    else
+        x1 = xmid + 1
+    update(cxt, bit)
+    while ((x1 ^ x2) & 0xff000000) = 0
+        x1 = (x1 << 8) & 0xffffffff
+        x2 = ((x2 << 8) + 255) & 0xffffffff
+        x = ((x << 8) + (global.input[inPos] & 0xff)) & 0xffffffff
+        inPos += 1
+    return bit
+
+fun compress()
+    c1 := 0 # previous byte
+    t4 : int[0x1000000] # context -> last 3 bytes + count
+    while 1
+        r := t4[h]
+        cxt int
+        if r & 0xffffffff >= 0x04000000
+            cxt = 1024 + (r >> 20)
+        else
+            cxt = c1 | ((r >> 16) & 0x3f00)
+        cxt *= 258
+        if inPos >= global.input.len
+            # EOF marker
+            writeBit(cxt, 1)
+            writeBit(cxt + 1, 0)
+            writeByte(cxt + 2, r & 0xff)
+            break
+        c := global.input[inPos] & 0xff
+        inPos += 1
+        comp3 := (c * 0x010101) ^ r
+        if comp3 & 0xff = 0
+            # match first
+            writeBit(cxt, 0)
+            if (r & 0xffffffff) < 0x3f000000
+                t4[h] += 0x01000000
+        elif comp3 & 0xff00 = 0
+            # match second
+            writeBit(cxt, 1)
+            writeBit(cxt + 1, 1)
+            writeBit(cxt + 2, 0)
+            t4[h] = (r & 0xff0000) | ((r << 8) & 0xff00) | c | 0x01000000
+        elif comp3 & 0xff0000 = 0
+            # match third
+            writeBit(cxt, 1)
+            writeBit(cxt + 1, 1)
+            writeBit(cxt + 2, 1)
+            t4[h] = ((r << 8) & 0xffff00) | c | 0x01000000
+        else
+            # literal
+            writeBit(cxt, 1)
+            writeBit(cxt + 1, 0)
+            writeByte(cxt + 2, c)
+            t4[h] = ((r << 8) & 0xffff00) | c
+        c1 = c
+        h = (h * (5 << di1) + c + 1) & 0xffffff
+    flush()
+
+fun decompress()
+    initRead()
+    c1 := 0 # previous byte
+    t4 : int[0x1000000]; # context -> last 3 bytes + count
+    while
+        r := t4[h]
+        cxt int
+        if r & 0xffffffff >= 0x04000000
+            cxt = 1024 + (r >> 20)
+        else
+            cxt = c1 | ((r >> 16) & 0x3f00)
+        cxt *= 258
+        if readBit(cxt) = 1
+            if readBit(cxt + 1) = 1
+                if readBit(cxt + 2) = 1
+                    # match third
+                    c1 = (r >> 16) & 0xff
+                    t4[h] = ((r << 8) & 0xffff00) | c1 | 0x01000000
+                else
+                    # match second
+                    c1 = (r >> 8) & 0xff
+                    t4[h] = (r & 0xff0000) | ((r << 8) & 0xff00) | c1 | 0x01000000
+            else
+                # literal
+                c1 = readByte(cxt + 2)
+                if c1 = (r & 0xff)
+                    break; # EOF
+                t4[h] = ((r << 8) & 0xffff00) | c1
+        else
+            # match first
+            c1 = r & 0xff
+            if (r & 0xffffffff) < 0x3f000000
+                t4[h] = r + 0x01000000
+        global.output[outPos] = c1
+        outPos += 1
+        h = (h * (5 << di1) + c1 + 1) & 0xffffff
+
+
+fun buildDT() const int[]
+    result : int[128]
+    for i := until(128)
+        result[i] = 512 / (i + 2)
+    return result
+
+DT : buildDT()
+
+di1 := 5
+h := 0
+state : int[(1024 + 1024) * 258]
+x1 := 0
+x2 := 0xffffffff
+x := 0
+inPos := 0
+outPos := 0
+global := Sr3(i8[0], i8[0])
