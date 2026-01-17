@@ -5,15 +5,27 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+https://news.ycombinator.com/item?id=46464270
+https://gist.github.com/attractivechaos/d2efc77cc1db56bbd5fc597987e73338
+
+Javascript backend, like Nim:
+nim js -d:nodejs fannkuch.nim
+
+diff
+
+shell
+split, cat, tar
+
+text-based browser
+https://cssence.com/2026/text-based-web-browsers/
+
+Operators: currently we use ~ for negation... what about ^ like in go, or 0 ^ ... ?
+
+webserver
+
 - SQLite database reader
 
-Ring buffer:
-https://news.ycombinator.com/item?id=46292937
-I've been writing ring buffers wrong all these years
-
 array-backed Treap
-
-better LZ4HC: https://github.com/mattseabrook/LZSS/blob/main/lzss.c
 
 hash function with seed parameter
 
@@ -23,13 +35,12 @@ hash function with seed parameter
 - hash map with tombstones
 - array-backed or doubly-linked hash map
 
-Scapegoat, Treap, simple AVL tree
+Simplify AVL tree
 
 all calculator functions
 
 sound / mp3 (afplay, aplay, miniaud.io, minimp3)
 
-base change (binary, octal, hex, ...)
 complex / polar coordinates
 sexagesimal conversion
 
