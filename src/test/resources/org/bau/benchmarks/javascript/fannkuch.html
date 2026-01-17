@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fannkuch</title>
+</head>
+<body>
+
+<h2>Fannkuch</h2>
+
+<label>
+    n:
+    <input id="nInput" type="number" value="7" min="1">
+</label>
+
+<button onclick="runTest()">Run</button>
+<div id="output"></div>
+
+<script>
+    
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
+
+function fannkuch(n) {
+    // start
+    // n = 10 checksum = undefined max flips = undefined time = 2902.20 ms
+    
+    // current
+    // n = 10 checksum = undefined max flips = undefined time = 1759.00 ms
+    
+    // BigInt64Array
+    n = BigInt.asIntN(64, n);
+
+    // perm1 initialization
+    const perm1 = new BigInt64Array(Number(n) | 0);
+    for (let i = 0n; i < n; i = BigInt.asIntN(64, i + 1n)) {
+        perm1[Number(i)] = i;
+    }
+
+    const perm = new BigInt64Array(Number(n) | 0);
+    const count = new BigInt64Array(Number(n) | 0);
+
+    let flips = 0n;
+    let nperm = 0n;
+    let checksum = 0n;
+    let r = BigInt.asIntN(64, n);
+
+    while (r > 0n) {
+        while (r > 1n) {
+            count[Number(r - 1n) | 0] = r;
+            r = BigInt.asIntN(64, r - 1n);
+        }
+
+        // for (let i = 0n; i < n; i++) {
+        for (let i = 0n; i < n; i = BigInt.asIntN(64, i + 1n)) {
+            perm[Number(i) | 0] = perm1[Number(i) | 0];
+        }
+
+        // Count flips
+        let f = 0n;
+        let k = perm[0];
+
+        while (k !== 0n) {
+            // for (let i = 0n; 2n * i < k; i++) {
+            for (let i = 0n; 2n * i < k; i = BigInt.asIntN(64, i + 1n)) {
+                const idx1 = Number(i) | 0;
+                const idx2 = Number(k - i) | 0;
+                const t = perm[idx1];
+                perm[idx1] = perm[idx2];
+                perm[idx2] = t;
+            }
+            k = perm[0];
+            // f++;
+            f = BigInt.asIntN(64, f + 1n);
+        }
+
+        if (f > flips) flips = f;
+
+        if (nperm % 2n === 0n) {
+            // checksum += f;
+            checksum = BigInt.asIntN(64, checksum + f)
+        } else {
+            // checksum -= f;
+            checksum = BigInt.asIntN(64, checksum - f)
+        }
+
+        // Generate next permutation
+        while (true) {
+            if (r === n) {
+                console.log(checksum.toString());
+                return flips;
+            }
+
+            const p0 = perm1[0];
+            let i = 0n;
+            while (i < r) {
+                // const j = i + 1n;
+                const j = BigInt.asIntN(64, i + 1n);
+                perm1[Number(i) | 0] = perm1[Number(j) | 0];
+                i = j;
+            }
+            perm1[Number(r) | 0] = p0;
+
+            // count[Number(r) | 0] --;
+            count[Number(r) | 0] = BigInt.asIntN(64, count[Number(r) | 0] - 1n);
+            if (count[Number(r) | 0] > 0n) break;
+            r = BigInt.asIntN(64, r + 1n);
+            // r++;
+        }
+
+        // nperm++;
+        nperm = BigInt.asIntN(64, nperm + 1n);
+    }
+
+    return flips;
+}
+
+function runTest() {
+    const n = document.getElementById("nInput").value;
+    const output = document.getElementById("output");
+
+    output.textContent = "Running...";
+
+    // Allow UI to update before running heavy computation
+    setTimeout(() => {
+        const start = performance.now();
+        const result = fannkuch(n);
+        const end = performance.now();
+
+        output.textContent =
+            `n = ${n}
+checksum = ${result.checksum}
+max flips = ${result.flips}
+time = ${(end - start).toFixed(2)} ms`;
+    }, 10);
+}
+
+</script>
+</body>
+</html>
