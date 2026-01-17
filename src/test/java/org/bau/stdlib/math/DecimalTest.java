@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 import java.math.BigDecimal;
 import java.util.Random;
 
-import org.bau.perf.Profiler;
 import org.junit.Test;
 
 public class DecimalTest {
