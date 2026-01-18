@@ -1,0 +1,170 @@
+module org.bau.Int
+
+import org.bau.Exception
+    exception
+import org.bau.Utils
+    if
+
+MIN_INT : 0x8000000000000000
+MAX_INT : 0x7fffffffffffffff
+MIN_I32 : -(1 << 31)
+MAX_I32 : (1 << 32) - 1
+
+fun arithmeticRightShift(x int, n int) const int
+    native(`return (int64_t) (((uint64_t) x) >> n);`)
+    return (x >> n) | ((0 - (x < 0)) << (64 - n))
+
+fun numberOfLeadingZeros(x int) const int
+    native(`return x == 0 ? 64 : _clzll(x);`)
+    if x <= 0
+        return if(x = 0, 64, 0)
+    n := 63
+    shift := 32
+    while shift > 0
+        if x >= 1 << shift
+            n -= shift
+            x >>= shift
+        shift >>= 1
+    return n
+
+fun bitCount(x int) const int 
+    return bitCountI32(i32(x)) + bitCountI32(i32(x >> 32))
+
+fun bitCountI32(x i32) const int
+    x -= (x >> 1) & 0x55555555
+    x = (x & 0x33333333) + ((x >> 2) & 0x33333333)
+    x = ((x + (x >> 4)) & 0x0f0f0f0f) * 0x01010101
+    return x >> 24
+    
+fun numberOfTrailingZeros(x int) const int
+    native(`return x == 0 ? 64 : _ctzll(x);`)
+    if x = 0
+        return 64
+    return bitCount(x ^ (x - 1)) - 1
+
+fun divUnsigned(dividend int, divisor int) int
+    # From Hacker's Delight
+    if divisor < 0
+        return (dividend & ~(dividend - divisor)) >> 63
+    q : ((dividend >> 1) / divisor) << 1
+    r : dividend - (q * divisor)
+    return q + ((r | ~(r - divisor)) >> 63)
+
+fun compareUnsigned(a int, b int) int
+    a += 0x8000000000000000
+    b += 0x8000000000000000
+    if a = b
+        return 0
+    if a < b
+        return -1
+    return 1
+
+fun min(a int, b int) const int
+    if a < b
+        return a
+    return b
+
+fun max(a int, b int) const int
+    if a > b
+        return a
+    return b
+
+fun powInt(base int, exponent int) const int
+    if exponent < 0
+        return -1
+    result := 1
+    b := base
+    while exponent > 0
+        if (exponent & 1) = 1
+            result *= b
+            if result > (1 << 31) or result < -(1 << 31)
+                return -1
+        exponent >>= 1
+        if exponent > 0
+            b *= b
+            if b > (1 << 31) or b < -(1 << 31)
+                return -1
+    return result
+
+fun sqrtInt(x int) const int
+    if x < 0
+        return 0
+    g := 1 << 31
+    c := g
+    while
+        t : g * g
+        if t > x or t < 0
+            g ^= c
+        c >>= 1
+        break c = 0
+        g |= c
+    return g
+
+fun parseInt(value i8[]) int
+    x := 0
+    sign := 1
+    if value.len
+        i := 0
+        if value[0] = ord('-')
+            sign = -1
+            i += 1
+        while i < value.len
+            n : value[i]
+            if n >= ord('0') and n <= ord('9')
+                x *= 10
+                x += n - ord('0')
+            i += 1
+        return sign * x
+    return 0
+
+fun intToStr(n int, buff i8[], start int, size int) int
+    i := 0
+    while i < size
+        buff[start + i] = ord('0') + (n % 10)
+        n /= 10
+        i += 1
+    return i + start
+
+fun appendInt(n int, buff i8[], pos int) int
+    if n < 0
+        buff[pos] = ord('-')
+        pos += 1
+    else
+        n = -n
+    start := pos
+    while
+        buff[pos] = ord('0') - (n % 10)
+        pos += 1
+        n /= 10
+        break n = 0
+    end : pos
+    while pos > start
+        pos -= 1
+        temp : buff[pos]
+        buff[pos] = buff[start]
+        buff[start] = temp
+        start += 1
+    return end
+
+fun intToString(n int) i8[]
+    buff : i8[20]
+    pos := appendInt(n, buff, 0)
+    result : i8[pos]
+    for j := until(pos)
+        result[j] = buff[j]
+    return result
+
+
+# parse an integer
+# overflow is ignored
+# throws an exception if the string does not match [0-9]+
+fun parsePositiveInt(s i8[]) int throws exception
+    result := 0
+    if s.len = 0
+        throw exception(s)
+    for i := until(s.len)
+        c : s[i]
+        if c <= ord('0') or c >= ord('9')
+            throw exception(s)
+        result = result * 10 + c - ord('0')
+    return result

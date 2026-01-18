@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -361,37 +360,25 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     randomSeed = 0;
-    int64_t _t1 = square_1(2);
-    int64_t _t2 = square_2(2, 3);
-    printf("%lld %lld\n", (long long)_t1, (long long)_t2);
-    int64_t _t3 = sum_var(1, /* argCount */ 1, 2);
+    int64_t _t0 = square_1(2);
+    int64_t _t1 = square_2(2, 3);
+    printf("%lld %lld\n", (long long)_t0, (long long)_t1);
+    int64_t _t2 = sum_var(1, /* argCount */ 1, 2);
+    printf("%lld\n", (long long)_t2);
+    int64_t _t3 = sum_var(1, /* argCount */ 2, 2, 3);
     printf("%lld\n", (long long)_t3);
-    int64_t _t4 = sum_var(1, /* argCount */ 2, 2, 3);
+    int64_t _t4 = sum_var(1, /* argCount */ 3, 2, 3, 4);
     printf("%lld\n", (long long)_t4);
-    int64_t _t5 = sum_var(1, /* argCount */ 3, 2, 3, 4);
-    printf("%lld\n", (long long)_t5);
     printf("ascii of \"0\" is %lld\n", (long long)48);
-    int64_t _t6 = int_rotateRight_2(1, 1);
-    int64_t _t7 = int_rotateRight_2(0x1, 1);
-    printf("%lld = %lld\n", (long long)_t6, (long long)_t7);
+    int64_t _t5 = int_rotateRight_2(1, 1);
+    int64_t _t6 = int_rotateRight_2(0x1, 1);
+    printf("%lld = %lld\n", (long long)_t5, (long long)_t6);
+    double _t7 = float_twice_1(1.0);
     double _t8 = float_twice_1(1.0);
-    double _t9 = float_twice_1(1.0);
-    printf("%.9f = %.9f\n", _t8, _t9);
+    printf("%.9f = %.9f\n", _t7, _t8);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.

@@ -2,7 +2,7 @@ import org.bau.Env
 import org.bau.File
 import org.bau.List
     newList
-import org.bau.Math
+import org.bau.Int
     intToString
 import org.bau.String
     string

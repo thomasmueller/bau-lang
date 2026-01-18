@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -313,19 +312,15 @@ int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 void nextTerm_1(int64_t k);
 org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b);
-int64_t org_bau_BigInt_arithmeticRightShift_2(int64_t x, int64_t n);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data);
-int64_t org_bau_BigInt_compareUnsigned_2(int64_t a, int64_t b);
 org_bau_BigInt_bigInt org_bau_BigInt_convertIntToBigInt_1(int64_t value);
 i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen);
 i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to);
-int64_t org_bau_BigInt_divUnsigned_2(int64_t divnd, int64_t divisor);
 org_bau_BigInt_bigInt org_bau_BigInt_mul_2(i32_array* a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_mulBig_2(i32_array* a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value);
 org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t negative);
-int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x);
 org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b);
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other);
 int64_t org_bau_BigInt_bigInt_compare_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt o);
@@ -340,7 +335,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_sub_2(org_bau_BigInt_bigInt this, or
 int64_t org_bau_BigInt_bigInt_toInt_1(org_bau_BigInt_bigInt this);
 i8_array* org_bau_Env_arg_1(int64_t index);
 int64_t org_bau_Env_argCount_0();
-int64_t org_bau_Math_parseInt_1(i8_array* value);
+int64_t org_bau_Int_arithmeticRightShift_2(int64_t x, int64_t n);
+int64_t org_bau_Int_compareUnsigned_2(int64_t a, int64_t b);
+int64_t org_bau_Int_divUnsigned_2(int64_t dividend, int64_t divisor);
+int64_t org_bau_Int_numberOfLeadingZeros_1(int64_t x);
+int64_t org_bau_Int_parseInt_1(i8_array* value);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
@@ -374,19 +373,12 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1024;
-int64_t I32_MIN_VALUE;
-int64_t I32_MAX_VALUE;
-int64_t INT_MIN_VALUE;
-double POS_INFINITY;
-double NEG_INFINITY;
-double NOT_A_NUMBER;
-double PI;
-double E;
-double LOG10;
-double LOG2;
+i8_array* string_1019;
+int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
 org_bau_BigInt_bigInt acc;
 org_bau_BigInt_bigInt den;
 org_bau_BigInt_bigInt num;
@@ -520,28 +512,12 @@ org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b) {
     _decUseStack(result, i32_array);
     return _t4;
 }
-int64_t org_bau_BigInt_arithmeticRightShift_2(int64_t x, int64_t n) {
-    return (int64_t) (((uint64_t) x) >> n);
-    int64_t _r0 = (shiftRight_int_2(x, n)) | (shiftLeft_2((0 - (x < 0)), (64 - n)));
-    return _r0;
-}
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data) {
-    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_new();
-    _t0.negative = 0;
+    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_new();
+    _t1.negative = 0;
     _incUseStack(data);
-    _t0.data = data;
-    return _t0;
-}
-int64_t org_bau_BigInt_compareUnsigned_2(int64_t a, int64_t b) {
-    a += 0x8000000000000000;
-    b += 0x8000000000000000;
-    if (a == b) {
-        return 0;
-    }
-    if (a < b) {
-        return -1;
-    }
-    return 1;
+    _t1.data = data;
+    return _t1;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_convertIntToBigInt_1(int64_t value) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_newBigInt_1(value);
@@ -607,16 +583,6 @@ i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from
     _decUseStack(_t0, i32_array);
     _decUseStack(a, i32_array);
     return x;
-}
-int64_t org_bau_BigInt_divUnsigned_2(int64_t divnd, int64_t divisor) {
-    if (divisor < 0) {
-        int64_t _r0 = shiftRight_int_2((divnd & ( ~ (divnd - divisor) )), 63);
-        return _r0;
-    }
-    int64_t q = shiftLeft_2((idiv_2((shiftRight_int_2(divnd, 1)), divisor)), 1);
-    int64_t r = divnd - (q * divisor);
-    int64_t _r1 = q + (shiftRight_int_2((r | ( ~ (r - divisor) )), 63));
-    return _r1;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_mul_2(i32_array* a, i32_array* b) {
     if (a->len < b->len) {
@@ -735,7 +701,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
             x.negative = 1;
             _decUseStack(_t2, i32_array);
             return x;
-        } else if (value > (-9223372036854775807LL-1LL)) {
+        } else if (value > -2147483648) {
             i32_array* _t3 = i32_array_new(2);
             org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t3);
             x.data->data[idx_2(0, x.data->len)] = - value;
@@ -801,28 +767,6 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t
     _decUseStack(d2, i32_array);
     _decUseStack(_t2, i32_array);
     return result;
-}
-int64_t org_bau_BigInt_numberOfLeadingZeros_1(int64_t x) {
-    return x == 0 ? 64 : _clzll(x);
-    if (x <= 0) {
-        int64_t _t0 = 0;
-        if (x == 0) {
-            _t0 = 64;
-        } else {
-            _t0 = 0;
-        }
-        return _t0;
-    }
-    int64_t n = 63;
-    int64_t shift = 32;
-    while (shift > 0) {
-        if (x >= ( shiftLeft_2(1, shift) )) {
-            n -= shift;
-            x >>= shift;
-        }
-        shift >>= 1;
-    }
-    return n;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b) {
     i32_array* result = org_bau_BigInt_copyOf_2(a, a->len);
@@ -1033,12 +977,12 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
     int64_t j = m - n;
     while (j >= 0) {
         int64_t aa = ((un->data[idx_2(( j + n ) - 1, un->len)] & 4294967295) * 4294967296) + (un->data[idx_2(( j + n ) - 2, un->len)] & 4294967295);
-        int64_t qhat = org_bau_BigInt_divUnsigned_2(aa, vn1);
+        int64_t qhat = org_bau_Int_divUnsigned_2(aa, vn1);
         int64_t rhat = aa - ( qhat * vn1 );
         while (1) {
             if (qhat < 4294967296) {
                 int64_t unnn = un->data[idx_2(( j + n ) - 3, un->len)] & 4294967295;
-                int64_t _t21 = org_bau_BigInt_compareUnsigned_2(qhat * vn2, ( rhat * 4294967296 ) + unnn);
+                int64_t _t21 = org_bau_Int_compareUnsigned_2(qhat * vn2, ( rhat * 4294967296 ) + unnn);
                 if (_t21 <= 0) {
                     break;
                 }
@@ -1058,7 +1002,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
                     int64_t t = (un->data[idx_2(i + j, un->len)] & 4294967295) - carry - (p & 4294967295);
                     int64_t _t22 = int_1(t);
                     un->data[idx_2(i + j, un->len)] = _t22;
-                    int64_t _t23 = org_bau_BigInt_arithmeticRightShift_2(t, 32);
+                    int64_t _t23 = org_bau_Int_arithmeticRightShift_2(t, 32);
                     carry = (shiftRight_int_2(p, 32)) - _t23;
                     int64_t _next = i + 1;
                     if (_next >= ( n - 1 )) {
@@ -1092,7 +1036,7 @@ int64_t org_bau_BigInt_bigInt_len_1(org_bau_BigInt_bigInt this) {
     if (this.data->len == 0) {
         return 0;
     }
-    int64_t _t0 = org_bau_BigInt_numberOfLeadingZeros_1(this.data->data[idx_2(this.data->len - 1, this.data->len)] & 4294967295);
+    int64_t _t0 = org_bau_Int_numberOfLeadingZeros_1(this.data->data[idx_2(this.data->len - 1, this.data->len)] & 4294967295);
     int64_t lastLen = 64 - _t0;
     int64_t _r0 = (this.data->len - 1) * 32 + lastLen;
     return _r0;
@@ -1309,7 +1253,55 @@ int64_t org_bau_Env_argCount_0() {
     return __argc;
     return 0;
 }
-int64_t org_bau_Math_parseInt_1(i8_array* value) {
+int64_t org_bau_Int_arithmeticRightShift_2(int64_t x, int64_t n) {
+    return (int64_t) (((uint64_t) x) >> n);
+    int64_t _r0 = (shiftRight_int_2(x, n)) | (shiftLeft_2((0 - (x < 0)), (64 - n)));
+    return _r0;
+}
+int64_t org_bau_Int_compareUnsigned_2(int64_t a, int64_t b) {
+    a += 0x8000000000000000;
+    b += 0x8000000000000000;
+    if (a == b) {
+        return 0;
+    }
+    if (a < b) {
+        return -1;
+    }
+    return 1;
+}
+int64_t org_bau_Int_divUnsigned_2(int64_t dividend, int64_t divisor) {
+    if (divisor < 0) {
+        int64_t _r0 = shiftRight_int_2((dividend & ( ~ (dividend - divisor) )), 63);
+        return _r0;
+    }
+    int64_t q = shiftLeft_2((idiv_2((shiftRight_int_2(dividend, 1)), divisor)), 1);
+    int64_t r = dividend - (q * divisor);
+    int64_t _r1 = q + (shiftRight_int_2((r | ( ~ (r - divisor) )), 63));
+    return _r1;
+}
+int64_t org_bau_Int_numberOfLeadingZeros_1(int64_t x) {
+    return x == 0 ? 64 : _clzll(x);
+    if (x <= 0) {
+        int64_t _t0 = 0;
+        if (x == 0) {
+            _t0 = 64;
+        } else {
+            _t0 = 0;
+        }
+        return _t0;
+    }
+    int64_t n = 63;
+    int64_t shift = 32;
+    while (shift > 0) {
+        if (x >= ( shiftLeft_2(1, shift) )) {
+            n -= shift;
+            x >>= shift;
+        }
+        shift >>= 1;
+    }
+    return n;
+}
+int64_t org_bau_Int_parseInt_1(i8_array* value) {
     int64_t x = 0;
     int64_t sign = 1;
     if (value->len) {
@@ -1350,49 +1342,42 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1024 = str_const(" : ", 3);
+    string_1019 = str_const(" : ", 3);
     _main();
     return 0;
 }
 void _main() {
-    I32_MIN_VALUE = -2147483648;
-    I32_MAX_VALUE = 4294967295;
-    INT_MIN_VALUE = (-9223372036854775807LL-1LL);
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
+    randomSeed = 0;
     MIN_INT = 0x8000000000000000;
     MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
     acc = org_bau_BigInt_convertIntToBigInt_1(0);
     den = org_bau_BigInt_convertIntToBigInt_1(1);
     num = org_bau_BigInt_convertIntToBigInt_1(1);
     int64_t n = 50;
-    int64_t _t40 = org_bau_Env_argCount_0();
-    if (_t40 > 1) {
-        i8_array* _t41 = org_bau_Env_arg_1(1);
-        int64_t _t42 = org_bau_Math_parseInt_1(_t41);
-        n = _t42;
-        _decUseStack(_t41, i8_array);
+    int64_t _t3 = org_bau_Env_argCount_0();
+    if (_t3 > 1) {
+        i8_array* _t4 = org_bau_Env_arg_1(1);
+        int64_t _t5 = org_bau_Int_parseInt_1(_t4);
+        n = _t5;
+        _decUseStack(_t4, i8_array);
     }
     int64_t k = 0;
     int64_t i = 0;
-    i8_array* _t43 = i8_array_new(10);
-    _incUseStack(_t43);
-    i8_array* buff = _t43;
+    i8_array* _t6 = i8_array_new(10);
+    _incUseStack(_t6);
+    i8_array* buff = _t6;
     while (i < n) {
         k += 1;
         nextTerm_1(k);
-        int64_t _t44 = org_bau_BigInt_bigInt_compare_2(num, acc);
-        if (_t44 > 0) {
+        int64_t _t7 = org_bau_BigInt_bigInt_compare_2(num, acc);
+        if (_t7 > 0) {
             continue;
         }
         int64_t d = extractDigit_1(3);
-        int64_t _t45 = extractDigit_1(4);
-        if (d != _t45) {
+        int64_t _t8 = extractDigit_1(4);
+        if (d != _t8) {
             continue;
         }
         eliminateDigit_1(d);
@@ -1403,7 +1388,7 @@ void _main() {
         }
     }
     _decUseStack(buff, i8_array);
-    _decUseStack(_t43, i8_array);
+    _decUseStack(_t6, i8_array);
     org_bau_BigInt_bigInt_free(&acc);
     org_bau_BigInt_bigInt_free(&den);
     org_bau_BigInt_bigInt_free(&num);
@@ -1411,8 +1396,26 @@ void _main() {
 }
 /*
 
+fun getRandomSeed() int
+Get the random seed.
+
+fun random() int
+Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun random(smallerThan int) int
+Pseudo-random number between 0 and smallerThan (excluding).
+
+fun setRandomSeed(seed int)
+Set the random seed.
+
+type exception
+An exception
+
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
 
 fun newBigInt(value int) bigInt
 create a new bigInt

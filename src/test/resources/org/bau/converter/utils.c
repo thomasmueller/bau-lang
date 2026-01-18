@@ -239,8 +239,8 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_Utils_dateTime org_bau_Utils_dateTime;
-struct org_bau_Utils_dateTime;
+typedef struct org_bau_DateTime_dateTime org_bau_DateTime_dateTime;
+struct org_bau_DateTime_dateTime;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -271,7 +271,7 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct org_bau_Utils_dateTime {
+struct org_bau_DateTime_dateTime {
     int32_t year;
     int64_t month;
     int64_t day;
@@ -280,8 +280,8 @@ struct org_bau_Utils_dateTime {
     int64_t second;
     int64_t millis;
 };
-org_bau_Utils_dateTime org_bau_Utils_dateTime_new() {
-    org_bau_Utils_dateTime result;
+org_bau_DateTime_dateTime org_bau_DateTime_dateTime_new() {
+    org_bau_DateTime_dateTime result;
     result.year = 0;
     result.month = 0;
     result.day = 0;
@@ -297,21 +297,21 @@ int __argc;
 char **__argv;
 /* functions */
 int64_t int_1(int64_t x);
+org_bau_DateTime_dateTime org_bau_DateTime_dateTime_0();
+org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0();
+int64_t org_bau_DateTime_getNanoTime_0();
+int64_t org_bau_Int_sqrtInt_1(int64_t x);
 double org_bau_Math_exp_1(double x);
 int64_t org_bau_Math_isNotANumber_1(double x);
 double org_bau_Math_log_1(double x);
 double org_bau_Math_sqrt_1(double x);
-int64_t org_bau_Math_sqrtInt_1(int64_t x);
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0();
-org_bau_Utils_dateTime org_bau_Utils_getDateTime_0();
-int64_t org_bau_Utils_getNanoTime_0();
 int64_t org_bau_Utils_random_0();
 void org_bau_Utils_setRandomSeed_1(int64_t seed);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x);
-void org_bau_Utils_dateTime_copy(org_bau_Utils_dateTime* x);
+void org_bau_DateTime_dateTime_free(org_bau_DateTime_dateTime* x);
+void org_bau_DateTime_dateTime_copy(org_bau_DateTime_dateTime* x);
 void i8_array_free(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
@@ -320,9 +320,9 @@ void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
-void org_bau_Utils_dateTime_free(org_bau_Utils_dateTime* x) {
+void org_bau_DateTime_dateTime_free(org_bau_DateTime_dateTime* x) {
 }
-void org_bau_Utils_dateTime_copy(org_bau_Utils_dateTime* x) {
+void org_bau_DateTime_dateTime_copy(org_bau_DateTime_dateTime* x) {
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -331,11 +331,15 @@ i8_array* str_const(char* data, uint32_t len) {
     result->data = (int8_t*) data;
     return result;
 }
-i8_array* string_1001;
-i8_array* string_1003;
-i8_array* string_1008;
-i8_array* string_1009;
+i8_array* string_1000;
+i8_array* string_1006;
+i8_array* string_1010;
+i8_array* string_1011;
 int64_t randomSeed;
+int64_t MIN_INT;
+int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
 double POS_INFINITY;
 double NEG_INFINITY;
 double NOT_A_NUMBER;
@@ -343,24 +347,89 @@ double PI;
 double E;
 double LOG10;
 double LOG2;
-int64_t MIN_INT;
-int64_t MAX_INT;
 int64_t int_1(int64_t x) {
     return x;
 }
+org_bau_DateTime_dateTime org_bau_DateTime_dateTime_0() {
+    org_bau_DateTime_dateTime _t33 = org_bau_DateTime_dateTime_new();
+    _t33.year = 0;
+    _t33.month = 0;
+    _t33.day = 0;
+    _t33.hour = 0;
+    _t33.minute = 0;
+    _t33.second = 0;
+    _t33.millis = 0;
+    return _t33;
+}
+org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0() {
+    time_t current;
+    time(&current);
+    struct tm* timeinfo;
+    timeinfo = localtime(&current);
+    org_bau_Utils_dateTime result;
+    result.year = timeinfo->tm_year + 1900;
+    result.month = timeinfo->tm_mon + 1;
+    result.day = timeinfo->tm_mday;
+    result.hour = timeinfo->tm_hour;
+    result.minute = timeinfo->tm_min;
+    result.second = timeinfo->tm_sec;
+    struct timespec time={0,0};
+    clock_gettime(CLOCK_REALTIME, &time);
+    result.millis = time.tv_nsec / 1000000;
+    return result;
+    org_bau_DateTime_dateTime alternative = org_bau_DateTime_dateTime_0();
+    alternative.year = 2000;
+    alternative.month = 1;
+    alternative.day = 1;
+    alternative.hour = 0;
+    alternative.minute = 0;
+    alternative.second = 0;
+    alternative.millis = 0;
+    return alternative;
+}
+int64_t org_bau_DateTime_getNanoTime_0() {
+    struct timespec time={0,0};
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return time.tv_sec * 1000000000ULL + time.tv_nsec;
+    return 0;
+}
+int64_t org_bau_Int_sqrtInt_1(int64_t x) {
+    if (x < 0) {
+        return 0;
+    }
+    int64_t g = 2147483648;
+    int64_t c = g;
+    while (1) {
+        int64_t t = g * g;
+        int64_t _t0 = t > x;
+        if (!(_t0)) {
+            int64_t _t1 = t < 0;
+            _t0 = _t1;
+        }
+        if (_t0) {
+            g ^= c;
+        }
+        c >>= 1;
+        if (c == 0) {
+            break;
+        }
+        g |= c;
+    }
+    return g;
+}
 double org_bau_Math_exp_1(double x) {
     return exp(x);
-    int64_t _t9 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t10 = _t9;
-    if (!(_t10)) {
-        int64_t _t11 = x == (1.0 / 0.0);
-        _t10 = _t11;
+    int64_t _t7 = org_bau_Math_isNotANumber_1(x);
+    int64_t _t8 = _t7;
+    if (!(_t8)) {
+        int64_t _t9 = x == (1.0 / 0.0);
+        _t8 = _t9;
     }
-    if (_t10) {
+    if (_t8) {
         return x;
     } else if (x < 0) {
-        double _t12 = org_bau_Math_exp_1(- x);
-        double _r0 = 1 / _t12;
+        double _t10 = org_bau_Math_exp_1(- x);
+        double _r0 = 1 / _t10;
         return _r0;
     }
     if (x > 2) {
@@ -388,26 +457,26 @@ int64_t org_bau_Math_isNotANumber_1(double x) {
 }
 double org_bau_Math_log_1(double x) {
     return log(x);
-    int64_t _t5 = x <= 0;
-    if (!(_t5)) {
-        int64_t _t6 = org_bau_Math_isNotANumber_1(x);
-        _t5 = _t6;
+    int64_t _t3 = x <= 0;
+    if (!(_t3)) {
+        int64_t _t4 = org_bau_Math_isNotANumber_1(x);
+        _t3 = _t4;
     }
     if (x == 0) {
         return (-1.0 / 0.0);
     } else if (x == (1.0 / 0.0)) {
         return x;
-    } else if (_t5) {
+    } else if (_t3) {
         return (0.0 / 0.0);
     }
     if (x < 0.7) {
-        double _t7 = org_bau_Math_log_1(2 * x);
-        double _r0 = _t7 - 0.6931471805599453;
+        double _t5 = org_bau_Math_log_1(2 * x);
+        double _r0 = _t5 - 0.6931471805599453;
         return _r0;
     }
     if (x >= 1.5) {
-        double _t8 = org_bau_Math_log_1(x / 2);
-        double _r1 = _t8 + 0.6931471805599453;
+        double _t6 = org_bau_Math_log_1(x / 2);
+        double _r1 = _t6 + 0.6931471805599453;
         return _r1;
     }
     double base = x - 1;
@@ -435,81 +504,14 @@ double org_bau_Math_sqrt_1(double x) {
         _t1 = _t2;
     }
     if (_t1) {
-        int64_t exact = org_bau_Math_sqrtInt_1(x2);
+        int64_t exact = org_bau_Int_sqrtInt_1(x2);
         if (( exact * exact ) == x) {
             return exact;
         }
     }
-    double _t13 = org_bau_Math_log_1(x);
-    double _t14 = org_bau_Math_exp_1(_t13 / 2);
-    return _t14;
-}
-int64_t org_bau_Math_sqrtInt_1(int64_t x) {
-    if (x < 0) {
-        return 0;
-    }
-    int64_t g = 2147483648;
-    int64_t c = g;
-    while (1) {
-        int64_t t = g * g;
-        int64_t _t3 = t > x;
-        if (!(_t3)) {
-            int64_t _t4 = t < 0;
-            _t3 = _t4;
-        }
-        if (_t3) {
-            g ^= c;
-        }
-        c >>= 1;
-        if (c == 0) {
-            break;
-        }
-        g |= c;
-    }
-    return g;
-}
-org_bau_Utils_dateTime org_bau_Utils_dateTime_0() {
-    org_bau_Utils_dateTime _t0 = org_bau_Utils_dateTime_new();
-    _t0.year = 0;
-    _t0.month = 0;
-    _t0.day = 0;
-    _t0.hour = 0;
-    _t0.minute = 0;
-    _t0.second = 0;
-    _t0.millis = 0;
-    return _t0;
-}
-org_bau_Utils_dateTime org_bau_Utils_getDateTime_0() {
-    time_t current;
-    time(&current);
-    struct tm* timeinfo;
-    timeinfo = localtime(&current);
-    org_bau_Utils_dateTime result;
-    result.year = timeinfo->tm_year + 1900;
-    result.month = timeinfo->tm_mon + 1;
-    result.day = timeinfo->tm_mday;
-    result.hour = timeinfo->tm_hour;
-    result.minute = timeinfo->tm_min;
-    result.second = timeinfo->tm_sec;
-    struct timespec time={0,0};
-    clock_gettime(CLOCK_REALTIME, &time);
-    result.millis = time.tv_nsec / 1000000;
-    return result;
-    org_bau_Utils_dateTime alternative = org_bau_Utils_dateTime_0();
-    alternative.year = 2000;
-    alternative.month = 1;
-    alternative.day = 1;
-    alternative.hour = 0;
-    alternative.minute = 0;
-    alternative.second = 0;
-    alternative.millis = 0;
-    return alternative;
-}
-int64_t org_bau_Utils_getNanoTime_0() {
-    struct timespec time={0,0};
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    return time.tv_sec * 1000000000ULL + time.tv_nsec;
-    return 0;
+    double _t11 = org_bau_Math_log_1(x);
+    double _t12 = org_bau_Math_exp_1(_t11 / 2);
+    return _t12;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;
@@ -530,15 +532,19 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1001 = str_const(".", 1);
-    string_1003 = str_const("-", 1);
-    string_1008 = str_const(" ", 1);
-    string_1009 = str_const(":", 1);
+    string_1000 = str_const("-", 1);
+    string_1006 = str_const(".", 1);
+    string_1010 = str_const(" ", 1);
+    string_1011 = str_const(":", 1);
     _main();
     return 0;
 }
 void _main() {
     randomSeed = 0;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
     POS_INFINITY = (1.0 / 0.0);
     NEG_INFINITY = (-1.0 / 0.0);
     NOT_A_NUMBER = (0.0 / 0.0);
@@ -546,44 +552,30 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
-    int64_t a = org_bau_Utils_getNanoTime_0();
+    int64_t a = org_bau_DateTime_getNanoTime_0();
     printf("%lld\n", (long long)a);
-    int64_t b = org_bau_Utils_getNanoTime_0();
+    int64_t b = org_bau_DateTime_getNanoTime_0();
     printf("%lld\n", (long long)a);
-    org_bau_Utils_dateTime c = org_bau_Utils_getDateTime_0();
+    org_bau_DateTime_dateTime c = org_bau_DateTime_getDateTime_0();
     printf("%d-%lld-%lld %lld:%lld:%lld.%lld\n", c.year, (long long)c.month, (long long)c.day, (long long)c.hour, (long long)c.minute, (long long)c.second, (long long)c.millis);
-    int64_t _t39 = org_bau_Utils_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t39);
-    int64_t _t40 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t40);
+    int64_t _t34 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t34);
+    int64_t _t35 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t35);
     printf("%.9f\n", 3.141592653589793);
     while (1 == 1) {
         int64_t i = 2;
         while (i < 4) {
-            double _t41 = org_bau_Math_sqrt_1(i);
-            printf("%.9f\n", _t41);
+            double _t36 = org_bau_Math_sqrt_1(i);
+            printf("%.9f\n", _t36);
             i += 1;
         }
         break;
     }
-    org_bau_Utils_dateTime_free(&c);
+    org_bau_DateTime_dateTime_free(&c);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.
@@ -597,7 +589,40 @@ Pseudo-random number between 0 and smallerThan (excluding).
 fun setRandomSeed(seed int)
 Set the random seed.
 
+type exception
+An exception
+
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
+
+type dateTime
+Date and time.
+
+fun daylightSaving() int
+Is daylight saving time active currently.
+
+fun daylightSaving(year int, month int, day int, hour int, min int, sec int) int
+Is daylight saving time active currently.
+
+fun getDateTime() dateTime
+Get the local time in millisecond precision.
+
+fun getNanoTime() int
+Nanosecons since some undefined point in the past. Never jumps backwards.
+
+fun getNanoTimeUTC() int
+Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
+
+fun timeMillis() int
+Get the seconds since the epoch
+
+fun timeOffset() int
+Get the current offset between the local time and UTC in seconds.
+
+fun timeOffset(year int, month int, day int, hour int, min int, sec int) int
+Get the current offset between the local time and UTC in seconds.
 
 */

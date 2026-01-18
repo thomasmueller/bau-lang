@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -319,12 +318,12 @@ i8_array* string_1003;
 i8_array* string_1004;
 int64_t randomSeed;
 Tree* Tree_2(Tree* left, Tree* right) {
-    Tree* _t1 = Tree_new();
+    Tree* _t0 = Tree_new();
     _incUseStack(left);
-    _t1->left = left;
+    _t0->left = left;
     _incUseStack(right);
-    _t1->right = right;
-    return _t1;
+    _t0->right = right;
+    return _t0;
 }
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;
@@ -378,8 +377,8 @@ void _main() {
     Tree* stretch = with_1(4);
     printf("ref count\n");
     if (stretch != NULL) {
-        int64_t _t3 = Tree_nodeCount_1(stretch);
-        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t3);
+        int64_t _t2 = Tree_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t2);
     }
     _decUseStack(stretch, Tree);
     stretch = NULL;
@@ -398,25 +397,13 @@ void _main() {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t4 = Tree_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t4);
+    int64_t _t3 = Tree_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t3);
     _decUseStack(longLived, Tree);
     _decUseStack(stretch, Tree);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.

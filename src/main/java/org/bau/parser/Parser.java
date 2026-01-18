@@ -277,7 +277,7 @@ public class Parser {
                 parser.isImport = true;
                 parser.parse();
             } catch (IllegalStateException e) {
-                throw syntaxError("Error parsing module: " + e.getMessage(), e);
+                throw syntaxError("Error parsing module " + name + ": " + e.getMessage(), e);
             }
         }
         return true;

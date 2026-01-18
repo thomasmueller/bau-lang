@@ -113,6 +113,7 @@ function convertJavaLine(line) {
     // Convert operators
     line = line.replace(/!=/g, '<>');
     line = line.replace(/==/g, '=');
+    line = line.replace(/>>>/g, '>>');
     line = line.replace(/\s*&&\s*/g, ' and ');
     line = line.replace(/\s*\|\|\s*/g, ' or ');
     line = line.replace(/\s*!\s*([a-zA-Z_]\w*)/g, ' not $1');
@@ -127,7 +128,7 @@ function convertJavaLine(line) {
     // Convert method declarations with parameters FIRST (before variable declarations)
     line = line.replace(/(?:static\s+|final\s+)*(\w+)\s+(\w+)\s*\(([^)]*)\)/g, function(match, returnType, methodName, params) {
         // Convert return type
-        const convertedReturnType = convertBauType(returnType);
+        const convertedReturnType = convertJavaBauType(returnType);
         
         // Convert parameters
         let convertedParams = '';
@@ -135,7 +136,7 @@ function convertJavaLine(line) {
             const paramList = params.split(',').map(param => {
                 const parts = param.trim().split(/\s+/);
                 if (parts.length >= 2) {
-                    const type = convertBauType(parts[0]);
+                    const type = convertJavaBauType(parts[0]);
                     const name = parts[1];
                     return name + ' ' + type;
                 }
@@ -160,7 +161,7 @@ function convertJavaLine(line) {
     line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0)\s*,\s*(\w+)\s*=\s*(0|0\.0);?/g, '$2, $4, $6, $8 := $3');
     // Array declarations: var perm1 = new int[n]; -> perm1 : int[n]
     line = line.replace(/\bvar\s+(\w+)\s*=\s*new\s+(\w+)\[([^\]]+)\]\s*;?/g, function(match, varName, javaType, size) {
-        const bauType = convertBauType(javaType);
+        const bauType = convertJavaBauType(javaType);
         return varName + ' : ' + bauType + '[' + size + ']';
     });
     // Handle Java 'var' keyword (type inferred): var x = 10; -> x := 10
@@ -177,7 +178,7 @@ function convertJavaLine(line) {
     
     // Variables without initialization: int x; -> x int (keep type when no initial value)
     line = line.replace(/\b(int|long|float|double|boolean|char|byte|short|String)\s+(\w+)\s*;?/g, function(match, javaType, varName) {
-        const bauType = convertBauType(javaType);
+        const bauType = convertJavaBauType(javaType);
         return varName + ' ' + bauType;
     });
     
@@ -202,7 +203,7 @@ function convertJavaLine(line) {
     return line;
 }
 
-function convertBauType(javaType) {
+function convertJavaBauType(javaType) {
     switch (javaType) {
         case 'long':
         case 'int':
@@ -232,11 +233,11 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         convertJavaToBau,
         convertJavaLine,
-        convertBauType
+        convertJavaBauType
     };
 } else if (typeof window !== 'undefined') {
     // Browser environment - make functions globally available
     window.convertJavaToBau = convertJavaToBau;
     window.convertJavaLine = convertJavaLine;
-    window.convertBauType = convertBauType;
+    window.convertJavaBauType = convertJavaBauType;
 } 

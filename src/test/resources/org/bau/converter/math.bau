@@ -45,8 +45,8 @@ fun main()
         y := -1.0
         while y <= 1
             println('pow ' Math.pow(x, y))
-            println('min ' Math.min(x, y))
-            println('max ' Math.max(x, y))
+            println('min ' Math.minFloat(x, y))
+            println('max ' Math.maxFloat(x, y))
             y += 0.5
         x += 0.5
 

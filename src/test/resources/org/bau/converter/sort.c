@@ -6,7 +6,6 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -426,18 +425,6 @@ void _main() {
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.

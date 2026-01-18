@@ -7,7 +7,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -265,6 +264,10 @@ void int_array_free(int_array* x) {
     _free(x); _traceFree(x);
 }
 int64_t randomSeed;
+int64_t MIN_INT;
+int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
 double POS_INFINITY;
 double NEG_INFINITY;
 double NOT_A_NUMBER;
@@ -272,8 +275,6 @@ double PI;
 double E;
 double LOG10;
 double LOG2;
-int64_t MIN_INT;
-int64_t MAX_INT;
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;
     int64_t z = randomSeed;
@@ -295,6 +296,10 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     randomSeed = 0;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
     POS_INFINITY = (1.0 / 0.0);
     NEG_INFINITY = (-1.0 / 0.0);
     NOT_A_NUMBER = (0.0 / 0.0);
@@ -302,29 +307,15 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
-    int64_t _t39 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t39);
+    int64_t _t33 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t33);
     printf("%.9f\n", 3.141592653589793);
-    int64_t _t40 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t40);
+    int64_t _t34 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t34);
     printf("%.9f\n", 3.141592653589793);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.
@@ -338,7 +329,13 @@ Pseudo-random number between 0 and smallerThan (excluding).
 fun setRandomSeed(seed int)
 Set the random seed.
 
+type exception
+An exception
+
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
 
 */

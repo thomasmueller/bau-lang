@@ -1,46 +1,19 @@
 module org.bau.BigInt
 
+import org.bau.Utils
+    if
+import org.bau.Int
+    MIN_I32
+    MAX_I32
+    divUnsigned
+    compareUnsigned
+    arithmeticRightShift
+    numberOfLeadingZeros
+    intToStr
+
 type bigInt
     negative int
     data i32[]
-
-I32_MIN_VALUE : -(1 << 31)
-I32_MAX_VALUE : (1 << 32) - 1
-INT_MIN_VALUE : -(1 << 63)
-
-fun arithmeticRightShift(x int, n int) int
-    native(`return (int64_t) (((uint64_t) x) >> n);`)
-    return (x >> n) | ((0 - (x < 0)) << (64 - n))
-    
-fun numberOfLeadingZeros(x int) int
-    native(`return x == 0 ? 64 : _clzll(x);`)
-    if x <= 0
-        return if(x = 0, 64, 0)
-    n := 63
-    shift := 32
-    while shift > 0
-        if x >= 1 << shift
-            n -= shift
-            x >>= shift
-        shift >>= 1
-    return n
-
-fun divUnsigned(divnd int, divisor int) int
-    # From Hacker's Delight
-    if divisor < 0
-        return (divnd & ~(divnd - divisor)) >> 63
-    q : ((divnd >> 1) / divisor) << 1
-    r : divnd - (q * divisor)
-    return q + ((r | ~(r - divisor)) >> 63)
-
-fun compareUnsigned(a int, b int) int
-    a += 0x8000000000000000
-    b += 0x8000000000000000
-    if a = b
-        return 0
-    if a < b
-        return -1
-    return 1
 
 fun copyOf(a i32[], newLen int) i32[]
     copyLen := newLen
@@ -99,12 +72,12 @@ fun newBigInt(value int) bigInt
     if value = 0 
         return bigInt(i32[0])
     elif value < 0 
-        if value >= I32_MIN_VALUE
+        if value >= MIN_I32
             x : bigInt(i32[1])
             x.data[0] = -value
             x.negative = 1
             return x
-        elif value > INT_MIN_VALUE 
+        elif value > MIN_I32 
             x : bigInt(i32[2])
             x.data[0] = -value
             x.data[1] = -value >> 32
@@ -117,7 +90,7 @@ fun newBigInt(value int) bigInt
             x.negative = 1
             return x
     else 
-        if value <= I32_MAX_VALUE
+        if value <= MAX_I32
             x : bigInt(i32[1])
             x.data[0] = value
             return x
@@ -177,12 +150,6 @@ fun bigInt len() int
         return 0
     lastLen := 64 - numberOfLeadingZeros(data[data.len - 1] & 0xffffffff)
     return (data.len - 1) * 32 + lastLen
-
-fun if(cond int, a T, b T) macro T
-    if cond
-        return a
-    else
-        return b
 
 # compare to another value
 fun bigInt compare(o bigInt) int
@@ -414,14 +381,6 @@ fun bigInt div(other bigInt) bigInt
         q[j] = int(qhat)
         j -= 1
     return bigInt(q)
-
-fun intToStr(n int, buff i8[], start int, size int) int
-    i := 0
-    while i < size
-        buff[start + i] = ord('0') + (n % 10)
-        n /= 10
-        i += 1
-    return i + start
 
 # convert to string
 fun bigInt toStr() i8[]

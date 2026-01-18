@@ -5,7 +5,6 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -330,12 +329,12 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     return result;
 }
 Tree_owned* Tree_owned_2(Tree_owned* left, Tree_owned* right) {
-    Tree_owned* _t2 = Tree_owned_new();
-    _t2->left = left;
+    Tree_owned* _t1 = Tree_owned_new();
+    _t1->left = left;
     left = NULL;
-    _t2->right = right;
+    _t1->right = right;
     right = NULL;
-    return _t2;
+    return _t1;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -375,8 +374,8 @@ void _main() {
     Tree_owned* stretch = with_1(4);
     printf("ownership / borrowing\n");
     if (stretch != NULL) {
-        int64_t _t3 = Tree_owned_nodeCount_1(stretch);
-        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t3);
+        int64_t _t2 = Tree_owned_nodeCount_1(stretch);
+        printf("stretch tree of depth %lld check: %lld\n", (long long)4, (long long)_t2);
     }
     Tree_owned_free(stretch);
     stretch = NULL;
@@ -395,25 +394,13 @@ void _main() {
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t4 = Tree_owned_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t4);
+    int64_t _t3 = Tree_owned_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t3);
     Tree_owned_free(longLived);
     Tree_owned_free(stretch);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.

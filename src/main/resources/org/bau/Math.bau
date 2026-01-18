@@ -1,5 +1,15 @@
 module org.bau.Math
 
+import org.bau.Utils
+    if
+import org.bau.Int
+    bitCount
+    appendInt
+    sqrtInt
+    powInt
+    MIN_INT
+    MAX_INT
+
 POS_INFINITY : 1.0 / 0.0
 NEG_INFINITY : -1.0 / 0.0
 NOT_A_NUMBER : 0.0 / 0.0
@@ -7,8 +17,6 @@ PI           : 3.14159265358979323846
 E            : 2.71828182845904523536
 LOG10        : 2.30258509299404568402
 LOG2         : 0.69314718055994530942
-MIN_INT      : 0x8000000000000000
-MAX_INT      : 0x7fffffffffffffff
 
 fun abs(x float) const float
     native(```
@@ -26,7 +34,7 @@ fun isNotANumber(x float) const int
 fun isNegativeZero(x float) const int
     return (x = 0.0) and (1.0 / x = NEG_INFINITY)
 
-fun min(a float, b float) const float
+fun minFloat(a float, b float) const float
     native('return fmin(a, b);')    
     if isNotANumber(a)
         return a
@@ -36,7 +44,7 @@ fun min(a float, b float) const float
         return a
     return b
 
-fun max(a float, b float) const float
+fun maxFloat(a float, b float) const float
     native('return fmax(a, b);')    
     if isNotANumber(a)
         return a
@@ -175,23 +183,6 @@ fun pow(x float, y float) const float
         return POS_INFINITY
     return NOT_A_NUMBER
 
-fun powInt(base int, exponent int) const int
-    if exponent < 0
-        return -1
-    result := 1
-    b := base
-    while exponent > 0
-        if (exponent & 1) = 1
-            result *= b
-            if result > (1 << 31) or result < -(1 << 31)
-                return -1
-        exponent >>= 1
-        if exponent > 0
-            b *= b
-            if b > (1 << 31) or b < -(1 << 31)
-                return -1
-    return result
-
 fun sin(x float) float
     native('return sin(x);')    
     if x = POS_INFINITY
@@ -218,7 +209,7 @@ fun sin(x float) float
 
 fun atan(x float) float
     native('return atan(x);')     
-    x = min(max(-1e16, x), 1e16)
+    x = minFloat(maxFloat(-1e16, x), 1e16)
     if abs(x) >= 0.4
         return 2 * atan(x / (1 + sqrt(1 + x * x)))
     approx := x
@@ -326,35 +317,6 @@ fun convertDoubleToLongBits(x float) int
     fraction := int(x * (1 << 52)) << 11 >> 11
     return ((exp + 1022) << 52) + fraction
 
-fun appendInt(n int, buff i8[], pos int) int
-    if n < 0
-        buff[pos] = ord('-')
-        pos += 1
-    else
-        n = -n
-    start := pos
-    while
-        buff[pos] = ord('0') - (n % 10)
-        pos += 1
-        n /= 10
-        break n = 0
-    end : pos
-    while pos > start
-        pos -= 1
-        temp : buff[pos]
-        buff[pos] = buff[start]
-        buff[start] = temp
-        start += 1
-    return end
-
-fun intToString(n int) i8[]
-    buff : i8[20]
-    pos := appendInt(n, buff, 0)
-    result : i8[pos]
-    for j := until(pos)
-        result[j] = buff[j]
-    return result
-
 fun appendFloat(n float, buff i8[], pos int) int
     e := 0
     if n >= 1e8 or n <= 1e-3
@@ -408,35 +370,4 @@ fun floatToString(n float) i8[]
     for j := until(end)
         result[j] = buff[j]
     return result
-
-fun parseInt(value i8[]) int
-    x := 0
-    sign := 1
-    if value.len
-        i := 0
-        if value[0] = ord('-')
-            sign = -1
-            i += 1
-        while i < value.len
-            n : value[i]
-            if n >= ord('0') and n <= ord('9')
-                x *= 10
-                x += n - ord('0')
-            i += 1
-        return sign * x
-    return 0
-
-fun sqrtInt(x int) const int
-    if x < 0
-        return 0
-    g := 1 << 31
-    c := g
-    while
-        t : g * g
-        if t > x or t < 0
-            g ^= c
-        c >>= 1
-        break c = 0
-        g |= c
-    return g
 

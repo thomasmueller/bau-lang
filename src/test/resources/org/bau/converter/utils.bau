@@ -1,13 +1,13 @@
-import org.bau.Utils
 import org.bau.Math
+import org.bau.DateTime
 
-a := Utils.getNanoTime()
+a := DateTime.getNanoTime()
 println(a)
-b := Utils.getNanoTime()
+b := DateTime.getNanoTime()
 println(a)
-c := Utils.getDateTime()
+c := DateTime.getDateTime()
 println(c.year '-' c.month '-' c.day ' ' c.hour ':' c.minute ':' c.second '.' c.millis)
-Utils.setRandomSeed(Utils.getNanoTime())
+Utils.setRandomSeed(DateTime.getNanoTime())
 println(Utils.random())
 println(Math.PI)
 for i := range(2, 4)

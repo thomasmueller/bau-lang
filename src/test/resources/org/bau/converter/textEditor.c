@@ -5,7 +5,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <math.h>
 #include <signal.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -404,13 +403,13 @@ int64_t org_bau_File_File_len_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer, int64_t pos, int64_t len);
 int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
+int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
+i8_array* org_bau_Int_intToString_1(int64_t n);
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_1(org_bau_String_string_array* array);
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T);
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x);
 void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_String_string* this, int64_t index, org_bau_String_string x);
 void org_bau_List_List_org_bau_String_string_remove_2(org_bau_List_List_org_bau_String_string* this, int64_t pos);
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
-i8_array* org_bau_Math_intToString_1(int64_t n);
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data);
 int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find);
 int64_t org_bau_String_indexOf_3(i8_array* s, i8_array* find, int64_t start);
@@ -512,8 +511,11 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1010;
-i8_array* string_1012;
+i8_array* string_1007;
+i8_array* string_1009;
+i8_array* string_1020;
+i8_array* string_1021;
+i8_array* string_1022;
 i8_array* string_1023;
 i8_array* string_1024;
 i8_array* string_1025;
@@ -522,9 +524,9 @@ i8_array* string_1027;
 i8_array* string_1028;
 i8_array* string_1029;
 i8_array* string_1030;
-i8_array* string_1031;
 i8_array* string_1032;
 i8_array* string_1033;
+i8_array* string_1034;
 i8_array* string_1035;
 i8_array* string_1036;
 i8_array* string_1037;
@@ -532,18 +534,11 @@ i8_array* string_1038;
 i8_array* string_1039;
 i8_array* string_1040;
 i8_array* string_1041;
-i8_array* string_1042;
-i8_array* string_1043;
-i8_array* string_1044;
-double POS_INFINITY;
-double NEG_INFINITY;
-double NOT_A_NUMBER;
-double PI;
-double E;
-double LOG10;
-double LOG2;
+int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
 int8_t queueByte;
 org_bau_os_Terminal_termIos oldTermIos;
 void  (*refreshScreenCallback_0)();
@@ -565,15 +560,15 @@ void down_0() {
     }
 }
 fileContent fileContent_3(i8_array* fileName, i8_array* data, org_bau_List_List_org_bau_String_string* lines) {
-    fileContent _t48 = fileContent_new();
+    fileContent _t11 = fileContent_new();
     _incUseStack(fileName);
-    _t48.fileName = fileName;
+    _t11.fileName = fileName;
     _incUseStack(data);
-    _t48.data = data;
+    _t11.data = data;
     _incUseStack(lines);
-    _t48.lines = lines;
-    _t48.modified = 0;
-    return _t48;
+    _t11.lines = lines;
+    _t11.modified = 0;
+    return _t11;
 }
 void find_0() {
     mode = 2;
@@ -915,12 +910,65 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     }
     return 0;
 }
+int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
+    if (n < 0) {
+        buff->data[idx_2(pos, buff->len)] = 45;
+        pos += 1;
+    } else {
+        n = - n;
+    }
+    int64_t start = pos;
+    while (1) {
+        buff->data[idx_2(pos, buff->len)] = 48 - (imod_2(n, 10));
+        pos += 1;
+        n = idiv_2(n, 10);
+        if (n == 0) {
+            break;
+        }
+    }
+    int64_t end = pos;
+    while (pos > start) {
+        pos -= 1;
+        int8_t temp = buff->data[idx_2(pos, buff->len)];
+        buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
+        buff->data[idx_2(start, buff->len)] = temp;
+        start += 1;
+    }
+    return end;
+}
+i8_array* org_bau_Int_intToString_1(int64_t n) {
+    i8_array* _t0 = i8_array_new(20);
+    _incUseStack(_t0);
+    i8_array* buff = _t0;
+    int64_t pos = org_bau_Int_appendInt_3(n, buff, 0);
+    i8_array* _t1 = i8_array_new(pos);
+    _incUseStack(_t1);
+    i8_array* result = _t1;
+    if (pos > 0) {
+        while (1 == 1) {
+            int64_t j = 0;
+            while (1) {
+                result->data[idx_2(j, result->len)] = buff->data[j];
+                int64_t _next = j + 1;
+                if (_next >= pos) {
+                    break;
+                }
+                j = _next;
+            }
+            break;
+        }
+    }
+    _decUseStack(_t1, i8_array);
+    _decUseStack(buff, i8_array);
+    _decUseStack(_t0, i8_array);
+    return result;
+}
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_1(org_bau_String_string_array* array) {
-    org_bau_List_List_org_bau_String_string* _t43 = org_bau_List_List_org_bau_String_string_new();
+    org_bau_List_List_org_bau_String_string* _t6 = org_bau_List_List_org_bau_String_string_new();
     _incUseStack(array);
-    _t43->array = array;
-    _t43->size = 0;
-    return _t43;
+    _t6->array = array;
+    _t6->size = 0;
+    return _t6;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
     org_bau_String_string_array* _t0 = org_bau_String_string_array_new(4);
@@ -1002,65 +1050,12 @@ void org_bau_List_List_org_bau_String_string_remove_2(org_bau_List_List_org_bau_
     }
     this->array->data[idx_2(pos, this->array->len)] = org_bau_String_string_new();
 }
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
-    if (n < 0) {
-        buff->data[idx_2(pos, buff->len)] = 45;
-        pos += 1;
-    } else {
-        n = - n;
-    }
-    int64_t start = pos;
-    while (1) {
-        buff->data[idx_2(pos, buff->len)] = 48 - (imod_2(n, 10));
-        pos += 1;
-        n = idiv_2(n, 10);
-        if (n == 0) {
-            break;
-        }
-    }
-    int64_t end = pos;
-    while (pos > start) {
-        pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, buff->len)];
-        buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
-        buff->data[idx_2(start, buff->len)] = temp;
-        start += 1;
-    }
-    return end;
-}
-i8_array* org_bau_Math_intToString_1(int64_t n) {
-    i8_array* _t0 = i8_array_new(20);
-    _incUseStack(_t0);
-    i8_array* buff = _t0;
-    int64_t pos = org_bau_Math_appendInt_3(n, buff, 0);
-    i8_array* _t1 = i8_array_new(pos);
-    _incUseStack(_t1);
-    i8_array* result = _t1;
-    if (pos > 0) {
-        while (1 == 1) {
-            int64_t j = 0;
-            while (1) {
-                result->data[idx_2(j, result->len)] = buff->data[j];
-                int64_t _next = j + 1;
-                if (_next >= pos) {
-                    break;
-                }
-                j = _next;
-            }
-            break;
-        }
-    }
-    _decUseStack(_t1, i8_array);
-    _decUseStack(buff, i8_array);
-    _decUseStack(_t0, i8_array);
-    return result;
-}
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
-    org_bau_String_StringBuilder* _t41 = org_bau_String_StringBuilder_new();
+    org_bau_String_StringBuilder* _t4 = org_bau_String_StringBuilder_new();
     _incUseStack(data);
-    _t41->data = data;
-    _t41->len = 0;
-    return _t41;
+    _t4->data = data;
+    _t4->len = 0;
+    return _t4;
 }
 int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find) {
     int64_t _t0 = org_bau_String_indexOf_3(s, find, 0);
@@ -1149,10 +1144,10 @@ org_bau_String_string org_bau_String_str_1(i8_array* s) {
     return _t0;
 }
 org_bau_String_string org_bau_String_string_1(i8_array* data) {
-    org_bau_String_string _t40 = org_bau_String_string_new();
+    org_bau_String_string _t3 = org_bau_String_string_new();
     _incUseStack(data);
-    _t40.data = data;
-    return _t40;
+    _t3.data = data;
+    return _t3;
 }
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start) {
     _incUseStack(s);
@@ -1175,16 +1170,16 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     }
     if (_t2) {
         _decUseStack(s, i8_array);
-        return string_1010;
+        return string_1007;
     }
     if (s->len <= 0) {
         _decUseStack(s, i8_array);
-        return string_1010;
+        return string_1007;
     }
     int64_t i = 0;
     if (start >= s->len) {
         _decUseStack(s, i8_array);
-        return string_1010;
+        return string_1007;
     }
     i = start;
     i8_array* _t4 = i8_array_new(len);
@@ -1399,16 +1394,16 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_1(i8_array* data) {
-    org_bau_os_Terminal_termIos _t45 = org_bau_os_Terminal_termIos_new();
+    org_bau_os_Terminal_termIos _t8 = org_bau_os_Terminal_termIos_new();
     _incUseStack(data);
-    _t45.data = data;
-    return _t45;
+    _t8.data = data;
+    return _t8;
 }
 org_bau_os_Terminal_windowSize org_bau_os_Terminal_windowSize_0() {
-    org_bau_os_Terminal_windowSize _t46 = org_bau_os_Terminal_windowSize_new();
-    _t46.rows = 0;
-    _t46.columns = 0;
-    return _t46;
+    org_bau_os_Terminal_windowSize _t9 = org_bau_os_Terminal_windowSize_new();
+    _t9.rows = 0;
+    _t9.columns = 0;
+    return _t9;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -1423,28 +1418,28 @@ void refreshScreen_0() {
     org_bau_os_Terminal_windowSize_copy(&_t1);
     org_bau_os_Terminal_windowSize_free(&currentWindowSize);
     currentWindowSize = _t1;
-    org_bau_String_StringBuilder_append_2(buff, string_1024);
+    org_bau_String_StringBuilder_append_2(buff, string_1021);
     int64_t curX = cursorX;
     int64_t curY = cursorY;
-    org_bau_String_StringBuilder_append_2(buff, string_1025);
+    org_bau_String_StringBuilder_append_2(buff, string_1022);
     if (mode == 1) {
-        org_bau_String_StringBuilder_append_2(buff, string_1026);
+        org_bau_String_StringBuilder_append_2(buff, string_1023);
     } else if (mode == 2) {
-        org_bau_String_StringBuilder_append_2(buff, string_1027);
+        org_bau_String_StringBuilder_append_2(buff, string_1024);
         org_bau_String_StringBuilder_append_2(buff, findText.data);
         curX = 27 + findText.data->len;
         curY = 1;
-        org_bau_String_StringBuilder_append_2(buff, string_1023);
+        org_bau_String_StringBuilder_append_2(buff, string_1020);
     } else {
-        org_bau_String_StringBuilder_append_2(buff, string_1028);
+        org_bau_String_StringBuilder_append_2(buff, string_1025);
         org_bau_String_StringBuilder_append_2(buff, currentFile.fileName);
-        org_bau_String_StringBuilder_append_2(buff, string_1029);
-        i8_array* _t2 = org_bau_Math_intToString_1(( cursorY + offsetY ) - 1);
+        org_bau_String_StringBuilder_append_2(buff, string_1026);
+        i8_array* _t2 = org_bau_Int_intToString_1(( cursorY + offsetY ) - 1);
         org_bau_String_StringBuilder_append_2(buff, _t2);
         _decUseStack(_t2, i8_array);
     }
-    org_bau_String_StringBuilder_append_2(buff, string_1030);
-    org_bau_String_StringBuilder_append_2(buff, string_1031);
+    org_bau_String_StringBuilder_append_2(buff, string_1027);
+    org_bau_String_StringBuilder_append_2(buff, string_1028);
     int64_t pos = 0;
     int64_t remainingHighlight = 0;
     _incUseStack(currentFile.lines);
@@ -1498,7 +1493,7 @@ void refreshScreen_0() {
                                             }
                                         }
                                         if (found) {
-                                            org_bau_String_StringBuilder_append_2(buff, string_1033);
+                                            org_bau_String_StringBuilder_append_2(buff, string_1030);
                                             remainingHighlight = findText.data->len;
                                         }
                                     }
@@ -1514,7 +1509,7 @@ void refreshScreen_0() {
                                 if (remainingHighlight > 0) {
                                     remainingHighlight -= 1;
                                     if (remainingHighlight == 0) {
-                                        org_bau_String_StringBuilder_append_2(buff, string_1030);
+                                        org_bau_String_StringBuilder_append_2(buff, string_1027);
                                     }
                                 }
                                 int64_t _next = x + 1;
@@ -1532,8 +1527,8 @@ void refreshScreen_0() {
                     }
                     org_bau_String_string_free(&line);
                 }
-                org_bau_String_StringBuilder_append_2(buff, string_1030);
-                org_bau_String_StringBuilder_append_2(buff, string_1031);
+                org_bau_String_StringBuilder_append_2(buff, string_1027);
+                org_bau_String_StringBuilder_append_2(buff, string_1028);
                 int64_t _next = y + 1;
                 if (_next >= ( currentWindowSize.rows - 2 )) {
                     break;
@@ -1543,14 +1538,14 @@ void refreshScreen_0() {
             break;
         }
     }
-    org_bau_String_StringBuilder_append_2(buff, string_1035);
-    i8_array* _t8 = org_bau_Math_intToString_1(curY);
+    org_bau_String_StringBuilder_append_2(buff, string_1032);
+    i8_array* _t8 = org_bau_Int_intToString_1(curY);
     org_bau_String_StringBuilder_append_2(buff, _t8);
-    org_bau_String_StringBuilder_append_2(buff, string_1036);
-    i8_array* _t9 = org_bau_Math_intToString_1(curX);
+    org_bau_String_StringBuilder_append_2(buff, string_1033);
+    i8_array* _t9 = org_bau_Int_intToString_1(curX);
     org_bau_String_StringBuilder_append_2(buff, _t9);
-    org_bau_String_StringBuilder_append_2(buff, string_1012);
-    org_bau_String_StringBuilder_append_2(buff, string_1037);
+    org_bau_String_StringBuilder_append_2(buff, string_1009);
+    org_bau_String_StringBuilder_append_2(buff, string_1034);
     org_bau_os_Terminal_writeToTerminal_2(buff->data, buff->len);
     _decUseStack(_t9, i8_array);
     _decUseStack(_t8, i8_array);
@@ -1690,7 +1685,7 @@ void save_0() {
             int64_t i = 0;
             while (1) {
                 org_bau_String_StringBuilder_append_2(data, lines->array->data[idx_2(i, lines->array->len)].data);
-                org_bau_String_StringBuilder_append_2(data, string_1032);
+                org_bau_String_StringBuilder_append_2(data, string_1029);
                 int64_t _next = i + 1;
                 if (_next >= lines->size) {
                     break;
@@ -1700,7 +1695,7 @@ void save_0() {
             break;
         }
     }
-    org_bau_File_File* f = org_bau_File_openFile_2(currentFile.fileName, string_1038);
+    org_bau_File_File* f = org_bau_File_openFile_2(currentFile.fileName, string_1035);
     if (!(f)) {
         printf("Could not write to %.*s\n", currentFile.fileName->len, currentFile.fileName->data);
         return;
@@ -1728,45 +1723,41 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("Exit code ", 10);
     string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
-    string_1010 = str_const("", 0);
-    string_1012 = str_const("H", 1);
-    string_1023 = str_const(" ", 1);
-    string_1024 = str_const("\x1b[?25l\x1b[H", 9);
-    string_1025 = str_const("\x1b[7m", 4);
-    string_1026 = str_const("File is modified. Quit without saving with Ctrl-Q", 49);
-    string_1027 = str_const("Find (Esc/Up/Down/Enter): ", 26);
-    string_1028 = str_const("Find Ctrl-F | Save Ctrl-S | Quit Ctrl-Q | File: ", 48);
-    string_1029 = str_const(" | Line ", 8);
-    string_1030 = str_const("\x1b[0m", 4);
-    string_1031 = str_const("\x1b[0K\x0d\n", 6);
-    string_1032 = str_const("\n", 1);
-    string_1033 = str_const("\x1b[47m", 5);
-    string_1035 = str_const("\x1b[", 2);
-    string_1036 = str_const(";", 1);
-    string_1037 = str_const("\x1b[?25h", 6);
-    string_1038 = str_const("w", 1);
-    string_1039 = str_const("Could not write to ", 19);
-    string_1040 = str_const("Not a terminal", 14);
-    string_1041 = str_const("Usage: ", 7);
-    string_1042 = str_const(" <fileName>", 11);
-    string_1043 = str_const("r", 1);
-    string_1044 = str_const("File not found: ", 16);
+    string_1007 = str_const("", 0);
+    string_1009 = str_const("H", 1);
+    string_1020 = str_const(" ", 1);
+    string_1021 = str_const("\x1b[?25l\x1b[H", 9);
+    string_1022 = str_const("\x1b[7m", 4);
+    string_1023 = str_const("File is modified. Quit without saving with Ctrl-Q", 49);
+    string_1024 = str_const("Find (Esc/Up/Down/Enter): ", 26);
+    string_1025 = str_const("Find Ctrl-F | Save Ctrl-S | Quit Ctrl-Q | File: ", 48);
+    string_1026 = str_const(" | Line ", 8);
+    string_1027 = str_const("\x1b[0m", 4);
+    string_1028 = str_const("\x1b[0K\x0d\n", 6);
+    string_1029 = str_const("\n", 1);
+    string_1030 = str_const("\x1b[47m", 5);
+    string_1032 = str_const("\x1b[", 2);
+    string_1033 = str_const(";", 1);
+    string_1034 = str_const("\x1b[?25h", 6);
+    string_1035 = str_const("w", 1);
+    string_1036 = str_const("Could not write to ", 19);
+    string_1037 = str_const("Not a terminal", 14);
+    string_1038 = str_const("Usage: ", 7);
+    string_1039 = str_const(" <fileName>", 11);
+    string_1040 = str_const("r", 1);
+    string_1041 = str_const("File not found: ", 16);
     _main();
     return 0;
 }
 void _main() {
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
+    randomSeed = 0;
     MIN_INT = 0x8000000000000000;
     MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
     queueByte = 0;
-    i8_array* _t47 = i8_array_new(0);
-    oldTermIos = org_bau_os_Terminal_termIos_1(_t47);
+    i8_array* _t10 = i8_array_new(0);
+    oldTermIos = org_bau_os_Terminal_termIos_1(_t10);
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;
     cursorY = 2;
     cursorX = 1;
@@ -1774,44 +1765,44 @@ void _main() {
     offsetX = 0;
     foundX = 0;
     foundY = 0;
-    i8_array* _t49 = i8_array_new(0);
-    findText = org_bau_String_string_1(_t49);
+    i8_array* _t12 = i8_array_new(0);
+    findText = org_bau_String_string_1(_t12);
     mode = 0;
     currentWindowSize = org_bau_os_Terminal_getWindowSize_0();
-    i8_array* _t50 = i8_array_new(0);
-    i8_array* _t51 = i8_array_new(0);
-    org_bau_List_List_org_bau_String_string* _t52 = org_bau_List_newList_org_bau_String_string_1(0);
-    currentFile = fileContent_3(_t50, _t51, _t52);
-    int64_t _t53 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t53)) {
+    i8_array* _t13 = i8_array_new(0);
+    i8_array* _t14 = i8_array_new(0);
+    org_bau_List_List_org_bau_String_string* _t15 = org_bau_List_newList_org_bau_String_string_1(0);
+    currentFile = fileContent_3(_t13, _t14, _t15);
+    int64_t _t16 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t16)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t54 = org_bau_Env_argCount_0();
-    if (_t54 != 2) {
-        i8_array* _t55 = org_bau_Env_arg_1(0);
-        printf("Usage: %.*s <fileName>\n", _t55->len, _t55->data);
+    int64_t _t17 = org_bau_Env_argCount_0();
+    if (_t17 != 2) {
+        i8_array* _t18 = org_bau_Env_arg_1(0);
+        printf("Usage: %.*s <fileName>\n", _t18->len, _t18->data);
         return;
     }
     i8_array* fileName = org_bau_Env_arg_1(1);
-    org_bau_File_File* f = org_bau_File_openFile_2(fileName, string_1043);
+    org_bau_File_File* f = org_bau_File_openFile_2(fileName, string_1040);
     if (!(f)) {
         printf("File not found: %.*s\n", fileName->len, fileName->data);
         return;
     }
-    int64_t _t56 = org_bau_File_File_len_1(f);
-    i8_array* _t57 = i8_array_new(_t56);
-    _incUseStack(_t57);
-    i8_array* fileData = _t57;
-    int64_t _t58 = org_bau_File_File_len_1(f);
-    int64_t _t59 = org_bau_File_File_readFully_4(f, fileData, 0, _t58);
+    int64_t _t19 = org_bau_File_File_len_1(f);
+    i8_array* _t20 = i8_array_new(_t19);
+    _incUseStack(_t20);
+    i8_array* fileData = _t20;
+    int64_t _t21 = org_bau_File_File_len_1(f);
+    int64_t _t22 = org_bau_File_File_readFully_4(f, fileData, 0, _t21);
     ;
     org_bau_File_File_close_1(f);
-    org_bau_List_List_org_bau_String_string* lines = org_bau_String_split_2(fileData, string_1032);
-    fileContent _t60 = fileContent_3(fileName, fileData, lines);
-    fileContent_copy(&_t60);
+    org_bau_List_List_org_bau_String_string* lines = org_bau_String_split_2(fileData, string_1029);
+    fileContent _t23 = fileContent_3(fileName, fileData, lines);
+    fileContent_copy(&_t23);
     fileContent_free(&currentFile);
-    currentFile = _t60;
+    currentFile = _t23;
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -1819,33 +1810,33 @@ void _main() {
         if (key < 0) {
             break;
         }
-        int64_t _t61 = key;
-        if ((_t61 == 3) || (_t61 == 17)) {
+        int64_t _t24 = key;
+        if ((_t24 == 3) || (_t24 == 17)) {
             if (!(currentFile.modified)) {
                 break;
             }
             mode = 1;
             refreshScreen_0();
-            int64_t _t62 = org_bau_os_Terminal_readEditorKey_0();
-            key = _t62;
+            int64_t _t25 = org_bau_os_Terminal_readEditorKey_0();
+            key = _t25;
             if (key == 17) {
                 break;
             }
             mode = 0;
-        } else if (_t61 == 13) {
+        } else if (_t24 == 13) {
             insertNewline_0();
-        } else if (_t61 == 19) {
+        } else if (_t24 == 19) {
             save_0();
-        } else if (_t61 == 6) {
+        } else if (_t24 == 6) {
             find_0();
-        } else if (((_t61 == 127) || (_t61 == 8)) || (_t61 == 1004)) {
+        } else if (((_t24 == 127) || (_t24 == 8)) || (_t24 == 1004)) {
             removeByte_0();
             if (cursorX > 1) {
                 cursorX -= 1;
             } else if (offsetX > 0) {
                 offsetX -= 1;
             }
-        } else if (_t61 == 1007) {
+        } else if (_t24 == 1007) {
             if (currentWindowSize.rows > 0) {
                 while (1 == 1) {
                     int64_t i = 0;
@@ -1860,7 +1851,7 @@ void _main() {
                     break;
                 }
             }
-        } else if (_t61 == 1008) {
+        } else if (_t24 == 1008) {
             if (currentWindowSize.rows > 0) {
                 while (1 == 1) {
                     int64_t i = 0;
@@ -1875,21 +1866,21 @@ void _main() {
                     break;
                 }
             }
-        } else if (_t61 == 1002) {
+        } else if (_t24 == 1002) {
             up_0();
-        } else if (_t61 == 1003) {
+        } else if (_t24 == 1003) {
             down_0();
-        } else if (_t61 == 1000) {
-            int64_t _t63 = cursorY > 2;
-            if (!(_t63)) {
-                int64_t _t64 = offsetY > 0;
-                _t63 = _t64;
+        } else if (_t24 == 1000) {
+            int64_t _t26 = cursorY > 2;
+            if (!(_t26)) {
+                int64_t _t27 = offsetY > 0;
+                _t26 = _t27;
             }
             if (cursorX > 1) {
                 cursorX -= 1;
             } else if (offsetX > 0) {
                 offsetX -= 1;
-            } else if (_t63) {
+            } else if (_t26) {
                 if (cursorY > 2) {
                     cursorY -= 1;
                 } else if (offsetY > 0) {
@@ -1905,7 +1896,7 @@ void _main() {
                 }
                 org_bau_String_string_free(&line);
             }
-        } else if (_t61 == 1001) {
+        } else if (_t24 == 1001) {
             int64_t x = ( cursorX + offsetX ) - 1;
             int64_t y = ( cursorY + offsetY ) - 2;
             org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
@@ -1927,8 +1918,8 @@ void _main() {
             }
             org_bau_String_string_free(&line);
         } else {
-            int8_t _t65 = i8_1(key);
-            insertByte_1(_t65);
+            int8_t _t28 = i8_1(key);
+            insertByte_1(_t28);
             if (cursorX < currentWindowSize.columns) {
                 cursorX += 1;
             } else {
@@ -1936,20 +1927,20 @@ void _main() {
             }
         }
     }
-    fileContent_free(&_t60);
+    fileContent_free(&_t23);
     _decUseStack(lines, org_bau_List_List_org_bau_String_string);
     _decUseStack(fileData, i8_array);
-    _decUseStack(_t57, i8_array);
+    _decUseStack(_t20, i8_array);
     _decUseStack(f, org_bau_File_File);
     _decUseStack(fileName, i8_array);
-    _decUseStack(_t47, i8_array);
+    _decUseStack(_t10, i8_array);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t49, i8_array);
+    _decUseStack(_t12, i8_array);
     org_bau_String_string_free(&findText);
     org_bau_os_Terminal_windowSize_free(&currentWindowSize);
-    _decUseStack(_t50, i8_array);
-    _decUseStack(_t51, i8_array);
-    _decUseStack(_t52, org_bau_List_List_org_bau_String_string);
+    _decUseStack(_t13, i8_array);
+    _decUseStack(_t14, i8_array);
+    _decUseStack(_t15, org_bau_List_List_org_bau_String_string);
     fileContent_free(&currentFile);
     _end();
 }
@@ -1970,7 +1961,25 @@ Insert an entry to the list at the given index
 fun List(T) get(x int) T?
 Insert an entry to the list at the given index
 
+type exception
+An exception
+
+fun getRandomSeed() int
+Get the random seed.
+
+fun random() int
+Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun random(smallerThan int) int
+Pseudo-random number between 0 and smallerThan (excluding).
+
+fun setRandomSeed(seed int)
+Set the random seed.
+
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
 
 */

@@ -308,14 +308,14 @@ int64_t canPlace_2(int64_t pos, int64_t rot);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
+int64_t org_bau_DateTime_getNanoTime_0();
 void org_bau_Env_atExit_1(void  (*callback_0)());
 void org_bau_Env_exit_1(int64_t code);
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
-i8_array* org_bau_Math_intToString_1(int64_t n);
+int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
+i8_array* org_bau_Int_intToString_1(int64_t n);
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data);
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b);
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end);
-int64_t org_bau_Utils_getNanoTimeUTC_0();
 int64_t org_bau_Utils_random_0();
 int64_t org_bau_Utils_random_1(int64_t smallerThan);
 void org_bau_Utils_setRandomSeed_1(int64_t seed);
@@ -366,10 +366,8 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1023;
-i8_array* string_1024;
+i8_array* string_1025;
 i8_array* string_1026;
-i8_array* string_1027;
 i8_array* string_1028;
 i8_array* string_1029;
 i8_array* string_1030;
@@ -378,6 +376,13 @@ i8_array* string_1032;
 i8_array* string_1033;
 i8_array* string_1034;
 i8_array* string_1035;
+i8_array* string_1036;
+i8_array* string_1037;
+int64_t randomSeed;
+int64_t MIN_INT;
+int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
 double POS_INFINITY;
 double NEG_INFINITY;
 double NOT_A_NUMBER;
@@ -385,12 +390,9 @@ double PI;
 double E;
 double LOG10;
 double LOG2;
-int64_t MIN_INT;
-int64_t MAX_INT;
 int8_t queueByte;
 org_bau_os_Terminal_termIos oldTermIos;
 void  (*refreshScreenCallback_0)();
-int64_t randomSeed;
 int64_t width;
 int64_t height;
 int64_t score;
@@ -457,6 +459,12 @@ int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
 }
+int64_t org_bau_DateTime_getNanoTime_0() {
+    struct timespec time={0,0};
+    clock_gettime(CLOCK_MONOTONIC, &time);
+    return time.tv_sec * 1000000000ULL + time.tv_nsec;
+    return 0;
+}
 void org_bau_Env_atExit_1(void  (*callback_0)()) {
     atexit(callback_0);
 }
@@ -470,7 +478,7 @@ void org_bau_Env_exit_1(int64_t code) {
     _decUseStack(x, int_array);
     _decUseStack(_t0, int_array);
 }
-int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
+int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     if (n < 0) {
         buff->data[idx_2(pos, buff->len)] = 45;
         pos += 1;
@@ -496,11 +504,11 @@ int64_t org_bau_Math_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     }
     return end;
 }
-i8_array* org_bau_Math_intToString_1(int64_t n) {
+i8_array* org_bau_Int_intToString_1(int64_t n) {
     i8_array* _t0 = i8_array_new(20);
     _incUseStack(_t0);
     i8_array* buff = _t0;
-    int64_t pos = org_bau_Math_appendInt_3(n, buff, 0);
+    int64_t pos = org_bau_Int_appendInt_3(n, buff, 0);
     i8_array* _t1 = i8_array_new(pos);
     _incUseStack(_t1);
     i8_array* result = _t1;
@@ -524,11 +532,11 @@ i8_array* org_bau_Math_intToString_1(int64_t n) {
     return result;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
-    org_bau_String_StringBuilder* _t39 = org_bau_String_StringBuilder_new();
+    org_bau_String_StringBuilder* _t35 = org_bau_String_StringBuilder_new();
     _incUseStack(data);
-    _t39->data = data;
-    _t39->len = 0;
-    return _t39;
+    _t35->data = data;
+    _t35->len = 0;
+    return _t35;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
     org_bau_String_StringBuilder_append_4(this, b, 0, b->len);
@@ -587,12 +595,6 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
         }
     }
     this->len += add;
-}
-int64_t org_bau_Utils_getNanoTimeUTC_0() {
-    struct timespec time={0,0};
-    clock_gettime(CLOCK_REALTIME, &time);
-    return time.tv_sec * 1000000000ULL + time.tv_nsec;
-    return 0;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed += 0x9e3779b97f4a7c15;
@@ -763,10 +765,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_1(i8_array* data) {
-    org_bau_os_Terminal_termIos _t43 = org_bau_os_Terminal_termIos_new();
+    org_bau_os_Terminal_termIos _t39 = org_bau_os_Terminal_termIos_new();
     _incUseStack(data);
-    _t43.data = data;
-    return _t43;
+    _t39.data = data;
+    return _t39;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -777,15 +779,15 @@ void org_bau_os_Terminal_writeToTerminal_2(i8_array* data, int64_t len) {
 void refreshScreen_0() {
     i8_array* _t0 = i8_array_new(32);
     org_bau_String_StringBuilder* buff = org_bau_String_StringBuilder_1(_t0);
-    org_bau_String_StringBuilder_append_2(buff, string_1026);
-    org_bau_String_StringBuilder_append_2(buff, string_1027);
     org_bau_String_StringBuilder_append_2(buff, string_1028);
-    i8_array* _t1 = org_bau_Math_intToString_1(score);
-    org_bau_String_StringBuilder_append_2(buff, _t1);
     org_bau_String_StringBuilder_append_2(buff, string_1029);
-    i8_array* _t2 = org_bau_Math_intToString_1(highScore);
-    org_bau_String_StringBuilder_append_2(buff, _t2);
     org_bau_String_StringBuilder_append_2(buff, string_1030);
+    i8_array* _t1 = org_bau_Int_intToString_1(score);
+    org_bau_String_StringBuilder_append_2(buff, _t1);
+    org_bau_String_StringBuilder_append_2(buff, string_1031);
+    i8_array* _t2 = org_bau_Int_intToString_1(highScore);
+    org_bau_String_StringBuilder_append_2(buff, _t2);
+    org_bau_String_StringBuilder_append_2(buff, string_1032);
     if (24 > 0) {
         while (1 == 1) {
             int64_t y = 0;
@@ -800,13 +802,13 @@ void refreshScreen_0() {
                                 _incUseStack(_t3);
                                 i8_array* c2 = _t3;
                                 c2->data[0] = ( 48 + c ) - 1;
-                                org_bau_String_StringBuilder_append_2(buff, string_1031);
+                                org_bau_String_StringBuilder_append_2(buff, string_1033);
                                 org_bau_String_StringBuilder_append_2(buff, c2);
-                                org_bau_String_StringBuilder_append_2(buff, string_1032);
+                                org_bau_String_StringBuilder_append_2(buff, string_1034);
                                 _decUseStack(c2, i8_array);
                                 _decUseStack(_t3, i8_array);
                             }
-                            org_bau_String_StringBuilder_append_2(buff, string_1033);
+                            org_bau_String_StringBuilder_append_2(buff, string_1035);
                             int64_t _next = x + 1;
                             if (_next >= 14) {
                                 break;
@@ -816,7 +818,7 @@ void refreshScreen_0() {
                         break;
                     }
                 }
-                org_bau_String_StringBuilder_append_2(buff, string_1034);
+                org_bau_String_StringBuilder_append_2(buff, string_1036);
                 int64_t _next = y + 1;
                 if (_next >= 24) {
                     break;
@@ -881,22 +883,27 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("Exit code ", 10);
     string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
-    string_1023 = str_const("......       X     X      X    X           X     X     X           X                      XX      X   X      XX         .....\n.XX...XXXX  XXX    XX    XX    X    X X    X     X     XX   XXX   XX     XX   XX    XXX    X    XXX   XXX    X    XXX   XXX..\n.XX...              X    X     XX   XXX   XX     X     X     X     X    XX     XX   X      X                 X      X   X.X..\n......                                           X                                                                      ......", 504);
-    string_1024 = str_const("AIJMNOURBKLCDEPQFSTFG", 21);
-    string_1026 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
-    string_1027 = str_const("\x1b[0K\x0d\n", 6);
-    string_1028 = str_const("  Score: ", 9);
-    string_1029 = str_const(" High: ", 7);
-    string_1030 = str_const("\x1b[0K\x0d\n\x1b[0K\x0d\n", 12);
-    string_1031 = str_const("\x1b[4", 3);
-    string_1032 = str_const("m", 1);
-    string_1033 = str_const("  \x1b[0m", 6);
-    string_1034 = str_const("\x1b[0m\x1b[0K\x0d\n", 10);
-    string_1035 = str_const("Not a terminal", 14);
+    string_1025 = str_const("......       X     X      X    X           X     X     X           X                      XX      X   X      XX         .....\n.XX...XXXX  XXX    XX    XX    X    X X    X     X     XX   XXX   XX     XX   XX    XXX    X    XXX   XXX    X    XXX   XXX..\n.XX...              X    X     XX   XXX   XX     X     X     X     X    XX     XX   X      X                 X      X   X.X..\n......                                           X                                                                      ......", 504);
+    string_1026 = str_const("AIJMNOURBKLCDEPQFSTFG", 21);
+    string_1028 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
+    string_1029 = str_const("\x1b[0K\x0d\n", 6);
+    string_1030 = str_const("  Score: ", 9);
+    string_1031 = str_const(" High: ", 7);
+    string_1032 = str_const("\x1b[0K\x0d\n\x1b[0K\x0d\n", 12);
+    string_1033 = str_const("\x1b[4", 3);
+    string_1034 = str_const("m", 1);
+    string_1035 = str_const("  \x1b[0m", 6);
+    string_1036 = str_const("\x1b[0m\x1b[0K\x0d\n", 10);
+    string_1037 = str_const("Not a terminal", 14);
     _main();
     return 0;
 }
 void _main() {
+    randomSeed = 0;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
     POS_INFINITY = (1.0 / 0.0);
     NEG_INFINITY = (-1.0 / 0.0);
     NOT_A_NUMBER = (0.0 / 0.0);
@@ -904,13 +911,10 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
     queueByte = 0;
-    i8_array* _t45 = i8_array_new(0);
-    oldTermIos = org_bau_os_Terminal_termIos_1(_t45);
+    i8_array* _t41 = i8_array_new(0);
+    oldTermIos = org_bau_os_Terminal_termIos_1(_t41);
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;
-    randomSeed = 0;
     width = 14;
     height = 24;
     score = 0;
@@ -919,20 +923,20 @@ void _main() {
     rotation = 0;
     running = 0;
     blockType = 0;
-    i8_array* _t47 = i8_array_new(336);
-    _incUseStack(_t47);
-    field = _t47;
-    _incUseStack(string_1023);
-    shapes = string_1023;
-    _incUseStack(string_1024);
-    rotated = string_1024;
-    int64_t _t48 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t48)) {
+    i8_array* _t42 = i8_array_new(336);
+    _incUseStack(_t42);
+    field = _t42;
+    _incUseStack(string_1025);
+    shapes = string_1025;
+    _incUseStack(string_1026);
+    rotated = string_1026;
+    int64_t _t43 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t43)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t49 = org_bau_Utils_getNanoTimeUTC_0();
-    org_bau_Utils_setRandomSeed_1(_t49);
+    int64_t _t44 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t44);
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -989,37 +993,37 @@ void _main() {
             updateBlock_1(0);
             int64_t loop = 16;
             while (1 == 1) {
-                int64_t _t50 = loop > 0;
-                if (_t50) {
-                    int64_t _t51 = running;
-                    _t50 = _t51;
+                int64_t _t45 = loop > 0;
+                if (_t45) {
+                    int64_t _t46 = running;
+                    _t45 = _t46;
                 }
-                if (!(_t50)) {
+                if (!(_t45)) {
                     break;
                 }
                 loop -= 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t52 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t52)) {
+                int64_t _t47 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t47)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t53 = key;
-                if (_t53 == 1000) {
+                int64_t _t48 = key;
+                if (_t48 == 1000) {
                     tempPos -= 1;
-                } else if (_t53 == 1001) {
+                } else if (_t48 == 1001) {
                     tempPos += 1;
-                } else if ((_t53 == 32) || (_t53 == 1002)) {
+                } else if ((_t48 == 32) || (_t48 == 1002)) {
                     tempRot = rotated->data[rotation] - 65;
-                } else if (_t53 == 27) {
+                } else if (_t48 == 27) {
                     org_bau_Env_exit_1(0);
-                } else if (_t53 == 1003) {
+                } else if (_t48 == 1003) {
                     running = 0;
                 }
-                int64_t _t54 = canPlace_2(tempPos, tempRot);
-                if (_t54) {
+                int64_t _t49 = canPlace_2(tempPos, tempRot);
+                if (_t49) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1027,8 +1031,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t55 = canPlace_2(position + 14, rotation);
-            if (_t55) {
+            int64_t _t50 = canPlace_2(position + 14, rotation);
+            if (_t50) {
                 position += 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1070,8 +1074,8 @@ void _main() {
                 i -= 1;
             }
             refreshScreen_0();
-            int64_t _t56 = org_bau_Utils_random_1(7);
-            rotation = _t56;
+            int64_t _t51 = org_bau_Utils_random_1(7);
+            rotation = _t51;
             blockType = rotation + 1;
             if (position < 28) {
                 break;
@@ -1080,9 +1084,9 @@ void _main() {
             running = 1;
         }
     }
-    _decUseStack(_t45, i8_array);
+    _decUseStack(_t41, i8_array);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t47, i8_array);
+    _decUseStack(_t42, i8_array);
     _decUseStack(field, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);
@@ -1090,8 +1094,53 @@ void _main() {
 }
 /*
 
+type dateTime
+Date and time.
+
+fun daylightSaving() int
+Is daylight saving time active currently.
+
+fun daylightSaving(year int, month int, day int, hour int, min int, sec int) int
+Is daylight saving time active currently.
+
+fun getDateTime() dateTime
+Get the local time in millisecond precision.
+
+fun getNanoTime() int
+Nanosecons since some undefined point in the past. Never jumps backwards.
+
+fun getNanoTimeUTC() int
+Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
+
+fun timeMillis() int
+Get the seconds since the epoch
+
+fun timeOffset() int
+Get the current offset between the local time and UTC in seconds.
+
+fun timeOffset(year int, month int, day int, hour int, min int, sec int) int
+Get the current offset between the local time and UTC in seconds.
+
+fun getRandomSeed() int
+Get the random seed.
+
+fun random() int
+Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun random(smallerThan int) int
+Pseudo-random number between 0 and smallerThan (excluding).
+
+fun setRandomSeed(seed int)
+Set the random seed.
+
+type exception
+An exception
+
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
 
 type List(T)
 List
@@ -1107,29 +1156,5 @@ Insert an entry to the list at the given index
 
 fun List(T) get(x int) T?
 Insert an entry to the list at the given index
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
-
-fun getRandomSeed() int
-Get the random seed.
-
-fun random() int
-Pseudo-random number generated using the Splitmix64 algorithm.
-
-fun random(smallerThan int) int
-Pseudo-random number between 0 and smallerThan (excluding).
-
-fun setRandomSeed(seed int)
-Set the random seed.
 
 */

@@ -6,7 +6,6 @@
 #include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -289,10 +288,10 @@ void BitField_free(BitField* x) {
 }
 int64_t randomSeed;
 BitField* BitField_1(int_array* data) {
-    BitField* _t1 = BitField_new();
+    BitField* _t0 = BitField_new();
     _incUseStack(data);
-    _t1->data = data;
-    return _t1;
+    _t0->data = data;
+    return _t0;
 }
 int64_t BitField_get_2(BitField* this, int64_t index) {
     int64_t _r0 = ( shiftRight_int_2(this->data->data[idx_2(shiftRight_int_2(index, 6), this->data->len)], (index & 63)) ) & 1;
@@ -358,23 +357,11 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     randomSeed = 0;
-    int64_t _t3 = primeSum_1(100);
-    printf("%lld\n", (long long)_t3);
+    int64_t _t2 = primeSum_1(100);
+    printf("%lld\n", (long long)_t2);
     _end();
 }
 /*
-
-type dateTime
-Date and time.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
 
 fun getRandomSeed() int
 Get the random seed.

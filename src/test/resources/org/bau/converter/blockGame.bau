@@ -1,10 +1,12 @@
 import org.bau.Env
+import org.bau.DateTime
 import org.bau.Math
 import org.bau.String
 import org.bau.os.Terminal
     keyCode
 import org.bau.os.Sleep
 import org.bau.Utils
+import org.bau.Int
 
 fun updateBlock(draw int)
     for y := until(4)
@@ -31,9 +33,9 @@ fun refreshScreen()
     # clear line from cursor right; newline
     buff.append('\x1b[0K\r\n')
     buff.append('  Score: ')
-    buff.append(Math.intToString(score))
+    buff.append(Int.intToString(score))
     buff.append(' High: ')
-    buff.append(Math.intToString(highScore))
+    buff.append(Int.intToString(highScore))
     buff.append('\x1b[0K\r\n\x1b[0K\r\n')
     for y := until(height)
         for x := until(width)
@@ -52,7 +54,7 @@ fun main()
     if not Terminal.isTerminal()
         println('Not a terminal')
         return
-    Utils.setRandomSeed(Utils.getNanoTimeUTC())
+    Utils.setRandomSeed(DateTime.getNanoTime())
     Terminal.enableRawMode(refreshScreen)
     while
         refreshScreen()
