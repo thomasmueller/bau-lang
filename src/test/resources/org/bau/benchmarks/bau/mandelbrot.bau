@@ -3,12 +3,12 @@
 
 import org.bau.Env
 import org.bau.File
-import org.bau.Math
+import org.bau.Int
 
 fun main()
     n := 200
     if Env.argCount() > 1
-        n = Math.parseInt(Env.arg(1))
+        n = Int.parseInt(Env.arg(1))
     w, h := n
     iter: 50
     limit: 2.0

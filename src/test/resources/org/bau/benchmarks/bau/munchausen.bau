@@ -1,6 +1,6 @@
 # https://github.com/jabbalaci/SpeedTests
 
-import org.bau.Math
+import org.bau.Int
 
 fun main()
     for i := until(LIMIT)
@@ -21,7 +21,7 @@ fun isMunchausen(number int) int
 fun getCache() const int[]
     result : int[10]
     for i := range(1, 10)
-        result[i] = int(Math.pow(i, i))
+        result[i] = Int.powInt(i, i)
     return result
 
 LIMIT : 440_000_000

@@ -1,13 +1,13 @@
 # The Computer Language Benchmarks Game
 # https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-import org.bau.Math
+import org.bau.Int
 import org.bau.Env
 
 fun main()
     n := 10
     if Env.argCount() > 1
-        n = Math.parseInt(Env.arg(1))
+        n = Int.parseInt(Env.arg(1))
     minDepth : 4
     maxDepth := n
     if minDepth + 2 > n
