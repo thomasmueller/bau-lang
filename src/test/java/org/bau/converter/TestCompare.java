@@ -96,6 +96,11 @@ public class TestCompare {
     }
 
     @Test
+    public void chess() throws IOException {
+        test("chess");
+    }
+
+    @Test
     public void compressSr3() throws IOException {
         test("compress-sr3");
     }

@@ -58,7 +58,7 @@ public class ArrayAccess implements Expression, LeftValue {
                 buff.append("[" + Program.esc("idx") + "_2(");
                 buff.append(arrayIndex.toC());
                 buff.append(", ");
-                buff.append(base.toC() + "->len");
+                buff.append("_arrayLen(" + base.toC() + ")");
                 buff.append(")]");
             } else {
                 buff.append("[");
@@ -135,7 +135,7 @@ public class ArrayAccess implements Expression, LeftValue {
                 buff.append("[" + Program.esc("idx") + "_2(");
                 buff.append(arrayIndex.toC());
                 buff.append(", ");
-                buff.append(base.toC() + "->len");
+                buff.append("_arrayLen(" + base.toC() + ")");
                 buff.append(")]");
             } else {
                 buff.append("[");

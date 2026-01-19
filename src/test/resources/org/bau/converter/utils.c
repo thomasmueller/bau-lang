@@ -226,10 +226,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -366,7 +367,7 @@ org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0() {
     time(&current);
     struct tm* timeinfo;
     timeinfo = localtime(&current);
-    org_bau_Utils_dateTime result;
+    org_bau_DateTime_dateTime result;
     result.year = timeinfo->tm_year + 1900;
     result.month = timeinfo->tm_mon + 1;
     result.day = timeinfo->tm_mday;

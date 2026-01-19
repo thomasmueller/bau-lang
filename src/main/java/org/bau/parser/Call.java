@@ -319,7 +319,7 @@ public class Call implements Statement, Expression, LeftValue {
             }
             if (a.type().isArray()) {
                 buff.append(", ");
-                buff.append(a.toC()).append("->len");
+                buff.append("_arrayLen(" + a.toC() + ")");
                 buff.append(", ");
                 buff.append(a.toC()).append("->data");
             } else  {

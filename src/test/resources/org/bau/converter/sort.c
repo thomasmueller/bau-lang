@@ -224,10 +224,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -280,22 +281,22 @@ int64_t idx_2(int64_t x, int64_t len) {
 void insertionSort_int_array_int_1(int_array* a) {
     while (1 == 1) {
         int64_t i = 1;
-        while (i < a->len) {
+        while (i < _arrayLen(a)) {
             int64_t t = a->data[i];
             int64_t j = i - 1;
             while (1 == 1) {
                 int64_t _t0 = j >= 0;
                 if (_t0) {
-                    int64_t _t1 = a->data[idx_2(j, a->len)] > t;
+                    int64_t _t1 = a->data[idx_2(j, _arrayLen(a))] > t;
                     _t0 = _t1;
                 }
                 if (!(_t0)) {
                     break;
                 }
-                a->data[idx_2(j + 1, a->len)] = a->data[idx_2(j, a->len)];
+                a->data[idx_2(j + 1, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
                 j -= 1;
             }
-            a->data[idx_2(j + 1, a->len)] = t;
+            a->data[idx_2(j + 1, _arrayLen(a))] = t;
             i += 1;
         }
         break;
@@ -311,7 +312,7 @@ int64_t org_bau_Utils_random_0() {
 }
 void shellSort_int_array_int_1(int_array* a) {
     int64_t h = 16;
-    while (a->len > ( idiv_2(h, 16) )) {
+    while (_arrayLen(a) > ( idiv_2(h, 16) )) {
         h = ( h + h ) + ( idiv_2(h, 4) ) + 16;
     }
     while (h > 15) {
@@ -319,22 +320,22 @@ void shellSort_int_array_int_1(int_array* a) {
         int64_t g = idiv_2((h + 15), 16);
         while (1 == 1) {
             int64_t i = g;
-            while (i < a->len) {
+            while (i < _arrayLen(a)) {
                 int64_t t = a->data[i];
                 int64_t j = i - g;
                 while (1 == 1) {
                     int64_t _t0 = j >= 0;
                     if (_t0) {
-                        int64_t _t1 = a->data[idx_2(j, a->len)] > t;
+                        int64_t _t1 = a->data[idx_2(j, _arrayLen(a))] > t;
                         _t0 = _t1;
                     }
                     if (!(_t0)) {
                         break;
                     }
-                    a->data[idx_2(j + g, a->len)] = a->data[idx_2(j, a->len)];
+                    a->data[idx_2(j + g, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
                     j -= g;
                 }
-                a->data[idx_2(j + g, a->len)] = t;
+                a->data[idx_2(j + g, _arrayLen(a))] = t;
                 i += 1;
             }
             break;

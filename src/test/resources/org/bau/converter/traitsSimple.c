@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -374,21 +375,21 @@ int64_t Memory_read_1(Memory* this) {
     int64_t p = this->pos;
     int64_t _t0 = p < 0;
     if (!(_t0)) {
-        int64_t _t1 = p >= this->array->len;
+        int64_t _t1 = p >= _arrayLen(this->array);
         _t0 = _t1;
     }
     if (_t0) {
         return -1;
     }
     this->pos += 1;
-    int64_t _r0 = this->array->data[idx_2(p, this->array->len)];
+    int64_t _r0 = this->array->data[idx_2(p, _arrayLen(this->array))];
     return _r0;
 }
 void Memory_write_2(Memory* this, int64_t x) {
     int64_t p = this->pos;
     int64_t _t0 = p < 0;
     if (!(_t0)) {
-        int64_t _t1 = p >= this->array->len;
+        int64_t _t1 = p >= _arrayLen(this->array);
         _t0 = _t1;
     }
     if (_t0) {
@@ -397,7 +398,7 @@ void Memory_write_2(Memory* this, int64_t x) {
     }
     this->pos += 1;
     printf("writing to pos=%lld\n", (long long)p);
-    this->array->data[idx_2(p, this->array->len)] = x;
+    this->array->data[idx_2(p, _arrayLen(this->array))] = x;
 }
 int64_t Reader_read_1(Reader* this) {
     int64_t (*_)(Reader*) = (int64_t (*)(Reader*)) this->_type->vtable[0];

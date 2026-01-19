@@ -1,0 +1,408 @@
+import org.bau.Utils
+    if
+import org.bau.Int
+import org.bau.os.Terminal
+    keyCode
+import org.bau.String
+    StringBuilder
+
+fun main()
+    if not Terminal.isTerminal()
+        println('Not a terminal')
+        return
+    Terminal.enableRawMode(refreshScreen)
+    init()
+    while
+        refreshScreen()
+        key : Terminal.readEditorKey()
+        break key < 0
+        continue key = 0
+        switch key
+        case ord('q') 
+            break
+        case ord(' ')
+            if state = 0
+                p : xx + 8 * yy
+                continue board[p] = 0 or isBlack(board[p]) <> blackTurn
+                from = p
+                state = 1
+                moves := getPossibleMoves(p, 0)
+                while moves <> 0
+                    target := Int.numberOfTrailingZeros(moves)
+                    board[target] |= 16
+                    moves ^= 1 << target
+                refreshScreen()
+            elif state = 1
+                p : xx + 8 * yy
+                allowed : (board[p] & 16) <> 0
+                for i := until(64)
+                    board[i] &= ~16
+                if allowed
+                    lastWhite = move(from, p)
+                    showCursor = 0
+                    refreshScreen()
+                    move : negamax(1, 5, not blackTurn, -Int.MAX_INT, Int.MAX_INT)
+                    if move <> 0
+                        lastBlack = move
+                        move(move)
+                showCursor = 1
+                refreshScreen()
+                state = 0
+        case ord('c')
+            p : xx + 8 * yy
+            if state = 0
+                from = p
+                state = 1
+            else
+                lastWhite = move(from, p)
+                refreshScreen()
+                state = 0
+        case ord('u')
+            if lastBlack <> 0 and lastWhite <> 0
+                undo(lastBlack)
+                undo(lastWhite)
+                refreshScreen()
+            lastBlack = 0
+            lastWhite = 0
+        case ord('s')
+            blackTurn = not blackTurn
+            showCursor = 0
+            refreshScreen()
+            move : negamax(1, 5, not blackTurn, -Int.MAX_INT, Int.MAX_INT)
+            if move <> 0
+                move(move)
+            showCursor = 1
+            refreshScreen()
+            state = 0
+        case keyCode.ARROW_RIGHT
+            xx = Int.min(7, xx + 1)
+        case keyCode.ARROW_LEFT
+            xx = Int.max(0, xx - 1)
+        case keyCode.ARROW_UP
+            yy = Int.max(0, yy - 1)
+        case keyCode.ARROW_DOWN
+            yy = Int.min(7, yy + 1)
+
+# UI
+xx := 3
+yy := 6
+state := 0
+showCursor := 1
+from := 3
+blackTurn := 0
+lastBlack := 0
+lastWhite := 0
+
+# constants
+KING   : 1
+QUEEN  : 2
+ROOK   : 3
+BISHOP : 4
+KNIGHT : 5
+PAWN   : 6
+BLACK  : 6
+
+# board
+board: int[64]
+castlingFlags := 0
+pawnMoved2 := 0
+turn := 0
+
+fun refreshScreen()
+    buff : String.StringBuilder(i8[32])
+    # hide cursor, go home
+    buff.append('\x1b[?25l\x1b[H\x1b[0m')
+    buff.append('   a  b  c  d  e  f  g  h  \r\n')
+    for y := until(8)
+        buff.append(Int.intToString(8 - y))
+        buff.append(' ')
+        for x := until(8)
+            b := board[x + 8 * y]
+            allowed : (b & 16) <> 0
+            b &= ~16
+            if allowed
+                buff.append('\x1b[30;100m')
+            elif (x + y) % 2 = 1
+                buff.append('\x1b[30;107m')
+            if isBlack(b)
+                # red
+                buff.append('\x1b[31m')
+            else
+                # blue
+                buff.append('\x1b[94m')
+            buff.append(' ')
+            if b = 0
+                buff.append(' ')
+            else
+                b2 : i8[3]
+                b2[0] = 0xe2
+                b2[1] = 0x99
+                b2[2] = 0x94 + (b - 1)
+                buff.append(b2)
+            buff.append(' ')
+            # reset all attributes
+            buff.append('\x1b[0m')
+        buff.append(' \r\n')
+    buff.append('  arrows:select space:move\r\n')
+    buff.append('  u:undo  s:switch  q:quit')
+    buff.append('\x1b[')
+    buff.append(Int.intToString(yy + 2))
+    buff.append(';')
+    buff.append(Int.intToString(1 + 3 * xx + 3))
+    buff.append('H')
+    if showCursor
+        buff.append('\x1b[?25h')
+    Terminal.writeToTerminal(buff.data, buff.len)
+
+fun init()
+    board[0] = ROOK
+    board[1] = KNIGHT
+    board[2] = BISHOP
+    board[3] = QUEEN
+    board[4] = KING
+    board[5] = BISHOP
+    board[6] = KNIGHT
+    board[7] = ROOK
+    for i := until(8)
+        board[i + 56] = board[i]
+        board[i] += BLACK
+        board[i + 8] = PAWN + BLACK
+        board[i + 48] = PAWN
+
+fun negamax(top int, depth int, black int, alpha int, beta int) int
+    best := -Int.MAX_INT
+    bestMove := 0
+    if depth <= 0
+        best = evaluateBoard(black)
+        if best >= beta or depth < -1
+            return best
+    for phase := until(2)
+        if depth <= 0 and phase = 1
+            return best
+        for i := until(64)
+            continue board[i] = 0 or isBlack(board[i]) <> black
+            attackOnly := 0
+            if phase = 0
+                attackOnly = 1
+            moves := getPossibleMoves(i, attackOnly)
+            while moves <> 0
+                target := Int.numberOfTrailingZeros(moves)
+                moves ^= 1 << target
+                capture := 0
+                if board[target] <> 0
+                    capture = 1
+                continue capture <> attackOnly
+                move : move(i, target)
+                score : -negamax(0, depth - 1, 1 - black, -beta, -alpha)
+                if score > best
+                    bestMove = move
+                    best = score
+                    alpha = Int.max(alpha, score)
+                undo(move)
+                break not top and best >= beta
+    if top
+        return bestMove
+    return best
+
+fun isFieldAttacked(black int, pos int) int
+    for i := until(64)
+        b : board[i]
+        continue b = 0 or isBlack(b) = black
+        moves := getPossibleMoves(i, 1)
+        if ((moves >> pos) & 1) = 1
+            return 1
+    return 0
+
+fun evaluateBoard(black int) int
+    sum := 0
+    for i := until(64)
+        b : board[i]
+        sc := 0
+        switch getPiece(b)
+        case KING
+            sc = 10000000
+        case QUEEN
+            sc = 1000
+        case ROOK
+            sc = 500
+        case KNIGHT
+            sc = Int.bitCount(getPossibleMoves(i, 0))
+            sc += 320
+        case BISHOP
+            sc = Int.bitCount(getPossibleMoves(i, 0))
+            sc += 330
+        case PAWN
+            sc = 100
+            if turn > 40
+                sc += 1 << if(isBlack(b), (i / 8) - 1, 6 - (i / 8))
+        if isBlack(b) <> black
+            sc = -sc
+        sum += sc
+    return sum
+
+fun getPossibleMoves(from int, attacksOnly int) int
+    b : board[from]
+    p : getPiece(b)
+    black : isBlack(b)
+    maxDist := 1
+    result := 0
+    if p = QUEEN or p = ROOK or p = BISHOP
+        maxDist = 7
+    if p = KING or p = QUEEN or p = BISHOP
+        result |= slide(from, maxDist, 1, 1)
+        result |= slide(from, maxDist, -1, -1)
+        result |= slide(from, maxDist, 1, -1)
+        result |= slide(from, maxDist, -1, 1)
+    if p = KING or p = QUEEN or p = ROOK
+        result |= slide(from, maxDist, 1, 0)
+        result |= slide(from, maxDist, -1, 0)
+        result |= slide(from, maxDist, 0, 1)
+        result |= slide(from, maxDist, 0, -1)
+    if p = KNIGHT
+        result |= slide(from, maxDist, 1, 2)
+        result |= slide(from, maxDist, 2, 1)
+        result |= slide(from, maxDist, -1, -2)
+        result |= slide(from, maxDist, -2, -1)
+        result |= slide(from, maxDist, 1, -2)
+        result |= slide(from, maxDist, 2, -1)
+        result |= slide(from, maxDist, -1, 2)
+        result |= slide(from, maxDist, -2, 1)
+    elif p = PAWN
+        dir : if(isBlack(b), 1, -1)
+        # straight
+        dist := 1
+        if not attacksOnly
+            if dir = 1 and from / 8 = 1 and board[from + 16] = 0
+                dist = 2
+            if dir = -1 and from / 8 = 6 and board[from - 16] = 0
+                dist = 2
+            result |= slide(from, dist, 0, dir)
+            if result <> 0 and board[from + dir * 8] <> 0
+                result = 0
+        if pawnMoved2 / 8 = from / 8
+            # en passant
+            if pawnMoved2 = from - 1
+                result |= 1 << (from - 1)
+            elif pawnMoved2 = from + 1
+                result |= 1 << (from + 1)
+        capture := slide(from, maxDist, 1, dir)
+        if capture <> 0 and board[from + 1 + dir * 8] <> 0
+            result |= capture
+        capture = slide(from, maxDist, -1, dir)
+        if capture <> 0 and board[from - 1 + dir * 8] <> 0
+            result |= capture
+    if p = KING and attacksOnly = 0
+        # castling
+        r := castlingFlags >> if(black, 0, 2)
+        if (r & 3) <> 3 and not isFieldAttacked(black, from)
+            if (r & 1) = 0 and not isFieldAttacked(black, from - 1)
+                rook := slide(from - 4, 8, 1, 0)
+                rook >>= from - 3
+                if (rook & 7) = 7
+                    result |= 1 << (from - 2)
+            if (r & 2) = 0 and not isFieldAttacked(black, from + 1)
+                rook := slide(from + 3, 8, -1, 0)
+                rook >>= from + 1
+                if (rook & 3) = 3
+                    result |= 1 << (from + 2)
+    return result
+
+fun slide(from int, maxDist int, xo int, yo int) int
+    x := from & 7
+    y := from / 8
+    isBlack := isBlack(board[from])
+    result := 0
+    i := 1
+    while
+        x += xo
+        y += yo
+        break i > maxDist or x < 0 or x > 7 or y < 0 or y > 7
+        p : x + y * 8
+        b : board[p]
+        if b <> 0
+            if isBlack(b) <> isBlack
+                result |= 1 << p
+            break
+        result |= 1 << p
+        i += 1
+    return result
+
+fun updateCastlingRights(pos int)
+    p : board[pos]
+    if getPiece(p) = ROOK
+        if (pos & 7) = 0 or (pos & 7) = 7
+            which : if((pos & 7) = 0, 1, 2)
+            castlingFlags |= which << if(isBlack(p), 0, 2)
+
+fun move(move int) int
+    source : (move >> 16) & 0xff
+    target : (move >> 8) & 0xff
+    return move(source, target)
+
+fun move(source int, target int) int
+    turn += 1
+    captured : board[target]
+    oldCastlingFlags : castlingFlags
+    updateCastlingRights(source)
+    updateCastlingRights(target)
+    old : board[source]
+    board[target] = old
+    p : getPiece(old)
+    isBlack : isBlack(old)
+    board[source] = 0
+    oldPawnMoved : pawnMoved2
+    pawnMoved2 = 0
+    if p = PAWN
+        shift : (target & 7) - (source & 7)
+        if shift <> 0 and captured = 0
+            # en passant capture
+            board[source + shift] = 0
+        if target <= 7 or target >= 56
+            # promotion
+            board[target] = QUEEN + if(isBlack, BLACK, 0)
+        if Int.abs(source - target) = 16
+            pawnMoved2 = target
+    if p = KING
+        castlingFlags |= 3 << if(isBlack, 0, 2)
+        if Int.abs((source & 7) - (target & 7)) > 1
+            # castling
+            if target > source
+                board[target - 1] = board[target + 1]
+                board[target + 1] = 0
+            else
+                board[target + 1] = board[target - 2]
+                board[target - 2] = 0
+    return (old << 40) | (oldPawnMoved << 32) | 
+            (captured << 24) | (source << 16) | 
+            (target << 8) | oldCastlingFlags
+
+fun undo(move int)
+    turn -= 1
+    old : (move >> 40) & 0xff
+    pawnMoved2 = (move >> 32) & 0xff
+    captured : (move >> 24) & 0xff
+    source : (move >> 16) & 0xff
+    target : (move >> 8) & 0xff
+    castlingFlags = move & 0xff
+    board[target] = captured
+    board[source] = old
+    if getPiece(old) = KING
+        if Int.abs((source & 7) - (target & 7)) > 1
+            # undo castling
+            if target > source
+                board[target + 1] = board[target - 1]
+                board[target - 1] = 0
+            else
+                board[target - 2] = board[target + 1]
+                board[target + 1] = 0
+    elif getPiece(old) = PAWN
+        shift : (target & 7) - (source & 7)
+        if shift <> 0 and captured = 0
+            # en passant capture
+            board[source + shift] = PAWN + if(isBlack(old), 0, BLACK)
+
+fun isBlack(p int) int
+    return p > 6
+
+fun getPiece(p int) int
+    return if(p > 6, p - 6, p)

@@ -1394,7 +1394,9 @@ public class Parser {
             }
             if (matchOp("*=")) {
                 s.modify = "*";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1406,7 +1408,9 @@ public class Parser {
                 return;
             } else if (matchOp("/=")) {
                 s.modify = "/";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1418,7 +1422,9 @@ public class Parser {
                 return;
             } else if (matchOp("%=")) {
                 s.modify = "%";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1430,7 +1436,9 @@ public class Parser {
                 return;
             } else if (matchOp("+=")) {
                 s.modify = "+";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1442,7 +1450,9 @@ public class Parser {
                 return;
             } else if (matchOp("-=")) {
                 s.modify = "-";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1454,7 +1464,9 @@ public class Parser {
                 return;
             } else if (matchOp("&=")) {
                 s.modify = "&";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1466,7 +1478,9 @@ public class Parser {
                 return;
             } else if (matchOp("|=")) {
                 s.modify = "|";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1478,7 +1492,9 @@ public class Parser {
                 return;
             } else if (matchOp("^=")) {
                 s.modify = "^";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1490,7 +1506,9 @@ public class Parser {
                 return;
             } else if (matchOp(">>=")) {
                 s.modify = ">>";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
@@ -1502,7 +1520,9 @@ public class Parser {
                 return;
             } else if (matchOp("<<=")) {
                 s.modify = "<<";
-                s.value = parseExpression();
+                Expression expr = parseExpression();
+                expr = expr.writeStatements(this, false, target);
+                s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");

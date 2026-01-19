@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -371,21 +372,21 @@ int_array* array_int_var(int _vaCount,...) {
     return entries;
 }
 void fill_1(int_array* data) {
-    if (data->len <= 0) {
+    if (_arrayLen(data) <= 0) {
         return;
     }
     int64_t i = 0;
     while (1) {
         data->data[i] = i;
         int64_t next = i + 1;
-        if (next >= data->len) {
+        if (next >= _arrayLen(data)) {
             break;
         }
         i = next;
     }
 }
 int64_t i8_array_len_1(i8_array* this) {
-    int32_t _r0 = this->len;
+    int32_t _r0 = _arrayLen(this);
     return _r0;
 }
 void _main();
@@ -419,13 +420,13 @@ void _main() {
         }
     }
     i8_array* a = arrayOf_i8_var(0, /* argCount */ 5, 0, 1, 2, 3, 44);
-    if (a->len > 0) {
+    if (_arrayLen(a) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 printf("%d\n", a->data[i]);
                 int64_t _next = i + 1;
-                if (_next >= a->len) {
+                if (_next >= _arrayLen(a)) {
                     break;
                 }
                 i = _next;
@@ -434,13 +435,13 @@ void _main() {
         }
     }
     int_array* b = array_int_var(/* argCount */ 4, 0, 1, 2, 3);
-    if (b->len > 0) {
+    if (_arrayLen(b) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)b->data[i]);
                 int64_t _next = i + 1;
-                if (_next >= b->len) {
+                if (_next >= _arrayLen(b)) {
                     break;
                 }
                 i = _next;
@@ -449,13 +450,13 @@ void _main() {
         }
     }
     float_array* c = array_float_var(/* argCount */ 3, 1.0, 2.0, 3.0);
-    if (c->len > 0) {
+    if (_arrayLen(c) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 printf("%.9f\n", c->data[i]);
                 int64_t _next = i + 1;
-                if (_next >= c->len) {
+                if (_next >= _arrayLen(c)) {
                     break;
                 }
                 i = _next;
@@ -466,14 +467,14 @@ void _main() {
     int_array* x = arrayOf_int_var(0, /* argCount */ 4, 0, 1, 2, 3);
     float_array* y = arrayOf_float_var(0, /* argCount */ 3, 1.0, 2.0, 3.0);
     i8_array* z = arrayOf_i8_var(0, /* argCount */ 3, 1, 0, 44);
-    printf("len %d\n", z->len);
-    if (z->len > 0) {
+    printf("len %d\n", _arrayLen(z));
+    if (_arrayLen(z) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 printf("%d\n", z->data[i]);
                 int64_t _next = i + 1;
-                if (_next >= z->len) {
+                if (_next >= _arrayLen(z)) {
                     break;
                 }
                 i = _next;

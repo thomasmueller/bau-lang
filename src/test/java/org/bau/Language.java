@@ -8,6 +8,8 @@ https://github.com/NicoNex/tau
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
+Demo apps: block game, text editor, data compression, sudoku solver,...
+
 diff
 
 shell
@@ -447,6 +449,8 @@ arrays may not be null,
 but can only be empty (meaning: have zero elements).
 - empty array should map to null in C, so that no memory is used.
 - and so, no inc/dec ref count
+- now it is so for value types, e.g. string that has a pointer;
+  this is needed to support string arrays (which do not have constructors)
 
 re-arrange fields for arrays?
 combine array length, refcount, array data

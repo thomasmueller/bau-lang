@@ -18,7 +18,7 @@ fun getDateTime() dateTime
         time(&current);
         struct tm* timeinfo;
         timeinfo = localtime(&current);
-        org_bau_Utils_dateTime result;
+        org_bau_DateTime_dateTime result;
         result.year = timeinfo->tm_year + 1900;
         result.month = timeinfo->tm_mon + 1;
         result.day = timeinfo->tm_mday;

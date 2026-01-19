@@ -109,7 +109,7 @@ public class FieldAccess implements Expression, LeftValue {
             if (!"len".equals(fieldName)) {
                 throw new IllegalStateException("Only 'len' is supported");
             }
-            return base.toC() + "->len";
+            return "_arrayLen(" + base.toC() + ")";
         } else if (base.type().isPointer()) {
             return base.toC() + "->" + Program.esc(fieldName);
         } else {

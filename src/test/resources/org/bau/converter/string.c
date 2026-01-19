@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -320,7 +321,7 @@ void string_copy(string* x) {
     _incUse(x->data);
 }
 void string_array_free(string_array* x) {
-    for (int i = 0; i < x->len; i++) string_free(&(x->data[i]));
+    for (int i = 0; i < _arrayLen(x); i++) string_free(&(x->data[i]));
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
@@ -370,7 +371,7 @@ void _main() {
     string _t4 = str_1(string_1002);
     string_copy(&_t4);
     x->data[2] = _t4;
-    printf("%.*s %.*s %.*s\n", x->data[0].data->len, x->data[0].data->data, x->data[1].data->len, x->data[1].data->data, x->data[2].data->len, x->data[2].data->data);
+    printf("%.*s %.*s %.*s\n", _arrayLen(x->data[0].data), x->data[0].data->data, _arrayLen(x->data[1].data), x->data[1].data->data, _arrayLen(x->data[2].data), x->data[2].data->data);
     string_free(&_t4);
     string_free(&_t3);
     string_free(&_t2);

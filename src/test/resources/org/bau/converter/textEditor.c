@@ -232,10 +232,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -470,7 +471,7 @@ void org_bau_String_string_copy(org_bau_String_string* x) {
     _incUse(x->data);
 }
 void org_bau_String_string_array_free(org_bau_String_string_array* x) {
-    for (int i = 0; i < x->len; i++) org_bau_String_string_free(&(x->data[i]));
+    for (int i = 0; i < _arrayLen(x); i++) org_bau_String_string_free(&(x->data[i]));
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
@@ -582,17 +583,17 @@ void find_0() {
         if ((((_t0 == 3) || (_t0 == 17)) || (_t0 == 27)) || (_t0 == 13)) {
             break;
         } else if (((_t0 == 127) || (_t0 == 8)) || (_t0 == 1004)) {
-            if (findText.data->len > 0) {
-                i8_array* _t1 = i8_array_new(findText.data->len - 1);
+            if (_arrayLen(findText.data) > 0) {
+                i8_array* _t1 = i8_array_new(_arrayLen(findText.data) - 1);
                 _incUseStack(_t1);
                 i8_array* new = _t1;
-                if (new->len > 0) {
+                if (_arrayLen(new) > 0) {
                     while (1 == 1) {
                         int64_t i = 0;
                         while (1) {
-                            new->data[i] = findText.data->data[idx_2(i, findText.data->len)];
+                            new->data[i] = findText.data->data[idx_2(i, _arrayLen(findText.data))];
                             int64_t _next = i + 1;
-                            if (_next >= new->len) {
+                            if (_next >= _arrayLen(new)) {
                                 break;
                             }
                             i = _next;
@@ -619,20 +620,20 @@ void find_0() {
             }
             int64_t _t5 = _t3;
             if (_t5) {
-                int64_t _t6 = findText.data->len < 100;
+                int64_t _t6 = _arrayLen(findText.data) < 100;
                 _t5 = _t6;
             }
             if (_t5) {
-                i8_array* _t7 = i8_array_new(findText.data->len + 1);
+                i8_array* _t7 = i8_array_new(_arrayLen(findText.data) + 1);
                 _incUseStack(_t7);
                 i8_array* new = _t7;
-                if (findText.data->len > 0) {
+                if (_arrayLen(findText.data) > 0) {
                     while (1 == 1) {
                         int64_t i = 0;
                         while (1) {
-                            new->data[idx_2(i, new->len)] = findText.data->data[i];
+                            new->data[idx_2(i, _arrayLen(new))] = findText.data->data[i];
                             int64_t _next = i + 1;
-                            if (_next >= findText.data->len) {
+                            if (_next >= _arrayLen(findText.data)) {
                                 break;
                             }
                             i = _next;
@@ -640,7 +641,7 @@ void find_0() {
                         break;
                     }
                 }
-                new->data[idx_2(new->len - 1, new->len)] = key;
+                new->data[idx_2(_arrayLen(new) - 1, _arrayLen(new))] = key;
                 org_bau_String_string _t8 = org_bau_String_string_1(new);
                 org_bau_String_string_copy(&_t8);
                 org_bau_String_string_free(&findText);
@@ -674,10 +675,10 @@ void insertByte_1(int8_t add) {
     int64_t y = ( cursorY + offsetY ) - 2;
     _incUseStack(currentFile.lines);
     org_bau_List_List_org_bau_String_string* lines = currentFile.lines;
-    org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
-    org_bau_String_string line = lines->array->data[idx_2(y, lines->array->len)];
+    org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+    org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
     int64_t x = ( cursorX + offsetX ) - 1;
-    if (line.data->len <= x) {
+    if (_arrayLen(line.data) <= x) {
         i8_array* _t0 = i8_array_new(x + 1);
         _incUseStack(_t0);
         i8_array* new = _t0;
@@ -685,7 +686,7 @@ void insertByte_1(int8_t add) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, new->len)] = 32;
+                    new->data[idx_2(i, _arrayLen(new))] = 32;
                     int64_t _next = i + 1;
                     if (_next >= x) {
                         break;
@@ -695,13 +696,13 @@ void insertByte_1(int8_t add) {
                 break;
             }
         }
-        if (line.data->len > 0) {
+        if (_arrayLen(line.data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, new->len)] = line.data->data[i];
+                    new->data[idx_2(i, _arrayLen(new))] = line.data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= line.data->len) {
+                    if (_next >= _arrayLen(line.data)) {
                         break;
                     }
                     i = _next;
@@ -709,24 +710,24 @@ void insertByte_1(int8_t add) {
                 break;
             }
         }
-        new->data[idx_2(x, new->len)] = add;
+        new->data[idx_2(x, _arrayLen(new))] = add;
         org_bau_String_string _t1 = org_bau_String_string_1(new);
         org_bau_String_string_copy(&_t1);
-        lines->array->data[idx_2(y, lines->array->len)] = _t1;
+        lines->array->data[idx_2(y, _arrayLen(lines->array))] = _t1;
         org_bau_String_string_free(&_t1);
         _decUseStack(new, i8_array);
         _decUseStack(_t0, i8_array);
     } else {
-        i8_array* _t2 = i8_array_new(line.data->len + 1);
+        i8_array* _t2 = i8_array_new(_arrayLen(line.data) + 1);
         _incUseStack(_t2);
         i8_array* new = _t2;
-        if (line.data->len > 0) {
+        if (_arrayLen(line.data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i + 1, new->len)] = line.data->data[i];
+                    new->data[idx_2(i + 1, _arrayLen(new))] = line.data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= line.data->len) {
+                    if (_next >= _arrayLen(line.data)) {
                         break;
                     }
                     i = _next;
@@ -738,7 +739,7 @@ void insertByte_1(int8_t add) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, new->len)] = line.data->data[idx_2(i, line.data->len)];
+                    new->data[idx_2(i, _arrayLen(new))] = line.data->data[idx_2(i, _arrayLen(line.data))];
                     int64_t _next = i + 1;
                     if (_next >= x) {
                         break;
@@ -748,10 +749,10 @@ void insertByte_1(int8_t add) {
                 break;
             }
         }
-        new->data[idx_2(x, new->len)] = add;
+        new->data[idx_2(x, _arrayLen(new))] = add;
         org_bau_String_string _t3 = org_bau_String_string_1(new);
         org_bau_String_string_copy(&_t3);
-        lines->array->data[idx_2(y, lines->array->len)] = _t3;
+        lines->array->data[idx_2(y, _arrayLen(lines->array))] = _t3;
         org_bau_String_string_free(&_t3);
         _decUseStack(new, i8_array);
         _decUseStack(_t2, i8_array);
@@ -764,24 +765,24 @@ void insertNewline_0() {
     int64_t y = ( cursorY + offsetY ) - 2;
     _incUseStack(currentFile.lines);
     org_bau_List_List_org_bau_String_string* lines = currentFile.lines;
-    org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
-    org_bau_String_string line = lines->array->data[idx_2(y, lines->array->len)];
+    org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+    org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
     int64_t x = ( cursorX + offsetX ) - 1;
-    if (x >= line.data->len) {
-        x = line.data->len;
+    if (x >= _arrayLen(line.data)) {
+        x = _arrayLen(line.data);
     }
     i8_array* _t0 = org_bau_String_substring_3(line.data, 0, x);
     org_bau_String_string line1 = org_bau_String_string_1(_t0);
-    i8_array* _t1 = org_bau_String_substring_3(line.data, x, line.data->len);
+    i8_array* _t1 = org_bau_String_substring_3(line.data, x, _arrayLen(line.data));
     org_bau_String_string line2 = org_bau_String_string_1(_t1);
     org_bau_List_List_org_bau_String_string_add_3(lines, y, line1);
     org_bau_String_string_copy(&line2);
-    lines->array->data[idx_2(y + 1, lines->array->len)] = line2;
+    lines->array->data[idx_2(y + 1, _arrayLen(lines->array))] = line2;
     int64_t indent = 0;
     while (1 == 1) {
-        int64_t _t2 = line1.data->len > indent;
+        int64_t _t2 = _arrayLen(line1.data) > indent;
         if (_t2) {
-            int64_t _t3 = line1.data->data[idx_2(indent, line1.data->len)] == 32;
+            int64_t _t3 = line1.data->data[idx_2(indent, _arrayLen(line1.data))] == 32;
             _t2 = _t3;
         }
         if (!(_t2)) {
@@ -834,7 +835,7 @@ void org_bau_Env_exit_1(int64_t code) {
     int_array* _t0 = int_array_new(0);
     _incUseStack(_t0);
     int_array* x = _t0;
-    x->data[idx_2(0, x->len)] = 1;
+    x->data[idx_2(0, _arrayLen(x))] = 1;
     _decUseStack(x, int_array);
     _decUseStack(_t0, int_array);
 }
@@ -912,14 +913,14 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
 }
 int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     if (n < 0) {
-        buff->data[idx_2(pos, buff->len)] = 45;
+        buff->data[idx_2(pos, _arrayLen(buff))] = 45;
         pos += 1;
     } else {
         n = - n;
     }
     int64_t start = pos;
     while (1) {
-        buff->data[idx_2(pos, buff->len)] = 48 - (imod_2(n, 10));
+        buff->data[idx_2(pos, _arrayLen(buff))] = 48 - (imod_2(n, 10));
         pos += 1;
         n = idiv_2(n, 10);
         if (n == 0) {
@@ -929,9 +930,9 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     int64_t end = pos;
     while (pos > start) {
         pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, buff->len)];
-        buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
-        buff->data[idx_2(start, buff->len)] = temp;
+        int8_t temp = buff->data[idx_2(pos, _arrayLen(buff))];
+        buff->data[idx_2(pos, _arrayLen(buff))] = buff->data[idx_2(start, _arrayLen(buff))];
+        buff->data[idx_2(start, _arrayLen(buff))] = temp;
         start += 1;
     }
     return end;
@@ -948,7 +949,7 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, result->len)] = buff->data[j];
+                result->data[idx_2(j, _arrayLen(result))] = buff->data[j];
                 int64_t _next = j + 1;
                 if (_next >= pos) {
                     break;
@@ -977,18 +978,18 @@ org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_str
     return _t1;
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
-    if (this->size >= this->array->len) {
-        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(this->array->len * 2);
+    if (this->size >= _arrayLen(this->array)) {
+        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
         _incUseStack(_t0);
         org_bau_String_string_array* n = _t0;
-        if (this->array->len > 0) {
+        if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
                     org_bau_String_string_copy(&this->array->data[i]);
-                    n->data[idx_2(i, n->len)] = this->array->data[i];
+                    n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= this->array->len) {
+                    if (_next >= _arrayLen(this->array)) {
                         break;
                     }
                     i = _next;
@@ -1003,22 +1004,22 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         _decUseStack(_t0, org_bau_String_string_array);
     }
     org_bau_String_string_copy(&x);
-    this->array->data[idx_2(this->size, this->array->len)] = x;
+    this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
 }
 void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_String_string* this, int64_t index, org_bau_String_string x) {
-    if (this->size >= this->array->len) {
-        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(this->array->len * 2);
+    if (this->size >= _arrayLen(this->array)) {
+        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
         _incUseStack(_t0);
         org_bau_String_string_array* n = _t0;
-        if (this->array->len > 0) {
+        if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
                     org_bau_String_string_copy(&this->array->data[i]);
-                    n->data[idx_2(i, n->len)] = this->array->data[i];
+                    n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= this->array->len) {
+                    if (_next >= _arrayLen(this->array)) {
                         break;
                     }
                     i = _next;
@@ -1034,21 +1035,21 @@ void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_Str
     }
     int64_t p = this->size;
     while (p > index) {
-        org_bau_String_string_copy(&this->array->data[idx_2(p - 1, this->array->len)]);
-        this->array->data[idx_2(p, this->array->len)] = this->array->data[idx_2(p - 1, this->array->len)];
+        org_bau_String_string_copy(&this->array->data[idx_2(p - 1, _arrayLen(this->array))]);
+        this->array->data[idx_2(p, _arrayLen(this->array))] = this->array->data[idx_2(p - 1, _arrayLen(this->array))];
         p -= 1;
     }
     org_bau_String_string_copy(&x);
-    this->array->data[idx_2(index, this->array->len)] = x;
+    this->array->data[idx_2(index, _arrayLen(this->array))] = x;
     this->size += 1;
 }
 void org_bau_List_List_org_bau_String_string_remove_2(org_bau_List_List_org_bau_String_string* this, int64_t pos) {
     while (pos < ( this->size - 1 )) {
-        org_bau_String_string_copy(&this->array->data[idx_2(pos + 1, this->array->len)]);
-        this->array->data[idx_2(pos, this->array->len)] = this->array->data[idx_2(pos + 1, this->array->len)];
+        org_bau_String_string_copy(&this->array->data[idx_2(pos + 1, _arrayLen(this->array))]);
+        this->array->data[idx_2(pos, _arrayLen(this->array))] = this->array->data[idx_2(pos + 1, _arrayLen(this->array))];
         pos += 1;
     }
-    this->array->data[idx_2(pos, this->array->len)] = org_bau_String_string_new();
+    this->array->data[idx_2(pos, _arrayLen(this->array))] = org_bau_String_string_new();
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
     org_bau_String_StringBuilder* _t4 = org_bau_String_StringBuilder_new();
@@ -1062,17 +1063,17 @@ int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find) {
     return _t0;
 }
 int64_t org_bau_String_indexOf_3(i8_array* s, i8_array* find, int64_t start) {
-    if (find->len <= 0) {
+    if (_arrayLen(find) <= 0) {
         return -1;
     }
-    if (s->len <= 0) {
+    if (_arrayLen(s) <= 0) {
         return -1;
     }
     int64_t i = 0;
     if (start < 0) {
         return -1;
     }
-    if (start >= s->len) {
+    if (start >= _arrayLen(s)) {
         return -1;
     }
     i = start;
@@ -1084,18 +1085,18 @@ int64_t org_bau_String_indexOf_3(i8_array* s, i8_array* find, int64_t start) {
                 break;
             }
             int64_t nj = j + 1;
-            if (nj >= find->len) {
+            if (nj >= _arrayLen(find)) {
                 return i;
             }
             j = nj;
             int64_t nx = x + 1;
-            if (nx >= s->len) {
+            if (nx >= _arrayLen(s)) {
                 break;
             }
             x = nx;
         }
         int64_t ni = i + 1;
-        if (ni >= s->len) {
+        if (ni >= _arrayLen(s)) {
             break;
         }
         i = ni;
@@ -1105,7 +1106,7 @@ int64_t org_bau_String_indexOf_3(i8_array* s, i8_array* find, int64_t start) {
 org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_array* delimiter) {
     org_bau_List_List_org_bau_String_string* list = org_bau_List_newList_org_bau_String_string_1(0);
     int64_t next = org_bau_String_indexOf_2(s, delimiter);
-    int64_t _t0 = delimiter->len == 0;
+    int64_t _t0 = _arrayLen(delimiter) == 0;
     if (!(_t0)) {
         int64_t _t1 = next < 0;
         _t0 = _t1;
@@ -1121,7 +1122,7 @@ org_bau_List_List_org_bau_String_string* org_bau_String_split_2(i8_array* s, i8_
         i8_array* p = org_bau_String_substring_3(s, index, next);
         org_bau_String_string _t3 = org_bau_String_str_1(p);
         org_bau_List_List_org_bau_String_string_add_2(list, _t3);
-        index = next + delimiter->len;
+        index = next + _arrayLen(delimiter);
         int64_t _t4 = org_bau_String_indexOf_3(s, delimiter, index);
         next = _t4;
         if (next < 0) {
@@ -1151,7 +1152,7 @@ org_bau_String_string org_bau_String_string_1(i8_array* data) {
 }
 i8_array* org_bau_String_substring_2(i8_array* s, int64_t start) {
     _incUseStack(s);
-    i8_array* _t0 = org_bau_String_substring_3(s, start, s->len);
+    i8_array* _t0 = org_bau_String_substring_3(s, start, _arrayLen(s));
     _decUseStack(s, i8_array);
     return _t0;
 }
@@ -1165,19 +1166,19 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     }
     int64_t _t2 = _t0;
     if (!(_t2)) {
-        int64_t _t3 = end > s->len;
+        int64_t _t3 = end > _arrayLen(s);
         _t2 = _t3;
     }
     if (_t2) {
         _decUseStack(s, i8_array);
         return string_1007;
     }
-    if (s->len <= 0) {
+    if (_arrayLen(s) <= 0) {
         _decUseStack(s, i8_array);
         return string_1007;
     }
     int64_t i = 0;
-    if (start >= s->len) {
+    if (start >= _arrayLen(s)) {
         _decUseStack(s, i8_array);
         return string_1007;
     }
@@ -1189,9 +1190,9 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, result->len)] = s->data[i];
+                result->data[idx_2(j, _arrayLen(result))] = s->data[i];
                 int64_t next = i + 1;
-                if (next >= s->len) {
+                if (next >= _arrayLen(s)) {
                     break;
                 }
                 i = next;
@@ -1209,34 +1210,34 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     return result;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
-    org_bau_String_StringBuilder_append_4(this, b, 0, b->len);
+    org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));
 }
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end) {
     int64_t add = end - start;
-    int64_t _t0 = start >= b->len;
+    int64_t _t0 = start >= _arrayLen(b);
     if (!(_t0)) {
         int64_t _t1 = end < start;
         _t0 = _t1;
     }
     int64_t _t2 = _t0;
     if (!(_t2)) {
-        int64_t _t3 = end > b->len;
+        int64_t _t3 = end > _arrayLen(b);
         _t2 = _t3;
     }
     if (_t2) {
         return;
     }
-    while (( this->len + add ) > this->data->len) {
-        i8_array* _t4 = i8_array_new(this->data->len * 2);
+    while (( this->len + add ) > _arrayLen(this->data)) {
+        i8_array* _t4 = i8_array_new(_arrayLen(this->data) * 2);
         _incUseStack(_t4);
         i8_array* n = _t4;
-        if (this->data->len > 0) {
+        if (_arrayLen(this->data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    n->data[idx_2(i, n->len)] = this->data->data[i];
+                    n->data[idx_2(i, _arrayLen(n))] = this->data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= this->data->len) {
+                    if (_next >= _arrayLen(this->data)) {
                         break;
                     }
                     i = _next;
@@ -1254,7 +1255,7 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                this->data->data[idx_2(this->len + i, this->data->len)] = b->data[idx_2(start + i, b->len)];
+                this->data->data[idx_2(this->len + i, _arrayLen(this->data))] = b->data[idx_2(start + i, _arrayLen(b))];
                 int64_t _next = i + 1;
                 if (_next >= add) {
                     break;
@@ -1427,7 +1428,7 @@ void refreshScreen_0() {
     } else if (mode == 2) {
         org_bau_String_StringBuilder_append_2(buff, string_1024);
         org_bau_String_StringBuilder_append_2(buff, findText.data);
-        curX = 27 + findText.data->len;
+        curX = 27 + _arrayLen(findText.data);
         curY = 1;
         org_bau_String_StringBuilder_append_2(buff, string_1020);
     } else {
@@ -1449,22 +1450,22 @@ void refreshScreen_0() {
             int64_t y = 0;
             while (1) {
                 if (( y + offsetY ) < lines->size) {
-                    org_bau_String_string_copy(&lines->array->data[idx_2(y + offsetY, lines->array->len)]);
-                    org_bau_String_string line = lines->array->data[idx_2(y + offsetY, lines->array->len)];
+                    org_bau_String_string_copy(&lines->array->data[idx_2(y + offsetY, _arrayLen(lines->array))]);
+                    org_bau_String_string line = lines->array->data[idx_2(y + offsetY, _arrayLen(lines->array))];
                     if (currentWindowSize.columns > 0) {
                         while (1 == 1) {
                             int64_t x = 0;
                             while (1) {
-                                if (( x + offsetX ) >= line.data->len) {
+                                if (( x + offsetX ) >= _arrayLen(line.data)) {
                                     break;
                                 }
-                                int8_t c = line.data->data[idx_2(x + offsetX, line.data->len)];
+                                int8_t c = line.data->data[idx_2(x + offsetX, _arrayLen(line.data))];
                                 if (c == 10) {
                                     break;
                                 }
-                                int64_t _t3 = findText.data->len > 0;
+                                int64_t _t3 = _arrayLen(findText.data) > 0;
                                 if (_t3) {
-                                    int64_t _t4 = findText.data->data[idx_2(0, findText.data->len)] == c;
+                                    int64_t _t4 = findText.data->data[idx_2(0, _arrayLen(findText.data))] == c;
                                     _t3 = _t4;
                                 }
                                 int64_t _t5 = _t3;
@@ -1473,18 +1474,18 @@ void refreshScreen_0() {
                                     _t5 = _t6;
                                 }
                                 if (_t5) {
-                                    if (( line.data->len - x ) - offsetX >= findText.data->len) {
+                                    if (( _arrayLen(line.data) - x ) - offsetX >= _arrayLen(findText.data)) {
                                         int64_t found = 1;
-                                        if (findText.data->len > 0) {
+                                        if (_arrayLen(findText.data) > 0) {
                                             while (1 == 1) {
                                                 int64_t i = 0;
                                                 while (1) {
-                                                    if (findText.data->data[i] != line.data->data[idx_2(( x + offsetX ) + i, line.data->len)]) {
+                                                    if (findText.data->data[i] != line.data->data[idx_2(( x + offsetX ) + i, _arrayLen(line.data))]) {
                                                         found = 0;
                                                         break;
                                                     }
                                                     int64_t _next = i + 1;
-                                                    if (_next >= findText.data->len) {
+                                                    if (_next >= _arrayLen(findText.data)) {
                                                         break;
                                                     }
                                                     i = _next;
@@ -1494,7 +1495,7 @@ void refreshScreen_0() {
                                         }
                                         if (found) {
                                             org_bau_String_StringBuilder_append_2(buff, string_1030);
-                                            remainingHighlight = findText.data->len;
+                                            remainingHighlight = _arrayLen(findText.data);
                                         }
                                     }
                                 }
@@ -1559,28 +1560,28 @@ void removeByte_0() {
     int64_t y = ( cursorY + offsetY ) - 2;
     _incUseStack(currentFile.lines);
     org_bau_List_List_org_bau_String_string* lines = currentFile.lines;
-    org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
-    org_bau_String_string line = lines->array->data[idx_2(y, lines->array->len)];
+    org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+    org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
     int64_t x = ( cursorX + offsetX ) - 1;
-    if (line.data->len < x) {
+    if (_arrayLen(line.data) < x) {
         return;
     }
     if (x == 0) {
         if (y == 0) {
             return;
         }
-        org_bau_String_string_copy(&lines->array->data[idx_2(y - 1, lines->array->len)]);
-        org_bau_String_string last = lines->array->data[idx_2(y - 1, lines->array->len)];
-        i8_array* _t0 = i8_array_new(line.data->len + last.data->len);
+        org_bau_String_string_copy(&lines->array->data[idx_2(y - 1, _arrayLen(lines->array))]);
+        org_bau_String_string last = lines->array->data[idx_2(y - 1, _arrayLen(lines->array))];
+        i8_array* _t0 = i8_array_new(_arrayLen(line.data) + _arrayLen(last.data));
         _incUseStack(_t0);
         i8_array* new = _t0;
-        if (last.data->len > 0) {
+        if (_arrayLen(last.data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, new->len)] = last.data->data[i];
+                    new->data[idx_2(i, _arrayLen(new))] = last.data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= last.data->len) {
+                    if (_next >= _arrayLen(last.data)) {
                         break;
                     }
                     i = _next;
@@ -1588,13 +1589,13 @@ void removeByte_0() {
                 break;
             }
         }
-        if (line.data->len > 0) {
+        if (_arrayLen(line.data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i + last.data->len, new->len)] = line.data->data[i];
+                    new->data[idx_2(i + _arrayLen(last.data), _arrayLen(new))] = line.data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= line.data->len) {
+                    if (_next >= _arrayLen(line.data)) {
                         break;
                     }
                     i = _next;
@@ -1607,29 +1608,29 @@ void removeByte_0() {
         } else if (offsetY > 0) {
             offsetY -= 1;
         }
-        cursorX += last.data->len + 1;
+        cursorX += _arrayLen(last.data) + 1;
         while (cursorX >= currentWindowSize.columns) {
             cursorX -= 1;
             offsetX += 1;
         }
         org_bau_String_string _t1 = org_bau_String_string_1(new);
         org_bau_String_string_copy(&_t1);
-        lines->array->data[idx_2(y - 1, lines->array->len)] = _t1;
+        lines->array->data[idx_2(y - 1, _arrayLen(lines->array))] = _t1;
         org_bau_List_List_org_bau_String_string_remove_2(lines, y);
         return;
     }
-    i8_array* _t2 = i8_array_new(line.data->len - 1);
+    i8_array* _t2 = i8_array_new(_arrayLen(line.data) - 1);
     _incUseStack(_t2);
     i8_array* new = _t2;
-    if (line.data->len > 0) {
+    if (_arrayLen(line.data) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 if (i > 0) {
-                    new->data[idx_2(i - 1, new->len)] = line.data->data[i];
+                    new->data[idx_2(i - 1, _arrayLen(new))] = line.data->data[i];
                 }
                 int64_t _next = i + 1;
-                if (_next >= line.data->len) {
+                if (_next >= _arrayLen(line.data)) {
                     break;
                 }
                 i = _next;
@@ -1641,7 +1642,7 @@ void removeByte_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                new->data[idx_2(i, new->len)] = line.data->data[idx_2(i, line.data->len)];
+                new->data[idx_2(i, _arrayLen(new))] = line.data->data[idx_2(i, _arrayLen(line.data))];
                 int64_t _next = i + 1;
                 if (_next >= ( x - 1 )) {
                     break;
@@ -1653,7 +1654,7 @@ void removeByte_0() {
     }
     org_bau_String_string _t3 = org_bau_String_string_1(new);
     org_bau_String_string_copy(&_t3);
-    lines->array->data[idx_2(y, lines->array->len)] = _t3;
+    lines->array->data[idx_2(y, _arrayLen(lines->array))] = _t3;
     org_bau_String_string_free(&_t3);
     _decUseStack(new, i8_array);
     _decUseStack(_t2, i8_array);
@@ -1668,7 +1669,7 @@ void save_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                size += lines->array->data[idx_2(i, lines->array->len)].data->len;
+                size += _arrayLen(lines->array->data[idx_2(i, _arrayLen(lines->array))].data);
                 int64_t _next = i + 1;
                 if (_next >= lines->size) {
                     break;
@@ -1684,7 +1685,7 @@ void save_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                org_bau_String_StringBuilder_append_2(data, lines->array->data[idx_2(i, lines->array->len)].data);
+                org_bau_String_StringBuilder_append_2(data, lines->array->data[idx_2(i, _arrayLen(lines->array))].data);
                 org_bau_String_StringBuilder_append_2(data, string_1029);
                 int64_t _next = i + 1;
                 if (_next >= lines->size) {
@@ -1697,7 +1698,7 @@ void save_0() {
     }
     org_bau_File_File* f = org_bau_File_openFile_2(currentFile.fileName, string_1035);
     if (!(f)) {
-        printf("Could not write to %.*s\n", currentFile.fileName->len, currentFile.fileName->data);
+        printf("Could not write to %.*s\n", _arrayLen(currentFile.fileName), currentFile.fileName->data);
         return;
     }
     int64_t _t1 = org_bau_File_File_write_4(f, data->data, 0, size);
@@ -1781,13 +1782,13 @@ void _main() {
     int64_t _t17 = org_bau_Env_argCount_0();
     if (_t17 != 2) {
         i8_array* _t18 = org_bau_Env_arg_1(0);
-        printf("Usage: %.*s <fileName>\n", _t18->len, _t18->data);
+        printf("Usage: %.*s <fileName>\n", _arrayLen(_t18), _t18->data);
         return;
     }
     i8_array* fileName = org_bau_Env_arg_1(1);
     org_bau_File_File* f = org_bau_File_openFile_2(fileName, string_1040);
     if (!(f)) {
-        printf("File not found: %.*s\n", fileName->len, fileName->data);
+        printf("File not found: %.*s\n", _arrayLen(fileName), fileName->data);
         return;
     }
     int64_t _t19 = org_bau_File_File_len_1(f);
@@ -1809,6 +1810,9 @@ void _main() {
         int64_t key = org_bau_os_Terminal_readEditorKey_0();
         if (key < 0) {
             break;
+        }
+        if (key == 0) {
+            continue;
         }
         int64_t _t24 = key;
         if ((_t24 == 3) || (_t24 == 17)) {
@@ -1887,9 +1891,9 @@ void _main() {
                     offsetY -= 1;
                 }
                 int64_t y = ( cursorY + offsetY ) - 2;
-                org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
-                org_bau_String_string line = lines->array->data[idx_2(y, lines->array->len)];
-                cursorX = line.data->len + 1;
+                org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+                org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
+                cursorX = _arrayLen(line.data) + 1;
                 while (cursorX >= currentWindowSize.columns) {
                     cursorX -= 1;
                     offsetX += 1;
@@ -1899,9 +1903,9 @@ void _main() {
         } else if (_t24 == 1001) {
             int64_t x = ( cursorX + offsetX ) - 1;
             int64_t y = ( cursorY + offsetY ) - 2;
-            org_bau_String_string_copy(&lines->array->data[idx_2(y, lines->array->len)]);
-            org_bau_String_string line = lines->array->data[idx_2(y, lines->array->len)];
-            if (x < line.data->len) {
+            org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+            org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
+            if (x < _arrayLen(line.data)) {
                 if (cursorX < currentWindowSize.columns) {
                     cursorX += 1;
                 } else {

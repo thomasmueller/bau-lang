@@ -233,10 +233,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -413,7 +414,7 @@ int64_t canPlace_2(int64_t pos, int64_t rot) {
                     while (1 == 1) {
                         int64_t x = 0;
                         while (1) {
-                            int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rot * 6 ) + x, shapes->len)];
+                            int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rot * 6 ) + x, _arrayLen(shapes))];
                             if (c != 88) {
                                 int64_t _next = x + 1;
                                 if (_next >= 4) {
@@ -423,7 +424,7 @@ int64_t canPlace_2(int64_t pos, int64_t rot) {
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
-                            if (field->data[idx_2(pos + offset, field->len)]) {
+                            if (field->data[idx_2(pos + offset, _arrayLen(field))]) {
                                 return 0;
                             }
                             int64_t _next = x + 1;
@@ -474,20 +475,20 @@ void org_bau_Env_exit_1(int64_t code) {
     int_array* _t0 = int_array_new(0);
     _incUseStack(_t0);
     int_array* x = _t0;
-    x->data[idx_2(0, x->len)] = 1;
+    x->data[idx_2(0, _arrayLen(x))] = 1;
     _decUseStack(x, int_array);
     _decUseStack(_t0, int_array);
 }
 int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     if (n < 0) {
-        buff->data[idx_2(pos, buff->len)] = 45;
+        buff->data[idx_2(pos, _arrayLen(buff))] = 45;
         pos += 1;
     } else {
         n = - n;
     }
     int64_t start = pos;
     while (1) {
-        buff->data[idx_2(pos, buff->len)] = 48 - (imod_2(n, 10));
+        buff->data[idx_2(pos, _arrayLen(buff))] = 48 - (imod_2(n, 10));
         pos += 1;
         n = idiv_2(n, 10);
         if (n == 0) {
@@ -497,9 +498,9 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     int64_t end = pos;
     while (pos > start) {
         pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, buff->len)];
-        buff->data[idx_2(pos, buff->len)] = buff->data[idx_2(start, buff->len)];
-        buff->data[idx_2(start, buff->len)] = temp;
+        int8_t temp = buff->data[idx_2(pos, _arrayLen(buff))];
+        buff->data[idx_2(pos, _arrayLen(buff))] = buff->data[idx_2(start, _arrayLen(buff))];
+        buff->data[idx_2(start, _arrayLen(buff))] = temp;
         start += 1;
     }
     return end;
@@ -516,7 +517,7 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, result->len)] = buff->data[j];
+                result->data[idx_2(j, _arrayLen(result))] = buff->data[j];
                 int64_t _next = j + 1;
                 if (_next >= pos) {
                     break;
@@ -539,34 +540,34 @@ org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
     return _t35;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
-    org_bau_String_StringBuilder_append_4(this, b, 0, b->len);
+    org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));
 }
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end) {
     int64_t add = end - start;
-    int64_t _t0 = start >= b->len;
+    int64_t _t0 = start >= _arrayLen(b);
     if (!(_t0)) {
         int64_t _t1 = end < start;
         _t0 = _t1;
     }
     int64_t _t2 = _t0;
     if (!(_t2)) {
-        int64_t _t3 = end > b->len;
+        int64_t _t3 = end > _arrayLen(b);
         _t2 = _t3;
     }
     if (_t2) {
         return;
     }
-    while (( this->len + add ) > this->data->len) {
-        i8_array* _t4 = i8_array_new(this->data->len * 2);
+    while (( this->len + add ) > _arrayLen(this->data)) {
+        i8_array* _t4 = i8_array_new(_arrayLen(this->data) * 2);
         _incUseStack(_t4);
         i8_array* n = _t4;
-        if (this->data->len > 0) {
+        if (_arrayLen(this->data) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    n->data[idx_2(i, n->len)] = this->data->data[i];
+                    n->data[idx_2(i, _arrayLen(n))] = this->data->data[i];
                     int64_t _next = i + 1;
-                    if (_next >= this->data->len) {
+                    if (_next >= _arrayLen(this->data)) {
                         break;
                     }
                     i = _next;
@@ -584,7 +585,7 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                this->data->data[idx_2(this->len + i, this->data->len)] = b->data[idx_2(start + i, b->len)];
+                this->data->data[idx_2(this->len + i, _arrayLen(this->data))] = b->data[idx_2(start + i, _arrayLen(b))];
                 int64_t _next = i + 1;
                 if (_next >= add) {
                     break;
@@ -796,7 +797,7 @@ void refreshScreen_0() {
                     while (1 == 1) {
                         int64_t x = 0;
                         while (1) {
-                            int8_t c = field->data[idx_2(x + ( 14 * y ), field->len)];
+                            int8_t c = field->data[idx_2(x + ( 14 * y ), _arrayLen(field))];
                             if (c) {
                                 i8_array* _t3 = i8_array_new(1);
                                 _incUseStack(_t3);
@@ -846,7 +847,7 @@ void updateBlock_1(int64_t draw) {
                     while (1 == 1) {
                         int64_t x = 0;
                         while (1) {
-                            int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rotation * 6 ) + x, shapes->len)];
+                            int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rotation * 6 ) + x, _arrayLen(shapes))];
                             if (c != 88) {
                                 int64_t _next = x + 1;
                                 if (_next >= 4) {
@@ -856,7 +857,7 @@ void updateBlock_1(int64_t draw) {
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
-                            field->data[idx_2(position + offset, field->len)] = (1 + blockType) * draw;
+                            field->data[idx_2(position + offset, _arrayLen(field))] = (1 + blockType) * draw;
                             int64_t _next = x + 1;
                             if (_next >= 4) {
                                 break;
@@ -963,8 +964,8 @@ void _main() {
             while (1 == 1) {
                 int64_t y = 0;
                 while (1) {
-                    field->data[idx_2(14 * y, field->len)] = 1;
-                    field->data[idx_2(13 + ( 14 * y ), field->len)] = 1;
+                    field->data[idx_2(14 * y, _arrayLen(field))] = 1;
+                    field->data[idx_2(13 + ( 14 * y ), _arrayLen(field))] = 1;
                     int64_t _next = y + 1;
                     if (_next >= 24) {
                         break;
@@ -1046,7 +1047,7 @@ void _main() {
                     while (1 == 1) {
                         int64_t j = 0;
                         while (1) {
-                            if (field->data[idx_2(( i * 14 ) + j, field->len)] == 0) {
+                            if (field->data[idx_2(( i * 14 ) + j, _arrayLen(field))] == 0) {
                                 found = 0;
                                 break;
                             }
@@ -1067,7 +1068,7 @@ void _main() {
                     }
                     int64_t k = ( i * 14 ) - 14;
                     while (k >= 0) {
-                        field->data[idx_2(k + 14, field->len)] = field->data[idx_2(k, field->len)];
+                        field->data[idx_2(k + 14, _arrayLen(field))] = field->data[idx_2(k, _arrayLen(field))];
                         k -= 1;
                     }
                 }

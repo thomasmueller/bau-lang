@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -320,11 +321,13 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     int64_t result = 1;
     Tree_owned* l = this->left;
     if (l) {
-        result += Tree_owned_nodeCount_1(l);
+        int64_t _t0 = Tree_owned_nodeCount_1(l);
+        result += _t0;
     }
     Tree_owned* r = this->right;
     if (r) {
-        result += Tree_owned_nodeCount_1(r);
+        int64_t _t1 = Tree_owned_nodeCount_1(r);
+        result += _t1;
     }
     return result;
 }
@@ -387,15 +390,16 @@ void _main() {
         int64_t i = 1;
         while (i <= iterations) {
             Tree_owned* t = with_1(depth);
-            check += Tree_owned_nodeCount_1(t);
+            int64_t _t3 = Tree_owned_nodeCount_1(t);
+            check += _t3;
             i += 1;
             Tree_owned_free(t);
         }
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
         depth += 2;
     }
-    int64_t _t3 = Tree_owned_nodeCount_1(longLived);
-    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t3);
+    int64_t _t4 = Tree_owned_nodeCount_1(longLived);
+    printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t4);
     Tree_owned_free(longLived);
     Tree_owned_free(stretch);
     _end();

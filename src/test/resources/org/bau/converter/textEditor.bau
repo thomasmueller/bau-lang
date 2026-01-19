@@ -249,15 +249,14 @@ fun main()
         refreshScreen()
         key := Terminal.readEditorKey()
         break key < 0
+        continue key = 0
         switch key
         case keyCode.CTRL_C, keyCode.CTRL_Q
-            if not currentFile.modified
-                break
+            break not currentFile.modified
             mode = editMode.quitAgain
             refreshScreen()
             key = Terminal.readEditorKey()
-            if key = keyCode.CTRL_Q
-                break
+            break key = keyCode.CTRL_Q
             mode = editMode.normal
         case keyCode.ENTER
             insertNewline()

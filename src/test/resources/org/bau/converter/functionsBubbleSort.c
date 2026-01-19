@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -268,10 +269,10 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
         array->data[_vaI] = va_arg(_vaList, int64_t);
     }
     va_end(_vaList);
-    int32_t n = array->len;
+    int32_t n = _arrayLen(array);
     while (1) {
         int64_t swapped = 0;
-        if (( array->len - 1 ) > 0) {
+        if (( _arrayLen(array) - 1 ) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
@@ -282,7 +283,7 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
                         swapped = 1;
                     }
                     int64_t _next = i + 1;
-                    if (_next >= ( array->len - 1 )) {
+                    if (_next >= ( _arrayLen(array) - 1 )) {
                         break;
                     }
                     i = _next;
@@ -295,13 +296,13 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
             break;
         }
     }
-    if (array->len > 0) {
+    if (_arrayLen(array) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)array->data[i]);
                 int64_t _next = i + 1;
-                if (_next >= array->len) {
+                if (_next >= _arrayLen(array)) {
                     break;
                 }
                 i = _next;

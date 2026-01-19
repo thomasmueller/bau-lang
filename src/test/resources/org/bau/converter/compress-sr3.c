@@ -225,10 +225,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -395,13 +396,13 @@ void compress_0() {
             cxt = c1 | ((shiftRight_int_2(r, 16)) & 16128);
         }
         cxt *= 258;
-        if (inPos >= global->input->len) {
+        if (inPos >= _arrayLen(global->input)) {
             writeBit_2(cxt, 1);
             writeBit_2(cxt + 1, 0);
             writeByte_2(cxt + 2, r & 255);
             break;
         }
-        int64_t c = global->input->data[idx_2(inPos, global->input->len)] & 255;
+        int64_t c = global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255;
         inPos += 1;
         int64_t comp3 = (c * 65793) ^ r;
         if (( comp3 & 255 ) == 0) {
@@ -473,7 +474,7 @@ void decompress_0() {
                 t4->data[h] = r + 16777216;
             }
         }
-        global->output->data[idx_2(outPos, global->output->len)] = c1;
+        global->output->data[idx_2(outPos, _arrayLen(global->output))] = c1;
         outPos += 1;
         h = (( h * (shiftLeft_2(5, di1)) ) + c1 + 1) & 16777215;
     }
@@ -481,11 +482,11 @@ void decompress_0() {
     _decUseStack(_t0, int_array);
 }
 void flush_0() {
-    global->output->data[idx_2(outPos, global->output->len)] = shiftRight_int_2(x1, 24);
-    global->output->data[idx_2(outPos + 1, global->output->len)] = 0xff;
-    global->output->data[idx_2(outPos + 2, global->output->len)] = 0xff;
-    global->output->data[idx_2(outPos + 3, global->output->len)] = 0xff;
-    global->output->data[idx_2(outPos + 4, global->output->len)] = 0xff;
+    global->output->data[idx_2(outPos, _arrayLen(global->output))] = shiftRight_int_2(x1, 24);
+    global->output->data[idx_2(outPos + 1, _arrayLen(global->output))] = 0xff;
+    global->output->data[idx_2(outPos + 2, _arrayLen(global->output))] = 0xff;
+    global->output->data[idx_2(outPos + 3, _arrayLen(global->output))] = 0xff;
+    global->output->data[idx_2(outPos + 4, _arrayLen(global->output))] = 0xff;
     outPos += 8;
 }
 int64_t idx_2(int64_t x, int64_t len) {
@@ -497,7 +498,7 @@ void initRead_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, global->input->len)] & 255)) & 4294967295;
+                x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255)) & 4294967295;
                 inPos += 1;
                 int64_t _next = i + 1;
                 if (_next >= 4) {
@@ -594,7 +595,7 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     return 0;
 }
 int64_t probability_1(int64_t cxt) {
-    int64_t _r0 = shiftRight_int_2(state->data[idx_2(cxt, state->len)], 20);
+    int64_t _r0 = shiftRight_int_2(state->data[idx_2(cxt, _arrayLen(state))], 20);
     return _r0;
 }
 int64_t readBit_1(int64_t cxt) {
@@ -613,7 +614,7 @@ int64_t readBit_1(int64_t cxt) {
     while (((x1 ^ x2) & 4278190080) == 0) {
         x1 = (shiftLeft_2(x1, 8)) & 4294967295;
         x2 = ((shiftLeft_2(x2, 8)) + 255) & 4294967295;
-        x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, global->input->len)] & 255)) & 4294967295;
+        x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255)) & 4294967295;
         inPos += 1;
     }
     return bit;
@@ -621,15 +622,23 @@ int64_t readBit_1(int64_t cxt) {
 int64_t readByte_1(int64_t cxt) {
     int64_t hi = 1;
     int64_t lo = 1;
-    hi += hi + readBit_1(cxt + hi);
-    hi += hi + readBit_1(cxt + hi);
-    hi += hi + readBit_1(cxt + hi);
-    hi += hi + readBit_1(cxt + hi);
+    int64_t _t0 = readBit_1(cxt + hi);
+    hi += hi + _t0;
+    int64_t _t1 = readBit_1(cxt + hi);
+    hi += hi + _t1;
+    int64_t _t2 = readBit_1(cxt + hi);
+    hi += hi + _t2;
+    int64_t _t3 = readBit_1(cxt + hi);
+    hi += hi + _t3;
     cxt += 15 * (hi - 15);
-    lo += lo + readBit_1(cxt + lo);
-    lo += lo + readBit_1(cxt + lo);
-    lo += lo + readBit_1(cxt + lo);
-    lo += lo + readBit_1(cxt + lo);
+    int64_t _t4 = readBit_1(cxt + lo);
+    lo += lo + _t4;
+    int64_t _t5 = readBit_1(cxt + lo);
+    lo += lo + _t5;
+    int64_t _t6 = readBit_1(cxt + lo);
+    lo += lo + _t6;
+    int64_t _t7 = readBit_1(cxt + lo);
+    lo += lo + _t7;
     int64_t _r0 = (shiftLeft_2((hi - 16), 4)) | (lo - 16);
     return _r0;
 }
@@ -640,15 +649,15 @@ int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
 }
 void update_2(int64_t cxt, int64_t bit) {
-    int64_t tc = state->data[idx_2(cxt, state->len)];
+    int64_t tc = state->data[idx_2(cxt, _arrayLen(state))];
     int64_t n = tc & 127;
     int64_t p = shiftRight_int_2(tc, 9);
     if (n < 127) {
         tc = (tc + 1) & 4294967295;
     }
-    int64_t delta = ((shiftLeft_2(bit, 23)) - p) * DT->data[idx_2(n, DT->len)];
+    int64_t delta = ((shiftLeft_2(bit, 23)) - p) * DT->data[idx_2(n, _arrayLen(DT))];
     tc = (tc + (delta & 4294967168)) & 4294967295;
-    state->data[idx_2(cxt, state->len)] = tc;
+    state->data[idx_2(cxt, _arrayLen(state))] = tc;
 }
 void writeBit_2(int64_t cxt, int64_t bit) {
     int64_t p = probability_1(cxt);
@@ -660,7 +669,7 @@ void writeBit_2(int64_t cxt, int64_t bit) {
     }
     update_2(cxt, bit);
     while (((x1 ^ x2) & 4278190080) == 0) {
-        global->output->data[idx_2(outPos, global->output->len)] = shiftRight_int_2(x2, 24);
+        global->output->data[idx_2(outPos, _arrayLen(global->output))] = shiftRight_int_2(x2, 24);
         outPos += 1;
         x1 = (shiftLeft_2(x1, 8)) & 4294967295;
         x2 = ((shiftLeft_2(x2, 8)) + 255) & 4294967295;
@@ -726,7 +735,7 @@ void _main() {
     i8_array* _t11 = i8_array_new(_t10);
     _incUseStack(_t11);
     i8_array* input = _t11;
-    int64_t _t12 = org_bau_File_File_read_4(in, input, 0, input->len);
+    int64_t _t12 = org_bau_File_File_read_4(in, input, 0, _arrayLen(input));
     ;
     if (528384 > 0) {
         while (1 == 1) {
@@ -743,7 +752,7 @@ void _main() {
         }
     }
     org_bau_File_File_close_1(in);
-    i8_array* _t13 = i8_array_new(input->len * 10);
+    i8_array* _t13 = i8_array_new(_arrayLen(input) * 10);
     _incUseStack(_t13);
     i8_array* output = _t13;
     Sr3* _t14 = Sr3_2(input, output);
@@ -751,29 +760,29 @@ void _main() {
     _decUseStack(global, Sr3);
     global = _t14;
     i8_array* _t15 = org_bau_Env_arg_1(1);
-    if (_t15->data[idx_2(0, _t15->len)] == 99) {
-        output->data[idx_2(0, output->len)] = 115;
-        output->data[idx_2(1, output->len)] = 82;
-        output->data[idx_2(2, output->len)] = 2;
-        output->data[idx_2(3, output->len)] = di1;
+    if (_t15->data[idx_2(0, _arrayLen(_t15))] == 99) {
+        output->data[idx_2(0, _arrayLen(output))] = 115;
+        output->data[idx_2(1, _arrayLen(output))] = 82;
+        output->data[idx_2(2, _arrayLen(output))] = 2;
+        output->data[idx_2(3, _arrayLen(output))] = di1;
         outPos = 4;
         compress_0();
     } else {
-        int64_t _t16 = input->data[idx_2(0, input->len)] != 115;
+        int64_t _t16 = input->data[idx_2(0, _arrayLen(input))] != 115;
         if (!(_t16)) {
-            int64_t _t17 = input->data[idx_2(1, input->len)] != 82;
+            int64_t _t17 = input->data[idx_2(1, _arrayLen(input))] != 82;
             _t16 = _t17;
         }
         int64_t _t18 = _t16;
         if (!(_t18)) {
-            int64_t _t19 = input->data[idx_2(2, input->len)] != 2;
+            int64_t _t19 = input->data[idx_2(2, _arrayLen(input))] != 2;
             _t18 = _t19;
         }
         if (_t18) {
             printf("Not an SR3 file\n");
             return;
         }
-        di1 = input->data[idx_2(3, input->len)];
+        di1 = input->data[idx_2(3, _arrayLen(input))];
         inPos = 4;
         decompress_0();
     }

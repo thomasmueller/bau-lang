@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -317,7 +318,7 @@ i8_array* hex_2(int64_t x, int64_t len) {
         if ((y & 15) > 9) {
             c = ( 97 + (y & 15) ) - 10;
         }
-        data->data[idx_2(i, data->len)] = c;
+        data->data[idx_2(i, _arrayLen(data))] = c;
         y >>= 4;
         i -= 1;
     }
@@ -332,14 +333,14 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 int32_t murmur3_32_1(i8_array* data) {
-    if (data->len <= 0) {
+    if (_arrayLen(data) <= 0) {
         return 0;
     }
     int32_t c1 = -862048943;
     int32_t c2 = 461845907;
     int32_t h = 0;
     int64_t i = 0;
-    if (i < ( data->len - 3 )) {
+    if (i < ( _arrayLen(data) - 3 )) {
         while (1) {
             int32_t x = i32_1(((data->data[i] & 255)) | (shiftLeft_2((data->data[i + 1] & 255), 8)) | (shiftLeft_2((data->data[i + 2] & 255), 16)) | (shiftLeft_2((data->data[i + 3] & 255), 24)));
             x *= -862048943;
@@ -351,19 +352,19 @@ int32_t murmur3_32_1(i8_array* data) {
             h = _t1;
             h = ( h * 5 ) + 3864292196;
             int64_t n = i + 4;
-            if (n > ( data->len - 4 )) {
+            if (n > ( _arrayLen(data) - 4 )) {
                 break;
             }
             i = n;
         }
     }
     int32_t x = 0;
-    if (i < ( data->len - 4 )) {
+    if (i < ( _arrayLen(data) - 4 )) {
         i += 4;
     }
-    int64_t _t2 = i < data->len;
+    int64_t _t2 = i < _arrayLen(data);
     if (_t2) {
-        int64_t _t3 = i != ( data->len - 4 );
+        int64_t _t3 = i != ( _arrayLen(data) - 4 );
         _t2 = _t3;
     }
     if (_t2) {
@@ -371,7 +372,7 @@ int32_t murmur3_32_1(i8_array* data) {
         while (1) {
             x ^= shiftLeft_2((data->data[i] & 255), s);
             int64_t n = i + 1;
-            if (n >= data->len) {
+            if (n >= _arrayLen(data)) {
                 break;
             }
             i = n;
@@ -383,7 +384,7 @@ int32_t murmur3_32_1(i8_array* data) {
         x *= 461845907;
         h ^= x;
     }
-    h ^= data->len;
+    h ^= _arrayLen(data);
     h ^= shiftRight_i32_2(h, 16);
     h *= 0x85ebca6b;
     h ^= shiftRight_i32_2(h, 13);
@@ -417,19 +418,19 @@ int main(int _argc, char *_argv[]) {
 void _main() {
     int32_t _t0 = murmur3_32_1(string_1002);
     i8_array* _t1 = hex_2(_t0, 8);
-    printf("%.*s\n", _t1->len, _t1->data);
+    printf("%.*s\n", _arrayLen(_t1), _t1->data);
     int32_t _t2 = murmur3_32_1(string_1001);
     i8_array* _t3 = hex_2(_t2, 8);
-    printf("%.*s\n", _t3->len, _t3->data);
+    printf("%.*s\n", _arrayLen(_t3), _t3->data);
     int32_t _t4 = murmur3_32_1(string_1003);
     i8_array* _t5 = hex_2(_t4, 8);
-    printf("%.*s\n", _t5->len, _t5->data);
+    printf("%.*s\n", _arrayLen(_t5), _t5->data);
     int32_t _t6 = murmur3_32_1(string_1004);
     i8_array* _t7 = hex_2(_t6, 8);
-    printf("%.*s\n", _t7->len, _t7->data);
+    printf("%.*s\n", _arrayLen(_t7), _t7->data);
     int32_t _t8 = murmur3_32_1(string_1005);
     i8_array* _t9 = hex_2(_t8, 8);
-    printf("%.*s\n", _t9->len, _t9->data);
+    printf("%.*s\n", _arrayLen(_t9), _t9->data);
     _decUseStack(_t9, i8_array);
     _decUseStack(_t7, i8_array);
     _decUseStack(_t5, i8_array);

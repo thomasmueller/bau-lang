@@ -224,10 +224,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -294,11 +295,11 @@ BitField* BitField_1(int_array* data) {
     return _t0;
 }
 int64_t BitField_get_2(BitField* this, int64_t index) {
-    int64_t _r0 = ( shiftRight_int_2(this->data->data[idx_2(shiftRight_int_2(index, 6), this->data->len)], (index & 63)) ) & 1;
+    int64_t _r0 = ( shiftRight_int_2(this->data->data[idx_2(shiftRight_int_2(index, 6), _arrayLen(this->data))], (index & 63)) ) & 1;
     return _r0;
 }
 void BitField_set_2(BitField* this, int64_t index) {
-    this->data->data[idx_2(shiftRight_int_2(index, 6), this->data->len)] |= shiftLeft_2(1, (index & 63));
+    this->data->data[idx_2(shiftRight_int_2(index, 6), _arrayLen(this->data))] |= shiftLeft_2(1, (index & 63));
 }
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;

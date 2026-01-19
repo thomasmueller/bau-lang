@@ -69,6 +69,11 @@ fun max(a int, b int) const int
         return a
     return b
 
+fun abs(x int) const int
+    if x > 0
+        return x
+    return -x
+
 fun powInt(base int, exponent int) const int
     if exponent < 0
         return -1

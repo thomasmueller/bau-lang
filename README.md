@@ -18,6 +18,7 @@ tiny programming language named <a href="src/test/java/org/bau/ena/test/Ena.md">
 * Runs everywhere: transpiles to C. No runtime library needed.
 * Avoid runtime array bounds checks using static analysis.
 * Null safety: null pointer errors are prevented at compile time.
+* <a href="doc/demo.md">Demo source code</a> with games and a tiny text editor.
 
 ## Why
 

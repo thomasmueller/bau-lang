@@ -223,10 +223,11 @@ void tmmalloc_removeFromFreeBlocksMap(uint64_t* block, int index) {
 #define _end()
 #define _traceMalloc(a)
 #define _traceFree(a)
-#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0); (a)->_refCount++;}}
-#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if(--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
 #define _incUseStack(a)       _incUse(a)
 #define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
 int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
@@ -289,8 +290,8 @@ List_int* List_int_1(int_array* array) {
     return _t0;
 }
 void List_int_add_2(List_int* this, int64_t x) {
-    if (this->size >= this->array->len) {
-        int_array* _t0 = int_array_new(this->array->len * 2);
+    if (this->size >= _arrayLen(this->array)) {
+        int_array* _t0 = int_array_new(_arrayLen(this->array) * 2);
         _incUseStack(_t0);
         int_array* n = _t0;
         _incUseStack(n);
@@ -299,7 +300,7 @@ void List_int_add_2(List_int* this, int64_t x) {
         _decUseStack(n, int_array);
         _decUseStack(_t0, int_array);
     }
-    this->array->data[idx_2(this->size, this->array->len)] = x;
+    this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
 }
 int64_t idx_2(int64_t x, int64_t len) {
@@ -311,8 +312,8 @@ void test_0() {
     List_int* intList = List_int_1(_t0);
     List_int_add_2(intList, 10);
     List_int_add_2(intList, 20);
-    printf("%lld\n", (long long)intList->array->data[idx_2(0, intList->array->len)]);
-    printf("%lld\n", (long long)intList->array->data[idx_2(1, intList->array->len)]);
+    printf("%lld\n", (long long)intList->array->data[idx_2(0, _arrayLen(intList->array))]);
+    printf("%lld\n", (long long)intList->array->data[idx_2(1, _arrayLen(intList->array))]);
     _decUseStack(intList, List_int);
     _decUseStack(_t0, int_array);
 }
