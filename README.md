@@ -210,8 +210,7 @@ If expressions are complex, then `,` or `()` are needed:
 `not` inverts a comparison. `and` `or` combine comparisons;
 the right side is only evaluated when needed.
 Integer `+` `-` `*` wrap around on over- / underflow.
-Integer `/` division by 0 returns max, min, or 0, for positive, negative,
-and 0 divisors, respectively. `%` by 0 returns 0.
+Possible integer division by 0 is detected at compile time.
 `&` `|` `^` `~` `<<` `>>` are bitwise and, or, xor, not, 
 shift left, and logical shift right: the leftmost bits become `0`.
 For arithmetic shift right, unsigned division, and other operations,
@@ -413,6 +412,21 @@ There are no null pointer errors at runtime.
         print(v.area())
 
 For value types and numbers, `null` means zero.
+
+### Division by Zero
+
+An explicit check for zero is required before integer `/` and `%`.
+Division by zero is not possible at runtime.
+
+    # does not compile
+    fun average(sum int, count int) int
+        return sum / count
+
+    # does compile
+    fun average(sum int, count int) int
+        if count = 0
+            return 0
+        return sum / count
 
 ### Memory Management
 
