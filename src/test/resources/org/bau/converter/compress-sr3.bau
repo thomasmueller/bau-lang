@@ -217,7 +217,9 @@ fun decompress()
 fun buildDT() const int[]
     result : int[128]
     for i := until(128)
-        result[i] = 512 / (i + 2)
+        ip2 : i + 2
+        if ip2 <> 0
+            result[i] = 512 / ip2
     return result
 
 DT : buildDT()

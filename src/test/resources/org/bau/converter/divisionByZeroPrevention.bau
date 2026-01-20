@@ -1,0 +1,54 @@
+fun divisionByZeroContinue()
+    y := -1
+    while y < 2
+        y += 1
+        if y = 0
+            continue
+        z := 10 / y
+        println('cont: ' z)
+
+fun divisionByZeroContinue2()
+    y := -1
+    while y < 2
+        y += 1
+        continue y = 0
+        z := 10 / y
+        println('cont2: ' z)
+
+fun divisionByZeroBreak()
+    y := -1
+    while y < 2
+        y += 1
+        if y = 0
+            break
+        z := 10 / y
+        println('break: ' z)
+
+fun divisionByZeroBreak2()
+    y := -1
+    while y < 2
+        y += 1
+        break y = 0
+        z := 10 / y
+        println('break2: ' z)
+
+fun divisionByZeroReturn()
+    y := -1
+    while y < 2
+        y += 1
+        if y = 0
+            return
+        z := 10 / y
+        println('ret: ' z)
+
+divisionByZeroContinue()
+divisionByZeroContinue2()
+divisionByZeroBreak()
+divisionByZeroBreak2()
+divisionByZeroReturn()
+
+## Expected
+cont: 10
+cont: 5
+cont2: 10
+cont2: 5

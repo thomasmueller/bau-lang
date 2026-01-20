@@ -362,7 +362,8 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = (int8_t*) data;
+    result->data = _malloc(sizeof(char) * len);
+    memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
 i8_array* string_1000;
@@ -606,6 +607,9 @@ int64_t org_bau_Utils_random_0() {
     return _r0;
 }
 int64_t org_bau_Utils_random_1(int64_t smallerThan) {
+    if (smallerThan == 0) {
+        return 0;
+    }
     int64_t max = smallerThan - 1;
     if ((smallerThan & (max - 1)) == 0) {
         int64_t _t0 = org_bau_Utils_random_0();

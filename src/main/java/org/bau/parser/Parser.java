@@ -1412,8 +1412,13 @@ public class Parser {
                 expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
-                if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                if (targetType != null) {
+                    if (!targetType.equals(s.value.type())) {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                    if (!targetType.isFloatingPoint()) {
+                        verifyNotZero(expr);
+                    }
                 }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
@@ -1426,8 +1431,13 @@ public class Parser {
                 expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
-                if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                if (targetType != null) {
+                    if (!targetType.equals(s.value.type())) {
+                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    }
+                    if (!targetType.isFloatingPoint()) {
+                        verifyNotZero(expr);
+                    }
                 }
                 verifyBounds(s);
                 s.setBounds(getScope(0));
@@ -1535,6 +1545,24 @@ public class Parser {
             }
         }
         throw syntaxError("Expected a statement, got '" + token + "'");
+    }
+
+    private void verifyNotZero(Expression expr) {
+        Value v = expr.eval(null);
+        if (v != null) {
+            if (v.longValue() == 0) {
+                throw syntaxError("Division by zero is not allowed");
+            }
+            return;
+        }
+        Bounds b = expr.getBounds();
+        if (b == null) {
+            throw syntaxError("Can not verify if value might be zero");
+        }
+        if (b.notZero(this)) {
+            return;
+        }
+        throw syntaxError("Can not verify if value might be zero; division by zero is not allowed: " + expr);
     }
 
     private boolean needBoundsCheck(Expression base, Expression arrayIndex) {
@@ -2119,6 +2147,13 @@ public class Parser {
         Break b = new Break();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
+            // for example, after: "if x = 0 { break }" we know that x will not be 0
+            if (blockConditions.size() > 0) {
+                Expression expr = blockConditions.get(blockConditions.size() - 1);
+                if (expr != null) {
+                    expr.applyBoundCondition(getScope(-1), ApplyType.NEGATIVE);
+                }
+            }
             return;
         }
         b.condition = parseCondition(target);
@@ -2151,6 +2186,13 @@ public class Parser {
         }
         Continue c = new Continue();
         if (matchOp("\n") || matchOp(";")) {
+            // for example, after: "if x = 0 { continue }" we know that x will not be 0
+            if (blockConditions.size() > 0) {
+                Expression expr = blockConditions.get(blockConditions.size() - 1);
+                if (expr != null) {
+                    expr.applyBoundCondition(getScope(-1), ApplyType.NEGATIVE);
+                }
+            }
             target.add(c);
             return;
         }
@@ -2951,6 +2993,11 @@ public class Parser {
                 throw syntaxError("Comparing a result of a comparison requires parenthesis");
             }
             Operation operation = new Operation(expr, op, right);
+            if ("/".equals(op) || "%".equals(op)) {
+                if (!operation.type().isFloatingPoint()) {
+                    verifyNotZero(right);
+                }
+            }
             expr = operation;
         }
         return expr;

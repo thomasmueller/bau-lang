@@ -6,50 +6,49 @@ package org.bau.games;
 public class SudokuSolver {
 
     public static void main(String... args) {
-        if (args.length != 1 || args[0].length() != 9 * 9) {
-            System.out.println("Expected: <line1><line2>...<line9>");
+        if (args.length != 1 || args[0].length() != 89) {
+            System.out.println("Expected one argument: \"<line1> <line2> ... <line9>\"");
             System.out.println("where each line is 9 characters: '0'-'9', or '.' for unknown.");
-        } else {
-            char[] result = solve(args[0].toCharArray());
-            if (result != null) {
-                for(int i=0; i<result.length; i++) {
-                    System.out.print(result[i]);
-                    if(i%9 == 8) {
-                        System.out.println();
-                    }
-                }
-                System.out.println();
-            } else {
-                System.out.println("No solution found");
+            return;
+        }
+        char[] c = args[0].toCharArray();
+        if (solve(c)) {
+            for (int i = 0; i < 8; i++) {
+                c[9 + 10 * i] = '\n';
             }
+            System.out.println(new String(c));
+        } else {
+            System.out.println("No solution found");
         }
     }
-    public static char[] solve(char[] c) {
+
+    public static boolean solve(char[] c) {
         int i = 0;
-        while(i < c.length) {
+        while (i < c.length) {
             if (c[i] == '.') {
                 break;
             }
             i++;
         }
         if (i >= c.length) {
-            return c;
+            return true;
         }
         for (char k = '1'; k <= '9'; k++) {
             int j = 0;
             while (j < 9) {
-                if (c[(i / 9 * 9) + j] == k) {
+                int m = i / 10 * 9 + i % 10;
+                if (c[((m / 9) * 10) + j] == k) {
                     // a digit in the same row matches
                     break;
                 }
-                if (c[(i % 9) + 9 * j] == k) {
+                if (c[(m % 9) + 10 * j] == k) {
                     // a digit in the same column matches
                     break;
                 }
                 // house
-                int h = (((i / 27) % 3) * 3) + ((i % 9) / 3);
+                int h = (((m / 27) % 3) * 3) + ((m % 9) / 3);
                 int n3 = h * 3 + (h / 3) * 18 + (j % 3) + (j / 3) * 9;
-                if (c[n3] == k) {
+                if (c[(n3 / 9 * 10) + (n3 % 9)] == k) {
                     // a digit in the same house matches
                     break;
                 }
@@ -57,14 +56,13 @@ public class SudokuSolver {
             }
             if (j >= 9) {
                 c[i] = k;
-                char[] result = solve(c);
-                if (result != null) {
-                    return result;
+                if (solve(c)) {
+                    return true;
                 }
                 c[i] = '.';
             }
         }
-        return null;
+        return false;
     }
 
 }

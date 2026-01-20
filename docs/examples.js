@@ -194,6 +194,38 @@ insertionSort(y)
 for i := until(y.len)
     println('y[' i '] = ' y[i])
 `
+    },
+    {
+        value: 'sudoku',
+        label: 'Sudoku Solver',
+        code: `# Enter the known digits below. Use '.' for unknown.
+p: '8........ ..36..... .7..9.2.. .5...7... ....457.. ...1...3. ..1....68 ..85...1. .9....4..'
+
+fun solve(c i8[]) int
+    for i := until(c.len)
+        continue c[i] <> ord('.')
+        for k := until(9)
+            for j := until(10)
+                if j = 9
+                    c[i] = k + ord('1')
+                    if solve(c)
+                        return 1
+                    c[i] = ord('.')
+                    break
+                m : (i / 10) * 9 + i % 10
+                break c[((m / 9) * 10) + j] = k + ord('1')
+                break c[(m % 9) + 10 * j] = k + ord('1')
+                h : (((m / 27) % 3) * 3) + ((m % 9) / 3)
+                n3 : h * 3 + (h / 3) * 18 + (j % 3) + (j / 3) * 9
+                break c[(n3 / 9 * 10) + (n3 % 9)] = k + ord('1')
+        return 0
+    return 1
+
+solve(p)
+for i := until(8)
+    p[i * 10 + 9] = ord('\\n')
+println(p)
+`
     }
 ];
 

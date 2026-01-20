@@ -7,6 +7,7 @@ import org.bau.runtime.Value;
 public class Bounds {
     ArrayList<Entry> list = new ArrayList<>();
     long offset;
+    boolean notZero;
 
     public Bounds() {
 
@@ -97,6 +98,10 @@ public class Bounds {
             e.maxVariable = "";
             if (expr instanceof NullValue) {
                 e.notNull = true;
+            } else if (expr instanceof NumberValue) {
+                if (((NumberValue) expr).value.longValue() == 0) {
+                    e.notZero = true;
+                }
             }
         } else {
             throw new IllegalStateException();
@@ -226,6 +231,26 @@ public class Bounds {
         return false;
     }
 
+    public boolean notZero(Parser p) {
+        if (offset != 0) {
+            // can not verify easily
+            return false;
+        }
+        for (Entry e : list) {
+            if (inScope(p.getBlockConditions(), e.scope)) {
+                if (e.minVariable.equals("")
+                        && e.maxVariable.equals("")
+                        && e.minOffset > 0) {
+                    return true;
+                }
+                if (e.notZero) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public Bounds plus(long offset) {
         Bounds b = new Bounds();
         b.list = list;
@@ -234,6 +259,7 @@ public class Bounds {
     }
 
     static class Entry {
+
         // in which part of the code this condition is valid,
         // null = always; or the condition of the if / elif / while statement
         Expression scope;
@@ -248,6 +274,7 @@ public class Bounds {
         String maxVariable;
         long maxExcludingOffset;
         boolean notNull;
+        boolean notZero;
 
         public String toString() {
             StringBuilder buff = new StringBuilder();
@@ -259,6 +286,9 @@ public class Bounds {
             }
             if (notNull) {
                 buff.append(", isNotNull");
+            }
+            if (notZero) {
+                buff.append(", notZero");
             }
             if (!operation.equals("<>")) {
                 buff.append(", bounds ");

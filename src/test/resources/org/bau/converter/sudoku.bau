@@ -1,0 +1,44 @@
+import org.bau.Env
+
+fun main()
+    if Env.argCount() <> 2 or Env.arg(1).len <> 89
+        println('Expected one argument: "<line1> <line2> ... <line9>"')
+        println('where each line is 9 characters: 0-9, or . for unknown.')
+        return
+    c : Env.arg(1)
+    if solve(c)
+        for i := until(8)
+            c[9 + 10 * i] = ord('\n')
+        println(c)
+    else
+        println('No solution found')
+        
+fun solve(c i8[]) int
+    i := 0
+    while i < c.len
+        break c[i] = ord('.')
+        i += 1
+    if i >= c.len
+        return 1
+    k := ord('1')
+    while k <= ord('9')
+        j := 0
+        while j < 9
+            m : (i / 10) * 9 + i % 10
+            # a digit in the same row matches
+            break c[((m / 9) * 10) + j] = k
+            # a digit in the same column matches
+            break c[(m % 9) + 10 * j] = k
+            # house
+            h : (((m / 27) % 3) * 3) + ((m % 9) / 3)
+            n3 : h * 3 + (h / 3) * 18 + (j % 3) + (j / 3) * 9
+            # a digit in the same house matches
+            break c[(n3 / 9 * 10) + (n3 % 9)] = k
+            j += 1
+        if j >= 9
+            c[i] = k
+            if solve(c)
+                return 1
+            c[i] = ord('.')
+        k += 1
+    return 0

@@ -391,7 +391,8 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = (int8_t*) data;
+    result->data = _malloc(sizeof(char) * len);
+    memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
 i8_array* string_1000;

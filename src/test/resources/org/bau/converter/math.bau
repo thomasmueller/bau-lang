@@ -1,8 +1,9 @@
 import org.bau.Math
 
 fun operations(a int, b int)
-    println(a '  / ' b ' = ' (a / b))
-    println(a '  % ' b ' = ' (a % b))
+    if b <> 0
+        println(a '  / ' b ' = ' (a / b))
+        println(a '  % ' b ' = ' (a % b))
     println(a ' >> ' b ' = ' (a >> b))
     println(a ' << ' b ' = ' (a << b))
 
@@ -51,16 +52,10 @@ fun main()
         x += 0.5
 
 ## Expected
-0  / 0 = 0
-0  % 0 = 0
 0 >> 0 = 0
 0 << 0 = 0
-1  / 0 = 9223372036854775807
-1  % 0 = 0
 1 >> 0 = 1
 1 << 0 = 1
--1  / 0 = -9223372036854775808
--1  % 0 = 0
 -1 >> 0 = -1
 -1 << 0 = -1
 3  / -50 = 0

@@ -320,7 +320,8 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = (int8_t*) data;
+    result->data = _malloc(sizeof(char) * len);
+    memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
 i8_array* string_1010;
@@ -378,8 +379,10 @@ int64_t int_1(int64_t x) {
     return x;
 }
 void operations_2(int64_t a, int64_t b) {
-    printf("%lld  / %lld = %lld\n", (long long)a, (long long)b, (long long)(idiv_2(a, b)));
-    printf("%lld  %% %lld = %lld\n", (long long)a, (long long)b, (long long)(imod_2(a, b)));
+    if (b != 0) {
+        printf("%lld  / %lld = %lld\n", (long long)a, (long long)b, (long long)(idiv_2(a, b)));
+        printf("%lld  %% %lld = %lld\n", (long long)a, (long long)b, (long long)(imod_2(a, b)));
+    }
     printf("%lld >> %lld = %lld\n", (long long)a, (long long)b, (long long)(shiftRight_int_2(a, b)));
     printf("%lld << %lld = %lld\n", (long long)a, (long long)b, (long long)(shiftLeft_2(a, b)));
 }

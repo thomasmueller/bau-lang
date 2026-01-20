@@ -26,6 +26,8 @@ fun random() int
 
 # Pseudo-random number between 0 and smallerThan (excluding).
 fun random(smallerThan int) int
+    if smallerThan = 0
+        return 0
     max : smallerThan - 1
     if (smallerThan & (max - 1)) = 0
         return random() & max

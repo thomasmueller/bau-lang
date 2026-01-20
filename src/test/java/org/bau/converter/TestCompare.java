@@ -116,6 +116,11 @@ public class TestCompare {
     }
 
     @Test
+    public void divisionByZeroPrevention() throws IOException {
+        test("divisionByZeroPrevention");
+    }
+
+    @Test
     public void enumTest() throws IOException {
         test("enum");
     }
@@ -268,6 +273,11 @@ public class TestCompare {
     @Test
     public void string2() throws IOException {
         test("string2");
+    }
+
+    @Test
+    public void sudoku() throws IOException {
+        test("sudoku");
     }
 
     @Test

@@ -16,8 +16,8 @@ tiny programming language named <a href="src/test/java/org/bau/ena/test/Ena.md">
 * Memory-safe. Automatic memory management using reference counting by default.
 * Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
+* Safety: null pointer errors and division by zero are prevented at compile time.
 * Avoid runtime array bounds checks using static analysis.
-* Null safety: null pointer errors are prevented at compile time.
 * <a href="doc/demo.md">Demo source code</a> with games and a tiny text editor.
 
 ## Why

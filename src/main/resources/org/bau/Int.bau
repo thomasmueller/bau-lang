@@ -42,7 +42,9 @@ fun numberOfTrailingZeros(x int) const int
         return 64
     return bitCount(x ^ (x - 1)) - 1
 
-fun divUnsigned(dividend int, divisor int) int
+fun divUnsignedOr0(dividend int, divisor int) int
+    if divisor = 0
+        return 0
     # From Hacker's Delight
     if divisor < 0
         return (dividend & ~(dividend - divisor)) >> 63

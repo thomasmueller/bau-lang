@@ -5,7 +5,7 @@ import org.bau.Utils
 import org.bau.Int
     MIN_I32
     MAX_I32
-    divUnsigned
+    divUnsignedOr0
     compareUnsigned
     arithmeticRightShift
     numberOfLeadingZeros
@@ -341,9 +341,14 @@ fun bigInt div(other bigInt) bigInt
         # optimization for very small results
         x : shiftRight(other.len() - 16).toInt()
         y : other.shiftRight(other.len() - 16).toInt()
-        z : x / y
-        if z = x / (y + 1) and z = x / (y - 1)
-            return newBigInt(z)
+        yp1 : y + 1
+        ym1 : y - 1
+        if y <> 0
+            if yp1 <> 0
+                if ym1 <> 0
+                    z : x / y
+                    if z = x / yp1 and z = x / ym1
+                        return newBigInt(z)
     otherLen := other.len()
     shift := (31 - otherLen) & 31
     otherLen += shift
@@ -361,7 +366,7 @@ fun bigInt div(other bigInt) bigInt
     j := m - n
     while j >= 0
         aa : ((un[j + n - 1] & 0xffffffff) * b) + (un[j + n - 2] & 0xffffffff)
-        qhat := divUnsigned(aa, vn1)
+        qhat := divUnsignedOr0(aa, vn1)
         rhat := aa - qhat * vn1
         while
             if qhat < b

@@ -1,6 +1,7 @@
 package org.bau.games;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -52,8 +53,8 @@ public class SudokuTest {
 
     @Test
     public void solve() {
-        char[] result = SudokuSolver.solve("8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..".toCharArray());
-        assertEquals("812753649943682175675491283154237896369845721287169534521974368438526917796318452", String.valueOf(result));
-
+        char[] c = "8........ ..36..... .7..9.2.. .5...7... ....457.. ...1...3. ..1....68 ..85...1. .9....4..".toCharArray();
+        assertTrue(SudokuSolver.solve(c));
+        assertEquals("812753649 943682175 675491283 154237896 369845721 287169534 521974368 438526917 796318452", String.valueOf(c));
     }
 }

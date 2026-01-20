@@ -338,7 +338,7 @@ i8_array* org_bau_Env_arg_1(int64_t index);
 int64_t org_bau_Env_argCount_0();
 int64_t org_bau_Int_arithmeticRightShift_2(int64_t x, int64_t n);
 int64_t org_bau_Int_compareUnsigned_2(int64_t a, int64_t b);
-int64_t org_bau_Int_divUnsigned_2(int64_t dividend, int64_t divisor);
+int64_t org_bau_Int_divUnsignedOr0_2(int64_t dividend, int64_t divisor);
 int64_t org_bau_Int_numberOfLeadingZeros_1(int64_t x);
 int64_t org_bau_Int_parseInt_1(i8_array* value);
 int64_t shiftLeft_2(int64_t a, int64_t b);
@@ -371,7 +371,8 @@ i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;
     result->_refCount = INT32_MAX;
-    result->data = (int8_t*) data;
+    result->data = _malloc(sizeof(char) * len);
+    memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
 i8_array* string_1019;
@@ -937,19 +938,27 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
         int64_t _t13 = org_bau_BigInt_bigInt_len_1(other);
         org_bau_BigInt_bigInt _t14 = org_bau_BigInt_bigInt_shiftRight_2(other, _t13 - 16);
         int64_t y = org_bau_BigInt_bigInt_toInt_1(_t14);
-        int64_t z = idiv_2(x, y);
-        int64_t _t15 = z == ( idiv_2(x, (y + 1)) );
-        if (_t15) {
-            int64_t _t16 = z == ( idiv_2(x, (y - 1)) );
-            _t15 = _t16;
-        }
-        if (_t15) {
-            org_bau_BigInt_bigInt _t17 = org_bau_BigInt_newBigInt_1(z);
-            org_bau_BigInt_bigInt_free(&_t14);
-            org_bau_BigInt_bigInt_free(&_t12);
-            org_bau_BigInt_bigInt_free(&other);
-            org_bau_BigInt_bigInt_free(&this);
-            return _t17;
+        int64_t yp1 = y + 1;
+        int64_t ym1 = y - 1;
+        if (y != 0) {
+            if (yp1 != 0) {
+                if (ym1 != 0) {
+                    int64_t z = idiv_2(x, y);
+                    int64_t _t15 = z == ( idiv_2(x, yp1) );
+                    if (_t15) {
+                        int64_t _t16 = z == ( idiv_2(x, ym1) );
+                        _t15 = _t16;
+                    }
+                    if (_t15) {
+                        org_bau_BigInt_bigInt _t17 = org_bau_BigInt_newBigInt_1(z);
+                        org_bau_BigInt_bigInt_free(&_t14);
+                        org_bau_BigInt_bigInt_free(&_t12);
+                        org_bau_BigInt_bigInt_free(&other);
+                        org_bau_BigInt_bigInt_free(&this);
+                        return _t17;
+                    }
+                }
+            }
         }
         org_bau_BigInt_bigInt_free(&_t14);
         org_bau_BigInt_bigInt_free(&_t12);
@@ -978,7 +987,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
     int64_t j = m - n;
     while (j >= 0) {
         int64_t aa = ((un->data[idx_2(( j + n ) - 1, _arrayLen(un))] & 4294967295) * 4294967296) + (un->data[idx_2(( j + n ) - 2, _arrayLen(un))] & 4294967295);
-        int64_t qhat = org_bau_Int_divUnsigned_2(aa, vn1);
+        int64_t qhat = org_bau_Int_divUnsignedOr0_2(aa, vn1);
         int64_t rhat = aa - ( qhat * vn1 );
         while (1) {
             if (qhat < 4294967296) {
@@ -1270,7 +1279,10 @@ int64_t org_bau_Int_compareUnsigned_2(int64_t a, int64_t b) {
     }
     return 1;
 }
-int64_t org_bau_Int_divUnsigned_2(int64_t dividend, int64_t divisor) {
+int64_t org_bau_Int_divUnsignedOr0_2(int64_t dividend, int64_t divisor) {
+    if (divisor == 0) {
+        return 0;
+    }
     if (divisor < 0) {
         int64_t _r0 = shiftRight_int_2((dividend & ( ~ (dividend - divisor) )), 63);
         return _r0;

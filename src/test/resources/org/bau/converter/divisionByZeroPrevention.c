@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 /* builtin */
@@ -232,25 +233,11 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
 }
-/* traits */
-typedef struct _typeMetaData _typeMetaData;
-typedef void (*_func)(void);
-struct _typeMetaData {
-    const char* typeName;
-    void (*vtable[])();
-};
-static _typeMetaData *_typeMetaMemory;
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct Reader Reader;
-struct Reader;
-typedef struct Writer Writer;
-struct Writer;
-typedef struct Memory Memory;
-struct Memory;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -281,73 +268,25 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct Reader {
-    _typeMetaData* _type;
-    int32_t _refCount;
-};
-Reader* Reader_new() {
-    Reader* result = _malloc(sizeof(Reader));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
-struct Writer {
-    _typeMetaData* _type;
-    int32_t _refCount;
-};
-Writer* Writer_new() {
-    Writer* result = _malloc(sizeof(Writer));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
-struct Memory {
-    _typeMetaData* _type;
-    int32_t _refCount;
-    int_array* array;
-    int64_t pos;
-};
-Memory* Memory_new() {
-    Memory* result = _malloc(sizeof(Memory));
-    _traceMalloc(result);
-    result->_type = _typeMetaMemory;
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
 char **__argv;
 /* functions */
-Memory* Memory_1(int_array* array);
-int64_t Memory_read_1(Memory* this);
-void Memory_write_2(Memory* this, int64_t x);
-int64_t Reader_read_1(Reader* this);
-void Writer_write_2(Writer* this, int64_t x);
-int64_t get_1(Reader* r);
-int64_t idx_2(int64_t x, int64_t len);
-void put_2(Writer* w, int64_t x);
+void divisionByZeroBreak_0();
+void divisionByZeroBreak2_0();
+void divisionByZeroContinue_0();
+void divisionByZeroContinue2_0();
+void divisionByZeroReturn_0();
+int64_t idiv_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void Reader_free(Reader* x);
-void Writer_free(Writer* x);
-void Memory_free(Memory* x);
 void i8_array_free(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void Reader_free(Reader* x) {
-    _free(x); _traceFree(x);
-}
-void Writer_free(Writer* x) {
-    _free(x); _traceFree(x);
-}
-void Memory_free(Memory* x) {
-    _decUse(x->array, int_array);
     _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
@@ -363,114 +302,84 @@ i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
-i8_array* string_1005;
-i8_array* string_1006;
-Memory* Memory_1(int_array* array) {
-    Memory* _t0 = Memory_new();
-    _incUseStack(array);
-    _t0->array = array;
-    _t0->pos = 0;
-    return _t0;
-}
-int64_t Memory_read_1(Memory* this) {
-    int64_t p = this->pos;
-    int64_t _t0 = p < 0;
-    if (!(_t0)) {
-        int64_t _t1 = p >= _arrayLen(this->array);
-        _t0 = _t1;
+void divisionByZeroBreak_0() {
+    int64_t y = -1;
+    while (y < 2) {
+        y += 1;
+        if (y == 0) {
+            break;
+        }
+        int64_t z = idiv_2(10, y);
+        printf("break: %lld\n", (long long)z);
     }
-    if (_t0) {
-        return -1;
+}
+void divisionByZeroBreak2_0() {
+    int64_t y = -1;
+    while (y < 2) {
+        y += 1;
+        if (y == 0) {
+            break;
+        }
+        int64_t z = idiv_2(10, y);
+        printf("break2: %lld\n", (long long)z);
     }
-    this->pos += 1;
-    int64_t _r0 = this->array->data[idx_2(p, _arrayLen(this->array))];
-    return _r0;
 }
-void Memory_write_2(Memory* this, int64_t x) {
-    int64_t p = this->pos;
-    int64_t _t0 = p < 0;
-    if (!(_t0)) {
-        int64_t _t1 = p >= _arrayLen(this->array);
-        _t0 = _t1;
+void divisionByZeroContinue_0() {
+    int64_t y = -1;
+    while (y < 2) {
+        y += 1;
+        if (y == 0) {
+            continue;
+        }
+        int64_t z = idiv_2(10, y);
+        printf("cont: %lld\n", (long long)z);
     }
-    if (_t0) {
-        printf("not writing to pos=%lld\n", (long long)p);
-        return;
+}
+void divisionByZeroContinue2_0() {
+    int64_t y = -1;
+    while (y < 2) {
+        y += 1;
+        if (y == 0) {
+            continue;
+        }
+        int64_t z = idiv_2(10, y);
+        printf("cont2: %lld\n", (long long)z);
     }
-    this->pos += 1;
-    printf("writing to pos=%lld\n", (long long)p);
-    this->array->data[idx_2(p, _arrayLen(this->array))] = x;
 }
-int64_t Reader_read_1(Reader* this) {
-    int64_t (*_)(Reader*) = (int64_t (*)(Reader*)) this->_type->vtable[0];
-    if (_) {
-        return _(this);
+void divisionByZeroReturn_0() {
+    int64_t y = -1;
+    while (y < 2) {
+        y += 1;
+        if (y == 0) {
+            return;
+        }
+        int64_t z = idiv_2(10, y);
+        printf("ret: %lld\n", (long long)z);
     }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "read", this->_type->typeName);
-    exit(1);
-    return 0;
 }
-void Writer_write_2(Writer* this, int64_t x) {
-    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[1];
-    if (_) {
-        _(this, x);
-        return;
-    }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "write", this->_type->typeName);
-    exit(1);
-}
-int64_t get_1(Reader* r) {
-    printf("reading\n");
-    int64_t _t0 = Reader_read_1(r);
-    return _t0;
-}
-int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
-    return arrayOutOfBounds(x, len);
-}
-void put_2(Writer* w, int64_t x) {
-    printf("writing\n");
-    Writer_write_2(w, x);
-}
-/* traits */
-void _traitInit() {
-    _typeMetaMemory = malloc(sizeof(_typeMetaData) + 2 * sizeof(void(*)(void)));
-    _typeMetaMemory->typeName = "Memory";
-    _typeMetaMemory->vtable[0] = (void (*)())Memory_read_1;
-    _typeMetaMemory->vtable[1] = (void (*)())Memory_write_2;
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
-    _traitInit();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("not writing to pos=", 19);
-    string_1001 = str_const("writing to pos=", 15);
-    string_1002 = str_const("reading", 7);
-    string_1003 = str_const("writing", 7);
-    string_1004 = str_const("start", 5);
-    string_1005 = str_const("write 10", 8);
-    string_1006 = str_const("read ", 5);
+    string_1000 = str_const("break: ", 7);
+    string_1001 = str_const("break2: ", 8);
+    string_1002 = str_const("cont: ", 6);
+    string_1003 = str_const("cont2: ", 7);
+    string_1004 = str_const("ret: ", 5);
     _main();
     return 0;
 }
 void _main() {
-    printf("start\n");
-    int_array* _t2 = int_array_new(10);
-    Memory* mem = Memory_1(_t2);
-    _incUseStack(((Reader*) mem));
-    Reader* r = ((Reader*) mem);
-    printf("write 10\n");
-    _incUseStack(((Writer*) mem));
-    Writer* w = ((Writer*) mem);
-    put_2(w, 10);
-    mem->pos = 0;
-    int64_t x = get_1(((Reader*) mem));
-    printf("read %lld\n", (long long)x);
-    _decUseStack(w, Writer);
-    _decUseStack(r, Reader);
-    _decUseStack(mem, Memory);
-    _decUseStack(_t2, int_array);
+    divisionByZeroContinue_0();
+    divisionByZeroContinue2_0();
+    divisionByZeroBreak_0();
+    divisionByZeroBreak2_0();
+    divisionByZeroReturn_0();
     _end();
 }

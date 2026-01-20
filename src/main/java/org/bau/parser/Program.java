@@ -682,7 +682,10 @@ public class Program {
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
-            buff.append(Statement.indent("result->data = (int8_t*) data;\n"));
+            // copy the string, so that the content can be changed
+            // (there is no way to prevent that currently)
+            buff.append(Statement.indent("result->data = _malloc(sizeof(char) * len);\n"));
+            buff.append(Statement.indent("memcpy(result->data, data, sizeof(char) * len);\n"));
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
             for (long id: stringConstantsMap.keySet()) {

@@ -5,6 +5,14 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+convert sudoku
+
+allow to edit constants?
+
+div by zero docs
+
+numberOf -> leadingZeros
+
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
@@ -180,6 +188,12 @@ Division by zero could be prevented using compile-time verification
 similar to null pointer access. That means, before dividing
 by a variable, the variable needs to be checked for zero.
 (Division by constants can be checked easily.)
+
+Library functions (for example divUnsigned) can be guarded
+with a special data type that does not allow zero.
+Rust supports std::num::NonZeroI32 for a similar purpose.
+However this would complicate usage quite a bit;
+it seem simpler to change the contract and rename the method to divUnsignedOrZero.
 
 ## Illegal Cast
 

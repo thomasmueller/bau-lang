@@ -3,8 +3,10 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -232,25 +234,11 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
     exit(1);
 }
-/* traits */
-typedef struct _typeMetaData _typeMetaData;
-typedef void (*_func)(void);
-struct _typeMetaData {
-    const char* typeName;
-    void (*vtable[])();
-};
-static _typeMetaData *_typeMetaMemory;
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct Reader Reader;
-struct Reader;
-typedef struct Writer Writer;
-struct Writer;
-typedef struct Memory Memory;
-struct Memory;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -281,73 +269,25 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
-struct Reader {
-    _typeMetaData* _type;
-    int32_t _refCount;
-};
-Reader* Reader_new() {
-    Reader* result = _malloc(sizeof(Reader));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
-struct Writer {
-    _typeMetaData* _type;
-    int32_t _refCount;
-};
-Writer* Writer_new() {
-    Writer* result = _malloc(sizeof(Writer));
-    _traceMalloc(result);
-    result->_refCount = 1;
-    return result;
-}
-struct Memory {
-    _typeMetaData* _type;
-    int32_t _refCount;
-    int_array* array;
-    int64_t pos;
-};
-Memory* Memory_new() {
-    Memory* result = _malloc(sizeof(Memory));
-    _traceMalloc(result);
-    result->_type = _typeMetaMemory;
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
 char **__argv;
 /* functions */
-Memory* Memory_1(int_array* array);
-int64_t Memory_read_1(Memory* this);
-void Memory_write_2(Memory* this, int64_t x);
-int64_t Reader_read_1(Reader* this);
-void Writer_write_2(Writer* this, int64_t x);
-int64_t get_1(Reader* r);
+int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
-void put_2(Writer* w, int64_t x);
+int64_t imod_2(int64_t a, int64_t b);
+i8_array* org_bau_Env_arg_1(int64_t index);
+int64_t org_bau_Env_argCount_0();
+int64_t solve_1(i8_array* c);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void Reader_free(Reader* x);
-void Writer_free(Writer* x);
-void Memory_free(Memory* x);
 void i8_array_free(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void Reader_free(Reader* x) {
-    _free(x); _traceFree(x);
-}
-void Writer_free(Writer* x) {
-    _free(x); _traceFree(x);
-}
-void Memory_free(Memory* x) {
-    _decUse(x->array, int_array);
     _free(x); _traceFree(x);
 }
 i8_array* str_const(char* data, uint32_t len) {
@@ -358,119 +298,136 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
-i8_array* string_1004;
 i8_array* string_1005;
 i8_array* string_1006;
-Memory* Memory_1(int_array* array) {
-    Memory* _t0 = Memory_new();
-    _incUseStack(array);
-    _t0->array = array;
-    _t0->pos = 0;
-    return _t0;
-}
-int64_t Memory_read_1(Memory* this) {
-    int64_t p = this->pos;
-    int64_t _t0 = p < 0;
-    if (!(_t0)) {
-        int64_t _t1 = p >= _arrayLen(this->array);
-        _t0 = _t1;
-    }
-    if (_t0) {
-        return -1;
-    }
-    this->pos += 1;
-    int64_t _r0 = this->array->data[idx_2(p, _arrayLen(this->array))];
-    return _r0;
-}
-void Memory_write_2(Memory* this, int64_t x) {
-    int64_t p = this->pos;
-    int64_t _t0 = p < 0;
-    if (!(_t0)) {
-        int64_t _t1 = p >= _arrayLen(this->array);
-        _t0 = _t1;
-    }
-    if (_t0) {
-        printf("not writing to pos=%lld\n", (long long)p);
-        return;
-    }
-    this->pos += 1;
-    printf("writing to pos=%lld\n", (long long)p);
-    this->array->data[idx_2(p, _arrayLen(this->array))] = x;
-}
-int64_t Reader_read_1(Reader* this) {
-    int64_t (*_)(Reader*) = (int64_t (*)(Reader*)) this->_type->vtable[0];
-    if (_) {
-        return _(this);
-    }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "read", this->_type->typeName);
-    exit(1);
-    return 0;
-}
-void Writer_write_2(Writer* this, int64_t x) {
-    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[1];
-    if (_) {
-        _(this, x);
-        return;
-    }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "write", this->_type->typeName);
-    exit(1);
-}
-int64_t get_1(Reader* r) {
-    printf("reading\n");
-    int64_t _t0 = Reader_read_1(r);
-    return _t0;
+i8_array* string_1008;
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
-void put_2(Writer* w, int64_t x) {
-    printf("writing\n");
-    Writer_write_2(w, x);
+int64_t imod_2(int64_t a, int64_t b) {
+    if (b != 0) return a % b;
+    return 0;
 }
-/* traits */
-void _traitInit() {
-    _typeMetaMemory = malloc(sizeof(_typeMetaData) + 2 * sizeof(void(*)(void)));
-    _typeMetaMemory->typeName = "Memory";
-    _typeMetaMemory->vtable[0] = (void (*)())Memory_read_1;
-    _typeMetaMemory->vtable[1] = (void (*)())Memory_write_2;
+i8_array* org_bau_Env_arg_1(int64_t index) {
+    int64_t _t0 = index < 0;
+    if (!(_t0)) {
+        int64_t _t1 = index >= org_bau_Env_argCount_0();
+        _t0 = _t1;
+    }
+    if (_t0) {
+        i8_array* _t2 = i8_array_new(0);
+        return _t2;
+    }
+    int64_t len = 0;
+    len = strlen(__argv[index]);
+    i8_array* _t3 = i8_array_new(len);
+    _incUseStack(_t3);
+    i8_array* result = _t3;
+    strncpy((char*) result->data, __argv[index], len);
+    _decUseStack(_t3, i8_array);
+    return result;
+}
+int64_t org_bau_Env_argCount_0() {
+    return __argc;
+    return 0;
+}
+int64_t solve_1(i8_array* c) {
+    int64_t i = 0;
+    while (i < _arrayLen(c)) {
+        if (c->data[i] == 46) {
+            break;
+        }
+        i += 1;
+    }
+    if (i >= _arrayLen(c)) {
+        return 1;
+    }
+    int64_t k = 49;
+    while (k <= 57) {
+        int64_t j = 0;
+        while (j < 9) {
+            int64_t m = (idiv_2(i, 10)) * 9 + ( imod_2(i, 10) );
+            if (c->data[idx_2(((idiv_2(m, 9)) * 10) + j, _arrayLen(c))] == k) {
+                break;
+            }
+            if (c->data[idx_2((imod_2(m, 9)) + ( 10 * j ), _arrayLen(c))] == k) {
+                break;
+            }
+            int64_t h = ((imod_2((idiv_2(m, 27)), 3)) * 3) + (idiv_2((imod_2(m, 9)), 3));
+            int64_t n3 = ( h * 3 ) + (idiv_2(h, 3)) * 18 + (imod_2(j, 3)) + (idiv_2(j, 3)) * 9;
+            if (c->data[idx_2((( idiv_2(n3, 9) ) * 10) + (imod_2(n3, 9)), _arrayLen(c))] == k) {
+                break;
+            }
+            j += 1;
+        }
+        if (j >= 9) {
+            c->data[i] = k;
+            int64_t _t0 = solve_1(c);
+            if (_t0) {
+                return 1;
+            }
+            c->data[i] = 46;
+        }
+        k += 1;
+    }
+    return 0;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
-    _traitInit();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("not writing to pos=", 19);
-    string_1001 = str_const("writing to pos=", 15);
-    string_1002 = str_const("reading", 7);
-    string_1003 = str_const("writing", 7);
-    string_1004 = str_const("start", 5);
-    string_1005 = str_const("write 10", 8);
-    string_1006 = str_const("read ", 5);
+    string_1005 = str_const("Expected one argument: \"<line1> <line2> ... <line9>\"", 52);
+    string_1006 = str_const("where each line is 9 characters: 0-9, or . for unknown.", 55);
+    string_1008 = str_const("No solution found", 17);
     _main();
     return 0;
 }
 void _main() {
-    printf("start\n");
-    int_array* _t2 = int_array_new(10);
-    Memory* mem = Memory_1(_t2);
-    _incUseStack(((Reader*) mem));
-    Reader* r = ((Reader*) mem);
-    printf("write 10\n");
-    _incUseStack(((Writer*) mem));
-    Writer* w = ((Writer*) mem);
-    put_2(w, 10);
-    mem->pos = 0;
-    int64_t x = get_1(((Reader*) mem));
-    printf("read %lld\n", (long long)x);
-    _decUseStack(w, Writer);
-    _decUseStack(r, Reader);
-    _decUseStack(mem, Memory);
-    _decUseStack(_t2, int_array);
+    int64_t _t0 = org_bau_Env_argCount_0();
+    int64_t _t1 = _t0 != 2;
+    if (!(_t1)) {
+        int64_t _t2 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
+        _t1 = _t2;
+    }
+    if (_t1) {
+        printf("Expected one argument: \"<line1> <line2> ... <line9>\"\n");
+        printf("where each line is 9 characters: 0-9, or . for unknown.\n");
+        return;
+    }
+    i8_array* c = org_bau_Env_arg_1(1);
+    int64_t _t3 = solve_1(c);
+    if (_t3) {
+        if (8 > 0) {
+            while (1 == 1) {
+                int64_t i = 0;
+                while (1) {
+                    c->data[idx_2(9 + ( 10 * i ), _arrayLen(c))] = 10;
+                    int64_t _next = i + 1;
+                    if (_next >= 8) {
+                        break;
+                    }
+                    i = _next;
+                }
+                break;
+            }
+        }
+        printf("%.*s\n", _arrayLen(c), c->data);
+    } else {
+        printf("No solution found\n");
+    }
+    _decUseStack(c, i8_array);
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/
