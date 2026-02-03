@@ -393,6 +393,7 @@ int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
 void insertByte_1(int8_t add);
 void insertNewline_0();
+void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t last);
 i8_array* org_bau_Env_arg_1(int64_t index);
 int64_t org_bau_Env_argCount_0();
 void org_bau_Env_atExit_1(void  (*callback_0)());
@@ -632,7 +633,7 @@ void find_0() {
                     while (1 == 1) {
                         int64_t i = 0;
                         while (1) {
-                            new->data[idx_2(i, _arrayLen(new))] = findText.data->data[i];
+                            new->data[i] = findText.data->data[i];
                             int64_t _next = i + 1;
                             if (_next >= _arrayLen(findText.data)) {
                                 break;
@@ -687,7 +688,7 @@ void insertByte_1(int8_t add) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, _arrayLen(new))] = 32;
+                    new->data[i] = 32;
                     int64_t _next = i + 1;
                     if (_next >= x) {
                         break;
@@ -701,7 +702,7 @@ void insertByte_1(int8_t add) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, _arrayLen(new))] = line.data->data[i];
+                    new->data[i] = line.data->data[i];
                     int64_t _next = i + 1;
                     if (_next >= _arrayLen(line.data)) {
                         break;
@@ -740,7 +741,7 @@ void insertByte_1(int8_t add) {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    new->data[idx_2(i, _arrayLen(new))] = line.data->data[idx_2(i, _arrayLen(line.data))];
+                    new->data[i] = line.data->data[i];
                     int64_t _next = i + 1;
                     if (_next >= x) {
                         break;
@@ -804,6 +805,26 @@ void insertNewline_0() {
     org_bau_String_string_free(&line);
     _decUseStack(lines, org_bau_List_List_org_bau_String_string);
 }
+void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t last) {
+    while (first < last) {
+        int8_t temp = buff->data[first];
+        buff->data[first] = buff->data[last];
+        buff->data[last] = temp;
+        int64_t f = first + 1;
+        if (f >= _arrayLen(buff)) {
+            break;
+        }
+        first = f;
+        int64_t l = last - 1;
+        if (l < 0) {
+            break;
+        }
+        if (l >= _arrayLen(buff)) {
+            break;
+        }
+        last = l;
+    }
+}
 i8_array* org_bau_Env_arg_1(int64_t index) {
     int64_t _t0 = index < 0;
     if (!(_t0)) {
@@ -832,13 +853,8 @@ void org_bau_Env_atExit_1(void  (*callback_0)()) {
 }
 void org_bau_Env_exit_1(int64_t code) {
     exit(code);
-    printf("Exit code %lld; will now throw an array out-of-bounds exception\n", (long long)code);
-    int_array* _t0 = int_array_new(0);
-    _incUseStack(_t0);
-    int_array* x = _t0;
-    x->data[idx_2(0, _arrayLen(x))] = 1;
-    _decUseStack(x, int_array);
-    _decUseStack(_t0, int_array);
+    printf("Exit code %lld; will now cause a stack overflow\n", (long long)code);
+    org_bau_Env_exit_1(code);
 }
 org_bau_File_File* org_bau_File_File_0() {
     org_bau_File_File* _t0 = org_bau_File_File_new();
@@ -913,29 +929,48 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     return 0;
 }
 int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
+    if (_arrayLen(buff) < 1) {
+        return pos;
+    }
+    int64_t p = 0;
+    if (pos >= _arrayLen(buff)) {
+        return pos;
+    }
+    if (pos < 0) {
+        return pos;
+    }
+    p = pos;
     if (n < 0) {
-        buff->data[idx_2(pos, _arrayLen(buff))] = 45;
+        buff->data[p] = 45;
         pos += 1;
+        if (pos >= _arrayLen(buff)) {
+            return pos;
+        }
+        if (pos < 0) {
+            return 0;
+        }
+        p = pos;
     } else {
         n = - n;
     }
-    int64_t start = pos;
+    int64_t start = p;
     while (1) {
-        buff->data[idx_2(pos, _arrayLen(buff))] = 48 - (imod_2(n, 10));
-        pos += 1;
+        buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
+        pos += 1;
+        if (pos >= _arrayLen(buff)) {
+            return pos;
+        }
+        if (pos < 0) {
+            return 0;
+        }
         if (n == 0) {
             break;
         }
+        p = pos;
     }
     int64_t end = pos;
-    while (pos > start) {
-        pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, _arrayLen(buff))];
-        buff->data[idx_2(pos, _arrayLen(buff))] = buff->data[idx_2(start, _arrayLen(buff))];
-        buff->data[idx_2(start, _arrayLen(buff))] = temp;
-        start += 1;
-    }
+    org_bau_Arrays_reverse_i8_array_i8_3(buff, start, p);
     return end;
 }
 i8_array* org_bau_Int_intToString_1(int64_t n) {
@@ -950,7 +985,7 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, _arrayLen(result))] = buff->data[j];
+                result->data[j] = buff->data[idx_2(j, _arrayLen(buff))];
                 int64_t _next = j + 1;
                 if (_next >= pos) {
                     break;
@@ -1183,6 +1218,9 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         _decUseStack(s, i8_array);
         return string_1007;
     }
+    if (start < 0) {
+        start = 0;
+    }
     i = start;
     i8_array* _t4 = i8_array_new(len);
     _incUseStack(_t4);
@@ -1191,7 +1229,7 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, _arrayLen(result))] = s->data[i];
+                result->data[j] = s->data[i];
                 int64_t next = i + 1;
                 if (next >= _arrayLen(s)) {
                     break;
@@ -1643,7 +1681,7 @@ void removeByte_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                new->data[idx_2(i, _arrayLen(new))] = line.data->data[idx_2(i, _arrayLen(line.data))];
+                new->data[idx_2(i, _arrayLen(new))] = line.data->data[i];
                 int64_t _next = i + 1;
                 if (_next >= ( x - 1 )) {
                     break;
@@ -1724,7 +1762,7 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Exit code ", 10);
-    string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
+    string_1001 = str_const("; will now cause a stack overflow", 33);
     string_1007 = str_const("", 0);
     string_1009 = str_const("H", 1);
     string_1020 = str_const(" ", 1);

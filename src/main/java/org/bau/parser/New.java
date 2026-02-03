@@ -96,7 +96,7 @@ public class New implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     public String toString() {
@@ -109,11 +109,6 @@ public class New implements Expression {
     @Override
     public boolean isEasyToRead() {
         return false;
-    }
-
-    @Override
-    public Bounds getBounds() {
-        return null;
     }
 
     @Override
@@ -143,6 +138,11 @@ public class New implements Expression {
         if (arrayLength != null) {
             arrayLength.used(program);
         }
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return arrayLength.containsModifiableVariables();
     }
 
 }

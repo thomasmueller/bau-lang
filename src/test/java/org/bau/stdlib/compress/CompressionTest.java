@@ -158,13 +158,13 @@ public class CompressionTest {
             long start = System.nanoTime();
             byte[] compress = compress(data, t);
             long timeCompress = System.nanoTime() - start;
-            System.out.println("Compress " + data.length + " => " + compress.length + " in "
-                    + timeCompress / data.length + " ns/byte");
+            // System.out.println("Compress " + data.length + " => " + compress.length + " in "
+            //         + timeCompress / data.length + " ns/byte");
             start = System.nanoTime();
             byte[] verify = decompress(compress, t);
             long timeDecompress = System.nanoTime() - start;
             assertTrue(Arrays.equals(verify, data));
-            System.out.println("Decompress in " + timeDecompress / data.length + " ns/byte");
+            // System.out.println("Decompress in " + timeDecompress / data.length + " ns/byte");
         }
 
     }

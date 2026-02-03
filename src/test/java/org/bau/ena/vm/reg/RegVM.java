@@ -1,16 +1,23 @@
 package org.bau.ena.vm.reg;
 
-import static org.bau.ena.vm.reg.RegBytecode.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bau.ena.vm.reg.RegBytecode.Func;
+import org.bau.ena.vm.reg.RegBytecode.Insn;
+
 public final class RegVM {
     // Configurable timeout
     private long maxOps = 1_000_000L;
     private int checkEvery = 1 << 16; // 65536
+    private boolean print = true;
+
+    public RegVM setPrintToSystemOut(boolean print) {
+        this.print = print;
+        return this;
+    }
 
     public RegVM setMaxOps(long maxOps) {
         this.maxOps = maxOps;
@@ -282,9 +289,13 @@ public final class RegVM {
             case PRINT -> {
                 Object v = R[in.a];
                 if (v instanceof TextHandle th)
-                    System.out.println(texts.get(th.id));
+                    if (print) {
+                        System.out.println(texts.get(th.id));
+                    }
                 else
-                    System.out.println(v);
+                    if (print) {
+                        System.out.println(v);
+                    }
             }
             case I2S -> {
                 Object vb = R[in.b];
@@ -435,4 +446,5 @@ public final class RegVM {
         texts.put(id, sa + sb);
         return new TextHandle(id);
     }
+
 }

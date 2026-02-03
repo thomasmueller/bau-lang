@@ -4,6 +4,7 @@ import org.bau.Exception
     exception
 import org.bau.Utils
     if
+import org.bau.Arrays
 
 MIN_INT : 0x8000000000000000
 MAX_INT : 0x7fffffffffffffff
@@ -133,24 +134,37 @@ fun intToStr(n int, buff i8[], start int, size int) int
     return i + start
 
 fun appendInt(n int, buff i8[], pos int) int
+    if buff.len < 1
+        return pos
+    p := 0..buff.len
+    if pos >= buff.len
+        return pos
+    if pos < 0
+        return pos
+    p = pos
     if n < 0
-        buff[pos] = ord('-')
+        buff[p]! = ord('-')
         pos += 1
+        if pos >= buff.len
+            return pos
+        if pos < 0
+            return 0
+        p = pos
     else
         n = -n
-    start := pos
+    start : p
     while
-        buff[pos] = ord('0') - (n % 10)
-        pos += 1
+        buff[p]! = ord('0') - (n % 10)
         n /= 10
+        pos += 1
+        if pos >= buff.len
+            return pos
+        if pos < 0
+            return 0
         break n = 0
+        p = pos
     end : pos
-    while pos > start
-        pos -= 1
-        temp : buff[pos]
-        buff[pos] = buff[start]
-        buff[start] = temp
-        start += 1
+    Arrays.reverse(buff, start, p)
     return end
 
 fun intToString(n int) i8[]
@@ -160,7 +174,6 @@ fun intToString(n int) i8[]
     for j := until(pos)
         result[j] = buff[j]
     return result
-
 
 # parse an integer
 # overflow is ignored

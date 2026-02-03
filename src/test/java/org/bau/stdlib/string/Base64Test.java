@@ -3,7 +3,6 @@ package org.bau.stdlib.string;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
@@ -37,7 +36,7 @@ public class Base64Test {
             test(bin, dec);
         }
         time = System.nanoTime() - time;
-        System.out.println("time=" + TimeUnit.NANOSECONDS.toMillis(time));
+        // System.out.println("time=" + TimeUnit.NANOSECONDS.toMillis(time));
     }
 
     private static void test(byte[] in, byte[] out) {

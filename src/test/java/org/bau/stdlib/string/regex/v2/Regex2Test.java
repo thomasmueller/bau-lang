@@ -147,10 +147,12 @@ public class Regex2Test {
                 same++;
             }
             if (!toRegex(toRegex2(regex)).equals(regex)) {
+                /*
                 System.out.println();
                 System.out.println("regex1 " + regex);
                 System.out.println("regex2 " + toRegex2(regex));
                 System.out.println("back   " + toRegex(toRegex2(regex)));
+                */
                 // System.out.println(regex + "   ==>   " + r2);
             }
         }

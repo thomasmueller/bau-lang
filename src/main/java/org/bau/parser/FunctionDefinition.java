@@ -243,8 +243,8 @@ public class FunctionDefinition {
         }
         StringBuilder buff2 = new StringBuilder();
         boolean hasReturn = Program.hasReturn(list);
-        boolean hasCatch = Program.hasCatch(list);
-        if (hasCatch) {
+        int catchCount = Program.catchCount(list);
+        for (int i = 0; i < catchCount; i++) {
             buff2.append(Statement.indent("do { do {\n"));
         }
         for (Statement s : list) {

@@ -36,7 +36,7 @@ public interface Statement {
 
     String toC();
 
-    default void setBounds(Expression scope) {
+    default void setBounds(Solver solver, int depth, boolean loop) {
 
     }
 

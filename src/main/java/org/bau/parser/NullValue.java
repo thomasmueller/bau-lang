@@ -50,17 +50,12 @@ public class NullValue implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     @Override
     public boolean isEasyToRead() {
         return true;
-    }
-
-    @Override
-    public Bounds getBounds() {
-        return null;
     }
 
     @Override
@@ -78,6 +73,11 @@ public class NullValue implements Expression {
         if (type != null) {
             type.used(program);
         }
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

@@ -72,6 +72,7 @@ public class SR3Test {
         start = System.nanoTime();
         byte[] compDeflate = deflate(data, param);
         long timeDeflate = (System.nanoTime() - start) / data.length;
+        /*
         System.out.println(data.length + " => " + compressed.length +
                 " (" + timeSR3 + " ns/byte)" +
                 "; di2=" + param +
@@ -82,6 +83,7 @@ public class SR3Test {
 //                "; xz: " + compXZ.length +
 //                " (" + timeXZ + " ns/byte)"
                 );
+        */
         ByteArrayOutputStream test = new ByteArrayOutputStream();
         sr = new SR3(new ByteArrayInputStream(compressed), test);
         sr.di1 = param;

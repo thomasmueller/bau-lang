@@ -205,8 +205,8 @@ public class MetaTableTest {
                     }
                     used.set(y);
                 }
-                System.out.println(
-                        "size " + size + " found s2=" + s2 + " seed=" + seed + " fillRate=" + ((double) size / s2));
+                // System.out.println(
+                //         "size " + size + " found s2=" + s2 + " seed=" + seed + " fillRate=" + ((double) size / s2));
                 return;
             }
         }

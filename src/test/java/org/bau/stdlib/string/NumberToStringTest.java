@@ -108,7 +108,7 @@ public class NumberToStringTest {
             }
         }
         time = System.nanoTime() - time;
-        System.out.println((time / count) + " ns/key dummy=" + dummy);
+        // System.out.println((time / count) + " ns/key dummy=" + dummy);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class NumberToStringTest {
             }
         }
         time = System.nanoTime() - time;
-        System.out.println((time / count) + " ns/key dummy=" + dummy);
+        // System.out.println((time / count) + " ns/key dummy=" + dummy);
     }
 
 }

@@ -29,6 +29,7 @@ public class ParserTest {
         Stmt.Program prog = parse(src);
         assertNotNull(prog);
         Interpreter it = new Interpreter();
+        it.setPrintToSystemOut(false);
         it.execute(prog);
     }
 
@@ -51,6 +52,7 @@ public class ParserTest {
         Stmt.Program prog = parse(src);
         assertNotNull(prog);
         Interpreter it = new Interpreter();
+        it.setPrintToSystemOut(false);
         it.execute(prog);
     }
 

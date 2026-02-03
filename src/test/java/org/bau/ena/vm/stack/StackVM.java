@@ -9,6 +9,12 @@ public final class StackVM {
     // Configurable timeout
     private long maxOps = 1_000_000L;
     private int checkEvery = 1 << 16; // 65536
+    private boolean print = true;
+
+    public StackVM setPrintToSystemOut(boolean print) {
+        this.print = print;
+        return this;
+    }
 
     public StackVM setMaxOps(long maxOps) {
         this.maxOps = maxOps;
@@ -189,9 +195,13 @@ public final class StackVM {
                     StringBuilder sb = new StringBuilder();
                     for (Object e : (List<?>) x)
                         sb.append(stringify(e));
-                    System.out.println(sb.toString());
+                    if (print) {
+                        System.out.println(sb.toString());
+                    }
                 } else {
-                    System.out.println(x);
+                    if (print) {
+                        System.out.println(x);
+                    }
                 }
             }
             case FORMAT -> {
@@ -329,4 +339,5 @@ public final class StackVM {
     private String stringify(Object v) {
         return v == null ? "null" : (v instanceof String s ? s : String.valueOf(v));
     }
+
 }

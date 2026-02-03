@@ -54,7 +54,7 @@ public class QrCodeTest {
             }
         }
         assertEquals(1, errorCount);
-        System.out.println("error count " + errorCount);
+        // System.out.println("error count " + errorCount);
     }
 
 	private static BufferedImage toImage(QrCode qr, int scale, int border) {

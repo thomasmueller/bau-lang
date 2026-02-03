@@ -30,7 +30,7 @@ public class PrimeNumbers {
         for (int n = 3; n > 0; n = 2 * n - 1) {
             for (;; n -= 2) {
                 if (isPrime(n)) {
-                    System.out.println("n=" + n);
+                    // System.out.println("n=" + n);
                     sum += n;
                     break;
                 }
@@ -63,7 +63,7 @@ public class PrimeNumbers {
             }
         }
         long time = System.currentTimeMillis() - start;
-        System.out.println("calcPrimesWithSieve last: " + last + " count: " + count + " time: " + time + " ms");
+        // System.out.println("calcPrimesWithSieve last: " + last + " count: " + count + " time: " + time + " ms");
     }
 
     @Test
@@ -78,6 +78,6 @@ public class PrimeNumbers {
             }
         }
         long time = System.currentTimeMillis() - start;
-        System.out.println("calcPrimesWithTest last: " + last + " count: " + count + " time: " + time + " ms");
+        // System.out.println("calcPrimesWithTest last: " + last + " count: " + count + " time: " + time + " ms");
     }
 }

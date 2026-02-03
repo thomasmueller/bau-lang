@@ -50,7 +50,7 @@ public class NanoTest {
         p.parse(s);
         long time = System.currentTimeMillis();
         assertEquals("fibonacci(1000000) = 2756670985995446685", p.run());
-        System.out.println("time: " + (System.currentTimeMillis() - time));
+        // System.out.println("time: " + (System.currentTimeMillis() - time));
 
 /*
 

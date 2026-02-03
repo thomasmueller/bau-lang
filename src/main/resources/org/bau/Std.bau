@@ -2,6 +2,6 @@ module org.bau.Std
 
 # The value of the first byte in the string. 0 if the string is empty.
 fun ord(s i8[]) const int
-    if s.len
-        return s[0]
-    return 0
+    if s.len <= 0
+        return 0
+    return s[0]!

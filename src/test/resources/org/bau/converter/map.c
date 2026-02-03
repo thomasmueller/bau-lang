@@ -678,16 +678,18 @@ int64_t hashCode_1(i8_array* data) {
     }
     int64_t h = shiftLeft_2(_arrayLen(data), 32);
     int64_t i = 0;
-    if (i < ( _arrayLen(data) - 3 )) {
+    if (_arrayLen(data) > 3) {
+        int64_t j = 0;
         while (1) {
-            int64_t x = (data->data[i] & 255) | (shiftLeft_2((data->data[i + 1] & 255), 8)) | (shiftLeft_2((data->data[i + 2] & 255), 16)) | (shiftLeft_2((data->data[i + 3] & 255), 24));
+            int64_t x = (data->data[j] & 255) | (shiftLeft_2((data->data[j + 1] & 255), 8)) | (shiftLeft_2((data->data[j + 2] & 255), 16)) | (shiftLeft_2((data->data[j + 3] & 255), 24));
             h = (h + x) * -7046029288634856825;
-            int64_t n = i + 4;
+            int64_t n = j + 4;
             if (n >= ( _arrayLen(data) - 3 )) {
                 break;
             }
-            i = n;
+            j = n;
         }
+        i = j;
     }
     int64_t _t0 = i < _arrayLen(data);
     if (_t0) {

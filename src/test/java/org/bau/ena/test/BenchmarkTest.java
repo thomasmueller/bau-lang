@@ -27,7 +27,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new Interpreter().setMaxOps(MAX_OPS).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
-        System.out.println("runInterpreter: " + time + " ms");
+        // System.out.println("runInterpreter: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }
 
@@ -41,7 +41,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new StackVM().setMaxOps(MAX_OPS).run(bc, "main"); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
-        System.out.println("runStackVM: " + time + " ms");
+        // System.out.println("runStackVM: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }
 
@@ -53,11 +53,11 @@ public class BenchmarkTest {
         PrintStream old = System.out;
         System.setOut(new PrintStream(baos));
         long start = System.currentTimeMillis();
-        Profiler prof = new Profiler().startCollecting();
+        // Profiler prof = new Profiler().startCollecting();
         try { new RegVM().setMaxOps(MAX_OPS).run(bc, "main"); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
-        System.out.println("runRegVM: " + time + " ms");
-        System.out.println(prof.getTop(10));
+        // System.out.println("runRegVM: " + time + " ms");
+        // System.out.println(prof.getTop(10));
         return baos.toString().replace("\r\n", "\n");
     }
 

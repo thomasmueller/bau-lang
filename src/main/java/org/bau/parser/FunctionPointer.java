@@ -64,12 +64,7 @@ public class FunctionPointer implements Expression {
     }
 
     @Override
-    public Bounds getBounds() {
-        return null;
-    }
-
-    @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     @Override
@@ -89,6 +84,11 @@ public class FunctionPointer implements Expression {
     @Override
     public void used(Program program) {
         program.getFunctionById(function.getFunctionId()).used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

@@ -21,7 +21,7 @@ public class ToCTest {
         Stmt.Program prog = Parser.parse(src);
         CGenerator gen = new CGenerator();
         String c = gen.generate(prog);
-        System.out.println("Generated C:\n" + c);
+        // System.out.println("Generated C:\n" + c);
         assertTrue(c.contains("#include <gc.h>"));
         assertTrue(c.contains("int64_t fib"));
         assertTrue(c.contains("void main_fn("));

@@ -389,7 +389,7 @@ void compress_0() {
     _incUseStack(_t0);
     int_array* t4 = _t0;
     while (1) {
-        int64_t r = t4->data[h];
+        int64_t r = t4->data[idx_2(h, _arrayLen(t4))];
         int64_t cxt = 0;
         if (( r & 4294967295 ) >= 67108864) {
             cxt = 1024 + (shiftRight_int_2(r, 20));
@@ -403,29 +403,29 @@ void compress_0() {
             writeByte_2(cxt + 2, r & 255);
             break;
         }
-        int64_t c = global->input->data[inPos] & 255;
+        int64_t c = global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255;
         inPos += 1;
         int64_t comp3 = (c * 65793) ^ r;
         if (( comp3 & 255 ) == 0) {
             writeBit_2(cxt, 0);
             if ((r & 4294967295) < 1056964608) {
-                t4->data[h] += 0x1000000;
+                t4->data[idx_2(h, _arrayLen(t4))] += 0x1000000;
             }
         } else if (( comp3 & 65280 ) == 0) {
             writeBit_2(cxt, 1);
             writeBit_2(cxt + 1, 1);
             writeBit_2(cxt + 2, 0);
-            t4->data[h] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c | 16777216;
+            t4->data[idx_2(h, _arrayLen(t4))] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c | 16777216;
         } else if (( comp3 & 16711680 ) == 0) {
             writeBit_2(cxt, 1);
             writeBit_2(cxt + 1, 1);
             writeBit_2(cxt + 2, 1);
-            t4->data[h] = ((shiftLeft_2(r, 8)) & 16776960) | c | 16777216;
+            t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c | 16777216;
         } else {
             writeBit_2(cxt, 1);
             writeBit_2(cxt + 1, 0);
             writeByte_2(cxt + 2, c);
-            t4->data[h] = ((shiftLeft_2(r, 8)) & 16776960) | c;
+            t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c;
         }
         c1 = c;
         h = (( h * (shiftLeft_2(5, di1)) ) + c + 1) & 16777215;
@@ -441,7 +441,7 @@ void decompress_0() {
     _incUseStack(_t0);
     int_array* t4 = _t0;
     while (1) {
-        int64_t r = t4->data[h];
+        int64_t r = t4->data[idx_2(h, _arrayLen(t4))];
         int64_t cxt = 0;
         if (( r & 4294967295 ) >= 67108864) {
             cxt = 1024 + (shiftRight_int_2(r, 20));
@@ -456,10 +456,10 @@ void decompress_0() {
                 int64_t _t3 = readBit_1(cxt + 2);
                 if (_t3 == 1) {
                     c1 = (shiftRight_int_2(r, 16)) & 255;
-                    t4->data[h] = ((shiftLeft_2(r, 8)) & 16776960) | c1 | 16777216;
+                    t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c1 | 16777216;
                 } else {
                     c1 = (shiftRight_int_2(r, 8)) & 255;
-                    t4->data[h] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c1 | 16777216;
+                    t4->data[idx_2(h, _arrayLen(t4))] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c1 | 16777216;
                 }
             } else {
                 int64_t _t4 = readByte_1(cxt + 2);
@@ -467,12 +467,12 @@ void decompress_0() {
                 if (c1 == (r & 255)) {
                     break;
                 }
-                t4->data[h] = ((shiftLeft_2(r, 8)) & 16776960) | c1;
+                t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c1;
             }
         } else {
             c1 = r & 255;
             if ((r & 4294967295) < 1056964608) {
-                t4->data[h] = r + 16777216;
+                t4->data[idx_2(h, _arrayLen(t4))] = r + 16777216;
             }
         }
         global->output->data[idx_2(outPos, _arrayLen(global->output))] = c1;
@@ -742,7 +742,7 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                state->data[i] = 2147483648;
+                state->data[idx_2(i, _arrayLen(state))] = 2147483648;
                 int64_t _next = i + 1;
                 if (_next >= 528384) {
                     break;

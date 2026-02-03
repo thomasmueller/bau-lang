@@ -170,7 +170,7 @@ fun find(text i8[], regex i8[]) int[]
 fun matchHere(list List(Token), rp int, text i8[], tp int) int
     if rp >= list.size
         return tp
-    t := list.data[rp]
+    t : list.data[rp]
     if t.type == tokenType.END
         if tp = text.len
             return tp

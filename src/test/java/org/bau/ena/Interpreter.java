@@ -9,6 +9,7 @@ import org.bau.ena.ast.Expr;
 import org.bau.ena.ast.Stmt;
 
 public final class Interpreter {
+
     static final class EnaFunction {
         final String name;
         final Stmt.Function def;
@@ -22,9 +23,11 @@ public final class Interpreter {
     static final class Environment {
         final Environment parent;
         final Map<String, Object> values = new HashMap<>();
+        final boolean print;
 
-        Environment(Environment parent) {
+        Environment(Environment parent, boolean print) {
             this.parent = parent;
+            this.print = print;
         }
 
         Object get(String name) {
@@ -41,6 +44,12 @@ public final class Interpreter {
 
         boolean hasLocal(String name) {
             return values.containsKey(name);
+        }
+
+        void println(String message) {
+            if (print) {
+                System.out.println(message);
+            }
         }
     }
 
@@ -60,6 +69,12 @@ public final class Interpreter {
     private int checkEvery = 65536;
     private long opCount = 0;
     private long nextCheck = checkEvery;
+    private boolean print = true;
+
+    public Interpreter setPrintToSystemOut(boolean print) {
+        this.print = print;
+        return this;
+    }
 
     public Interpreter setMaxOps(long maxOps) {
         this.maxOps = maxOps <= 0 ? Long.MAX_VALUE : maxOps;
@@ -90,7 +105,7 @@ public final class Interpreter {
                 types.put(td.name(), td);
         }
 
-        Environment globals = new Environment(null);
+        Environment globals = new Environment(null, print);
         // Built-in: println implemented via format+puts at call time (no special AST
         // def)
         functions.put("println", new EnaFunction("println", null));
@@ -123,13 +138,13 @@ public final class Interpreter {
             StringBuilder sb = new StringBuilder();
             for (Object a : vargs)
                 sb.append(stringify(a));
-            System.out.println(sb.toString());
+            callerEnv.println(sb.toString());
             return null;
         }
         if (name.equals("puts")) {
             if (args.size() != 1)
                 throw new RuntimeException("puts expects 1 argument");
-            System.out.println(stringify(args.get(0)));
+            callerEnv.println(stringify(args.get(0)));
             return null;
         }
         if (name.equals("format")) {
@@ -181,7 +196,7 @@ public final class Interpreter {
                 throw new RuntimeException("arity mismatch for " + name);
             }
         }
-        Environment env = new Environment(callerEnv);
+        Environment env = new Environment(callerEnv, print);
         for (int i = 0; i < def.params().length; i++) {
             env.set(def.params()[i].name(), callArgs.get(i));
         }

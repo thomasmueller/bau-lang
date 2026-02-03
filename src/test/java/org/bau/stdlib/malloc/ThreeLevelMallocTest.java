@@ -39,13 +39,13 @@ public class ThreeLevelMallocTest {
             assertEquals(i, sc);
             assertEquals(sc, scm1 + 1);
             assertEquals(Math.min(63, sc + 1), scp1);
-            System.out.println(i + ": usableBytes:" + ((size - 2) * 4) + " words:" + size + " c(n):" + sc + " c(n-1):" + scm1 + " c(round(n+1)):" + scp1);
+            // System.out.println(i + ": usableBytes:" + ((size - 2) * 4) + " words:" + size + " c(n):" + sc + " c(n-1):" + scm1 + " c(round(n+1)):" + scp1);
         }
         int last = 0;
         for (int i = 4; i < 1_000_000; i += 4) {
             int sc = sizeClass(i);
             if (sc < last) {
-                System.out.println();
+                // System.out.println();
             }
             assertTrue(sc >= last);
             last = sc;
@@ -100,19 +100,19 @@ public class ThreeLevelMallocTest {
         for(int seed = 0; seed < count; seed++) {
             int fail = test(seed, maxLoop);
             if (fail < best) {
-                System.out.println("best: " + seed + " @" + fail);
+                // System.out.println("best: " + seed + " @" + fail);
                 best = fail;
                 maxLoop = best;
             }
             worstMemoryUsage = Math.max(worstMemoryUsage, maxMemoryUsage);
             sumMemoryUsage += maxMemoryUsage;
         }
-        System.out.println("calls " + Malloc.countCalls + " branch " + Malloc.countBranches);
+        // System.out.println("calls " + Malloc.countCalls + " branch " + Malloc.countBranches);
         for (int i = 0; i < 64; i++) {
             // System.out.println(i + " " + levelCount[i]);
         }
         // Average memory usage 1446439 worst 2394128
-        System.out.println("Average memory usage " + sumMemoryUsage / count + " worst " + worstMemoryUsage);
+        // System.out.println("Average memory usage " + sumMemoryUsage / count + " worst " + worstMemoryUsage);
     }
 
     public int test(int seed, int maxLoop) {

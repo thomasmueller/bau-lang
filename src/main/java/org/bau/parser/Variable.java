@@ -3,6 +3,7 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bau.parser.Solver.Rule;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -14,8 +15,7 @@ public class Variable implements Expression, LeftValue {
     String name;
     String module;
     private DataType type;
-    private Bounds bounds;
-    private Bounds lenBounds;
+    private Expression length;
     boolean isConstant;
     Value constantValue;
     public boolean global;
@@ -33,11 +33,6 @@ public class Variable implements Expression, LeftValue {
         this.name = name;
         this.global = global;
         this.type = type;
-        if (type.isRange()) {
-            Expression max = type.maxValue;
-            bounds = new Bounds();
-            bounds.addCondition(null, "<", max);
-        }
     }
 
     public static String getGlobalVariableId(String module, String name) {
@@ -131,9 +126,12 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int depth, boolean loop) {
         if (type != null && type.memoryType() == MemoryType.OWNER) {
-            setBoundValue(scope, "=", new NullValue(type));
+            Solver.Rule r = Operation.toRule(this, "=", NumberValue.ZERO);
+            r.depth = depth;
+            solver.removeRulesFor(r.left);
+            solver.addRule(r);
         }
     }
 
@@ -197,13 +195,8 @@ public class Variable implements Expression, LeftValue {
         return true;
     }
 
-    @Override
-    public Bounds getBounds() {
-        return bounds;
-    }
-
-    public Bounds getLenBounds() {
-        return lenBounds;
+    public Expression getConstantLength() {
+        return length;
     }
 
     @Override
@@ -214,32 +207,8 @@ public class Variable implements Expression, LeftValue {
         return this;
     }
 
-    public void addLenBoundCondition(Expression scope, String operation, Expression expr) {
-        if (lenBounds == null) {
-            lenBounds = new Bounds();
-        }
-        lenBounds.addCondition(scope, operation, expr);
-    }
-
-    public void addBoundCondition(Expression scope, String operation, Expression expr) {
-        if (bounds == null) {
-            bounds = new Bounds();
-        }
-        bounds.addCondition(scope, operation, expr);
-    }
-
-    @Override
-    public void setBoundValue(Expression scope, String modify, Expression value) {
-        if (!(value instanceof NullValue) && !value.type().isNumber()) {
-            return;
-        }
-        if (value instanceof Call) {
-            return;
-        }
-        if (bounds == null) {
-            bounds = new Bounds();
-        }
-        bounds.setBoundValue(scope, modify, value);
+    public void setConstantLength(Expression length) {
+        this.length = length;
     }
 
     @Override
@@ -329,9 +298,8 @@ public class Variable implements Expression, LeftValue {
         return used;
     }
 
-    public void copyBounds(Variable v2) {
-        lenBounds = v2.lenBounds;
-        bounds = v2.bounds;
+    public void copyConstant(Variable v2) {
+        length = v2.length;
     }
 
     @Override
@@ -352,6 +320,17 @@ public class Variable implements Expression, LeftValue {
     @Override
     public String assignmentC() {
         return nameC();
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return !isConstant;
+    }
+
+    @Override
+    public List<Rule> getRules() {
+        Rule r = Solver.rule(Solver.variable(toString()), "<>", Solver.number(0));
+        return List.of(r);
     }
 
 }

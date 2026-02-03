@@ -3,6 +3,7 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bau.parser.Solver.Rule;
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -14,7 +15,6 @@ public class FieldAccess implements Expression, LeftValue {
 
     Expression base;
     final String fieldName;
-    private Bounds lenBounds;
     final DataType type;
 
     FieldAccess(Expression base, String fieldName, DataType type) {
@@ -29,9 +29,9 @@ public class FieldAccess implements Expression, LeftValue {
             if ("len".equals(fieldName)) {
                 if (base instanceof Variable) {
                     Variable var = (Variable) base;
-                    Bounds lenBounds = var.getLenBounds();
-                    if (lenBounds != null) {
-                        Value v = lenBounds.eval();
+                    Expression lenExpr = var.getConstantLength();
+                    if (lenExpr != null) {
+                        Value v = lenExpr.eval(null);
                         if (v != null) {
                             return v;
                         }
@@ -40,15 +40,6 @@ public class FieldAccess implements Expression, LeftValue {
                 Value v = base.eval(memory);
                 if (v == null) {
                     return null;
-                }
-                if (memory == null) {
-                    Bounds b = getBounds();
-                    if (b != null) {
-                        Value val = b.eval();
-                        if (val != null) {
-                            return val;
-                        }
-                    }
                 }
                 if (v instanceof ValueRef) {
                     Value array = memory.getHeap(v.longValue());
@@ -128,8 +119,7 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
-        setBoundValue(scope, "=", new NullValue(type));
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     public String assignmentC() {
@@ -190,35 +180,6 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void setBoundValue(Expression scope, String modify, Expression value) {
-
-    }
-
-    @Override
-    public Bounds getBounds() {
-        if (base.type().isArray() && fieldName.equals("len")) {
-            if (base instanceof Variable) {
-                return ((Variable) base).getLenBounds();
-            } else if (base instanceof FieldAccess) {
-                FieldAccess f = (FieldAccess) base;
-                return f.getLenBounds();
-            }
-        }
-        return null;
-    }
-
-    public Bounds getLenBounds() {
-        return lenBounds;
-    }
-
-    @Override
-    public void addBoundCondition(Expression scope, String operation, Expression right) {
-        if (base.type().isArray() && fieldName.equals("len") && base instanceof Variable) {
-            ((Variable) base).addLenBoundCondition(scope, operation, right);
-        }
-    }
-
-    @Override
     public boolean isSimple() {
         return false;
     }
@@ -274,6 +235,20 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public void incrementReassignCount() {
         // ignore
+    }
+
+    @Override
+    public List<Rule> getRules() {
+        if ("len".equals(fieldName)) {
+            Rule r = Solver.rule(Solver.variable(toString()), ">", Solver.number(0));
+            return List.of(r);
+        }
+        return List.of();
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return true;
     }
 
 }

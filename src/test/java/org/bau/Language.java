@@ -5,9 +5,202 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-convert sudoku
 
-allow to edit constants?
+https://lemire.me/blog/2026/02/02/converting-data-to-hexadecimal-outputs-quickly/
+char nibble(uint8_t x) { return x + '0' + ((x > 9) * 39); }
+for (size_t i = 0, k = 0; k < dlen; i += 1, k += 2) {
+    uint8_t val = src[i];
+    dst[k + 0] = nibble(val >> 4);
+    dst[k + 1] = nibble(val & 15);
+}
+
+add test that tries to re-assign "this"
+
+verify if / how array bound checks are removed in other languages and Bau,
+eg. reversing the entries of an array.
+
+yn: input('Is the number larger than ' x ' ?')
+
+* Weird syntax
+At the same type a data type _and_ a value, which is weird
+i := 0..x.len
+
+* Bound check:
+fun reverse_i8_array_i8(buff i8[], first 0..buff.len, last 0..buff.len)
+    while first < last
+        temp : buff[first]![*]
+        buff[first]! = buff[last]!
+        buff[last]! = temp
+        f := first + 1
+        break f >= buff.len
+        first = f
+        l := last - 1
+        break l < 0
+        break l >= buff.len
+        last = l
+
+* Bound check:
+fun ord1(s i8[]) const int
+    if s.len
+        return s[0]!
+    return 0
+
+* Bound check:
+fun getCache() const int[]
+    result : int[10]
+    result[0] = 0
+    for i := range(1, 10)
+        result[i] = i
+    return result
+
+
+* Bound check:
+fun ord1(s i8[]) const int
+    if s.len <= 0
+        return 0
+    return s[0]!
+
+* Solver
+add rules for len >= 0.
+that means len <> 0 means len > 0
+
+* Bound check (should pass)
+fun sum(x int[]) int
+    sum := 0
+    if x.len = 0
+        return 0
+    i := 0..x.len
+    while i < x.len
+        sum += x[i]!
+    return sum
+
+* Bound check (should pass)
+fun test()
+  x : i8[4]
+  x[0]! = 0x12
+
+
+  x[1]! = 0x34
+  x[2]! = 0x56
+  x[3]! = 0x78
+  println(readI32Le(x, i32(0)))
+
+
+* Bound check (should pass)
+fun truncate(data i32[]) int
+    newLen := data.len
+    while newLen > 0 and data[newLen - 1]! = 0
+        newLen -= 1
+    return newLen
+
+* Bound check (should pass)
+fun matchChar(text i8[], pos int) int
+    if pos < 0
+        return 0
+    if pos >= text.len
+        return 0
+    c : text[pos]!
+    return c - 1
+
+* Bound check (should fail; passed before)
+fun matchChar(text i8[], pos int) int
+    if pos >= text.len
+        return 0
+    c : text[pos]!
+    return c - 1
+
+* Bound checks (should pass; didn't pass before)
+fun test(value i8[]) int
+    if value.len
+        x : value[0]!
+        return x
+    return 0
+
+fun test(value i8[]) int
+    if value.len > 0
+        x : value[0]!
+        return x
+    return 0
+
+* Bound checks (should pass)
+cache : int[10]
+fun isMunchausen(number int) int
+    n := number
+    total := 0
+    while n > 0
+        digit : n % 10
+        total += cache[digit]!
+        n /= 10
+    return total
+
+* Bound checks test case (should pass):
+fun readInt(d i8[], pos 0 .. d.len - 4) int
+    return d[pos + 3]!
+
+fun readInt(d i8[], pos 0 .. d.len - 4) int
+    return (d[pos]! & 0xff) |
+           ((d[pos + 1]! & 0xff) << 8) |
+           ((d[pos + 2]! & 0xff) << 16) |
+           ((d[pos + 3]! & 0xff) << 24)
+
+* Bound checks test case (should fail):
+fun test()
+    data : i8[10]
+    i := 0
+    while i < 20
+        println(data[i]!)
+        i += 1
+test()
+
+* Bound checks test case (should pass)
+fun test()
+    data : i8[10]
+    for i := until(data.len)
+        println(data[i]!)
+test()
+
+
+
+* verify whitespace count (eg warn if whitespace doesn't match the expectation)
+
+* simplify throw / catch by limiting catch to top level?
+* per-module compiler flags: panicOnNullPointer, panicOnDivByZero,...
+* option (just 'throws divByZero'?) to throw a checked exception for NPE and division by zero
+
+* test setjmp / longjmp
+
+* we have a doc and a docs directory, rename one
+
+* array bound checks
+fun test()
+    data : i8[10]
+    for i:= until(data.len)
+        data[i - 1]! = i
+
+fun test()
+    x : int[10]
+    i := 0..x.len
+    while
+        println(x[i]!)
+        next : i + 1
+        break next >= x.len
+        i = next
+test()
+
+bitwise not: ~ => 0^
+Operators: currently we use ~ for negation... what about ^ like in go, or 0 ^ ... ?
+
+* better error message than "type main not found"
+type Test
+    value int
+x := 10
+fun main()
+    println('test')
+fun test() int
+    return 1
+y := test()
+
+is it allow to edit constants (string literals) in a C program?
 
 div by zero docs
 
@@ -16,7 +209,13 @@ numberOf -> leadingZeros
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
-Demo apps: block game, text editor, data compression, sudoku solver,...
+Demo apps:
+- block game,
+- text editor,
+- data compression,
+- sudoku solver,
+- chess
+- ...
 
 diff
 
@@ -25,8 +224,6 @@ split, cat, tar
 
 text-based browser
 https://cssence.com/2026/text-based-web-browsers/
-
-Operators: currently we use ~ for negation... what about ^ like in go, or 0 ^ ... ?
 
 webserver
 
@@ -129,37 +326,33 @@ I'm writing a new systems programming language.
 I'm trying to write an article about "panic".
 Could you review the article and provide feedback?
 
-# Preventing and handling Panic Situations
+# Preventing and Handling Panic Situations
 
 I want to build a memory-safe systems language
-that reduces / eliminates panic situations at runtime.
+that reduces panic situations that stops program execution,
+such as null pointer access, integer division by zero,
+array-out-of-bounds, errors on unwrap, and similar.
 
-A panic situation is a program error that stops execution.
-In Rust, this is panic / abort, in other languages
-it results in an unchecked exceptions. Typical cases are
-null pointer access, array-out-of-bounds, integer division by zero,
-errors on unwrap, out-of-memory, stack overflow, and similar.
-
-In most programming languages, these trigger either panic or unchecked exceptions.
-My language does not support unchecked exceptions, so this is not an option.
-I would like to reduce or eliminating panic situations as much as possible.
-I'm not trying to prevent all possible bugs, endless loops, etc.
-as that is nearly impossible.
-I'm writing a memory-safe language; there is no compromise of the memory safety.
+For my language, I would like to prevent such cases where possible,
+and provide a good framework to handle them when needed.
+I'm writing a memory-safe language; I do not want to compromise of the memory safety.
 My language does not have undefined behavior, and even in such cases,
-behavior needs to be well defined.
+I want behavior to be well defined.
 
-I argue that, in case of a the above situations, stopping the process
-(or even the whole system) is not always needed, and sometimes worse
-than logging an error and continuing, if this is possible in a controlled way,
-and retaining memory safety and well-defined behavior.
-Memory-safety is preserved, but the program may produce incorrect results,
-and must be designed to tolerate soft errors.
-Fail-soft instead of fail-stop.
+In Java and similar languages,
+these result in unchecked exceptions that can be caught.
+My language does not support unchecked exceptions, so this is not an option.
 
-Why:
+In Rust, these usually result in panic which stops the process
+or the thread, if unwinding is enabled.
+I don't think unwinding is easy to implement in C
+(my language is transpiled to C).
+There is libunwind, but I would prefer to not depend on it,
+as it is not available everywhere.
 
-(a) Prevent things like the Cloudflare outage on November 2025 (usage of Rust "unwrap");
+Why I'm trying to find a better solution:
+
+(a) To prevent things like the Cloudflare outage on November 2025 (usage of Rust "unwrap");
     the Ariane 5 rocket explosion, where an overflow caused a hardware trap;
     divide by zero causing operating systems to crash (eg. find_busiest_group, get_dirty_limits).
 (b) Be able to use the language for embedded systems,
@@ -184,51 +377,39 @@ So that null pointer access at runtime is not possible.
 
 ## Division by Zero
 
-Division by zero could be prevented using compile-time verification
-similar to null pointer access. That means, before dividing
-by a variable, the variable needs to be checked for zero.
+My language prevents prevented possible division by zero at compile
+time, similar to how it prevents null pointer access.
+That means, before dividing (or modulo) by a variable,
+the variable needs to be checked for zero.
 (Division by constants can be checked easily.)
+As far as I'm aware, no popular language works like this.
+I know some languages can prevent division by zero,
+by using the type system, but this feels complicated to me.
 
-Library functions (for example divUnsigned) can be guarded
-with a special data type that does not allow zero.
+Library functions (for example divUnsigned) could be guarded
+with a special data type that does not allow zero:
 Rust supports std::num::NonZeroI32 for a similar purpose.
 However this would complicate usage quite a bit;
-it seem simpler to change the contract and rename the method to divUnsignedOrZero.
+I find it simpler to change the contract: divUnsignedOrZero,
+so that zero divisor returns zero in a well-documented way
+(this is then purely op-in).
+
+## Error on Unwrap
+
+My language does not support unwrap.
 
 ## Illegal Cast
 
-This is similar to null pointer exception:
 My language does not allow unchecked casts (similar to null pointer).
 
-## Unchecked Exceptions
+## Re-link in Destructor
 
-In Java, Javascript, etc, an unchecked exception is thrown, which can be caught.
-For my language, which is converted to C, this is not really an option.
-Also, this kind of error handling has some runtime complexity and overhead.
-
-# Mitigation
-
-## Panic Callback
-
-My main idea is to have a (configurable) callback
-for the error cases, which can either:
-stop the process, or log an error (like printk_ratelimit in the Linux kernel)
-and continue, or just continue.
-Logging is useful, because just silently ignoring can hide bugs.
-A user-defined callback could be used, but which decides
-what to do depending on problem.
-There are some limitations on what the callback can do,
-these need to be defined.
-
-## Unwinding like Rust
-
-In Rust, unwinding can be enabled, which means such errors
-can be handled without stopping the process: only the thread is stopped.
-I don't think this behavior is easy to implement in C or in my language;
-there is libunwind, but I would prefer to not depend on it,
-as it is not available everywhere.
-
-# Panic Root Causes
+My language support a callback method ('close') if an object is freed.
+In Swift, if this callback re-links the object, the program panics.
+In my language, right now, my language also panics for this case currently,
+but I'm considering to change the semantics.
+In other languages (eg. Java), the object will not be garbage collected in this case.
+(in Java, "finalize" is kind of deprecated now AFAIK.)
 
 ## Array Index Out Of Bounds
 
@@ -236,41 +417,36 @@ My language support value-dependent types for array indexes.
 By using a  as follows:
 
     for i := until(data.len)
-        data[i]! = i    <<=== i is guaranteed to be inside the bound
+        data[i]! = i    <<== i is guaranteed to be inside the bound
 
 That means, similar to null checks, the array index is guaranteed
 to be within the bound when using the "!" syntax like above.
-I read that this is similar to what ATS, Agda, and SPARK Ada do.
+I read that this is similar to what ATS, Agda, and SPARK Ada support.
 So for these cases, array-index-out-of-bounds is impossible.
 
 However, in practise, this syntax is not convenient to use:
 unlike possible null pointers, array access is relatively common.
 _requiring_ an explicit bound check for each array access would not be practical in my view.
+Sure, the compiled code is faster if array-bound checks are not needed,
+and there are no panics.
+But it is inconvenient: not all code needs to be fast.
 
 I'm considering a special syntax such that a zero value is returned for out-of-bounds.
 Example:
 
     x = buffer[index]?   // zero or null on out-of-bounds
 
-The "?" syntax is already relatively well known, including null-coalescing assignment: e.g.
+The "?" syntax is well known in other languages like Kotlin.
+It is opt-in and visually marks lossy semantics.
 
     val length = user?.name?.length            // null if user or name is null
     val length: Int = user?.name?.length ?: 0  // zero if null
 
-Similarly, when trying to update, this syntax could mean "ignore":
+Similarly, when trying to update, this syntax would mean "ignore":
 
     index := -1
     valueOrNull = buffer[index]?  // zero or null on out-of-bounds
     buffer[index]? = 20           // ignored on out-of-bounds
-
-## Re-link in Destructor
-
-My language support a callback method ('close') if an object is freed.
-In Swift, if this callback re-links the object, the program panics.
-In my language, right now, my language also panics for this case currently,
-but I think that's a mistake.
-In other languages (eg. Java), the object will not be garbage collected in this case.
-(in Java, "finalize" is kind of deprecated now AFAIK.)
 
 ## Out of Memory
 
@@ -287,15 +463,31 @@ it just gets slower.
 This is similar to out-of-memory.
 Static analysis can help here a bit, but not completely.
 GCC -fsplit-stack allows to increase the stack size automatically if needed,
-which then means it just uses more memory.
+which then means it "just" uses more memory.
 This would be ideal for my language,
 but it seems to be only available in GCC, and Go.
 
+## Panic Callback
+
+So many panic situations can be prevented, but not all.
+For most use cases, "stop the process" might be the best option.
+But maybe there _are_ cases where logging (similar to WARN_ONCE in Linux)
+and continuing might be better,
+if this is possible in a controlled way,
+and memory safety can be preserved.
+These cases would be op-in.
+For these cases, a possible solution might be to have a (configurable) callback,
+which can either: stop the process;
+log an error (like printk_ratelimit in the Linux kernel) and continue;
+or just continue.
+Logging is useful, because just silently ignoring can hide bugs.
+A user-defined callback could be used, but which decides
+what to do, depending on problem.
+There are some limitations on what the callback can do,
+these would need to be defined.
 
 
-
-
-
+----------------
 
 
 

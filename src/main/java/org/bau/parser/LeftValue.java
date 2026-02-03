@@ -12,10 +12,6 @@ public interface LeftValue extends Expression {
 
     Expression replace(Variable old, Expression with);
 
-    void setBoundValue(Expression scope, String modify, Expression value);
-
-    void addBoundCondition(Expression scope, String operation, Expression right);
-
     String decrementRefCountC();
     String incrementRefCountC();
 

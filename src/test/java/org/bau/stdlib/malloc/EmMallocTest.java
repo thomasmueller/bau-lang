@@ -148,7 +148,7 @@ public class EmMallocTest {
             if (group < lastGroup) {
                 fail();
             } else if (group > lastGroup) {
-                System.out.println("size => " + size + " is " + group);
+                // System.out.println("size => " + size + " is " + group);
                 lastGroup = group;
             }
             if (group <= 0 || group >= 64) {
@@ -180,7 +180,7 @@ public class EmMallocTest {
         for(int seed = 0; seed < 10; seed++) {
             int fail = test(seed, maxLoop);
             if (fail < best) {
-                System.out.println("best: " + seed + " @" + fail);
+                // System.out.println("best: " + seed + " @" + fail);
                 best = fail;
                 maxLoop = best;
             }

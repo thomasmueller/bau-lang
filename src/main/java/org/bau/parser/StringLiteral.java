@@ -46,7 +46,7 @@ public class StringLiteral implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     public Expression replace(Variable old, Expression with) {
@@ -90,11 +90,6 @@ public class StringLiteral implements Expression {
     @Override
     public boolean isEasyToRead() {
         return true;
-    }
-
-    @Override
-    public Bounds getBounds() {
-        return null;
     }
 
     @Override
@@ -147,6 +142,11 @@ public class StringLiteral implements Expression {
 
     public boolean isUsed() {
         return used;
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

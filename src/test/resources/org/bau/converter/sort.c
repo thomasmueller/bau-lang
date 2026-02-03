@@ -282,7 +282,7 @@ void insertionSort_int_array_int_1(int_array* a) {
     while (1 == 1) {
         int64_t i = 1;
         while (i < _arrayLen(a)) {
-            int64_t t = a->data[i];
+            int64_t t = a->data[idx_2(i, _arrayLen(a))];
             int64_t j = i - 1;
             while (1 == 1) {
                 int64_t _t0 = j >= 0;
@@ -321,7 +321,7 @@ void shellSort_int_array_int_1(int_array* a) {
         while (1 == 1) {
             int64_t i = g;
             while (i < _arrayLen(a)) {
-                int64_t t = a->data[i];
+                int64_t t = a->data[idx_2(i, _arrayLen(a))];
                 int64_t j = i - g;
                 while (1 == 1) {
                     int64_t _t0 = j >= 0;

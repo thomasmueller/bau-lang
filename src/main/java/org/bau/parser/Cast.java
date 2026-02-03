@@ -51,13 +51,8 @@ public class Cast implements Expression {
     }
 
     @Override
-    public Bounds getBounds() {
-        return base.getBounds();
-    }
-
-    @Override
-    public void setOwnedBoundsToNull(Expression scope) {
-        base.setOwnedBoundsToNull(scope);
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
+        base.setOwnedBoundsToNull(solver, level, loop);
     }
 
     @Override
@@ -74,6 +69,11 @@ public class Cast implements Expression {
     public void used(Program program) {
         base.used(program);
         targetType.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return base.containsModifiableVariables();
     }
 
 }

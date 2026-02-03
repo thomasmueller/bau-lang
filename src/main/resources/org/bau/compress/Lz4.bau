@@ -133,6 +133,10 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
                 p += 1
                 literalLen += x
                 break x <> 0xff
+        if p < 0
+            return -1
+        if outPos < 0
+            return -1
         if p < inData.len - 8
             s := 0..inData.len - 7
             s = p
@@ -179,9 +183,13 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
             next = outPos - offset
             if next >= outData.len - 8
                 return -1
+            if next < 0
+                return -1
             s := 0..outData.len - 7
             s = next
             o := 0..outData.len - 7
+            if outPos < 0
+                return -1
             if outPos >= outData.len - 8
                 return -1
             o = outPos
@@ -214,6 +222,8 @@ fun hash5Slow(data i8[], pos int) i32
         return -1
     p := 0..data.len - 7
     if pos >= data.len - 8
+        return -1
+    if pos < 0
         return -1
     p = pos
     x : read8(data, p)
@@ -256,6 +266,8 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         return -1
     if len >= inData.len - 7
         return -1
+    if len < 0
+        return -1
     if outData.len <= 16
         return -1
     inLen := 0..inData.len - 7
@@ -271,11 +283,15 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         if inPos < inLen - 16
             h := hash5(inData, inPos)
             cp : hashTable[h]
+            if cp < 0
+                return -1
             hashTable[h] = inPos
             #candidatePos = hashTable[h]
             if cp >= inPos or cp + 0xffff < inPos
                 step : searchMatch >> skipTrigger
                 next := inPos + step
+                if next < 0
+                    return -1
                 if next < inData.len - 8
                     inPos = next
                     literalLen += step
@@ -293,6 +309,8 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
                 if runLen >= 4
                     p := inPos + runLen - 2
                     if p >= inData.len - 8
+                        return -1
+                    if p < 0
                         return -1
                     h = hash5(inData, p)
                     hashTable[h] = p
@@ -317,9 +335,15 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         tagPos := outPos
         outPos += 1
         # possibly increase the match len backwards
-        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1] = inData[candidatePos - 1]
+        while
+            break candidatePos <= 0
+            break literalLen <= 0
+            break inPos <= 0 
+            break inData[inPos - 1] <> inData[candidatePos - 1]
             runLen += 1
             next := inPos - 1
+            if next < 0
+                return -1
             if next < inData.len - 7
                 inPos = next
             literalLen -= 1
@@ -337,6 +361,8 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         s := 0..inData.len - 7
         next := inPos - copyLen
         if next >= inData.len - 8
+            return -1
+        if next < 0
             return -1
         s = next
         o := 0..outData.len - 7
@@ -386,6 +412,8 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         outData[tagPos] = tag
         next = inPos + skipLen
         if next >= inData.len - 7
+            return -1
+        if next < 0
             return -1
         inPos = next
         literalLen = 0

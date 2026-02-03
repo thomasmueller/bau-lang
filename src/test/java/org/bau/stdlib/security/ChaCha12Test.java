@@ -24,7 +24,7 @@ public class ChaCha12Test {
                 + "ca58");
         ChaCha12 cha = new ChaCha12(key, nonce);
         byte[] result = cha.encrypt(plain.getBytes());
-        System.out.println(HexEncode.convertBytesToHex(result));
+        // System.out.println(HexEncode.convertBytesToHex(result));
         assertTrue(Arrays.equals(test, result));
     }
 

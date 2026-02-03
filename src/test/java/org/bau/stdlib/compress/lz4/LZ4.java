@@ -18,7 +18,7 @@ public class LZ4 {
             String outputFileName = args[2];
             try {
                 long result = decompressFile(inputFileName, outputFileName);
-                System.out.println("Decompressed " + result + " bytes");
+                // System.out.println("Decompressed " + result + " bytes");
             } catch (Exception e) {
                 System.out.println("Failed to decompress " + inputFileName + " to " + outputFileName + ": " + e);
                 e.printStackTrace();
@@ -39,7 +39,7 @@ public class LZ4 {
                 String outputFileName = args[2];
                 try {
                     long result = compressFile(inputFileName, outputFileName, level);
-                    System.out.println("Compressed " + result + " bytes");
+                    // System.out.println("Compressed " + result + " bytes");
                 } catch (Exception e) {
                     System.out.println("Failed to compress " + inputFileName + " to " + outputFileName + ": " + e);
                     e.printStackTrace();

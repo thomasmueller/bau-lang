@@ -536,6 +536,12 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
                 }
             }
         }
+        if (p < 0) {
+            return -1;
+        }
+        if (outPos < 0) {
+            return -1;
+        }
         if (p < ( _arrayLen(inData) - 8 )) {
             int64_t s = 0;
             s = p;
@@ -606,9 +612,15 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
             if (next >= ( _arrayLen(outData) - 8 )) {
                 return -1;
             }
+            if (next < 0) {
+                return -1;
+            }
             int64_t s = 0;
             s = next;
             int64_t o = 0;
+            if (outPos < 0) {
+                return -1;
+            }
             if (outPos >= ( _arrayLen(outData) - 8 )) {
                 return -1;
             }
@@ -730,6 +742,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
     if (len >= ( _arrayLen(inData) - 7 )) {
         return -1;
     }
+    if (len < 0) {
+        return -1;
+    }
     if (_arrayLen(outData) <= 16) {
         return -1;
     }
@@ -745,6 +760,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
         if (inPos < ( inLen - 16 )) {
             int32_t h = org_bau_compress_Lz4_hash5_2(inData, inPos);
             int64_t cp = this->hashTable->data[idx_2(h, _arrayLen(this->hashTable))];
+            if (cp < 0) {
+                return -1;
+            }
             this->hashTable->data[idx_2(h, _arrayLen(this->hashTable))] = inPos;
             int64_t _t0 = cp >= inPos;
             if (!(_t0)) {
@@ -754,6 +772,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
             if (_t0) {
                 int64_t step = shiftRight_int_2(searchMatch, skipTrigger);
                 int64_t next = inPos + step;
+                if (next < 0) {
+                    return -1;
+                }
                 if (next < ( _arrayLen(inData) - 8 )) {
                     inPos = next;
                     literalLen += step;
@@ -772,6 +793,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
                 if (runLen >= 4) {
                     int64_t p = ( inPos + runLen ) - 2;
                     if (p >= ( _arrayLen(inData) - 8 )) {
+                        return -1;
+                    }
+                    if (p < 0) {
                         return -1;
                     }
                     int32_t _t3 = org_bau_compress_Lz4_hash5_2(inData, p);
@@ -799,27 +823,24 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
         }
         int64_t tagPos = outPos;
         outPos += 1;
-        while (1 == 1) {
-            int64_t _t4 = candidatePos > 0;
-            if (_t4) {
-                int64_t _t5 = literalLen > 0;
-                _t4 = _t5;
+        while (1) {
+            if (candidatePos <= 0) {
+                break;
             }
-            int64_t _t6 = _t4;
-            if (_t6) {
-                int64_t _t7 = inPos > 0;
-                _t6 = _t7;
+            if (literalLen <= 0) {
+                break;
             }
-            int64_t _t8 = _t6;
-            if (_t8) {
-                int64_t _t9 = inData->data[idx_2(inPos - 1, _arrayLen(inData))] == inData->data[candidatePos - 1];
-                _t8 = _t9;
+            if (inPos <= 0) {
+                break;
             }
-            if (!(_t8)) {
+            if (inData->data[inPos - 1] != inData->data[candidatePos - 1]) {
                 break;
             }
             runLen += 1;
             int64_t next = inPos - 1;
+            if (next < 0) {
+                return -1;
+            }
             if (next < ( _arrayLen(inData) - 7 )) {
                 inPos = next;
             }
@@ -840,6 +861,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
         int64_t s = 0;
         int64_t next = inPos - copyLen;
         if (next >= ( _arrayLen(inData) - 8 )) {
+            return -1;
+        }
+        if (next < 0) {
             return -1;
         }
         s = next;
@@ -895,6 +919,9 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
         outData->data[idx_2(tagPos, _arrayLen(outData))] = tag;
         next = inPos + skipLen;
         if (next >= ( _arrayLen(inData) - 7 )) {
+            return -1;
+        }
+        if (next < 0) {
             return -1;
         }
         inPos = next;
@@ -1048,7 +1075,7 @@ int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_arra
                 while (1 == 1) {
                     int64_t i = 0;
                     while (1) {
-                        outBlock->data[i + 4] = block->data[i];
+                        outBlock->data[idx_2(i + 4, _arrayLen(outBlock))] = block->data[idx_2(i, _arrayLen(block))];
                         int64_t _next = i + 1;
                         if (_next >= read) {
                             break;
@@ -1267,7 +1294,7 @@ int64_t org_bau_compress_Lz4Tool_is_2(i8_array* a, i8_array* b) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                if (a->data[i] != b->data[idx_2(i, _arrayLen(b))]) {
+                if (a->data[i] != b->data[i]) {
                     return 0;
                 }
                 int64_t _next = i + 1;

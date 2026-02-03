@@ -71,7 +71,7 @@ public class HashTableTest {
             }
         }
         long time = System.currentTimeMillis() - start;
-        System.out.println("time: " + time + " ms " + dummy);
+        // System.out.println("time: " + time + " ms " + dummy);
     }
 
     @Test

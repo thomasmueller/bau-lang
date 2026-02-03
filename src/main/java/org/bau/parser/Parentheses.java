@@ -2,7 +2,6 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 
-import org.bau.parser.Bounds.ApplyType;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -50,22 +49,13 @@ public class Parentheses implements Expression {
     }
 
     @Override
-    public Bounds getBounds() {
-        return base.getBounds();
-    }
-
-    @Override
-    public void setOwnedBoundsToNull(Expression scope) {
-        base.setOwnedBoundsToNull(scope);
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
+        base.setOwnedBoundsToNull(solver, level, loop);
     }
 
     @Override
     public Expression simplify() {
         return this;
-    }
-
-    public void applyBoundCondition(Expression scope, ApplyType type) {
-        base.applyBoundCondition(scope, type);
     }
 
     @Override
@@ -82,6 +72,11 @@ public class Parentheses implements Expression {
     @Override
     public void used(Program program) {
         base.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return base.containsModifiableVariables();
     }
 
 }

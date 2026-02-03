@@ -2,6 +2,7 @@ package org.bau.bounds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.bau.parser.Parser;
 import org.junit.Test;
@@ -40,8 +41,9 @@ public class BoundsTest {
                             i = next
                     test()
                     """).parse();
+            fail();
         } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().startsWith("Can not verify"));
+            assertTrue(e.getMessage(), e.getMessage().startsWith("Can not verify"));
         }
     }
 
@@ -59,8 +61,9 @@ public class BoundsTest {
                             i = next
                     test()
                     """).parse();
+            fail();
         } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().startsWith("Can not verify"));
+            assertTrue(e.getMessage(), e.getMessage().startsWith("Can not verify"));
         }
     }
 

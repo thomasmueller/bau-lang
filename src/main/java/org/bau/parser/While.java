@@ -77,8 +77,8 @@ public class While implements Statement {
         StringBuilder buff = new StringBuilder();
         buff.append("while (" + condition.toC() + ") {\n");
         boolean hasReturn = Program.hasReturn(list);
-        boolean hasCatch = Program.hasCatch(list);
-        if (hasCatch) {
+        int catchCount = Program.catchCount(list);
+        for (int j = 0; j < catchCount; j++) {
             buff.append(Statement.indent("do { do {\n"));
         }
         for (Statement s : list) {

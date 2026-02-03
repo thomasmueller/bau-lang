@@ -309,6 +309,7 @@ int64_t canPlace_2(int64_t pos, int64_t rot);
 int64_t idiv_2(int64_t a, int64_t b);
 int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
+void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t last);
 int64_t org_bau_DateTime_getNanoTime_0();
 void org_bau_Env_atExit_1(void  (*callback_0)());
 void org_bau_Env_exit_1(int64_t code);
@@ -461,6 +462,26 @@ int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
 }
+void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t last) {
+    while (first < last) {
+        int8_t temp = buff->data[first];
+        buff->data[first] = buff->data[last];
+        buff->data[last] = temp;
+        int64_t f = first + 1;
+        if (f >= _arrayLen(buff)) {
+            break;
+        }
+        first = f;
+        int64_t l = last - 1;
+        if (l < 0) {
+            break;
+        }
+        if (l >= _arrayLen(buff)) {
+            break;
+        }
+        last = l;
+    }
+}
 int64_t org_bau_DateTime_getNanoTime_0() {
     struct timespec time={0,0};
     clock_gettime(CLOCK_MONOTONIC, &time);
@@ -472,38 +493,52 @@ void org_bau_Env_atExit_1(void  (*callback_0)()) {
 }
 void org_bau_Env_exit_1(int64_t code) {
     exit(code);
-    printf("Exit code %lld; will now throw an array out-of-bounds exception\n", (long long)code);
-    int_array* _t0 = int_array_new(0);
-    _incUseStack(_t0);
-    int_array* x = _t0;
-    x->data[idx_2(0, _arrayLen(x))] = 1;
-    _decUseStack(x, int_array);
-    _decUseStack(_t0, int_array);
+    printf("Exit code %lld; will now cause a stack overflow\n", (long long)code);
+    org_bau_Env_exit_1(code);
 }
 int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
+    if (_arrayLen(buff) < 1) {
+        return pos;
+    }
+    int64_t p = 0;
+    if (pos >= _arrayLen(buff)) {
+        return pos;
+    }
+    if (pos < 0) {
+        return pos;
+    }
+    p = pos;
     if (n < 0) {
-        buff->data[idx_2(pos, _arrayLen(buff))] = 45;
+        buff->data[p] = 45;
         pos += 1;
+        if (pos >= _arrayLen(buff)) {
+            return pos;
+        }
+        if (pos < 0) {
+            return 0;
+        }
+        p = pos;
     } else {
         n = - n;
     }
-    int64_t start = pos;
+    int64_t start = p;
     while (1) {
-        buff->data[idx_2(pos, _arrayLen(buff))] = 48 - (imod_2(n, 10));
-        pos += 1;
+        buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
+        pos += 1;
+        if (pos >= _arrayLen(buff)) {
+            return pos;
+        }
+        if (pos < 0) {
+            return 0;
+        }
         if (n == 0) {
             break;
         }
+        p = pos;
     }
     int64_t end = pos;
-    while (pos > start) {
-        pos -= 1;
-        int8_t temp = buff->data[idx_2(pos, _arrayLen(buff))];
-        buff->data[idx_2(pos, _arrayLen(buff))] = buff->data[idx_2(start, _arrayLen(buff))];
-        buff->data[idx_2(start, _arrayLen(buff))] = temp;
-        start += 1;
-    }
+    org_bau_Arrays_reverse_i8_array_i8_3(buff, start, p);
     return end;
 }
 i8_array* org_bau_Int_intToString_1(int64_t n) {
@@ -518,7 +553,7 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, _arrayLen(result))] = buff->data[j];
+                result->data[j] = buff->data[idx_2(j, _arrayLen(buff))];
                 int64_t _next = j + 1;
                 if (_next >= pos) {
                     break;
@@ -607,11 +642,12 @@ int64_t org_bau_Utils_random_0() {
     return _r0;
 }
 int64_t org_bau_Utils_random_1(int64_t smallerThan) {
-    if (smallerThan == 0) {
+    int64_t limit = smallerThan;
+    if (limit == 0) {
         return 0;
     }
-    int64_t max = smallerThan - 1;
-    if ((smallerThan & (max - 1)) == 0) {
+    int64_t max = limit - 1;
+    if ((limit & (max - 1)) == 0) {
         int64_t _t0 = org_bau_Utils_random_0();
         int64_t _r0 = _t0 & max;
         return _r0;
@@ -619,7 +655,7 @@ int64_t org_bau_Utils_random_1(int64_t smallerThan) {
     while (1) {
         int64_t _t1 = org_bau_Utils_random_0();
         int64_t x = shiftRight_int_2(_t1, 1);
-        int64_t result = imod_2(x, smallerThan);
+        int64_t result = imod_2(x, limit);
         return result;
     }
 }
@@ -887,7 +923,7 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("Exit code ", 10);
-    string_1001 = str_const("; will now throw an array out-of-bounds exception", 49);
+    string_1001 = str_const("; will now cause a stack overflow", 33);
     string_1025 = str_const("......       X     X      X    X           X     X     X           X                      XX      X   X      XX         .....\n.XX...XXXX  XXX    XX    XX    X    X X    X     X     XX   XXX   XX     XX   XX    XXX    X    XXX   XXX    X    XXX   XXX..\n.XX...              X    X     XX   XXX   XX     X     X     X     X    XX     XX   X      X                 X      X   X.X..\n......                                           X                                                                      ......", 504);
     string_1026 = str_const("AIJMNOURBKLCDEPQFSTFG", 21);
     string_1028 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
@@ -954,7 +990,7 @@ void _main() {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    field->data[i] = 0;
+                    field->data[idx_2(i, _arrayLen(field))] = 0;
                     int64_t _next = i + 1;
                     if (_next >= 336) {
                         break;
@@ -983,7 +1019,7 @@ void _main() {
             while (1 == 1) {
                 int64_t x = 0;
                 while (1) {
-                    field->data[x + 322] = 1;
+                    field->data[idx_2(x + 322, _arrayLen(field))] = 1;
                     int64_t _next = x + 1;
                     if (_next >= 14) {
                         break;
@@ -1021,7 +1057,7 @@ void _main() {
                 } else if (_t48 == 1001) {
                     tempPos += 1;
                 } else if ((_t48 == 32) || (_t48 == 1002)) {
-                    tempRot = rotated->data[rotation] - 65;
+                    tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                 } else if (_t48 == 27) {
                     org_bau_Env_exit_1(0);
                 } else if (_t48 == 1003) {

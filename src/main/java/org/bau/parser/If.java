@@ -107,8 +107,8 @@ public class If implements Statement {
             }
             ArrayList<Statement> list = listList.get(i);
             boolean hasReturn = Program.hasReturn(list);
-            boolean hasCatch = Program.hasCatch(list);
-            if (hasCatch) {
+            int catchCount = Program.catchCount(list);
+            for (int j = 0; j < catchCount; j++) {
                 buff.append(Statement.indent("do { do {\n"));
             }
             for (Statement s : list) {

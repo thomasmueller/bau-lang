@@ -8,8 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bau.parser.Bounds.ApplyType;
-import org.bau.parser.Bounds.CompareResult;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueArray;
 import org.bau.runtime.Value.ValueException;
@@ -40,9 +38,11 @@ public class Parser {
     private int indent;
     private DataType exceptionType;
 
-    // the block level is the level of indentation
-    // (1 for a function, and incremented by one for each nesting level)
-    private ArrayList<Expression> blockConditions = new ArrayList<>();
+    // solver for array bound checks etc
+    private Solver solver;
+    // depth of blocks (indentation depth)
+    private int depth;
+
     // the block id is is incremented for each if / elif / else block
     private Program program;
     private FunctionContext functionContext;
@@ -80,6 +80,7 @@ public class Parser {
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.lineOffset = lineOffset;
+        this.solver = new Solver(program.getSolver());
     }
 
     public void setScanPhase(boolean scanPhase) {
@@ -140,10 +141,6 @@ public class Parser {
             }
         }
         return program;
-    }
-
-    public ArrayList<Expression> getBlockConditions() {
-        return blockConditions;
     }
 
     private int getLine(int pos) {
@@ -319,7 +316,7 @@ public class Parser {
                 def.callType = type;
                 matchOp("(");
                 Variable var = new Variable("this", type);
-                var.isConstant = false;
+                var.isConstant = true;
                 def.parameters.add(var);
                 boolean template = parseFunctionDeclaration(targetModule, def);
                 if (template) {
@@ -605,7 +602,9 @@ public class Parser {
                 throw syntaxError("Type '" + id + "' not found when reading a function definition");
             }
             Variable var = new Variable("this", callType);
-            var.isConstant = false;
+            // "this" can not be re-assigned
+            var.isConstant = true;
+
             def.parameters.add(var);
             functionContext.addVariable(var);
         }
@@ -644,9 +643,21 @@ public class Parser {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
         }
+
+        for (Variable var : def.parameters) {
+            if (var.name.equals("this") && var.isConstant) {
+                // "this" is not null (if it is constant, which allows "this" to be a parameter for other functions)
+                setBlockCondition(var, false, false);
+            } else if (var.type().memoryType() == MemoryType.OWNER) {
+                // not null, until used
+                setBlockCondition(var, false, false);
+            }
+        }
+
+
         program.addComment(def.toString(), comment);
         program.addFunction(def);
-        addBlockCondition(null);
+        startBlock(false, null);
         while (true) {
             if (indent <= defIndent) {
                 break;
@@ -685,10 +696,11 @@ public class Parser {
         def.autoClose(autoClose);
         functionContext.rewindStack(stackPos);
         currentLoop = null;
-        undoLastBlockCondition();
-        if (!blockConditions.isEmpty()) {
+        endBlock();
+        if (depth != 0) {
             throw new IllegalStateException();
         }
+        solver.clear();
         if (currentFunctionDefinition.returnType != null) {
             if (!Program.doesReturn(currentFunctionDefinition.list)) {
                 throw syntaxError("Function does not return or throw");
@@ -739,6 +751,9 @@ public class Parser {
                         type = type.arrayType();
                     }
                     Variable var = new Variable(name, type);
+                    if (type.isRange()) {
+                        setRangeBounds(var);
+                    }
                     if (type.memoryType() == MemoryType.OWNER) {
                         if (varArgs) {
                             throw syntaxError("Owned var-args are not supported");
@@ -1149,8 +1164,11 @@ public class Parser {
                         }
                         functionContext.addVariable(v);
                     }
+                    if (type.isRange()) {
+                        setRangeBounds(v);
+                    }
                     verifyBounds(s);
-                    s.setBounds(getScope(0));
+                    s.setBounds(solver, depth, false);
                     target.add(s);
                 }
                 readEndOfStatement();
@@ -1196,7 +1214,7 @@ public class Parser {
                 v.isConstant = true;
                 v.constantValue = constValue;
                 s.leftValue = v;
-                s.setConstantBounds(v);
+                s.setConstantBounds(solver, v, expr);
                 s.type = s.value.type();
                 if (functionContext.getVariable(null, v.name) != null) {
                     throw syntaxError("Variable already defined: " + v.name);
@@ -1206,7 +1224,7 @@ public class Parser {
                     program.addGlobalVariable(v);
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1387,7 +1405,7 @@ public class Parser {
                     s.value = left.type().nullExpression();
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1402,7 +1420,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1421,7 +1439,7 @@ public class Parser {
                     }
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1440,7 +1458,7 @@ public class Parser {
                     }
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1454,7 +1472,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1468,7 +1486,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1482,7 +1500,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1496,7 +1514,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1510,7 +1528,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1524,7 +1542,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1538,7 +1556,7 @@ public class Parser {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
                 verifyBounds(s);
-                s.setBounds(getScope(0));
+                s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
                 return;
@@ -1555,51 +1573,58 @@ public class Parser {
             }
             return;
         }
-        Bounds b = expr.getBounds();
-        if (b == null) {
-            throw syntaxError("Can not verify if value might be zero");
-        }
-        if (b.notZero(this)) {
+        boolean maybeZero = false;
+        Solver.Rule r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(expr);
+        r.type = "<>";
+        r.right = Solver.number(0);
+        if (r.isComplete() && solver.isTrue(r)) {
+            // eg. via "if x = null; return"
             return;
         }
-        throw syntaxError("Can not verify if value might be zero; division by zero is not allowed: " + expr);
+        r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(expr);
+        r.type = ">=";
+        r.right = Solver.number(1);
+        if (!r.isComplete() || !solver.isTrue(r)) {
+            maybeZero = true;
+        }
+        r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(expr);
+        r.type = "<=";
+        r.right = Solver.number(-1);
+        if (!r.isComplete() || !solver.isTrue(r)) {
+            maybeZero = true;
+        }
+        if (maybeZero) {
+            throw syntaxError("Can not verify if value might be zero; division by zero is not allowed: " + expr);
+        }
     }
 
     private boolean needBoundsCheck(Expression base, Expression arrayIndex) {
-        Value v = arrayIndex.eval(null);
-        if (v != null) {
-            if (base instanceof Variable) {
-                Variable var = (Variable) base;
-                Bounds b = var.getLenBounds();
-                if (b != null && b.largerThan(v.longValue())) {
-                    return false;
-                }
-            }
-            Value v2 = base.eval(null);
-            if (v2 != null && v2.isArray()) {
-                if (v.longValue() < v2.len().longValue()) {
-                    return false;
-                }
-            }
+        Solver.Rule r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(arrayIndex);
+        r.type = ">=";
+        r.right = Solver.number(0);
+        boolean largerEqualZero;
+        if (!r.isComplete()) {
+            largerEqualZero = false;
+        } else {
+            largerEqualZero = solver.isTrue(r);
         }
-        FieldAccess f = new FieldAccess(base, "len", program.getType(null, DataType.INT));
-        Bounds b = arrayIndex.getBounds();
-        if (b != null) {
-            CompareResult r = b.compareTo(this, f);
-            if (r == CompareResult.SMALLER || r == CompareResult.EQUAL) {
-                return false;
-            }
+        r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(arrayIndex);
+        r.type = "<";
+        FieldAccess f = new FieldAccess(base, "len", DataType.INT_TYPE);
+        r.right = Operation.toSolverExpr(f);
+        boolean smallerLen;
+        if (!r.isComplete()) {
+            smallerLen = false;
+        } else {
+            smallerLen = solver.isTrue(r);
         }
-        DataType indexType = arrayIndex.type();
-        if (!indexType.isRange()) {
-            return true;
-        }
-        // TODO this is a bit fuzzy; need to compare identity
-        // and verify bounds exactly
-        if (indexType.maxValue.toString().startsWith(base.toString() + ".len")) {
-            return false;
-        }
-        return true;
+        boolean newResult = !largerEqualZero || !smallerLen;
+        return newResult;
     }
 
     private void verifyBounds(Assignment s) {
@@ -1643,42 +1668,32 @@ public class Parser {
     }
 
     private void verifyBounds(DataType targetType, Expression expr, Expression max) {
-        Value v = expr.eval(null);
-        Value m = max.eval(null);
-        if (v != null && m != null) {
-            if (v.longValue() > m.longValue()) {
-                // TODO handle overflow etc
-                throw syntaxError("Value is out-of-range");
-            }
-            return;
+        Solver.Rule r0 = new Solver.Rule();
+        r0.left = Operation.toSolverExpr(expr);
+        r0.type = ">=";
+        r0.right = Solver.number(0);
+        boolean largerEqualZero;
+        if (!r0.isComplete()) {
+            largerEqualZero = false;
+        } else {
+            largerEqualZero = solver.isTrue(r0);
         }
-        DataType exprType = expr.type();
-        if (exprType.toString().equals(targetType.toString())) {
-            return;
+        Solver.Rule r = new Solver.Rule();
+        r.left = Operation.toSolverExpr(expr);
+        r.type = "<";
+        r.right = Operation.toSolverExpr(max);
+        boolean smallerLen;
+        if (!r.isComplete()) {
+            smallerLen = false;
+        } else {
+            smallerLen = solver.isTrue(r);
         }
-        if (exprType.isRange()) {
-            // the expression (parameter) type is a range,
-            // and the max value is the same as the max value of the parameter
-            if (exprType.maxValue.toString().equals(max.toString())) {
-                return;
-            }
+        if (!largerEqualZero) {
+            throw syntaxError("Can not verify if value is larger than 0");
         }
-        Bounds b = expr.getBounds();
-        if (b == null) {
+        if (!smallerLen) {
             throw syntaxError("Can not verify if value is smaller than '" + max + "'");
         }
-        CompareResult result = b.compareTo(this, max);
-        if (result == CompareResult.SMALLER || result == CompareResult.EQUAL) {
-            return;
-        }
-        Bounds mb = max.getBounds();
-        if (mb != null) {
-            result = mb.compareTo(this, expr);
-            if (result == CompareResult.LARGER) {
-                return;
-            }
-        }
-        throw syntaxError("Can not verify if value is smaller than '" + max + "'");
     }
 
     private void readEndOfStatement() {
@@ -2032,7 +2047,7 @@ public class Parser {
             exceptionType = call.exceptionType();
         }
         // owned variables are now null
-        call.setBounds(getScope(0));
+        call.setBounds(solver, depth, false);
         return call;
     }
 
@@ -2041,17 +2056,12 @@ public class Parser {
             throw syntaxError("Return needs to be inside of a function");
         }
         Return b = new Return(null);
-        if (blockConditions.size() > 0) {
-            Expression expr = blockConditions.get(blockConditions.size() - 1);
-            if (expr != null) {
-                expr.applyBoundCondition(getScope(-1), ApplyType.NEGATIVE);
-            }
-        }
         if (matchOp("\n") || matchOp(";")) {
             if (currentFunctionDefinition.returnType != null) {
                 throw syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType);
             }
             target.add(b);
+            negateLastBlockCondition();
             return;
         }
         // if it is not a simple value  (e.g. string1 + string2)
@@ -2083,6 +2093,7 @@ public class Parser {
         }
         verifyBounds(currentFunctionDefinition.returnType, b.expr);
         b.autoClose = autoClose(stackPosFunction, b.expr);
+        negateLastBlockCondition();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
             return;
@@ -2127,6 +2138,7 @@ public class Parser {
         Throw t = new Throw();
         if (matchOp("\n") || matchOp(";")) {
             target.add(t);
+            negateLastBlockCondition();
             return;
         }
         t.expr = parseExpression(target);
@@ -2135,6 +2147,7 @@ public class Parser {
         // declared in the function
         if (matchOp("\n") || matchOp(";")) {
             target.add(t);
+            negateLastBlockCondition();
             return;
         }
         throw syntaxError("Expected end of statement, got '" + token + "' in 'throw' statement");
@@ -2147,17 +2160,11 @@ public class Parser {
         Break b = new Break();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
-            // for example, after: "if x = 0 { break }" we know that x will not be 0
-            if (blockConditions.size() > 0) {
-                Expression expr = blockConditions.get(blockConditions.size() - 1);
-                if (expr != null) {
-                    expr.applyBoundCondition(getScope(-1), ApplyType.NEGATIVE);
-                }
-            }
+            negateLastBlockCondition();
             return;
         }
         b.condition = parseCondition(target);
-        b.condition.applyBoundCondition(getScope(0), ApplyType.NEGATIVE);
+        setBlockCondition(b.condition, false, true);
         b.autoClose = autoClose(stackPosLoop, null);
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
@@ -2166,39 +2173,20 @@ public class Parser {
         throw syntaxError("Expected end of statement, got '" + token + "' in 'break' statement");
     }
 
-    /**
-     * Get the "scope" condition at the specified level.
-     *
-     * @param level the level (0 for "top scope", that is valid within the function)
-     * @return the condition (if any)
-     */
-    private Expression getScope(int level) {
-        int l = getBlockConditions().size() + level - 1;
-        if (l < 0) {
-            return null;
-        }
-        return getBlockConditions().get(l);
-    }
-
     private void parseContinue(ArrayList<Statement> target) {
         if (currentLoop == null) {
             throw syntaxError("'continue' statement outside of a loop");
         }
         Continue c = new Continue();
         if (matchOp("\n") || matchOp(";")) {
-            // for example, after: "if x = 0 { continue }" we know that x will not be 0
-            if (blockConditions.size() > 0) {
-                Expression expr = blockConditions.get(blockConditions.size() - 1);
-                if (expr != null) {
-                    expr.applyBoundCondition(getScope(-1), ApplyType.NEGATIVE);
-                }
-            }
             target.add(c);
+            negateLastBlockCondition();
             return;
         }
         c.condition = parseCondition(target);
         c.loop = currentLoop;
-        c.condition.applyBoundCondition(getScope(0), ApplyType.NEGATIVE);
+        setBlockCondition(c.condition, false, true);
+
         c.autoClose = autoClose(stackPosLoop, null);
         if (matchOp("\n") || matchOp(";")) {
             target.add(c);
@@ -2267,17 +2255,17 @@ public class Parser {
                     throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
                 }
                 if (!first) {
-                    undoLastBlockCondition();
+                    endBlock();
                 }
-                addBlockCondition(condition);
+                startBlock(false, condition);
                 first = false;
                 ifStatement.conditions.add(condition);
             } else if (match("else")) {
                 if (!matchOp("\n")) {
                     throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
                 }
-                undoLastBlockCondition();
-                addBlockCondition(null);
+                endBlock();
+                startBlock(false, null);
                 first = false;
                 elsePart = true;
             } else {
@@ -2298,7 +2286,7 @@ public class Parser {
             }
             switchIndent = indent;
         }
-        undoLastBlockCondition();
+        endBlock();
         target.add(ifStatement);
     }
 
@@ -2307,7 +2295,7 @@ public class Parser {
         boolean sameLine;
         If ifStatement = new If();
         Expression condition = parseCondition(target);
-        addBlockCondition(condition);
+        startBlock(false, condition);
         ifStatement.conditions.add(condition);
         boolean elsePart = false;
         int stackPos = functionContext.getStackPos();
@@ -2343,20 +2331,38 @@ public class Parser {
             }
             ifIndent = indent;
             if (match("elif")) {
-                undoLastBlockCondition();
+                endBlock();
                 condition = parseCondition(target);
-                addBlockCondition(condition);
+                startBlock(false, condition);
                 ifStatement.conditions.add(condition);
             } else if (match("else")) {
-                undoLastBlockCondition();
-                addBlockCondition(null);
+                endBlock();
+                startBlock(false, null);
                 elsePart = true;
             } else {
                 break;
             }
         }
-        undoLastBlockCondition();
+        endBlock();
         target.add(ifStatement);
+    }
+
+    private void setRangeBounds(Variable var) {
+        DataType type = var.type();
+        if (type.isRange()) {
+            Solver.Rule r = Solver.rule(Solver.variable(var.name), ">=", Solver.number(0));
+            if (!var.global) {
+                r.depth = depth;
+            }
+            r.always = true;
+            solver.addRule(r);
+            r = Solver.rule(Solver.variable(var.name), "<", Operation.toSolverExpr(type.maxValue));
+            if (!var.global) {
+                r.depth = depth;
+            }
+            r.always = true;
+            solver.addRule(r);
+        }
     }
 
     private void parseFor(ArrayList<Statement> target) {
@@ -2410,6 +2416,9 @@ public class Parser {
                 );
         comp.operator = "=";
         Variable var = new Variable(variableName, call.type());
+        if (var.type().isRange()) {
+            setRangeBounds(var);
+        }
         functionContext.addVariable(var);
         While loop = new While();
         int i = 0;
@@ -2436,7 +2445,7 @@ public class Parser {
                 wrappingIf.conditions.add(condition);
             }
         }
-        addBlockCondition(comp);
+        startBlock(true, comp);
         outerLoop.condition = comp;
         for (; i < loopFunctionList.size(); i++) {
             Statement s = loopFunctionList.get(i);
@@ -2448,16 +2457,16 @@ public class Parser {
                 While w = (While) s;
                 whileLoop = w.list;
                 loop.condition = w.condition;
-                loop.condition.applyBoundCondition(getScope(0), ApplyType.POSITIVE);
+                setBlockCondition(loop.condition, true, false);
                 i++;
                 break;
             }
-            s.setBounds(getScope(0));
+            s.setBounds(solver, depth, true);
             outerLoop.list.add(s);
         }
         While oldLoop = currentLoop;
         currentLoop = loop;
-        addBlockCondition(loop.condition);
+        startBlock(true, loop.condition);
         int j = 0;
         for (; j < whileLoop.size(); j++) {
             Statement s = whileLoop.get(j);
@@ -2469,7 +2478,7 @@ public class Parser {
             for(int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
             }
-            s.setBounds(getScope(0));
+            s.setBounds(solver, depth, true);
             loop.list.add(s);
         }
         boolean sameLine;
@@ -2503,10 +2512,10 @@ public class Parser {
             } else if (s instanceof Continue) {
                 ((Continue) s).autoClose = autoClose(stackPosLoop, null);
             }
-            s.setBounds(getScope(0));
+            s.setBounds(solver, depth, true);
             loop.listContinue.add(s);
         }
-        undoLastBlockCondition();
+        endBlock();
         outerLoop.list.add(loop);
         for (; i < loopFunctionList.size(); i++) {
             Statement s = loopFunctionList.get(i);
@@ -2515,7 +2524,7 @@ public class Parser {
         outerLoop.list.add(new Break());
         loop.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
-        undoLastBlockCondition();
+        endBlock();
         stackPosLoop = oldStackPosLoop;
         currentLoop = oldLoop;
         if (wrappingIf == null) {
@@ -2529,18 +2538,40 @@ public class Parser {
         }
     }
 
-    private void addBlockCondition(Expression condition) {
-        blockConditions.add(condition);
+    private void startBlock(boolean loop, Expression condition) {
+        depth++;
+        setBlockCondition(condition, loop, false);
+    }
+
+    private void setBlockCondition(Expression condition, boolean loop, boolean negated) {
+        if (loop) {
+            solver.removeNotAlwaysRules();
+        }
         if (condition != null) {
-            condition.applyBoundCondition(condition, ApplyType.POSITIVE);
+            List<Solver.Rule> list = condition.getRules();
+            if (!list.isEmpty()) {
+                for (Solver.Rule r : list) {
+                    if (negated) {
+                        r = r.reverse();
+                    }
+                    r.depth = depth;
+                    if (!condition.containsModifiableVariables()) {
+                        r.always = true;
+                    }
+                    solver.addRule(r);
+                }
+            }
         }
     }
 
-    private void undoLastBlockCondition() {
-        Expression last = blockConditions.remove(blockConditions.size() - 1);
-        if (last != null) {
-            last.applyBoundCondition(last, ApplyType.UNDO);
-        }
+    private void negateLastBlockCondition() {
+        // for example, after: "if x = 0 { throw }" we know that x will not be 0
+        solver.reversRulesOfDepth(depth);
+    }
+
+    private void endBlock() {
+        depth--;
+        solver.removeDeeperRules(depth);
     }
 
     private void parseWhile(ArrayList<Statement> target) {
@@ -2553,7 +2584,7 @@ public class Parser {
         } else {
             loop.condition = parseCondition(loop.list);
         }
-        addBlockCondition(loop.condition);
+        startBlock(true, loop.condition);
         if (!loop.list.isEmpty()) {
             // we need to make it a "while true" loop with a break condition
             Break b = new Break();
@@ -2591,7 +2622,7 @@ public class Parser {
         loop.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
         stackPosLoop = oldStackPosLoop;
-        undoLastBlockCondition();
+        endBlock();
         currentLoop = oldLoop;
         target.add(loop);
     }
@@ -2942,17 +2973,32 @@ public class Parser {
         return v;
     }
 
-    private void verifyNullAccess(Expression e) {
-        if (e.type().isNullable()) {
-            Bounds b = e.getBounds();
-            if (b == null || !b.isNotNull(this)) {
-                throw syntaxError("The expression '" + e + "' could be null here. You need to verify using 'if " + e + "' before accessing it.");
+    private void verifyNullAccess(Expression expr) {
+        boolean needTest = true;
+        if (expr.type().isNullable()) {
+            Solver.Rule r = new Solver.Rule();
+            r.left = Operation.toSolverExpr(expr);
+            r.type = "<>";
+            r.right = Solver.number(0);
+            if (r.isComplete() && solver.isTrue(r)) {
+                needTest = false;
             }
-        } else if (e.type().memoryType() == MemoryType.OWNER) {
-            // owners are known to not be null, until they are cleared
-            Bounds b = e.getBounds();
-            if (b != null && !b.isNotNull(this)) {
-                throw syntaxError("The expression '" + e + "' could be null here. You need to verify using 'if " + e + "' before accessing it.");
+            if (needTest) {
+                throw syntaxError("The expression '" + expr + "' could be null here. You need to verify using 'if " + expr + "' before accessing it.");
+            }
+        } else if (expr.type().memoryType() == MemoryType.OWNER) {
+            // owners are known to _not_ be null, until they are cleared
+            needTest = false;
+            Solver.Rule r = new Solver.Rule();
+            r.left = Operation.toSolverExpr(expr);
+            r.type = "<>";
+            r.right = Solver.number(0);
+            if (r.isComplete() && solver.isTrue(r)) {
+                needTest = true;
+            }
+            if (!needTest) {
+                throw syntaxError("The expression '" + expr + "' could be null here. You need to verify using 'if " + expr
+                        + "' before accessing it.");
             }
         }
     }
@@ -3337,7 +3383,13 @@ public class Parser {
         assign.type = type;
         assign.leftValue = var;
         assign.value = expr;
-        assign.setConstantBounds(var);
+        Solver.Rule r = Operation.toRule(var, "=", expr);
+        if (r != null) {
+            r.depth = depth;
+            r.always = true;
+            solver.addRule(r);
+        }
+        assign.setConstantBounds(solver, var, expr);
         target.add(assign);
         functionContext.addVariable(var);
         return var;

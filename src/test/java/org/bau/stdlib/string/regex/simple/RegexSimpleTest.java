@@ -67,7 +67,7 @@ public class RegexSimpleTest {
                     }
                 }
                 long time = (System.nanoTime() - start) / count;
-                System.out.println("time: " + time + " m=" + (m == 0 ? "my " : "std") + " matchCount " + matchCount);
+                // System.out.println("time: " + time + " m=" + (m == 0 ? "my " : "std") + " matchCount " + matchCount);
             }
         }
     }
@@ -230,9 +230,9 @@ public class RegexSimpleTest {
             if (!exp.equals(g)) {
                 if (regex.length() < smallestReplaceFirst) {
                     smallestReplaceFirst = regex.length();
-                    System.out.println("Regex.replaceFirst(\"" + text + "\", \"" + regex + "\", \"X\");");
-                    System.out.println("expected: " + exp);
-                    System.out.println("got:      " + g);
+                    // System.out.println("Regex.replaceFirst(\"" + text + "\", \"" + regex + "\", \"X\");");
+                    // System.out.println("expected: " + exp);
+                    // System.out.println("got:      " + g);
                 }
                 // assertEquals("Regex.replaceFirst(\"" + text + "\", \"" + regex + "\", \"X\");", exp, g);
             }
@@ -241,14 +241,14 @@ public class RegexSimpleTest {
             if (!expa.equals(ga)) {
                 if (regex.length() < smallestReplaceFirst) {
                     smallestReplaceFirst = regex.length();
-                    System.out.println("Regex.replaceAll(\"" + text + "\", \"" + regex + "\", \"X\");");
-                    System.out.println("expected: " + expa);
-                    System.out.println("got:      " + ga);
+                    // System.out.println("Regex.replaceAll(\"" + text + "\", \"" + regex + "\", \"X\");");
+                    // System.out.println("expected: " + expa);
+                    // System.out.println("got:      " + ga);
                 }
                 assertEquals("Regex.replaceAll(\"" + text + "\", \"" + regex + "\", \"X\");", exp, g);
             }
         }
-        System.out.println("count: " + count + " timeout: " + timeout);
+        // System.out.println("count: " + count + " timeout: " + timeout);
         if (timeout > count * 0.01) {
             fail();
         }

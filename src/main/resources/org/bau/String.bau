@@ -79,6 +79,8 @@ fun substring(s i8[], start int, end int) i8[]
     i := 0..s.len
     if start >= s.len
         return ''
+    if start < 0
+        start = 0
     i = start
     result : i8[len]
     for j := until(len)

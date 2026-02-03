@@ -10,7 +10,7 @@ fun main()
     if Env.argCount() <> 4
         println('Parameters: c|d input output')
         return
-    in := openFile(Env.arg(2), 'r')
+    in : openFile(Env.arg(2), 'r')
     if not in
         println('Input does not exist')
         return
@@ -37,7 +37,7 @@ fun main()
         di1 = input[3]
         inPos = 4
         decompress()
-    out := openFile(Env.arg(3), 'w')
+    out : openFile(Env.arg(3), 'w')
     if not out
         println('Could not open output')
         return

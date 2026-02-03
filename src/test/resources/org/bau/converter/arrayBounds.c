@@ -272,7 +272,6 @@ int_array* int_array_new(uint32_t len) {
 int __argc;
 char **__argv;
 /* functions */
-int64_t idx_2(int64_t x, int64_t len);
 void test_0();
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
@@ -283,10 +282,6 @@ void i8_array_free(i8_array* x) {
 void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
-}
-int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
-    return arrayOutOfBounds(x, len);
 }
 void test_0() {
     i8_array* _t0 = i8_array_new(10);
@@ -310,7 +305,7 @@ void test_0() {
     while (1 == 1) {
         int64_t i = 0;
         while (i < 20) {
-            sum += data->data[idx_2(i, _arrayLen(data))];
+            sum += data->data[i];
             i += 1;
         }
         break;

@@ -162,12 +162,12 @@ public class TlsfMallocTest {
             worstMemoryUsage = Math.max(worstMemoryUsage, maxMemoryUsage);
             sumMemoryUsage += maxMemoryUsage;
         }
-        System.out.println("calls " + Malloc.countCalls + " branch " + Malloc.countBranches);
+        // System.out.println("calls " + Malloc.countCalls + " branch " + Malloc.countBranches);
         for (int i = 0; i < 64; i++) {
             // System.out.println(i + " " + levelCount[i]);
         }
         // Average memory usage 1369360 worst 2107308
-        System.out.println("Average memory usage " + sumMemoryUsage / count + " worst " + worstMemoryUsage);
+        // System.out.println("Average memory usage " + sumMemoryUsage / count + " worst " + worstMemoryUsage);
     }
 
     public int test(int seed, int maxLoop) {

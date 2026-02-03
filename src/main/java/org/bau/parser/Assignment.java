@@ -38,28 +38,48 @@ public class Assignment implements Statement {
     }
 
     @Override
-    public void setBounds(Expression scope) {
+    public void setBounds(Solver solver, int depth, boolean loop) {
         if (initial || modify == null) {
             if (value instanceof Operation) {
                 Operation op = (Operation) value;
                 if (op.operator.equals("%")) {
                     // if the bounds of the left operand are >= 0, then
                     // we can set the bounds to be >= 0 and smaller than the right
-                    Bounds b = op.left.getBounds();
-                    if (b != null && b.largerThan(scope, -1)) {
-                        leftValue.setBoundValue(scope, "<", op.right);
+                    Solver.Rule r = Solver.rule(Operation.toSolverExpr(op.left), ">=", Solver.number(0));
+                    if (solver.isTrue(r)) {
+                        r = Solver.rule(Operation.toSolverExpr(leftValue), ">=", Solver.number(0));
+                        r.depth = depth;
+                        solver.addRule(r);
+                        r = Solver.rule(Operation.toSolverExpr(leftValue), "<", Operation.toSolverExpr(op.right));
+                        r.depth = depth;
+                        solver.addRule(r);
                     }
+                } else if (op.operator.equals(">>")) {
+                    // logical right shift will always result in >= 0
+                    Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), ">=", Solver.number(0));
+                    r.depth = depth;
+                    solver.addRule(r);
                 } else {
-                    leftValue.setBoundValue(scope, "=", value);
+                    Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "=", Operation.toSolverExpr(value));
+                    if (r.isComplete()) {
+                        solver.addRule(r);
+                    }
                 }
             } else {
-                leftValue.setBoundValue(scope, "=", value);
+                Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "=", Operation.toSolverExpr(value));
+                if (r.isComplete()) {
+                    solver.addRule(r);
+                }
+                if (leftValue.type().memoryType() == MemoryType.OWNER) {
+                    // set it to be not null (the old owner is set to null elsewhere)
+                    Solver.Rule r2 = Operation.toRule(leftValue, "<>", NumberValue.ZERO);
+                    // survive loops etc
+                    r2.always = true;
+                    solver.addRule(r2);
+                }
             }
-        } else {
-            // TODO modify bounds
-            // leftValue.setBoundValue(scope, modify, value);
         }
-        value.setOwnedBoundsToNull(scope);
+        value.setOwnedBoundsToNull(solver, depth, loop);
     }
 
     @Override
@@ -215,23 +235,71 @@ public class Assignment implements Statement {
         value.used(program);
     }
 
-    public void setConstantBounds(Variable v) {
-        if (value.type().isArray()) {
+    public void setConstantBounds(Solver solver, Variable v, Expression expr) {
+        DataType type = value.type();
+        if (type.memoryType() == MemoryType.OWNER) {
+            solver.removeRulesFor(Solver.variable(v.name));
+        }
+        if (type.isArray()) {
             if (value instanceof New) {
                 New n = (New) value;
-                v.addLenBoundCondition(null, "=", n.arrayLength);
+                v.setConstantLength(n.arrayLength);
+                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                Solver.Rule r = Operation.toRule(f, "=", n.arrayLength);
+                if (r != null) {
+                    r.always = true;
+                    r.global = v.global;
+                    solver.addRule(r);
+                }
             } else if (value instanceof StringLiteral) {
                 StringLiteral n = (StringLiteral) value;
-                v.addLenBoundCondition(null, "=", new NumberValue(n.array.len(), DataType.INT_TYPE, false));
+                NumberValue len = new NumberValue(n.array.len(), DataType.INT_TYPE, false);
+                v.setConstantLength(len);
+                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                Solver.Rule r = Operation.toRule(f, "=", len);
+                if (r != null) {
+                    r.always = true;
+                    r.global = v.global;
+                    solver.addRule(r);
+                }
             } else if (value instanceof ArrayConstant) {
                 ArrayConstant n = (ArrayConstant) value;
-                v.addLenBoundCondition(null, "=", new NumberValue(n.len(), DataType.INT_TYPE, false));
+                NumberValue len = new NumberValue(n.len(), DataType.INT_TYPE, false);
+                v.setConstantLength(len);
+                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                Solver.Rule r = Operation.toRule(f, "=", len);
+                if (r != null) {
+                    r.always = true;
+                    r.global = v.global;
+                    solver.addRule(r);
+                }
             } else if (value instanceof Variable) {
                 Variable v2 = (Variable) value;
-                v.copyBounds(v2);
+                v.copyConstant(v2);
+                FieldAccess f1 = new FieldAccess(v2, "len", DataType.INT_TYPE);
+                FieldAccess f2 = new FieldAccess(v, "len", DataType.INT_TYPE);
+                Solver.Rule r = Operation.toRule(f1, "=", f2);
+                if (r != null) {
+                    r.always = true;
+                    r.global = v.global;
+                    solver.addRule(r);
+                }
             }
         }
-        v.setBoundValue(null, "=", value);
+        if (type.memoryType() == MemoryType.OWNER) {
+            // set it to be not null (the old owner is set to null elsewhere)
+            Solver.Rule r = Operation.toRule(v, "<>", NumberValue.ZERO);
+            // survive loops etc
+            r.always = true;
+            solver.addRule(r);
+        } else {
+            Solver.Rule r = Operation.toRule(v, "=", value);
+            if (r != null) {
+                r.always = true;
+                r.global = v.global;
+                solver.addRule(r);
+            }
+        }
     }
 
 }

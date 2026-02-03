@@ -3,7 +3,7 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bau.parser.Bounds.ApplyType;
+import org.bau.parser.Solver.Rule;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -27,29 +27,11 @@ public interface Expression {
         return false;
     }
 
-    Bounds getBounds();
-
-    /**
-     * Apply the bounds to all the variables in the expression.
-     *
-     * while i<n     -> applyBounds(i<n)
-     *   i+=1        -> i.setBounds(+1)
-     *
-     * @param scope the condition applies within this scope
-     * @param type whether the condition should be reversed, or undone
-     * @param condition
-     */
-    default void applyBoundCondition(Expression scope, ApplyType type) {
-
-    }
-
     /**
      * After "using" owned variables and fields, they are null
      * (calling a method, assigning to another variable)
-     *
-     * @param scope
      */
-    void setOwnedBoundsToNull(Expression scope);
+    void setOwnedBoundsToNull(Solver solver, int depth, boolean loop);
 
     /**
      * Whether the expression is a constant or a variable. Operations
@@ -76,5 +58,11 @@ public interface Expression {
     }
 
     void used(Program program);
+
+    default List<Rule> getRules() {
+        return List.of();
+    }
+
+    boolean containsModifiableVariables();
 
 }

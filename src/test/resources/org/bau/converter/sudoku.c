@@ -340,7 +340,7 @@ int64_t org_bau_Env_argCount_0() {
 int64_t solve_1(i8_array* c) {
     int64_t i = 0;
     while (i < _arrayLen(c)) {
-        if (c->data[i] == 46) {
+        if (c->data[idx_2(i, _arrayLen(c))] == 46) {
             break;
         }
         i += 1;
@@ -367,12 +367,12 @@ int64_t solve_1(i8_array* c) {
             j += 1;
         }
         if (j >= 9) {
-            c->data[i] = k;
+            c->data[idx_2(i, _arrayLen(c))] = k;
             int64_t _t0 = solve_1(c);
             if (_t0) {
                 return 1;
             }
-            c->data[i] = 46;
+            c->data[idx_2(i, _arrayLen(c))] = 46;
         }
         k += 1;
     }

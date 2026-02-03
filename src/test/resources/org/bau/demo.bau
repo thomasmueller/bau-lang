@@ -1,1 +1,3 @@
+import org.bau.Int
+
 println('Hello ' 'World')

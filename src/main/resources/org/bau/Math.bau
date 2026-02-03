@@ -361,8 +361,8 @@ fun floatToString(n float) i8[]
     buff : i8[30]
     pos := 0
     if n < 0
-        buff[pos] = ord('-')
-        pos += 1
+        buff[0] = ord('-')
+        pos = 1
         n = -n
     else
     end : appendFloat(n, buff, pos)

@@ -238,6 +238,8 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
+typedef struct org_bau_Exception_exception org_bau_Exception_exception;
+struct org_bau_Exception_exception;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -268,7 +270,33 @@ int_array* int_array_new(uint32_t len) {
     result->_refCount = 1;
     return result;
 }
+struct org_bau_Exception_exception {
+    int64_t exceptionType;
+    i8_array* message;
+};
+org_bau_Exception_exception org_bau_Exception_exception_new() {
+    org_bau_Exception_exception result;
+    result.exceptionType = 0;
+    result.message = 0;
+    return result;
+}
 /* exception types */
+typedef struct _int64_t_or_exception _int64_t_or_exception;
+struct _int64_t_or_exception {
+    org_bau_Exception_exception exception;
+    int64_t result;
+};
+_int64_t_or_exception ok_int64_t_or_exception(int64_t result) {
+    _int64_t_or_exception x;
+    x.exception.exceptionType = -1;
+    x.result = result;
+    return x;
+}
+_int64_t_or_exception exception_int64_t_or_exception(org_bau_Exception_exception exception) {
+    _int64_t_or_exception x;
+    x.exception = exception;
+    return x;
+}
 /* global */
 int __argc;
 char **__argv;
@@ -278,9 +306,13 @@ void divisionByZeroBreak2_0();
 void divisionByZeroContinue_0();
 void divisionByZeroContinue2_0();
 void divisionByZeroReturn_0();
+_int64_t_or_exception divisionByZeroThrow_2(int64_t sum, int64_t count);
 int64_t idiv_2(int64_t a, int64_t b);
+org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
+void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
+void org_bau_Exception_exception_copy(org_bau_Exception_exception* x);
 void i8_array_free(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
@@ -288,6 +320,12 @@ void i8_array_free(i8_array* x) {
 void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
+}
+void org_bau_Exception_exception_free(org_bau_Exception_exception* x) {
+    _decUse(x->message, i8_array);
+}
+void org_bau_Exception_exception_copy(org_bau_Exception_exception* x) {
+    _incUse(x->message);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -302,6 +340,10 @@ i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
+i8_array* string_1005;
+i8_array* string_1006;
+i8_array* string_1007;
+i8_array* string_1008;
 void divisionByZeroBreak_0() {
     int64_t y = -1;
     while (y < 2) {
@@ -357,10 +399,33 @@ void divisionByZeroReturn_0() {
         printf("ret: %lld\n", (long long)z);
     }
 }
+_int64_t_or_exception divisionByZeroThrow_2(int64_t sum, int64_t count) {
+    org_bau_Exception_exception _lastException;
+    _int64_t_or_exception _x0;
+    do {
+    if (count == 0) {
+        org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1005);
+        _x0 = exception_int64_t_or_exception(_t0); _lastException = _x0.exception; goto catch0;
+        org_bau_Exception_exception_free(&_t0);
+    }
+    int64_t z = idiv_2(sum, count);
+    printf("throw: %lld\n", (long long)z);
+    return ok_int64_t_or_exception(z);
+    } while(0);
+    catch0:
+    return exception_int64_t_or_exception(_lastException);
+}
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
     if (a == 0) return 0;
     return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
+    org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
+    _t0.exceptionType = 0;
+    _incUseStack(message);
+    _t0.message = message;
+    return _t0;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
@@ -372,14 +437,53 @@ int main(int _argc, char *_argv[]) {
     string_1002 = str_const("cont: ", 6);
     string_1003 = str_const("cont2: ", 7);
     string_1004 = str_const("ret: ", 5);
+    string_1005 = str_const("Can not get the average with count 0", 36);
+    string_1006 = str_const("throw: ", 7);
+    string_1007 = str_const("div by zero caught", 18);
+    string_1008 = str_const("div by non-zero?", 16);
     _main();
     return 0;
 }
 void _main() {
+    org_bau_Exception_exception _lastException;
+    _int64_t_or_exception _x0;
+    _int64_t_or_exception _x1;
+    do { do {
+    do { do {
     divisionByZeroContinue_0();
     divisionByZeroContinue2_0();
     divisionByZeroBreak_0();
     divisionByZeroBreak2_0();
     divisionByZeroReturn_0();
+    _x0 = divisionByZeroThrow_2(10, 0);
+    ;
+    if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
+    int64_t _t1 = _x0.result;
+    goto skip0;
+    } while(0);
+    catch0:;
+    org_bau_Exception_exception exception = _lastException;
+        printf("div by zero caught\n");
+        org_bau_Exception_exception_free(&exception);
+    } while(0);
+    skip0:;
+    _x1 = divisionByZeroThrow_2(10, 1);
+    ;
+    if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch1; }
+    int64_t _t2 = _x1.result;
+    goto skip1;
+    } while(0);
+    catch1:;
+    org_bau_Exception_exception exception = _lastException;
+        printf("div by non-zero?\n");
+        org_bau_Exception_exception_free(&exception);
+    } while(0);
+    skip1:;
     _end();
 }
+/*
+
+type exception
+An exception
+
+*/

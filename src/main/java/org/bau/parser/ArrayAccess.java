@@ -147,7 +147,7 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int depth, boolean loop) {
         // ignore
     }
 
@@ -157,21 +157,8 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public Bounds getBounds() {
-        return null;
-    }
-
-    @Override
     public Expression simplify() {
         return this;
-    }
-
-    @Override
-    public void setBoundValue(Expression scope, String modify, Expression value) {
-    }
-
-    @Override
-    public void addBoundCondition(Expression scope, String operation, Expression right) {
     }
 
     @Override
@@ -250,6 +237,11 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public void incrementReassignCount() {
         // ignore
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return base.containsModifiableVariables();
     }
 
 }

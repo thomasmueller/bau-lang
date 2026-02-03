@@ -41,7 +41,7 @@ public class ArrayConstant implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int depth, boolean loop) {
     }
 
     public Expression replace(Variable old, Expression with) {
@@ -68,11 +68,6 @@ public class ArrayConstant implements Expression {
     }
 
     @Override
-    public Bounds getBounds() {
-        return null;
-    }
-
-    @Override
     public Expression simplify() {
         return this;
     }
@@ -90,6 +85,11 @@ public class ArrayConstant implements Expression {
     @Override
     public void used(Program program) {
         type.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

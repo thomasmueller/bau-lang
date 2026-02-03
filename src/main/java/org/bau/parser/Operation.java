@@ -2,8 +2,9 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import org.bau.parser.Bounds.ApplyType;
+import org.bau.parser.Solver.Rule;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueFloat;
@@ -358,7 +359,12 @@ public class Operation implements Expression {
         if (isComparison()) {
             return DataType.INT_TYPE;
         }
-        return widerType();
+        DataType result = widerType();
+        if (result.isRange()) {
+            // range + range still results in int
+            return DataType.INT_TYPE;
+        }
+        return result;
     }
 
     public Expression replace(Variable old, Expression with) {
@@ -417,103 +423,6 @@ public class Operation implements Expression {
     @Override
     public boolean isEasyToRead() {
         return false;
-    }
-
-    public void applyBoundCondition(Expression scope, ApplyType type) {
-        if (type == ApplyType.UNDO && ("and".equals(operator) || "or".equals(operator))) {
-            left.applyBoundCondition(scope, type);
-            right.applyBoundCondition(scope, type);
-            return;
-        }
-        if ("and".equals(operator) && type == ApplyType.POSITIVE) {
-            left.applyBoundCondition(scope, type);
-            right.applyBoundCondition(scope, type);
-            return;
-        } else if ("or".equals(operator) && type == ApplyType.NEGATIVE) {
-            left.applyBoundCondition(scope, type);
-            right.applyBoundCondition(scope, type);
-        }
-        String op = operator;
-        LeftValue var = null;
-        if (left instanceof LeftValue) {
-            var = (LeftValue) left;
-        }
-        Expression compare = right;
-        if (type == ApplyType.NEGATIVE) {
-            switch(operator) {
-            case "not":
-                if (right instanceof LeftValue) {
-                    op = "<>";
-                    var = (LeftValue) right;
-                    compare = new NullValue(right.type());
-                }
-                break;
-            case ">":
-                op = "<=";
-                break;
-            case ">=":
-                op = "<";
-                break;
-            case "=":
-                op = "<>";
-                break;
-            case "<>":
-                op = "=";
-                break;
-            case "<":
-                op = ">=";
-                break;
-            case "<=":
-                op = ">";
-                break;
-            default:
-                op = null;
-            }
-        }
-        if (var == null) {
-            return;
-        }
-        if (op == null) {
-            // eg. "if i & 1"
-            return;
-        }
-        switch (op) {
-        case ">":
-        case ">=":
-        case "=":
-        case "<":
-        case "<=":
-        case "<>":
-            if (type == ApplyType.UNDO) {
-                var.addBoundCondition(scope, null, null);
-            } else {
-                var.addBoundCondition(scope, op, compare);
-            }
-        }
-    }
-
-    @Override
-    public Bounds getBounds() {
-        if ("+".equals(operator)) {
-            Value v = right.eval(null);
-            if (v != null) {
-                Bounds b = left.getBounds();
-                if (b != null) {
-                    b = b.plus(v.longValue());
-                    return b;
-                }
-            }
-        } else if ("-".equals(operator)) {
-            Value v = right.eval(null);
-            if (v != null) {
-                Bounds b = left.getBounds();
-                if (b != null) {
-                    b = b.plus(-v.longValue());
-                    return b;
-                }
-            }
-        }
-        return null;
     }
 
     @Override
@@ -615,11 +524,11 @@ public class Operation implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
         if (left != null) {
-            left.setOwnedBoundsToNull(scope);
+            left.setOwnedBoundsToNull(solver, level, loop);
         }
-        right.setOwnedBoundsToNull(scope);
+        right.setOwnedBoundsToNull(solver, level, loop);
     }
 
     public static Value convertToType(Value val, DataType targetType) {
@@ -687,6 +596,84 @@ public class Operation implements Expression {
             break;
         }
         right.used(program);
+    }
+
+    @Override
+    public List<Rule> getRules() {
+        ArrayList<Rule> list = new ArrayList<>();
+        switch (operator) {
+        case "not":
+            for (Solver.Rule r : right.getRules()) {
+                list.add(r.reverse());
+            }
+            break;
+        case "and":
+            list.addAll(left.getRules());
+            list.addAll(right.getRules());
+            break;
+        case "=":
+        case "<=":
+        case ">=":
+        case "<":
+        case ">":
+        case "<>":
+            Rule r = toRule(left, operator, right);
+            if (r != null) {
+                list.add(r);
+            }
+        }
+        return list;
+    }
+
+    public static Rule toRule(Expression left, String operator, Expression right) {
+        Rule r = new Rule();
+        r.left = toSolverExpr(left);
+        r.right = toSolverExpr(right);
+        r.type = operator;
+        if (r.isComplete()) {
+            return r;
+        }
+        return null;
+    }
+
+    public static Solver.Expr toSolverExpr(Expression expr) {
+        if (expr instanceof Variable) {
+            return Solver.variable(((Variable) expr).name);
+        } else if(expr instanceof FieldAccess) {
+            FieldAccess f = (FieldAccess) expr;
+            if (f.base.type().isArray() && f.fieldName.equals("len")) {
+                if (f.base instanceof Variable) {
+                    return Solver.variable(((Variable) f.base).name + ".len");
+                } else if (f.base instanceof FieldAccess) {
+                    return Solver.variable(f.toString());
+                }
+            } else {
+                return Solver.variable(f.toString());
+            }
+        } else if (expr instanceof NullValue) {
+            return Solver.number(0);
+        } else if (expr instanceof NumberValue) {
+            NumberValue n = (NumberValue) expr;
+            if (expr.type().isNumber() && !expr.type().isFloatingPoint()) {
+                return Solver.number(n.value.longValue());
+            }
+        } else if (expr instanceof Operation) {
+            Operation op = (Operation) expr;
+            switch (op.operator) {
+            case "+":
+            case "-":
+                return Solver.operation(toSolverExpr(op.left), op.operator, toSolverExpr(op.right));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        if (left != null) {
+            return left.containsModifiableVariables() || right.containsModifiableVariables();
+        }
+        return right.containsModifiableVariables();
     }
 
 }

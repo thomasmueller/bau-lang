@@ -597,6 +597,9 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         _decUseStack(s, i8_array);
         return string_1000;
     }
+    if (start < 0) {
+        start = 0;
+    }
     i = start;
     i8_array* _t4 = i8_array_new(len);
     _incUseStack(_t4);
@@ -605,7 +608,7 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
         while (1 == 1) {
             int64_t j = 0;
             while (1) {
-                result->data[idx_2(j, _arrayLen(result))] = s->data[i];
+                result->data[j] = s->data[i];
                 int64_t next = i + 1;
                 if (next >= _arrayLen(s)) {
                     break;

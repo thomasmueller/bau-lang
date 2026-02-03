@@ -13,9 +13,9 @@ import java.util.Random;
 import org.junit.Test;
 
 public class HashTest {
-    
+
     private static Random random = new Random(1);
-    
+
     @Test
     public void primeTest() {
         // https://github.com/OpenHFT/Zero-Allocation-Hashing/blob/ea/src/main/java/net/openhft/hashing/XXH3.java
@@ -30,16 +30,16 @@ public class HashTest {
         }
         return h;
     }
-    
+
     static long javaStringHash4(byte[] data) {
         // https://lemire.me/blog/2015/10/22/faster-hashing-without-effort/
         long h = 1;
         int i = 0;
         for (; i < data.length - 3; i += 4) {
-            h = 31 * 31 * 31 * 31 * h + 
-                    31 * 31 * 31 * (data[i] & 0xff) + 
-                    31 * 31 * (data[i + 1] & 0xff) + 
-                    31 * (data[i + 2] & 0xff) + 
+            h = 31 * 31 * 31 * 31 * h +
+                    31 * 31 * 31 * (data[i] & 0xff) +
+                    31 * 31 * (data[i + 1] & 0xff) +
+                    31 * (data[i + 2] & 0xff) +
                     (data[i + 3] & 0xff);
         }
         for (; i < data.length; i++) {
@@ -47,7 +47,7 @@ public class HashTest {
         }
         return h;
     }
-        
+
     static int murmur3_32(byte[] data) {
         // MurmurHash3_x86_32
         // https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp
@@ -82,7 +82,7 @@ public class HashTest {
             int s = 0;
             while (true) {
                 x ^= (data[i] & 0xff) << s;
-System.out.println("x " + Long.toHexString(x));                
+                // System.out.println("x " + Long.toHexString(x));
                 int n = i + 1;
                 if (n >= data.length)
                     break;
@@ -93,23 +93,23 @@ System.out.println("x " + Long.toHexString(x));
             x = Integer.rotateLeft(x, 15);
             x *= c2;
             h ^= x;
-System.out.println("h " + Long.toHexString(h));                
+            // System.out.println("h " + Long.toHexString(h));
         }
         h ^= data.length;
-System.out.println("h2 " + Long.toHexString(h));                
+        // System.out.println("h2 " + Long.toHexString(h));
         h ^= h >>> 16;
-System.out.println("h3 " + Long.toHexString(h));                
+        // System.out.println("h3 " + Long.toHexString(h));
         h *= 0x85ebca6b;
-System.out.println("h4 " + Long.toHexString(h));                
+        // System.out.println("h4 " + Long.toHexString(h));
         h ^= h >>> 13;
-System.out.println("h5 " + Long.toHexString(h));                
+        // System.out.println("h5 " + Long.toHexString(h));
         h *= 0xc2b2ae35;
-System.out.println("h6 " + Long.toHexString(h));                
+        // System.out.println("h6 " + Long.toHexString(h));
         h ^= h >>> 16;
-System.out.println("h8 " + Long.toHexString(h));                
+        // System.out.println("h8 " + Long.toHexString(h));
         return h;
     }
-    
+
     @Test
     public void testCollisions() {
         Random r = new Random(1);
@@ -160,7 +160,7 @@ System.out.println("h8 " + Long.toHexString(h));
             }
         }
     }
-    
+
     static long hash(int type, byte[] data) {
         switch (type) {
         case 0:
@@ -178,7 +178,7 @@ System.out.println("h8 " + Long.toHexString(h));
         }
         throw new IllegalArgumentException();
     }
-    
+
     private static long sha256(byte[] data) {
         MessageDigest md;
         try {
@@ -199,16 +199,16 @@ System.out.println("h8 " + Long.toHexString(h));
         assertEquals(0xba6bd213, murmur3_32("test".getBytes(StandardCharsets.UTF_8)));
         assertEquals(0xc0363e43, murmur3_32("Hello, world!".getBytes(StandardCharsets.UTF_8)));
     }
-    
+
     // polynomial hash function
     // (similar to Java String hash, but 4 bytes at a time)
     static long polyHash4(byte[] data) {
         long h = ((long) data.length << 32);
         int i = 0;
         for (; i < data.length - 3; i += 4) {
-            int x = ((data[i] & 0xff) | 
-                    ((data[i + 1] & 0xff) << 8) | 
-                    ((data[i + 2] & 0xff) << 16) | 
+            int x = ((data[i] & 0xff) |
+                    ((data[i + 1] & 0xff) << 8) |
+                    ((data[i + 2] & 0xff) << 16) |
                     ((data[i + 3] & 0xff) << 24));
             h = (h + x) * 0x9E3779B185EBCA87L;
         }
@@ -228,9 +228,9 @@ System.out.println("h8 " + Long.toHexString(h));
         long h = data.length;
         int i = 0;
         for (; i < data.length - 7; i += 8) {
-            long x = ((data[i] & 0xffL) | 
-                    ((data[i + 1] & 0xffL) << 8) | 
-                    ((data[i + 2] & 0xffL) << 16) | 
+            long x = ((data[i] & 0xffL) |
+                    ((data[i + 1] & 0xffL) << 8) |
+                    ((data[i + 2] & 0xffL) << 16) |
                     ((data[i + 3] & 0xffL) << 24) |
                     ((data[i + 4] & 0xffL) << 32) |
                     ((data[i + 5] & 0xffL) << 40) |
@@ -238,7 +238,7 @@ System.out.println("h8 " + Long.toHexString(h));
                     ((data[i + 7] & 0xffL) << 56));
             h = (h + x) * 0x9E3779B185EBCA87L;
         }
-        if (i < data.length) { 
+        if (i < data.length) {
             long x = 0;
             for (int s = 0; i < data.length; i++, s += 8) {
                 x += ((data[i] & 0xffL)) << s;
@@ -247,8 +247,8 @@ System.out.println("h8 " + Long.toHexString(h));
         }
         h = ((h ^ (h >>> 32))) * 0x9E3779B185EBCA87L;
         return h ^ (h >>> 32);
-    }      
-    
+    }
+
 //    @Test
 //    public void testPerf10() {
 //        testPerf(10, 100_000_000);
@@ -270,7 +270,7 @@ System.out.println("h8 " + Long.toHexString(h));
 //            testPerf(size, 100_000_000 / size);
 //        }
 //    }
-    
+
     public void testPerf(int size, int count) {
         byte[] data = new byte[size];
         for (int test = 0; test < 5; test++) {
@@ -286,7 +286,7 @@ System.out.println("h8 " + Long.toHexString(h));
             }
         }
     }
-    
+
     /*
 
 javaStringHash

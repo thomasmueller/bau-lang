@@ -5,7 +5,8 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-There is now a new "cousin" minimal, 
+* New <a href="doc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
+* There is now a new "cousin" minimal, 
 tiny programming language named <a href="src/test/java/org/bau/ena/test/Ena.md">Ena</a>.
 
 ## Highlights

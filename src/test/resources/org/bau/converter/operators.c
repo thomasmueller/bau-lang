@@ -299,7 +299,7 @@ void _main() {
     f32v = 1.0;
     a = 6172;
     b = 24690;
-    c = idiv_2(a, b);
-    d = imod_2(a, b);
+    c = idiv_2(a, 10);
+    d = imod_2(a, 10);
     _end();
 }

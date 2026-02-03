@@ -30,7 +30,7 @@ public class PrimeSieveTest {
                 count++;
             }
         }
-        System.out.println("count " + count + " sum " + sum + " to " + largeN);
+        // System.out.println("count " + count + " sum " + sum + " to " + largeN);
         return sum;
     }
 }

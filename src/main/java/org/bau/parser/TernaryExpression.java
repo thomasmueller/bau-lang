@@ -72,18 +72,12 @@ public class TernaryExpression implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     @Override
     public boolean isEasyToRead() {
         return false;
-    }
-
-    @Override
-    public Bounds getBounds() {
-        // TODO not implemented yet
-        throw new RuntimeException("Not yet implemented");
     }
 
     @Override
@@ -143,6 +137,11 @@ public class TernaryExpression implements Expression {
             s.used(program);
         }
         ifFalse.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return condition.containsModifiableVariables() || ifTrue.containsModifiableVariables() || ifFalse.containsModifiableVariables();
     }
 
 }

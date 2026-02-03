@@ -73,6 +73,8 @@ public class Program {
 
     private int nextTempVariableIdGlobalScopeId;
 
+    private Solver solver = new Solver();
+
     {
         FunctionDefinition f = new FunctionDefinition(0);
         // TODO move println to std
@@ -107,6 +109,10 @@ public class Program {
 
     public int nextTempVariableIdGlobalScope() {
         return nextTempVariableIdGlobalScopeId++;
+    }
+
+    Solver getSolver() {
+        return solver;
     }
 
     /**
@@ -781,8 +787,8 @@ public class Program {
             }
             buff2.append(Statement.indent(buff3.toString()));
         }
-        boolean hasCatch = Program.hasCatch(mainList);
-        if (hasCatch) {
+        int catchCount = Program.catchCount(mainList);
+        for (int i = 0; i < catchCount; i++) {
             buff2.append(Statement.indent("do { do {\n"));
         }
         for (Statement s : mainList) {
@@ -1118,13 +1124,14 @@ Testing.
         }
     }
 
-    public static boolean hasCatch(ArrayList<Statement> list) {
+    public static int catchCount(ArrayList<Statement> list) {
+        int count = 0;
         for (Statement s : list) {
             if (s instanceof Catch) {
-                return true;
+                count++;
             }
         }
-        return false;
+        return count;
     }
 
     public static boolean hasReturn(ArrayList<Statement> list) {

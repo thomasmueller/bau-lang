@@ -4,8 +4,12 @@ import java.util.ArrayList;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueInt;
 
 public class NumberValue implements Expression {
+
+    public static final NumberValue ZERO = new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false);
+
     boolean hex;
     Value value;
     DataType type;
@@ -79,11 +83,6 @@ public class NumberValue implements Expression {
     }
 
     @Override
-    public Bounds getBounds() {
-        return new Bounds(this);
-    }
-
-    @Override
     public Expression simplify() {
         return this;
     }
@@ -94,7 +93,7 @@ public class NumberValue implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
     }
 
     @Override
@@ -115,6 +114,11 @@ public class NumberValue implements Expression {
     @Override
     public void used(Program program) {
         type.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

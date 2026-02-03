@@ -341,9 +341,10 @@ int32_t murmur3_32_1(i8_array* data) {
     int32_t c2 = 461845907;
     int32_t h = 0;
     int64_t i = 0;
-    if (i < ( _arrayLen(data) - 3 )) {
+    if (_arrayLen(data) > 3) {
+        int64_t j = 0;
         while (1) {
-            int32_t x = i32_1(((data->data[i] & 255)) | (shiftLeft_2((data->data[i + 1] & 255), 8)) | (shiftLeft_2((data->data[i + 2] & 255), 16)) | (shiftLeft_2((data->data[i + 3] & 255), 24)));
+            int32_t x = i32_1(((data->data[j] & 255)) | (shiftLeft_2((data->data[j + 1] & 255), 8)) | (shiftLeft_2((data->data[j + 2] & 255), 16)) | (shiftLeft_2((data->data[j + 3] & 255), 24)));
             x *= -862048943;
             int32_t _t0 = rotLefti32_2(x, 15);
             x = _t0;
@@ -352,12 +353,13 @@ int32_t murmur3_32_1(i8_array* data) {
             int32_t _t1 = rotLefti32_2(h, 13);
             h = _t1;
             h = ( h * 5 ) + 3864292196;
-            int64_t n = i + 4;
+            int64_t n = j + 4;
             if (n > ( _arrayLen(data) - 4 )) {
                 break;
             }
-            i = n;
+            j = n;
         }
+        i = j;
     }
     int32_t x = 0;
     if (i < ( _arrayLen(data) - 4 )) {

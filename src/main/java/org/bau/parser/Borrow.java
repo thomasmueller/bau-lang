@@ -50,18 +50,13 @@ public class Borrow implements Expression {
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
         // ignore
     }
 
     @Override
     public boolean isEasyToRead() {
         return base.isEasyToRead();
-    }
-
-    @Override
-    public Bounds getBounds() {
-        return base.getBounds();
     }
 
     @Override
@@ -92,6 +87,11 @@ public class Borrow implements Expression {
     @Override
     public void used(Program program) {
         base.used(program);
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return base.containsModifiableVariables();
     }
 
 }

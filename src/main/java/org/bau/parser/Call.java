@@ -360,11 +360,6 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public Bounds getBounds() {
-        return null;
-    }
-
-    @Override
     public Expression simplify() {
         return this;
     }
@@ -375,17 +370,18 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public void setBounds(Expression scope) {
+    public void setBounds(Solver solver, int depth, boolean loop) {
         List<Expression> list = getUsedOwned();
         for (Expression e : list) {
-            e.setOwnedBoundsToNull(scope);
+            e.setOwnedBoundsToNull(solver, depth, loop);
+
         }
     }
 
     @Override
-    public void setOwnedBoundsToNull(Expression scope) {
+    public void setOwnedBoundsToNull(Solver solver, int depth, boolean loop) {
         for (Expression a : args) {
-            a.setOwnedBoundsToNull(scope);
+            a.setOwnedBoundsToNull(solver, depth, loop);
         }
     }
 
@@ -425,18 +421,6 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public void setBoundValue(Expression scope, String modify, Expression value) {
-        // can not assign
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public void addBoundCondition(Expression scope, String operation, Expression right) {
-        // can not assign
-        throw new IllegalStateException();
-    }
-
-    @Override
     public String decrementRefCountC() {
         // can not assign
         throw new IllegalStateException();
@@ -463,6 +447,11 @@ public class Call implements Statement, Expression, LeftValue {
     @Override
     public void incrementReassignCount() {
         // ignore
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return false;
     }
 
 }

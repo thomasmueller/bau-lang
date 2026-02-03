@@ -165,7 +165,7 @@ fun matchStar(t Token, list List(Token), rp int, text i8[], tp int, max int) int
 fun matchHere(list List(Token), rp int, text i8[], tp int) int throws exception
     if rp >= list.size
         return tp
-    t := list.array[rp]
+    t : list.array[rp]
     if not t
         return tp
     if t.ttype = tokenType.END

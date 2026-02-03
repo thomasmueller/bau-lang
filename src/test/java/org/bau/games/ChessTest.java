@@ -27,20 +27,20 @@ public class ChessTest {
                 blackTime += System.nanoTime() - start;
                 c.move(move);
                 print(c);
-                System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
+                // System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
                 // Thread.sleep(3000);
                 start = System.nanoTime();
                 move = c.negamax(true, 4, false, -Long.MAX_VALUE, Long.MAX_VALUE);
                 whiteTime += System.nanoTime() - start;
 
                 if (c.turn % 10 == 9) {
-                    System.out.println(prof.getTop(10));
+                    // System.out.println(prof.getTop(10));
                     prof = new Profiler();
                     prof.startCollecting();
                 }
                 c.move(move);
                 print(c);
-                System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
+                // System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
                 // Thread.sleep(3000);
                 boolean whiteOk = false, blackOk = false;
                 for (int i = 0; i < 64; i++) {
@@ -61,7 +61,7 @@ public class ChessTest {
                     break;
                 }
             }
-            System.out.println("white score " + whiteScore + " black " + blackScore);
+            // System.out.println("white score " + whiteScore + " black " + blackScore);
         }
     }
 
@@ -115,7 +115,7 @@ public class ChessTest {
         c.init();
         c.move(1 * 8 + 6, 4 * 8 + 6);
         c.move(6 * 8 + 7, 4 * 8 + 7);
-        print(c);
+        // print(c);
         long pawn = c.getPossibleMoves(4 * 8 + 6, false);
         assertEquals("--------/--------/--------/--------/-------x/------x-/--------/--------/", ChessTest.toStringPossibleMove(pawn));
     }
