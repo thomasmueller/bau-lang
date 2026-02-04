@@ -254,7 +254,8 @@ struct i8_array {
     int32_t _refCount;
     int8_t* data;
 };
-i8_array* i8_array_new(uint32_t len) {
+i8_array* i8_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
@@ -269,7 +270,8 @@ struct int_array {
     int32_t _refCount;
     int64_t* data;
 };
-int_array* int_array_new(uint32_t len) {
+int_array* int_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     int_array* result = _malloc(sizeof(int_array));
     _traceMalloc(result);
     result->len = len;
@@ -940,19 +942,14 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
         int8_t temp = buff->data[first];
         buff->data[first] = buff->data[last];
         buff->data[last] = temp;
-        int64_t f = first + 1;
-        if (f >= _arrayLen(buff)) {
+        if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first = f;
-        int64_t l = last - 1;
-        if (l < 0) {
+        first += 1;
+        if (last < 1) {
             break;
         }
-        if (l >= _arrayLen(buff)) {
-            break;
-        }
-        last = l;
+        last -= 1;
     }
 }
 void org_bau_Env_atExit_1(void  (*callback_0)()) {

@@ -1382,7 +1382,7 @@ public class Parser {
             Assignment s = new Assignment();
             s.leftValue = left;
             if (left.isContant()) {
-                throw syntaxError("Can not modify contants: " + left);
+                throw syntaxError("Can not modify constant '" + left + "'");
             }
             if (matchOp("=")) {
                 Expression expr = parseExpression();
@@ -1689,7 +1689,7 @@ public class Parser {
             smallerLen = solver.isTrue(r);
         }
         if (!largerEqualZero) {
-            throw syntaxError("Can not verify if value is larger than 0");
+            throw syntaxError("Can not verify if value is at least 0");
         }
         if (!smallerLen) {
             throw syntaxError("Can not verify if value is smaller than '" + max + "'");
@@ -2980,7 +2980,7 @@ public class Parser {
             r.left = Operation.toSolverExpr(expr);
             r.type = "<>";
             r.right = Solver.number(0);
-            if (r.isComplete() && solver.isTrue(r)) {
+            if (!r.isComplete() || solver.isTrue(r)) {
                 needTest = false;
             }
             if (needTest) {
@@ -2993,7 +2993,7 @@ public class Parser {
             r.left = Operation.toSolverExpr(expr);
             r.type = "<>";
             r.right = Solver.number(0);
-            if (r.isComplete() && solver.isTrue(r)) {
+            if (!r.isComplete() || solver.isTrue(r)) {
                 needTest = true;
             }
             if (!needTest) {

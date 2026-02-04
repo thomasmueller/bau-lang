@@ -517,7 +517,8 @@ public class Program {
                 }
                 buff.append("};\n");
                 if (t.isArray()) {
-                    buff.append(t.nameC() + "* " + t.nameC() + "_new(uint32_t len) {\n");
+                    buff.append(t.nameC() + "* " + t.nameC() + "_new(uint64_t len) {\n");
+                    buff.append(Statement.indent("if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);\n"));
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
                     buff.append(Statement.indent("result->len = len;\n"));

@@ -305,9 +305,12 @@ To create a new array and then access it, use:
     data : i8[3]
     data[0] = 10
 
+The maximum array length is `1 << 31`.
 Bounds are checked where needed.
 Access without runtime checks requires that the compiler verifies correctness.
-Index variables with range restrictions allow this.
+Index variables with range restrictions allow this:
+`i := 0 .. data.len` defines a integer with the provided range,
+and initalized it with zero.
 For performance-critical code, use `[..]!` to ensure
 no runtime checks are done.
 The conditional `break` guarantees that `i` is within the bounds.

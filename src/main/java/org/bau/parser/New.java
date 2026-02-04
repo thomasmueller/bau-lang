@@ -26,7 +26,8 @@ public class New implements Expression {
             if (len == null) {
                 return null;
             }
-            int l = len.intValue();
+            long l1 = len.longValue();
+            int l = l1 < 0 || l1 > Integer.MAX_VALUE ? 0 : (int) l1;
             if (type.baseType().isCopyType()) {
                 switch (type.baseType().name()) {
                 case DataType.I32:

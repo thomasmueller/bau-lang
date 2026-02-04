@@ -1,0 +1,101 @@
+import org.bau.Env
+import org.bau.Int
+import org.bau.Utils
+
+fun reverse(buff T[], first 0..buff.len, last 0..buff.len)
+    while first < last
+        temp : buff[first]!
+        buff[first]! = buff[last]!
+        buff[last]! = temp
+        break first >= buff.len - 1
+        first += 1
+        break last < 1
+        last -= 1
+
+fun reverseSimple(buff T[], first int, last int)
+    while first < last
+        temp : buff[first]
+        buff[first] = buff[last]
+        buff[last] = temp
+        first += 1
+        last -= 1
+
+fun shellSortSimple(a T[])
+    if a.len < 1
+        return
+    h := 16
+    while a.len > h / 16
+        h = h + h + h / 4 + 16
+    while h > 15
+        h = (h - 16) / 9 * 4
+        g : (h + 15) / 16
+        for i := range(g, a.len)
+            t : a[i]
+            j := i - g
+            while j >= 0 and a[j] > t
+                a[j + g] = a[j]
+                j -= g
+            a[j + g] = t
+
+fun shellSort(a T[])
+    if a.len < 1
+        return
+    h := 16
+    while a.len > h / 16
+        h = h + h + h / 4 + 16
+    while h > 15
+        h = (h - 16) / 9 * 4
+        g : (h + 15) / 16
+        break g < 0
+        break g >= a.len
+        i := 0..a.len
+        i = g
+        while i < a.len
+            t : a[i]!
+            break i - g < 0
+            break i - g >= a.len
+            j := 0..a.len
+            j = i - g
+            prev := 0..a.len
+            prev = i
+            while a[j]! > t
+                a[prev]! = a[j]!
+                next := j - g
+                prev = j
+                break next < 0
+                break next >= a.len
+                j = next
+            a[prev]! = t
+            break i + 1 >= a.len
+            i += 1
+
+fun main()
+    repeat := 10
+    count := 10
+    if Env.argCount() > 1
+        repeat = Int.parseInt(Env.arg(1))
+    if Env.argCount() > 2
+        count = Int.parseInt(Env.arg(2))        
+    println('repeat ' repeat ' count ' count)
+    test : int[count]
+    if test.len <= 1
+        return
+    for i := until(test.len)
+        test[i]! = Utils.random()
+    sum := 0
+    for loop := until(repeat)
+        if loop < 5
+            println('first ' test[0] ' last ' test[test.len - 1])
+        reverse(test, 0, test.len - 1)
+        shellSort(test)
+        sum += test[0]
+    println('sum ' sum)
+
+## Expected
+repeat 10 count 10
+first -2152535657050944081 last -884877559730491226
+first -4214222208109204676 last 7960286522194355700
+first -4214222208109204676 last 7960286522194355700
+first -4214222208109204676 last 7960286522194355700
+first -4214222208109204676 last 7960286522194355700
+sum -5248733933672943528

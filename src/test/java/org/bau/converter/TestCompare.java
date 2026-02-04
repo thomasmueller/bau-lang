@@ -261,6 +261,11 @@ public class TestCompare {
     }
 
     @Test
+    public void reverseSortArrayFast() throws IOException {
+        test("reverseSortArrayFast");
+    }
+
+    @Test
     public void sort() throws IOException {
         test("sort");
     }

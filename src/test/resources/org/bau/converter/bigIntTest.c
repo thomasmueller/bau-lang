@@ -250,7 +250,8 @@ struct i8_array {
     int32_t _refCount;
     int8_t* data;
 };
-i8_array* i8_array_new(uint32_t len) {
+i8_array* i8_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     i8_array* result = _malloc(sizeof(i8_array));
     _traceMalloc(result);
     result->len = len;
@@ -265,7 +266,8 @@ struct i32_array {
     int32_t _refCount;
     int32_t* data;
 };
-i32_array* i32_array_new(uint32_t len) {
+i32_array* i32_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     i32_array* result = _malloc(sizeof(i32_array));
     _traceMalloc(result);
     result->len = len;
@@ -280,7 +282,8 @@ struct int_array {
     int32_t _refCount;
     int64_t* data;
 };
-int_array* int_array_new(uint32_t len) {
+int_array* int_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     int_array* result = _malloc(sizeof(int_array));
     _traceMalloc(result);
     result->len = len;

@@ -108,6 +108,10 @@ public class SolverTest {
         Solver s;
 
         s = new Solver();
+        s.addRule(rule(variable("x"), ">=", number(0)));
+        assertTrue(s.isTrue(rule(operation(variable("x"), "+", number(-1)), "<", variable("x"))));
+
+        s = new Solver();
         s.addRule(rule(variable("x"), ">", number(0)));
         assertTrue(s.isTrue(rule(operation(variable("x"), "-", number(1)), ">=", number(0))));
 

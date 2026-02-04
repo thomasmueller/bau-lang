@@ -243,7 +243,8 @@ struct int_array {
     int32_t _refCount;
     int64_t* data;
 };
-int_array* int_array_new(uint32_t len) {
+int_array* int_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
     int_array* result = _malloc(sizeof(int_array));
     _traceMalloc(result);
     result->len = len;

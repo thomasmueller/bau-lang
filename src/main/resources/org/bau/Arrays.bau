@@ -5,10 +5,7 @@ fun reverse(buff T[], first 0..buff.len, last 0..buff.len)
         temp : buff[first]!
         buff[first]! = buff[last]!
         buff[last]! = temp
-        f := first + 1
-        break f >= buff.len
-        first = f
-        l := last - 1
-        break l < 0
-        break l >= buff.len
-        last = l
+        break first >= buff.len - 1
+        first += 1
+        break last < 1
+        last -= 1

@@ -5,20 +5,6 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-
-https://lemire.me/blog/2026/02/02/converting-data-to-hexadecimal-outputs-quickly/
-char nibble(uint8_t x) { return x + '0' + ((x > 9) * 39); }
-for (size_t i = 0, k = 0; k < dlen; i += 1, k += 2) {
-    uint8_t val = src[i];
-    dst[k + 0] = nibble(val >> 4);
-    dst[k + 1] = nibble(val & 15);
-}
-
-add test that tries to re-assign "this"
-
-verify if / how array bound checks are removed in other languages and Bau,
-eg. reversing the entries of an array.
-
 yn: input('Is the number larger than ' x ' ?')
 
 * Weird syntax

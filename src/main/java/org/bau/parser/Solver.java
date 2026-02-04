@@ -186,6 +186,15 @@ public class Solver {
                 return isAlwaysTrue(r2, recursionDepth + 1);
             }
         }
+        if (r.left instanceof Variable && r.right instanceof Operation) {
+            Variable v = (Variable) r.left;
+            Operation op = (Operation) r.right;
+            if (v.equals(op.left)) {
+                return isAlwaysTrue(rule(number(0), r.type, operation(number(0), op.type, op.right).simplify()), recursionDepth + 1);
+            }
+        } else if (r.right instanceof Variable && r.left instanceof Operation) {
+            return isAlwaysTrue(rule(r.right, reverse(r.type), r.left), recursionDepth + 1);
+        }
         return false;
     }
 
@@ -343,6 +352,9 @@ public class Solver {
                     }
                 }
             }
+        }
+        if (isAlwaysTrue(rule(var, type, expr), 0)) {
+            return true;
         }
         return false;
     }

@@ -3,8 +3,10 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -274,6 +276,15 @@ int_array* int_array_new(uint64_t len) {
 int __argc;
 char **__argv;
 /* functions */
+int64_t idiv_2(int64_t a, int64_t b);
+int64_t idx_2(int64_t x, int64_t len);
+i8_array* org_bau_Env_arg_1(int64_t index);
+int64_t org_bau_Env_argCount_0();
+int64_t org_bau_Int_parseInt_1(i8_array* value);
+int64_t org_bau_Utils_random_0();
+void reverse_int_array_int_3(int_array* buff, int64_t first, int64_t last);
+void shellSort_int_array_int_1(int_array* a);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
@@ -292,17 +303,255 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1000;
+i8_array* string_1007;
+i8_array* string_1008;
+i8_array* string_1009;
+i8_array* string_1010;
+i8_array* string_1011;
+int64_t randomSeed;
+int64_t MIN_INT;
+int64_t MAX_INT;
+int64_t MIN_I32;
+int64_t MAX_I32;
+int64_t idiv_2(int64_t a, int64_t b) {
+    if (b != 0) return a / b;
+    if (a == 0) return 0;
+    return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    return arrayOutOfBounds(x, len);
+}
+i8_array* org_bau_Env_arg_1(int64_t index) {
+    int64_t _t0 = index < 0;
+    if (!(_t0)) {
+        int64_t _t1 = index >= org_bau_Env_argCount_0();
+        _t0 = _t1;
+    }
+    if (_t0) {
+        i8_array* _t2 = i8_array_new(0);
+        return _t2;
+    }
+    int64_t len = 0;
+    len = strlen(__argv[index]);
+    i8_array* _t3 = i8_array_new(len);
+    _incUseStack(_t3);
+    i8_array* result = _t3;
+    strncpy((char*) result->data, __argv[index], len);
+    _decUseStack(_t3, i8_array);
+    return result;
+}
+int64_t org_bau_Env_argCount_0() {
+    return __argc;
+    return 0;
+}
+int64_t org_bau_Int_parseInt_1(i8_array* value) {
+    int64_t x = 0;
+    int64_t sign = 1;
+    if (_arrayLen(value)) {
+        int64_t i = 0;
+        if (value->data[0] == 45) {
+            sign = -1;
+            i += 1;
+        }
+        while (i < _arrayLen(value)) {
+            int8_t n = value->data[idx_2(i, _arrayLen(value))];
+            int64_t _t0 = n >= 48;
+            if (_t0) {
+                int64_t _t1 = n <= 57;
+                _t0 = _t1;
+            }
+            if (_t0) {
+                x *= 10;
+                x += n - 48;
+            }
+            i += 1;
+        }
+        int64_t _r0 = sign * x;
+        return _r0;
+    }
+    return 0;
+}
+int64_t org_bau_Utils_random_0() {
+    randomSeed += 0x9e3779b97f4a7c15;
+    int64_t z = randomSeed;
+    z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
+    z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
+    int64_t _r0 = z ^ (shiftRight_int_2(z, 31));
+    return _r0;
+}
+void reverse_int_array_int_3(int_array* buff, int64_t first, int64_t last) {
+    while (first < last) {
+        int64_t temp = buff->data[first];
+        buff->data[first] = buff->data[last];
+        buff->data[last] = temp;
+        if (first >= ( _arrayLen(buff) - 1 )) {
+            break;
+        }
+        first += 1;
+        if (last < 1) {
+            break;
+        }
+        last -= 1;
+    }
+}
+void shellSort_int_array_int_1(int_array* a) {
+    if (_arrayLen(a) < 1) {
+        return;
+    }
+    int64_t h = 16;
+    while (_arrayLen(a) > ( idiv_2(h, 16) )) {
+        h = ( h + h ) + ( idiv_2(h, 4) ) + 16;
+    }
+    while (h > 15) {
+        h = ( idiv_2((h - 16), 9) ) * 4;
+        int64_t g = idiv_2((h + 15), 16);
+        if (g < 0) {
+            break;
+        }
+        if (g >= _arrayLen(a)) {
+            break;
+        }
+        int64_t i = 0;
+        i = g;
+        while (i < _arrayLen(a)) {
+            int64_t t = a->data[i];
+            if (( i - g ) < 0) {
+                break;
+            }
+            if (( i - g ) >= _arrayLen(a)) {
+                break;
+            }
+            int64_t j = 0;
+            j = i - g;
+            int64_t prev = 0;
+            prev = i;
+            while (a->data[j] > t) {
+                a->data[prev] = a->data[j];
+                int64_t next = j - g;
+                prev = j;
+                if (next < 0) {
+                    break;
+                }
+                if (next >= _arrayLen(a)) {
+                    break;
+                }
+                j = next;
+            }
+            a->data[prev] = t;
+            if (( i + 1 ) >= _arrayLen(a)) {
+                break;
+            }
+            i += 1;
+        }
+    }
+}
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
+}
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("Hello World", 11);
+    string_1007 = str_const("repeat ", 7);
+    string_1008 = str_const(" count ", 7);
+    string_1009 = str_const("first ", 6);
+    string_1010 = str_const(" last ", 6);
+    string_1011 = str_const("sum ", 4);
     _main();
     return 0;
 }
 void _main() {
-    printf("Hello World\n");
+    randomSeed = 0;
+    MIN_INT = 0x8000000000000000;
+    MAX_INT = 0x7fffffffffffffff;
+    MIN_I32 = -2147483648;
+    MAX_I32 = 4294967295;
+    int64_t repeat = 10;
+    int64_t count = 10;
+    int64_t _t1 = org_bau_Env_argCount_0();
+    if (_t1 > 1) {
+        i8_array* _t2 = org_bau_Env_arg_1(1);
+        int64_t _t3 = org_bau_Int_parseInt_1(_t2);
+        repeat = _t3;
+        _decUseStack(_t2, i8_array);
+    }
+    int64_t _t4 = org_bau_Env_argCount_0();
+    if (_t4 > 2) {
+        i8_array* _t5 = org_bau_Env_arg_1(2);
+        int64_t _t6 = org_bau_Int_parseInt_1(_t5);
+        count = _t6;
+        _decUseStack(_t5, i8_array);
+    }
+    printf("repeat %lld count %lld\n", (long long)repeat, (long long)count);
+    int_array* _t7 = int_array_new(count);
+    _incUseStack(_t7);
+    int_array* test = _t7;
+    if (_arrayLen(test) <= 1) {
+        return;
+    }
+    if (_arrayLen(test) > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                int64_t _t8 = org_bau_Utils_random_0();
+                test->data[i] = _t8;
+                int64_t _next = i + 1;
+                if (_next >= _arrayLen(test)) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    int64_t sum = 0;
+    if (repeat > 0) {
+        while (1 == 1) {
+            int64_t loop = 0;
+            while (1) {
+                if (loop < 5) {
+                    printf("first %lld last %lld\n", (long long)test->data[0], (long long)test->data[_arrayLen(test) - 1]);
+                }
+                reverse_int_array_int_3(test, 0, _arrayLen(test) - 1);
+                shellSort_int_array_int_1(test);
+                sum += test->data[0];
+                int64_t _next = loop + 1;
+                if (_next >= repeat) {
+                    break;
+                }
+                loop = _next;
+            }
+            break;
+        }
+    }
+    printf("sum %lld\n", (long long)sum);
+    _decUseStack(test, int_array);
+    _decUseStack(_t7, int_array);
     _end();
 }
+/*
+
+type exception
+An exception
+
+fun getRandomSeed() int
+Get the random seed.
+
+fun random() int
+Pseudo-random number generated using the Splitmix64 algorithm.
+
+fun random(smallerThan int) int
+Pseudo-random number between 0 and smallerThan (excluding).
+
+fun setRandomSeed(seed int)
+Set the random seed.
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+fun parsePositiveInt(s i8[]) int throws exception
+throws an exception if the string does not match [0-9]+
+
+*/
