@@ -382,6 +382,18 @@
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td>Unsigned integer types</td>
+<td></td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td></td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
 </tbody>
 </table>
 <h2 id="non-features">Non-Features</h2>
@@ -390,7 +402,9 @@
 supported, for example inheritance, method overloading, polymorphism,
 and more complex encapsulation.</li>
 <li>Many concepts of functional programming languages are not supported,
-for example high-order functions, functional composition, closures.</li>
+for example high-order functions, functional composition, closures. This
+is on purpose, to avoid choice friction, and to simplify learning and
+using the language.</li>
 <li><code>map</code>, <code>filter</code>, etc are not supported. One
 problem here is exception handling.</li>
 <li>Reflection is not supported.</li>
@@ -402,6 +416,11 @@ are supported that work like macros.</li>
 <li>String interpolation is not supported to simplify the language.
 Instead, use an arrays of strings. As commas are optional, this is
 short.</li>
+<li>Unsigned integer are intentionally not supported to simplify
+learning and using the language, to avoid surprising behavior and edge
+cases, and to reduce security issues and error-handling pitfalls. When
+needed, unsigned behavior is available through explicit operations. This
+design does not affect performance or memory usage.</li>
 </ul>
 <h3 id="syntax">Syntax</h3>
 <ul>
@@ -492,14 +511,8 @@ used to to flag whether the method was successful or not, and a negative
 value is used to indicate success).</li>
 <li>Possible null references need to be handled. There is no way that
 null references can throw an exception or panic.</li>
-<li>Integer division (<code>/</code>) by zero, the same as floating
-point division by zero, doesn't throw an exception. Instead, it returns
-the highest / lowest value (if dividing positive or negative numbers),
-or zero (for zero by zero). This is to be more consistent with the
-floating point division, and to avoid panic for cases were it was used
-for "unimportant" operations such as calculating the number of
-instructions per second, for zero seconds. Modulo by zero always returns
-zero.</li>
+<li>Potential integer division (<code>/</code>) by zero is detected at
+compile time and not allowed.</li>
 <li>Where array bound checks are needed, and the index is out of bounds,
 the program panics.</li>
 <li>If a type has a <code>close()</code> function, it is called when the

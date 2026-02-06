@@ -5,9 +5,8 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* New <a href="doc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
-* There is now a new "cousin" minimal, 
-tiny programming language named <a href="src/test/java/org/bau/ena/test/Ena.md">Ena</a>.
+* 2026-02-06: Regulal loops now use the "loop" keyword instead of "while".
+* 2026-01-06: New <a href="doc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
 
 ## Highlights
 
@@ -49,7 +48,7 @@ and the safety of Rust and Java.
 ## Keywords
 
 Control flow
-* `if` `elif` `else` `for` `while`
+* `if` `elif` `else` `for` `loop`
 * `break` `continue` `return`
 * `throw` `catch` `switch` `case`
 
@@ -123,17 +122,17 @@ and not `null` is considered true.
 
 ### Loops
 
-There are `for` and `while` loops.
-`while` without a condition is endless.
+`for` and `loop` are supported.
+`loop` without a condition is endless.
 
     # loop from 0 to 9
     for i := range(0, 10)
         println(i)
 
-`for` is internally converted to `while`:
+`for` is internally converted to `loop`:
 
     i := 0
-    while i < 10
+    loop i < 10
         println(i)
         i += 1
 
@@ -317,7 +316,7 @@ The conditional `break` guarantees that `i` is within the bounds.
 
     if data.len
         i := 0 .. data.len
-        while
+        loop
             data[i]! = i
             next : i + 1
             break next >= data.len
@@ -527,7 +526,7 @@ The `return _` statement is replaced during compilation with the loop body.
 
     fun evenRange(from int, to int) int
         _ := from
-        while _ < to
+        loop _ < to
             return _
             _ += 2
 
@@ -535,7 +534,7 @@ is equivalent to:
 
     fun main()
         x := 0
-        while x < 30
+        loop x < 30
             println('even: ' x)
             x += 2
 
@@ -571,7 +570,7 @@ contain a list of functions.
 Types that implement a trait needs to declares all trait functions
 if the trait does not have a default implementation.
 
-    fun Reader size()
+    fun Reader size() int
         return -1
 
     type Memory : Reader

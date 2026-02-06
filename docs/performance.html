@@ -368,7 +368,7 @@ for i in {1..3}; do time ./piDigits 10000 &gt; out.txt; done
 for i in {1..3}; do time ./mandelbrot 8000 &gt; out.tiff; done
 
 echo &quot;== Vlang ============&quot;
-cp ../src/test/resources/org/bau/benchmarks/v/* .
+cp ../src/test/resources/org/bau/benchmarks/vlang/* .
 find . -type f ! -name &quot;*.?*&quot; -delete
 v -prod -force-bounds-checking binaryTrees.v
 v -prod -force-bounds-checking fannkuch.v

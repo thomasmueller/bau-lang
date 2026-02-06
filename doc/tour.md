@@ -58,6 +58,13 @@
     PI : 3.1415
     println(PI)
     
+### Loops
+
+    sum := 1
+    loop sum < 10_000
+        sum += sum
+    println(sum)
+    
 ### For Loops
 
     sum := 0
@@ -65,13 +72,6 @@
         sum += i
     println(sum)
 
-### While Loops
-
-    sum := 1
-    while sum < 10_000
-        sum += sum
-    println(sum)
-    
 ### If
 
     for i := range(1, 10)

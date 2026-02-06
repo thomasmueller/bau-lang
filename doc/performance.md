@@ -279,7 +279,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
 
     echo "== Vlang ============"
-    cp ../src/test/resources/org/bau/benchmarks/v/* .
+    cp ../src/test/resources/org/bau/benchmarks/vlang/* .
     find . -type f ! -name "*.?*" -delete
     v -prod -force-bounds-checking binaryTrees.v
     v -prod -force-bounds-checking fannkuch.v

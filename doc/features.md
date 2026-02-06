@@ -32,6 +32,7 @@
 |Goto                  |       |       |&check;|&check;|       |&check;|&check;|       |       |
 |Multiple Inheritance  |       |&check;|       |&check;|       |       |       |       |       |
 |Tail-Call Optimization|       |       |       |       |       |       |       |       |       |
+|Unsigned integer types|       |       |&check;|&check;|       |&check;|&check;|&check;|&check;|
 
 ## Non-Features
 
@@ -40,7 +41,8 @@
   and more complex encapsulation.
 * Many concepts of functional programming languages are not supported, 
   for example high-order functions, functional composition,
-  closures.
+  closures. This is on purpose, to avoid choice friction,
+  and to simplify learning and using the language.
 * `map`, `filter`, etc are not supported. One problem here is exception handling.
 * Reflection is not supported.
 * Tail calls are only optimized by the C compiler.
@@ -50,6 +52,11 @@
 * `goto` and labels are not supported.
 * String interpolation is not supported to simplify the language. 
   Instead, use an arrays of strings. As commas are optional, this is short.
+* Unsigned integer are intentionally not supported to simplify learning and
+  using the language, to avoid surprising behavior and edge cases,
+  and to reduce security issues and error-handling pitfalls.
+  When needed, unsigned behavior is available through explicit operations.
+  This design does not affect performance or memory usage.
 
 ### Syntax
 
@@ -120,13 +127,8 @@
   and a negative value is used to indicate success).
 * Possible null references need to be handled. 
   There is no way that null references can throw an exception or panic.
-* Integer division (`/`) by zero, the same as floating point division by zero,
-  doesn't throw an exception. Instead, it returns the highest / lowest value
-  (if dividing positive or negative numbers), or zero (for zero by zero).
-  This is to be more consistent with the floating point division, and
-  to avoid panic for cases were it was used for "unimportant" operations
-  such as calculating the number of instructions per second, for zero seconds.
-  Modulo by zero always returns zero.
+* Potential integer division (`/`) by zero is detected at compile time
+  and not allowed.
 * Where array bound checks are needed, and the index is out of bounds,
   the program panics.
 * If a type has a  `close()` function, it is called when the memory
