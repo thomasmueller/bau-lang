@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.TreeSet;
 
 public class SyntaxStats {
@@ -55,7 +56,7 @@ public class SyntaxStats {
                     s.suffix = l2[1];
                     stats.put(l, s);
                 }
-                String dir = "src/test/resources/org/bau/benchmarks/";
+                String dir = "src/test/resources/org/bau/benchmarks/" + s.language.toLowerCase(Locale.ROOT) + "/";
                 if (s.language.equals("Java") || s.language.equals("Kotlin")) {
                     dir = "src/test/java/org/bau/benchmarks/";
                 } else {
@@ -63,9 +64,9 @@ public class SyntaxStats {
                 }
                 if (file.equals("piDigits")) {
                     if (s.language.equals("Rust")) {
-                        file = "rust/pi_digits/src/main";
+                        file = "pi_digits/src/main";
                     } else if (s.language.equals("Swift")) {
-                        file = "swift/piDigits/Sources/main";
+                        file = "piDigits/Sources/main";
                     }
                 }
                 File f = new File(dir + file + "." + s.suffix);

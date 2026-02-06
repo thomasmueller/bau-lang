@@ -24,7 +24,7 @@ fun fill(data int[])
   if data.len <= 0
     return
   i := 0..data.len
-  while 1 = 1
+  loop 1 = 1
     data[i]! = i
     next : i + 1
     break next >= data.len

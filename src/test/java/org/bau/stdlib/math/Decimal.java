@@ -239,8 +239,8 @@ public class Decimal {
         int exp = exponent + other.exponent + 18;
         long mantissaA = mantissa;
         long mantissaB = other.mantissa;
-        Int128 ma = new Int128((int) mantissaA, (int) (mantissaA >>> 32), 0, 0);
-        Int128 mb = new Int128((int) mantissaB, (int) (mantissaB >>> 32), 0, 0);
+        Int128 ma = new Int128(mantissaA, 0);
+        Int128 mb = new Int128(mantissaB, 0);
         Int128 m = ma.multiply(mb).divide(Int128.valueOf(1_000_000_000_000_000_000L));
         return normalize(sign * other.sign, exp, m.longValue());
     }
@@ -252,9 +252,9 @@ public class Decimal {
         int exp = exponent - other.exponent - 17;
         long mantissaA = mantissa;
         long mantissaB = other.mantissa;
-        Int128 ma = new Int128((int) mantissaA, (int) (mantissaA >>> 32), 0, 0);
+        Int128 ma = new Int128(mantissaA, 0);
         ma = ma.multiply(Int128.valueOf(100_000_000_000_000_000L));
-        Int128 mb = new Int128((int) mantissaB, (int) (mantissaB >>> 32), 0, 0);
+        Int128 mb = new Int128(mantissaB, 0);
         Int128 m = ma.divide(mb);
         return normalize(sign * other.sign, exp, m.longValue());
     }

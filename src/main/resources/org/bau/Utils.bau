@@ -1,6 +1,6 @@
 module org.bau.Utils
 
-fun if(cond int, a T, b T) macro T
+fun when(cond int, a T, b T) macro T
     if cond
         return a
     else
@@ -32,7 +32,7 @@ fun random(smallerThan int) int
     max : limit - 1
     if (limit & (max - 1)) = 0
         return random() & max
-    while
+    loop
         x : random() >> 1
         result : x % limit
         #if result >= x + max

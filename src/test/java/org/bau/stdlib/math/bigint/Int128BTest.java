@@ -9,7 +9,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-public class Int128Test {
+public class Int128BTest {
 
     private final static BigInteger MASK = BigInteger.ONE.shiftLeft(128).subtract(BigInteger.ONE);
     private final static BigInteger MIN_VALUE = BigInteger.ONE.shiftLeft(127).negate();
@@ -65,14 +65,14 @@ public class Int128Test {
         Random r = new Random(1);
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);
-            Int128 aa = Int128.valueOf(a);
+            Int128B aa = Int128B.valueOf(a);
             assertEquals("" + a, aa.toString());
-            Int128 bb = Int128.valueOf("" + a);
+            Int128B bb = Int128B.valueOf("" + a);
             assertEquals("" + a, bb.toString());
         }
         for (int i = 0; i < 1000; i++) {
             BigInteger a = randomBigInteger128(r);
-            Int128 aa = Int128.valueOf(a.toString());
+            Int128B aa = Int128B.valueOf(a.toString());
             assertEquals(a.toString(), aa.toString());
         }
     }
@@ -81,20 +81,20 @@ public class Int128Test {
     public void shift() {
         Random r = new Random(1);
         for (int j = -100; j < 100; j++) {
-            Int128 a = Int128.valueOf(j);
-            Int128 b = a.shiftLeft(100);
-            Int128 c = b.shiftRightArithmetic(100);
+            Int128B a = Int128B.valueOf(j);
+            Int128B b = a.shiftLeft(100);
+            Int128B c = b.shiftRightArithmetic(100);
             assertTrue(a.equals(c));
         }
         for (int i = 0; i < 1_000; i++) {
             BigInteger ai = randomBigInteger128(r);
-            Int128 aa = Int128.valueOf(ai.toString());
+            Int128B aa = Int128B.valueOf(ai.toString());
             int shift = r.nextInt(100);
             BigInteger li = shiftRightLogical(ai, shift);
-            Int128 la = aa.shiftRight(shift);
+            Int128B la = aa.shiftRight(shift);
             assertEquals(li.toString(), la.toString());
             BigInteger ri = shiftRightLogical(ai, shift);
-            Int128 ra = aa.shiftRight(shift);
+            Int128B ra = aa.shiftRight(shift);
             assertEquals(ri.toString(), ra.toString());
         }
     }
@@ -116,16 +116,16 @@ public class Int128Test {
 
     @Test
     public void add() {
-        assertEquals("170141183460469231731687303715884105727", Int128.MAX_VALUE.toString());
-        assertEquals("-170141183460469231731687303715884105728", Int128.MIN_VALUE.toString());
-        assertEquals(Int128.MIN_VALUE, Int128.MAX_VALUE.add(Int128.valueOf(1)));
-        assertEquals(Int128.MAX_VALUE, Int128.MIN_VALUE.subtract(Int128.valueOf(1)));
+        assertEquals("170141183460469231731687303715884105727", Int128B.MAX_VALUE.toString());
+        assertEquals("-170141183460469231731687303715884105728", Int128B.MIN_VALUE.toString());
+        assertEquals(Int128B.MIN_VALUE, Int128B.MAX_VALUE.add(Int128B.valueOf(1)));
+        assertEquals(Int128B.MAX_VALUE, Int128B.MIN_VALUE.subtract(Int128B.valueOf(1)));
         Random r = new Random(1);
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);
             long b = randomLong(r, i);
-            Int128 aa = Int128.valueOf(a);
-            Int128 bb = Int128.valueOf(b);
+            Int128B aa = Int128B.valueOf(a);
+            Int128B bb = Int128B.valueOf(b);
             if (r.nextBoolean()) {
                 aa = aa.negate();
                 a = -a;
@@ -135,7 +135,7 @@ public class Int128Test {
                 bb = bb.negate();
                 b = -b;
             }
-            Int128 cc = aa.add(bb);
+            Int128B cc = aa.add(bb);
             assertEquals(a + "+" + b, "" + (a + b), cc.toString());
             BigInteger ai = BigInteger.valueOf(a);
             BigInteger bi = BigInteger.valueOf(b);
@@ -160,8 +160,8 @@ public class Int128Test {
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);
             long b = randomLong(r, i);
-            Int128 aa = Int128.valueOf(a);
-            Int128 bb = Int128.valueOf(b);
+            Int128B aa = Int128B.valueOf(a);
+            Int128B bb = Int128B.valueOf(b);
             if (r.nextBoolean()) {
                 aa = aa.negate();
                 a = -a;
@@ -191,8 +191,8 @@ public class Int128Test {
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);
             long b = randomLong(r, i);
-            Int128 aa = Int128.valueOf(a);
-            Int128 bb = Int128.valueOf(b);
+            Int128B aa = Int128B.valueOf(a);
+            Int128B bb = Int128B.valueOf(b);
             if (r.nextBoolean()) {
                 aa = aa.negate();
                 a = -a;
@@ -201,10 +201,9 @@ public class Int128Test {
                 bb = bb.negate();
                 b = -b;
             }
-            Int128 cc = aa.subtract(bb);
+            Int128B cc = aa.subtract(bb);
             if (!("" + (a - b)).equals(cc.toString())) {
                 cc = aa.subtract(bb);
-                cc.toString();
             }
             assertEquals(a + "-" + b, "" + (a - b), cc.toString());
         }
@@ -238,8 +237,8 @@ public class Int128Test {
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);
             long b = randomLong(r, i);
-            Int128 aa = Int128.valueOf(a);
-            Int128 bb = Int128.valueOf(b);
+            Int128B aa = Int128B.valueOf(a);
+            Int128B bb = Int128B.valueOf(b);
             if (r.nextBoolean()) {
                 aa = aa.negate();
                 a = -a;
@@ -248,17 +247,17 @@ public class Int128Test {
                 bb = bb.negate();
                 b = -b;
             }
-            Int128 cc = aa.divide(bb);
+            Int128B cc = aa.divide(bb);
             BigInteger test;
             if (b == 0) {
-                assertEquals(Int128.ZERO, cc);
+                assertEquals(Int128B.ZERO, cc);
             } else {
                 test = BigInteger.valueOf(a).divide(BigInteger.valueOf(b));
                 if (!test.toString().equals(cc.toString())) {
                     cc = aa.divide(bb);
                     assertEquals(a + "/" + b, test.toString(), cc.toString());
                 }
-                Int128 ccMod = aa.remainder(bb);
+                Int128B ccMod = aa.remainder(bb);
                 BigInteger testMod = BigInteger.valueOf(a).remainder(BigInteger.valueOf(b));
                 assertEquals(a + "%" + b, testMod.toString(), ccMod.toString());
             }
@@ -271,17 +270,17 @@ public class Int128Test {
         for (int i = 0; i < 1000; i++) {
             BigInteger ai = randomBigInteger128(r);
             BigInteger bi = randomBigInteger128(r);
-            Int128 aa = Int128.valueOf(ai.toString());
-            Int128 bb = Int128.valueOf(bi.toString());
+            Int128B aa = Int128B.valueOf(ai.toString());
+            Int128B bb = Int128B.valueOf(bi.toString());
             assertEquals(ai.toString(), aa.toString());
             if (!(bi.toString().equals(bb.toString()))) {
-                bb = Int128.valueOf(bi.toString());
+                bb = Int128B.valueOf(bi.toString());
             }
             assertEquals(Integer.signum(ai.compareTo(bi)),
                     Integer.signum(aa.compareTo(bb)));
             assertEquals(bi.toString(), bb.toString());
             BigInteger ci;
-            Int128 cc;
+            Int128B cc;
             ci = overflow(ai.add(bi));
             cc = aa.add(bb);
             assertEquals(ci.toString(), cc.toString());

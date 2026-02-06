@@ -10,7 +10,7 @@ fun divisionByZeroThrow(sum int, count int) int throws exception
 
 fun divisionByZeroContinue()
     y := -1
-    while y < 2
+    loop y < 2
         y += 1
         if y = 0
             continue
@@ -19,7 +19,7 @@ fun divisionByZeroContinue()
 
 fun divisionByZeroContinue2()
     y := -1
-    while y < 2
+    loop y < 2
         y += 1
         continue y = 0
         z := 10 / y
@@ -27,7 +27,7 @@ fun divisionByZeroContinue2()
 
 fun divisionByZeroBreak()
     y := -1
-    while y < 2
+    loop y < 2
         y += 1
         if y = 0
             break
@@ -36,7 +36,7 @@ fun divisionByZeroBreak()
 
 fun divisionByZeroBreak2()
     y := -1
-    while y < 2
+    loop y < 2
         y += 1
         break y = 0
         z := 10 / y
@@ -44,7 +44,7 @@ fun divisionByZeroBreak2()
 
 fun divisionByZeroReturn()
     y := -1
-    while y < 2
+    loop y < 2
         y += 1
         if y = 0
             return

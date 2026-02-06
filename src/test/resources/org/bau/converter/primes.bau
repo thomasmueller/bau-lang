@@ -15,16 +15,16 @@ fun BitField get(index int) int
 fun primeSum(limit int) int
     sieve := newBitField(limit + 1)
     i := 3
-    while i * i <= limit
+    loop i * i <= limit
         if not sieve.get(i)
             j := i * i
-            while j <= limit
+            loop j <= limit
                 sieve.set(j)
                 j += i
         i += 2
     sum := 2
     i = 3
-    while i <= limit
+    loop i <= limit
         if not sieve.get(i)
             sum += i
         i += 2
@@ -37,13 +37,13 @@ fun primeSum2(limit int) int
         return 0
     m := 0..sieve.len
     i := 3
-    while i * i <= limit
+    loop i * i <= limit
         next := i >> 6
         break next >= sieve.len
         m = next
         if not (sieve[m]! >> (i & 0x3f) & 1)
             j := i * i
-            while 1
+            loop 1
                 next = j >> 6
                 break next >= sieve.len
                 m = next
@@ -52,7 +52,7 @@ fun primeSum2(limit int) int
         i += 2
     sum := 2
     i = 3
-    while i <= limit
+    loop i <= limit
         next := i >> 6
         break next >= sieve.len
         m = next

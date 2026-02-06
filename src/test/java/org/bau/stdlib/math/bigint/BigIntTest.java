@@ -174,6 +174,12 @@ public class BigIntTest {
 
     @Test
     public void compare() {
+        for(int off = -10; off < 10; off++) {
+            assertEquals(0, BigInt.valueOf(Integer.MAX_VALUE + (long) off).
+                    compareTo(BigInt.valueOf(Integer.MAX_VALUE).add(BigInt.valueOf(off))));
+            assertEquals(0, BigInt.valueOf(Integer.MIN_VALUE - (long) off).
+                    compareTo(BigInt.valueOf(Integer.MIN_VALUE).add(BigInt.valueOf(-off))));
+        }
         Random r = new Random(1);
         for (int i = 0; i < 10_000; i++) {
             long a = randomLong(r, i);

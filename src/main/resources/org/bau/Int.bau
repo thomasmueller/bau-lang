@@ -3,7 +3,7 @@ module org.bau.Int
 import org.bau.Exception
     exception
 import org.bau.Utils
-    if
+    when
 import org.bau.Arrays
 
 MIN_INT : 0x8000000000000000
@@ -18,10 +18,10 @@ fun arithmeticRightShift(x int, n int) const int
 fun numberOfLeadingZeros(x int) const int
     native(`return x == 0 ? 64 : _clzll(x);`)
     if x <= 0
-        return if(x = 0, 64, 0)
+        return when(x = 0, 64, 0)
     n := 63
     shift := 32
-    while shift > 0
+    loop shift > 0
         if x >= 1 << shift
             n -= shift
             x >>= shift
@@ -82,7 +82,7 @@ fun powInt(base int, exponent int) const int
         return -1
     result := 1
     b := base
-    while exponent > 0
+    loop exponent > 0
         if (exponent & 1) = 1
             result *= b
             if result > (1 << 31) or result < -(1 << 31)
@@ -99,7 +99,7 @@ fun sqrtInt(x int) const int
         return 0
     g := 1 << 31
     c := g
-    while
+    loop
         t : g * g
         if t > x or t < 0
             g ^= c
@@ -116,7 +116,7 @@ fun parseInt(value i8[]) int
         if value[0] = ord('-')
             sign = -1
             i += 1
-        while i < value.len
+        loop i < value.len
             n : value[i]
             if n >= ord('0') and n <= ord('9')
                 x *= 10
@@ -127,7 +127,7 @@ fun parseInt(value i8[]) int
 
 fun intToStr(n int, buff i8[], start int, size int) int
     i := 0
-    while i < size
+    loop i < size
         buff[start + i] = ord('0') + (n % 10)
         n /= 10
         i += 1
@@ -153,7 +153,7 @@ fun appendInt(n int, buff i8[], pos int) int
     else
         n = -n
     start : p
-    while
+    loop
         buff[p]! = ord('0') - (n % 10)
         n /= 10
         pos += 1

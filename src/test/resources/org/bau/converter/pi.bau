@@ -9,7 +9,7 @@ fun main()
         n = Int.parseInt(Env.arg(1))
     k, i := 0
     buff : i8[10]
-    while i < n
+    loop i < n
         k += 1
         nextTerm(k)
         continue num.compare(acc) > 0

@@ -46,3 +46,4 @@ func mandelbrot(n: Int) {
 
 let n = CommandLine.arguments.count > 1 ? Int(CommandLine.arguments[1]) ?? 200 : 200
 mandelbrot(n: n)
+

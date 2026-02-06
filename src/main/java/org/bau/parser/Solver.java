@@ -379,10 +379,6 @@ public class Solver {
             switch (t1) {
             case "=":
                 return r == Result.EQUAL;
-            case ">":
-                return r == Result.SMALLER || r == Result.EQUAL;
-            case "<":
-                return r == Result.LARGER || r == Result.EQUAL;
             case ">=":
                 return r == Result.SMALLER || r == Result.EQUAL;
             case "<=":
@@ -394,12 +390,7 @@ public class Solver {
         }
         switch (t1) {
         case ">=":
-            if (t2 == null) {
-                throw new IllegalArgumentException();
-            }
             switch (t2) {
-            case ">":
-                return r == Result.EQUAL;
             case "=":
                 return r == Result.SMALLER || r == Result.EQUAL;
             }
@@ -410,24 +401,6 @@ public class Solver {
                 return r == Result.EQUAL;
             case "=":
                 return r == Result.LARGER || r == Result.EQUAL;
-            }
-            break;
-        case ">":
-            switch (t2) {
-            case ">=":
-                int todoVerify;
-                return r == Result.SMALLER;
-            case "=":
-                return r == Result.SMALLER;
-            }
-            break;
-        case "<":
-            switch (t2) {
-            case "<=":
-                int todoVerify;
-                return r == Result.LARGER;
-            case "=":
-                return r == Result.LARGER;
             }
             break;
         }

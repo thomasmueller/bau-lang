@@ -7,7 +7,7 @@ fun hex(x int, len int) i8[]
     data : i8[l]
     y := x
     i := l - 1
-    while i >= 0
+    loop i >= 0
         c := ord('0') + (y & 0xf)
         if (y & 0xf) > 9
             c = ord('a') + (y & 0xf) - 10
@@ -31,7 +31,7 @@ fun murmur3_32_old(data i8[]) i32
     i := 0..data.len
     if data.len > 3
         j := 0..data.len - 3
-        while 1
+        loop 1
             x := i32(((data[j]! & 0xff)) |
                     ((data[j + 1]! & 0xff) << 8) |
                     ((data[j + 2]! & 0xff) << 16) |
@@ -51,7 +51,7 @@ fun murmur3_32_old(data i8[]) i32
         i += 4
     if i < data.len and i <> data.len - 4
         s := 0
-        while 1
+        loop 1
             x ^= (data[i]! & 0xff) << s
             n : i + 1
             break n >= data.len
@@ -81,7 +81,7 @@ fun murmur3_32(data i8[]) i32
     i := 0..data.len
     if data.len > 3
         j := 0..data.len - 3
-        while 1
+        loop 1
             x := i32(((data[j]! & 0xff)) |
                     ((data[j + 1]! & 0xff) << 8) |
                     ((data[j + 2]! & 0xff) << 16) |
@@ -101,7 +101,7 @@ fun murmur3_32(data i8[]) i32
         i += 4
     if i < data.len and i <> data.len - 4
         s := 0
-        while 1
+        loop 1
             x ^= (data[i]! & 0xff) << s
             n : i + 1
             break n >= data.len

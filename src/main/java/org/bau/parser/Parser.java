@@ -610,10 +610,16 @@ public class Parser {
         }
         boolean template = parseFunctionDeclaration(targetModule, def);
         FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
-        if (scanPhase && !def.macro) {
-            if (old != null) {
-                throw syntaxError("Function '" + def.name + "' already exists");
+        if (old != null) {
+            if (old.list.isEmpty()) {
+                program.removeFunction(old);
+                // this ensures it is not called
+                old.list = null;
+            } else {
+                throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
+        }
+        if (scanPhase && !def.macro) {
             if (template) {
                 parseFunctionTemplate(defIndent, def);
                 functionContext.rewindStack(stackPos);
@@ -634,16 +640,6 @@ public class Parser {
             currentFunctionDefinition = null;
             return true;
         }
-        if (old != null) {
-            if (old.list.isEmpty()) {
-                program.removeFunction(old);
-                // this ensures it is not called
-                old.list = null;
-            } else {
-                throw syntaxError("Function '" + def.name + "' already has an implementation");
-            }
-        }
-
         for (Variable var : def.parameters) {
             if (var.name.equals("this") && var.isConstant) {
                 // "this" is not null (if it is constant, which allows "this" to be a parameter for other functions)
@@ -1035,8 +1031,11 @@ public class Parser {
                 if (match("if")) {
                     parseIf(target);
                     return;
+                } else if (match("loop")) {
+                    parseLoop(target);
+                    return;
                 } else if (match("while")) {
-                    parseWhile(target);
+                    parseLoop(target);
                     return;
                 } else if (match("for")) {
                     parseFor(target);
@@ -1067,6 +1066,12 @@ public class Parser {
             ArrayList<String> identifierList = new ArrayList<>();
             while (true) {
                 String identifier1 = readIdentifier();
+                if (identifier1.equals("fun")) {
+                    if ("main".equals(currentFunctionDefinition.name)) {
+                        throw syntaxError("Trying to define a function inside the main function. Note that any statement starts the main function implicitly.");
+                    }
+                    throw syntaxError("Trying to define a function inside a function");
+                }
                 // TODO this is duplicate source code
                 // if there is no variable with this name, and
                 // no function with this name, and
@@ -2574,7 +2579,7 @@ public class Parser {
         solver.removeDeeperRules(depth);
     }
 
-    private void parseWhile(ArrayList<Statement> target) {
+    private void parseLoop(ArrayList<Statement> target) {
         int loopIndent = indent;
         While oldLoop = currentLoop;
         While loop = new While();
@@ -2586,7 +2591,7 @@ public class Parser {
         }
         startBlock(true, loop.condition);
         if (!loop.list.isEmpty()) {
-            // we need to make it a "while true" loop with a break condition
+            // we need to make it an endless loop with a break condition
             Break b = new Break();
             b.condition = new Operation(null, "not", loop.condition);
             loop.list.add(b);

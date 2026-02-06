@@ -28,9 +28,9 @@ public class TestFor {
     @Test
     public void forLoop() {
         assertEquals("""
-while 1 = 1
+loop 1 = 1
     a := 0
-    while a < 10
+    loop a < 10
         println(a)
         a += 1
     break
@@ -38,7 +38,7 @@ while 1 = 1
                 new Parser("""
 fun range(from int, to int) int
   _ := from
-  while _ < to
+  loop _ < to
     return _
     _ += 1
 for a := range(0, 10)

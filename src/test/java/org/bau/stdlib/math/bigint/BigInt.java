@@ -15,19 +15,21 @@ public class BigInt implements Comparable<BigInt> {
             this.data = new int[] { };
             this.negative = false;
         } else if (value < 0) {
-            if (value >= Integer.MIN_VALUE) {
+            if (value >= (long) Integer.MIN_VALUE << 1) {
                 this.data = new int[] { (int) -value };
             } else if (value > Long.MIN_VALUE) {
                 this.data = new int[] { (int) -value, (int) ((-value) >>> 32) };
+                assert data[1] != 0;
             } else {
                 this.data = new int[] { 0, 0x80000000 };
             }
             this.negative = true;
         } else {
-            if (value <= Integer.MAX_VALUE) {
+            if (value < 1L << 32) {
                 this.data = new int[] { (int) value };
             } else {
                 this.data = new int[] { (int) value, (int) (value >>> 32) };
+                assert data[1] != 0;
             }
             this.negative = false;
         }

@@ -8,7 +8,6 @@ import sys
 UPPER_BOUND = 5000000
 PREFIX = 32338
 
-
 class Node:
     def __init__(self):
         self.children = {}

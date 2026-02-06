@@ -19,7 +19,7 @@ fun pow(a int, b int) const int
 fun isMunchausen(number int) int
     n := number
     total := 0
-    while n > 0
+    loop n > 0
         digit : n % 10
         total += cache[digit]!
         if total > number

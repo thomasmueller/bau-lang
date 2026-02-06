@@ -136,6 +136,7 @@ public class RegexTest {
                     }
                 }
                 long time = (System.nanoTime() - start) / count;
+                assertTrue(time >= 0 && matchCount >= 0);
                 // System.out.println("time: " + time + " m=" + (m == 0 ? "my " : "std") + " matchCount " + matchCount);
             }
         }

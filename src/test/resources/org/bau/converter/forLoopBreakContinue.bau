@@ -1,13 +1,13 @@
 fun range(from int, to int) int
-  _ := from
-  while _ < to
-    return _
-    _ += 1
+    _ := from
+    loop _ < to
+        return _
+        _ += 1
 
 for a := range(0, 10)
-  break a = 5
-  continue a = 2
-  println(a)
+    break a = 5
+    continue a = 2
+    println(a)
 
 ## Expected
 0

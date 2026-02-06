@@ -18,6 +18,7 @@ public class HexEncodeTest {
             long start = System.currentTimeMillis();
             test();
             long time = System.currentTimeMillis() - start;
+            assertTrue(time >= 0);
             // System.out.println("time: " + time);
         }
     }

@@ -685,14 +685,14 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
         _decUseStack(_t0, i32_array);
         return _t1;
     } else if (value < 0) {
-        if (value >= -2147483648) {
+        if (value >= -4294967296) {
             i32_array* _t2 = i32_array_new(1);
             org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t2);
             x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
             x.negative = 1;
             _decUseStack(_t2, i32_array);
             return x;
-        } else if (value > -2147483648) {
+        } else if (value > (-9223372036854775807LL-1LL)) {
             i32_array* _t3 = i32_array_new(2);
             org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t3);
             x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
@@ -710,7 +710,7 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
             return x;
         }
     } else {
-        if (value <= 4294967295) {
+        if (value < 4294967296) {
             i32_array* _t5 = i32_array_new(1);
             org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t5);
             x.data->data[idx_2(0, _arrayLen(x.data))] = value;

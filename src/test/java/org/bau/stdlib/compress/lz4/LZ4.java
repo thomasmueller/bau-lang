@@ -1,5 +1,7 @@
 package org.bau.stdlib.compress.lz4;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,6 +20,7 @@ public class LZ4 {
             String outputFileName = args[2];
             try {
                 long result = decompressFile(inputFileName, outputFileName);
+                assertTrue(result >= 0);
                 // System.out.println("Decompressed " + result + " bytes");
             } catch (Exception e) {
                 System.out.println("Failed to decompress " + inputFileName + " to " + outputFileName + ": " + e);
@@ -39,6 +42,7 @@ public class LZ4 {
                 String outputFileName = args[2];
                 try {
                     long result = compressFile(inputFileName, outputFileName, level);
+                    assertTrue(result >= 0);
                     // System.out.println("Compressed " + result + " bytes");
                 } catch (Exception e) {
                     System.out.println("Failed to compress " + inputFileName + " to " + outputFileName + ": " + e);

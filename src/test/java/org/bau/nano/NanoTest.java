@@ -1,6 +1,7 @@
 package org.bau.nano;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -48,8 +49,10 @@ public class NanoTest {
                 """;
         NanoBau p = new NanoBau();
         p.parse(s);
-        long time = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         assertEquals("fibonacci(1000000) = 2756670985995446685", p.run());
+        long time = System.currentTimeMillis() - start;
+        assertTrue(time >= 0);
         // System.out.println("time: " + (System.currentTimeMillis() - time));
 
 /*

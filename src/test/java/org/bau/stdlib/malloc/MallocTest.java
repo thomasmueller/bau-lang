@@ -116,6 +116,7 @@ public class MallocTest {
             worstMemoryUsage = Math.max(worstMemoryUsage, maxMemoryUsage);
             sumMemoryUsage += maxMemoryUsage;
         }
+        assertTrue(sumMemoryUsage >= 0);
         // System.out.println("calls " + Malloc.countCalls + " branch " + Malloc.countBranches);
         for (int i = 0; i < 64; i++) {
             // System.out.println(i + " " + levelCount[i]);

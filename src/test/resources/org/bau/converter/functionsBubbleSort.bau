@@ -1,6 +1,6 @@
 fun bubbleSort(T type, array T..)
     n := array.len
-    while 1
+    loop 1
         swapped := 0
         for i := until(array.len - 1)
             if array[i] > array[i + 1]

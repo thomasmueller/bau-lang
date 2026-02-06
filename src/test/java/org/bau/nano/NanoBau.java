@@ -3,6 +3,50 @@ package org.bau.nano;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+
+Alternatively, we could use one-character keywords:
+
+a = 1
+? a > 1
+  print 'larger'
+: a < 1
+  print 'smaller'
+:
+  print 'equal'
+
+* i > 0
+  ^ x > 2
+  < end
+  i -1
+
++ fact(x #) #
+  ? x <= 1
+    = 1
+  = x * fact(x - 1)
+
+* i = 0 .. 20
+  print fact(i)
+
+if       ? <condition>
+elif     : <condition>
+else     :
+for      *
+while    *
+break    <
+continue ^
+return   =
+throw    !
+catch    >
+switch   /
+case     :
+
+assignment =
+decrement  -1
+increment  +1
+
+*/
+
 public class NanoBau {
     // compile time
     private final HashMap<String, Variable> variables = new HashMap<>();

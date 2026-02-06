@@ -12,7 +12,7 @@ fun main()
         return
     Terminal.enableRawMode(refreshScreen)
     init()
-    while
+    loop
         refreshScreen()
         key : Terminal.readEditorKey()
         break key < 0
@@ -27,7 +27,7 @@ fun main()
                 from = p
                 state = 1
                 moves := getPossibleMoves(p, 0)
-                while moves <> 0
+                loop moves <> 0
                     target := Int.numberOfTrailingZeros(moves)
                     board[target] |= 16
                     moves ^= 1 << target
@@ -185,7 +185,7 @@ fun negamax(top int, depth int, black int, alpha int, beta int) int
             if phase = 0
                 attackOnly = 1
             moves := getPossibleMoves(i, attackOnly)
-            while moves <> 0
+            loop moves <> 0
                 target := Int.numberOfTrailingZeros(moves)
                 moves ^= 1 << target
                 capture := 0
@@ -234,7 +234,7 @@ fun evaluateBoard(black int) int
         case PAWN
             sc = 100
             if turn > 40
-                sc += 1 << if(isBlack(b), (i / 8) - 1, 6 - (i / 8))
+                sc += 1 << when(isBlack(b), (i / 8) - 1, 6 - (i / 8))
         if isBlack(b) <> black
             sc = -sc
         sum += sc
@@ -268,7 +268,7 @@ fun getPossibleMoves(from int, attacksOnly int) int
         result |= slide(from, maxDist, -1, 2)
         result |= slide(from, maxDist, -2, 1)
     elif p = PAWN
-        dir : if(isBlack(b), 1, -1)
+        dir : when(isBlack(b), 1, -1)
         # straight
         dist := 1
         if not attacksOnly
@@ -293,7 +293,7 @@ fun getPossibleMoves(from int, attacksOnly int) int
             result |= capture
     if p = KING and attacksOnly = 0
         # castling
-        r := castlingFlags >> if(black, 0, 2)
+        r := castlingFlags >> when(black, 0, 2)
         if (r & 3) <> 3 and not isFieldAttacked(black, from)
             if (r & 1) = 0 and not isFieldAttacked(black, from - 1)
                 rook := slide(from - 4, 8, 1, 0)
@@ -313,7 +313,7 @@ fun slide(from int, maxDist int, xo int, yo int) int
     isBlack := isBlack(board[from])
     result := 0
     i := 1
-    while
+    loop
         x += xo
         y += yo
         break i > maxDist or x < 0 or x > 7 or y < 0 or y > 7
@@ -331,8 +331,8 @@ fun updateCastlingRights(pos int)
     p : board[pos]
     if getPiece(p) = ROOK
         if (pos & 7) = 0 or (pos & 7) = 7
-            which : if((pos & 7) = 0, 1, 2)
-            castlingFlags |= which << if(isBlack(p), 0, 2)
+            which : when((pos & 7) = 0, 1, 2)
+            castlingFlags |= which << when(isBlack(p), 0, 2)
 
 fun move(move int) int
     source : (move >> 16) & 0xff
@@ -359,11 +359,11 @@ fun move(source int, target int) int
             board[source + shift] = 0
         if target <= 7 or target >= 56
             # promotion
-            board[target] = QUEEN + if(isBlack, BLACK, 0)
+            board[target] = QUEEN + when(isBlack, BLACK, 0)
         if Int.abs(source - target) = 16
             pawnMoved2 = target
     if p = KING
-        castlingFlags |= 3 << if(isBlack, 0, 2)
+        castlingFlags |= 3 << when(isBlack, 0, 2)
         if Int.abs((source & 7) - (target & 7)) > 1
             # castling
             if target > source
@@ -399,10 +399,10 @@ fun undo(move int)
         shift : (target & 7) - (source & 7)
         if shift <> 0 and captured = 0
             # en passant capture
-            board[source + shift] = PAWN + if(isBlack(old), 0, BLACK)
+            board[source + shift] = PAWN + when(isBlack(old), 0, BLACK)
 
 fun isBlack(p int) int
     return p > 6
 
 fun getPiece(p int) int
-    return if(p > 6, p - 6, p)
+    return when(p > 6, p - 6, p)

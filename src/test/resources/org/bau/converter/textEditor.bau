@@ -103,7 +103,7 @@ fun insertNewline()
     lines.add(y, line1)
     lines.array[y + 1] = line2
     indent := 0
-    while line1.data.len > indent and line1.data[indent] = ord(' ')
+    loop line1.data.len > indent and line1.data[indent] = ord(' ')
         indent += 1
     cursorX = 1 + indent
     if cursorY < currentWindowSize.rows - 1
@@ -157,7 +157,7 @@ fun removeByte()
         elif offsetY > 0
             offsetY -= 1
         cursorX += last.data.len + 1
-        while cursorX >= currentWindowSize.columns
+        loop cursorX >= currentWindowSize.columns
             cursorX -= 1
             offsetX += 1
         lines.array[y - 1] = string(new)
@@ -173,7 +173,7 @@ fun removeByte()
 
 fun find()
     mode = editMode.find
-    while
+    loop
         refreshScreen()
         key := Terminal.readEditorKey()
         break key < 0
@@ -245,7 +245,7 @@ fun main()
     lines : String.split(fileData, '\n')
     currentFile = fileContent(fileName, fileData, lines)
     Terminal.enableRawMode(refreshScreen)
-    while
+    loop
         refreshScreen()
         key := Terminal.readEditorKey()
         break key < 0
@@ -293,7 +293,7 @@ fun main()
                 y : cursorY + offsetY - 2
                 line : lines.array[y]
                 cursorX = line.data.len + 1
-                while cursorX >= currentWindowSize.columns
+                loop cursorX >= currentWindowSize.columns
                     cursorX -= 1
                     offsetX += 1
         case keyCode.ARROW_RIGHT

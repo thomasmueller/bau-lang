@@ -18,8 +18,8 @@ fun fannkuch(n int) int
     count : int[n]
     flips, checksum, nperm := 0
     r := n
-    while r > 0
-        while r > 1
+    loop r > 0
+        loop r > 1
             count[r - 1] = r
             r -= 1
         for i := until(n)
@@ -27,7 +27,7 @@ fun fannkuch(n int) int
         # Count flips and update max and checksum
         f := 0
         k := perm[0]
-        while k <> 0
+        loop k <> 0
             for i := until(perm.len)
                 break 2 * i >= k
                 t := perm[i]
@@ -42,13 +42,13 @@ fun fannkuch(n int) int
         else
             checksum -= f
         # Use incremental change to generate another permutation
-        while
+        loop
             if r = n
                 println(checksum)
                 return flips
             p0 := perm1[0]
             i := 0
-            while i < r
+            loop i < r
                 j := i + 1
                 perm1[i] = perm1[j]
                 i = j

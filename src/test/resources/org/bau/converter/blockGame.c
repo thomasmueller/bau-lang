@@ -1029,9 +1029,9 @@ void _main() {
         refreshScreen_0();
         while (1) {
             updateBlock_1(0);
-            int64_t loop = 16;
+            int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t45 = loop > 0;
+                int64_t _t45 = tick > 0;
                 if (_t45) {
                     int64_t _t46 = running;
                     _t45 = _t46;
@@ -1039,7 +1039,7 @@ void _main() {
                 if (!(_t45)) {
                     break;
                 }
-                loop -= 1;
+                tick -= 1;
                 org_bau_os_Sleep_sleep_1(14);
                 int64_t _t47 = org_bau_os_Terminal_keyboardHit_0();
                 if (!(_t47)) {

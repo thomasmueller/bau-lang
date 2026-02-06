@@ -12,7 +12,7 @@ fun hex(x int, len int) i8[]
     data : i8[l]
     y := x
     i := l - 1
-    while i >= 0
+    loop i >= 0
         c := ord('0') + (y & 0xf)
         if (y & 0xf) > 9
             c = ord('a') + (y & 0xf) - 10
@@ -31,7 +31,7 @@ PRIME5 :   374_761_393
 
 fun File readFully(buffer i8[], len i32) i32
     count := 0
-    while 1
+    loop 1
         l := this.read(buffer, count, len - count)
         if l = 0
             return count
@@ -69,7 +69,7 @@ fun XXHash32 update(buf i8[], start 0..buf.len, len i32) i32
     h32 := i32(0)
     if len >= 16
         limit := end - 16
-        while 1
+        loop 1
             this.v1 = rotLefti32(readi32Le(buf, pos + 0) * PRIME2 + v1, 13) * PRIME1
             this.v2 = rotLefti32(readi32Le(buf, pos + 4) * PRIME2 + v2, 13) * PRIME1
             this.v3 = rotLefti32(readi32Le(buf, pos + 8) * PRIME2 + v3, 13) * PRIME1
@@ -85,12 +85,12 @@ fun XXHash32 update(buf i8[], start 0..buf.len, len i32) i32
     else
         h32 = this.v3 + PRIME5
     h32 += this.total
-    while pos + 4 <= end
+    loop pos + 4 <= end
         h32 = rotLefti32(readi32Le(buf, pos) * PRIME3 + h32, 17) * PRIME4
         next : pos + 4
         break next >= buf.len
         pos = next
-    while pos < end
+    loop pos < end
         h32 = rotLefti32((buf[pos] & 0xff) * PRIME5 + h32, 11) * PRIME1
         next : pos + 1
         break next >= buf.len
@@ -105,7 +105,7 @@ fun test()
     blockLen := 4 * 1024 * 1024
     buffer : i8[blockLen]
     hash := 0
-    while 1
+    loop 1
         len := f.readFully(buffer, blockLen)
         if len = 0
             println('hash ', hex(hash, 8), ' size ', y.total)

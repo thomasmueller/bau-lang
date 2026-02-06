@@ -11,7 +11,7 @@ fun assert(condition int, message i8[]) macro
         println(message)
         exit(1)
 
-fun if(cond int, a T, b T) macro T
+fun when(cond int, a T, b T) macro T
     if cond
         return a
     else
@@ -22,7 +22,7 @@ fun expensiveCalc(a i8[]) i8[]
     return a
 
 for i := until(2)
-    x : if(i, expensiveCalc('not zero'), expensiveCalc('zero'))
+    x : when(i, expensiveCalc('not zero'), expensiveCalc('zero'))
     println(i ': ' x)
     assert(i < 1, 'assertion failed')
     println('next')

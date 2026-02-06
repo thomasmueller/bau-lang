@@ -274,9 +274,9 @@ int_array* int_array_new(uint64_t len) {
 int __argc;
 char **__argv;
 /* functions */
-int64_t if_int_3(int64_t condition, int64_t a, int64_t b);
 int64_t int_then_int_3(int64_t this, int64_t a, int64_t b);
 i8_array* typeName_int_1(int64_t a);
+int64_t when_int_3(int64_t condition, int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free(i8_array* x) {
@@ -299,12 +299,6 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
-int64_t if_int_3(int64_t condition, int64_t a, int64_t b) {
-    if (condition) {
-        return a;
-    }
-    return b;
-}
 int64_t int_then_int_3(int64_t this, int64_t a, int64_t b) {
     if (this) {
         return a;
@@ -313,6 +307,12 @@ int64_t int_then_int_3(int64_t this, int64_t a, int64_t b) {
 }
 i8_array* typeName_int_1(int64_t a) {
     return string_1003;
+}
+int64_t when_int_3(int64_t condition, int64_t a, int64_t b) {
+    if (condition) {
+        return a;
+    }
+    return b;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
@@ -330,7 +330,7 @@ void _main() {
     while (1 == 1) {
         int64_t i = -1;
         while (i < 2) {
-            int64_t _t0 = if_int_3(i < 0, - i, i);
+            int64_t _t0 = when_int_3(i < 0, - i, i);
             printf("abs(%lld)= %lld\n", (long long)i, (long long)_t0);
             int64_t _t1 = int_then_int_3((i < 0), - i, i);
             printf("abs(%lld)= %lld\n", (long long)i, (long long)_t1);

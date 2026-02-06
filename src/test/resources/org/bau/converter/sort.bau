@@ -2,15 +2,15 @@ import org.bau.Utils
 
 fun shellSort(a T[])
     h := 16
-    while a.len > h / 16
+    loop a.len > h / 16
         h = h + h + h / 4 + 16
-    while h > 15
+    loop h > 15
         h = (h - 16) / 9 * 4
         g : (h + 15) / 16
         for i := range(g, a.len)
             t : a[i]
             j := i - g
-            while j >= 0 and a[j] > t
+            loop j >= 0 and a[j] > t
                 a[j + g] = a[j]
                 j -= g
             a[j + g] = t
@@ -19,7 +19,7 @@ fun insertionSort(a T[])
     for i := range(1, a.len)
         t := a[i]
         j := i - 1
-        while j >= 0 and a[j] > t
+        loop j >= 0 and a[j] > t
             a[j + 1] = a[j]
             j -= 1
         a[j + 1] = t

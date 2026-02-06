@@ -14,7 +14,7 @@ fun File use()
     println('use ' fp)
 
 i := 0
-while i < 10
+loop i < 10
     f : openFile(i)
     println('opened ' i)
     break i = 5

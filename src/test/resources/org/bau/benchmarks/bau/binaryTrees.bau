@@ -16,7 +16,7 @@ fun main()
     stretch(stretchDepth)
     longLived : buildTree(maxDepth)
     depth := minDepth
-    while depth <= maxDepth
+    loop depth <= maxDepth
         iterations := 1 << (maxDepth - depth + minDepth)
         sum := 0
         for i := until(iterations)

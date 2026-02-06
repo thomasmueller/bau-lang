@@ -27,14 +27,14 @@ fun List(T) add(index int, x T)
             n[i] = array[i]
         array = n
     p := size
-    while p > index
+    loop p > index
         array[p] = array[p - 1]
         p -= 1
     array[index] = x
     size += 1
 
 fun List(T) remove(pos int)
-    while pos < size - 1
+    loop pos < size - 1
         array[pos] = array[pos + 1]
         pos += 1
     array[pos] = null

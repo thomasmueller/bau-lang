@@ -91,8 +91,8 @@ public class SoftDouble {
         long exponent = exponent(a) + exponent(b) - 1023;
         long mantissaA = mantissa(a);
         long mantissaB = mantissa(b);
-        Int128 ma = new Int128((int) mantissaA, (int) (mantissaA >>> 32), 0, 0);
-        Int128 mb = new Int128((int) mantissaB, (int) (mantissaB >>> 32), 0, 0);
+        Int128 ma = new Int128(mantissaA, 0);
+        Int128 mb = new Int128(mantissaB, 0);
         Int128 m = ma.multiply(mb).shiftRight(42);
         long mm = m.longValue() >>> 10;
         return normalize(sign(a) ^ sign(b), exponent, mm);
@@ -105,8 +105,8 @@ public class SoftDouble {
         long exponent = exponent(a) - exponent(b) + 1023;
         long mantissaA = mantissa(a) << 0;
         long mantissaB = mantissa(b) << 2;
-        Int128 ma = new Int128(0, 0, (int) mantissaA, (int) (mantissaA >>> 32));
-        Int128 mb = new Int128((int) mantissaB, (int) (mantissaB >>> 32), 0, 0);
+        Int128 ma = new Int128(0, mantissaA);
+        Int128 mb = new Int128(mantissaB, 0);
         Int128 m = ma.divide(mb);
         long mm = m.longValue() >>> 10;
         return normalize(sign(a) ^ sign(b), exponent, mm);

@@ -69,7 +69,7 @@ fun XXHash update(buf i8[], start 0..buf.len, len int) i32
             return -1
         p := 0..buf.len - 15
         p = pos
-        while
+        loop
             v1 = i32(rotateLeft32(i32(read4(buf, p) * PRIME2 + v1), 13) * PRIME1)
             v2 = i32(rotateLeft32(i32(read4(buf, p + 4) * PRIME2 + v2), 13) * PRIME1)
             v3 = i32(rotateLeft32(i32(read4(buf, p + 8) * PRIME2 + v3), 13) * PRIME1)
@@ -93,13 +93,13 @@ fun XXHash update(buf i8[], start 0..buf.len, len int) i32
         if pos >= buf.len - 4
             return -1
         p = pos
-        while p + 4 <= end
+        loop p + 4 <= end
             h32 = rotateLeft32(i32(read4(buf, p) * PRIME3 + h32), 17) * PRIME4
             next : p + 4
             break next >= buf.len - 4
             p = next
         pos = p
-    while pos < end
+    loop pos < end
         h32 = rotateLeft32(i32((buf[pos] & 0xff) * PRIME5 + h32), 11) * PRIME1
         next : pos + 1
         break next >= buf.len
@@ -121,14 +121,14 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         return -1
     if outData.len < 16
         return -1
-    while
+    loop
         tag := inData[p] & 0xff
         next := p + 1
         break next >= inData.len
         p = next
         literalLen := tag >> 4
         if literalLen = 0xf
-            while
+            loop
                 x := inData[p] & 0xff
                 p += 1
                 literalLen += x
@@ -145,7 +145,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
                 return -1
             o = outPos
             n := 0
-            while
+            loop
                 x : read8(inData, s)
                 write8(outData, o, x)
                 n += 8
@@ -173,7 +173,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
             break
         runLen := tag & 0xf
         if runLen = 0xf
-            while
+            loop
                 x := inData[p] & 0xff
                 p += 1
                 runLen += x
@@ -194,7 +194,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
                 return -1
             o = outPos
             n := 0
-            while
+            loop
                 x : read8(outData, s)
                 write8(outData, o, x)
                 n += 8
@@ -236,7 +236,7 @@ fun countTrailingZeros(x int) int
 
 fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..data.len - 7) int
     runLen := 0
-    while
+    loop
         ax : read8(data, ai)
         bx : read8(data, bi)
         diff : ax ^ bx
@@ -251,13 +251,13 @@ fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..d
         break next > data.len - 8
         bi = next
         runLen += 8
-    #while ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+    #loop ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
     #    runLen += 1
     return runLen
 
 fun runLenCountSlow(data i8[], aLen 0..data.len - 7, ai int, bi int) int
     runLen := 0
-    while ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+    loop ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
         runLen += 1
     return runLen
 
@@ -276,7 +276,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
     inPos := 0..inData.len - 7
     skipTrigger := 6
     searchMatch := 1 << skipTrigger
-    while
+    loop
         runLen := 0
         candidatePos := 0..inData.len - 7
         #candidatePos := 0
@@ -335,7 +335,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         tagPos := outPos
         outPos += 1
         # possibly increase the match len backwards
-        while
+        loop
             break candidatePos <= 0
             break literalLen <= 0
             break inPos <= 0 
@@ -350,7 +350,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
             candidatePos -= 1
         copyLen := literalLen
         if literalLen >= 0xf
-            while literalLen - 0xf >= 0xff
+            loop literalLen - 0xf >= 0xff
                 outData[outPos] = 0xff
                 outPos += 1
                 literalLen -= 0xff
@@ -371,7 +371,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
             return -1
         o = next
         n := 0
-        while
+        loop
             x : read8(inData, s)
             write8(outData, o, x)
             n += 8
@@ -401,7 +401,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
         runLen -= 4
         # println('runLen ' runLen ' outPos ' outPos)
         if runLen >= 0xf
-            while runLen - 0xf >= 0xff
+            loop runLen - 0xf >= 0xff
                 outData[outPos] = 0xff
                 outPos += 1
                 runLen -= 0xff
@@ -433,7 +433,7 @@ fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int
     inPos := 0
     skipTrigger := 6
     searchMatch := 1 << skipTrigger
-    while
+    loop
         runLen := 0
         candidatePos := 0
         if inPos + 16 < inLen
@@ -468,14 +468,14 @@ fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int
         tagPos := outPos
         outPos += 1
         # possibly increase the match len backwards
-        while candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1] = inData[candidatePos - 1]
+        loop candidatePos > 0 and literalLen > 0 and inPos > 0 and inData[inPos - 1] = inData[candidatePos - 1]
             runLen += 1
             inPos -= 1
             literalLen -= 1
             candidatePos -= 1
         copyLen := literalLen
         if literalLen >= 0xf
-            while literalLen - 0xf >= 0xff
+            loop literalLen - 0xf >= 0xff
                 outData[outPos] = 0xff
                 outPos += 1
                 literalLen -= 0xff
@@ -499,7 +499,7 @@ fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int
         runLen -= 4
         # println('runLen ' runLen ' outPos ' outPos)
         if runLen >= 0xf
-            while runLen - 0xf >= 0xff
+            loop runLen - 0xf >= 0xff
                 outData[outPos] = 0xff
                 outPos += 1
                 runLen -= 0xff

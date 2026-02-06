@@ -60,7 +60,7 @@ fun File read(data i8[], pos int, len int) int
 
 fun File readFully(buffer i8[], pos int, len int) int
     count := 0
-    while
+    loop
         l := this.read(buffer, count + pos, len - count)
         if l = 0
             return count

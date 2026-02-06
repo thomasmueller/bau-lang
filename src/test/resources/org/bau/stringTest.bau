@@ -20,7 +20,7 @@ fun String resize()
     if (old.len > 0) and (nd.len > 0) 
         i := 0..old.len
         j := 0..nd.len
-        while 1
+        loop 1
             nd[j] = old[i]
             break i + 1 > old.len
             break j + 1 > nd.len

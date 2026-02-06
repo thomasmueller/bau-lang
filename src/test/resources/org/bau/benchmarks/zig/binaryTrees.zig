@@ -37,7 +37,7 @@ const Node = struct {
         }
         return result;
     }
-    
+
     pub fn destroy(self: *Node, allocator: Allocator) void {
         if (self.left) |l| {
             l.destroy(allocator);
@@ -61,7 +61,7 @@ pub fn main() !void {
     const allocator = std.heap.c_allocator;
     var n: u32 = 10;
     var args = std.process.args();
-    _ = args.next(); 
+    _ = args.next();
     if (args.next()) |arg| {
         n = try std.fmt.parseInt(u32, arg, 10);
     }

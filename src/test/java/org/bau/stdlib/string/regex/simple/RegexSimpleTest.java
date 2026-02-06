@@ -1,6 +1,7 @@
 package org.bau.stdlib.string.regex.simple;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
@@ -67,6 +68,7 @@ public class RegexSimpleTest {
                     }
                 }
                 long time = (System.nanoTime() - start) / count;
+                assertTrue(time >= 0 && matchCount >= 0);
                 // System.out.println("time: " + time + " m=" + (m == 0 ? "my " : "std") + " matchCount " + matchCount);
             }
         }

@@ -29,20 +29,20 @@ else
 a = 1
 b = 1
 println('testing and loop')
-while call('a', a) > 0 and call('b', b) > 0
+loop call('a', a) > 0 and call('b', b) > 0
     println('  dec a')
     a -= 1
 a = 1
 b = 1
 println('testing and loop')
-while call('a', a) > 0 and call('b', b) > 0
+loop call('a', a) > 0 and call('b', b) > 0
     println('  dec b')
     b -= 1
 
 a = 1
 b = 1
 println('testing or loop')
-while call('a', a) > 0 or call('b', b) > 0
+loop call('a', a) > 0 or call('b', b) > 0
     if a > 0
         println('  dec a')
         a -= 1

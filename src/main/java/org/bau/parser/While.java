@@ -103,7 +103,7 @@ public class While implements Statement {
     public String toString() {
         // TODO this is not correct if continue is used
         StringBuilder buff = new StringBuilder();
-        buff.append("while " + condition + "\n");
+        buff.append("loop " + condition + "\n");
         for(Statement s : list) {
             buff.append(Statement.indent(s.toString()));
         }

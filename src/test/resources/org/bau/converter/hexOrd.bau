@@ -14,7 +14,7 @@ fun hex(x int, len int) i8[]
     data : i8[l]
     y := x
     i := l - 1
-    while i >= 0
+    loop i >= 0
         c := ord('0') + (y & 0xf)
         if (y & 0xf) > 9
             c = ord('a') + (y & 0xf) - 10

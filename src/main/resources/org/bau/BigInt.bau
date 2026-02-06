@@ -1,9 +1,10 @@
 module org.bau.BigInt
 
 import org.bau.Utils
-    if
+    when
 import org.bau.Int
     MIN_I32
+    MIN_INT
     MAX_I32
     divUnsignedOr0
     compareUnsigned
@@ -36,7 +37,7 @@ fun copyOf(a i32[], newLen int) i32[]
         ```)
     result : i32[newLen]
     i := 0
-    while i < newLen and i < a.len
+    loop i < newLen and i < a.len
         result[i] = a[i]
         i += 1
     return result
@@ -45,7 +46,7 @@ fun copyOfRange(a T[], from int, to int) T[]
     len : to - from
     x : T[len]
     i := 0
-    while i + from < to and i < a.len
+    loop i + from < to and i < a.len
         x[i] = a[i + from]
         i += 1
     return x
@@ -55,11 +56,11 @@ type str
 
 fun newBigIntShorten(data i32[], negative int) bigInt
     newLen := data.len
-    while newLen > 0 and data[newLen - 1] = 0
+    loop newLen > 0 and data[newLen - 1] = 0
         newLen -= 1
     if newLen = 0
         negative = 0
-    d2 : if(newLen = data.len, data, copyOf(data, newLen))
+    d2 : when(newLen = data.len, data, copyOf(data, newLen))
     result : bigInt(d2)
     result.negative = negative
     return result
@@ -72,12 +73,12 @@ fun newBigInt(value int) bigInt
     if value = 0 
         return bigInt(i32[0])
     elif value < 0 
-        if value >= MIN_I32
+        if value >= MIN_I32 << 1
             x : bigInt(i32[1])
             x.data[0] = -value
             x.negative = 1
             return x
-        elif value > MIN_I32 
+        elif value > MIN_INT 
             x : bigInt(i32[2])
             x.data[0] = -value
             x.data[1] = -value >> 32
@@ -90,7 +91,7 @@ fun newBigInt(value int) bigInt
             x.negative = 1
             return x
     else 
-        if value <= MAX_I32
+        if value < 1 << 32
             x : bigInt(i32[1])
             x.data[0] = value
             return x
@@ -119,7 +120,7 @@ fun bigInt shiftLeft(n int) bigInt
     data2 : i32[(len2 + 31) / 32]
     carry := 0
     i := 0
-    while i < len
+    loop i < len
         old := data[i >> 5] & 0xffffffff
         data2[(i + n) >> 5] = i32((old << (n & 31)) | carry)
         carry = old >> (32 - (n & 31))
@@ -137,7 +138,7 @@ fun bigInt shiftRight(n int) bigInt
     data2 : copyOfRange(data, n / 32, data.len)
     carry := 0
     i := data2.len - 1
-    while i >= 0
+    loop i >= 0
         x : data2[i] & 0xffffffff
         data2[i] = i32((carry | x) >> (n & 31))
         carry = x << 32
@@ -154,19 +155,19 @@ fun bigInt len() int
 # compare to another value
 fun bigInt compare(o bigInt) int
     if negative <> o.negative
-        return if(negative, -1, 1)
+        return when(negative, -1, 1)
     if negative
         return - neg().compare(o.neg())
     len : len()
     oLen : o.len()
     if len <> oLen
-        return if(len > oLen, 1, -1)
+        return when(len > oLen, 1, -1)
     i := data.len - 1
-    while i >= 0
+    loop i >= 0
         x : data[i] & 0xffffffff
         y : o.data[i] & 0xffffffff
         if x <> y
-            return if(x > y, 1, -1)
+            return when(x > y, 1, -1)
         i -= 1
     return 0
 
@@ -191,7 +192,7 @@ fun add(a i32[], b i32[]) bigInt
     carry := 0
     for i := until(a.len)
         x : result[i] & 0xffffffff
-        y : if(i >= b.len, 0, b[i] & 0xffffffff)
+        y : when(i >= b.len, 0, b[i] & 0xffffffff)
         z : x + y + carry
         result[i] = i32(z)
         carry = z >> 32
@@ -232,7 +233,7 @@ fun sub(a i32[], b i32[]) bigInt
 
 # get the int value (at most 32 bits)
 fun bigInt toInt() int
-    return signum() * if(data.len = 0, 0, data[0] & 0xffffffff)
+    return signum() * when(data.len = 0, 0, data[0] & 0xffffffff)
 
 # multiplication
 fun bigInt mul(other bigInt) bigInt
@@ -315,7 +316,7 @@ fun mulBig(a i32[], b i32[]) bigInt
             result[i] = i32(z)
             carry = z >> 32
             i += 1
-        while carry > 0
+        loop carry > 0
             z : result[i] + carry
             result[i] = i32(z)
             carry = z >> 32
@@ -364,11 +365,11 @@ fun bigInt div(other bigInt) bigInt
     vn1 : vn[n - 2] & 0xffffffff
     vn2 : vn[n - 3] & 0xffffffff
     j := m - n
-    while j >= 0
+    loop j >= 0
         aa : ((un[j + n - 1] & 0xffffffff) * b) + (un[j + n - 2] & 0xffffffff)
         qhat := divUnsignedOr0(aa, vn1)
         rhat := aa - qhat * vn1
-        while
+        loop
             if qhat < b
                 unnn : un[j + n - 3] & 0xffffffff
                 break compareUnsigned(qhat * vn2, rhat * b + unnn) <= 0
@@ -398,7 +399,7 @@ fun bigInt toStr() i8[]
         n = n.neg()
     i := start
     group := newBigInt(1_000_000_000)
-    while
+    loop
         next := n.div(group)
         remainder := n.sub(next.mul(group))
         val : remainder.toInt()
@@ -407,10 +408,10 @@ fun bigInt toStr() i8[]
         i = intToStr(val, buff.data, i, 9)
         n = next
         break n.signum() = 0
-    while i > start + 1 and buff.data[i - 1] = ord('0')
+    loop i > start + 1 and buff.data[i - 1] = ord('0')
         i -= 1
     end : i
-    while i > start
+    loop i > start
         i -= 1
         temp : buff.data[i]
         buff.data[i] = buff.data[start]

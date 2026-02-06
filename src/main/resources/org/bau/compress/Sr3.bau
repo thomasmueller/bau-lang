@@ -65,7 +65,7 @@ fun writeBit(cxt int, bit int)
     else
         x1 = (xmid + 1) & 0xffffffff
     update(cxt, bit)
-    while ((x1 ^ x2) & 0xff000000) = 0
+    loop ((x1 ^ x2) & 0xff000000) = 0
         global.output[outPos] = x2 >> 24
         outPos += 1
         x1 = (x1 << 8) & 0xffffffff
@@ -122,7 +122,7 @@ fun readBit(cxt int) int
     else
         x1 = xmid + 1
     update(cxt, bit)
-    while ((x1 ^ x2) & 0xff000000) = 0
+    loop ((x1 ^ x2) & 0xff000000) = 0
         x1 = (x1 << 8) & 0xffffffff
         x2 = ((x2 << 8) + 255) & 0xffffffff
         x = ((x << 8) + (global.input[inPos] & 0xff)) & 0xffffffff
@@ -132,7 +132,7 @@ fun readBit(cxt int) int
 fun compress()
     c1 := 0 # previous byte
     t4 : int[0x1000000] # context -> last 3 bytes + count
-    while 1
+    loop 1
         r := t4[h]
         cxt int
         if r & 0xffffffff >= 0x04000000
@@ -180,7 +180,7 @@ fun decompress()
     initRead()
     c1 := 0 # previous byte
     t4 : int[0x1000000]; # context -> last 3 bytes + count
-    while
+    loop
         r := t4[h]
         cxt int
         if r & 0xffffffff >= 0x04000000

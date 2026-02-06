@@ -28,7 +28,6 @@ public class SR3Test {
 
     // @Test
     public void calgary() throws IOException {
-        int todo;
         File dir = new File(System.getProperty("user.home") + "/Downloads/calgary");
         if (!dir.exists()) {
             return;
@@ -62,6 +61,7 @@ public class SR3Test {
         long start = System.nanoTime();
         sr.compress();
         long timeSR3 = (System.nanoTime() - start) / data.length;
+        assertTrue(timeSR3 >= 0);
         byte[] compressed = out.toByteArray();
         start = System.nanoTime();
 //        byte[] compLZ4 = LZ4Test.compress(data);
@@ -72,6 +72,7 @@ public class SR3Test {
         start = System.nanoTime();
         byte[] compDeflate = deflate(data, param);
         long timeDeflate = (System.nanoTime() - start) / data.length;
+        assertTrue(compDeflate.length >= 0 && timeDeflate >= 0);
         /*
         System.out.println(data.length + " => " + compressed.length +
                 " (" + timeSR3 + " ns/byte)" +

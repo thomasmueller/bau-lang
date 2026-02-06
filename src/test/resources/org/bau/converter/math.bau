@@ -15,7 +15,7 @@ fun main()
 
     x := -1.0
     x = -1
-    while x <= 1
+    loop x <= 1
         println('signum ' x ' = ' Math.signum(x))
         println('abs    ' x ' = ' Math.abs(x))
         println('floor  ' x ' = ' Math.floor(x))
@@ -34,7 +34,7 @@ fun main()
         x += 0.5
 
     x = -1
-    while x <= 1
+    loop x <= 1
         println('isNotANumber   ' x ' = ' Math.isNotANumber(x))
         println('isNegativeZero ' x ' = ' Math.isNegativeZero(x))
         println('convertDoubleToLongBits ' x ' = ' Math.convertDoubleToLongBits(x))
@@ -42,9 +42,9 @@ fun main()
         x += 0.5
 
     x = -1
-    while x <= 1
+    loop x <= 1
         y := -1.0
-        while y <= 1
+        loop y <= 1
             println('pow ' Math.pow(x, y))
             println('min ' Math.minFloat(x, y))
             println('max ' Math.maxFloat(x, y))

@@ -56,7 +56,7 @@ fun main()
         return
     Utils.setRandomSeed(DateTime.getNanoTime())
     Terminal.enableRawMode(refreshScreen)
-    while
+    loop
         refreshScreen()
         score = 0
         rotation = 0
@@ -71,11 +71,11 @@ fun main()
         for x := until(width)
             field[x + width * (height - 1)] = 1
         refreshScreen()
-        while
+        loop
             updateBlock(0)
-            loop := 16
-            while loop > 0 and running
-                loop -= 1
+            tick := 16
+            loop tick > 0 and running
+                tick -= 1
                 Sleep.sleep(14)
                 continue not Terminal.keyboardHit()
                 tempRot := rotation
@@ -105,7 +105,7 @@ fun main()
                 continue
             updateBlock(1)
             i := height - 2
-            while i > 0
+            loop i > 0
                 found := 1
                 for j := until(width)
                     if field[i * width + j] = 0
@@ -117,7 +117,7 @@ fun main()
                     if score > highScore
                         highScore = score
                     k := i * width - width
-                    while k >= 0
+                    loop k >= 0
                         field[k + width] = field[k]
                         k -= 1
                 i -= 1

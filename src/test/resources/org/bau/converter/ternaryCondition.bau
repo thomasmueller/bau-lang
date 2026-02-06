@@ -1,4 +1,4 @@
-fun if(condition int, a T, b T) T
+fun when(condition int, a T, b T) T
     if condition
         return a
     return b
@@ -12,7 +12,7 @@ fun typeName(a T) i8[]
     return T.name
 
 for i := range(-1, 2)
-    println('abs(' i ')= ' if(i < 0, -i, i))
+    println('abs(' i ')= ' when(i < 0, -i, i))
     println('abs(' i ')= ' (i < 0).then(-i, i))
     println('typeName: ' typeName(1))
 

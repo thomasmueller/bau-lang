@@ -1,20 +1,20 @@
 import org.bau.Exception
-  exception
+    exception
 
 fun factorial(x int) int throws exception
-  if x > 20
-    throw exception('Value too large')
-  if x <= 1
-    return 1
-  f := factorial(x - 1)
-  return x * f
+    if x > 20
+        throw exception('Value too large')
+    if x <= 1
+        return 1
+    f := factorial(x - 1)
+    return x * f
 
 i := 0
-while i <= 30
-  println('Factorial of ' i ' is ' factorial(i))
-  catch e
-    println('Factorial of ' i ' resulted in ' e.message)
-  i += 1
+loop i <= 30
+    println('Factorial of ' i ' is ' factorial(i))
+    catch e
+        println('Factorial of ' i ' resulted in ' e.message)
+    i += 1
 
 ## Expected
 Factorial of 0 is 1

@@ -15,15 +15,15 @@ fun main()
         
 fun solve(c i8[]) int
     i := 0
-    while i < c.len
+    loop i < c.len
         break c[i] = ord('.')
         i += 1
     if i >= c.len
         return 1
     k := ord('1')
-    while k <= ord('9')
+    loop k <= ord('9')
         j := 0
-        while j < 9
+        loop j < 9
             m : (i / 10) * 9 + i % 10
             # a digit in the same row matches
             break c[((m / 9) * 10) + j] = k

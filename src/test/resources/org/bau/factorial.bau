@@ -4,6 +4,6 @@ fun factorial(x i64) i64
     return x * factorial(x - 1)
 
 i := 0
-while i <= 10
+loop i <= 10
     print('Factorial of ', i, ' = ', factorial(i), '\n')
     i += 1

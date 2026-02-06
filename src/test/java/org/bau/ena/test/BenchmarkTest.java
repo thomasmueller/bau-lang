@@ -1,5 +1,11 @@
 package org.bau.ena.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import org.bau.ena.Interpreter;
 import org.bau.ena.Parser;
 import org.bau.ena.ast.Stmt;
@@ -10,12 +16,6 @@ import org.bau.ena.vm.stack.StackBytecode;
 import org.bau.ena.vm.stack.StackCompiler;
 import org.bau.ena.vm.stack.StackVM;
 import org.junit.Test;
-import org.bau.perf.Profiler;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
-import static org.junit.Assert.*;
 
 public class BenchmarkTest {
     private static final long MAX_OPS = 100_000_000L;
@@ -27,6 +27,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new Interpreter().setMaxOps(MAX_OPS).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
+        assertTrue(time > 0);
         // System.out.println("runInterpreter: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }
@@ -41,6 +42,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new StackVM().setMaxOps(MAX_OPS).run(bc, "main"); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
+        assertTrue(time > 0);
         // System.out.println("runStackVM: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }
@@ -56,6 +58,7 @@ public class BenchmarkTest {
         // Profiler prof = new Profiler().startCollecting();
         try { new RegVM().setMaxOps(MAX_OPS).run(bc, "main"); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
+        assertTrue(time >= 0);
         // System.out.println("runRegVM: " + time + " ms");
         // System.out.println(prof.getTop(10));
         return baos.toString().replace("\r\n", "\n");

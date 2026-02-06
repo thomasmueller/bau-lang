@@ -1,7 +1,7 @@
 module org.bau.Arrays
 
 fun reverse(buff T[], first 0..buff.len, last 0..buff.len)
-    while first < last
+    loop first < last
         temp : buff[first]!
         buff[first]! = buff[last]!
         buff[last]! = temp

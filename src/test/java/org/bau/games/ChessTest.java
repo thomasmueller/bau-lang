@@ -27,8 +27,8 @@ public class ChessTest {
                 blackTime += System.nanoTime() - start;
                 c.move(move);
                 print(c);
-                // System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
-                // Thread.sleep(3000);
+                System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
+                Thread.sleep(3000);
                 start = System.nanoTime();
                 move = c.negamax(true, 4, false, -Long.MAX_VALUE, Long.MAX_VALUE);
                 whiteTime += System.nanoTime() - start;
@@ -40,8 +40,8 @@ public class ChessTest {
                 }
                 c.move(move);
                 print(c);
-                // System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
-                // Thread.sleep(3000);
+                System.out.println("time: white=" + (whiteTime / 1000000) + " black=" + (blackTime / 1000000));
+                Thread.sleep(3000);
                 boolean whiteOk = false, blackOk = false;
                 for (int i = 0; i < 64; i++) {
                     if (c.board[i] == Chess.KING) {
@@ -61,7 +61,7 @@ public class ChessTest {
                     break;
                 }
             }
-            // System.out.println("white score " + whiteScore + " black " + blackScore);
+            System.out.println("white score " + whiteScore + " black " + blackScore);
         }
     }
 

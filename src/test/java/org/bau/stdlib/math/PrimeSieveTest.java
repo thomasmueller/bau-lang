@@ -23,14 +23,11 @@ public class PrimeSieveTest {
 
     private static long sumPrimesTo(int largeN) {
         long sum = 0;
-        int count = 0;
         for (int i = 0; i < largeN; i++) {
             if (BigInteger.valueOf(i).isProbablePrime(15)) {
                 sum += i;
-                count++;
             }
         }
-        // System.out.println("count " + count + " sum " + sum + " to " + largeN);
         return sum;
     }
 }

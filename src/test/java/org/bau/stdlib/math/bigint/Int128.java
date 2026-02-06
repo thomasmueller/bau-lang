@@ -2,26 +2,25 @@ package org.bau.stdlib.math.bigint;
 
 import java.nio.charset.StandardCharsets;
 
+import org.bau.stdlib.math.IntMath;
+
 public class Int128 {
 
-    // x0: lowest, x3: highest
-    private final int x0, x1, x2, x3;
+    private final long low, high;
 
-    public static final Int128 MIN_VALUE = new Int128(0, 0, 0, Integer.MIN_VALUE);
-    public static final Int128 MAX_VALUE = new Int128(-1, -1, -1, Integer.MAX_VALUE);
-    public static final Int128 ZERO = new Int128(0, 0, 0, 0);
-    public static final Int128 ONE = new Int128(1, 0, 0, 0);
+    public static final Int128 MIN_VALUE = new Int128(0, Long.MIN_VALUE);
+    public static final Int128 MAX_VALUE = new Int128(-1, Long.MAX_VALUE);
+    public static final Int128 ZERO = new Int128(0, 0);
+    public static final Int128 ONE = new Int128(1, 0);
 
-    public Int128(int x0, int x1, int x2, int x3) {
-        this.x0 = x0;
-        this.x1 = x1;
-        this.x2 = x2;
-        this.x3 = x3;
+    public Int128(long low, long high) {
+        this.low = low;
+        this.high = high;
     }
 
     public static Int128 valueOf(long x) {
         int high = -(int) (x >>> 63);
-        return new Int128((int) (x), (int) (x >>> 32), high, high);
+        return new Int128(x, high);
     }
 
     public static Int128 valueOf(String string) {
@@ -37,55 +36,34 @@ public class Int128 {
     }
 
     public Int128 add(Int128 other) {
-        long r0 = (x0 & 0xffffffffL) + (other.x0 & 0xffffffffL);
-        long r1 = (x1 & 0xffffffffL) + (other.x1 & 0xffffffffL) + (r0 >>> 32);
-        long r2 = (x2 & 0xffffffffL) + (other.x2 & 0xffffffffL) + (r1 >>> 32);
-        long r3 = (x3 & 0xffffffffL) + (other.x3 & 0xffffffffL) + (r2 >>> 32);
-        return new Int128((int) r0, (int) r1, (int) r2, (int) r3);
+        long l = low + other.low;
+        long c = ((low & other.low) | ((low | other.low) & ~l)) >>> 63;
+        long h = high + other.high + c;
+        return new Int128(l, h);
     }
 
     public Int128 subtract(Int128 other) {
         return add(other.negate());
     }
 
-    private int sign() {
-        return (x3 >>> 63) & 1;
+    private long sign() {
+        return (high >>> 63) & 1;
     }
 
     public Int128 multiply(Int128 other) {
-        long r0 = (x0 & 0xffffffffL) * (other.x0 & 0xffffffffL);
-        long r1 = (x0 & 0xffffffffL) * (other.x1 & 0xffffffffL) + (r0 >>> 32);
-        long r2 = (x0 & 0xffffffffL) * (other.x2 & 0xffffffffL) + (r1 >>> 32);
-        long r3 = (x0 & 0xffffffffL) * (other.x3 & 0xffffffffL) + (r2 >>> 32);
-        r0 &= 0xffffffffL;
-        r1 &= 0xffffffffL;
-        r2 &= 0xffffffffL;
-        r1 += (x1 & 0xffffffffL) * (other.x0 & 0xffffffffL);
-        r2 += (x1 & 0xffffffffL) * (other.x1 & 0xffffffffL) + (r1 >>> 32);
-        r3 += (x1 & 0xffffffffL) * (other.x2 & 0xffffffffL) + (r2 >>> 32);
-        r1 &= 0xffffffffL;
-        r2 &= 0xffffffffL;
-        r2 += (x2 & 0xffffffffL) * (other.x0 & 0xffffffffL);
-        r3 += (x2 & 0xffffffffL) * (other.x1 & 0xffffffffL) + (r2 >>> 32);
-        r2 &= 0xffffffffL;
-        r3 += (x3 & 0xffffffffL) * (other.x0 & 0xffffffffL) + (r2 >>> 32);
-        return new Int128((int) r0, (int) r1, (int) r2, (int) r3);
+        long h = IntMath.multiplyHighUnsigned(low, other.low);
+        h += high * other.low + low * other.high;
+        return new Int128(low * other.low, h);
     }
 
     public Int128 remainder(Int128 other) {
-        Int128 div = divide(other);
-        return subtract(div.multiply(other));
+        return subtract(divide(other).multiply(other));
     }
 
     public Int128 divide(Int128 other) {
         int signum = signum();
         if (other.signum() == 0) {
-            if (signum == 0) {
-                return this;
-            } else if (signum == 1) {
-                return MAX_VALUE;
-            }
-            return MIN_VALUE;
+            return other;
         } else if (signum == 0) {
             return this;
         } else if (signum == 1) {
@@ -99,12 +77,17 @@ public class Int128 {
         } else if (cmp == 0) {
             return ONE;
         }
+        if (other.high == 0) {
+            long q = IntMath.divide128Unsigned(high, low, other.low);
+            return new Int128(q, 0);
+        }
+        // fallback (slow)
         Int128 remainder = this;
         Int128 result = Int128.valueOf(0);
         Int128 shifted = other;
         int shiftCount = 0;
         Int128 old = shifted;
-        while (shifted.compareTo(remainder) >= 0) {
+        while (shifted.compareUnsigned(remainder) >= 0) {
             old = shifted;
             shifted = shifted.shiftLeft(1);
             shiftCount++;
@@ -128,18 +111,15 @@ public class Int128 {
             return false;
         }
         Int128 o = (Int128) other;
-        return x0 == o.x0 &&
-                x1 == o.x1 &&
-                x2 == o.x2 &&
-                x3 == o.x3;
+        return low == o.low && high == o.high;
     }
 
     private long intValue() {
-        return sign() == 1 ? -x0 : x0;
+        return sign() == 1 ? -low : low;
     }
 
     public long longValue() {
-        return (((long) x1) << 32) | (x0 & 0xffffffffL);
+        return low;
     }
 
     public String toString() {
@@ -184,103 +164,90 @@ public class Int128 {
     }
 
     public Int128 negate() {
-        long r0 = (~x0 & 0xffffffffL) + 1;
-        long r1 = (~x1 & 0xffffffffL) + (r0 >>> 32);
-        long r2 = (~x2 & 0xffffffffL) + (r1 >>> 32);
-        long r3 = (~x3 & 0xffffffffL) + (r2 >>> 32);
-        return new Int128((int) r0, (int) r1, (int) r2, (int) r3);
+        long l = ~low + 1;
+        long h = ~high;
+        if (l == 0) {
+            h++;
+        }
+        return new Int128(l, h);
     }
 
-    public Int128 shiftLeft(int digits) {
-        int n = digits & 31;
-        long m0 = x0 & 0xffffffffL;
-        long m1 = x1 & 0xffffffffL;
-        long m2 = x2 & 0xffffffffL;
-        long m3 = x3 & 0xffffffffL;
-        int t0 = (int) (m0 << n);
-        int t1 = (int) ((m1 << n) | (m0 >>> (32 - n)));
-        int t2 = (int) ((m2 << n) | (m1 >>> (32 - n)));
-        int t3 = (int) ((m3 << n) | (m2 >>> (32 - n)));
-        if (digits < 32) {
-            return new Int128(t0,  t1,  t2,  t3);
-        } else if (digits < 64) {
-            return new Int128(0,  t0,  t1,  t2);
-        } else if (digits < 96) {
-            return new Int128(0, 0,  t0,  t1);
-        } else {
-            return new Int128(0, 0, 0,  t0);
+    public Int128 shiftLeft(int n) {
+        if (n == 0) {
+            return this;
+        } else if (n < 64) {
+            long h = (high << n) | (low >>> (64 - n));
+            long l  = low << n;
+            return new Int128(l, h);
+        } else if (n < 128) {
+            return new Int128(0, low << (n - 64));
         }
+        return new Int128(0, 0);
     }
 
-    public Int128 shiftRight(int digits) {
-        int n = digits & 31;
-        long m0 = x0 & 0xffffffffL;
-        long m1 = x1 & 0xffffffffL;
-        long m2 = x2 & 0xffffffffL;
-        long m3 = x3 & 0xffffffffL;
-        int t3 = (int) (m3 >>> n);
-        int t2 = (int) ((m2 >>> n) | (m3 << (32 - n)));
-        int t1 = (int) ((m1 >>> n) | (m2 << (32 - n)));
-        int t0 = (int) ((m0 >>> n) | (m1 << (32 - n)));
-        if (digits < 32) {
-            return new Int128(t0, t1, t2, t3);
-        } else if (digits < 64) {
-            return new Int128(t1, t2, t3, 0);
-        } else if (digits < 96) {
-            return new Int128(t2, t3, 0, 0);
-        } else {
-            return new Int128(t3, 0, 0, 0);
+    public Int128 shiftRight(int n) {
+        if (n == 0) {
+            return this;
+        } else if (n < 64) {
+            long l  = (low >>> n) | (high << (64 - n));
+            long h = high >>> n;
+            return new Int128(l, h);
+        } else if (n < 128) {
+            return new Int128(high >>> (n - 64), 0);
         }
+        return new Int128(0, 0);
     }
 
-    public Int128 shiftRightArithmetic(int digits) {
-        int n = digits & 31;
-        int fill = -sign();
-        long m0 = x0 & 0xffffffffL;
-        long m1 = x1 & 0xffffffffL;
-        long m2 = x2 & 0xffffffffL;
-        long m3 = x3;
-        int t3 = (int) (m3 >> n);
-        int t2 = (int) ((m2 >>> n) | (m3 << (32 - n)));
-        int t1 = (int) ((m1 >>> n) | (m2 << (32 - n)));
-        int t0 = (int) ((m0 >>> n) | (m1 << (32 - n)));
-        if (digits < 32) {
-            return new Int128(t0, t1, t2, t3);
-        } else if (digits < 64) {
-            return new Int128(t1, t2, t3, fill);
-        } else if (digits < 96) {
-            return new Int128(t2, t3, fill, fill);
-        } else {
-            return new Int128(t3, fill, fill, fill);
+    public Int128 shiftRightArithmetic(int n) {
+        if (n == 0) {
+            return this;
+        } else if (n < 64) {
+            long l  = (low >>> n) | (high << (64 - n));
+            long h = high >> n;
+            return new Int128(l, h);
+        } else if (n < 128) {
+            long l  = high >> (n - 64);
+            long h = high >> 63;
+            return new Int128(l, h);
         }
+        long fill = high >> 63;
+        return new Int128(fill, fill);
     }
 
     public int numberOfLeadingZeros() {
-        if (x3 != 0) {
-            return Integer.numberOfLeadingZeros(x3);
-        } else if (x2 != 0) {
-            return 32 + Integer.numberOfLeadingZeros(x2);
-        } else if (x1 != 0) {
-            return 64 + Integer.numberOfLeadingZeros(x1);
+        if (high != 0) {
+            return Long.numberOfLeadingZeros(high);
         }
-        return 96 + Integer.numberOfLeadingZeros(x0);
+        return 64 + Long.numberOfLeadingZeros(low);
+    }
+
+    public int compareUnsigned(Int128 other) {
+        int comp = Long.compareUnsigned(high, other.high);
+        if (comp != 0) {
+            return comp;
+        }
+        return Long.compareUnsigned(low, other.low);
     }
 
     public int compareTo(Int128 other) {
-        return subtract(other).signum();
+        int comp = Long.compare(high, other.high);
+        if (comp != 0) {
+            return comp;
+        }
+        return Long.compareUnsigned(low, other.low);
     }
 
     public int signum() {
-        if (x0 == 0 && x1 == 0 && x2 == 0 && x3 == 0) {
+        if (low == 0 && high == 0) {
             return 0;
-        } else if (x3 < 0) {
+        } else if (high < 0) {
             return -1;
         }
         return 1;
     }
 
     public Int128 abs() {
-        if (x3 < 0) {
+        if (high < 0) {
             return negate();
         }
         return this;

@@ -168,7 +168,7 @@ public class Std {
         }
         String type = "fun range(start int, lessThan int) int\n"
                 + "  _ := start\n"
-                + "  while _ < lessThan\n"
+                + "  loop _ < lessThan\n"
                 + "    return _\n"
                 + "    _ += 1";
         Parser parser = new Parser(type);
@@ -183,7 +183,7 @@ public class Std {
         String type = "fun until(lessThan int) 0 .. lessThan\n"
                 + "  if lessThan > 0\n"
                 + "    _ := 0 .. lessThan\n"
-                + "    while 1 = 1\n"
+                + "    loop 1 = 1\n"
                 + "      return _\n"
                 + "      _next : _ + 1\n"
                 + "      break _next >= lessThan\n"

@@ -210,6 +210,7 @@ public class SortedMapTest {
             }
         }
         long time = System.currentTimeMillis() - start;
+        assertTrue(dummy >= 0);
         // System.out.println("time: " + time + " ms " + dummy);
 
 //        System.out.println(prof.getTop(10));

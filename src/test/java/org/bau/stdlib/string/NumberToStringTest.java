@@ -1,6 +1,7 @@
 package org.bau.stdlib.string;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Random;
@@ -108,6 +109,7 @@ public class NumberToStringTest {
             }
         }
         time = System.nanoTime() - time;
+        assertTrue(time >= 0 && dummy >= 0 && count >= 0);
         // System.out.println((time / count) + " ns/key dummy=" + dummy);
     }
 
@@ -129,6 +131,7 @@ public class NumberToStringTest {
             }
         }
         time = System.nanoTime() - time;
+        assertTrue(time >= 0 && dummy >= 0 && count >= 0);
         // System.out.println((time / count) + " ns/key dummy=" + dummy);
     }
 

@@ -7,174 +7,11 @@ https://github.com/NicoNex/tau
 
 yn: input('Is the number larger than ' x ' ?')
 
-* Weird syntax
-At the same type a data type _and_ a value, which is weird
-i := 0..x.len
-
-* Bound check:
-fun reverse_i8_array_i8(buff i8[], first 0..buff.len, last 0..buff.len)
-    while first < last
-        temp : buff[first]![*]
-        buff[first]! = buff[last]!
-        buff[last]! = temp
-        f := first + 1
-        break f >= buff.len
-        first = f
-        l := last - 1
-        break l < 0
-        break l >= buff.len
-        last = l
-
-* Bound check:
-fun ord1(s i8[]) const int
-    if s.len
-        return s[0]!
-    return 0
-
-* Bound check:
-fun getCache() const int[]
-    result : int[10]
-    result[0] = 0
-    for i := range(1, 10)
-        result[i] = i
-    return result
-
-
-* Bound check:
-fun ord1(s i8[]) const int
-    if s.len <= 0
-        return 0
-    return s[0]!
-
-* Solver
-add rules for len >= 0.
-that means len <> 0 means len > 0
-
-* Bound check (should pass)
-fun sum(x int[]) int
-    sum := 0
-    if x.len = 0
-        return 0
-    i := 0..x.len
-    while i < x.len
-        sum += x[i]!
-    return sum
-
-* Bound check (should pass)
-fun test()
-  x : i8[4]
-  x[0]! = 0x12
-
-
-  x[1]! = 0x34
-  x[2]! = 0x56
-  x[3]! = 0x78
-  println(readI32Le(x, i32(0)))
-
-
-* Bound check (should pass)
-fun truncate(data i32[]) int
-    newLen := data.len
-    while newLen > 0 and data[newLen - 1]! = 0
-        newLen -= 1
-    return newLen
-
-* Bound check (should pass)
-fun matchChar(text i8[], pos int) int
-    if pos < 0
-        return 0
-    if pos >= text.len
-        return 0
-    c : text[pos]!
-    return c - 1
-
-* Bound check (should fail; passed before)
-fun matchChar(text i8[], pos int) int
-    if pos >= text.len
-        return 0
-    c : text[pos]!
-    return c - 1
-
-* Bound checks (should pass; didn't pass before)
-fun test(value i8[]) int
-    if value.len
-        x : value[0]!
-        return x
-    return 0
-
-fun test(value i8[]) int
-    if value.len > 0
-        x : value[0]!
-        return x
-    return 0
-
-* Bound checks (should pass)
-cache : int[10]
-fun isMunchausen(number int) int
-    n := number
-    total := 0
-    while n > 0
-        digit : n % 10
-        total += cache[digit]!
-        n /= 10
-    return total
-
-* Bound checks test case (should pass):
-fun readInt(d i8[], pos 0 .. d.len - 4) int
-    return d[pos + 3]!
-
-fun readInt(d i8[], pos 0 .. d.len - 4) int
-    return (d[pos]! & 0xff) |
-           ((d[pos + 1]! & 0xff) << 8) |
-           ((d[pos + 2]! & 0xff) << 16) |
-           ((d[pos + 3]! & 0xff) << 24)
-
-* Bound checks test case (should fail):
-fun test()
-    data : i8[10]
-    i := 0
-    while i < 20
-        println(data[i]!)
-        i += 1
-test()
-
-* Bound checks test case (should pass)
-fun test()
-    data : i8[10]
-    for i := until(data.len)
-        println(data[i]!)
-test()
-
-
-
 * verify whitespace count (eg warn if whitespace doesn't match the expectation)
-
-* simplify throw / catch by limiting catch to top level?
-* per-module compiler flags: panicOnNullPointer, panicOnDivByZero,...
-* option (just 'throws divByZero'?) to throw a checked exception for NPE and division by zero
 
 * test setjmp / longjmp
 
 * we have a doc and a docs directory, rename one
-
-* array bound checks
-fun test()
-    data : i8[10]
-    for i:= until(data.len)
-        data[i - 1]! = i
-
-fun test()
-    x : int[10]
-    i := 0..x.len
-    while
-        println(x[i]!)
-        next : i + 1
-        break next >= x.len
-        i = next
-test()
-
-bitwise not: ~ => 0^
-Operators: currently we use ~ for negation... what about ^ like in go, or 0 ^ ... ?
 
 * better error message than "type main not found"
 type Test
@@ -195,15 +32,7 @@ numberOf -> leadingZeros
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
-Demo apps:
-- block game,
-- text editor,
-- data compression,
-- sudoku solver,
-- chess
-- ...
-
-diff
+stdlib: add "diff" utility?
 
 shell
 split, cat, tar

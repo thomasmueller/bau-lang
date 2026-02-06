@@ -30,7 +30,7 @@ fun HashMap(K, V) put(hash int, key K, value V)
       if oh[i] <> 0
         this.put(oh[i], ok[i], ov[i])
   p := hash & (keys.len - 1)
-  while 1
+  loop 1
     if hashes[p] = hash and keys[p] = key
       values[p] = value
       return
@@ -44,7 +44,7 @@ fun HashMap(K, V) put(hash int, key K, value V)
 
 fun HashMap(K, V) get(hash int, key K) V
   p := hash & (keys.len - 1)
-  while 1
+  loop 1
     if hashes[p] = 0
       return values[p]
     elif hashes[p] = hash and keys[p] = key
@@ -53,7 +53,7 @@ fun HashMap(K, V) get(hash int, key K) V
 
 fun HashMap(K, V) remove(hash int, key K) int
   p := hash & (keys.len - 1)
-  while 1
+  loop 1
     if hashes[p] = 0
       # not found
       return 0
@@ -65,7 +65,7 @@ fun HashMap(K, V) remove(hash int, key K) int
       break
     p = (p + 1) & (keys.len - 1)
   p2 := (p + 1) & (keys.len - 1)
-  while 1
+  loop 1
     h2 := hashes[p2]
     break h2 = 0
     pb := h2 & (keys.len - 1)
@@ -97,7 +97,7 @@ fun hashCode(data i8[]) int
   h := data.len << 32
   i := 0..data.len
   if i < data.len - 3
-    while 1
+    loop 1
       x := (data[i!] & 0xff) |
            ((data[i + 1!] & 0xff) << 8) |
            ((data[i + 2!] & 0xff) << 16) |
@@ -109,7 +109,7 @@ fun hashCode(data i8[]) int
   if i < data.len and i <> data.len - 4
     x := 0
     s := 0
-    while 1
+    loop 1
       x ^= (data[i!] & 0xff) << s
       s += 8
       n : i + 1

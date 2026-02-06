@@ -11,11 +11,11 @@ fun main()
     stretch = null
     longLived := with(maxDepth)
     depth := minDepth
-    while depth <= maxDepth
+    loop depth <= maxDepth
         iterations := 1 << (maxDepth - depth + minDepth)
         check := 0;
         i := 1
-        while i <= iterations
+        loop i <= iterations
             t := with(depth)
             check += t.nodeCount()
             i += 1

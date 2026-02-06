@@ -72,6 +72,8 @@ public class HashTableRobinHoodTest {
             }
         }
         long time = System.currentTimeMillis() - start;
+        assertTrue(time >= 0);
+        assertTrue(dummy >= 0);
         // System.out.println("time: " + time + " ms " + dummy);
     }
 
