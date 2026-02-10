@@ -124,30 +124,25 @@ public class CompressionTest {
             outputStream.write(buffer, 0, count);
         }
         deflater.end();
-        deflater.close();
         return outputStream.toByteArray();
     }
 
     public static byte[] inflate(byte[] input) {
         Inflater inflater = new Inflater();
-        try {
-            inflater.setInput(input);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
-            byte[] buffer = new byte[4096];
-            while (!inflater.finished()) {
-                int count;
-                try {
-                    count = inflater.inflate(buffer);
-                } catch (DataFormatException e) {
-                    throw new RuntimeException(e);
-                }
-                outputStream.write(buffer, 0, count);
+        inflater.setInput(input);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(input.length);
+        byte[] buffer = new byte[4096];
+        while (!inflater.finished()) {
+            int count;
+            try {
+                count = inflater.inflate(buffer);
+            } catch (DataFormatException e) {
+                throw new RuntimeException(e);
             }
-            inflater.end();
-            return outputStream.toByteArray();
-        } finally {
-            inflater.close();
+            outputStream.write(buffer, 0, count);
         }
+        inflater.end();
+        return outputStream.toByteArray();
     }
 
     @Test

@@ -98,7 +98,7 @@ public class JsonTest {
     @Test
     public void validateNesting() {
         StringBuilder buff = new StringBuilder();
-        buff.repeat("[", 2000);
+        buff.repeat('[', 2000);
         buff.append("0");
         buff.repeat("]", 2000);
         assertTrue(JsonUtils.validate(buff.toString()));

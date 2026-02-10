@@ -106,7 +106,6 @@ public class SR3Test {
             outputStream.write(buffer, 0, count);
         }
         deflater.end();
-        deflater.close();
         return outputStream.toByteArray();
     }
 

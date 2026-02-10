@@ -7,6 +7,13 @@ https://github.com/NicoNex/tau
 
 yn: input('Is the number larger than ' x ' ?')
 
+
+https://news.ycombinator.com/item?id=46945235
+https://wingolog.org/archives/2026/02/09/six-thoughts-on-generating-c
+
+SectorC: A C Compiler in 512 bytes
+https://news.ycombinator.com/item?id=46925741
+
 * verify whitespace count (eg warn if whitespace doesn't match the expectation)
 
 * test setjmp / longjmp
