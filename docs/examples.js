@@ -52,8 +52,8 @@ for i := range(1, 10)
         code: `PI : 3.1415
 println('Pi: ' PI)
 
-a := 10_000_000
-b := 3
+a : 10_000_000
+b : 3
 println('integer a/b: ', a / b)
 println('float   a/b: ', float(a) / b)
 `
