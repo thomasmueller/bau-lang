@@ -1,0 +1,93 @@
+POS_INFINITY:1/0;
+NEG_INFINITY:-1/0;
+NOT_A_NUMBER:0/0;
+PI   :3.14159265358979323846;
+E    :2.71828182845904523536;
+LOG10:2.30258509299404568402;
+LOG2 :0.69314718055994530942;
+fun abs(x) {?x>=0{=x};=-x}
+fun isNaN(x) {=x<>x}
+fun isNegZero(x) {=(x=0)&(1/x=NEG_INFINITY)}
+fun min(a,b) { if isNaN(a) { return a } 
+                  if a = b & a = 0 & isNegZero(b) { return b }
+                  if a <= b {return a }
+                  return b }
+fun max(a,b) { if isNaN(a) { return a } 
+                  if a = b & a = 0 & isNegZero(a) { return b }
+                  if a >= b { return a }
+                  return b }
+fun floor(x) { if isNaN(x) | x = 0 { return x }
+                  i : x | 0; d : i;
+                  if d = x | x >= 0 { return d } 
+                  return d - 1 }
+fun ceil(x)     { return -floor(-x) }
+fun round(x)    { if isNaN(x) { return 0 }
+                  return (x + 0.5) | 0 }
+fun signum(x)   { if x = 0.0 | isNaN(x) { return x }
+                  if x >= 0 { return 1 }
+                  return -1 }
+fun exp(x)      { if isNaN(x) | x = POS_INFINITY { return x }
+                  if x < 0 { return 1 / exp(-x) }
+                  if x > 2 { r : exp(x / 2);  return r * r }
+                  approx : 1.0; term : 1.0; 
+                  i : 1; while i < 22 { term:term*x/i ; approx:approx+term; i:i+1 }
+                  return approx }
+fun log(x)      { if x = 0 { return NEG_INFINITY }
+                  if x = POS_INFINITY { return x }
+                  if x <= 0 | isNaN(x) { return NOT_A_NUMBER }
+                  if x < 0.7 { return log(2 * x) - LOG2 }
+                  if x >= 1.5 { return log(x / 2) + LOG2 }
+                  base:x-1; sign:1; term:base; result:term;
+                  i : 2; while i < 30 {sign:-sign; term : term * base; 
+                  result:result+sign*term/i; i:i+1}
+                  return result }
+fun sqrt(x)     {=exp(log(x)/2)}
+fun log10(x)    {=log(x)/LOG10}
+fun e(x,n)      {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};=x} 
+fun pow(x,y)    { if x > 0 & y > 0 { return exp(y * log(x)) }
+                  if y = 0.0 { return 1.0 }
+                  if isNaN(x) | isNaN(y) { return NOT_A_NUMBER }
+                  absX : abs(x); if y = NEG_INFINITY {
+                    if absX > 1.0 { return 0.0 }
+                    if absX = 1.0 { return NOT_A_NUMBER }
+                    return POS_INFINITY }
+                  yy : y | 0; odd : (yy = y) & ((yy & 1) = 1);
+                  if isNegZero(x) & yy = y { if odd { return -pow(-x, y) } return pow(-x, y) }
+                  if x >= 0 { return exp(y * log(x)) }
+                  if odd { return -pow(-x, y) }
+                  if x = NEG_INFINITY { if y < 0 { return 0.0 } return POS_INFINITY }
+                  if yy = y { return pow(-x, y) }
+                  if abs(y) > e(1,19) { if y > 0 { return pow(-x, y) } 
+                  if x = -1 { return 1 } if absX > 1 { return 0 } return POS_INFINITY }
+                  return NOT_A_NUMBER }
+fun sin(x)      { if x = POS_INFINITY { return NOT_A_NUMBER }
+                  if abs(x) < e(1,-8) { return x }
+                  if x < 0 {return -sin(-x) }
+                  if x > PI * 2 { x : x - floor(x / (PI * 2)) * (PI * 2) }
+                  if x > PI { return -sin(x - PI) }
+                  if x > PI / 2 { x : PI - x }
+                  approx : 0.0; sign : 1; p : x; n : 2;
+                  while n < 24 {
+                    approx : approx + sign * p;
+                    p : p * x * x / (n * (n + 1)); sign : -sign; n:n+2;
+                  } return approx; }
+fun atan(x)     { x : min(max(e(-1,16), x), e(1,16));
+                  if abs(x) >= 0.4 { return 2 * atan(x / (1 + sqrt(1 + x * x))) }
+                  approx : x; sign : -1; p : x;
+                  n:3; while n < 32 {
+                    p : p * x * x; approx : approx + sign * p / n;
+                    sign : -sign; n:n+1
+                  } return approx; }
+fun cos(x) {=sin(x+PI/2)}
+fun tan(x) {=sin(x)/cos(x)}
+fun asin(x) {=atan(x/sqrt(1-x*x))}
+fun acos(x) {=PI/2-asin(x)}
+
+print('pow(2, 10) ' pow(2, 10));
+print('sqrt(2) ' sqrt(2));
+print('sin(0.5) ' sin(0.5));
+print('cos(0.5) ' cos(0.5));
+print('tan(0.5) ' tan(0.5));
+print('asin(0.5) ' asin(0.5));
+print('acos(0.5) ' acos(0.5));
+print('atan(0.5) ' atan(0.5));

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>At Language Interpreter</title>
+    <style>
+        body {
+            font-family: monospace;
+            margin: 20px auto;
+            max-width: 900px;
+            color: #333;
+        }
+        h1, h3, h4, label { color: #06a; }
+        h1 { text-align: center; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        textarea, #output, .grammar {
+            width: 100%;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ccc;
+        }
+        textarea { height: 280px; resize: vertical; }
+        #output { min-height: 120px; white-space: pre-wrap; color: #060; }
+        #output.error { color: #c00; }
+        .button-row { margin: 16px 0; }
+        button { padding: 10px 24px; cursor: pointer; margin-right: 8px; }
+        #runBtn { background: #06a; color: #fff; border: none; }
+        .example-btn { padding: 6px 12px; background: #f0f7ff; color: #06a; border: 1px solid #06a; }
+        .documentation { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        .doc-content li { line-height: 1.8; }
+        .doc-content code { background: #f0f0f0; padding: 2px 5px; color: #060; }
+        .grammar { background: #f8f8f8; white-space: pre; overflow-x: auto; }
+        .grammar .rule { color: #06a; }
+        .grammar .terminal { color: #060; }
+        .grammar .alt { color: #c60; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>The @ Language</h1>
+        <p class="subtitle">A tiny programming language interpreter</p>
+        
+        <div class="editor-container">
+            <label for="code">Source Code</label>
+            <textarea id="code" spellcheck="false" placeholder="Enter your @ language code here...">fun fib(n) {
+    if n < 2 { return n }
+    return fib(n - 1) + fib(n - 2)
+}
+print(fib(10))</textarea>
+            
+            <div class="button-row">
+                <button id="runBtn">▶ Run</button>
+                <button class="example-btn" data-example="hello">Hello World</button>
+                <button class="example-btn" data-example="fib">Fibonacci</button>
+                <button class="example-btn" data-example="factorial">Factorial</button>
+                <button class="example-btn" data-example="loop">Loop</button>
+                <button class="example-btn" data-example="array">Array</button>
+                <button class="example-btn" data-example="operators">Operators</button>
+                <button class="example-btn" data-example="math">Math</button>
+            </div>
+            
+            <div class="output-container">
+                <label>Output</label>
+                <div id="output"></div>
+            </div>
+        </div>
+        
+        <div class="documentation">
+            <h3>Documentation</h3>
+
+            <div class="doc-content">
+                <ul>
+                    <li>Minimalistic syntax. Tiny footprint (~450 lines of code).</li>
+                    <li>Operator overloading is supported.</li>
+                    <li>Ability to minify the code. Each keyword has a single-character shortcut: 
+                        <code>?</code> if, <code>:</code> else, <code>*</code> repeat, 
+                        <code>@</code> while, <code>+</code> fun, <code>=</code> return, 
+                        <code>></code><code>print</code>.</li>
+                        This is also useful for code golfing, 
+                        and writing programs on the command line, or on a phone.
+                    <li>Assignment uses <code>:</code>, and <code>=</code> for comparison.</li>
+                    <li>Global variables and constants start with a capital letter.</li>
+                    <li>Text literals start and end with <code>'</code>.
+                        As in SQL, the only escape character is <code>''</code> for <code>'</code>.
+                        Use free-standing text literals as comments.
+                    <li>Commas and semicolons are optional.</li>
+                    <li><code>&</code> and <code>|</code> are logical and bitwise "and" and "or".</li>
+                    <li>Arrays of floating point are the only data type.</li>
+                    <li>Array indexing uses <code>.</code> instead of <code>[]</code>.</li>
+                    <li>Zero error philosophy: out-of-bounds array access returns 0, 
+                        except for entry -1 which returns the length.</li>
+                    <li>Text has at least two elements (zero values are ignored).</li>
+                </ul>
+            </div>
+
+            <h4>Why?</h4>
+            <div class="doc-content">
+                <ul>
+                    <li>Low footprint command line programmable calculator</li>
+                    <li>Code golfing</li>
+                    <li>Language design experiment</li>
+                    <li>Educational tool for learning interpreter design</li>
+                    <li>Embedded scripting with minimal dependencies</li>
+                    <li>Sandboxed execution of user-submitted code</li>
+                    <li>Prototyping new language features</li>
+                    <li>Resource-constrained environments</li>
+                </ul>
+            </div>
+
+            <h4>Grammar</h4>
+            <div class="grammar"><span class="rule">&lt;program&gt;</span>    := <span class="rule">&lt;definition&gt;</span> | <span class="rule">&lt;expr&gt;</span> <span class="terminal">";"</span> ...
+<span class="rule">&lt;definition&gt;</span> := <span class="terminal">"fun"</span> <span class="rule">&lt;id&gt;</span> <span class="terminal">"("</span> <span class="rule">&lt;id&gt;</span> ... <span class="terminal">")"</span> <span class="rule">&lt;block&gt;</span>
+<span class="rule">&lt;block&gt;</span>      := <span class="terminal">"{"</span> <span class="rule">&lt;expr&gt;</span> [ <span class="terminal">";"</span> ... ] <span class="terminal">"}"</span>
+<span class="rule">&lt;expr&gt;</span>       := <span class="rule">&lt;primary&gt;</span> | <span class="rule">&lt;expr&gt;</span> <span class="rule">&lt;op&gt;</span> <span class="rule">&lt;expr&gt;</span>
+<span class="rule">&lt;primary&gt;</span>    := <span class="rule">&lt;literal&gt;</span> <span class="alt">|</span> <span class="rule">&lt;id&gt;</span>   <span class="alt">|</span> <span class="rule">&lt;call&gt;</span>
+              <span class="alt">|</span> <span class="rule">&lt;if&gt;</span>      <span class="alt">|</span> <span class="rule">&lt;loop&gt;</span> <span class="alt">|</span> <span class="rule">&lt;return&gt;</span>
+              <span class="alt">|</span> <span class="terminal">"("</span> <span class="rule">&lt;expr&gt;</span> <span class="terminal">")"</span> <span class="alt">|</span> <span class="terminal">"-"</span> <span class="rule">&lt;primary&gt;</span>
+<span class="rule">&lt;if&gt;</span>         := <span class="terminal">"if"</span> <span class="rule">&lt;expr&gt;</span> <span class="rule">&lt;block&gt;</span> [ <span class="terminal">"else"</span> <span class="rule">&lt;block&gt;</span> ]
+<span class="rule">&lt;loop&gt;</span>       := ( <span class="terminal">"while"</span> <span class="alt">|</span> <span class="terminal">"repeat"</span> ) <span class="rule">&lt;expr&gt;</span> <span class="rule">&lt;block&gt;</span>
+<span class="rule">&lt;return&gt;</span>     := <span class="terminal">"return"</span> <span class="rule">&lt;expr&gt;</span>
+<span class="rule">&lt;call&gt;</span>       := <span class="rule">&lt;id&gt;</span> <span class="terminal">"("</span> { <span class="rule">&lt;expr&gt;</span> [ <span class="terminal">","</span> ... ] } <span class="terminal">")"</span>
+<span class="rule">&lt;literal&gt;</span>    := digits [ <span class="terminal">"."</span> digits ] <span class="alt">|</span> <span class="terminal">"'"</span> characters <span class="terminal">"'"</span>
+<span class="rule">&lt;op&gt;</span>         := <span class="terminal">":"</span> <span class="alt">|</span> <span class="terminal">"."</span> <span class="alt">|</span> <span class="terminal">"*"</span> <span class="alt">|</span> <span class="terminal">"/"</span>  <span class="alt">|</span> <span class="terminal">"%"</span>  <span class="alt">|</span> <span class="terminal">"+"</span>  <span class="alt">|</span> <span class="terminal">"-"</span>
+              <span class="alt">|</span> <span class="terminal">"="</span> <span class="alt">|</span> <span class="terminal">"&lt;"</span> <span class="alt">|</span> <span class="terminal">"&gt;"</span> <span class="alt">|</span> <span class="terminal">"&lt;&gt;"</span> <span class="alt">|</span> <span class="terminal">"&lt;="</span> <span class="alt">|</span> <span class="terminal">"&gt;="</span>
+              <span class="alt">|</span> <span class="terminal">"&amp;"</span> <span class="alt">|</span> <span class="terminal">"|"</span>
+<span class="rule">&lt;id&gt;</span>         := letter { letter <span class="alt">|</span> digit <span class="alt">|</span> <span class="terminal">"_"</span> }</div>
+            
+        </div>
+    </div>
+
+    <script>
+    /**
+     * At Language Interpreter
+     * Converted from At.java
+     */
+    class At {
+        constructor() {
+            this.global = new Map();
+            this.functions = new Map();
+            this.stack = [];
+            this.out = '';
+            this.local = new Map();
+            this.code = '';
+            this.token = '';
+            this.value = null;
+            this.pos = 0;
+            this.returnValue = null;
+            this.counter = 0;
+            this.inOperator = false;
+        }
+
+        // Expression types
+        static BLOCK = 1;
+        static CALL = 2;
+        static IF = 3;
+        static LITERAL = 4;
+        static REPEAT = 5;
+        static LOOP = 6;
+        static OPERATION = 7;
+        static VARIABLE = 8;
+        static RETURN = 9;
+        static LIST = 10;
+
+        run(programCode) {
+            const program = [];
+            this.code = programCode;
+            this.pos = 0;
+            this.counter = 100000;
+            this.global.clear();
+            this.functions.clear();
+            this.local = new Map();
+            this.stack = [];
+            this.returnValue = null;
+            
+            this.read();
+            while (this.token !== '') {
+                if (this.match('+', 'fun')) {
+                    const n = this.token;
+                    this.inOperator = true;
+                    this.functions.set(n, { type: At.BLOCK, name: null, value: null, list: [] });
+                    const c = this.parseExpr(0);
+                    c.list.push(this.parseExpr(0));
+                    this.inOperator = false;
+                    this.functions.set(n, c);
+                } else {
+                    program.push(this.parseExpr(0));
+                }
+                this.match(',', ';');
+            }
+            
+            this.out = '';
+            let result = null;
+            for (const e of program) {
+                result = this.execute(e);
+            }
+            if (this.out === '' && result !== null) {
+                this.out = this.convertToString(result);
+            }
+            return this.out;
+        }
+
+        parseExpr(min) {
+            let prim = this.parsePrimary();
+            while (true) {
+                let power = -1;
+                if (this.token === '') {
+                    return prim;
+                }
+                const op = { type: At.OPERATION, name: this.token, value: null, list: [prim] };
+                let right = 1;
+                if (this.token === ':') {
+                    if (op.list[0].type !== At.VARIABLE && op.list[0].name !== '.') {
+                        return op.list[0];
+                    }
+                    power = 10;
+                    right = -1;
+                } else if (this.token === '.') {
+                    power = 60;
+                } else if (this.token.charCodeAt(0) < 'a'.charCodeAt(0) || this.token.charCodeAt(0) > 'z'.charCodeAt(0)) {
+                    power = this.operator(this.token, true, 0, 0);
+                }
+                if (power < min) {
+                    return prim;
+                }
+                this.read();
+                op.list.push(this.parseExpr(power + right));
+                prim = op;
+            }
+        }
+
+        parsePrimary() {
+            const v = this.value;
+            if (this.token.length === 0) {
+                return { type: At.LITERAL, name: null, value: [0], list: [] };
+            } else if (this.match('@', 'while')) {
+                const e = { type: At.LOOP, name: null, value: null, list: [] };
+                e.list.push(this.parseExpr(0));
+                e.list.push(this.parseExpr(0));
+                return e;
+            } else if (this.match('*', 'repeat')) {
+                const e = { type: At.REPEAT, name: null, value: null, list: [] };
+                e.list.push(this.parseExpr(0));
+                e.list.push(this.parseExpr(0));
+                return e;
+            } else if (this.match('?', 'if')) {
+                const e = { type: At.IF, name: null, value: null, list: [] };
+                e.list.push(this.parseExpr(0));
+                e.list.push(this.parseExpr(0));
+                if (this.match(':', 'else')) {
+                    e.list.push(this.parseExpr(0));
+                }
+                return e;
+            } else if (this.match('=', 'return')) {
+                const e = { type: At.RETURN, name: null, value: null, list: [] };
+                e.list.push(this.parseExpr(0));
+                return e;
+            } else if (this.match('-', '-')) {
+                const e = { type: At.OPERATION, name: '-', value: null, list: [] };
+                e.list.push({ type: At.LITERAL, name: null, value: [0], list: [] });
+                e.list.push(this.parsePrimary());
+                return e;
+            } else if (this.match('(', '(')) {
+                const e = { type: At.LIST, name: null, value: null, list: [] };
+                while (!this.match(')', ')') && this.pos < this.code.length) {
+                    e.list.push(this.parseExpr(0));
+                    this.match(',', ',');
+                }
+                return e;
+            } else if (this.match('{', '{')) {
+                const e = { type: At.BLOCK, name: null, value: null, list: [] };
+                while (!this.match('}', '}') && this.pos < this.code.length) {
+                    e.list.push(this.parseExpr(0));
+                    this.match(';', ';');
+                }
+                return e;
+            } else if (this.match('0', "'")) {
+                return { type: At.LITERAL, name: null, value: v, list: [] };
+            }
+            
+            let id = this.token;
+            if (this.match('>', 'print')) {
+                id = '>';
+            } else {
+                this.read();
+            }
+            if ((this.functions.has(id) || id === '>') && this.match('(', '(')) {
+                const e = { type: At.CALL, name: id, value: null, list: [] };
+                while (!this.match(')', ')') && this.pos < this.code.length) {
+                    e.list.push(this.parseExpr(0));
+                    this.match(',', ',');
+                }
+                return e;
+            }
+            return { type: At.VARIABLE, name: id, value: null, list: [] };
+        }
+
+        match(a, b) {
+            if (this.token === a || this.token === b) {
+                this.read();
+                return true;
+            }
+            return false;
+        }
+
+        read() {
+            this.token = '';
+            while (true) {
+                if (this.pos >= this.code.length) {
+                    return;
+                }
+                const c = this.code.charAt(this.pos);
+                if (c === ' ' || c === '\n' || c === '\r' || c === '\t') {
+                    this.pos++;
+                } else {
+                    break;
+                }
+            }
+            const start = this.pos;
+            let c = this.code.charAt(this.pos);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_') {
+                this.pos++;
+                while (this.pos < this.code.length) {
+                    c = this.code.charAt(this.pos);
+                    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_' || (c >= '0' && c <= '9')) {
+                        this.pos++;
+                    } else {
+                        break;
+                    }
+                }
+                this.token = this.code.substring(start, this.pos);
+            } else if (c >= '0' && c <= '9') {
+                this.pos++;
+                let v = c.charCodeAt(0) - '0'.charCodeAt(0);
+                let div = 0;
+                while (this.pos < this.code.length) {
+                    c = this.code.charAt(this.pos);
+                    if (c >= '0' && c <= '9') {
+                        v = v * 10 + (c.charCodeAt(0) - '0'.charCodeAt(0));
+                        div *= 10;
+                    } else if (c === '.' && div === 0) {
+                        div = 1;
+                    } else {
+                        break;
+                    }
+                    this.pos++;
+                }
+                if (div > 0) {
+                    v /= div;
+                }
+                this.value = [v];
+                this.token = '0';
+            } else if (c === "'") {
+                this.pos++;
+                this.value = [];
+                while (true) {
+                    if (this.pos >= this.code.length || this.code.charAt(this.pos) === "'") {
+                        this.pos++;
+                        if (this.pos >= this.code.length || this.code.charAt(this.pos) !== "'") {
+                            break;
+                        }
+                    }
+                    this.value.push(this.code.charCodeAt(this.pos));
+                    this.pos++;
+                }
+                this.value.push(0);
+                this.token = "'";
+            } else {
+                const first = c;
+                this.pos++;
+                if (this.pos < this.code.length) {
+                    c = this.code.charAt(this.pos);
+                    if ((first === '<' && (c === '<' || c === '=' || c === '>'))
+                            || (first === '*' && c === '*')
+                            || (first === '>' && (c === '=' || c === '>'))) {
+                        this.pos++;
+                    }
+                }
+                this.token = this.code.substring(start, this.pos);
+            }
+        }
+
+        convertToString(array) {
+            if (array.length === 1) {
+                const x = array[0];
+                if (x === Math.floor(x)) {
+                    return Math.floor(x).toString();
+                }
+                return x.toString();
+            }
+            let buff = '';
+            for (const d of array) {
+                if (d > 0) {
+                    buff += String.fromCharCode(d);
+                }
+            }
+            return buff;
+        }
+
+        execute(expr) {
+            let result = [0];
+            if (expr.type === At.LITERAL) {
+                result = expr.value;
+            } else if (expr.type === At.VARIABLE) {
+                let map;
+                if (expr.name.charCodeAt(0) <= 'Z'.charCodeAt(0)) {
+                    map = this.global;
+                } else {
+                    map = this.local;
+                }
+                result = map.get(expr.name);
+                if (result === undefined) {
+                    result = [0];
+                }
+            } else if (expr.type === At.IF) {
+                if (Math.floor(this.execute(expr.list[0])[0]) !== 0) {
+                    result = this.execute(expr.list[1]);
+                } else if (expr.list.length > 2) {
+                    result = this.execute(expr.list[2]);
+                }
+            } else if (expr.type === At.REPEAT) {
+                const c = Math.floor(this.execute(expr.list[0])[0]);
+                for (let i = 0; i < c && this.returnValue === null && this.counter-- > 0; i++) {
+                    this.local.set('_', [i]);
+                    result = this.execute(expr.list[1]);
+                }
+            } else if (expr.type === At.LOOP) {
+                while (Math.floor(this.execute(expr.list[0])[0]) !== 0 && this.returnValue === null && this.counter-- > 0) {
+                    result = this.execute(expr.list[1]);
+                }
+            } else if (expr.type === At.RETURN) {
+                result = this.execute(expr.list[0]);
+                this.returnValue = result;
+            } else if (expr.type === At.CALL) {
+                if (expr.name === '>') {
+                    for (const e of expr.list) {
+                        this.out += this.convertToString(this.execute(e));
+                    }
+                    this.out += '\n';
+                } else {
+                    result = this.call(expr.name, expr.list);
+                }
+            } else if (expr.type === At.BLOCK) {
+                for (const e of expr.list) {
+                    result = this.execute(e);
+                    if (this.returnValue !== null) {
+                        break;
+                    }
+                }
+            } else if (expr.type === At.LIST) {
+                result = [];
+                for (const e of expr.list) {
+                    result.push(...this.execute(e));
+                    if (this.returnValue !== null) {
+                        break;
+                    }
+                }
+                if (result.length === 0) {
+                    result.push(0);
+                }
+            } else if (expr.type === At.OPERATION) {
+                const left = expr.list[0];
+                const right = expr.list[1];
+                if (expr.name === ':') {
+                    let map;
+                    let name = '';
+                    let arrayIndex = null;
+                    if (left.type === At.VARIABLE) {
+                        name = left.name;
+                    } else if (left.type === At.OPERATION && left.name === '.') {
+                        name = left.list[0].name;
+                        arrayIndex = left.list[1];
+                    }
+                    if (name && name.length > 0 && name.charCodeAt(0) <= 'Z'.charCodeAt(0)) {
+                        map = this.global;
+                    } else {
+                        map = this.local;
+                    }
+                    const v = this.execute(right);
+                    if (arrayIndex !== null) {
+                        let o = map.get(name);
+                        if (o === undefined) {
+                            o = [0];
+                            map.set(name, o);
+                        }
+                        const index = Math.floor(this.execute(arrayIndex)[0]);
+                        if (index >= 0) {
+                            while (o.length <= index) {
+                                o.push(0);
+                            }
+                            o[index] = v[0];
+                        }
+                    } else {
+                        map.set(name, v);
+                    }
+                    return v;
+                }
+                const lo = this.execute(left);
+                const r = this.execute(right)[0];
+                if (expr.name === '.') {
+                    if (r < 0 || r >= lo.length) {
+                        if (r === -1) {
+                            return [lo.length];
+                        }
+                        return [0];
+                    }
+                    return [lo[Math.floor(r)]];
+                }
+                result = [this.operator(expr.name, false, lo[0], r)];
+            }
+            return result;
+        }
+
+        call(name, list) {
+            const m = this.functions.get(name);
+            const newLocal = new Map();
+            for (let i = 0; i < m.list.length - 1 && i < list.length; i++) {
+                newLocal.set(m.list[i].name, this.execute(list[i]));
+            }
+            this.stack.push(this.local);
+            this.local = newLocal;
+            let result = this.execute(m.list[m.list.length - 1]);
+            if (this.returnValue !== null) {
+                result = this.returnValue;
+                this.returnValue = null;
+            }
+            this.local = this.stack.pop();
+            return result;
+        }
+
+        operator(op, precedence, l, r) {
+            if (this.functions.has(op) && !this.inOperator) {
+                if (precedence) {
+                    return 40;
+                }
+                this.inOperator = true;
+                const list = [
+                    { type: At.LITERAL, name: null, value: [l], list: [] },
+                    { type: At.LITERAL, name: null, value: [r], list: [] }
+                ];
+                const result = this.call(op, list)[0];
+                this.inOperator = false;
+                return result;
+            }
+            let res = 0;
+            let power = -1;
+            if (op === '&') {
+                res = Math.floor(l) & Math.floor(r);
+                power = 20;
+            } else if (op === '|') {
+                res = Math.floor(l) | Math.floor(r);
+                power = 20;
+            } else if (op === '=') {
+                res = (l === r) ? 1 : 0;
+                power = 30;
+            } else if (op === '<>') {
+                res = (l !== r) ? 1 : 0;
+                power = 30;
+            } else if (op === '>') {
+                res = (l > r) ? 1 : 0;
+                power = 30;
+            } else if (op === '<') {
+                res = (l < r) ? 1 : 0;
+                power = 30;
+            } else if (op === '>=') {
+                res = (l >= r) ? 1 : 0;
+                power = 30;
+            } else if (op === '<=') {
+                res = (l <= r) ? 1 : 0;
+                power = 30;
+            } else if (op === '+') {
+                res = l + r;
+                power = 40;
+            } else if (op === '-') {
+                res = l - r;
+                power = 40;
+            } else if (op === '*') {
+                res = l * r;
+                power = 50;
+            } else if (op === '/') {
+                res = l / r;
+                power = 50;
+            } else if (op === '%') {
+                res = l % r;
+                power = 50;
+            }
+            if (precedence) {
+                return power;
+            }
+            return res;
+        }
+    }
+
+    // Examples
+    const examples = {
+        hello: `'Each keyword has a short form, 
+eg. ">" is the short form of print';
+
+>'Hello, World!'`,
+        fib: `fun fib(n) {
+    if n < 2 { = n }
+    return fib(n - 1) + fib(n - 2)
+}
+print(fib(10))`,
+        factorial: `fun fact(n) {
+    if n <= 1 { = 1 }
+    return n * fact(n - 1)
+}
+print(fact(10))`,
+        loop: `'This example uses the long and short version'
+x : 0;
+repeat 10 {
+    x : x + _;
+    print(x)
+}
+
+x:0;*10{x:x+_;>(x)}
+`,
+        array: `A : (1, 2, 3, 4, 5);
+print('Length: ', A.-1);
+print('First: ', A.0);
+print('Last: ', A.4);
+sum : 0;
+
+'Loop over the entries (element -1 contains the length)';
+repeat A.-1 {
+    sum : sum + A._
+}
+print('Sum: ', sum)
+
+'Manipulate text'
+original : 'Hello, World!';
+repeat original.-1 - 1 {
+    encrypted._ : original._ + 1
+}
+print('Original:  ' original)
+print('Encrypted: ' encrypted)
+`,
+        operators: `'Operator overloading: ^ xor, ** power';
+
+fun ^(a, b) {
+    return (a | b) - (a & b)
+}
+
+fun **(base, exp) {
+    result : 1;
+    repeat exp {
+        result : result * base
+    };
+    return result
+}
+
+print('5 ^ 3 (xor) = ', 5 ^ 3);
+print('2 ** 8 (power) = ', 2 ** 8);
+print('3 ** 4 = ', 3 ** 4)`,
+        math: `'Math Library, partially minified';
+POS_INFINITY:1/0;NEG_INFINITY:-1/0;NOT_A_NUMBER:0/0;
+PI:3.14159265358979323846;E:2.71828182845904523536;
+LOG10:2.30258509299404568402;LOG2:0.69314718055994530942;
+fun abs(x)       {?x>=0{=x};=-x}
+fun isNaN(x)     {=x<>x}
+fun isNegZero(x) {=(x=0)&(1/x=NEG_INFINITY)}
+fun min(a,b)     { if isNaN(a) { return a } 
+                   if a = b & a = 0 & isNegZero(b) { return b }
+                   if a <= b {return a }
+                   return b }
+fun max(a,b)     { if isNaN(a) { return a } 
+                   if a = b & a = 0 & isNegZero(a) { return b }
+                   if a >= b { return a }
+                   return b }
+fun floor(x)     { if isNaN(x) | x = 0 { return x }
+                   i : x | 0; d : i;
+                   if d = x | x >= 0 { return d } 
+                   return d - 1 }
+fun ceil(x)      { return -floor(-x) }
+fun round(x)     { if isNaN(x) { return 0 }
+                   return (x + 0.5) | 0 }
+fun signum(x)    { if x = 0.0 | isNaN(x) { return x }
+                   if x >= 0 { return 1 }
+                   return -1 }
+fun exp(x)       { if isNaN(x) | x = POS_INFINITY { return x }
+                   if x < 0 { return 1 / exp(-x) }
+                   if x > 2 { r : exp(x / 2);  return r * r }
+                   approx : 1.0; term : 1.0; 
+                   i : 1; while i < 22 { term:term*x/i ; approx:approx+term; i:i+1 }
+                   return approx }
+fun log(x)       { if x = 0 { return NEG_INFINITY }
+                   if x = POS_INFINITY { return x }
+                   if x <= 0 | isNaN(x) { return NOT_A_NUMBER }
+                   if x < 0.7 { return log(2 * x) - LOG2 }
+                   if x >= 1.5 { return log(x / 2) + LOG2 }
+                   base:x-1; sign:1; term:base; result:term;
+                   i : 2; while i < 30 {sign:-sign; term : term * base; 
+                   result:result+sign*term/i; i:i+1}
+                   return result }
+fun sqrt(x)      {=exp(log(x)/2)}
+fun log10(x)     {=log(x)/LOG10}
+fun e(x,n)       {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};=x} 
+fun pow(x,y)     { if x > 0 & y > 0 { return exp(y * log(x)) }
+                   if y = 0.0 { return 1.0 }
+                   if isNaN(x) | isNaN(y) { return NOT_A_NUMBER }
+                   absX : abs(x); if y = NEG_INFINITY {
+                     if absX > 1.0 { return 0.0 }
+                     if absX = 1.0 { return NOT_A_NUMBER }
+                     return POS_INFINITY }
+                   yy : y | 0; odd : (yy = y) & ((yy & 1) = 1);
+                   if isNegZero(x) & yy = y { if odd { return -pow(-x, y) } return pow(-x, y) }
+                   if x >= 0 { return exp(y * log(x)) }
+                   if odd { return -pow(-x, y) }
+                   if x = NEG_INFINITY { if y < 0 { return 0.0 } return POS_INFINITY }
+                   if yy = y { return pow(-x, y) }
+                   if abs(y) > e(1,19) { if y > 0 { return pow(-x, y) } 
+                   if x = -1 { return 1 } if absX > 1 { return 0 } return POS_INFINITY }
+                   return NOT_A_NUMBER }
+fun sin(x)       { if x = POS_INFINITY { return NOT_A_NUMBER }
+                   if abs(x) < e(1,-8) { return x }
+                   if x < 0 {return -sin(-x) }
+                   if x > PI * 2 { x : x - floor(x / (PI * 2)) * (PI * 2) }
+                   if x > PI { return -sin(x - PI) }
+                   if x > PI / 2 { x : PI - x }
+                   approx : 0.0; sign : 1; p : x; n : 2;
+                   while n < 24 {
+                     approx : approx + sign * p;
+                     p : p * x * x / (n * (n + 1)); sign : -sign; n:n+2;
+                   } return approx; }
+fun atan(x)      { x : min(max(e(-1,16), x), e(1,16));
+                   if abs(x) >= 0.4 { return 2 * atan(x / (1 + sqrt(1 + x * x))) }
+                   approx : x; sign : -1; p : x;
+                   n:3; while n < 32 {
+                     p : p * x * x; approx : approx + sign * p / n;
+                     sign : -sign; n:n+1
+                   } return approx; }
+fun cos(x) {=sin(x+PI/2)}
+fun tan(x) {=sin(x)/cos(x)}
+fun asin(x) {=atan(x/sqrt(1-x*x))}
+fun acos(x) {=PI/2-asin(x)}
+
+print('pow(2, 10) ' pow(2, 10));
+print('sqrt(2) ' sqrt(2));
+print('sin(0.5) ' sin(0.5));
+print('cos(0.5) ' cos(0.5));
+print('tan(0.5) ' tan(0.5));
+print('asin(0.5) ' asin(0.5));
+print('acos(0.5) ' acos(0.5));
+print('atan(0.5) ' atan(0.5));
+`
+    };
+
+    // UI Logic
+    const codeArea = document.getElementById('code');
+    const outputDiv = document.getElementById('output');
+    const runBtn = document.getElementById('runBtn');
+
+    runBtn.addEventListener('click', () => {
+        const code = codeArea.value;
+        outputDiv.classList.remove('error');
+        try {
+            const at = new At();
+            const result = at.run(code);
+            outputDiv.textContent = result || '(no output)';
+        } catch (e) {
+            outputDiv.classList.add('error');
+            outputDiv.textContent = 'Error: ' + e.message;
+        }
+    });
+
+    // Example buttons
+    document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const example = btn.dataset.example;
+            if (examples[example]) {
+                codeArea.value = examples[example];
+            }
+        });
+    });
+
+    // Run on Ctrl+Enter
+    codeArea.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            runBtn.click();
+        }
+    });
+    </script>
+</body>
+</html>
