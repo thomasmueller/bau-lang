@@ -5,7 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* 2026-02-12: <a href="https://thomasmueller.github.io/bau-lang/docs/at.html">New experimental tiny language "At" with separate playground.</a>
+* 2026-02-12: <a href="https://thomasmueller.github.io/bau-lang/at.html">New experimental tiny language "At" with separate playground.</a>
 * 2026-02-06: Regular loops now use the "loop" keyword instead of "while".
 * 2026-01-06: New <a href="doc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
 
