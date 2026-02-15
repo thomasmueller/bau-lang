@@ -95,9 +95,13 @@ public class ArrayAccess implements Expression, LeftValue {
         return "";
     }
 
+    boolean isBaseTypeArray() {
+        return base.type().isArray();
+    }
+
     @Override
     public DataType type() {
-        // array elements is always nullable
+        // array elements are always nullable
         DataType type = base.type().baseType();
         if (type.orNull() != null) {
             return type.orNull();

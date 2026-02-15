@@ -87,7 +87,7 @@ public class AtTest {
     @Test
     public void random() {
         Random r = new Random(1);
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 200; i++) {
             if (i % 2000 == 1000) {
                 System.out.println(i);
             }

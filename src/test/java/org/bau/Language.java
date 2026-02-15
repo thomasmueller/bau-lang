@@ -7,9 +7,14 @@ https://github.com/NicoNex/tau
 
 yn: input('Is the number larger than ' x ' ?')
 
+how can HashMap.get return V and is not required to return V? (nullable)
+
+value equality and comparison operator overloading, specially for strings
 
 https://news.ycombinator.com/item?id=46945235
 https://wingolog.org/archives/2026/02/09/six-thoughts-on-generating-c
+
+enforce a naming convention for global variables?
 
 SectorC: A C Compiler in 512 bytes
 https://news.ycombinator.com/item?id=46925741
@@ -466,10 +471,22 @@ toString
 
 https://github.com/kostya/benchmarks
 
+equals vs == what do other languages do?
+is == supported, and what does it do exactly?
+Javascript has ===
+
 print and println without help of C
 - each type has a "toStr()" method
 
 short string optimization
+- length categories: 35% 0-8, 30% 9-16, 35% 17+ bytes size
+- median between 15and 25 bytes
+Memory usage
+- Swift: 16 <= 15; 32 + n + 32 for larger (ref-counts, obj header)
+- Go:    16 + n + 8-16 (no short-string optimization)
+- Rust:  24 + n + 8-16; capacity doubles?
+- JS V8: 24 + n, + 16 + align8
+- Java:  40 + n + 16 + align8, including hash code (UTF-16: 40 + 2n)
 
 maybe support slices
 

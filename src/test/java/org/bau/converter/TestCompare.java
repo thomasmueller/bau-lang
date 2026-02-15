@@ -166,6 +166,11 @@ public class TestCompare {
     }
 
     @Test
+    public void hashMap() throws IOException {
+        test("hashMap");
+    }
+
+    @Test
     public void helloWorld() throws IOException {
         test("helloWorld");
     }

@@ -561,8 +561,10 @@ fileContent currentFile;
 void down_0() {
     if (cursorY < ( currentWindowSize.rows - 1 )) {
         cursorY += 1;
-    } else if (( cursorY + offsetY ) < currentFile.lines->size) {
-        offsetY += 1;
+    } else {
+        if (( cursorY + offsetY ) < currentFile.lines->size) {
+            offsetY += 1;
+        }
     }
 }
 fileContent fileContent_3(i8_array* fileName, i8_array* data, org_bau_List_List_org_bau_String_string* lines) {
@@ -798,8 +800,10 @@ void insertNewline_0() {
     cursorX = 1 + indent;
     if (cursorY < ( currentWindowSize.rows - 1 )) {
         cursorY += 1;
-    } else if (( cursorY + offsetY ) < currentFile.lines->size) {
-        offsetY += 1;
+    } else {
+        if (( cursorY + offsetY ) < currentFile.lines->size) {
+            offsetY += 1;
+        }
     }
     org_bau_String_string_free(&line2);
     _decUseStack(_t1, i8_array);
@@ -1386,8 +1390,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         if (e0 == 79) {
             if (e1 == 72) {
                 return 1005;
-            } else if (e1 == 70) {
-                return 1006;
+            } else {
+                if (e1 == 70) {
+                    return 1006;
+                }
             }
             return key;
         }
@@ -1462,19 +1468,21 @@ void refreshScreen_0() {
     org_bau_String_StringBuilder_append_2(buff, string_1022);
     if (mode == 1) {
         org_bau_String_StringBuilder_append_2(buff, string_1023);
-    } else if (mode == 2) {
-        org_bau_String_StringBuilder_append_2(buff, string_1024);
-        org_bau_String_StringBuilder_append_2(buff, findText.data);
-        curX = 27 + _arrayLen(findText.data);
-        curY = 1;
-        org_bau_String_StringBuilder_append_2(buff, string_1020);
     } else {
-        org_bau_String_StringBuilder_append_2(buff, string_1025);
-        org_bau_String_StringBuilder_append_2(buff, currentFile.fileName);
-        org_bau_String_StringBuilder_append_2(buff, string_1026);
-        i8_array* _t2 = org_bau_Int_intToString_1(( cursorY + offsetY ) - 1);
-        org_bau_String_StringBuilder_append_2(buff, _t2);
-        _decUseStack(_t2, i8_array);
+        if (mode == 2) {
+            org_bau_String_StringBuilder_append_2(buff, string_1024);
+            org_bau_String_StringBuilder_append_2(buff, findText.data);
+            curX = 27 + _arrayLen(findText.data);
+            curY = 1;
+            org_bau_String_StringBuilder_append_2(buff, string_1020);
+        } else {
+            org_bau_String_StringBuilder_append_2(buff, string_1025);
+            org_bau_String_StringBuilder_append_2(buff, currentFile.fileName);
+            org_bau_String_StringBuilder_append_2(buff, string_1026);
+            i8_array* _t2 = org_bau_Int_intToString_1(( cursorY + offsetY ) - 1);
+            org_bau_String_StringBuilder_append_2(buff, _t2);
+            _decUseStack(_t2, i8_array);
+        }
     }
     org_bau_String_StringBuilder_append_2(buff, string_1027);
     org_bau_String_StringBuilder_append_2(buff, string_1028);
@@ -1642,8 +1650,10 @@ void removeByte_0() {
         }
         if (cursorY > 2) {
             cursorY -= 1;
-        } else if (offsetY > 0) {
-            offsetY -= 1;
+        } else {
+            if (offsetY > 0) {
+                offsetY -= 1;
+            }
         }
         cursorX += _arrayLen(last.data) + 1;
         while (cursorX >= currentWindowSize.columns) {
@@ -1750,8 +1760,10 @@ void save_0() {
 void up_0() {
     if (cursorY > 2) {
         cursorY -= 1;
-    } else if (offsetY > 0) {
-        offsetY -= 1;
+    } else {
+        if (offsetY > 0) {
+            offsetY -= 1;
+        }
     }
 }
 void _main();
@@ -1874,8 +1886,10 @@ void _main() {
             removeByte_0();
             if (cursorX > 1) {
                 cursorX -= 1;
-            } else if (offsetX > 0) {
-                offsetX -= 1;
+            } else {
+                if (offsetX > 0) {
+                    offsetX -= 1;
+                }
             }
         } else if (_t24 == 1007) {
             if (currentWindowSize.rows > 0) {
@@ -1912,30 +1926,36 @@ void _main() {
         } else if (_t24 == 1003) {
             down_0();
         } else if (_t24 == 1000) {
-            int64_t _t26 = cursorY > 2;
-            if (!(_t26)) {
-                int64_t _t27 = offsetY > 0;
-                _t26 = _t27;
-            }
             if (cursorX > 1) {
                 cursorX -= 1;
-            } else if (offsetX > 0) {
-                offsetX -= 1;
-            } else if (_t26) {
-                if (cursorY > 2) {
-                    cursorY -= 1;
-                } else if (offsetY > 0) {
-                    offsetY -= 1;
+            } else {
+                if (offsetX > 0) {
+                    offsetX -= 1;
+                } else {
+                    int64_t _t26 = cursorY > 2;
+                    if (!(_t26)) {
+                        int64_t _t27 = offsetY > 0;
+                        _t26 = _t27;
+                    }
+                    if (_t26) {
+                        if (cursorY > 2) {
+                            cursorY -= 1;
+                        } else {
+                            if (offsetY > 0) {
+                                offsetY -= 1;
+                            }
+                        }
+                        int64_t y = ( cursorY + offsetY ) - 2;
+                        org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+                        org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
+                        cursorX = _arrayLen(line.data) + 1;
+                        while (cursorX >= currentWindowSize.columns) {
+                            cursorX -= 1;
+                            offsetX += 1;
+                        }
+                        org_bau_String_string_free(&line);
+                    }
                 }
-                int64_t y = ( cursorY + offsetY ) - 2;
-                org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
-                org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
-                cursorX = _arrayLen(line.data) + 1;
-                while (cursorX >= currentWindowSize.columns) {
-                    cursorX -= 1;
-                    offsetX += 1;
-                }
-                org_bau_String_string_free(&line);
             }
         } else if (_t24 == 1001) {
             int64_t x = ( cursorX + offsetX ) - 1;
@@ -1948,13 +1968,17 @@ void _main() {
                 } else {
                     offsetX += 1;
                 }
-            } else if (y < lines->size) {
-                cursorX = 1;
-                offsetX = 0;
-                if (cursorY < ( currentWindowSize.rows - 1 )) {
-                    cursorY += 1;
-                } else if (( cursorY + offsetY ) < currentFile.lines->size) {
-                    offsetY += 1;
+            } else {
+                if (y < lines->size) {
+                    cursorX = 1;
+                    offsetX = 0;
+                    if (cursorY < ( currentWindowSize.rows - 1 )) {
+                        cursorY += 1;
+                    } else {
+                        if (( cursorY + offsetY ) < currentFile.lines->size) {
+                            offsetY += 1;
+                        }
+                    }
                 }
             }
             org_bau_String_string_free(&line);

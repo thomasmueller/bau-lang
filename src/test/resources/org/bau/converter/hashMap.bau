@@ -1,0 +1,20 @@
+import org.bau.HashMap
+    newHashMap
+    mix
+
+fun int equals(o int) int
+    return this = o
+
+fun main()
+    map : newHashMap(int, int)
+    for i := until(5)
+        map.put(mix(i), i, i * 10)
+    for i := until(5)
+        println(map.get(mix(i), i))
+
+## Expected
+0
+10
+20
+30
+40

@@ -9,6 +9,9 @@ type List(T)
 fun newList(T type) List(T)
     return List(T)(T[4])
 
+fun List(T) len() int
+    return size
+
 # Append an entry to the list
 fun List(T) add(x T)
     if size >= array.len

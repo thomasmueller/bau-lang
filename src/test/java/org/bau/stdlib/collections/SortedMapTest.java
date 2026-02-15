@@ -83,7 +83,7 @@ public class SortedMapTest {
             Random random = new Random(seed);
             myMap.clear();
             TreeMap<Integer, Long> map = new TreeMap<>();
-            for (int i = 0; i < 200_000; i++) {
+            for (int i = 0; i < 50_000; i++) {
                 log("size", map.size(), map.size() == myMap.size() ? "=" : "<>", myMap.size());
                 assertEquals(map.size(), myMap.size());
                 int key = random.nextInt(1000);

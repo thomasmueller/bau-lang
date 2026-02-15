@@ -601,9 +601,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_mulBig_2(i32_array* a, i32_array* b) {
     if (_arrayLen(a) == 1) {
         org_bau_BigInt_bigInt _t0 = org_bau_BigInt_mulSmall_2(a->data[0], b);
         return _t0;
-    } else if (_arrayLen(b) == 1) {
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_mulSmall_2(b->data[0], a);
-        return _t1;
+    } else {
+        if (_arrayLen(b) == 1) {
+            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_mulSmall_2(b->data[0], a);
+            return _t1;
+        }
     }
     i32_array* _t2 = i32_array_new(_arrayLen(a) + _arrayLen(b));
     _incUseStack(_t2);
@@ -698,45 +700,49 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
         org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_1(_t0);
         _decUseStack(_t0, i32_array);
         return _t1;
-    } else if (value < 0) {
-        if (value >= -4294967296) {
-            i32_array* _t2 = i32_array_new(1);
-            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t2);
-            x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
-            x.negative = 1;
-            _decUseStack(_t2, i32_array);
-            return x;
-        } else if (value > (-9223372036854775807LL-1LL)) {
-            i32_array* _t3 = i32_array_new(2);
-            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t3);
-            x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
-            x.data->data[idx_2(1, _arrayLen(x.data))] = shiftRight_int_2(- value, 32);
-            x.negative = 1;
-            _decUseStack(_t3, i32_array);
-            return x;
-        } else {
-            i32_array* _t4 = i32_array_new(2);
-            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t4);
-            x.data->data[idx_2(0, _arrayLen(x.data))] = 0;
-            x.data->data[idx_2(1, _arrayLen(x.data))] = 0x80000000;
-            x.negative = 1;
-            _decUseStack(_t4, i32_array);
-            return x;
-        }
     } else {
-        if (value < 4294967296) {
-            i32_array* _t5 = i32_array_new(1);
-            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t5);
-            x.data->data[idx_2(0, _arrayLen(x.data))] = value;
-            _decUseStack(_t5, i32_array);
-            return x;
+        if (value < 0) {
+            if (value >= -4294967296) {
+                i32_array* _t2 = i32_array_new(1);
+                org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t2);
+                x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
+                x.negative = 1;
+                _decUseStack(_t2, i32_array);
+                return x;
+            } else {
+                if (value > (-9223372036854775807LL-1LL)) {
+                    i32_array* _t3 = i32_array_new(2);
+                    org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t3);
+                    x.data->data[idx_2(0, _arrayLen(x.data))] = - value;
+                    x.data->data[idx_2(1, _arrayLen(x.data))] = shiftRight_int_2(- value, 32);
+                    x.negative = 1;
+                    _decUseStack(_t3, i32_array);
+                    return x;
+                } else {
+                    i32_array* _t4 = i32_array_new(2);
+                    org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t4);
+                    x.data->data[idx_2(0, _arrayLen(x.data))] = 0;
+                    x.data->data[idx_2(1, _arrayLen(x.data))] = 0x80000000;
+                    x.negative = 1;
+                    _decUseStack(_t4, i32_array);
+                    return x;
+                }
+            }
         } else {
-            i32_array* _t6 = i32_array_new(2);
-            org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t6);
-            x.data->data[idx_2(0, _arrayLen(x.data))] = value;
-            x.data->data[idx_2(1, _arrayLen(x.data))] = shiftRight_int_2(value, 32);
-            _decUseStack(_t6, i32_array);
-            return x;
+            if (value < 4294967296) {
+                i32_array* _t5 = i32_array_new(1);
+                org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t5);
+                x.data->data[idx_2(0, _arrayLen(x.data))] = value;
+                _decUseStack(_t5, i32_array);
+                return x;
+            } else {
+                i32_array* _t6 = i32_array_new(2);
+                org_bau_BigInt_bigInt x = org_bau_BigInt_bigInt_1(_t6);
+                x.data->data[idx_2(0, _arrayLen(x.data))] = value;
+                x.data->data[idx_2(1, _arrayLen(x.data))] = shiftRight_int_2(value, 32);
+                _decUseStack(_t6, i32_array);
+                return x;
+            }
         }
     }
 }
@@ -808,9 +814,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, or
     if (_arrayLen(this.data) == 0) {
         org_bau_BigInt_bigInt_free(&this);
         return other;
-    } else if (_arrayLen(other.data) == 0) {
-        org_bau_BigInt_bigInt_free(&other);
-        return this;
+    } else {
+        if (_arrayLen(other.data) == 0) {
+            org_bau_BigInt_bigInt_free(&other);
+            return this;
+        }
     }
     if (this.negative) {
         if (other.negative) {
@@ -898,24 +906,28 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t0;
-    } else if (this.negative != other.negative) {
-        org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(other);
-        org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_div_2(this, _t1);
-        org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_neg_1(_t2);
-        org_bau_BigInt_bigInt_free(&_t2);
-        org_bau_BigInt_bigInt_free(&_t1);
-        org_bau_BigInt_bigInt_free(&other);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t3;
-    } else if (this.negative) {
-        org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(this);
-        org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_neg_1(other);
-        org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_div_2(_t4, _t5);
-        org_bau_BigInt_bigInt_free(&_t5);
-        org_bau_BigInt_bigInt_free(&_t4);
-        org_bau_BigInt_bigInt_free(&other);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t6;
+    } else {
+        if (this.negative != other.negative) {
+            org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_neg_1(other);
+            org_bau_BigInt_bigInt _t2 = org_bau_BigInt_bigInt_div_2(this, _t1);
+            org_bau_BigInt_bigInt _t3 = org_bau_BigInt_bigInt_neg_1(_t2);
+            org_bau_BigInt_bigInt_free(&_t2);
+            org_bau_BigInt_bigInt_free(&_t1);
+            org_bau_BigInt_bigInt_free(&other);
+            org_bau_BigInt_bigInt_free(&this);
+            return _t3;
+        } else {
+            if (this.negative) {
+                org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(this);
+                org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_neg_1(other);
+                org_bau_BigInt_bigInt _t6 = org_bau_BigInt_bigInt_div_2(_t4, _t5);
+                org_bau_BigInt_bigInt_free(&_t5);
+                org_bau_BigInt_bigInt_free(&_t4);
+                org_bau_BigInt_bigInt_free(&other);
+                org_bau_BigInt_bigInt_free(&this);
+                return _t6;
+            }
+        }
     }
     int64_t cmp = org_bau_BigInt_bigInt_compare_2(this, other);
     if (cmp < 0) {
@@ -923,11 +935,13 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t7;
-    } else if (cmp == 0) {
-        org_bau_BigInt_bigInt _t8 = org_bau_BigInt_newBigInt_1(1);
-        org_bau_BigInt_bigInt_free(&other);
-        org_bau_BigInt_bigInt_free(&this);
-        return _t8;
+    } else {
+        if (cmp == 0) {
+            org_bau_BigInt_bigInt _t8 = org_bau_BigInt_newBigInt_1(1);
+            org_bau_BigInt_bigInt_free(&other);
+            org_bau_BigInt_bigInt_free(&this);
+            return _t8;
+        }
     }
     int64_t _t9 = _arrayLen(this.data) > 2;
     if (_t9) {
@@ -1062,9 +1076,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_mul_2(org_bau_BigInt_bigInt this, or
     if (thisLen == 0) {
         org_bau_BigInt_bigInt_free(&other);
         return this;
-    } else if (otherLen == 0) {
-        org_bau_BigInt_bigInt_free(&this);
-        return other;
+    } else {
+        if (otherLen == 0) {
+            org_bau_BigInt_bigInt_free(&this);
+            return other;
+        }
     }
     if (this.negative != other.negative) {
         org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_neg_1(other);
@@ -1081,15 +1097,17 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_mul_2(org_bau_BigInt_bigInt this, or
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t3;
-    } else if (thisLen == 1) {
-        if (this.negative) {
-            org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(other);
-            org_bau_BigInt_bigInt_free(&other);
+    } else {
+        if (thisLen == 1) {
+            if (this.negative) {
+                org_bau_BigInt_bigInt _t4 = org_bau_BigInt_bigInt_neg_1(other);
+                org_bau_BigInt_bigInt_free(&other);
+                org_bau_BigInt_bigInt_free(&this);
+                return _t4;
+            }
             org_bau_BigInt_bigInt_free(&this);
-            return _t4;
+            return other;
         }
-        org_bau_BigInt_bigInt_free(&this);
-        return other;
     }
     org_bau_BigInt_bigInt _t5 = org_bau_BigInt_mul_2(this.data, other.data);
     org_bau_BigInt_bigInt_free(&other);
@@ -1171,8 +1189,10 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_shiftRight_2(org_bau_BigInt_bigInt t
 int64_t org_bau_BigInt_bigInt_signum_1(org_bau_BigInt_bigInt this) {
     if (_arrayLen(this.data) == 0) {
         return 0;
-    } else if (this.negative) {
-        return -1;
+    } else {
+        if (this.negative) {
+            return -1;
+        }
     }
     return 1;
 }
@@ -1184,9 +1204,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_sub_2(org_bau_BigInt_bigInt this, or
         org_bau_BigInt_bigInt_free(&other);
         org_bau_BigInt_bigInt_free(&this);
         return _t0;
-    } else if (_arrayLen(other.data) == 0) {
-        org_bau_BigInt_bigInt_free(&other);
-        return this;
+    } else {
+        if (_arrayLen(other.data) == 0) {
+            org_bau_BigInt_bigInt_free(&other);
+            return this;
+        }
     }
     if (this.negative) {
         if (!(other.negative)) {

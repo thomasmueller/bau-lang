@@ -211,9 +211,6 @@ public class DataType {
 
     public String fullName() {
         return fullName.toString();
-//        int todoNamingConflictWithGetFullName;
-//System.out.println("fullName: " + fullName(module, id()));
-//        return fullName(module, id());
     }
 
     public FullName getFullName() {
@@ -398,6 +395,9 @@ public class DataType {
     }
 
     public DataType orNull() {
+        if (isNullable) {
+            return this;
+        }
         return nullableType;
     }
 

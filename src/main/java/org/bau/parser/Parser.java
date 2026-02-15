@@ -1282,6 +1282,7 @@ public class Parser {
                 if (targetType.isNumber()) {
                     expr = new NumberValue(Value.ValueInt.ZERO, targetType, false);
                 } else {
+                    targetType = targetType.orNull();
                     expr = new NullValue(targetType);
                 }
                 if (targetType != null && !targetType.equals(expr.type())) {
@@ -1633,14 +1634,27 @@ public class Parser {
     }
 
     private void verifyBounds(Assignment s) {
+        int todoCheckType;
+        if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
+            throw syntaxError("Not an array: " + s.leftValue);
+        }
         if (!s.leftValue.type().isNumber() && !s.leftValue.type().equals(s.value.type())) {
             if (s.value.type() == null) {
-                throw syntaxError("The type of the variable is different than the type of the expression");
+                throw syntaxError("The type of the variable is different than the type of the expression: " +
+                        s.leftValue.type());
             }
             if (s.leftValue.type().equals(s.value.type().orNull())) {
                 // setting a not-null value to a nullable variable is ok
+            } else if (s.value.type().equals(s.leftValue.type().orNull())) {
+                // setting a nullable variable to a non-nullable variable:
+                // needs a check
+                verifyNullAccess(s.value);
+            } else if (s.value.toString().equals("0")
+                    && s.leftValue instanceof ArrayAccess) {
+                // setting 0 to a nullable variable is ok
             } else {
-                throw syntaxError("The type of the variable is different than the type of the expression");
+                throw syntaxError("The type of the variable is different than the type of the expression: " +
+                        s.leftValue.type() + " got " + s.value.type());
             }
         }
         if (!s.leftValue.type().isFloatingPoint()) {
@@ -1664,7 +1678,8 @@ public class Parser {
                 throw syntaxError("The expression may not be 'null' here.");
             }
         } else if (expr.type().isNullable() && !targetType.isNullable()) {
-            throw syntaxError("The expression may be 'null', but this is not allowed here.");
+            verifyNullAccess(expr);
+            // throw syntaxError("The expression may be 'null', but this is not allowed here.");
         }
         if (!targetType.isRange()) {
             return;
@@ -1893,6 +1908,9 @@ public class Parser {
                                 typeName = t.name();
                                 templateNames.add(typeName);
                                 pt = p.type();
+                                if (!pt.isArray()) {
+                                    throw syntaxError("Expected array, got " + pt);
+                                }
                                 pt = pt.baseType();
                                 templateParams.add(pt.fullName());
                             }
@@ -1947,6 +1965,9 @@ public class Parser {
         if (call.def == null) {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
             String notFound = "Function '" + identifier + "' not found";
+            if (type != null) {
+                notFound += " on type " + type;
+            }
             if (didYouMean != null) {
                 notFound += "; did you mean " + didYouMean.toString() + " ?";
             }
@@ -2096,6 +2117,9 @@ public class Parser {
             b.expr = ret.leftValue;
             target.add(ret);
         }
+        if (!areTypesCompatible(b.expr, currentFunctionDefinition.returnType)) {
+            throw syntaxError("Incompatible types: " + b.expr.type() + "; required: " + currentFunctionDefinition.returnType);
+        }
         verifyBounds(currentFunctionDefinition.returnType, b.expr);
         b.autoClose = autoClose(stackPosFunction, b.expr);
         negateLastBlockCondition();
@@ -2104,6 +2128,58 @@ public class Parser {
             return;
         }
         throw syntaxError("Expected end of statement, got '" + token + "' in 'return' statement");
+    }
+
+    boolean areTypesCompatible(Expression expr, DataType assignToType) {
+        DataType exprType = expr.type();
+        if (exprType == null) {
+            // unknown (eg. "null")
+            expr = assignToType.nullExpression();
+            exprType = assignToType.orNull();
+        }
+        // TODO use this function everywhere where it makes sense
+        if (exprType.equals(assignToType)) {
+            return true;
+        }
+        if (exprType.isNumber() || assignToType.isNumber()) {
+            if (!exprType.isNumber() || !assignToType.isNumber()) {
+                return false;
+            }
+            if (exprType.isRange() && !assignToType.isRange()) {
+                return true;
+            }
+            if (!exprType.isRange() && assignToType.isRange()) {
+                return false;
+            }
+            if (exprType.isFloatingPoint() && !assignToType.isFloatingPoint()) {
+                // throw syntaxError("The expression is floating point, but the variable is not.");
+                // TODO there are many more cases that are not allowed
+                return false;
+            }
+            return true;
+        }
+        int todo;
+        if (exprType == null || assignToType == null) {
+            return exprType == assignToType;
+        }
+        if (exprType == assignToType || exprType.equals(assignToType)) {
+            return true;
+        }
+        if (exprType.isArray() != assignToType.isArray()) {
+            return false;
+        }
+        if (exprType.isArray()) {
+            return exprType.equals(assignToType);
+        }
+        if (exprType.isNullable() == assignToType.isNullable()) {
+            return exprType.equals(assignToType);
+        } else if (exprType.isNullable() && !assignToType.isNullable()) {
+            verifyNullAccess(expr);
+            return exprType.equals(assignToType.orNull());
+        } else if (!exprType.isNullable() && assignToType.isNullable()) {
+            return exprType.orNull().equals(assignToType);
+        }
+        return false;
     }
 
     private void parseCatch(ArrayList<Statement> target) {
@@ -2299,6 +2375,7 @@ public class Parser {
         int ifIndent = indent;
         boolean sameLine;
         If ifStatement = new If();
+        If topIfStatement = ifStatement;
         Expression condition = parseCondition(target);
         startBlock(false, condition);
         ifStatement.conditions.add(condition);
@@ -2337,9 +2414,15 @@ public class Parser {
             ifIndent = indent;
             if (match("elif")) {
                 endBlock();
-                condition = parseCondition(target);
+                If elseIf = new If();
+                list = new ArrayList<>();
+                condition = parseCondition(list);
+                elseIf.conditions.add(condition);
+                list.add(elseIf);
+                ifStatement.listList.add(list);
+                ifStatement.autoClose(List.of());
+                ifStatement = elseIf;
                 startBlock(false, condition);
-                ifStatement.conditions.add(condition);
             } else if (match("else")) {
                 endBlock();
                 startBlock(false, null);
@@ -2349,7 +2432,7 @@ public class Parser {
             }
         }
         endBlock();
-        target.add(ifStatement);
+        target.add(topIfStatement);
     }
 
     private void setRangeBounds(Variable var) {
@@ -2658,7 +2741,11 @@ public class Parser {
     }
 
     private Expression parseExpression(ArrayList<Statement> target) {
-        return parseExpression().writeStatements(this, false, target);
+        try {
+            return parseExpression().writeStatements(this, false, target);
+        } catch (IllegalStateException e) {
+            throw syntaxError(e.getMessage());
+        }
     }
 
     private Expression parseExpression() {

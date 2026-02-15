@@ -568,15 +568,19 @@ double org_bau_Math_convertLongBitsToDouble_1(int64_t x) {
     int64_t exp = (shiftRight_int_2(x, 52)) & 2047;
     if (x == 0) {
         return 0.0;
-    } else if (x == (-9223372036854775807LL-1LL)) {
-        return -0.0;
+    } else {
+        if (x == (-9223372036854775807LL-1LL)) {
+            return -0.0;
+        }
     }
     int64_t fraction = shiftRight_int_2(shiftLeft_2(x, 12), 12);
     if (exp == 2047) {
         if (fraction != 0) {
             return (0.0 / 0.0);
-        } else if (sign == 0) {
-            return (1.0 / 0.0);
+        } else {
+            if (sign == 0) {
+                return (1.0 / 0.0);
+            }
         }
         return (-1.0 / 0.0);
     }
@@ -636,10 +640,12 @@ double org_bau_Math_exp_1(double x) {
     }
     if (_t8) {
         return x;
-    } else if (x < 0) {
-        double _t10 = org_bau_Math_exp_1(- x);
-        double _r0 = 1 / _t10;
-        return _r0;
+    } else {
+        if (x < 0) {
+            double _t10 = org_bau_Math_exp_1(- x);
+            double _r0 = 1 / _t10;
+            return _r0;
+        }
     }
     if (x > 2) {
         double r = org_bau_Math_exp_1(x / 2);
@@ -707,17 +713,21 @@ int64_t org_bau_Math_isNotANumber_1(double x) {
 }
 double org_bau_Math_log_1(double x) {
     return log(x);
-    int64_t _t3 = x <= 0;
-    if (!(_t3)) {
-        int64_t _t4 = org_bau_Math_isNotANumber_1(x);
-        _t3 = _t4;
-    }
     if (x == 0) {
         return (-1.0 / 0.0);
-    } else if (x == (1.0 / 0.0)) {
-        return x;
-    } else if (_t3) {
-        return (0.0 / 0.0);
+    } else {
+        if (x == (1.0 / 0.0)) {
+            return x;
+        } else {
+            int64_t _t3 = x <= 0;
+            if (!(_t3)) {
+                int64_t _t4 = org_bau_Math_isNotANumber_1(x);
+                _t3 = _t4;
+            }
+            if (_t3) {
+                return (0.0 / 0.0);
+            }
+        }
     }
     if (x < 0.7) {
         double _t5 = org_bau_Math_log_1(2 * x);

@@ -61,7 +61,7 @@ public class At {
             int right = 1;
             if (":".equals(token)) {
                 if (op.list.get(0).type != Expr.VARIABLE && !".".equals(op.list.get(0).name)) {
-                    return op.list.get(0);
+                    return prim;
                 }
                 power = 10;
                 right = -1;
@@ -273,10 +273,8 @@ public class At {
         if (expr.type == Expr.LITERAL) {
             result = expr.value;
         } else if (expr.type == Expr.VARIABLE) {
-            HashMap<String, ArrayList<Double>> map;
-            if (expr.name.charAt(0) <= 'Z') {
-                map = global;
-            } else {
+            HashMap<String, ArrayList<Double>> map = global;
+            if (expr.name.charAt(0) > 'Z') {
                 map = local;
             }
             result = map.get(expr.name);
@@ -333,7 +331,6 @@ public class At {
             Expr left = expr.list.get(0);
             Expr right = expr.list.get(1);
             if (":".equals(expr.name)) {
-                HashMap<String, ArrayList<Double>> map;
                 String name = "";
                 Expr arrayIndex = null;
                 if (left.type == Expr.VARIABLE) {
@@ -342,9 +339,8 @@ public class At {
                     name = left.list.get(0).name;
                     arrayIndex = left.list.get(1);
                 }
-                if (name != null && name.length() > 0 && name.charAt(0) <= 'Z') {
-                    map = global;
-                } else {
+                HashMap<String, ArrayList<Double>> map = global;
+                if (name != null && name.length() > 0 && name.charAt(0) > 'Z') {
                     map = local;
                 }
                 ArrayList<Double> v = run(right);

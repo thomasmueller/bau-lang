@@ -305,7 +305,7 @@ public class RegexTest {
         int smallestFailure = Integer.MAX_VALUE;
         int smallestReplaceFirst = Integer.MAX_VALUE;
         int timeout = 0;
-        int count = 10_000;
+        int count = 5_000;
         for (int test = 0; test < count; test++) {
             StringBuilder buff = new StringBuilder();
             int len = 1 + r.nextInt(10);

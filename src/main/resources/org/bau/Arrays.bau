@@ -9,3 +9,12 @@ fun reverse(buff T[], first 0..buff.len, last 0..buff.len)
         first += 1
         break last < 1
         last -= 1
+
+fun equals(a T[], b T[]) int
+    if a.len <> b.len
+        return 0
+    for i := until(a.len)
+        if a[i] <> b[i]
+            return 0
+    return 1
+

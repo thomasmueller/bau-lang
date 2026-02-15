@@ -188,7 +188,7 @@ public class Program {
 
     public Expression cast(Expression expr, DataType target) {
         if (target.isNullable()) {
-            if (expr.type() == null) {
+            if (expr.type() == null ||expr.type().orNull() == null) {
                 if (expr instanceof NullValue) {
                     return new NullValue(target);
                 }

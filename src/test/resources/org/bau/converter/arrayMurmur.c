@@ -308,8 +308,10 @@ i8_array* hex_2(int64_t x, int64_t len) {
     int64_t l = len;
     if (l < 0) {
         l = 0;
-    } else if (l > 16) {
-        l = 16;
+    } else {
+        if (l > 16) {
+            l = 16;
+        }
     }
     i8_array* _t0 = i8_array_new(l);
     _incUseStack(_t0);

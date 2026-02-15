@@ -757,8 +757,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         if (e0 == 79) {
             if (e1 == 72) {
                 return 1005;
-            } else if (e1 == 70) {
-                return 1006;
+            } else {
+                if (e1 == 70) {
+                    return 1006;
+                }
             }
             return key;
         }

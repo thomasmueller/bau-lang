@@ -7,16 +7,10 @@ type HashMap(K, V)
     hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-    result : HashMap(K, V)()
-    result.size = 0
-    result.keys = K[4]
-    result.values = V[4]
-    result.hashes = int[4]
-    return result          
+    return HashMap(K, V)(K[4], V[4], int[4])
 
 fun HashMap(K, V) put(hash int, key K, value V)
     if size * 2 >= keys.len
-        println('grow')
         kn : K[keys.len * 2]
         vn : V[keys.len * 2]
         hn : int[keys.len * 2]
@@ -31,7 +25,7 @@ fun HashMap(K, V) put(hash int, key K, value V)
                 this.put(oh[i], ok[i], ov[i])
     p := hash & (keys.len - 1)
     loop
-        if hashes[p] = hash and keys[p] = key
+        if hashes[p] = hash and key.equals(keys[p])
             values[p] = value
             return
         elif hashes[p] = 0
@@ -42,12 +36,12 @@ fun HashMap(K, V) put(hash int, key K, value V)
             return
         p = (p + 1) & (keys.len - 1)
 
-fun HashMap(K, V) get(hash int, key K) V
+fun HashMap(K, V) get(hash int, key K) V?
     p := hash & (keys.len - 1)
     loop
         if hashes[p] = 0
             return values[p]
-        elif hashes[p] = hash and keys[p] = key
+        elif hashes[p] = hash and key.equals(keys[p])
             return values[p]
         p = (p + 1) & (keys.len - 1)
 
@@ -57,7 +51,7 @@ fun HashMap(K, V) remove(hash int, key K) int
         if hashes[p] = 0
             # not found
             return 0
-        elif hashes[p] = hash and keys[p] = key
+        elif hashes[p] = hash and key.equals(keys[p])
             keys[p] = 0
             hashes[p] = 0
             values[p] = 0
@@ -96,21 +90,22 @@ fun hashCode(data i8[]) int
         return 0
     h := data.len << 32
     i := 0..data.len
-    if i < data.len - 3
+    if data.len >= 4
+        j := 0..data.len - 3
         loop
-            x := (data[i!] & 0xff) |
-                      ((data[i + 1!] & 0xff) << 8) |
-                      ((data[i + 2!] & 0xff) << 16) |
-                      ((data[i + 3!] & 0xff) << 24)
+            x := (data[j]! & 0xff) |
+                      ((data[j + 1]! & 0xff) << 8) |
+                      ((data[j + 2]! & 0xff) << 16) |
+                      ((data[j + 3]! & 0xff) << 24)
             h = (h + x) * 0x9e3779b185ebca87
-            n : i + 4
-            break n >= data.len
-            i = n
+            n := j + 4
+            break n + 4 >= data.len
+            j = n
     if i < data.len and i <> data.len - 4
         x := 0
         s := 0
         loop
-            x ^= (data[i!] & 0xff) << s
+            x ^= (data[i]! & 0xff) << s
             s += 8
             n : i + 1
             break n >= data.len

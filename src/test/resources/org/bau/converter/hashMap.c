@@ -3,11 +3,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
-#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
-#include <time.h>
 /* builtin */
 static inline int _ctzll(uint64_t x) {
 #if defined(__GNUC__) || defined(__clang__)
@@ -236,28 +233,10 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
     exit(1);
 }
 /* types */
-typedef struct i8_array i8_array;
-struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
-typedef struct org_bau_DateTime_dateTime org_bau_DateTime_dateTime;
-struct org_bau_DateTime_dateTime;
-struct i8_array {
-    int32_t len;
-    int32_t _refCount;
-    int8_t* data;
-};
-i8_array* i8_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    i8_array* result = _malloc(sizeof(i8_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int8_t) * len);
-    memset(result->data, 0, sizeof(int8_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
+typedef struct org_bau_HashMap_HashMap_int_int org_bau_HashMap_HashMap_int_int;
+struct org_bau_HashMap_HashMap_int_int;
 struct int_array {
     int32_t len;
     int32_t _refCount;
@@ -274,24 +253,17 @@ int_array* int_array_new(uint64_t len) {
     result->_refCount = 1;
     return result;
 }
-struct org_bau_DateTime_dateTime {
-    int32_t year;
-    int64_t month;
-    int64_t day;
-    int64_t hour;
-    int64_t minute;
-    int64_t second;
-    int64_t millis;
+struct org_bau_HashMap_HashMap_int_int {
+    int32_t _refCount;
+    int64_t size;
+    int_array* keys;
+    int_array* values;
+    int_array* hashes;
 };
-org_bau_DateTime_dateTime org_bau_DateTime_dateTime_new() {
-    org_bau_DateTime_dateTime result;
-    result.year = 0;
-    result.month = 0;
-    result.day = 0;
-    result.hour = 0;
-    result.minute = 0;
-    result.second = 0;
-    result.millis = 0;
+org_bau_HashMap_HashMap_int_int* org_bau_HashMap_HashMap_int_int_new() {
+    org_bau_HashMap_HashMap_int_int* result = _malloc(sizeof(org_bau_HashMap_HashMap_int_int));
+    _traceMalloc(result);
+    result->_refCount = 1;
     return result;
 }
 /* exception types */
@@ -299,240 +271,154 @@ org_bau_DateTime_dateTime org_bau_DateTime_dateTime_new() {
 int __argc;
 char **__argv;
 /* functions */
-int64_t int_1(int64_t x);
-org_bau_DateTime_dateTime org_bau_DateTime_dateTime_0();
-org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0();
-int64_t org_bau_DateTime_getNanoTime_0();
-int64_t org_bau_Int_sqrtInt_1(int64_t x);
-double org_bau_Math_exp_1(double x);
-int64_t org_bau_Math_isNotANumber_1(double x);
-double org_bau_Math_log_1(double x);
-double org_bau_Math_sqrt_1(double x);
-int64_t org_bau_Utils_random_0();
-void org_bau_Utils_setRandomSeed_1(int64_t seed);
+int64_t idx_2(int64_t x, int64_t len);
+int64_t int_equals_2(int64_t this, int64_t o);
+org_bau_HashMap_HashMap_int_int* org_bau_HashMap_HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes);
+int64_t org_bau_HashMap_mix_1(int64_t z);
+org_bau_HashMap_HashMap_int_int* org_bau_HashMap_newHashMap_int_int_2(int64_t _K, int64_t _V);
+int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key);
+void org_bau_HashMap_HashMap_int_int_put_4(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key, int64_t value);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
-void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
-void org_bau_DateTime_dateTime_free(org_bau_DateTime_dateTime* x);
-void org_bau_DateTime_dateTime_copy(org_bau_DateTime_dateTime* x);
-void i8_array_free(i8_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
+void org_bau_HashMap_HashMap_int_int_free(org_bau_HashMap_HashMap_int_int* x);
 void int_array_free(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
-void org_bau_DateTime_dateTime_free(org_bau_DateTime_dateTime* x) {
+void org_bau_HashMap_HashMap_int_int_free(org_bau_HashMap_HashMap_int_int* x) {
+    _decUse(x->keys, int_array);
+    _decUse(x->values, int_array);
+    _decUse(x->hashes, int_array);
+    _free(x); _traceFree(x);
 }
-void org_bau_DateTime_dateTime_copy(org_bau_DateTime_dateTime* x) {
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    return arrayOutOfBounds(x, len);
 }
-i8_array* str_const(char* data, uint32_t len) {
-    i8_array* result = _malloc(sizeof(i8_array));
-    result->len = len;
-    result->_refCount = INT32_MAX;
-    result->data = _malloc(sizeof(char) * len);
-    memcpy(result->data, data, sizeof(char) * len);
-    return result;
-}
-i8_array* string_1000;
-i8_array* string_1006;
-i8_array* string_1010;
-i8_array* string_1011;
-int64_t randomSeed;
-int64_t MIN_INT;
-int64_t MAX_INT;
-int64_t MIN_I32;
-int64_t MAX_I32;
-double POS_INFINITY;
-double NEG_INFINITY;
-double NOT_A_NUMBER;
-double PI;
-double E;
-double LOG10;
-double LOG2;
-int64_t int_1(int64_t x) {
-    return x;
-}
-org_bau_DateTime_dateTime org_bau_DateTime_dateTime_0() {
-    org_bau_DateTime_dateTime _t33 = org_bau_DateTime_dateTime_new();
-    _t33.year = 0;
-    _t33.month = 0;
-    _t33.day = 0;
-    _t33.hour = 0;
-    _t33.minute = 0;
-    _t33.second = 0;
-    _t33.millis = 0;
-    return _t33;
-}
-org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0() {
-    time_t current;
-    time(&current);
-    struct tm* timeinfo;
-    timeinfo = localtime(&current);
-    org_bau_DateTime_dateTime result;
-    result.year = timeinfo->tm_year + 1900;
-    result.month = timeinfo->tm_mon + 1;
-    result.day = timeinfo->tm_mday;
-    result.hour = timeinfo->tm_hour;
-    result.minute = timeinfo->tm_min;
-    result.second = timeinfo->tm_sec;
-    struct timespec time={0,0};
-    clock_gettime(CLOCK_REALTIME, &time);
-    result.millis = time.tv_nsec / 1000000;
-    return result;
-    org_bau_DateTime_dateTime alternative = org_bau_DateTime_dateTime_0();
-    alternative.year = 2000;
-    alternative.month = 1;
-    alternative.day = 1;
-    alternative.hour = 0;
-    alternative.minute = 0;
-    alternative.second = 0;
-    alternative.millis = 0;
-    return alternative;
-}
-int64_t org_bau_DateTime_getNanoTime_0() {
-    struct timespec time={0,0};
-    clock_gettime(CLOCK_MONOTONIC, &time);
-    return time.tv_sec * 1000000000ULL + time.tv_nsec;
-    return 0;
-}
-int64_t org_bau_Int_sqrtInt_1(int64_t x) {
-    if (x < 0) {
-        return 0;
-    }
-    int64_t g = 2147483648;
-    int64_t c = g;
-    while (1) {
-        int64_t t = g * g;
-        int64_t _t0 = t > x;
-        if (!(_t0)) {
-            int64_t _t1 = t < 0;
-            _t0 = _t1;
-        }
-        if (_t0) {
-            g ^= c;
-        }
-        c >>= 1;
-        if (c == 0) {
-            break;
-        }
-        g |= c;
-    }
-    return g;
-}
-double org_bau_Math_exp_1(double x) {
-    return exp(x);
-    int64_t _t7 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t8 = _t7;
-    if (!(_t8)) {
-        int64_t _t9 = x == (1.0 / 0.0);
-        _t8 = _t9;
-    }
-    if (_t8) {
-        return x;
-    } else {
-        if (x < 0) {
-            double _t10 = org_bau_Math_exp_1(- x);
-            double _r0 = 1 / _t10;
-            return _r0;
-        }
-    }
-    if (x > 2) {
-        double r = org_bau_Math_exp_1(x / 2);
-        double _r1 = r * r;
-        return _r1;
-    }
-    double approx = 1.0;
-    double term = 1.0;
-    while (1 == 1) {
-        int64_t i = 1;
-        while (i < 22) {
-            term *= x / i;
-            approx += term;
-            i += 1;
-        }
-        break;
-    }
-    return approx;
-}
-int64_t org_bau_Math_isNotANumber_1(double x) {
-    return isnan(x);
-    int64_t _r0 = x != x;
+int64_t int_equals_2(int64_t this, int64_t o) {
+    int64_t _r0 = this == o;
     return _r0;
 }
-double org_bau_Math_log_1(double x) {
-    return log(x);
-    if (x == 0) {
-        return (-1.0 / 0.0);
-    } else {
-        if (x == (1.0 / 0.0)) {
-            return x;
-        } else {
-            int64_t _t3 = x <= 0;
-            if (!(_t3)) {
-                int64_t _t4 = org_bau_Math_isNotANumber_1(x);
-                _t3 = _t4;
-            }
-            if (_t3) {
-                return (0.0 / 0.0);
-            }
-        }
-    }
-    if (x < 0.7) {
-        double _t5 = org_bau_Math_log_1(2 * x);
-        double _r0 = _t5 - 0.6931471805599453;
-        return _r0;
-    }
-    if (x >= 1.5) {
-        double _t6 = org_bau_Math_log_1(x / 2);
-        double _r1 = _t6 + 0.6931471805599453;
-        return _r1;
-    }
-    double base = x - 1;
-    int64_t sign = 1;
-    double term = base;
-    double result = term;
-    while (1 == 1) {
-        int64_t i = 2;
-        while (i < 30) {
-            sign = - sign;
-            term *= base;
-            result += sign * term / i;
-            i += 1;
-        }
-        break;
-    }
-    return result;
+org_bau_HashMap_HashMap_int_int* org_bau_HashMap_HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes) {
+    org_bau_HashMap_HashMap_int_int* _t0 = org_bau_HashMap_HashMap_int_int_new();
+    _t0->size = 0;
+    _incUseStack(keys);
+    _t0->keys = keys;
+    _incUseStack(values);
+    _t0->values = values;
+    _incUseStack(hashes);
+    _t0->hashes = hashes;
+    return _t0;
 }
-double org_bau_Math_sqrt_1(double x) {
-    return sqrt(x);
-    int64_t x2 = int_1(x);
-    int64_t _t1 = x2 > 0;
-    if (_t1) {
-        int64_t _t2 = x2 == x;
-        _t1 = _t2;
-    }
-    if (_t1) {
-        int64_t exact = org_bau_Int_sqrtInt_1(x2);
-        if (( exact * exact ) == x) {
-            return exact;
-        }
-    }
-    double _t11 = org_bau_Math_log_1(x);
-    double _t12 = org_bau_Math_exp_1(_t11 / 2);
-    return _t12;
-}
-int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
-    int64_t z = randomSeed;
+int64_t org_bau_HashMap_mix_1(int64_t z) {
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
     int64_t _r0 = z ^ (shiftRight_int_2(z, 31));
     return _r0;
 }
-void org_bau_Utils_setRandomSeed_1(int64_t seed) {
-    randomSeed = seed;
+org_bau_HashMap_HashMap_int_int* org_bau_HashMap_newHashMap_int_int_2(int64_t _K, int64_t _V) {
+    int_array* _t0 = int_array_new(4);
+    int_array* _t1 = int_array_new(4);
+    int_array* _t2 = int_array_new(4);
+    org_bau_HashMap_HashMap_int_int* _t3 = org_bau_HashMap_HashMap_int_int_3(_t0, _t1, _t2);
+    _decUseStack(_t2, int_array);
+    _decUseStack(_t1, int_array);
+    _decUseStack(_t0, int_array);
+    return _t3;
+}
+int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key) {
+    int64_t p = hash & (_arrayLen(this->keys) - 1);
+    while (1) {
+        if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
+            int64_t _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
+            return _r0;
+        } else {
+            int64_t _t0 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t0) {
+                int64_t _t1 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t0 = _t1;
+            }
+            if (_t0) {
+                int64_t _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
+                return _r1;
+            }
+        }
+        p = (p + 1) & (_arrayLen(this->keys) - 1);
+    }
+}
+void org_bau_HashMap_HashMap_int_int_put_4(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key, int64_t value) {
+    if (( this->size * 2 ) >= _arrayLen(this->keys)) {
+        int_array* _t0 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t0);
+        int_array* kn = _t0;
+        int_array* _t1 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t1);
+        int_array* vn = _t1;
+        int_array* _t2 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t2);
+        int_array* hn = _t2;
+        _incUseStack(this->keys);
+        int_array* ok = this->keys;
+        _incUseStack(this->hashes);
+        int_array* oh = this->hashes;
+        _incUseStack(this->values);
+        int_array* ov = this->values;
+        _incUseStack(kn);
+        _decUse(this->keys, int_array);
+        this->keys = kn;
+        _incUseStack(vn);
+        _decUse(this->values, int_array);
+        this->values = vn;
+        _incUseStack(hn);
+        _decUse(this->hashes, int_array);
+        this->hashes = hn;
+        if (_arrayLen(ok) > 0) {
+            while (1 == 1) {
+                int64_t i = 0;
+                while (1) {
+                    if (oh->data[idx_2(i, _arrayLen(oh))] != 0) {
+                        org_bau_HashMap_HashMap_int_int_put_4(this, oh->data[idx_2(i, _arrayLen(oh))], ok->data[i], ov->data[idx_2(i, _arrayLen(ov))]);
+                    }
+                    int64_t _next = i + 1;
+                    if (_next >= _arrayLen(ok)) {
+                        break;
+                    }
+                    i = _next;
+                }
+                break;
+            }
+        }
+        _decUseStack(ov, int_array);
+        _decUseStack(oh, int_array);
+        _decUseStack(ok, int_array);
+        _decUseStack(hn, int_array);
+        _decUseStack(_t2, int_array);
+        _decUseStack(vn, int_array);
+        _decUseStack(_t1, int_array);
+        _decUseStack(kn, int_array);
+        _decUseStack(_t0, int_array);
+    }
+    int64_t p = hash & (_arrayLen(this->keys) - 1);
+    while (1) {
+        int64_t _t3 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t3) {
+            int64_t _t4 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t3 = _t4;
+        }
+        if (_t3) {
+            this->values->data[idx_2(p, _arrayLen(this->values))] = value;
+            return;
+        } else {
+            if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
+                this->size += 1;
+                this->keys->data[idx_2(p, _arrayLen(this->keys))] = key;
+                this->hashes->data[idx_2(p, _arrayLen(this->hashes))] = hash;
+                this->values->data[idx_2(p, _arrayLen(this->values))] = value;
+                return;
+            }
+        }
+        p = (p + 1) & (_arrayLen(this->keys) - 1);
+    }
 }
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
@@ -542,97 +428,48 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("-", 1);
-    string_1006 = str_const(".", 1);
-    string_1010 = str_const(" ", 1);
-    string_1011 = str_const(":", 1);
     _main();
     return 0;
 }
 void _main() {
-    randomSeed = 0;
-    MIN_INT = 0x8000000000000000;
-    MAX_INT = 0x7fffffffffffffff;
-    MIN_I32 = -2147483648;
-    MAX_I32 = 4294967295;
-    POS_INFINITY = (1.0 / 0.0);
-    NEG_INFINITY = (-1.0 / 0.0);
-    NOT_A_NUMBER = (0.0 / 0.0);
-    PI = 3.141592653589793;
-    E = 2.718281828459045;
-    LOG10 = 2.302585092994046;
-    LOG2 = 0.6931471805599453;
-    int64_t a = org_bau_DateTime_getNanoTime_0();
-    printf("%lld\n", (long long)a);
-    int64_t b = org_bau_DateTime_getNanoTime_0();
-    printf("%lld\n", (long long)a);
-    org_bau_DateTime_dateTime c = org_bau_DateTime_getDateTime_0();
-    printf("%d-%lld-%lld %lld:%lld:%lld.%lld\n", c.year, (long long)c.month, (long long)c.day, (long long)c.hour, (long long)c.minute, (long long)c.second, (long long)c.millis);
-    int64_t _t34 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t34);
-    int64_t _t35 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t35);
-    printf("%.9f\n", 3.141592653589793);
-    while (1 == 1) {
-        int64_t i = 2;
-        while (i < 4) {
-            double _t36 = org_bau_Math_sqrt_1(i);
-            printf("%.9f\n", _t36);
-            i += 1;
+    org_bau_HashMap_HashMap_int_int* map = org_bau_HashMap_newHashMap_int_int_2(0, 0);
+    if (5 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                int64_t _t2 = org_bau_HashMap_mix_1(i);
+                org_bau_HashMap_HashMap_int_int_put_4(map, _t2, i, i * 10);
+                int64_t _next = i + 1;
+                if (_next >= 5) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
         }
-        break;
     }
-    org_bau_DateTime_dateTime_free(&c);
+    if (5 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                int64_t _t3 = org_bau_HashMap_mix_1(i);
+                int64_t _t4 = org_bau_HashMap_HashMap_int_int_get_3(map, _t3, i);
+                printf("%lld\n", (long long)_t4);
+                int64_t _next = i + 1;
+                if (_next >= 5) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    _decUseStack(map, org_bau_HashMap_HashMap_int_int);
     _end();
 }
 /*
 
-fun getRandomSeed() int
-Get the random seed.
-
-fun random() int
-Pseudo-random number generated using the Splitmix64 algorithm.
-
-fun random(smallerThan int) int
-Pseudo-random number between 0 and smallerThan (excluding).
-
-fun setRandomSeed(seed int)
-Set the random seed.
-
-type exception
-An exception
-
-fun ord(s i8[]) const int
-The value of the first byte in the string. 0 if the string is empty.
-
-fun parsePositiveInt(s i8[]) int throws exception
-throws an exception if the string does not match [0-9]+
-
-type dateTime
-Date and time.
-
-fun daylightSaving() int
-Is daylight saving time active currently.
-
-fun daylightSaving(year int, month int, day int, hour int, min int, sec int) int
-Is daylight saving time active currently.
-
-fun getDateTime() dateTime
-Get the local time in millisecond precision.
-
-fun getNanoTime() int
-Nanosecons since some undefined point in the past. Never jumps backwards.
-
-fun getNanoTimeUTC() int
-Nanoseconds since 1970 (epoch). May jump backwards when the system clock is adjusted.
-
-fun timeMillis() int
-Get the seconds since the epoch
-
-fun timeOffset() int
-Get the current offset between the local time and UTC in seconds.
-
-fun timeOffset(year int, month int, day int, hour int, min int, sec int) int
-Get the current offset between the local time and UTC in seconds.
+fun hashCode(data i8[]) int
+4 bytes at a time if possible
 
 */

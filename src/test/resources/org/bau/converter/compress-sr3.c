@@ -413,21 +413,25 @@ void compress_0() {
             if ((r & 4294967295) < 1056964608) {
                 t4->data[idx_2(h, _arrayLen(t4))] += 0x1000000;
             }
-        } else if (( comp3 & 65280 ) == 0) {
-            writeBit_2(cxt, 1);
-            writeBit_2(cxt + 1, 1);
-            writeBit_2(cxt + 2, 0);
-            t4->data[idx_2(h, _arrayLen(t4))] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c | 16777216;
-        } else if (( comp3 & 16711680 ) == 0) {
-            writeBit_2(cxt, 1);
-            writeBit_2(cxt + 1, 1);
-            writeBit_2(cxt + 2, 1);
-            t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c | 16777216;
         } else {
-            writeBit_2(cxt, 1);
-            writeBit_2(cxt + 1, 0);
-            writeByte_2(cxt + 2, c);
-            t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c;
+            if (( comp3 & 65280 ) == 0) {
+                writeBit_2(cxt, 1);
+                writeBit_2(cxt + 1, 1);
+                writeBit_2(cxt + 2, 0);
+                t4->data[idx_2(h, _arrayLen(t4))] = (r & 16711680) | ((shiftLeft_2(r, 8)) & 65280) | c | 16777216;
+            } else {
+                if (( comp3 & 16711680 ) == 0) {
+                    writeBit_2(cxt, 1);
+                    writeBit_2(cxt + 1, 1);
+                    writeBit_2(cxt + 2, 1);
+                    t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c | 16777216;
+                } else {
+                    writeBit_2(cxt, 1);
+                    writeBit_2(cxt + 1, 0);
+                    writeByte_2(cxt + 2, c);
+                    t4->data[idx_2(h, _arrayLen(t4))] = ((shiftLeft_2(r, 8)) & 16776960) | c;
+                }
+            }
         }
         c1 = c;
         h = (( h * (shiftLeft_2(5, di1)) ) + c + 1) & 16777215;

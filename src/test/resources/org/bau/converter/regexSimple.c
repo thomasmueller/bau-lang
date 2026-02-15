@@ -849,40 +849,44 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         }
         if (c == 46) {
             t->ttype = 5;
-        } else if (c == 92) {
-            t->ttype = 2;
-            i += 1;
-            org_bau_List_List_i8_add_2(t->data, regex->data[idx_2(i, _arrayLen(regex))]);
-        } else if (c == 91) {
-            i += 1;
-            c = regex->data[idx_2(i, _arrayLen(regex))];
-            if (c == 94) {
-                t->ttype = 4;
+        } else {
+            if (c == 92) {
+                t->ttype = 2;
                 i += 1;
-                c = regex->data[idx_2(i, _arrayLen(regex))];
+                org_bau_List_List_i8_add_2(t->data, regex->data[idx_2(i, _arrayLen(regex))]);
             } else {
-                t->ttype = 3;
-            }
-            org_bau_List_List_i8_add_2(t->data, c);
-            org_bau_List_List_i8_add_2(t->data, c);
-            while (1) {
-                i += 1;
-                c = regex->data[idx_2(i, _arrayLen(regex))];
-                if (c == 93) {
-                    break;
-                }
-                if (c == 45) {
+                if (c == 91) {
                     i += 1;
                     c = regex->data[idx_2(i, _arrayLen(regex))];
-                    t->data->array->data[idx_2(t->data->size - 1, _arrayLen(t->data->array))] = c;
-                } else {
+                    if (c == 94) {
+                        t->ttype = 4;
+                        i += 1;
+                        c = regex->data[idx_2(i, _arrayLen(regex))];
+                    } else {
+                        t->ttype = 3;
+                    }
                     org_bau_List_List_i8_add_2(t->data, c);
+                    org_bau_List_List_i8_add_2(t->data, c);
+                    while (1) {
+                        i += 1;
+                        c = regex->data[idx_2(i, _arrayLen(regex))];
+                        if (c == 93) {
+                            break;
+                        }
+                        if (c == 45) {
+                            i += 1;
+                            c = regex->data[idx_2(i, _arrayLen(regex))];
+                            t->data->array->data[idx_2(t->data->size - 1, _arrayLen(t->data->array))] = c;
+                        } else {
+                            org_bau_List_List_i8_add_2(t->data, c);
+                            org_bau_List_List_i8_add_2(t->data, c);
+                        }
+                    }
+                } else {
+                    t->ttype = 2;
                     org_bau_List_List_i8_add_2(t->data, c);
                 }
             }
-        } else {
-            t->ttype = 2;
-            org_bau_List_List_i8_add_2(t->data, c);
         }
         org_bau_List_List_Token_add_2(result, t);
         if (( i + 1 ) >= _arrayLen(regex)) {
@@ -894,63 +898,69 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         c = regex->data[idx_2(i, _arrayLen(regex))];
         if (c == 43) {
             t->max = 9999;
-        } else if (c == 42) {
-            t->min = 0;
-            t->max = 9999;
-        } else if (c == 63) {
-            t->min = 0;
-            t->max = 1;
-        } else if (c == 123) {
-            i += 1;
-            int64_t start = i;
-            int64_t value = 0;
-            while (i < _arrayLen(regex)) {
-                c = regex->data[idx_2(i, _arrayLen(regex))];
-                int64_t _t1 = c < 48;
-                if (!(_t1)) {
-                    int64_t _t2 = c > 57;
-                    _t1 = _t2;
-                }
-                if (_t1) {
-                    break;
-                }
-                value = ( value * 10 ) + c - 48;
-                if (value > 9999) {
-                    break;
-                }
-                i += 1;
-            }
-            t->min = value;
-            t->max = t->min;
-            if (c == 44) {
-                i += 1;
-                start = i;
-                value = 0;
-                while (i < _arrayLen(regex)) {
-                    c = regex->data[idx_2(i, _arrayLen(regex))];
-                    int64_t _t3 = c < 48;
-                    if (!(_t3)) {
-                        int64_t _t4 = c > 57;
-                        _t3 = _t4;
-                    }
-                    if (_t3) {
-                        break;
-                    }
-                    value = ( value * 10 ) + c - 48;
-                    if (value > 9999) {
-                        break;
-                    }
-                    i += 1;
-                }
-                t->max = value;
-            }
-            if (c != 125) {
-                org_bau_Exception_exception _t5 = org_bau_Exception_exception_1(string_1017);
-                _x0 = exception_org_bau_List_List_Token_or_exception(_t5); _lastException = _x0.exception; goto catch0;
-                org_bau_Exception_exception_free(&_t5);
-            }
         } else {
-            i -= 1;
+            if (c == 42) {
+                t->min = 0;
+                t->max = 9999;
+            } else {
+                if (c == 63) {
+                    t->min = 0;
+                    t->max = 1;
+                } else {
+                    if (c == 123) {
+                        i += 1;
+                        int64_t start = i;
+                        int64_t value = 0;
+                        while (i < _arrayLen(regex)) {
+                            c = regex->data[idx_2(i, _arrayLen(regex))];
+                            int64_t _t1 = c < 48;
+                            if (!(_t1)) {
+                                int64_t _t2 = c > 57;
+                                _t1 = _t2;
+                            }
+                            if (_t1) {
+                                break;
+                            }
+                            value = ( value * 10 ) + c - 48;
+                            if (value > 9999) {
+                                break;
+                            }
+                            i += 1;
+                        }
+                        t->min = value;
+                        t->max = t->min;
+                        if (c == 44) {
+                            i += 1;
+                            start = i;
+                            value = 0;
+                            while (i < _arrayLen(regex)) {
+                                c = regex->data[idx_2(i, _arrayLen(regex))];
+                                int64_t _t3 = c < 48;
+                                if (!(_t3)) {
+                                    int64_t _t4 = c > 57;
+                                    _t3 = _t4;
+                                }
+                                if (_t3) {
+                                    break;
+                                }
+                                value = ( value * 10 ) + c - 48;
+                                if (value > 9999) {
+                                    break;
+                                }
+                                i += 1;
+                            }
+                            t->max = value;
+                        }
+                        if (c != 125) {
+                            org_bau_Exception_exception _t5 = org_bau_Exception_exception_1(string_1017);
+                            _x0 = exception_org_bau_List_List_Token_or_exception(_t5); _lastException = _x0.exception; goto catch0;
+                            org_bau_Exception_exception_free(&_t5);
+                        }
+                    } else {
+                        i -= 1;
+                    }
+                }
+            }
         }
         i += 1;
         _decUseStack(t, Token);

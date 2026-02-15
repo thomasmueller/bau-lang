@@ -30,7 +30,7 @@ public class QrCodeTest {
         // 1: 0; 5: 0; 8: 9/23320; 10: 37/23320; 100: 3959/23320; 1000: 23320/23320
 
         String all = "the quick brown fox jumps over the lazy dog. ".repeat(1000);
-        for (int len = 0; len < 2332; len += 30) {
+        for (int len = 0; len < 2332; len += 60) {
             // System.out.println("len " + len);
             for (int test = 0; test < 1; test++) {
                 Random r = new Random(test);

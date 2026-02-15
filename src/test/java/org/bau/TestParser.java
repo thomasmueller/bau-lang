@@ -63,10 +63,11 @@ println('end')
 a := 1
 if a = 0
     println('zero')
-elif a = 1
-    println('one')
 else
-    println('other')
+    if a = 1
+        println('one')
+    else
+        println('other')
 println('done')
                 """,
                 new Parser("a:= 1\n" +

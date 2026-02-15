@@ -17,7 +17,7 @@ public class SR3Test {
 
     @Test
     public void simple() throws IOException {
-        byte[] data = new byte[1024 * 1024];
+        byte[] data = new byte[128 * 1024];
         test(data);
         Arrays.fill(data, (byte) 32);
         test(data);

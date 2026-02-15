@@ -564,78 +564,82 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
         result |= _t26;
         int64_t _t27 = slide_4(from, maxDist, -2, 1);
         result |= _t27;
-    } else if (p == 6) {
-        int64_t _t28 = 0;
-        if (isBlack_1(b)) {
-            _t28 = 1;
-        } else {
-            _t28 = -1;
-        }
-        int64_t dir = _t28;
-        int64_t dist = 1;
-        if (!(attacksOnly)) {
-            int64_t _t29 = dir == 1;
-            if (_t29) {
-                int64_t _t30 = ( idiv_2(from, 8) ) == 1;
-                _t29 = _t30;
+    } else {
+        if (p == 6) {
+            int64_t _t28 = 0;
+            if (isBlack_1(b)) {
+                _t28 = 1;
+            } else {
+                _t28 = -1;
             }
-            int64_t _t31 = _t29;
-            if (_t31) {
-                int64_t _t32 = board->data[idx_2(from + 16, _arrayLen(board))] == 0;
-                _t31 = _t32;
+            int64_t dir = _t28;
+            int64_t dist = 1;
+            if (!(attacksOnly)) {
+                int64_t _t29 = dir == 1;
+                if (_t29) {
+                    int64_t _t30 = ( idiv_2(from, 8) ) == 1;
+                    _t29 = _t30;
+                }
+                int64_t _t31 = _t29;
+                if (_t31) {
+                    int64_t _t32 = board->data[idx_2(from + 16, _arrayLen(board))] == 0;
+                    _t31 = _t32;
+                }
+                if (_t31) {
+                    dist = 2;
+                }
+                int64_t _t33 = dir == -1;
+                if (_t33) {
+                    int64_t _t34 = ( idiv_2(from, 8) ) == 6;
+                    _t33 = _t34;
+                }
+                int64_t _t35 = _t33;
+                if (_t35) {
+                    int64_t _t36 = board->data[idx_2(from - 16, _arrayLen(board))] == 0;
+                    _t35 = _t36;
+                }
+                if (_t35) {
+                    dist = 2;
+                }
+                int64_t _t37 = slide_4(from, dist, 0, dir);
+                result |= _t37;
+                int64_t _t38 = result != 0;
+                if (_t38) {
+                    int64_t _t39 = board->data[idx_2(from + ( dir * 8 ), _arrayLen(board))] != 0;
+                    _t38 = _t39;
+                }
+                if (_t38) {
+                    result = 0;
+                }
             }
-            if (_t31) {
-                dist = 2;
+            if (( idiv_2(pawnMoved2, 8) ) == ( idiv_2(from, 8) )) {
+                if (pawnMoved2 == ( from - 1 )) {
+                    result |= shiftLeft_2(1, (from - 1));
+                } else {
+                    if (pawnMoved2 == ( from + 1 )) {
+                        result |= shiftLeft_2(1, (from + 1));
+                    }
+                }
             }
-            int64_t _t33 = dir == -1;
-            if (_t33) {
-                int64_t _t34 = ( idiv_2(from, 8) ) == 6;
-                _t33 = _t34;
+            int64_t capture = slide_4(from, maxDist, 1, dir);
+            int64_t _t40 = capture != 0;
+            if (_t40) {
+                int64_t _t41 = board->data[idx_2(( from + 1 ) + ( dir * 8 ), _arrayLen(board))] != 0;
+                _t40 = _t41;
             }
-            int64_t _t35 = _t33;
-            if (_t35) {
-                int64_t _t36 = board->data[idx_2(from - 16, _arrayLen(board))] == 0;
-                _t35 = _t36;
+            if (_t40) {
+                result |= capture;
             }
-            if (_t35) {
-                dist = 2;
+            int64_t _t42 = slide_4(from, maxDist, -1, dir);
+            capture = _t42;
+            int64_t _t43 = capture != 0;
+            if (_t43) {
+                int64_t _t44 = board->data[idx_2(( from - 1 ) + ( dir * 8 ), _arrayLen(board))] != 0;
+                _t43 = _t44;
             }
-            int64_t _t37 = slide_4(from, dist, 0, dir);
-            result |= _t37;
-            int64_t _t38 = result != 0;
-            if (_t38) {
-                int64_t _t39 = board->data[idx_2(from + ( dir * 8 ), _arrayLen(board))] != 0;
-                _t38 = _t39;
+            if (_t43) {
+                result |= capture;
             }
-            if (_t38) {
-                result = 0;
-            }
-        }
-        if (( idiv_2(pawnMoved2, 8) ) == ( idiv_2(from, 8) )) {
-            if (pawnMoved2 == ( from - 1 )) {
-                result |= shiftLeft_2(1, (from - 1));
-            } else if (pawnMoved2 == ( from + 1 )) {
-                result |= shiftLeft_2(1, (from + 1));
-            }
-        }
-        int64_t capture = slide_4(from, maxDist, 1, dir);
-        int64_t _t40 = capture != 0;
-        if (_t40) {
-            int64_t _t41 = board->data[idx_2(( from + 1 ) + ( dir * 8 ), _arrayLen(board))] != 0;
-            _t40 = _t41;
-        }
-        if (_t40) {
-            result |= capture;
-        }
-        int64_t _t42 = slide_4(from, maxDist, -1, dir);
-        capture = _t42;
-        int64_t _t43 = capture != 0;
-        if (_t43) {
-            int64_t _t44 = board->data[idx_2(( from - 1 ) + ( dir * 8 ), _arrayLen(board))] != 0;
-            _t43 = _t44;
-        }
-        if (_t43) {
-            result |= capture;
         }
     }
     int64_t _t45 = p == 1;
@@ -1214,8 +1218,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         if (e0 == 79) {
             if (e1 == 72) {
                 return 1005;
-            } else if (e1 == 70) {
-                return 1006;
+            } else {
+                if (e1 == 70) {
+                    return 1006;
+                }
             }
             return key;
         }
@@ -1292,8 +1298,10 @@ void refreshScreen_0() {
                             b &= -17;
                             if (allowed) {
                                 org_bau_String_StringBuilder_append_2(buff, string_1034);
-                            } else if (( imod_2((x + y), 2) ) == 1) {
-                                org_bau_String_StringBuilder_append_2(buff, string_1035);
+                            } else {
+                                if (( imod_2((x + y), 2) ) == 1) {
+                                    org_bau_String_StringBuilder_append_2(buff, string_1035);
+                                }
                             }
                             int64_t _t2 = isBlack_1(b);
                             if (_t2) {
@@ -1422,7 +1430,6 @@ void undo_1(int64_t move) {
     board->data[idx_2(target, _arrayLen(board))] = captured;
     board->data[idx_2(source, _arrayLen(board))] = old;
     int64_t _t0 = getPiece_1(old);
-    int64_t _t2 = getPiece_1(old);
     if (_t0 == 1) {
         int64_t _t1 = org_bau_Int_abs_1((source & 7) - (target & 7));
         if (_t1 > 1) {
@@ -1434,22 +1441,25 @@ void undo_1(int64_t move) {
                 board->data[idx_2(target + 1, _arrayLen(board))] = 0;
             }
         }
-    } else if (_t2 == 6) {
-        int64_t shift = (target & 7) - (source & 7);
-        int64_t _t3 = shift != 0;
-        if (_t3) {
-            int64_t _t4 = captured == 0;
-            _t3 = _t4;
-        }
-        if (_t3) {
-            int64_t _t5 = 0;
-            int64_t _t6 = isBlack_1(old);
-            if (_t6) {
-                _t5 = 0;
-            } else {
-                _t5 = 6;
+    } else {
+        int64_t _t2 = getPiece_1(old);
+        if (_t2 == 6) {
+            int64_t shift = (target & 7) - (source & 7);
+            int64_t _t3 = shift != 0;
+            if (_t3) {
+                int64_t _t4 = captured == 0;
+                _t3 = _t4;
             }
-            board->data[idx_2(source + shift, _arrayLen(board))] = 6 + _t5;
+            if (_t3) {
+                int64_t _t5 = 0;
+                int64_t _t6 = isBlack_1(old);
+                if (_t6) {
+                    _t5 = 0;
+                } else {
+                    _t5 = 6;
+                }
+                board->data[idx_2(source + shift, _arrayLen(board))] = 6 + _t5;
+            }
         }
     }
 }
@@ -1577,38 +1587,40 @@ void _main() {
                     moves ^= shiftLeft_2(1, target);
                 }
                 refreshScreen_0();
-            } else if (state == 1) {
-                int64_t p = xx + ( 8 * yy );
-                int64_t allowed = (board->data[idx_2(p, _arrayLen(board))] & 16) != 0;
-                if (64 > 0) {
-                    while (1 == 1) {
-                        int64_t i = 0;
-                        while (1) {
-                            board->data[idx_2(i, _arrayLen(board))] &= -17;
-                            int64_t _next = i + 1;
-                            if (_next >= 64) {
-                                break;
+            } else {
+                if (state == 1) {
+                    int64_t p = xx + ( 8 * yy );
+                    int64_t allowed = (board->data[idx_2(p, _arrayLen(board))] & 16) != 0;
+                    if (64 > 0) {
+                        while (1 == 1) {
+                            int64_t i = 0;
+                            while (1) {
+                                board->data[idx_2(i, _arrayLen(board))] &= -17;
+                                int64_t _next = i + 1;
+                                if (_next >= 64) {
+                                    break;
+                                }
+                                i = _next;
                             }
-                            i = _next;
+                            break;
                         }
-                        break;
                     }
-                }
-                if (allowed) {
-                    int64_t _t14 = move_2(from, p);
-                    lastWhite = _t14;
-                    showCursor = 0;
+                    if (allowed) {
+                        int64_t _t14 = move_2(from, p);
+                        lastWhite = _t14;
+                        showCursor = 0;
+                        refreshScreen_0();
+                        int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
+                        if (move != 0) {
+                            lastBlack = move;
+                            int64_t _t15 = move_1(move);
+                            ;
+                        }
+                    }
+                    showCursor = 1;
                     refreshScreen_0();
-                    int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
-                    if (move != 0) {
-                        lastBlack = move;
-                        int64_t _t15 = move_1(move);
-                        ;
-                    }
+                    state = 0;
                 }
-                showCursor = 1;
-                refreshScreen_0();
-                state = 0;
             }
         } else if (_t11 == 99) {
             int64_t p = xx + ( 8 * yy );

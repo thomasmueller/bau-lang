@@ -1268,8 +1268,10 @@ i8_array* org_bau_compress_Lz4Tool_hex_2(int64_t x, int64_t len) {
     int64_t l = len;
     if (l < 0) {
         l = 0;
-    } else if (l > 8) {
-        l = 8;
+    } else {
+        if (l > 8) {
+            l = 8;
+        }
     }
     i8_array* _t0 = i8_array_new(l);
     _incUseStack(_t0);
@@ -1322,31 +1324,35 @@ int64_t org_bau_compress_Lz4Tool_main_0() {
         int64_t _t7 = org_bau_compress_Lz4Tool_is_2(a1, string_1008);
         _t6 = _t7;
     }
-    int64_t _t10 = args == 4;
-    if (_t10) {
-        int64_t _t11 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
-        _t10 = _t11;
-    }
-    int64_t _t14 = args == 3;
-    if (_t14) {
-        int64_t _t15 = org_bau_compress_Lz4Tool_is_2(a1, string_1013);
-        _t14 = _t15;
-    }
     if (_t6) {
         i8_array* _t8 = org_bau_Env_arg_1(3);
         int64_t _t9 = org_bau_compress_Lz4Tool_decompressFile_2(a2, _t8);
         printf("Decompressed %lld bytes\n", (long long)_t9);
         _decUseStack(_t8, i8_array);
-    } else if (_t10) {
-        i8_array* _t12 = org_bau_Env_arg_1(3);
-        int64_t _t13 = org_bau_compress_Lz4Tool_compressFile_3(a2, _t12, 1);
-        printf("Compressed %lld bytes\n", (long long)_t13);
-        _decUseStack(_t12, i8_array);
-    } else if (_t14) {
-        int64_t _t16 = org_bau_compress_Lz4Tool_xxhashFile_1(a2);
-        i8_array* _t17 = org_bau_compress_Lz4Tool_hex_2(_t16, 8);
-        printf("%.*s\n", _arrayLen(_t17), _t17->data);
-        _decUseStack(_t17, i8_array);
+    } else {
+        int64_t _t10 = args == 4;
+        if (_t10) {
+            int64_t _t11 = org_bau_compress_Lz4Tool_is_2(a1, string_1011);
+            _t10 = _t11;
+        }
+        if (_t10) {
+            i8_array* _t12 = org_bau_Env_arg_1(3);
+            int64_t _t13 = org_bau_compress_Lz4Tool_compressFile_3(a2, _t12, 1);
+            printf("Compressed %lld bytes\n", (long long)_t13);
+            _decUseStack(_t12, i8_array);
+        } else {
+            int64_t _t14 = args == 3;
+            if (_t14) {
+                int64_t _t15 = org_bau_compress_Lz4Tool_is_2(a1, string_1013);
+                _t14 = _t15;
+            }
+            if (_t14) {
+                int64_t _t16 = org_bau_compress_Lz4Tool_xxhashFile_1(a2);
+                i8_array* _t17 = org_bau_compress_Lz4Tool_hex_2(_t16, 8);
+                printf("%.*s\n", _arrayLen(_t17), _t17->data);
+                _decUseStack(_t17, i8_array);
+            }
+        }
     }
     _decUseStack(a2, i8_array);
     _decUseStack(a1, i8_array);
