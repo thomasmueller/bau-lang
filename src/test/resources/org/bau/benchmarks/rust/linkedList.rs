@@ -42,7 +42,8 @@ fn main() {
     let count: usize = 1_000_000;
     let len: usize = 1000;
     let mut worst: u64 = 0;
-    let mut last = Instant::now();
+    let start = Instant::now();
+    let mut last = start;
     for _ in 0..count {
         create_linked_list(len);
         let now = Instant::now();
@@ -50,5 +51,10 @@ fn main() {
         worst = std::cmp::max(worst, elapsed);
         last = now;
     }
-    println!("Max delay: {} ms; dummy={}", (worst as f64) / 1_000_000.0, x.value);
+    let elapsed = (Instant::now() - start).as_nanos() as u64;
+    let avg = elapsed / (count as u64);
+    println!("Max delay: {} ms, avg {} ms; dummy={}", 
+        ((worst - avg) as f64) / 1_000_000.0, 
+        (avg as f64) / 1_000_000.0,
+        x.value);
 }

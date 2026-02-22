@@ -24,10 +24,12 @@ fun main()
     count : 1_000_000
     len : 1000
     worst := 0
-    last := getNanoTime()
+    start := getNanoTime()
+    last := start
     for i := until(count)
         createLinkedList(len)
         now : getNanoTime()
         worst = Int.max(worst, now - last)
         last = now
-    println('Max delay: ' (worst / 1_000_000.0) ' ms; dummy value: ' x.value)
+    avg : (getNanoTime() - start) / count
+    println('Max delay: ' ((worst - avg) / 1_000_000.0) ' ms, avg ' (avg / 1_000_000.0) ' ms; dummy value: ' x.value)

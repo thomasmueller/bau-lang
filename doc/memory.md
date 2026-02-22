@@ -74,7 +74,7 @@ It is the task of the developer to prevent them where needed.
 To avoid cycles, explicitly set fields to `null`
 (there is no garbage collection).
 
-## Real-Time Memory Allocation
+## Real-Time Memory Allocation
 
 This language is transpiled to C.
 Both reference counting as well as ownership use 
@@ -84,8 +84,8 @@ to allocate and de-allocate objects on the heap.
 However, an alternative O(1) `malloc` / `free` implementation
 called "TmMalloc" is included,
 which offers similar guarantees than the real-time memory allocation
-library TLSF (Two-Level Segregated Fit memory allocator).
-This further reduces worst-case performance on dynamic memory management.
+library TLSF (<a href="https://github.com/mattconte/tlsf">Two-Level Segregated Fit</a>).
+This further reduces worst-case delays on dynamic memory management.
 Because it uses an allocation strategy that is similar to area allocation,
 it is often faster than the default `malloc` / `free` implementations
 (see benchmark results below).
@@ -120,13 +120,13 @@ or the de-allocation needs to be done in code.
 
 ## Memory Management Tests
 
-To understand the effects of memory management on performance,
+To understand the effects of memory management,
 two benchmarks are included: the BinaryTrees benchmark
 from "The Computer Language Benchmarks Game",
 and the <a href="https://lemire.me/blog/2026/02/15/how-bad-can-python-stop-the-world-pauses-get/">
 "Linked List" benchmark from Daniel Lemire</a>.
 The linked list benchmark also measures stop-the-world garbage collection pauses
-which are typical for tracing garbage collection, in the row "max pause".
+which are typical for tracing garbage collection, in the row "delay (ms)".
 
 
 | Benchmark              | Bau | Bau RC | Bau TmMalloc | Bau RC+TmMalloc |  Go  | Java |  PyPy | Rust | Python |
@@ -135,9 +135,8 @@ which are typical for tracing garbage collection, in the row "max pause".
 | Linked List    seconds |13.4 |   16.4 |          7.9 |            10.0 | 19.3 |  6.2 |   8.3 | 10.6 |  129.3 |
 | Linked List delay (ms) | 2.3 |    3.6 |         0.09 |            0.06 | 25.0 | 83.8 |  12.9 |  1.3 |    4.5 |
 
-
-For the Linked List test, programming languages that use tracing GC (Go, Java, PyPy),
-the maximum delay (between runs) is many milliseconds 
+For the linked list test, programming languages that use tracing GC (Go, Java, PyPy),
+the maximum delay between runs is many milliseconds 
 (the variability between runs is very high).
 Both Bau and Rust and Bau, when using the default `malloc` and `free` implementations,
 also sometimes have a delay of a few milliseconds. 
@@ -175,13 +174,13 @@ Compiling and Running the C, Java, and Bau versions:
     java -jar bau.jar -O3 -useTmMalloc false *.bau
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./binaryTreesRefCount 20; done
-    for i in {1..3}; do time ./linkedList; done
-    for i in {1..3}; do time ./linkedListRefCount; done
+    for i in {1..10}; do time ./linkedList; done
+    for i in {1..10}; do time ./linkedListRefCount; done
     java -jar bau.jar -useTmMalloc true -O3 *.bau
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./binaryTreesRefCount 20; done
-    for i in {1..3}; do time ./linkedList; done
-    for i in {1..3}; do time ./linkedListRefCount; done
+    for i in {1..10}; do time ./linkedList; done
+    for i in {1..10}; do time ./linkedListRefCount; done
 
     echo "== Go ============"
     cp ../src/test/resources/org/bau/benchmarks/go/* .
@@ -189,19 +188,19 @@ Compiling and Running the C, Java, and Bau versions:
     go build -ldflags="-s -w" binaryTrees.go
     go build -ldflags="-s -w" linkedList.go
     for i in {1..3}; do time GOMAXPROCS=1 ./binaryTrees 20; done
-    for i in {1..3}; do time GOMAXPROCS=1 ./linkedList; done
+    for i in {1..10}; do time GOMAXPROCS=1 ./linkedList; done
 
     echo "== Java ============"
     javac ../src/test/java/org/bau/benchmarks/*.java -d .
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.LinkedList
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.BinaryTrees 20; done
-    for i in {1..3}; do time java -Xmx2g org.bau.benchmarks.LinkedList; done
+    for i in {1..10}; do time java -Xmx2g org.bau.benchmarks.LinkedList; done
     
     echo "== Python via PyPy ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
     for i in {1..3}; do time pypy3.10 binaryTrees.py 20; done
-    for i in {1..3}; do time pypy3.10 linkedList.py; done
+    for i in {1..10}; do time pypy3.10 linkedList.py; done
     
     echo "== Rust ============"
     cp ../src/test/resources/org/bau/benchmarks/rust/*.rs .
@@ -209,11 +208,11 @@ Compiling and Running the C, Java, and Bau versions:
     rustc -C opt-level=3 binaryTrees.rs
     rustc -C opt-level=3 linkedList.rs
     for i in {1..3}; do time ./binaryTrees 20; done
-    for i in {1..3}; do time ./linkedList; done
+    for i in {1..10}; do time ./linkedList; done
 
     echo "== Python (CPython) ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
     for i in {1..3}; do time python3 binaryTrees.py 20; done
-    for i in {1..3}; do time python3 linkedList.py; done
+    for i in {1..10}; do time python3 linkedList.py; done
     
     cd ..
