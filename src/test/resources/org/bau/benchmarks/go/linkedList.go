@@ -28,12 +28,15 @@ func main() {
     count := 1_000_000
     len := 1000
     worst := int64(0)
-    last := time.Now().UnixNano()
+    start := time.Now().UnixNano()
+    last := start
     for i := 0; i < count; i++ {
         createLinkedList(len)
         now := time.Now().UnixNano()
         worst = max(worst, now - last)
         last = now
     }
-    fmt.Printf("Max delay: %d ms; dummy=%d\n", worst / 1_000_000.0, x.value)
+    avg := (time.Now().UnixNano() - start) / int64(count)
+    fmt.Printf("Max delay: %d ms, avg %d ms; dummy=%d\n", 
+        worst / 1_000_000.0, avg / 1_000_000.0, x.value)
 }

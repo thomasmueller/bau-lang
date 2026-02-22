@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>memory</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="github-styles.css" />
+</head>
+<body>
+<h1 id="memory-management">Memory Management</h1>
+<h2 id="memory-management-variants">Memory Management Variants</h2>
+<p>Mainly the following strategies are used today. Each one has some
+advantages and disadvantages. This is a simplification: some languages
+are hybrids and configurable (eg Rust also offers reference counting);
+listed are only the defaults:</p>
+<ul>
+<li>Memory-unsafe manual memory management (C, C++, Zig). Runtime
+performance is great, but safety and manual work are concerns.</li>
+<li>Tracing garbage collection (Java, C#, Javascript, Go, PyPy). This is
+safe, and the most developer-friendly variant. But it uses more memory,
+suffers from (short) stop-the-world pauses, and collection is
+non-deterministic.</li>
+<li>Reference counting (Swift, Nim, Python, Bau). Typically uses less
+memory than tracing GC, is deterministic and easy to use, but sometimes
+a bit slower than the alternatives.</li>
+<li>Memory-safe manual memory management via ownership and borrow
+checking (Rust). Uses little memory, runtime performance is great and
+deterministic. But it is harder to use, and ownership prevents cyclic
+data structures.</li>
+</ul>
+<p>This language uses reference counting by default. For for
+performance-critical areas, an easy-to-use variant of ownership /
+borrowing is supported. There are no stop-the-world GC pauses, and peak
+memory usage, compared to tracing garbage collection, is reduced. Memory
+management is deterministic, and relatively easy to use. Stack overflow
+during destruction is prevented for almost all cases. There is no weak
+references and automatic cycle detection currently, so that some manual
+work is needed to prevent cycles.</p>
+<h2 id="close-methods">Close Methods</h2>
+<p>If a type has a <code>close</code> function, then it is called before
+the memory is freed. It is not allowed to re-link the freed object in
+this method; if this is done, then the program panics.</p>
+<h2 id="ownership">Ownership</h2>
+<p>Where speed is critical, use single ownership, by adding
+<code>+</code> to the type, and borrow with <code>&amp;</code>.</p>
+<pre><code>type Tree
+    left Tree+?
+    right Tree+?
+
+fun Tree+ nodeCount() int
+    result := 1
+    l : &amp;left
+    if l
+        result += l.nodeCount()
+    r : &amp;right
+    if r
+        result += r.nodeCount()
+    return result</code></pre>
+<p>In this case, reference counting is not used. During borrowing, it is
+not allowed to call a method that directly or indirectly de-allocates
+objects of the given type.</p>
+<h2 id="reference-counting-cycles">Reference Counting Cycles</h2>
+<p>Reference counting can form cycles. As an example, an object can
+reference itself, in which case the reference count can not drop to
+zero, even if the object is not referenced from anywhere else. Currently
+such cycles are not detected or prevented. It is the task of the
+developer to prevent them where needed. To avoid cycles, explicitly set
+fields to <code>null</code> (there is no garbage collection).</p>
+<h2 id="real-time-memory-allocation">Real-Time Memory Allocation</h2>
+<p>This language is transpiled to C. Both reference counting as well as
+ownership use the <code>malloc</code> and <code>free</code> methods of
+the C standard library by default to allocate and de-allocate objects on
+the heap.</p>
+<p>However, an alternative O(1) <code>malloc</code> / <code>free</code>
+implementation called "TmMalloc" is included, which offers similar
+guarantees than the real-time memory allocation library TLSF
+(<a href="https://github.com/mattconte/tlsf">Two-Level Segregated
+Fit</a>). This further reduces worst-case delays on dynamic memory
+management. Because it uses an allocation strategy that is similar to
+area allocation, it is often faster than the default <code>malloc</code>
+/ <code>free</code> implementations (see benchmark results below). To
+enable TmMalloc, use <code>-useTmMalloc true</code> when transpiling to
+C:</p>
+<pre><code>java -jar bau.jar -useTmMalloc true -O3 *.bau</code></pre>
+<h2 id="stack-save-deallocation">Stack-Save Deallocation</h2>
+<p>Deallocation of one object can indirectly cause deallocation of a
+large number of nested objects. One such example is a long linked list:
+if the head is deallocated, indirectly all the linked entries are
+de-allocated as well.</p>
+<p>Deep deallocation chains can cause stack overflow in some languages,
+e.g Rust, Swift, Nim, Zig, unless if deallocation is implemented in
+code. Stack overflow is not an issue in languages that use tracing
+garbage collection, eg. Java, Python, and Go.</p>
+<p>This language uses the following approach to prevent stack overflow
+for most cases: deallocation is recursive up to 2048 entries. If there
+are more entries to be deallocated at once, the objects to be
+deallocated are added to a stack instead. Entries in this stack are
+processed in a loop instead of using recursion. The deallocation stack
+size is 1024; if exhausted, deallocation switches back to recursion.
+This approach prevents stack overflow in almost all cases: both long
+linked lists as well as large array of references are supported. Stack
+overflow is still possible with a combination, eg. large arrays that
+reference long linked lists that itself point to arrays. For such cases,
+either the configured values needs to be changed, or the de-allocation
+needs to be done in code.</p>
+<h2 id="memory-management-tests">Memory Management Tests</h2>
+<p>To understand the effects of memory management, two benchmarks are
+included: the BinaryTrees benchmark from "The Computer Language
+Benchmarks Game", and the
+<a href="https://lemire.me/blog/2026/02/15/how-bad-can-python-stop-the-world-pauses-get/">
+"Linked List" benchmark from Daniel Lemire</a>. The linked list
+benchmark also measures stop-the-world garbage collection pauses which
+are typical for tracing garbage collection, in the row "delay (ms)".</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>Bau</th>
+<th>Bau RC</th>
+<th>Bau TmMalloc</th>
+<th>Bau RC+TmMalloc</th>
+<th>Go</th>
+<th>Java</th>
+<th>PyPy</th>
+<th>Python</th>
+<th>Rust</th>
+<th>Swift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Binary Trees seconds</td>
+<td>3.5</td>
+<td>4.9</td>
+<td>2.4</td>
+<td>2.7</td>
+<td>6.8</td>
+<td>2.0</td>
+<td>5.5</td>
+<td>67.5</td>
+<td>4.1</td>
+<td>10.8</td>
+</tr>
+<tr>
+<td>Linked List seconds</td>
+<td>13.6</td>
+<td>18.7</td>
+<td>8.3</td>
+<td>10.6</td>
+<td>22.1</td>
+<td>6.2</td>
+<td>8.3</td>
+<td>129.3</td>
+<td>11.0</td>
+<td>39.0</td>
+</tr>
+<tr>
+<td>Linked List delay (ms)</td>
+<td>0.6</td>
+<td>3.6</td>
+<td>0.04</td>
+<td>0.05</td>
+<td>25.0</td>
+<td>14.0</td>
+<td>12.9</td>
+<td>4.5</td>
+<td>0.06</td>
+<td>0.7</td>
+</tr>
+</tbody>
+</table>
+<p>For the linked list test, programming languages that use tracing GC
+(Go, Java, PyPy), the maximum delay between runs is many milliseconds.
+For Java, JDK 25 was used for testing. Pauses depend on the garbage
+collection algorithm used and the memory available. The option
+<code>-XX:MaxGCPauseMillis=0</code> is not supported; later values
+doesn't seem to have the desired effect. The shortest pauses of around
+1.5 ms were observed with <code>-Xmx4g -XX:+UseShenandoahGC</code>,
+which is about twice the amount of memory used otherwise.</p>
+<p>Both Bau and Rust and Bau, when using the default <code>malloc</code>
+and <code>free</code> implementations, also sometimes have a delay of a
+few milliseconds. When using a (near-) real-time <code>malloc</code> /
+<code>free</code>, the pauses are much shorter.</p>
+<p>Notice that the Linked List test, for Rust, would throw stack
+overflow when freeing the large linked list, because Rust recursively
+frees (drops) objects. To avoid stack overflow during deconstruction, an
+explicit <code>drop</code> method needs to be implemented. Bau does not
+need an explicit implementation.</p>
+<h2 id="building-and-running-the-tests">Building and Running the
+Tests</h2>
+<p>Download and build the latest version:</p>
+<pre><code>git clone git@github.com:thomasmueller/bau-lang.git
+cd bau-lang</code></pre>
+<p>Using Maven:</p>
+<pre><code>mvn -DskipTests clean install</code></pre>
+<p>Using Make:</p>
+<pre><code>make jar</code></pre>
+<p>Compiling and Running the C, Java, and Bau versions:</p>
+<pre><code>mkdir -p target
+cd target
+
+echo &quot;== Bau ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/bau/* .
+find . -type f ! -name &quot;*.?*&quot; -delete
+java -jar bau.jar -O3 -useTmMalloc false *.bau
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..3}; do time ./binaryTreesRefCount 20; done
+for i in {1..10}; do time ./linkedList; done
+for i in {1..10}; do time ./linkedListRefCount; done
+java -jar bau.jar -useTmMalloc true -O3 *.bau
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..3}; do time ./binaryTreesRefCount 20; done
+for i in {1..10}; do time ./linkedList; done
+for i in {1..10}; do time ./linkedListRefCount; done
+
+echo &quot;== Go ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/go/* .
+find . -type f ! -name &quot;*.?*&quot; -delete
+go build -ldflags=&quot;-s -w&quot; binaryTrees.go
+go build -ldflags=&quot;-s -w&quot; linkedList.go
+for i in {1..3}; do time GOMAXPROCS=1 GOMEMLIMIT=2GiB ./binaryTrees 20; done
+for i in {1..10}; do time GOMAXPROCS=1 GOMEMLIMIT=2GiB ./linkedList; done
+
+echo &quot;== Java ============&quot;
+javac ../src/test/java/org/bau/benchmarks/*.java -d .
+time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
+time java -Xmx2g org.bau.benchmarks.Loop org.bau.benchmarks.LinkedList
+for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.BinaryTrees 20; done
+for i in {1..10}; do time java -Xmx2g org.bau.benchmarks.LinkedList; done
+for i in {1..10}; do time java -Xmx2g -XX:+UseShenandoahGC org.bau.benchmarks.LinkedList; done
+
+echo &quot;== Python via PyPy ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/python/* .
+for i in {1..3}; do time pypy3.10 binaryTrees.py 20; done
+for i in {1..10}; do time pypy3.10 linkedList.py; done
+
+echo &quot;== Rust ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/rust/*.rs .
+find . -type f ! -name &quot;*.?*&quot; -delete
+rustc -C opt-level=3 binaryTrees.rs
+rustc -C opt-level=3 linkedList.rs
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..10}; do time ./linkedList; done
+
+echo &quot;== Swift ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .
+find . -type f ! -name &quot;*.?*&quot; -delete
+swiftc -O binaryTrees.swift -o binaryTrees
+swiftc -O linkedList.swift -o linkedList
+for i in {1..3}; do time ./binaryTrees 20; done
+for i in {1..10}; do time ./linkedList; done
+
+echo &quot;== Python (CPython) ============&quot;
+cp ../src/test/resources/org/bau/benchmarks/python/* .
+for i in {1..3}; do time python3 binaryTrees.py 20; done
+for i in {1..10}; do time python3 linkedList.py; done
+
+cd ..</code></pre>
+</body>
+</html>

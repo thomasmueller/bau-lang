@@ -9,13 +9,14 @@ type Node
     next  Node?
 
 fun createLinkedList(len int) Node
+    i := len - 1
     head := Node(null)
-    current := head
-    for i := range(1, len)
-        n : Node(null)
+    head.value = i
+    loop i > 0
+        i -= 1
+        n : Node(head)
         n.value = i
-        current.next = n
-        current = n
+        head = n
     return head
 
 fun main()
@@ -32,4 +33,5 @@ fun main()
         worst = Int.max(worst, now - last)
         last = now
     avg : (getNanoTime() - start) / count
-    println('Max delay: ' ((worst - avg) / 1_000_000.0) ' ms, avg ' (avg / 1_000_000.0) ' ms; dummy value: ' x.value)
+    println('Max delay: ' ((worst - avg) / 1_000_000.0) 
+        ' ms, avg ' (avg / 1_000_000.0) ' ms; dummy value: ' x.value)

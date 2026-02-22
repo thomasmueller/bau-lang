@@ -129,17 +129,23 @@ The linked list benchmark also measures stop-the-world garbage collection pauses
 which are typical for tracing garbage collection, in the row "delay (ms)".
 
 
-| Benchmark              | Bau | Bau RC | Bau TmMalloc | Bau RC+TmMalloc |  Go  | Java |  PyPy | Rust | Python |
-|------------------------|-----|--------|--------------|-----------------|------|------|-------|------|--------|
-| Binary Trees   seconds | 3.5 |    4.9 |          2.4 |             2.7 |  6.8 |  2.0 |   5.5 |  4.1 |   67.5 |
-| Linked List    seconds |13.4 |   16.4 |          7.9 |            10.0 | 19.3 |  6.2 |   8.3 | 10.6 |  129.3 |
-| Linked List delay (ms) | 2.3 |    3.6 |         0.09 |            0.06 | 25.0 | 83.8 |  12.9 |  1.3 |    4.5 |
+| Benchmark              | Bau | Bau RC | Bau TmMalloc | Bau RC+TmMalloc |  Go  | Java |  PyPy | Python | Rust | Swift |
+|------------------------|-----|--------|--------------|-----------------|------|------|-------|--------|------|-------|
+| Binary Trees   seconds | 3.5 |    4.9 |          2.4 |             2.7 |  6.8 |  2.0 |   5.5 |   67.5 |  4.1 |  10.8 |
+| Linked List    seconds |13.6 |   18.7 |          8.3 |            10.6 | 22.1 |  6.2 |   8.3 |  129.3 | 11.0 |  39.0 |
+| Linked List delay (ms) | 0.6 |    3.6 |         0.04 |            0.05 | 25.0 | 14.0 |  12.9 |    4.5 | 0.06 |   0.7 |
 
 For the linked list test, programming languages that use tracing GC (Go, Java, PyPy),
-the maximum delay between runs is many milliseconds 
-(the variability between runs is very high).
+the maximum delay between runs is many milliseconds.
+For Java, JDK 25 was used for testing. 
+Pauses depend on the garbage collection algorithm used and the memory available.
+The option `-XX:MaxGCPauseMillis=0` is not supported;
+later values doesn't seem to have the desired effect.
+The shortest pauses of around 1.5 ms were observed with `-Xmx4g -XX:+UseShenandoahGC`,
+which is about twice the amount of memory used otherwise.
+
 Both Bau and Rust and Bau, when using the default `malloc` and `free` implementations,
-also sometimes have a delay of a few milliseconds. 
+also sometimes have a delay of a few milliseconds.
 When using a (near-) real-time `malloc` / `free`, the pauses are much shorter.
 
 Notice that the Linked List test, for Rust, would throw stack overflow
@@ -187,15 +193,16 @@ Compiling and Running the C, Java, and Bau versions:
     find . -type f ! -name "*.?*" -delete
     go build -ldflags="-s -w" binaryTrees.go
     go build -ldflags="-s -w" linkedList.go
-    for i in {1..3}; do time GOMAXPROCS=1 ./binaryTrees 20; done
-    for i in {1..10}; do time GOMAXPROCS=1 ./linkedList; done
+    for i in {1..3}; do time GOMAXPROCS=1 GOMEMLIMIT=2GiB ./binaryTrees 20; done
+    for i in {1..10}; do time GOMAXPROCS=1 GOMEMLIMIT=2GiB ./linkedList; done
 
     echo "== Java ============"
     javac ../src/test/java/org/bau/benchmarks/*.java -d .
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.BinaryTrees 20
-    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.LinkedList
+    time java -Xmx2g org.bau.benchmarks.Loop org.bau.benchmarks.LinkedList
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.BinaryTrees 20; done
     for i in {1..10}; do time java -Xmx2g org.bau.benchmarks.LinkedList; done
+    for i in {1..10}; do time java -Xmx2g -XX:+UseShenandoahGC org.bau.benchmarks.LinkedList; done
     
     echo "== Python via PyPy ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
@@ -207,6 +214,14 @@ Compiling and Running the C, Java, and Bau versions:
     find . -type f ! -name "*.?*" -delete
     rustc -C opt-level=3 binaryTrees.rs
     rustc -C opt-level=3 linkedList.rs
+    for i in {1..3}; do time ./binaryTrees 20; done
+    for i in {1..10}; do time ./linkedList; done
+    
+    echo "== Swift ============"
+    cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .
+    find . -type f ! -name "*.?*" -delete
+    swiftc -O binaryTrees.swift -o binaryTrees
+    swiftc -O linkedList.swift -o linkedList
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..10}; do time ./linkedList; done
 
