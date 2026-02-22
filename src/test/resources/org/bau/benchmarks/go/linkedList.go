@@ -5,7 +5,6 @@ package main
 import (
     "fmt"
     "time"
-    "runtime"
 )
 
 type Node struct {
@@ -13,10 +12,10 @@ type Node struct {
     next  *Node
 }
 
-func createLinkedList(num int) *Node {
+func createLinkedList(len int) *Node {
     head := &Node{value: 0}
     current := head
-    for i := 1; i < num; i++ {
+    for i := 1; i < len; i++ {
         current.next = &Node{value: i}
         current = current.next
     }
@@ -24,26 +23,17 @@ func createLinkedList(num int) *Node {
 }
 
 func main() {
-    runtime.GOMAXPROCS(1)
-    fmt.Println("Starting GC stress test...")
-    maxdiff := time.Duration(0)
-
-    objects1 := createLinkedList(50_000_000)
-    start := time.Now()
-    dummy := 0
-
-    // Create a lot of cyclic garbage
-    for batch := 0; batch < 1_000_000; batch++ {
-        batchStart := time.Now()
-        // compute the delay between batchStart and start
-        diff := batchStart.Sub(start)
-        if diff > maxdiff {
-            maxdiff = diff
-        }
-        start = batchStart
-        objects := createLinkedList(1000)
-        dummy += objects.value
+    fmt.Println("Starting stress test...")
+    x := createLinkedList(50_000_000)
+    count := 1_000_000
+    len := 1000
+    worst := int64(0)
+    last := time.Now().UnixNano()
+    for i := 0; i < count; i++ {
+        createLinkedList(len)
+        now := time.Now().UnixNano()
+        worst = max(worst, now - last)
+        last = now
     }
-    fmt.Printf("Max delay between batch start and overall start: %v\n", maxdiff)
-    fmt.Printf("GC stress test completed. Value: %d %d\n", objects1.value, dummy)
+    fmt.Printf("Max delay: %d ms; dummy=%d\n", worst / 1_000_000.0, x.value)
 }

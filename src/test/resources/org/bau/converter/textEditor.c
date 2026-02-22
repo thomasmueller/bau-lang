@@ -243,21 +243,22 @@ int64_t arrayOutOfBounds(int64_t x, int64_t len) {
 }
 typedef struct _ToBeFreed _ToBeFreed;
 struct _ToBeFreed { void* obj; void (*free)(void*); };
-_ToBeFreed _toBeFreedStack[1024];
-int _freeStackDraining = 0, _freeStack = 0;
+#define FREE_STACK_MAX_RECURSION 2048
+#define FREE_STACK_ARRAY_SIZE 1024
+_ToBeFreed _toBeFreedStack[FREE_STACK_ARRAY_SIZE];
+int _freeStackDraining = 0, _freeStackArrayPos = 0;
 void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
-    if (_freeStackDraining < 100) {
+    if (_freeStackDraining < FREE_STACK_MAX_RECURSION || _freeStackArrayPos >= FREE_STACK_ARRAY_SIZE) {
         _freeStackDraining++; free(x); _freeStackDraining--; return; }
-    _toBeFreedStack[_freeStack].obj = x;
-    _toBeFreedStack[_freeStack].free = free;
-    if (_freeStack++ >= 1024) { fprintf(stdout, "Free stack overflow\n"); exit(1); }    
-    if (_freeStackDraining == 100) {
-        _freeStackDraining = 200;
-        while(_freeStack > 0) {
-            _freeStack--; void* n = _toBeFreedStack[_freeStack].obj;
-            void (*free)(void*) = _toBeFreedStack[_freeStack].free;
+    _toBeFreedStack[_freeStackArrayPos].obj = x;
+    _toBeFreedStack[_freeStackArrayPos].free = free;
+    if (_freeStackDraining == FREE_STACK_MAX_RECURSION) {
+        _freeStackDraining = FREE_STACK_MAX_RECURSION + 1;
+        while(_freeStackArrayPos > 0) {
+            _freeStackArrayPos--; void* n = _toBeFreedStack[_freeStackArrayPos].obj;
+            void (*free)(void*) = _toBeFreedStack[_freeStackArrayPos].free;
             free(n);
-        } _freeStackDraining = 100; } }
+        } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;

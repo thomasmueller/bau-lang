@@ -20,17 +20,17 @@ def create_linked_list(limit):
     return head
 
 def main():
-    print("Starting loading linked list...")
+    print("Starting stress test...")
     x = create_linked_list(50_000_000)
-    print("Initial batch completed, starting stress test...")
-    start = time.time()
-    worse_case = 0.0
+    count = 1_000_000
+    len = 1000
+    worst = 0.0
+    last = time.perf_counter_ns()
     for i in range(1_000_000):
-        batch_start = time.time()
-        if batch_start - start > worse_case:
-            worse_case = batch_start - start
-        start = batch_start
         create_linked_list(1000)
-    print(f"Max delay between batch start and overall start: {worse_case * 1000:.4f} milliseconds", flush=True)
+        now = time.perf_counter_ns()
+        worst = max(worst, now - last)
+        last = now
+    print(f"Max delay: {worst / 1_000_000} ms; dummy value: {x.value}", flush=True)
 
 main()

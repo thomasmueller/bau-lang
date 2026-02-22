@@ -6,16 +6,16 @@ import org.bau.Int
 
 type Node
     value int
-    next  Node+?
+    next  Node?
 
-fun createLinkedList(len int) Node+
-    i := len - 1
-    head Node+? := null
-    loop i >= 0
-        n : Node+(head)
+fun createLinkedList(len int) Node
+    head := Node(null)
+    current := head
+    for i := range(1, len)
+        n : Node(null)
         n.value = i
-        head = n
-        i -= 1
+        current.next = n
+        current = n
     return head
 
 fun main()

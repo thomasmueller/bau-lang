@@ -12,6 +12,7 @@
 |Fast Execution        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |No GC Pauses          |&check;|       |&check;|&check;|       |       |       |&check;|&check;|
 |Low Memory Usage      |&check;|       |&check;|&check;|       |       |&check;|&check;|&check;|
+|Automatic Memory Mgmt |&check;|&check;|       |       |&check;|&check;|&check;|       |&check;|
 |Runs Everywhere       |&check;|       |&check;|&check;|       |       |       |&check;|       |
 |Generics / Templates  |&check;|&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
 |Macros                |&check;|       |&check;|&check;|       |       |       |&check;|&check;|

@@ -12,13 +12,12 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## Highlights
 
-* Easy to learn and use.
+* Easy to learn and use. Memory-safe.
 * <a href="doc/conciseSyntax.md">Concise syntax inspired by Python</a>.
 * <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
-* Memory-safe. Automatic memory management using reference counting by default.
-* Low memory usage; no GC pauses.
+* <a href="doc/memory.md">Automatic memory management</a> using reference counting by default. Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
-* Safety: null pointer errors and division by zero are prevented at compile time.
+* Null pointer errors and division by zero are prevented at compile time.
 * Avoid runtime array bounds checks using static analysis.
 * <a href="doc/demo.md">Demo source code</a> with games and a tiny text editor.
 

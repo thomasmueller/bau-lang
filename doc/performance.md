@@ -25,7 +25,7 @@ which results in simple code and high productivity.
 
 | Benchmark              |  Bau |   C  |  Go  | Java |  Nim | PyPy | Rust | Swift| Vlang|  Zig |
 |------------------------|------|------|------|------|------|------|------|------|------|------|
-| Binary Trees           |  3.6 |  3.3 |  6.7 |  2.0 |  4.0 |  5.5 |  4.1 | 10.8 |  4.5 |  4.5 |
+| Binary Trees           |  3.5 |  3.3 |  6.8 |  2.0 |  4.0 |  5.5 |  4.1 | 10.8 |  4.5 |  4.5 |
 | Fannkuch               |  1.4 |  1.5 |  1.5 |  1.8 |  1.5 |  3.7 |  1.4 |  1.7 |  1.5 |  1.6 |
 | SpeedTest              |  1.2 |  1.2 |  1.9 |  2.7 |  1.6 | 10.2 |  1.2 |  1.4 |  1.3 |  1.2 |
 | Pi Digits              |  1.3 |  0.4 |  0.6 |  1.9 | 24.0 |  1.4 |  1.0 |  5.0 |  3.2 |  3.1 |
@@ -200,12 +200,12 @@ Compiling and Running the C, Java, and Bau versions:
     go build -ldflags="-s -w" piDigits.go
     go build -ldflags="-s -w" mandelbrot.go
     go build -ldflags="-s -w" linkedList.go
-    for i in {1..3}; do time ./binaryTrees 20; done
-    for i in {1..3}; do time ./fannkuch 11; done
-    for i in {1..3}; do time ./munchausen; done
-    for i in {1..3}; do time ./piDigits > out.txt; done
-    for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
-    for i in {1..3}; do time ./linkedList; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./binaryTrees 20; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./fannkuch 11; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./munchausen; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./piDigits > out.txt; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./linkedList; done
 
     echo "== Java ============"
     javac ../src/test/java/org/bau/benchmarks/*.java -d .
@@ -258,11 +258,13 @@ Compiling and Running the C, Java, and Bau versions:
     rustc -C opt-level=3 fannkuch.rs
     rustc -C opt-level=3 munchausen.rs
     rustc -C opt-level=3 mandelbrot.rs
+    rustc -C opt-level=3 linkedList.rs
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./linkedList; done
 
     echo "== Swift ============"
     cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .
