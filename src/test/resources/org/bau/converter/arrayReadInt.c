@@ -302,13 +302,15 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 int64_t readInt_2(i8_array* d, int64_t pos) {
     int64_t _r0 = (d->data[pos] & 255) | (shiftLeft_2((d->data[pos + 1] & 255), 8)) | (shiftLeft_2((d->data[pos + 2] & 255), 16)) | (shiftLeft_2((d->data[pos + 3] & 255), 24));
     return _r0;

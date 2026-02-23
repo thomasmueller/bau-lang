@@ -478,25 +478,29 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void org_bau_File_File_free_0(org_bau_File_File* x) {
     org_bau_File_File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
     _free(x); _traceFree(x);
 }
 void org_bau_File_File_free(org_bau_File_File* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_File_File_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_File_File_free_0);
+}
 void org_bau_String_string_free_0(org_bau_String_string* x) {
     _decUse(x->data, i8_array);
 }
 void org_bau_String_string_free(org_bau_String_string* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_free_0);
+}
 void org_bau_String_string_copy(org_bau_String_string* x) {
     _incUse(x->data);
 }
@@ -506,31 +510,36 @@ void org_bau_String_string_array_free_0(org_bau_String_string_array* x) {
     _free(x); _traceFree(x);
 }
 void org_bau_String_string_array_free(org_bau_String_string_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_array_free_0);
+}
 void org_bau_String_StringBuilder_free_0(org_bau_String_StringBuilder* x) {
     _decUse(x->data, i8_array);
     _free(x); _traceFree(x);
 }
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);
+}
 void org_bau_List_List_org_bau_String_string_free_0(org_bau_List_List_org_bau_String_string* x) {
     _decUse(x->array, org_bau_String_string_array);
     _free(x); _traceFree(x);
 }
 void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_String_string* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_org_bau_String_string_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_org_bau_String_string_free_0);
+}
 void org_bau_os_Terminal_termIos_free_0(org_bau_os_Terminal_termIos* x) {
     _decUse(x->data, i8_array);
 }
 void org_bau_os_Terminal_termIos_free(org_bau_os_Terminal_termIos* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_termIos_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_termIos_free_0);
+}
 void org_bau_os_Terminal_termIos_copy(org_bau_os_Terminal_termIos* x) {
     _incUse(x->data);
 }
 void org_bau_os_Terminal_windowSize_free_0(org_bau_os_Terminal_windowSize* x) {
 }
 void org_bau_os_Terminal_windowSize_free(org_bau_os_Terminal_windowSize* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_windowSize_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_windowSize_free_0);
+}
 void org_bau_os_Terminal_windowSize_copy(org_bau_os_Terminal_windowSize* x) {
 }
 void fileContent_free_0(fileContent* x) {
@@ -539,7 +548,8 @@ void fileContent_free_0(fileContent* x) {
     _decUse(x->lines, org_bau_List_List_org_bau_String_string);
 }
 void fileContent_free(fileContent* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))fileContent_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))fileContent_free_0);
+}
 void fileContent_copy(fileContent* x) {
     _incUse(x->fileName);
     _incUse(x->data);

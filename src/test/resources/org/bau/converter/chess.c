@@ -377,18 +377,21 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void org_bau_os_Terminal_termIos_free_0(org_bau_os_Terminal_termIos* x) {
     _decUse(x->data, i8_array);
 }
 void org_bau_os_Terminal_termIos_free(org_bau_os_Terminal_termIos* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_termIos_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_os_Terminal_termIos_free_0);
+}
 void org_bau_os_Terminal_termIos_copy(org_bau_os_Terminal_termIos* x) {
     _incUse(x->data);
 }
@@ -397,7 +400,8 @@ void org_bau_String_StringBuilder_free_0(org_bau_String_StringBuilder* x) {
     _free(x); _traceFree(x);
 }
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

@@ -379,31 +379,36 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void org_bau_compress_Lz4_XXHash_free_0(org_bau_compress_Lz4_XXHash* x) {
     _free(x); _traceFree(x);
 }
 void org_bau_compress_Lz4_XXHash_free(org_bau_compress_Lz4_XXHash* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_compress_Lz4_XXHash_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_compress_Lz4_XXHash_free_0);
+}
 void org_bau_compress_Lz4_LZ4Compress_free_0(org_bau_compress_Lz4_LZ4Compress* x) {
     _decUse(x->hashTable, int_array);
     _free(x); _traceFree(x);
 }
 void org_bau_compress_Lz4_LZ4Compress_free(org_bau_compress_Lz4_LZ4Compress* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_compress_Lz4_LZ4Compress_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_compress_Lz4_LZ4Compress_free_0);
+}
 void org_bau_File_File_free_0(org_bau_File_File* x) {
     org_bau_File_File_close_1(x);
     if (x->_refCount) { fprintf(stdout, "Object re-referenced in the close method"); exit(1); }
     _free(x); _traceFree(x);
 }
 void org_bau_File_File_free(org_bau_File_File* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_File_File_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_File_File_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

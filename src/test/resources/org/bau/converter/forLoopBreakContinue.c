@@ -280,7 +280,8 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();

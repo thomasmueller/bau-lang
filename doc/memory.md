@@ -129,11 +129,14 @@ The linked list benchmark also measures stop-the-world garbage collection pauses
 which are typical for tracing garbage collection, in the row "delay (ms)".
 
 
-| Benchmark              | Bau | Bau RC | Bau TmMalloc | Bau RC+TmMalloc |  Go  | Java |  PyPy | Python | Rust | Swift |
-|------------------------|-----|--------|--------------|-----------------|------|------|-------|--------|------|-------|
-| Binary Trees   seconds | 3.5 |    4.9 |          2.4 |             2.7 |  6.8 |  2.0 |   5.5 |   67.5 |  4.1 |  10.8 |
-| Linked List    seconds |13.6 |   18.7 |          8.3 |            10.6 | 22.1 |  6.2 |   8.3 |  129.3 | 11.0 |  39.0 |
-| Linked List delay (ms) | 0.6 |    3.6 |         0.04 |            0.05 | 25.0 | 14.0 |  12.9 |    4.5 | 0.06 |   0.7 |
+| Benchmark               |Bau RC|Bau |Bau RC<br>TmMalloc|Bau<br>TmMalloc|  Go|Java|PyPy|Python|Rust|Swift|
+|-------------------------|-----:|---:|-----------------:|--------------:|---:|---:|---:|-----:|---:|----:|
+| Binary Trees, seconds   |   4.9| 3.5|               2.7|            2.4| 6.8| 2.0| 5.5|  67.5| 4.1| 10.8|
+| Linked List, seconds    |  18.7|13.6|              10.6|            8.3|22.1| 6.2| 8.3| 129.3|11.0| 39.0|
+| Linked List, delay (ms) |   3.6| 0.6|              0.05|           0.04|25.0|14.0|12.9|   4.5|0.06|  0.7|
+
+(Runtime in seconds, and worst-case delay in milliseconds.
+Lower is better. Measured on an Apple MacBook Pro M4.)
 
 For the linked list test, programming languages that use tracing GC (Go, Java, PyPy),
 the maximum delay between runs is many milliseconds.

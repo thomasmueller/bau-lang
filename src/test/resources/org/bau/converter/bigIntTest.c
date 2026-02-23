@@ -383,24 +383,28 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void i32_array_free_0(i32_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void i32_array_free(i32_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i32_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i32_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void org_bau_BigInt_bigInt_free_0(org_bau_BigInt_bigInt* x) {
     _decUse(x->data, i32_array);
 }
 void org_bau_BigInt_bigInt_free(org_bau_BigInt_bigInt* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_BigInt_bigInt_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_BigInt_bigInt_free_0);
+}
 void org_bau_BigInt_bigInt_copy(org_bau_BigInt_bigInt* x) {
     _incUse(x->data);
 }
@@ -408,7 +412,8 @@ void org_bau_BigInt_str_free_0(org_bau_BigInt_str* x) {
     _decUse(x->data, i8_array);
 }
 void org_bau_BigInt_str_free(org_bau_BigInt_str* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_BigInt_str_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_BigInt_str_free_0);
+}
 void org_bau_BigInt_str_copy(org_bau_BigInt_str* x) {
     _incUse(x->data);
 }

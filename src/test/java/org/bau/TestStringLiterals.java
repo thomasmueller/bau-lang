@@ -27,10 +27,10 @@ public class TestStringLiterals {
                         println(`Backslash n: \\n`)
                         println(``Backtick: ` ``)
                         println(```Two Backticks: `` ```)
-                        
+
                         """).parse().toString());
     }
-    
+
     @Test
     public void multiLineRawString() {
         assertEquals("println('for i := range(1, 10)\\n  println(i)\\nprintln(``backtick ` ``)')\n"
@@ -42,14 +42,23 @@ public class TestStringLiterals {
                           println(``backtick ` ``)
                           ```)
                         """).parse().toString());
-    }    
-    
+    }
+
     @Test
     public void testUnindentRawMultiLineString() {
         assertEquals("", StringLiteral.unindentRawMultiLineString(""));
         assertEquals("abc", StringLiteral.unindentRawMultiLineString("abc"));
         assertEquals("abc", StringLiteral.unindentRawMultiLineString("\n  abc\n  "));
-        assertEquals("0\n 1\n-", StringLiteral.unindentRawMultiLineString("\n  0\n   1\n-\n  "));
+        assertEquals("  0\n"
+                + "   1\n"
+                + "-", StringLiteral.unindentRawMultiLineString("\n  0\n   1\n-\n  "));
+        assertEquals("This is a raw string.\n"
+                + "Second line.", StringLiteral.unindentRawMultiLineString(
+                "\n"
+                + " This is a raw string.\n"
+                + " Second line.\n"
+                + "         "));
+
     }
 
 }

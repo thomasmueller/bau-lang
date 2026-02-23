@@ -298,13 +298,15 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void org_bau_List_List_int_free_0(org_bau_List_List_int* x) {
     _decUse(x->array, int_array);
     _free(x); _traceFree(x);
 }
 void org_bau_List_List_int_free(org_bau_List_List_int* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_int_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_int_free_0);
+}
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);

@@ -5,101 +5,24 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-raw string that are shifted too much to the left
-
-http://members.chello.at/easyfilter/bresenham.html
-graphics library
 code coverage tool
 assertions on the right?
 language server
 improved stdlib and add to readme
 
-//-----------------
-Node* Node_toBeFreed = 0;
-int Node_draining = 0;
-void Node_drain() {
-    Node_draining = 1;
-    while (Node_toBeFreed != 0) {
-        Node* x = Node_toBeFreed;
-        Node_toBeFreed = 0;
-        _decUse(x->next, Node);
-        _free(x); _traceFree(x);
-    }
-    Node_draining = 0;
-}
-void Node_free(Node* x) {
-    Node_toBeFreed = x;
-    // _free(x); _traceFree(x);
-    if (!Node_draining) {
-        Node_drain();
-    }
-}
-//
-void Node_free(Node* x) {
-    _decUse(x->next, Node);
-    _free(x); _traceFree(x);
-}
-//-----------------
-typedef struct _ToBeFreed _ToBeFreed;
-struct _ToBeFreed {
-    void* obj;
-    void (*free)(void*);
-};
-_ToBeFreed _toBeFreedStack[1024];
-int _freeStack = 0;
-void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
-    _toBeFreedStack[_freeStack].obj = x;
-    _toBeFreedStack[_freeStack].free = free;
-    _freeStack++;
-    if (_freeStack == 1) {
-        while(_freeStack > 0) {
-            _freeStack--;
-            void* n = _toBeFreedStack[_freeStack].obj;
-            (*free)(void*) = _toBeFreedStack[_freeStack].free;
-            free(n);
-        }
-    }
-}
-void Node_free(Node* x) {
-    _registerAndMaybeDrain(x, Node_free_0);
-}
-void Node_free_0(Node* x) {
-    _decUse(x->next, Node);
-    _free(x); _traceFree(x);
-}
-
-
-
-
-// --------------------------
-void Node_free(Node* x) {
-    x->nextToFree = Node_toBeFreed;
-    Node_toBeFreed = x;
-    if (!Node_draining) {
-        Node_drain();
-    }
-}
-void Node_drain() {
-    Node_draining = 1;
-    while (Node_toBeFreed != 0) {
-        Node* x = Node_toBeFreed;
-        Node_toBeFreed = x->nextToFree;
-        _decUse(x->next, Node);
-        _free(x);
-        _traceFree(x);
-    }
-    Node_draining = 0;
-}
-// --------------------------
-
-
 yn: input('Is the number larger than ' x ' ?')
 
 tiny vector font renderer
 
-how can HashMap.get return V and is not required to return V? (nullable)
+how can HashMap.get return V and is not required to return null able (V?)
 
 value equality and comparison operator overloading, specially for strings
+reference equality via
+- Rust: std::ptr::eq(a, b)
+- Go, Java, Zig, C, C++ use ==
+- Swift, JavaScript ===
+- Python, Nim, V: "is"
+- alternatives: addr(a) = addr(b), &a = &b
 
 https://news.ycombinator.com/item?id=46945235
 https://wingolog.org/archives/2026/02/09/six-thoughts-on-generating-c

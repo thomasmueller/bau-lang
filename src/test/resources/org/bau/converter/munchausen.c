@@ -284,7 +284,8 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 int_array* int_array_const(int64_t* data, uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
     result->len = len;

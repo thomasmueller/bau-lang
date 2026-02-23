@@ -111,10 +111,21 @@ public class StringLiteral implements Expression {
         if (text.isEmpty() || text.charAt(0) != '\n') {
             return text;
         }
-        int indent = 0;
-        while (text.charAt(text.length() - indent - 1) != '\n') {
-            indent++;
+        int indent = Integer.MAX_VALUE;
+        for (int i = 0; i < text.length();) {
+            if (text.charAt(i++) == '\n') {
+                int start = i;
+                while (i < text.length() && text.charAt(i) == ' ') {
+                    i++;
+                }
+                indent = Math.min(indent, i - start);
+            }
         }
+//
+//        int indent = 0;
+//        while (text.charAt(text.length() - indent - 1) != '\n') {
+//            indent++;
+//        }
         StringBuilder buff = new StringBuilder();
         int begin = 1;
         int start = 1;

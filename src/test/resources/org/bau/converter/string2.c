@@ -356,12 +356,14 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void org_bau_String_string_free_0(org_bau_String_string* x) {
     _decUse(x->data, i8_array);
 }
 void org_bau_String_string_free(org_bau_String_string* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_free_0);
+}
 void org_bau_String_string_copy(org_bau_String_string* x) {
     _incUse(x->data);
 }
@@ -371,19 +373,22 @@ void org_bau_String_string_array_free_0(org_bau_String_string_array* x) {
     _free(x); _traceFree(x);
 }
 void org_bau_String_string_array_free(org_bau_String_string_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_string_array_free_0);
+}
 void org_bau_String_StringBuilder_free_0(org_bau_String_StringBuilder* x) {
     _decUse(x->data, i8_array);
     _free(x); _traceFree(x);
 }
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_String_StringBuilder_free_0);
+}
 void org_bau_List_List_org_bau_String_string_free_0(org_bau_List_List_org_bau_String_string* x) {
     _decUse(x->array, org_bau_String_string_array);
     _free(x); _traceFree(x);
 }
 void org_bau_List_List_org_bau_String_string_free(org_bau_List_List_org_bau_String_string* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_org_bau_String_string_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_org_bau_String_string_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

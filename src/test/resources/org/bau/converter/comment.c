@@ -298,13 +298,15 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void List_int_free_0(List_int* x) {
     _decUse(x->array, int_array);
     _free(x); _traceFree(x);
 }
 void List_int_free(List_int* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))List_int_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))List_int_free_0);
+}
 List_int* List_int_1(int_array* array) {
     List_int* _t0 = List_int_new();
     _incUseStack(array);

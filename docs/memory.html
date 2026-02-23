@@ -137,60 +137,62 @@ are typical for tracing garbage collection, in the row "delay (ms)".</p>
 <thead>
 <tr>
 <th>Benchmark</th>
-<th>Bau</th>
-<th>Bau RC</th>
-<th>Bau TmMalloc</th>
-<th>Bau RC+TmMalloc</th>
-<th>Go</th>
-<th>Java</th>
-<th>PyPy</th>
-<th>Python</th>
-<th>Rust</th>
-<th>Swift</th>
+<th style="text-align: right;">Bau RC</th>
+<th style="text-align: right;">Bau</th>
+<th style="text-align: right;">Bau RC<br>TmMalloc</th>
+<th style="text-align: right;">Bau<br>TmMalloc</th>
+<th style="text-align: right;">Go</th>
+<th style="text-align: right;">Java</th>
+<th style="text-align: right;">PyPy</th>
+<th style="text-align: right;">Python</th>
+<th style="text-align: right;">Rust</th>
+<th style="text-align: right;">Swift</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Binary Trees seconds</td>
-<td>3.5</td>
-<td>4.9</td>
-<td>2.4</td>
-<td>2.7</td>
-<td>6.8</td>
-<td>2.0</td>
-<td>5.5</td>
-<td>67.5</td>
-<td>4.1</td>
-<td>10.8</td>
+<td>Binary Trees, seconds</td>
+<td style="text-align: right;">4.9</td>
+<td style="text-align: right;">3.5</td>
+<td style="text-align: right;">2.7</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">67.5</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">10.8</td>
 </tr>
 <tr>
-<td>Linked List seconds</td>
-<td>13.6</td>
-<td>18.7</td>
-<td>8.3</td>
-<td>10.6</td>
-<td>22.1</td>
-<td>6.2</td>
-<td>8.3</td>
-<td>129.3</td>
-<td>11.0</td>
-<td>39.0</td>
+<td>Linked List, seconds</td>
+<td style="text-align: right;">18.7</td>
+<td style="text-align: right;">13.6</td>
+<td style="text-align: right;">10.6</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">22.1</td>
+<td style="text-align: right;">6.2</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">129.3</td>
+<td style="text-align: right;">11.0</td>
+<td style="text-align: right;">39.0</td>
 </tr>
 <tr>
-<td>Linked List delay (ms)</td>
-<td>0.6</td>
-<td>3.6</td>
-<td>0.04</td>
-<td>0.05</td>
-<td>25.0</td>
-<td>14.0</td>
-<td>12.9</td>
-<td>4.5</td>
-<td>0.06</td>
-<td>0.7</td>
+<td>Linked List, delay (ms)</td>
+<td style="text-align: right;">3.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.04</td>
+<td style="text-align: right;">25.0</td>
+<td style="text-align: right;">14.0</td>
+<td style="text-align: right;">12.9</td>
+<td style="text-align: right;">4.5</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.7</td>
 </tr>
 </tbody>
 </table>
+<p>(Runtime in seconds, and worst-case delay in milliseconds. Lower is
+better. Measured on an Apple MacBook Pro M4.)</p>
 <p>For the linked list test, programming languages that use tracing GC
 (Go, Java, PyPy), the maximum delay between runs is many
 milliseconds.</p>

@@ -288,7 +288,8 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 int64_t randomSeed;
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;

@@ -315,21 +315,24 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void Tree_owned_free_0(Tree_owned* x) {
-    if (x == NULL) return;
     if (x->left) Tree_owned_free(x->left);
     if (x->right) Tree_owned_free(x->right);
     _free(x); _traceFree(x);
 }
 void Tree_owned_free(Tree_owned* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))Tree_owned_free_0);}
+    if (x == NULL) return;
+    _registerAndMaybeDrain(x, (void(*)(void*))Tree_owned_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

@@ -382,18 +382,21 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void str_free_0(str* x) {
     _decUse(x->value, i8_array);
 }
 void str_free(str* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))str_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))str_free_0);
+}
 void str_copy(str* x) {
     _incUse(x->value);
 }
@@ -403,7 +406,8 @@ void str_array_free_0(str_array* x) {
     _free(x); _traceFree(x);
 }
 void str_array_free(str_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))str_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))str_array_free_0);
+}
 void HashMap_int_int_free_0(HashMap_int_int* x) {
     _decUse(x->keys, int_array);
     _decUse(x->values, int_array);
@@ -411,7 +415,8 @@ void HashMap_int_int_free_0(HashMap_int_int* x) {
     _free(x); _traceFree(x);
 }
 void HashMap_int_int_free(HashMap_int_int* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))HashMap_int_int_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))HashMap_int_int_free_0);
+}
 void HashMap_str_str_free_0(HashMap_str_str* x) {
     _decUse(x->keys, str_array);
     _decUse(x->values, str_array);
@@ -419,7 +424,8 @@ void HashMap_str_str_free_0(HashMap_str_str* x) {
     _free(x); _traceFree(x);
 }
 void HashMap_str_str_free(HashMap_str_str* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))HashMap_str_str_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))HashMap_str_str_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

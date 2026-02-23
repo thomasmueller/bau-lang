@@ -276,7 +276,8 @@ void Value_free_0(Value* x) {
     _free(x); _traceFree(x);
 }
 void Value_free(Value* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))Value_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))Value_free_0);
+}
 Value* Value_0() {
     Value* _t0 = Value_new();
     _t0->data = 0;

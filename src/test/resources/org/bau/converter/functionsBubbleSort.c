@@ -281,7 +281,8 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     int_array* array = int_array_new(_vaCount);

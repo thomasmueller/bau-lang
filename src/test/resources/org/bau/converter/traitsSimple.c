@@ -357,29 +357,34 @@ void i8_array_free_0(i8_array* x) {
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void Reader_free_0(Reader* x) {
     _free(x); _traceFree(x);
 }
 void Reader_free(Reader* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))Reader_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))Reader_free_0);
+}
 void Writer_free_0(Writer* x) {
     _free(x); _traceFree(x);
 }
 void Writer_free(Writer* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))Writer_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))Writer_free_0);
+}
 void Memory_free_0(Memory* x) {
     _decUse(x->array, int_array);
     _free(x); _traceFree(x);
 }
 void Memory_free(Memory* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))Memory_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))Memory_free_0);
+}
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
     result->len = len;

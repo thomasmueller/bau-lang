@@ -123,6 +123,7 @@ public class Image {
     }
 
     // https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+    // http://members.chello.at/easyfilter/bresenham.html
     public void drawLine(int x0, int y0, int x1, int y1) {
         int sx = x0 < x1 ? 1 : -1;
         int dx = sx * (x1 - x0);

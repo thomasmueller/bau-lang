@@ -303,13 +303,15 @@ void int_array_free_0(int_array* x) {
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
 void BitField_free_0(BitField* x) {
     _decUse(x->data, int_array);
     _free(x); _traceFree(x);
 }
 void BitField_free(BitField* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))BitField_free_0);}
+    _registerAndMaybeDrain(x, (void(*)(void*))BitField_free_0);
+}
 int64_t randomSeed;
 BitField* BitField_1(int_array* data) {
     BitField* _t0 = BitField_new();
