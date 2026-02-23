@@ -27,13 +27,19 @@ public class SvgUtils {
             switch (token) {
             case 'm':
                 read();
-                xs = xp += readValue();
-                ys = yp += readValue();
+                double x = readValue(), y = readValue();
+                xs += x;
+                ys += y;
+                xp += x;
+                yp += y;
                 while (token == '0') {
+                    x = readValue();
+                    y = readValue();
                     cp.add(xp);
                     cp.add(yp);
-                    xp = readValue();
-                    yp = readValue();
+                    xp += x;
+                    yp += y;
+
                 };
                 break;
             case 'M':
@@ -72,6 +78,15 @@ public class SvgUtils {
                     yp = readValue();
                 } while (token == '0');
                 break;
+            case 'l':
+                read();
+                do {
+                    cp.add(xp);
+                    cp.add(yp);
+                    xp += readValue();
+                    yp += readValue();
+                } while (token == '0');
+                break;
             case 'v':
                 read();
                 do {
@@ -95,6 +110,8 @@ public class SvgUtils {
                 cp.add(yp);
                 cp.add(xs);
                 cp.add(ys);
+                xp = xs;
+                yp = ys;
                 polys.add(cp);
                 cp = new ArrayList<>();
                 break;
@@ -107,6 +124,23 @@ public class SvgUtils {
                     double y1 = yp + readValue();
                     double x2 = xp + readValue();
                     double y2 = yp + readValue();
+                    if (dist(xp, yp, x1, y1, x2, y2) > MAX_DIST) {
+                        splitBezier(cp, xp, yp, x1, y1, x2, y2);
+                    }
+                    xp = x2;
+                    yp = y2;
+                } while (token == '0');
+                break;
+            }
+            case 'Q': {
+                read();
+                do {
+                    cp.add(xp);
+                    cp.add(yp);
+                    double x1 = readValue();
+                    double y1 = readValue();
+                    double x2 = readValue();
+                    double y2 = readValue();
                     if (dist(xp, yp, x1, y1, x2, y2) > MAX_DIST) {
                         splitBezier(cp, xp, yp, x1, y1, x2, y2);
                     }
@@ -183,7 +217,7 @@ public class SvgUtils {
             } else if (token != '+') {
                 value = token - '0';
             }
-            int div = 0;
+            long div = 0;
             while(pos < path.length()) {
                 token = path.charAt(pos);
                 if (token >= '0' && token <= '9') {

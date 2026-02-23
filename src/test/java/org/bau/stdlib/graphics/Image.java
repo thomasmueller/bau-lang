@@ -1,6 +1,5 @@
 package org.bau.stdlib.graphics;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Image {
@@ -56,7 +55,7 @@ public class Image {
         return 6 * size;
     }
 
-    public void drawText3x5(int color, int x, int y, String text, int size) {
+    public void drawText3x5(int x, int y, String text, int size) {
         // size = 1;
         for (int i = 0; i < text.length(); i++, x += 4 * size) {
             char c = text.charAt(i);
@@ -81,7 +80,7 @@ public class Image {
         }
     }
 
-    public void drawText5x6(int color, int x, int y, String text, int size) {
+    public void drawText5x6(int x, int y, String text, int size) {
         // size = 1;
         for (int i = 0; i < text.length(); i++, x += 6 * size) {
             char c = text.charAt(i);
@@ -102,16 +101,17 @@ public class Image {
                     }
                 }
             }
-
         }
     }
 
-    public void setColor(int color) {
+    public Image color(int color) {
         this.color = color;
+        return this;
     }
 
-    public void setColorBackground(int backColor) {
+    public Image colorBackground(int backColor) {
         this.backColor = backColor;
+        return this;
     }
 
     public void fillRectangle(int x0, int y0, int x1, int y1) {
@@ -149,226 +149,11 @@ public class Image {
         }
     }
 
-    public void drawQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2)
-    {
-      int sx = x2-x1, sy = y2-y1;
-      long xx = x0-x1, yy = y0-y1, xy;         /* relative values for checks */
-      double dx, dy, err, cur = xx*sy-yy*sx;                    /* curvature */
-
-      assert(xx*sx <= 0 && yy*sy <= 0);  /* sign of gradient must not change */
-
-      if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */
-        x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur;  /* swap P0 P2 */
-      }
-      if (cur != 0) {                                    /* no straight line */
-        xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
-        yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
-        xy = 2*xx*yy; xx *= xx; yy *= yy;          /* differences 2nd degree */
-        if (cur*sx*sy < 0) {                           /* negated curvature? */
-          xx = -xx; yy = -yy; xy = -xy; cur = -cur;
-        }
-        dx = 4.0*sy*cur*(x1-x0)+xx-xy;             /* differences 1st degree */
-        dy = 4.0*sx*cur*(y0-y1)+yy-xy;
-        xx += xx; yy += yy; err = dx+dy+xy;                /* error 1st step */
-        do {
-            imageData[x0 + y0 * width] = (byte) color;
-          // setPixel(x0,y0);                                     /* plot curve */
-          if (x0 == x2 && y0 == y2) return;  /* last pixel -> curve finished */
-          boolean s = (boolean) (2*err < dx);                  /* save value for test of y step */
-          if (2*err > dy) { x0 += sx; dx -= xy; err += dy += yy; } /* x step */
-          if (    s    ) { y0 += sy; dy -= xy; err += dx += xx; } /* y step */
-        } while (dy < dx );           /* gradient negates -> algorithm fails */
-      }
-      drawLine(x0,y0, x2,y2);                  /* plot remaining part to end */
-    }
-
-    void drawQuadBezierAA(int x0, int y0, int x1, int y1, int x2, int y2)
-    { /* plot any quadratic Bezier curve */
-    int x = x0-x1, y = y0-y1;
-    double t = x0-2*x1+x2, r;
-    if ((long)x*(x2-x1) > 0) { /* horizontal cut at P4? */
-    if ((long)y*(y2-y1) > 0) /* vertical cut at P6 too? */
-    if (Math.abs((y0-2*y1+y2)/t*x) > Math.abs(y)) { /* which first? */
-    x0 = x2; x2 = x+x1; y0 = y2; y2 = y+y1; /* swap points */
-    } /* now horizontal cut at P4 comes first */
-    t = (x0-x1)/t;
-    r = (1-t)*((1-t)*y0+2.0*t*y1)+t*t*y2; t = (x0*x2-x1*x1)*t/(x0-x1); /* By(t=P4) */
-    /* gradient dP4/dx=0 */
-    x = floor(t+0.5); y = floor(r+0.5);
-    r = (y1-y0)*(t-x0)/(x1-x0)+y0; drawQuadBezierSegAA(x0,y0, x,floor(r+0.5), x,y);
-    r = (y1-y2)*(t-x2)/(x1-x2)+y2; x0 = x1 = x; y0 = y; y1 = floor(r+0.5); /* intersect P3 | P0 P1 */
-    /* intersect P4 | P1 P2 */
-    /* P0 = P4, P1 = P8 */
-    }
-    if ((long)(y0-y1)*(y2-y1) > 0) { t = y0-2*y1+y2; t = (y0-y1)/t;
-    r = (1-t)*((1-t)*x0+2.0*t*x1)+t*t*x2; t = (y0*y2-y1*y1)*t/(y0-y1); x = floor(r+0.5); y = floor(t+0.5);
-    r = (x1-x0)*(t-y0)/(y1-y0)+x0; drawQuadBezierSegAA(x0,y0, floor(r+0.5),y, x,y);
-    r = (x1-x2)*(t-y2)/(y1-y2)+x2; x0 = x; x1 = floor(r+0.5); y0 = y1 = y; /* vertical cut at P6? */
-    /* Bx(t=P6) */
-    /* gradient dP6/dy=0 */
-    /* intersect P6 | P0 P1 */
-    /* intersect P7 | P1 P2 */
-    /* P0 = P6, P1 = P7 */
-    }
-    drawQuadBezierSegAA(x0,y0, x1,y1, x2,y2); /* remaining part */
-    }
-
     static int floor(double x) {
         return (int) Math.floor(x);
     }
 
-
-
-    void drawQuadBezierSegAA(int x0, int y0, int x1, int y1, int x2, int y2)
-    {
-        System.out.println(x0 +"/" + y0 + " " + x1 + "/" + y1 + " " + x2 + "/" + y2);
-       int sx = x2-x1, sy = y2-y1;
-       long xx = x0-x1, yy = y0-y1, xy;         /* relative values for checks */
-       double dx, dy, err, ed, cur = xx*sy-yy*sx;                /* curvature */
-
-//       assert(xx*sx >= 0 && yy*sy >= 0);  /* sign of gradient must not change */
-
-       if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */
-          x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur; /* swap P0 P2 */
-       }
-       if (cur != 0)
-       {                                                  /* no straight line */
-          xx += sx; xx *= sx = x0 < x2 ? 1 : -1;          /* x step direction */
-          yy += sy; yy *= sy = y0 < y2 ? 1 : -1;          /* y step direction */
-          xy = 2*xx*yy; xx *= xx; yy *= yy;         /* differences 2nd degree */
-          if (cur*sx*sy < 0) {                          /* negated curvature? */
-             xx = -xx; yy = -yy; xy = -xy; cur = -cur;
-          }
-          dx = 4.0*sy*(x1-x0)*cur+xx-xy;            /* differences 1st degree */
-          dy = 4.0*sx*(y0-y1)*cur+yy-xy;
-          xx += xx; yy += yy; err = dx+dy+xy;               /* error 1st step */
-          do {
-             cur = Math.min(dx+xy,-xy-dy);
-             ed = Math.max(dx+xy,-xy-dy);           /* approximate error distance */
-             ed = 255/(ed+2*ed*cur*cur/(4.*ed*ed+cur*cur));
-             setPixel(x0,y0, ed*Math.abs(err-dx-dy-xy));          /* plot curve */
-             if (x0 == x2 && y0 == y2) return;/* last pixel -> curve finished */
-             x1 = x0; cur = dx-err;
-             boolean yy1 = 2*err+dy < 0;
-             if (2*err+dx > 0) {                                    /* x step */
-                if (err-dy < ed) setPixel(x0,y0+sy, ed*Math.abs(err-dy));
-                x0 += sx; dx -= xy; err += dy += yy;
-             }
-             if (yy1) {                                              /* y step */
-                if (cur < ed) setPixel(x1+sx,y0, ed*Math.abs(cur));
-                y0 += sy; dy -= xy; err += dx += xx;
-             }
-          } while (dy < dx);              /* gradient negates -> close curves */
-       }
-       drawLineAA(x0,y0, x2,y2);              /* plot remaining needle to end */
-    }
-
-
-//    void drawQuadBezierSegAntialiased(int x0, int y0, int x1, int y1, int x2, int y2)
-//    {
-//       int sx = x2-x1, sy = y2-y1;
-//       long xx = x0-x1, yy = y0-y1, xy;         /* relative values for checks */
-//       double dx, dy, err, ed, cur = xx*sy-yy*sx;                /* curvature */
-//
-//       assert(xx*sx >= 0 && yy*sy >= 0);  /* sign of gradient must not change */
-//
-//       if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */
-//          x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur; /* swap P0 P2 */
-//       }
-//       if (cur != 0)
-//       {                                                  /* no straight line */
-//          xx += sx; xx *= sx = x0 < x2 ? 1 : -1;          /* x step direction */
-//          yy += sy; yy *= sy = y0 < y2 ? 1 : -1;          /* y step direction */
-//          xy = 2*xx*yy; xx *= xx; yy *= yy;         /* differences 2nd degree */
-//          if (cur*sx*sy < 0) {                          /* negated curvature? */
-//             xx = -xx; yy = -yy; xy = -xy; cur = -cur;
-//          }
-//          dx = 4.0*sy*(x1-x0)*cur+xx-xy;            /* differences 1st degree */
-//          dy = 4.0*sx*(y0-y1)*cur+yy-xy;
-//          xx += xx; yy += yy; err = dx+dy+xy;               /* error 1st step */
-//          do {
-//             cur = Math.min(dx+xy,-xy-dy);
-//             ed = Math.max(dx+xy,-xy-dy);           /* approximate error distance */
-//             ed = 255/(ed+2*ed*cur*cur/(4.*ed*ed+cur*cur));
-//
-//
-//             // int c1 = (int) (cBack + (((c - cBack) * (ed*Math.abs(err-dx-dy-xy))) / 256));
-//
-//             setPixel(x0,y0, (int) (ed*Math.abs(err-dx-dy-xy)));
-//             // setPixelAA(x0,y0, ed*Math.abs(err-dx-dy-xy));          /* plot curve */
-//
-//
-//             if (x0 == x2 && y0 == y2) return;/* last pixel -> curve finished */
-//             x1 = x0; cur = dx-err;
-//             boolean b = 2*err+dy < 0;
-//             if (2*err+dx > 0) {                                    /* x step */
-//                if (err-dy < ed) {
-//                    setPixel(x0,y0+sy, (int) (ed*Math.abs(err-dy)));
-//                   // setPixelAA(x0,y0+sy, ed*Math.abs(err-dy));
-//                }
-//                x0 += sx; dx -= xy; err += dy += yy;
-//             }
-//             if (b) {                                              /* y step */
-//                if (cur < ed) {
-//                    setPixel(x1, y0, (int) (ed*Math.abs(cur)));
-//                    // setPixelAA(x1+sx,y0, ed*Math.abs(cur));
-//                }
-//                y0 += sy; dy -= xy; err += dx += xx;
-//             }
-//          } while (dy < dx);              /* gradient negates -> close curves */
-//       }
-//       drawLineAntialiased(x0,y0, x2,y2);              /* plot remaining needle to end */
-//    }
-
-    private void setPixel(int x, int y, double vf) {
-        int v = (int) vf;
-        int s = backColor + (((color - backColor) * v) >> 8);
-        imageData[x + y * width] = (byte) s;
-
-    }
-
-    // http://members.chello.at/easyfilter/bresenham.html
-    public void drawLineAntialiasedWidth(int x0, int y0, int x1, int y1, double wdt) {
-        int dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-        int dy = Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-        int err = dx - dy, e2, x2, y2; /* error value e_xy */
-        float ed = (dx + dy == 0) ? 1.0f : (float) Math.sqrt((float) dx * dx + (float) dy * dy);
-        for (wdt = (wdt + 1) / 2;;) { /* pixel loop */
-            int v = Math.max(0, (int) (255 * (Math.abs(err - dx + dy) / ed - wdt + 1)));
-            setPixel(x0, y0, v);
-//            int s = cBack + (((c - cBack) * v) >> 8);
-//            imageData[x0 + y0 * width] = (byte) s;
-            e2 = err;
-            x2 = x0;
-            if (2 * e2 >= -dx) { /* x step */
-                for (e2 += dy, y2 = y0; e2 < ed * wdt && (y1 != y2 || dx > dy); e2 += dx)
-                    v = Math.max(0, (int) (255 * (Math.abs(e2) / ed - wdt + 1)));
-                y2 += sy;
-                setPixel(x0, y2, v);
-//                s = cBack + (((c - cBack) * v) >> 8);
-//                imageData[x0 + y2 * width] = (byte) s;
-                if (x0 == x1)
-                    break;
-                e2 = err;
-                err -= dy;
-                x0 += sx;
-            }
-            if (2 * e2 <= dy) { /* y step */
-                for (e2 = dx - e2; e2 < ed * wdt && (x1 != x2 || dx < dy); e2 += dy)
-                    v = Math.max(0, (int) (255 * (Math.abs(e2) / ed - wdt + 1)));
-                x2 += sx;
-                setPixel(x2, y0, v);
-//                s = cBack + (((c - cBack) * v) >> 8);
-//               imageData[x2 + y0 * width] = (byte) s;
-                if (y0 == y1)
-                    break;
-                err += dx;
-                y0 += sy;
-            }
-        }
-    }
-
-    public void drawLineAA(int x0, int y0, int x1, int y1) {
+    public void drawLineAntiAliased(int x0, int y0, int x1, int y1) {
         if (x0 == x1 || y0 == y1) {
             drawLine(x0, y0, x1, y1);
             return;

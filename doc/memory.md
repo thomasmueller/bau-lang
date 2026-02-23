@@ -2,29 +2,29 @@
 
 ## Memory Management Variants
 
-Mainly the following strategies are used today.
-Each one has some advantages and disadvantages.
+Programming languages today mainly use the following strategies
+to manage heap-allocated objects.
+Each strategy has some advantages and disadvantages.
 This is a simplification: some languages are hybrids and configurable 
-(eg Rust also offers reference counting); listed are only the defaults:
+(eg. Rust and C++ also offers reference counting); listed are only the defaults:
 
 * Memory-unsafe manual memory management (C, C++, Zig).
   Runtime performance is great, but safety and manual work are concerns.
-* Tracing garbage collection (Java, C#, Javascript, Go, PyPy).
+* Tracing garbage collection (Java, C#, JavaScript, Go, PyPy, Ruby).
   This is safe, and the most developer-friendly variant.
   But it uses more memory, suffers from (short) stop-the-world pauses, 
   and collection is non-deterministic.
-* Reference counting (Swift, Nim, Python, Bau).
+* Reference counting (Bau, Swift, Objective-C, Nim, CPython).
   Typically uses less memory than tracing GC, 
   is deterministic and easy to use,
   but sometimes a bit slower than the alternatives.
 * Memory-safe manual memory management via
   ownership and borrow checking (Rust).
   Uses little memory, runtime performance is great and deterministic.
-  But it is harder to use, 
-  and ownership prevents cyclic data structures.
+  But it is harder to use, and ownership prevents cyclic data structures.
 
-This language uses reference counting by default.
-For for performance-critical areas, an easy-to-use variant 
+Bau uses reference counting by default;
+for for performance-critical areas, an easy-to-use variant 
 of ownership / borrowing is supported.
 There are no stop-the-world GC pauses, and peak memory usage, 
 compared to tracing garbage collection, is reduced.
@@ -39,6 +39,17 @@ If a type has a `close` function, then it is called
 before the memory is freed.
 It is not allowed to re-link the freed object in this method;
 if this is done, then the program panics.
+
+## Reference Counting Cycles
+
+Reference counting can form cycles. As an example, 
+an object can reference itself, 
+in which case the reference count can not drop to zero,
+even if the object is not referenced from anywhere else.
+In this programming language,
+currently such cycles are not detected or prevented.
+It is the task of the developer to prevent them where needed.
+To avoid cycles, explicitly set fields to `null`.
 
 ## Ownership
 
@@ -62,17 +73,6 @@ by adding `+` to the type, and borrow with `&`.
 In this case, reference counting is not used.
 During borrowing, it is not allowed to call a method
 that directly or indirectly de-allocates objects of the given type.
-
-## Reference Counting Cycles
-
-Reference counting can form cycles. As an example, 
-an object can reference itself, 
-in which case the reference count can not drop to zero,
-even if the object is not referenced from anywhere else.
-Currently such cycles are not detected or prevented.
-It is the task of the developer to prevent them where needed.
-To avoid cycles, explicitly set fields to `null`
-(there is no garbage collection).
 
 ## Real-Time Memory Allocation
 
@@ -100,7 +100,7 @@ One such example is a long linked list: if the head is deallocated,
 indirectly all the linked entries are de-allocated as well.
 
 Deep deallocation chains can cause stack overflow in some languages,
-e.g Rust, Swift, Nim, Zig, unless if deallocation is implemented in code.
+e.g Rust, unless if deallocation is implemented in code.
 Stack overflow is not an issue in languages that use tracing garbage collection, 
 eg. Java, Python, and Go.
 
@@ -137,6 +137,7 @@ which are typical for tracing garbage collection, in the row "delay (ms)".
 
 For the linked list test, programming languages that use tracing GC (Go, Java, PyPy),
 the maximum delay between runs is many milliseconds.
+
 For Java, JDK 25 was used for testing. 
 Pauses depend on the garbage collection algorithm used and the memory available.
 The option `-XX:MaxGCPauseMillis=0` is not supported;
@@ -144,13 +145,13 @@ later values doesn't seem to have the desired effect.
 The shortest pauses of around 1.5 ms were observed with `-Xmx4g -XX:+UseShenandoahGC`,
 which is about twice the amount of memory used otherwise.
 
-Both Bau and Rust and Bau, when using the default `malloc` and `free` implementations,
-also sometimes have a delay of a few milliseconds.
+Both Bau and Rust and Bau have, when using the default `malloc` and `free` implementations,
+also sometimes a delay of a few milliseconds.
 When using a (near-) real-time `malloc` / `free`, the pauses are much shorter.
 
-Notice that the Linked List test, for Rust, would throw stack overflow
+For Rust, the Linked List test would overflow the stack
 when freeing the large linked list, because Rust recursively frees
-(drops) objects. To avoid stack overflow during deconstruction, an explicit
+(drops) objects. To avoid this stack overflow, an explicit
 `drop` method needs to be implemented.
 Bau does not need an explicit implementation.
 
