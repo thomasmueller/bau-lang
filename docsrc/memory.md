@@ -108,7 +108,7 @@ One such example is a long linked list: if the head is deallocated,
 indirectly all the linked entries are de-allocated as well.
 
 Deep deallocation chains can cause stack overflow in some languages,
-e.g Rust, unless if deallocation is implemented in code.
+e.g Rust, unless if deallocation is implemented in user code.
 Stack overflow is not an issue in languages that use tracing garbage collection, 
 eg. Java, Python, and Go.
 
@@ -125,6 +125,20 @@ Stack overflow is still possible with a combination, eg. large arrays
 that reference long linked lists that itself point to arrays.
 For such cases, either the configured values needs to be changed,
 or the de-allocation needs to be done in code.
+
+## Immediate Deallocation
+
+When deallocating an object, all nested objects that need to be deallocated
+are processed immediately and synchronously
+(but not necessarily recursively, see above in "Stack-Save Deallocation").
+This behavior is sometimes called deallocation cascade or destruction chain.
+There are some advantages and disadvantages.
+The advantages are that deallocation is synchronous and deterministic.
+Memory is released promptly.
+For some use cases, this behavior might be problematic.
+The design of the destruction algorithm would allow for deferred processing,
+but it would require changing the central allocation / deallocation algorithm
+(which is written in C).
 
 ## Memory Management Tests
 
