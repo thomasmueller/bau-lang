@@ -319,13 +319,13 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
-int64_t a;
-double b;
-int64_t c;
-i8_array* d;
-i8_array* e;
-i8_array* f;
-double g;
+int64_t A;
+double B;
+int64_t C;
+i8_array* D;
+i8_array* E;
+i8_array* F;
+double G;
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
@@ -338,21 +338,21 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    a = 1000000;
-    b = 3.1415;
-    c = 0xcafe;
+    A = 1000000;
+    B = 3.1415;
+    C = 0xcafe;
     _incUseStack(string_1000);
-    d = string_1000;
+    D = string_1000;
     _incUseStack(string_1001);
-    e = string_1001;
+    E = string_1001;
     _incUseStack(string_1002);
-    f = string_1002;
-    g = -1.23E-45;
-    _decUseStack(f, i8_array);
-    _decUseStack(e, i8_array);
-    _decUseStack(d, i8_array);
-    _decUseStack(d, i8_array);
-    _decUseStack(e, i8_array);
-    _decUseStack(f, i8_array);
+    F = string_1002;
+    G = -1.23E-45;
+    _decUseStack(F, i8_array);
+    _decUseStack(E, i8_array);
+    _decUseStack(D, i8_array);
+    _decUseStack(D, i8_array);
+    _decUseStack(E, i8_array);
+    _decUseStack(F, i8_array);
     _end();
 }

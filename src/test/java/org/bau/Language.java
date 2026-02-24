@@ -14,8 +14,6 @@ yn: input('Is the number larger than ' x ' ?')
 
 tiny vector font renderer
 
-how can HashMap.get return V and is not required to return null able (V?)
-
 value equality and comparison operator overloading, specially for strings
 reference equality via
 - Rust: std::ptr::eq(a, b)
@@ -26,8 +24,6 @@ reference equality via
 
 https://news.ycombinator.com/item?id=46945235
 https://wingolog.org/archives/2026/02/09/six-thoughts-on-generating-c
-
-enforce a naming convention for global variables?
 
 SectorC: A C Compiler in 512 bytes
 https://news.ycombinator.com/item?id=46925741

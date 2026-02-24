@@ -428,15 +428,15 @@ double LOG2;
 int8_t queueByte;
 org_bau_os_Terminal_termIos oldTermIos;
 void  (*refreshScreenCallback_0)();
-int64_t width;
-int64_t height;
+int64_t WIDTH;
+int64_t HEIGHT;
 int64_t score;
 int64_t highScore;
 int64_t position;
 int64_t rotation;
 int64_t running;
 int64_t blockType;
-i8_array* field;
+i8_array* FIELD;
 i8_array* shapes;
 i8_array* rotated;
 int64_t canPlace_2(int64_t pos, int64_t rot) {
@@ -458,7 +458,7 @@ int64_t canPlace_2(int64_t pos, int64_t rot) {
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
-                            if (field->data[idx_2(pos + offset, _arrayLen(field))]) {
+                            if (FIELD->data[idx_2(pos + offset, _arrayLen(FIELD))]) {
                                 return 0;
                             }
                             int64_t _next = x + 1;
@@ -866,7 +866,7 @@ void refreshScreen_0() {
                     while (1 == 1) {
                         int64_t x = 0;
                         while (1) {
-                            int8_t c = field->data[idx_2(x + ( 14 * y ), _arrayLen(field))];
+                            int8_t c = FIELD->data[idx_2(x + ( 14 * y ), _arrayLen(FIELD))];
                             if (c) {
                                 i8_array* _t3 = i8_array_new(1);
                                 _incUseStack(_t3);
@@ -926,7 +926,7 @@ void updateBlock_1(int64_t draw) {
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
-                            field->data[idx_2(position + offset, _arrayLen(field))] = (1 + blockType) * draw;
+                            FIELD->data[idx_2(position + offset, _arrayLen(FIELD))] = (1 + blockType) * draw;
                             int64_t _next = x + 1;
                             if (_next >= 4) {
                                 break;
@@ -985,8 +985,8 @@ void _main() {
     i8_array* _t41 = i8_array_new(0);
     oldTermIos = org_bau_os_Terminal_termIos_1(_t41);
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;
-    width = 14;
-    height = 24;
+    WIDTH = 14;
+    HEIGHT = 24;
     score = 0;
     highScore = 0;
     position = 0;
@@ -995,7 +995,7 @@ void _main() {
     blockType = 0;
     i8_array* _t42 = i8_array_new(336);
     _incUseStack(_t42);
-    field = _t42;
+    FIELD = _t42;
     _incUseStack(string_1025);
     shapes = string_1025;
     _incUseStack(string_1026);
@@ -1019,7 +1019,7 @@ void _main() {
             while (1 == 1) {
                 int64_t i = 0;
                 while (1) {
-                    field->data[idx_2(i, _arrayLen(field))] = 0;
+                    FIELD->data[idx_2(i, _arrayLen(FIELD))] = 0;
                     int64_t _next = i + 1;
                     if (_next >= 336) {
                         break;
@@ -1033,8 +1033,8 @@ void _main() {
             while (1 == 1) {
                 int64_t y = 0;
                 while (1) {
-                    field->data[idx_2(14 * y, _arrayLen(field))] = 1;
-                    field->data[idx_2(13 + ( 14 * y ), _arrayLen(field))] = 1;
+                    FIELD->data[idx_2(14 * y, _arrayLen(FIELD))] = 1;
+                    FIELD->data[idx_2(13 + ( 14 * y ), _arrayLen(FIELD))] = 1;
                     int64_t _next = y + 1;
                     if (_next >= 24) {
                         break;
@@ -1048,7 +1048,7 @@ void _main() {
             while (1 == 1) {
                 int64_t x = 0;
                 while (1) {
-                    field->data[idx_2(x + 322, _arrayLen(field))] = 1;
+                    FIELD->data[idx_2(x + 322, _arrayLen(FIELD))] = 1;
                     int64_t _next = x + 1;
                     if (_next >= 14) {
                         break;
@@ -1116,7 +1116,7 @@ void _main() {
                     while (1 == 1) {
                         int64_t j = 0;
                         while (1) {
-                            if (field->data[idx_2(( i * 14 ) + j, _arrayLen(field))] == 0) {
+                            if (FIELD->data[idx_2(( i * 14 ) + j, _arrayLen(FIELD))] == 0) {
                                 found = 0;
                                 break;
                             }
@@ -1137,7 +1137,7 @@ void _main() {
                     }
                     int64_t k = ( i * 14 ) - 14;
                     while (k >= 0) {
-                        field->data[idx_2(k + 14, _arrayLen(field))] = field->data[idx_2(k, _arrayLen(field))];
+                        FIELD->data[idx_2(k + 14, _arrayLen(FIELD))] = FIELD->data[idx_2(k, _arrayLen(FIELD))];
                         k -= 1;
                     }
                 }
@@ -1157,7 +1157,7 @@ void _main() {
     _decUseStack(_t41, i8_array);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
     _decUseStack(_t42, i8_array);
-    _decUseStack(field, i8_array);
+    _decUseStack(FIELD, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);
     _end();

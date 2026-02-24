@@ -13,16 +13,16 @@ fun updateBlock(draw int)
         for x := until(4)
             c : shapes[y * 21 * 6 + rotation * 6 + x]
             continue c <> ord('X')
-            offset : y * width + x
-            field[position + offset] = (1 + blockType) * draw
+            offset : y * WIDTH + x
+            FIELD[position + offset] = (1 + blockType) * draw
 
 fun canPlace(pos int, rot int) int
     for y := until(4)
         for x := until(4)
             c : shapes[y * 21 * 6 + rot * 6 + x]
             continue c <> ord('X')
-            offset : y * width + x
-            if field[pos + offset]
+            offset : y * WIDTH + x
+            if FIELD[pos + offset]
                 return 0
     return 1
 
@@ -37,9 +37,9 @@ fun refreshScreen()
     buff.append(' High: ')
     buff.append(Int.intToString(highScore))
     buff.append('\x1b[0K\r\n\x1b[0K\r\n')
-    for y := until(height)
-        for x := until(width)
-            c := field[x + width * y]
+    for y := until(HEIGHT)
+        for x := until(WIDTH)
+            c := FIELD[x + WIDTH * y]
             if c
                 c2 : i8[1]
                 c2[0] = ord('0') + c - 1
@@ -60,16 +60,16 @@ fun main()
         refreshScreen()
         score = 0
         rotation = 0
-        position = width + width / 2 - 1
+        position = WIDTH + WIDTH / 2 - 1
         running = 1
         blockType = 1
-        for i := until(width * height)
-            field[i] = 0
-        for y := until(height)
-            field[width * y] = 1
-            field[width - 1 + width * y] = 1
-        for x := until(width)
-            field[x + width * (height - 1)] = 1
+        for i := until(WIDTH * HEIGHT)
+            FIELD[i] = 0
+        for y := until(HEIGHT)
+            FIELD[WIDTH * y] = 1
+            FIELD[WIDTH - 1 + WIDTH * y] = 1
+        for x := until(WIDTH)
+            FIELD[x + WIDTH * (HEIGHT - 1)] = 1
         refreshScreen()
         loop
             updateBlock(0)
@@ -98,17 +98,17 @@ fun main()
                     updateBlock(1)
                     refreshScreen()
                     updateBlock(0)
-            if canPlace(position + width, rotation)
-                position += width
+            if canPlace(position + WIDTH, rotation)
+                position += WIDTH
                 updateBlock(1)
                 refreshScreen()
                 continue
             updateBlock(1)
-            i := height - 2
+            i := HEIGHT - 2
             loop i > 0
                 found := 1
-                for j := until(width)
-                    if field[i * width + j] = 0
+                for j := until(WIDTH)
+                    if FIELD[i * WIDTH + j] = 0
                         found = 0
                         break
                 if found
@@ -116,22 +116,22 @@ fun main()
                     score += 1
                     if score > highScore
                         highScore = score
-                    k := i * width - width
+                    k := i * WIDTH - WIDTH
                     loop k >= 0
-                        field[k + width] = field[k]
+                        FIELD[k + WIDTH] = FIELD[k]
                         k -= 1
                 i -= 1
             refreshScreen()
             rotation = Utils.random(7)
             blockType = rotation + 1
-            break position < width * 2
-            position = width + width / 2 - 1
+            break position < WIDTH * 2
+            position = WIDTH + WIDTH / 2 - 1
             running = 1
 
-width : 14
-height : 24
+WIDTH : 14
+HEIGHT : 24
 score, highScore, position, rotation, running, blockType := 0
-field : i8[width * height]
+FIELD : i8[WIDTH * HEIGHT]
 #      A0123 B0123 C0123 D0123 E0123 F0123 G0123 H0123 I0123 J0123 K0123 L0123 M0123 N0123 O0123 P0123 Q0123 R0123 S0123 T0123 U0123
 shapes: ``
         ......       X     X      X    X           X     X     X           X                      XX      X   X      XX         .....

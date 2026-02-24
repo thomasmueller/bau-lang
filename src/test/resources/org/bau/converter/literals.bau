@@ -1,10 +1,10 @@
-a : 1_000_000
-b : 3.1415
-c : 0xcafe
-d : 'String literal'
-e : `Raw string`
-f : ``
+A : 1_000_000
+B : 3.1415
+C : 0xcafe
+D : 'String literal'
+E : `Raw string`
+F : ``
     Two-line
     raw string with `
     ``
-g : -1.23e-45
+G : -1.23e-45

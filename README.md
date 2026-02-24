@@ -5,25 +5,26 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* 2026-02-20: Prevent stack overflow when freeing a huge linked list.
+* 2026-02-24: Global constants and variables have additional restrictions for safety and clearness.
+* 2026-02-20: Memory management documentation and tests.
 * 2026-02-12: <a href="https://thomasmueller.github.io/bau-lang/at.html">New experimental tiny language "At" with separate playground.</a>
 * 2026-02-06: Regular loops now use the "loop" keyword instead of "while".
-* 2026-01-06: New <a href="doc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
+* 2026-01-06: New <a href="docsrc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
 
 ## Highlights
 
 * Easy to learn and use. Memory-safe.
-* <a href="doc/conciseSyntax.md">Concise syntax inspired by Python</a>.
-* <a href="doc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
-* <a href="doc/memory.md">Automatic memory management</a> using reference counting by default. Low memory usage; no GC pauses.
+* <a href="docsrc/conciseSyntax.md">Concise syntax inspired by Python</a>.
+* <a href="docsrc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
+* <a href="docsrc/memory.md">Memory management</a> using reference counting by default. Low memory usage; no GC pauses.
 * Runs everywhere: transpiles to C. No runtime library needed.
 * Null pointer errors and division by zero are prevented at compile time.
 * Avoid runtime array bounds checks using static analysis.
-* <a href="doc/demo.md">Demo source code</a> with games and a tiny text editor.
+* <a href="docsrc/demo.md">Demo source code</a> with games and a tiny text editor.
 
 ## Why
 
-Our <a href="doc/why.md">vision</a> is:
+Our <a href="docsrc/why.md">vision</a> is:
 We want to have a language as easy and concise as Python,
 with the speed and ability to run really everywhere like C
 and the safety of Rust and Java.
@@ -32,9 +33,9 @@ and the safety of Rust and Java.
 
 * <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 * <a href="https://thomasmueller.github.io/bau-lang/convert-to-bau.html">Convert to Bau</a>
-* <a href="doc/transpile.md">Transpiler</a>
-* <a href="doc/features.md">Features and Non-Features</a>
-* <a href="doc/tour.md">Tour</a>
+* <a href="docsrc/transpile.md">Transpiler</a>
+* <a href="docsrc/features.md">Features and Non-Features</a>
+* <a href="docsrc/tour.md">Tour</a>
 
 ## Example
 
@@ -79,7 +80,6 @@ Identifiers contain letters, digits, and `_`.
     x += 1    # shortcut for x = x + 1
 
 Variables need to be defined before they are used.
-Variables outside of functions (without indentation) are global.
 Variables without value require a type:
 
     x int
@@ -88,6 +88,11 @@ A list of variables can be declared and initialized.
 Here, zero is assigned to both variables:
 
     x, y := 0
+
+Variables outside of functions (without indentation) are global.
+Names of global constants need to be capitalized,
+and global variables may not be imported.
+Global variables and constants may not be shadowed.
 
 ### Built-In Types
 

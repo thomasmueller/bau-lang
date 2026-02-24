@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.bau.runtime.Value;
@@ -275,6 +276,12 @@ public class Parser {
                 parser.parse();
             } catch (IllegalStateException e) {
                 throw syntaxError("Error parsing module " + name + ": " + e.getMessage(), e);
+            }
+        }
+        for (String e : entries) {
+            Variable v = program.getGlobalVariable(name, e);
+            if (v != null && !v.isConstant) {
+                throw syntaxError("May not import global constants; use " + name + "." + e + " instead");
             }
         }
         return true;
@@ -1221,6 +1228,11 @@ public class Parser {
                 s.leftValue = v;
                 s.setConstantBounds(solver, v, expr);
                 s.type = s.value.type();
+                if (global && !identifier.toUpperCase(Locale.ROOT).equals(identifier)) {
+                    if (!s.type.isArray()) {
+                        throw syntaxError("Global constants need to be all caps: " + identifier);
+                    }
+                }
                 if (functionContext.getVariable(null, v.name) != null) {
                     throw syntaxError("Variable already defined: " + v.name);
                 }
