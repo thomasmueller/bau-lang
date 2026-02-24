@@ -1,5 +1,13 @@
 # Memory Management
 
+In addition to being a very fast and user-friendly programming language, 
+one of the highlights of this language is 
+that it does not suffer from stop-the-world garbage collection pauses.
+
+<img src="memoryPauses.png">
+
+See below for details of the test setup.
+
 ## Memory Management Variants
 
 Programming languages today mainly use the following strategies
