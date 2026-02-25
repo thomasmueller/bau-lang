@@ -1,0 +1,39 @@
+import bench
+
+type Node {
+  Nil()
+  Cons(value: Int, next: Node)
+}
+
+def head(n: Node): Int = n match {
+  case Cons(value, _) => value
+  case Nil() => 0
+}
+
+def createLinkedList(limit: Int): Node = {
+  def build(i: Int, a: Node): Node =
+    if (i < 0) a
+    else build(i - 1, Cons(i, a))
+  build(limit - 1, Nil())
+}
+
+def main() = {
+  println("Starting stress test...")
+  val x   = createLinkedList(50000000)
+  val len = 1000
+  val count = 10000000
+
+  def go(i: Int, last: Int, worst: Int): Int =
+    if (i <= 0) {
+      worst
+    } else {
+      createLinkedList(len)
+      val now = relativeTimestamp()
+      go(i - 1, now, max(worst, now - last))
+    }
+
+  val worst = go(count, relativeTimestamp(), 0)
+  println("Max delay: " ++ show(worst) ++
+    " ns; dummy value: " ++ show(x.head))
+}
+
