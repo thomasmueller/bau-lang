@@ -76,6 +76,10 @@ public class FunctionDefinition {
     }
 
     public String headerToC() {
+        return headerToC("");
+    }
+
+    public String headerToC(String nameSuffix) {
         StringBuilder buff = new StringBuilder();
         if (builtIn) {
             return "";
@@ -88,7 +92,7 @@ public class FunctionDefinition {
             buff.append(returnType.toC());
         }
         buff.append(' ');
-        buff.append(functionNameC());
+        buff.append(functionNameC() + nameSuffix);
         buff.append('(');
         int i = 0;
         for (Variable v : parameters) {
@@ -169,9 +173,7 @@ public class FunctionDefinition {
         StringBuilder buff = new StringBuilder();
         buff.append(headerToC());
         buff.append(" {\n");
-        if (callType != null && callType.traitDefinition != null) {
-            // todo functionId needs to be set
-            int todo;
+        if (callType != null && callType.isTrait()) {
             StringBuilder buff2 = new StringBuilder();
             buff2.append(getFunctionPointerDeclaration("_"));
             buff2.append(" = (");
@@ -179,34 +181,25 @@ public class FunctionDefinition {
             buff2.append(") this->_type->vtable[" + traitFunctionId + "];\n");
             buff.append(Statement.indent(buff2.toString()));
             buff2 = new StringBuilder();
-            buff2.append(Statement.indent("if (_) {\n"));
-            StringBuilder buff3 = new StringBuilder();
             if (exceptionType != null || returnType != null) {
-                buff3.append("return ");
+                buff2.append("return ");
             }
-            buff3.append("_(");
+            buff2.append("_(");
             int i = 0;
             for (Variable v : parameters) {
                 if (i++ > 0) {
-                    buff3.append(", ");
+                    buff2.append(", ");
                 }
-                buff3.append(v.nameC());
+                buff2.append(v.nameC());
             }
-            buff3.append(");\n");
-            if (exceptionType == null && returnType == null) {
-                buff3.append("return;\n");
-            }
-            buff2.append(Statement.indent(buff3.toString()));
+            buff2.append(");\n");
             buff.append(Statement.indent(buff2.toString()));
-            buff.append(Statement.indent("}\n"));
+
+
+            buff.append("}\n");
+            buff.append(headerToC("_default"));
+            buff.append(" {\n");
             if (list.isEmpty()) {
-                int todo2;
-                // TODO verify at compile time (and not runtime)
-                // that that each implementation has this function;
-                // if not, use the default function (if available)
-                // or throw an exception during compilation
-                buff.append(Statement.indent("fprintf(stdout, \"Function %s not implemented for type %s\\n\", \""+ name +"\", this->_type->typeName);\n"));
-                buff.append(Statement.indent("exit(1);\n"));
                 if (exceptionType != null || returnType != null) {
                     buff.append(Statement.indent("return 0;\n"));
                 }

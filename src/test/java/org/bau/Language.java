@@ -5,7 +5,19 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-r/compilers
+r/C_Programming, r/compsci, r/compilers, r/embedded/
+
+Traits
+
+SDL2 or GLFW
+
+value equality and comparison operator overloading, specially for strings
+reference equality via
+- Rust: std::ptr::eq(a, b)
+- Go, Java, Zig, C, C++ use ==
+- Swift, JavaScript ===
+- Python, Nim, V: "is"
+- alternatives: addr(a) = addr(b), &a = &b
 
 code coverage tool
 assertions on the right?
@@ -15,14 +27,6 @@ improved stdlib and add to readme
 yn: input('Is the number larger than ' x ' ?')
 
 tiny vector font renderer
-
-value equality and comparison operator overloading, specially for strings
-reference equality via
-- Rust: std::ptr::eq(a, b)
-- Go, Java, Zig, C, C++ use ==
-- Swift, JavaScript ===
-- Python, Nim, V: "is"
-- alternatives: addr(a) = addr(b), &a = &b
 
 https://news.ycombinator.com/item?id=46945235
 https://wingolog.org/archives/2026/02/09/six-thoughts-on-generating-c
@@ -34,21 +38,13 @@ https://news.ycombinator.com/item?id=46925741
 
 * test setjmp / longjmp
 
-* we have a doc and a docs directory, rename one
-
-* better error message than "type main not found"
-type Test
-    value int
-x := 10
-fun main()
-    println('test')
-fun test() int
-    return 1
-y := test()
+Maybe make parenthesis optional for statement-level function calls (eg. println),
+if the function doesn't return a value
+- Ruby, Tcl, old Python, Coffeescript, ML, Haskell, F#, OCAML, Visual Basic, scripting languages
 
 is it allow to edit constants (string literals) in a C program?
 
-div by zero docs
+div by zero: change implementation (simplify)
 
 numberOf -> leadingZeros
 
@@ -1277,23 +1273,11 @@ malloc() provides 8-byte aligned memory addresses for 32-bit platforms, and 16-b
 
 initializer, or memset
 
-drop / delete
-
-# Assert Macro
-
-how often is assert used in practise? answer: not often
-
 assert as a statement?
 assert
 assert(...)
 if it's a function call, then the expression is always evaluated, but we do not want this
 if assertTrue <statement>
-
-# Namespaces
-
-C++    namespace; class::
-Java   nesting
-Rust   impl Person
 
 must use return value
 https://stackoverflow.com/questions/36938104/can-i-apply-must-use-to-a-function-result
@@ -1307,110 +1291,6 @@ int watched __attribute__((cleanup (scoped)));
 
 https://borretti.me/article/introducing-austral
 https://eev.ee/blog/2016/12/01/lets-stop-copying-c/
-
-interfaces Traits
-structs
-
-# Comparison to Other Languages
-
-https://www.lua.org/manual/5.4/
-https://ziglang.org/learn/overview/ - no memory safety
-
-String Literals
-- escape
-
-struct
-
-function
-
-function pointers, e.g. in sort
-- use a compare "interface" / "class" / "type"?
-- function pointer?
-- use macro / template / preprocessor?
-
-sort(a, b, compare)
-
-fun sort(a u8[], compare fun(a u8, b u8))
-fun sort(a u8[8], compare fun(a u8, b u8))
-fun sort(a [u8], compare fun(a u8, b u8))
-fun sort(a [type], compare fun(a type, b type))
-
-Variables
-- global
-
-Statements
-
-Assignment
-varlist ‘=’ explist
-x, y = y, x
-
-Logical Operators
-
-    and, or, and not
-
-Precedence
-
-
-Table Constructors
-
-Function Definitions
-
-Visibility Rules
-     x = 10                -- global variable
-     do                    -- new block
-       local x = x         -- new 'x', with value 10
-       print(x)            --> 10
-       x = x+1
-       do                  -- another block
-         local x = x+1     -- another 'x'
-         print(x)          --> 12
-       end
-       print(x)            --> 11
-     end
-     print(x)              --> 10  (the global one)
-
-     a = {}
-     local x = 20
-     for i = 1, 10 do
-       local y = 0
-       a[i] = function () y = y + 1; return x + y end
-     end
-
-Debugging
-- we can ignore this for now, because we can convert to C / Rust / Java / Lua / ...
-
-
-Python:
-def factorial(x):
-    if x <= 1:
-        return 1
-    return x * factorial(x - 1)
-
-def factorial(x):
-    return 1 if x <= 1 else x * factorial(x - 1)
-
-Rust:
-let x: Typ = Wert;
-let mut v: Typ;
-v = Wert;
-
-fn fakultaet(i: u64) -> u64 {
-    let mut acc = 1;
-    for num in 2..=i {
-        acc *= num;
-    }
-    acc
-}
-
-https://en.wikipedia.org/wiki/Foreach_loop
-Lua:    for index, value in pairs(array) do
-Python: for i, item in enumerate(seq):
-
-if x = 1
-  print "one"
-elif x = 2
-  print "two"
-
 
  */
 public class Language {

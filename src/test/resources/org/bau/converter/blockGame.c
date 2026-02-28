@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <math.h>
@@ -696,14 +697,13 @@ void org_bau_os_Sleep_sleep_1(int64_t millis) {
     if (millis < 0) {
         return;
     }
-    #include <errno.h> 
-          struct timespec ts;
-          ts.tv_sec = millis / 1000;
-          ts.tv_nsec = (millis % 1000) * 1000000;
-          int res;
-          do {
-              res = nanosleep(&ts, &ts);
-          } while (res && errno == EINTR);
+    struct timespec ts;
+    ts.tv_sec = millis / 1000;
+    ts.tv_nsec = (millis % 1000) * 1000000;
+    int res;
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
 }
 void org_bau_os_Terminal_disableRawMode_0() {
     struct termios old;

@@ -74,7 +74,15 @@ public class Service {
                 e.printStackTrace(System.out);
             }
             System.out.println("Compiling =======================================");
-            int exitCode = runProcess("gcc", "-O3", fc.toString());
+            int exitCode;
+            boolean sdl = false;
+            if (sdl) {
+                exitCode = runProcess("gcc", "-O3",
+                        "-I/opt/homebrew/include", "-D_THREAD_SAFE",
+                        "-L/opt/homebrew/lib", "-lSDL2", fc.toString());
+            } else {
+                exitCode = runProcess("gcc", "-O3", fc.toString());
+            }
             // int exitCode = runProcess("gcc", fc.toString());
             File f2 = new File("a.out");
             if (exitCode == 0) {

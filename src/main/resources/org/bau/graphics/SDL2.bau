@@ -1,0 +1,64 @@
+module org.bau.graphics.SDL2
+
+## 
+
+Mac OS:
+    brew install sdl2
+    sdl2-config --cflags --libs
+    ==> -I/opt/homebrew/include/SDL2 -D_THREAD_SAFE
+    gcc -O3 -I/opt/homebrew/include -D_THREAD_SAFE demo.c
+
+Raspberry Pi:
+
+## 
+
+type SDL
+    error int
+    init int
+    window int
+    renderer int
+    surface int
+    texture int
+
+fun open() SDL?
+    println('Initializing SDL')
+    result : SDL()
+    native(`#include <SDL2/SDL.h>
+        if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+            fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
+            result->error = 1;
+        } else {
+            result->init = 1;
+        }
+        SDL_Window* win = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+            640, 480, SDL_WINDOW_SHOWN);
+        if (win == NULL) {
+            fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
+            result->error = 1;
+        } else {
+            result->window = (int64_t) win;
+        }
+        SDL_Surface* winSurface = SDL_GetWindowSurface(win);
+        if ( !winSurface ) {
+            fprintf(stderr, "SDL_GetWindowSurface Error: %s\n", SDL_GetError());
+            result->error = 1;
+        }
+        SDL_FillRect( winSurface, NULL, SDL_MapRGB( winSurface->format, 0, 0, 255 ) );
+        SDL_UpdateWindowSurface( win );
+        for(int i=0; i<100; i++) {
+            SDL_PumpEvents();
+            SDL_Delay(1);
+        }
+        SDL_Delay(5000);
+        
+    `)
+    return result
+
+fun SDL close()
+    println('Closing SDL')
+    if init
+        native(`SDL_Quit();`)
+        init = 0
+    if window
+        native(`SDL_DestroyWindow((SDL_Window*) this->window);`)
+        window = 0

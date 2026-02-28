@@ -74,8 +74,10 @@ public class Assignment implements Statement {
                     // set it to be not null (the old owner is set to null elsewhere)
                     Solver.Rule r2 = Operation.toRule(leftValue, "<>", NumberValue.ZERO);
                     // survive loops etc
-                    r2.always = true;
-                    solver.addRule(r2);
+                    if (r2 != null) {
+                        r2.always = true;
+                        solver.addRule(r2);
+                    }
                 }
             }
         }

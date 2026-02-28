@@ -251,6 +251,7 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
             free(n);
         } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
 /* traits */
+int _traitFunctionOffsets[2];
 typedef struct _typeMetaData _typeMetaData;
 typedef void (*_func)(void);
 struct _typeMetaData {
@@ -265,8 +266,16 @@ typedef struct int_array int_array;
 struct int_array;
 typedef struct Reader Reader;
 struct Reader;
+typedef struct Reader_array Reader_array;
+struct Reader_array;
+typedef struct Reader_owned Reader_owned;
+struct Reader_owned;
 typedef struct Writer Writer;
 struct Writer;
+typedef struct Writer_array Writer_array;
+struct Writer_array;
+typedef struct Writer_owned Writer_owned;
+struct Writer_owned;
 typedef struct Memory Memory;
 struct Memory;
 struct i8_array {
@@ -311,6 +320,29 @@ Reader* Reader_new() {
     result->_refCount = 1;
     return result;
 }
+struct Reader_array {
+    int32_t len;
+    int32_t _refCount;
+    Reader** data;
+};
+Reader_array* Reader_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
+    Reader_array* result = _malloc(sizeof(Reader_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(Reader*) * len);
+    memset(result->data, 0, sizeof(Reader*) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+struct Reader_owned {
+};
+Reader_owned* Reader_owned_new() {
+    Reader_owned* result = _malloc(sizeof(Reader_owned));
+    _traceMalloc(result);
+    return result;
+}
 struct Writer {
     _typeMetaData* _type;
     int32_t _refCount;
@@ -319,6 +351,29 @@ Writer* Writer_new() {
     Writer* result = _malloc(sizeof(Writer));
     _traceMalloc(result);
     result->_refCount = 1;
+    return result;
+}
+struct Writer_array {
+    int32_t len;
+    int32_t _refCount;
+    Writer** data;
+};
+Writer_array* Writer_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
+    Writer_array* result = _malloc(sizeof(Writer_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(Writer*) * len);
+    memset(result->data, 0, sizeof(Writer*) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+struct Writer_owned {
+};
+Writer_owned* Writer_owned_new() {
+    Writer_owned* result = _malloc(sizeof(Writer_owned));
+    _traceMalloc(result);
     return result;
 }
 struct Memory {
@@ -350,7 +405,11 @@ void put_2(Writer* w, int64_t x);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void Reader_free(Reader* x);
+void Reader_array_free(Reader_array* x);
+void Reader_owned_free(Reader_owned* x);
 void Writer_free(Writer* x);
+void Writer_array_free(Writer_array* x);
+void Writer_owned_free(Writer_owned* x);
 void Memory_free(Memory* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
@@ -372,11 +431,41 @@ void Reader_free_0(Reader* x) {
 void Reader_free(Reader* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))Reader_free_0);
 }
+void Reader_array_free_0(Reader_array* x) {
+    for (int i = 0; i < _arrayLen(x); i++) _decUse(x->data[i], Reader);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void Reader_array_free(Reader_array* x) {
+    _registerAndMaybeDrain(x, (void(*)(void*))Reader_array_free_0);
+}
+void Reader_owned_free_0(Reader_owned* x) {
+    _free(x); _traceFree(x);
+}
+void Reader_owned_free(Reader_owned* x) {
+    if (x == NULL) return;
+    _registerAndMaybeDrain(x, (void(*)(void*))Reader_owned_free_0);
+}
 void Writer_free_0(Writer* x) {
     _free(x); _traceFree(x);
 }
 void Writer_free(Writer* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))Writer_free_0);
+}
+void Writer_array_free_0(Writer_array* x) {
+    for (int i = 0; i < _arrayLen(x); i++) _decUse(x->data[i], Writer);
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void Writer_array_free(Writer_array* x) {
+    _registerAndMaybeDrain(x, (void(*)(void*))Writer_array_free_0);
+}
+void Writer_owned_free_0(Writer_owned* x) {
+    _free(x); _traceFree(x);
+}
+void Writer_owned_free(Writer_owned* x) {
+    if (x == NULL) return;
+    _registerAndMaybeDrain(x, (void(*)(void*))Writer_owned_free_0);
 }
 void Memory_free_0(Memory* x) {
     _decUse(x->array, int_array);
@@ -438,21 +527,16 @@ void Memory_write_2(Memory* this, int64_t x) {
 }
 int64_t Reader_read_1(Reader* this) {
     int64_t (*_)(Reader*) = (int64_t (*)(Reader*)) this->_type->vtable[0];
-    if (_) {
-        return _(this);
-    }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "read", this->_type->typeName);
-    exit(1);
+    return _(this);
+}
+int64_t Reader_read_1_default(Reader* this) {
     return 0;
 }
 void Writer_write_2(Writer* this, int64_t x) {
-    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[1];
-    if (_) {
-        _(this, x);
-        return;
-    }
-    fprintf(stdout, "Function %s not implemented for type %s\n", "write", this->_type->typeName);
-    exit(1);
+    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[3];
+    _(this, x);
+}
+void Writer_write_2_default(Writer* this, int64_t x) {
 }
 int64_t get_1(Reader* r) {
     printf("reading\n");
@@ -469,10 +553,13 @@ void put_2(Writer* w, int64_t x) {
 }
 /* traits */
 void _traitInit() {
-    _typeMetaMemory = malloc(sizeof(_typeMetaData) + 2 * sizeof(void(*)(void)));
+    _traitFunctionOffsets[0] = 0;
+    _traitFunctionOffsets[1] = 2;
+    _typeMetaMemory = malloc(sizeof(_typeMetaData) + 4 * sizeof(void(*)(void)));
     _typeMetaMemory->typeName = "Memory";
     _typeMetaMemory->vtable[0] = (void (*)())Memory_read_1;
-    _typeMetaMemory->vtable[1] = (void (*)())Memory_write_2;
+    _typeMetaMemory->vtable[2] = (void (*)())Memory_read_1;
+    _typeMetaMemory->vtable[3] = (void (*)())Memory_write_2;
 }
 void _main();
 int main(int _argc, char *_argv[]) {

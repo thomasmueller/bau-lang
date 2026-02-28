@@ -564,8 +564,6 @@ parameter names are removed. Example:
 
 ### Traits
 
-Note: The trait implementation is work-in-progress.
-
 Traits (in other languages called interfaces, mixins, or prototypes)
 contain a list of functions.
 

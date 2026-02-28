@@ -176,6 +176,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./binaryTreesRefCount 20; done
     for i in {1..3}; do time ./linkedList; done
+    for i in {1..3}; do time ./virtualDispatch; done
 
     echo "== C ============"
     cp ../src/test/resources/org/bau/benchmarks/c/* .
@@ -200,12 +201,14 @@ Compiling and Running the C, Java, and Bau versions:
     go build -ldflags="-s -w" piDigits.go
     go build -ldflags="-s -w" mandelbrot.go
     go build -ldflags="-s -w" linkedList.go
+    go build -ldflags="-s -w" virtualDispatch.go
     for i in {1..3}; do time GOMAXPROCS=1 ./binaryTrees 20; done
     for i in {1..3}; do time GOMAXPROCS=1 ./fannkuch 11; done
     for i in {1..3}; do time GOMAXPROCS=1 ./munchausen; done
     for i in {1..3}; do time GOMAXPROCS=1 ./piDigits > out.txt; done
     for i in {1..3}; do time GOMAXPROCS=1 ./mandelbrot 8000 > out.tiff; done
     for i in {1..3}; do time GOMAXPROCS=1 ./linkedList; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./virtualDispatch; done
 
     echo "== Java ============"
     javac ../src/test/java/org/bau/benchmarks/*.java -d .
@@ -259,12 +262,14 @@ Compiling and Running the C, Java, and Bau versions:
     rustc -C opt-level=3 munchausen.rs
     rustc -C opt-level=3 mandelbrot.rs
     rustc -C opt-level=3 linkedList.rs
+    rustc -C opt-level=3 virtualDispatch.rs
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
     for i in {1..3}; do time ./linkedList; done
+    for i in {1..3}; do time ./virtualDispatch; done
 
     echo "== Swift ============"
     cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .

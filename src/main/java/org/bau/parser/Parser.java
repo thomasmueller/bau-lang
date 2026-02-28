@@ -301,11 +301,35 @@ public class Parser {
         DataType type = DataType.newTraitType(targetModule, name);
         FullName traitName = new FullName(targetModule, name);
         type.traitDefinition = new Trait(traitName);
+        int functionId = 0;
         if (matchOp(":")) {
             while (true) {
                 FullName n = readIdentifierWithPossibleModule();
-                int todoImplementVerificationOfRequiredTraits;
                 type.traitDefinition.requiredTraitNames.add(n);
+                DataType required = program.getType(n.module, n.name);
+                if (required != null) {
+                    Trait tr = required.traitDefinition;
+                    if (tr == null) {
+                        throw syntaxError("Type '" + name + "' is not a trait");
+                    }
+                    for (FunctionDefinition def : tr.functions) {
+                        FunctionDefinition d2 = new FunctionDefinition(def.lineOffset);
+                        d2.name = def.name;
+                        d2.callType = type;
+                        d2.varArgs = def.varArgs;
+                        for (Variable v : def.parameters) {
+                            // can we share the variables?
+                            d2.parameters.add(v);
+                        }
+                        d2.traitFunctionId = def.traitFunctionId;
+                        if (functionId <= d2.traitFunctionId) {
+                            functionId = d2.traitFunctionId + 1;
+                        }
+                        d2.returnType = def.returnType;
+                        type.traitDefinition.functions.add(d2);
+                        program.addFunction(d2);
+                    }
+                }
                 if (!matchOp(",")) {
                     break;
                 }
@@ -315,7 +339,6 @@ public class Parser {
         functionContext.rewindStack(stackPos);
         program.addComment("trait " + type.toString(), comment);
         lastComment = null;
-        int id = 0;
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 FunctionDefinition def = new FunctionDefinition(getLine(lastPos));
@@ -329,7 +352,7 @@ public class Parser {
                 if (template) {
                     throw syntaxError("Template are not supported in traits");
                 }
-                def.traitFunctionId = id++;
+                def.traitFunctionId = functionId++;
                 type.traitDefinition.functions.add(def);
                 program.addFunction(def);
             }
@@ -943,12 +966,6 @@ public class Parser {
                 t = parseTemplatedType(t, params);
             }
         }
-        if (arraysOk && matchOp("[")) {
-            if (!matchOp("]")) {
-                throw syntaxError("Expected ']', got '" + token + "' when reading a type");
-            }
-            t = t.arrayType();
-        }
         if (matchOp("+")) {
             if (borrow) {
                 throw syntaxError("Borrow types don't need ':'");
@@ -957,6 +974,12 @@ public class Parser {
                 throw syntaxError("Not a pointer type");
             }
             t = t.ownerType();
+        }
+        if (arraysOk && matchOp("[")) {
+            if (!matchOp("]")) {
+                throw syntaxError("Expected ']', got '" + token + "' when reading a type");
+            }
+            t = t.arrayType();
         }
         if (borrow) {
             if (t.memoryType() != MemoryType.REF_COUNT) {
@@ -1145,7 +1168,7 @@ public class Parser {
                     type = rangeType;
                 }
                 if (targetType != null) {
-                    Expression cast = program.cast(expr, targetType);
+                    Expression cast = program.cast(expr, false, targetType);
                     if (cast == null) {
                         throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
                     }
@@ -1215,7 +1238,7 @@ public class Parser {
                 s.isGlobalScope = isGlobalScope;
                 s.initial = true;
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, targetType);
+                    expr = program.cast(expr, false, targetType);
                     if (expr == null) {
                         throw syntaxError("The type of the variable is different than the type of the expression");
                     }
@@ -1252,7 +1275,7 @@ public class Parser {
                 }
                 String identifier = identifierList.get(0);
                 if ("native".equals(identifier)) {
-                    String s = token;
+                    String s = token.trim();
                     read();
                     if (!matchOp(")")) {
                         throw syntaxError("Expected ')'");
@@ -1265,7 +1288,7 @@ public class Parser {
                         String include = s.substring(0, index);
                         include = include.substring("#include ".length());
                         program.addIncludeC(include);
-                        s = s.substring(index + 1);
+                        s = s.substring(index + 1).trim();
                     }
                     readEndOfStatement();
                     target.add(new NativeCode(s + "\n"));
@@ -1298,7 +1321,7 @@ public class Parser {
                     expr = new NullValue(targetType);
                 }
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, targetType);
+                    expr = program.cast(expr, false, targetType);
                     if (expr == null) {
                         throw syntaxError("The type of the variable is different than the type of the expression");
                     }
@@ -1406,7 +1429,7 @@ public class Parser {
                 Expression expr = parseExpression();
                 expr = expr.writeStatements(this, false, target);
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, targetType);
+                    expr = program.cast(expr, false, targetType);
                     if (expr == null) {
                         throw syntaxError("The type of the variable is different than the type of the expression");
                     }
@@ -1646,35 +1669,14 @@ public class Parser {
     }
 
     private void verifyBounds(Assignment s) {
-        int todoCheckType;
         if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
             throw syntaxError("Not an array: " + s.leftValue);
         }
-        if (!s.leftValue.type().isNumber() && !s.leftValue.type().equals(s.value.type())) {
-            if (s.value.type() == null) {
-                throw syntaxError("The type of the variable is different than the type of the expression: " +
-                        s.leftValue.type());
-            }
-            if (s.leftValue.type().equals(s.value.type().orNull())) {
-                // setting a not-null value to a nullable variable is ok
-            } else if (s.value.type().equals(s.leftValue.type().orNull())) {
-                // setting a nullable variable to a non-nullable variable:
-                // needs a check
-                verifyNullAccess(s.value);
-            } else if (s.value.toString().equals("0")
-                    && s.leftValue instanceof ArrayAccess) {
-                // setting 0 to a nullable variable is ok
-            } else {
-                throw syntaxError("The type of the variable is different than the type of the expression: " +
-                        s.leftValue.type() + " got " + s.value.type());
-            }
+        if (!areTypesCompatible(s.value, s.leftValue.type())) {
+            throw syntaxError("Incompatible types: " + s.value.type() + "; required: " + s.leftValue.type());
         }
-        if (!s.leftValue.type().isFloatingPoint()) {
-            DataType valueType = s.value.type();
-            if (valueType != null && valueType.isFloatingPoint()) {
-                // TODO there are many more cases that are not allowed
-                throw syntaxError("The expression is floating point, but the variable is not.");
-            }
+        if (s.leftValue.type().isTrait() && s.value.type().implementsTrait(s.leftValue.type())) {
+            s.value = new Cast(s.value, s.leftValue.type());
         }
         if (s.modify == null) {
             verifyBounds(s.leftValue.type(), s.value);
@@ -2074,7 +2076,19 @@ public class Parser {
                 if (expr.type() != null && expr.type().equals(targetType)) {
                     continue;
                 }
-                Expression cast = program.cast(expr, targetType);
+                boolean isNotNull = false;
+                if (expr.type() != null && expr.type().isNullable()) {
+                    Solver.Rule r = new Solver.Rule();
+                    r.left = Operation.toSolverExpr(expr);
+                    if (r.left != null) {
+                        r.type = "<>";
+                        r.right = Solver.number(0);
+                        if (r != null && solver.isTrue(r)) {
+                            isNotNull = true;
+                        }
+                    }
+                }
+                Expression cast = program.cast(expr, isNotNull, targetType);
                 if (cast == null) {
                     throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
                 }
@@ -2129,8 +2143,12 @@ public class Parser {
             b.expr = ret.leftValue;
             target.add(ret);
         }
-        if (!areTypesCompatible(b.expr, currentFunctionDefinition.returnType)) {
+        DataType type = currentFunctionDefinition.returnType;
+        if (!areTypesCompatible(b.expr, type)) {
             throw syntaxError("Incompatible types: " + b.expr.type() + "; required: " + currentFunctionDefinition.returnType);
+        }
+        if (type.isTrait() && b.expr.type().implementsTrait(type)) {
+            b.expr = new Cast(b.expr, type);
         }
         verifyBounds(currentFunctionDefinition.returnType, b.expr);
         b.autoClose = autoClose(stackPosFunction, b.expr);
@@ -2142,7 +2160,7 @@ public class Parser {
         throw syntaxError("Expected end of statement, got '" + token + "' in 'return' statement");
     }
 
-    boolean areTypesCompatible(Expression expr, DataType assignToType) {
+    private boolean areTypesCompatible(Expression expr, DataType assignToType) {
         DataType exprType = expr.type();
         if (exprType == null) {
             // unknown (eg. "null")
@@ -2154,8 +2172,16 @@ public class Parser {
             return true;
         }
         if (exprType.isNumber() || assignToType.isNumber()) {
+            if (expr.toString().equals("0") && (assignToType.isCopyType() || assignToType.isNullable())) {
+                // setting 0 to a nullable variable or value type is ok
+                return true;
+            }
             if (!exprType.isNumber() || !assignToType.isNumber()) {
                 return false;
+            }
+            if (!exprType.isRange() && assignToType.isRange()) {
+                // verified via bounds check
+                return true;
             }
             if (exprType.isRange() && !assignToType.isRange()) {
                 return true;
@@ -2170,7 +2196,6 @@ public class Parser {
             }
             return true;
         }
-        int todo;
         if (exprType == null || assignToType == null) {
             return exprType == assignToType;
         }
@@ -2189,7 +2214,13 @@ public class Parser {
             verifyNullAccess(expr);
             return exprType.equals(assignToType.orNull());
         } else if (!exprType.isNullable() && assignToType.isNullable()) {
-            return exprType.orNull().equals(assignToType);
+            assignToType = assignToType.notNullType();
+        }
+        if (exprType.equals(assignToType)) {
+            return true;
+        }
+        if (exprType.implementsTrait(assignToType)) {
+            return true;
         }
         return false;
     }

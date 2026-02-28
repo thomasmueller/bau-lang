@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueInt;
@@ -37,6 +38,7 @@ public class DataType {
 
 
     private final DataType nullableType;
+    private DataType notNullType;
     private final boolean isNullable;
 
     // for non-array: the array type
@@ -68,10 +70,13 @@ public class DataType {
     public ArrayList<DataType> traitTypes = new ArrayList<>();
     public Trait traitDefinition;
     public HashSet<DataType> implementingTypes = new HashSet<>();
-    public int traitSlot = -1;
 
     public static boolean isGenericTypeName(String token) {
+        while (token.endsWith("[]")) {
+            token = token.substring(0, token.length() - 2);
+        }
         return token != null && !token.isEmpty() &&
+                token.length() <= 2 &&
                 token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
                 token.toUpperCase().equals(token);
     }
@@ -161,6 +166,7 @@ public class DataType {
         if (!isArray() && memoryType != MemoryType.COPY && !isNullable) {
             nullableType = new DataType(module, name, sizeOf, false, null, refCountBaseType, true, memoryType);
             nullableType.fields = fields;
+            nullableType.notNullType = this;
         } else {
             nullableType = null;
         }
@@ -227,11 +233,11 @@ public class DataType {
 
     public String idC() {
         String n = name;
+        if (isArray()) {
+            n = arrayBaseType.idC() + "_array";
+        }
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             n += "_owned";
-        }
-        if (isArray()) {
-            n = arrayBaseType.id() + "_array";
         }
         return n;
     }
@@ -342,10 +348,10 @@ public class DataType {
             } else {
                 s = n;
             }
-            if (isArray()) {
-                // replace "[]" with "_array"
-                s = s.substring(0, s.length() - 2) + "_array";
-            }
+        }
+        if (isArray()) {
+            // replace "[]" with "_array"
+            s = s.replaceAll(Pattern.quote("[]"), "_array");
         }
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             s += "_owned";
@@ -399,6 +405,13 @@ public class DataType {
             return this;
         }
         return nullableType;
+    }
+
+    public DataType notNullType() {
+        if (!isNullable) {
+            return this;
+        }
+        return notNullType;
     }
 
     public MemoryType memoryType() {
@@ -477,6 +490,44 @@ public class DataType {
             return new Value.ValueFloat(0);
         }
         return ValueNull.INSTANCE;
+    }
+
+    public int getTraitSlot() {
+        return traitDefinition.getSlot();
+    }
+
+    public boolean isTrait() {
+        if (traitDefinition != null) {
+            return true;
+        }
+        if (notNullType != null && notNullType.isTrait()) {
+            return true;
+        }
+        if (refCountBaseType != null && refCountBaseType.isTrait()) {
+            return true;
+        }
+        if (isArray()) {
+            return arrayBaseType.isTrait();
+        }
+        return false;
+    }
+
+    public boolean implementsTrait(DataType traitType) {
+        for (DataType t : traitTypes) {
+            if (t.equals(traitType)) {
+                return true;
+            }
+        }
+        for (FullName t : traitNames) {
+            if (t.equals(traitType.getFullName())) {
+                return true;
+            }
+        }
+        // owner or borrow type
+        if (refCountBaseType != null && traitType.refCountBaseType != null) {
+            return refCountBaseType.implementsTrait(traitType.refCountBaseType);
+        }
+        return false;
     }
 
 }

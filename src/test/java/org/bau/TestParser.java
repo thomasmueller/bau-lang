@@ -21,11 +21,11 @@ public class TestParser {
 
     @Test
     public void longLines() {
-        assertEquals("a : 2\n"
+        assertEquals("A : 2\n"
                 + "println('Hello ', 'world')\n"
                 + "",
                 new Parser("""
-                        a : 1 +
+                        A : 1 +
                             1
                         println('Hello ',
                               'world')
@@ -70,16 +70,16 @@ else
         println('other')
 println('done')
                 """,
-                new Parser("a:= 1\n" +
+                new Parser("a := 1\n" +
                         "if a=0\n" +
-                        "  println('zero')\n" +
+                        "    println('zero')\n" +
                         "elif a=1\n" +
-                        "  println('one')\n" +
+                        "    println('one')\n" +
                         "else\n" +
-                        "  println('other')\n" +
+                        "    println('other')\n" +
                         "println('done')").parse().toString());
-        assertEquals("a : 5\n",
-                new Parser("a : 1 + 2 * 3 & 5").parse().toString());
+        assertEquals("A : 5\n",
+                new Parser("A : 1 + 2 * 3 & 5").parse().toString());
     }
 
     @Test
@@ -94,9 +94,9 @@ println('end')
                 """,
                 new Parser("a:=1\n" +
                         "loop 1\n" +
-                        "  break a>10\n" +
-                        "  println(a)\n" +
-                        "  a+=1\n" +
+                        "    break a>10\n" +
+                        "    println(a)\n" +
+                        "    a+=1\n" +
                         "println('end')\n").parse().toString());
     }
 }
