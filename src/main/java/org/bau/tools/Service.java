@@ -75,11 +75,11 @@ public class Service {
             }
             System.out.println("Compiling =======================================");
             int exitCode;
-            boolean sdl = false;
+            boolean sdl = true;
             if (sdl) {
                 exitCode = runProcess("gcc", "-O3",
-                        "-I/opt/homebrew/include", "-D_THREAD_SAFE",
-                        "-L/opt/homebrew/lib", "-lSDL2", fc.toString());
+                        "-I/opt/homebrew/include", fc.toString(),
+                        "-L/opt/homebrew/lib", "-lSDL3");
             } else {
                 exitCode = runProcess("gcc", "-O3", fc.toString());
             }

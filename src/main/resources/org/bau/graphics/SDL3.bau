@@ -1,0 +1,182 @@
+module org.bau.graphics.SDL3
+
+## 
+
+Mac OS:
+    brew install sdl3
+    gcc -O3 -I/opt/homebrew/include demo.c -L/usr/local/lib -lSDL3 ; ./a.out
+
+Raspberry Pi:
+    install SDL3 from source
+    export LD_LIBRARY_PATH=/usr/local/lib
+    gcc -O3 -I/usr/local/include demo.c -L/usr/local/lib -lSDL3 ; ./a.out
+
+## 
+
+type SDL
+    error int
+    init int
+    window int
+    renderer int
+
+enum eventType
+    none: 0
+    quit: 1
+    key: 2
+    mouseMove: 3
+
+enum keyCode
+    escape: 27
+    space: 32
+    left: 0x40000050
+    right: 0x4000004f
+    up: 0x40000052
+    down: 0x40000051
+    
+type event
+    type int
+    key int
+    x int
+    y int
+
+fun SDL pollEvent() event
+    result : event()
+    native(`
+        SDL_Event event;
+        if (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_EVENT_QUIT:
+                result.type = 1; // quit
+                break;
+            case SDL_EVENT_KEY_DOWN:
+                result.type = 2; // key
+                result.key = event.key.key;
+                break;
+            case SDL_EVENT_MOUSE_MOTION:
+                result.type = 3; // mouseMove
+                result.x = event.motion.x;
+                result.y = event.motion.y;
+                break;
+            }
+        }
+    `)
+    return result
+
+fun SDL draw()
+    native(`
+        SDL_Window* window = (SDL_Window*) this->window;
+        SDL_Renderer* renderer = (SDL_Renderer*) this->renderer;
+        // SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255); // for SDL_RenderClear()
+        // clear the window to red fade color
+        // SDL_RenderClear(renderer);
+        // set draw color to white
+        // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // for SDL_RenderFillRect()
+        // draw mouse rectangle
+        // SDL_RenderFillRect(renderer, &mouseRect);
+        // draw everything to screen
+        SDL_RenderPresent(renderer);
+        SDL_Delay(1);
+        `)
+
+fun SDL color(r int, g int, b int, a int)
+    native(`
+        SDL_Renderer* renderer = (SDL_Renderer*) this->renderer;
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    `)       
+
+fun SDL fillRect(x int, y int, w int, h int)
+    native(`
+        SDL_Renderer* renderer = (SDL_Renderer*) this->renderer;
+        SDL_FRect rect;
+        rect.x = x;
+        rect.y = y;
+        rect.w = w;
+        rect.h = h;
+        SDL_RenderFillRect(renderer, &rect);
+    `)       
+        
+fun SDL start()
+    native(`
+        SDL_Window* window = (SDL_Window*) this->window;
+        SDL_Renderer* renderer = (SDL_Renderer*) this->renderer;
+        SDL_Event event;
+        bool running = true;
+        SDL_FRect mouseRect;
+        mouseRect.x = mouseRect.y = -1000; // ensure it's offscreen at startup
+        mouseRect.w = mouseRect.h = 50;
+        // main loop
+        while (running) {
+            // go through all pending events until there are no more
+            while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                    case SDL_EVENT_QUIT: // triggered on window close
+                        running = false;
+                        break;
+                    case SDL_EVENT_KEY_DOWN: // triggered when user presses ESC key
+                        if (event.key.key == SDLK_ESCAPE) {
+                            running = false;
+                        }
+                    case SDL_EVENT_MOUSE_MOTION:
+                        mouseRect.x = event.motion.x - (mouseRect.w / 2.0f);
+                        mouseRect.y = event.motion.y - (mouseRect.h / 2.0f);
+                        break;
+                }
+            }
+    
+            // sine wave with 3 second period
+            float sineWave = SDL_sinf((((float)(SDL_GetTicks() % 3000)) / 3000.0f) * 2.0f * SDL_PI_F);
+            // multiply amplitude by 127 and shift by +127 to get 0..254 color range
+            Uint8 r = (Uint8)(sineWave * 127.0f) + 127;
+            // set shade of red
+            SDL_SetRenderDrawColor(renderer, r, 0, 0, 255); // for SDL_RenderClear()
+    
+            // clear the window to red fade color
+            SDL_RenderClear(renderer);
+    
+            // set draw color to white
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // for SDL_RenderFillRect()
+    
+            // draw mouse rectangle
+            SDL_RenderFillRect(renderer, &mouseRect);
+    
+            // draw everything to screen
+            SDL_RenderPresent(renderer);
+            
+            SDL_Delay(1);
+        }
+    `)
+
+
+fun open() SDL?
+    result : SDL()
+    native(`#include <SDL3/SDL.h>
+        #include <SDL3/SDL_main.h>
+        SDL_Init(SDL_INIT_VIDEO);
+        SDL_Window* window = SDL_CreateWindow("", 640, 480, 0);
+        if (window == NULL) {
+            fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
+            result->error = 1;
+        } else {
+            result->window = (int64_t) window;
+        }
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
+        if ( !renderer ) {
+            fprintf(stderr, "SDL_GetWindowSurface Error: %s\n", SDL_GetError());
+            result->error = 1;
+        } else {
+            result->renderer = (int64_t) renderer;
+        }
+    `)
+    return result
+
+fun SDL close()
+    println('Closing SDL')
+    if renderer
+        native(`SDL_DestroyRenderer((SDL_Renderer*) this->renderer);`)
+        window = 0
+    if window
+        native(`SDL_DestroyWindow((SDL_Window*) this->window);`)
+        window = 0
+    if init
+        native(`SDL_Quit();`)
+        init = 0
