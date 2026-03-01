@@ -93,7 +93,16 @@ fun SDL fillRect(x int, y int, w int, h int)
         rect.w = w;
         rect.h = h;
         SDL_RenderFillRect(renderer, &rect);
-    `)       
+    `)
+
+fun SDL debugText(x int, y int, text i8[])
+    nullTerminatedText : i8[text.len + 1]
+    for i := until(text.len)
+        nullTerminatedText[i] = text[i]
+    native(`
+        SDL_Renderer* renderer = (SDL_Renderer*) this->renderer;
+        SDL_RenderDebugText(renderer, x, y, (const char*) (nullTerminatedText->data));
+    `)
         
 fun SDL start()
     native(`
@@ -147,12 +156,12 @@ fun SDL start()
     `)
 
 
-fun open() SDL?
+fun open(width int, height int) SDL?
     result : SDL()
     native(`#include <SDL3/SDL.h>
         #include <SDL3/SDL_main.h>
         SDL_Init(SDL_INIT_VIDEO);
-        SDL_Window* window = SDL_CreateWindow("", 640, 480, 0);
+        SDL_Window* window = SDL_CreateWindow("", width, height, 0);
         if (window == NULL) {
             fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
             result->error = 1;
