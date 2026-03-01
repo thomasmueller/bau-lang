@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
@@ -34,6 +36,7 @@ public class Service {
             rf.close();
             String s = new String(data, StandardCharsets.UTF_8);
             System.out.println("Parsing =======================================");
+            boolean sdl = s.contains("import org.bau.graphics.SDL");
             Parser p = new Parser(s);
             String c;
             String markdown;
@@ -48,7 +51,6 @@ public class Service {
                 System.out.println("Waiting =====================================");
                 continue;
             }
-
             RandomAccessFile rf2 = new RandomAccessFile(fc, "rw");
             data = c.getBytes(StandardCharsets.UTF_8);
             rf2.write(data);
@@ -75,15 +77,15 @@ public class Service {
             }
             System.out.println("Compiling =======================================");
             int exitCode;
-            boolean sdl = true;
+            ArrayList<String> gcc = new ArrayList<>(List.of(
+                    "gcc", "-O3",
+                    "-I/usr/local/include",
+                    "-I/opt/homebrew/include", fc.toString(),
+                    "-L/opt/homebrew/lib"));
             if (sdl) {
-                exitCode = runProcess("gcc", "-O3",
-                        "-I/opt/homebrew/include", fc.toString(),
-                        "-L/opt/homebrew/lib", "-lSDL3");
-            } else {
-                exitCode = runProcess("gcc", "-O3", fc.toString());
+                gcc.add("-lSDL3");
             }
-            // int exitCode = runProcess("gcc", fc.toString());
+            exitCode = runProcess(gcc.toArray(new String[0]));
             File f2 = new File("a.out");
             if (exitCode == 0) {
                 System.out.println("Running =========================================");

@@ -12,17 +12,23 @@ public class Transpile {
 
     public static void main(String... args) throws Exception {
         ArrayList<String> sourceFileNames = new ArrayList<>();
-        ArrayList<String> gccOptions = new ArrayList<>();
+        ArrayList<String> gccIncludeOptions = new ArrayList<>();
+        ArrayList<String> gccLinkOptions = new ArrayList<>();
         boolean useTmMalloc = false;
         boolean traceRefCounts = false;
         for (int i = 0; i < args.length; i++) {
             String a = args[i];
-            if (a.equals("-useTmMalloc")) {
+            if (a.equals("-service")) {
+                Service.main(new String[0]);
+                return;
+            } else if (a.equals("-useTmMalloc")) {
                 useTmMalloc = Boolean.parseBoolean(args[++i]);
             } else if (a.equals("-traceRefCounts")) {
                 traceRefCounts = Boolean.parseBoolean(args[++i]);
-            } else if (a.startsWith("-")) {
-                gccOptions.add(a);
+            } else if (a.startsWith("-I")) {
+                gccIncludeOptions.add(a);
+            } else if (a.startsWith("-L") || a.startsWith("-l")) {
+                gccLinkOptions.add(a);
             } else if (a.endsWith("*.bau")) {
                 String path = a.substring(0, a.length() - "*.bau".length());
                 File dir = new File(path);
@@ -91,11 +97,11 @@ public class Transpile {
             rf2.write(data);
             rf2.setLength(data.length);
             rf2.close();
-            if (!gccOptions.isEmpty()) {
+            if (!gccIncludeOptions.isEmpty()) {
                 String outFileName = sourceFileName.substring(0, sourceFileName.length() - 4);
                 ArrayList<String> gcc = new ArrayList<>();
                 gcc.add("gcc");
-                gcc.addAll(gccOptions);
+                gcc.addAll(gccIncludeOptions);
                 gcc.add(cFileName);
                 gcc.add("-o");
                 gcc.add(outFileName);

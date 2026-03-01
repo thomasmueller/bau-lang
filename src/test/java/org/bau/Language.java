@@ -7,9 +7,13 @@ https://github.com/NicoNex/tau
 
 r/C_Programming, r/compsci, r/compilers, r/embedded/
 
-Traits
 
-SDL2 or GLFW
+Microgpt
+https://news.ycombinator.com/item?id=47202708
+https://karpathy.github.io/2026/02/12/microgpt/
+
+
+Traits
 
 value equality and comparison operator overloading, specially for strings
 reference equality via

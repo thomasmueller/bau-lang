@@ -9,7 +9,7 @@ fn main() {
 
     for i in 0..SIZE {
         let expr: Box<dyn Expression> = match random(i as i32, 9) {
-            0 => Box::new(Variable { value: 1 }),
+            0 => Box::new(Variable { value: random(i as i32, 1000) as i32 }),
             1 => Box::new(NumberLiteral),
             2 => Box::new(StringLiteral),
             3 => Box::new(NewExpr),
@@ -61,10 +61,12 @@ fn run(expressions: &[Box<dyn Expression>],
     let mut sum: i64 = 0;
 
     for i in 0..expressions.len() {
-        sum += expressions[i].eval() as i64;
-        sum += expressions[i].hash() as i64;
-        sum += statements[i].execute() as i64;
-        sum += statements[i].hash() as i64;
+        let mut j = random(i as i32, expressions.len() as u32);
+        sum += expressions[j].eval() as i64;
+        sum += statements[j].execute() as i64;
+        j = random(-(i as i32), expressions.len() as u32);
+        sum += expressions[j].hash() as i64;
+        sum += statements[j].hash() as i64;
     }
 
     sum
@@ -105,7 +107,7 @@ struct Variable {
 }
 
 impl Hashable for Variable {
-    fn hash(&self) -> i32 { 11 }
+    fn hash(&self) -> i32 { self.value + 11 }
 }
 
 impl Expression for Variable {
@@ -167,8 +169,8 @@ impl Statement for DoWhileStmt { fn execute(&self) -> i32 { 23 } }
 
 struct Assignment;
 impl Hashable for Assignment { fn hash(&self) -> i32 { 34 } }
-impl Statement for Assignment { fn execute(&self) -> i32 { 24 } }
-impl Expression for Assignment { fn eval(&self) -> i32 { 25 } }
+impl Statement for Assignment { fn execute(&self) -> i32 { self.hash() + 24 } }
+impl Expression for Assignment { fn eval(&self) -> i32 { self.hash() + 25 } }
 
 struct SwitchStmt;
 impl Hashable for SwitchStmt { fn hash(&self) -> i32 { 36 } }
