@@ -54,6 +54,7 @@ proc fannkuch(n: int): int =
     result = flips
 
 proc main() =
+    echo &"Nim"
     let args = commandLineParams()
     var n = 4
     if args.len > 0:

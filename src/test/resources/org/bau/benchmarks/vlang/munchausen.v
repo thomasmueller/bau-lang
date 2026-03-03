@@ -5,6 +5,7 @@ import math
 const limit = 440_000_000
 
 fn main() {
+    println('V')
     cache := get_cache()
     for i in 0 .. limit {
         if is_munchausen(i, cache) {

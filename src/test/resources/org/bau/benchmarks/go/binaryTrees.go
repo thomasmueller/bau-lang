@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+    fmt.Println("Go")
     n := 10
     flag.Parse()
     if flag.NArg() > 0 {

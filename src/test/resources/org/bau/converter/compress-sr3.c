@@ -383,12 +383,12 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1002;
 i8_array* string_1003;
 i8_array* string_1004;
-i8_array* string_1008;
+i8_array* string_1005;
 i8_array* string_1009;
 i8_array* string_1010;
+i8_array* string_1011;
 int_array* int_array_const(int64_t* data, uint32_t len) {
     int_array* result = _malloc(sizeof(int_array));
     result->len = len;
@@ -408,12 +408,12 @@ int64_t inPos;
 int64_t outPos;
 Sr3* global;
 Sr3* Sr3_2(i8_array* input, i8_array* output) {
-    Sr3* _t2 = Sr3_new();
+    Sr3* _t1 = Sr3_new();
     _incUseStack(input);
-    _t2->input = input;
+    _t1->input = input;
     _incUseStack(output);
-    _t2->output = output;
-    return _t2;
+    _t1->output = output;
+    return _t1;
 }
 void compress_0() {
     int64_t c1 = 0;
@@ -730,12 +730,12 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1002 = str_const("Parameters: c|d input output", 28);
-    string_1003 = str_const("r", 1);
-    string_1004 = str_const("Input does not exist", 20);
-    string_1008 = str_const("Not an SR3 file", 15);
-    string_1009 = str_const("w", 1);
-    string_1010 = str_const("Could not open output", 21);
+    string_1003 = str_const("Parameters: c|d input output", 28);
+    string_1004 = str_const("r", 1);
+    string_1005 = str_const("Input does not exist", 20);
+    string_1009 = str_const("Not an SR3 file", 15);
+    string_1010 = str_const("w", 1);
+    string_1011 = str_const("Could not open output", 21);
     int64_t array_const_1000[] = {256, 170, 128, 102, 85, 73, 64, 56, 51, 46, 42, 39, 36, 34, 32, 30, 28, 26, 25, 24, 23, 22, 21, 20, 19, 18, 18, 17, 17, 16, 16, 15, 15, 14, 14, 13, 13, 13, 12, 12, 12, 11, 11, 11, 11, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3};
     array_1000 = int_array_const(array_const_1000, 128);
     _main();
@@ -746,33 +746,33 @@ void _main() {
     DT = array_1000;
     di1 = 5;
     h = 0;
-    int_array* _t5 = int_array_new(528384);
-    _incUseStack(_t5);
-    state = _t5;
+    int_array* _t3 = int_array_new(528384);
+    _incUseStack(_t3);
+    state = _t3;
     x1 = 0;
     x2 = 0xffffffff;
     x = 0;
     inPos = 0;
     outPos = 0;
-    i8_array* _t6 = i8_array_new(0);
-    i8_array* _t7 = i8_array_new(0);
-    global = Sr3_2(_t6, _t7);
-    int64_t _t8 = org_bau_Env_argCount_0();
-    if (_t8 != 4) {
+    i8_array* _t4 = i8_array_new(0);
+    i8_array* _t5 = i8_array_new(0);
+    global = Sr3_2(_t4, _t5);
+    int64_t _t6 = org_bau_Env_argCount_0();
+    if (_t6 != 4) {
         printf("Parameters: c|d input output\n");
         return;
     }
-    i8_array* _t9 = org_bau_Env_arg_1(2);
-    org_bau_File_File* in = org_bau_File_openFile_2(_t9, string_1003);
+    i8_array* _t7 = org_bau_Env_arg_1(2);
+    org_bau_File_File* in = org_bau_File_openFile_2(_t7, string_1004);
     if (!(in)) {
         printf("Input does not exist\n");
         return;
     }
-    int64_t _t10 = org_bau_File_File_len_1(in);
-    i8_array* _t11 = i8_array_new(_t10);
-    _incUseStack(_t11);
-    i8_array* input = _t11;
-    int64_t _t12 = org_bau_File_File_read_4(in, input, 0, _arrayLen(input));
+    int64_t _t8 = org_bau_File_File_len_1(in);
+    i8_array* _t9 = i8_array_new(_t8);
+    _incUseStack(_t9);
+    i8_array* input = _t9;
+    int64_t _t10 = org_bau_File_File_read_4(in, input, 0, _arrayLen(input));
     ;
     if (528384 > 0) {
         while (1 == 1) {
@@ -789,15 +789,15 @@ void _main() {
         }
     }
     org_bau_File_File_close_1(in);
-    i8_array* _t13 = i8_array_new(_arrayLen(input) * 10);
-    _incUseStack(_t13);
-    i8_array* output = _t13;
-    Sr3* _t14 = Sr3_2(input, output);
-    _incUseStack(_t14);
+    i8_array* _t11 = i8_array_new(_arrayLen(input) * 10);
+    _incUseStack(_t11);
+    i8_array* output = _t11;
+    Sr3* _t12 = Sr3_2(input, output);
+    _incUseStack(_t12);
     _decUseStack(global, Sr3);
-    global = _t14;
-    i8_array* _t15 = org_bau_Env_arg_1(1);
-    if (_t15->data[idx_2(0, _arrayLen(_t15))] == 99) {
+    global = _t12;
+    i8_array* _t13 = org_bau_Env_arg_1(1);
+    if (_t13->data[idx_2(0, _arrayLen(_t13))] == 99) {
         output->data[idx_2(0, _arrayLen(output))] = 115;
         output->data[idx_2(1, _arrayLen(output))] = 82;
         output->data[idx_2(2, _arrayLen(output))] = 2;
@@ -805,17 +805,17 @@ void _main() {
         outPos = 4;
         compress_0();
     } else {
-        int64_t _t16 = input->data[idx_2(0, _arrayLen(input))] != 115;
+        int64_t _t14 = input->data[idx_2(0, _arrayLen(input))] != 115;
+        if (!(_t14)) {
+            int64_t _t15 = input->data[idx_2(1, _arrayLen(input))] != 82;
+            _t14 = _t15;
+        }
+        int64_t _t16 = _t14;
         if (!(_t16)) {
-            int64_t _t17 = input->data[idx_2(1, _arrayLen(input))] != 82;
+            int64_t _t17 = input->data[idx_2(2, _arrayLen(input))] != 2;
             _t16 = _t17;
         }
-        int64_t _t18 = _t16;
-        if (!(_t18)) {
-            int64_t _t19 = input->data[idx_2(2, _arrayLen(input))] != 2;
-            _t18 = _t19;
-        }
-        if (_t18) {
+        if (_t16) {
             printf("Not an SR3 file\n");
             return;
         }
@@ -823,30 +823,30 @@ void _main() {
         inPos = 4;
         decompress_0();
     }
-    i8_array* _t20 = org_bau_Env_arg_1(3);
-    org_bau_File_File* out = org_bau_File_openFile_2(_t20, string_1009);
+    i8_array* _t18 = org_bau_Env_arg_1(3);
+    org_bau_File_File* out = org_bau_File_openFile_2(_t18, string_1010);
     if (!(out)) {
         printf("Could not open output\n");
         return;
     }
-    int64_t _t21 = org_bau_File_File_write_4(out, output, 0, outPos);
+    int64_t _t19 = org_bau_File_File_write_4(out, output, 0, outPos);
     ;
     org_bau_File_File_close_1(out);
     _decUseStack(out, org_bau_File_File);
-    _decUseStack(_t20, i8_array);
-    _decUseStack(_t15, i8_array);
-    _decUseStack(_t14, Sr3);
-    _decUseStack(output, i8_array);
+    _decUseStack(_t18, i8_array);
     _decUseStack(_t13, i8_array);
-    _decUseStack(input, i8_array);
+    _decUseStack(_t12, Sr3);
+    _decUseStack(output, i8_array);
     _decUseStack(_t11, i8_array);
-    _decUseStack(in, org_bau_File_File);
+    _decUseStack(input, i8_array);
     _decUseStack(_t9, i8_array);
-    _decUseStack(DT, int_array);
-    _decUseStack(_t5, int_array);
-    _decUseStack(state, int_array);
-    _decUseStack(_t6, i8_array);
+    _decUseStack(in, org_bau_File_File);
     _decUseStack(_t7, i8_array);
+    _decUseStack(DT, int_array);
+    _decUseStack(_t3, int_array);
+    _decUseStack(state, int_array);
+    _decUseStack(_t4, i8_array);
+    _decUseStack(_t5, i8_array);
     _decUseStack(global, Sr3);
     _end();
 }

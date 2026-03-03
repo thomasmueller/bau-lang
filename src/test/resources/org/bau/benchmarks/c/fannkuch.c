@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 int fannkuch(int n) {
+    printf("C\n");
     int perm1[n];
     for (int i = 0; i < n; i++)
         perm1[i] = i;

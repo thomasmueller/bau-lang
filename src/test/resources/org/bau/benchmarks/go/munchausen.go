@@ -10,6 +10,7 @@ import (
 const LIMIT = 440_000_000
 
 func main() {
+    fmt.Println("Go")
     cache := getCache()
     for i := 0; i < LIMIT; i++ {
         if isMunchausen(i, &cache) {

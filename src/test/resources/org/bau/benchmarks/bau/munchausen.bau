@@ -3,6 +3,7 @@
 import org.bau.Int
 
 fun main()
+    println('Bau')
     for i := until(LIMIT)
         if isMunchausen(i)
             println(i)

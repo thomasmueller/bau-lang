@@ -5,17 +5,21 @@ import org.bau.Int
 import org.bau.Env
 
 fun main()
-    minDepth : 4
-    maxDepth := 10
+    println('Bau')
+    n := 10
     if Env.argCount() > 1
-        maxDepth = Int.parseInt(Env.arg(1))
+        n = Int.parseInt(Env.arg(1))
+    minDepth : 4
+    maxDepth := n
+    if minDepth + 2 > n
+        maxDepth = minDepth + 2
     stretchDepth : maxDepth + 1
     stretch(stretchDepth)
     longLived : buildTree(maxDepth)
     depth := minDepth
     loop depth <= maxDepth
         iterations := 1 << (maxDepth - depth + minDepth)
-        sum := 0;
+        sum := 0
         for i := until(iterations)
             sum += count(depth)
         println(iterations '\t trees of depth ' depth '\t check: ' sum)

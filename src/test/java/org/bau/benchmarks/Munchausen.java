@@ -7,6 +7,7 @@ public class Munchausen {
     static int[] cache = getCache();
 
     public static void main(String[] args) {
+        System.out.println("Java");
         for (int i = 0; i < LIMIT; ++i)
             if (isMunchausen(i))
                 System.out.println(i);

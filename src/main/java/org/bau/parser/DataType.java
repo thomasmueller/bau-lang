@@ -51,9 +51,8 @@ public class DataType {
 
     public List<Variable> fields = new ArrayList<>();
 
-    private final DataType refCountBaseType;
-    private DataType ownerType;
     private DataType borrowType;
+    private DataType ownerType2;
 
     public LinkedHashMap<String, Long> enumValues;
     FunctionDefinition autoClose;
@@ -68,7 +67,7 @@ public class DataType {
     public DataType functionPointerReturnType;
     public ArrayList<FullName> traitNames = new ArrayList<>();
     public ArrayList<DataType> traitTypes = new ArrayList<>();
-    public Trait traitDefinition;
+    private Trait traitDefinition;
     public HashSet<DataType> implementingTypes = new HashSet<>();
 
     public static boolean isGenericTypeName(String token) {
@@ -81,12 +80,12 @@ public class DataType {
                 token.toUpperCase().equals(token);
     }
 
-    public static DataType newTraitType(String module, String name) {
-        return new DataType(module, name, 0, false, null, null, false, MemoryType.REF_COUNT);
+    public static DataType newTraitType(String module, String name, MemoryType memoryType) {
+        return new DataType(module, name, 0, false, null, false, memoryType);
     }
 
     public static DataType newNumberType(String name, int sizeOf) {
-        return new DataType(null, name, sizeOf, true, null, null, false, MemoryType.COPY);
+        return new DataType(null, name, sizeOf, true, null, false, MemoryType.COPY);
     }
 
     public static DataType newBuiltIn(String name, int sizeOf) {
@@ -94,7 +93,7 @@ public class DataType {
     }
 
     public static DataType newEnumType(String module, String name) {
-        return new DataType(module, name, 8, true, null, null, false, MemoryType.COPY);
+        return new DataType(module, name, 8, true, null, false, MemoryType.COPY);
     }
 
     public static DataType newEmptyType(String module, String name) {
@@ -102,17 +101,17 @@ public class DataType {
     }
 
     public static DataType newRegularType(String module, String name, int sizeOf, MemoryType memoryType) {
-        if (memoryType == MemoryType.BORROW || memoryType == MemoryType.OWNER) {
+        if (memoryType == MemoryType.BORROW) {
             throw new IllegalArgumentException();
         }
         return newNonArray(module, name, sizeOf, memoryType);
     }
 
     private static DataType newNonArray(String module, String name, int sizeOf, MemoryType memoryType) {
-        if (memoryType == MemoryType.BORROW || memoryType == MemoryType.OWNER) {
+        if (memoryType == MemoryType.BORROW) {
             throw new IllegalArgumentException();
         }
-        return new DataType(module, name, sizeOf, false, null, null, false, memoryType);
+        return new DataType(module, name, sizeOf, false, null, false, memoryType);
     }
 
     public static DataType newFunctionPointer(String module, ArrayList<DataType> params, DataType returnType) {
@@ -148,7 +147,7 @@ public class DataType {
         }
     }
 
-    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, DataType refCountBaseType, boolean isNullable, MemoryType memoryType) {
+    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, boolean isNullable, MemoryType memoryType) {
         this.isNullable = isNullable;
         this.module = module;
         this.name = name;
@@ -157,21 +156,20 @@ public class DataType {
         this.sizeOf = sizeOf;
         this.isNumber = isNumber;
         this.arrayBaseType = arrayBaseType;
-        this.refCountBaseType = refCountBaseType;
         if (isNumber) {
             isFloatingPoint = name.charAt(0) == 'f';
         } else {
             isFloatingPoint = false;
         }
         if (!isArray() && memoryType != MemoryType.COPY && !isNullable) {
-            nullableType = new DataType(module, name, sizeOf, false, null, refCountBaseType, true, memoryType);
+            nullableType = new DataType(module, name, sizeOf, false, null, true, memoryType);
             nullableType.fields = fields;
             nullableType.notNullType = this;
         } else {
             nullableType = null;
         }
         if (!isArray()) {
-            arrayType = new DataType(module, name + "[]", sizeOf, false, this, null, isNullable, MemoryType.REF_COUNT);
+            arrayType = new DataType(module, name + "[]", sizeOf, false, this, isNullable, MemoryType.REF_COUNT);
         } else {
             arrayType = this;
         }
@@ -225,9 +223,10 @@ public class DataType {
 
     public String id() {
         String n = name;
-        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
-            n += "+";
-        }
+        int todo;
+//        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
+//            n += "+";
+//        }
         return n;
     }
 
@@ -278,10 +277,6 @@ public class DataType {
             throw new IllegalStateException();
         }
         return arrayType;
-    }
-
-    public DataType refCountBaseType() {
-        return refCountBaseType;
     }
 
     public String toString() {
@@ -426,26 +421,31 @@ public class DataType {
         if (memoryType == MemoryType.OWNER) {
             return this;
         } else if (memoryType == MemoryType.BORROW) {
-            return refCountBaseType.ownerType();
+            int todoRemove2;
+            if (ownerType2 == null) {
+                throw new IllegalStateException();
+            }
+            return ownerType2;
+        } else {
+            throw new IllegalStateException();
         }
-        if (ownerType == null) {
-            ownerType = new DataType(module, name, sizeOf, false, null, this, false, MemoryType.OWNER);
-            ownerType.fields = fields;
-        }
-        return ownerType;
     }
 
     public DataType borrowType() {
         if (memoryType == MemoryType.BORROW) {
             return this;
         } else if (memoryType == MemoryType.OWNER) {
-            return refCountBaseType.borrowType();
+            if (borrowType == null) {
+                borrowType = new DataType(module, name, sizeOf, false, null, false, MemoryType.BORROW);
+                borrowType.ownerType2 = this;
+                borrowType.fields = fields;
+            }
+            return borrowType;
+        } else {
+            int todoReturnThis;
+            throw new IllegalStateException();
         }
-        if (borrowType == null) {
-            borrowType = new DataType(module, name, sizeOf, false, null, this, false, MemoryType.BORROW);
-            borrowType.fields = fields;
-        }
-        return borrowType;
+
     }
 
     public boolean isNullable() {
@@ -454,6 +454,23 @@ public class DataType {
 
     public String getModule() {
         return module;
+    }
+
+    public void setTraitDefinition(Trait trait) {
+        this.traitDefinition = trait;
+    }
+
+    public Trait getTraitDefinition() {
+        if (traitDefinition != null) {
+            return traitDefinition;
+        }
+        if (notNullType != null && notNullType.getTraitDefinition() != null) {
+            return notNullType.getTraitDefinition();
+        }
+        if (ownerType2 != null) {
+            return ownerType2.getTraitDefinition();
+        }
+        return null;
     }
 
     public static String getId(String name, ArrayList<DataType> params) {
@@ -500,12 +517,13 @@ public class DataType {
         if (traitDefinition != null) {
             return true;
         }
+        if (ownerType2 != null && ownerType2.isTrait()) {
+            return true;
+        }
         if (notNullType != null && notNullType.isTrait()) {
             return true;
         }
-        if (refCountBaseType != null && refCountBaseType.isTrait()) {
-            return true;
-        }
+        int todoCheckOnOwnerOrBorrowMaybe;
         if (isArray()) {
             return arrayBaseType.isTrait();
         }
@@ -523,10 +541,7 @@ public class DataType {
                 return true;
             }
         }
-        // owner or borrow type
-        if (refCountBaseType != null && traitType.refCountBaseType != null) {
-            return refCountBaseType.implementsTrait(traitType.refCountBaseType);
-        }
+        int todoCheckOnOwnerOrBorrowMaybe;
         return false;
     }
 

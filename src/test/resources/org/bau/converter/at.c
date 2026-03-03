@@ -826,30 +826,30 @@ int64_t VARIABLE;
 int64_t RETURN;
 int64_t LIST;
 At* At_9(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value, Value* returnValue) {
-    At* _t52 = At_new();
+    At* _t43 = At_new();
     _incUseStack(global);
-    _t52->global = global;
+    _t43->global = global;
     _incUseStack(local);
-    _t52->local = local;
+    _t43->local = local;
     _incUseStack(functions);
-    _t52->functions = functions;
+    _t43->functions = functions;
     _incUseStack(stack);
-    _t52->stack = stack;
+    _t43->stack = stack;
     _incUseStack(out);
-    _t52->out = out;
+    _t43->out = out;
     org_bau_String_string_copy(&code);
-    _t52->code = code;
+    _t43->code = code;
     org_bau_String_string_copy(&token);
-    _t52->token = token;
+    _t43->token = token;
     _incUseStack(value);
-    _t52->value = value;
-    _t52->pos = 0;
+    _t43->value = value;
+    _t43->pos = 0;
     _incUseStack(returnValue);
-    _t52->returnValue = returnValue;
-    _t52->hasReturnValue = 0;
-    _t52->counter = 0;
-    _t52->inOperator = 0;
-    return _t52;
+    _t43->returnValue = returnValue;
+    _t43->hasReturnValue = 0;
+    _t43->counter = 0;
+    _t43->inOperator = 0;
+    return _t43;
 }
 Value* At_call_3(At* this, org_bau_String_string name, Expr_array* argList) {
     org_bau_List_List_Expr* m = At_getFunction_2(this, name);
@@ -2108,21 +2108,21 @@ void At_setFunction_3(At* this, org_bau_String_string name, Expr* expr) {
     org_bau_HashMap_HashMap_org_bau_String_string_Expr_put_4(this->functions, _t0, name, expr);
 }
 Expr* Expr_3(org_bau_String_string name, Value* value, org_bau_List_List_Expr* list) {
-    Expr* _t44 = Expr_new();
-    _t44->exprType = 0;
+    Expr* _t39 = Expr_new();
+    _t39->exprType = 0;
     org_bau_String_string_copy(&name);
-    _t44->name = name;
+    _t39->name = name;
     _incUseStack(value);
-    _t44->value = value;
+    _t39->value = value;
     _incUseStack(list);
-    _t44->list = list;
-    return _t44;
+    _t39->list = list;
+    return _t39;
 }
 Value* Value_1(org_bau_List_List_float* list) {
-    Value* _t40 = Value_new();
+    Value* _t37 = Value_new();
     _incUseStack(list);
-    _t40->list = list;
-    return _t40;
+    _t37->list = list;
+    return _t37;
 }
 void Value_add_2(Value* this, double x) {
     org_bau_List_List_float_add_2(this->list, x);
@@ -2280,26 +2280,26 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
     }
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Expr* org_bau_HashMap_HashMap_org_bau_String_string_Expr_3(org_bau_String_string_array* keys, Expr_array* values, int_array* hashes) {
-    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t48 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_new();
-    _t48->size = 0;
+    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t41 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_new();
+    _t41->size = 0;
     _incUseStack(keys);
-    _t48->keys = keys;
+    _t41->keys = keys;
     _incUseStack(values);
-    _t48->values = values;
+    _t41->values = values;
     _incUseStack(hashes);
-    _t48->hashes = hashes;
-    return _t48;
+    _t41->hashes = hashes;
+    return _t41;
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_HashMap_HashMap_org_bau_String_string_Value_3(org_bau_String_string_array* keys, Value_array* values, int_array* hashes) {
-    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t46 = org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
-    _t46->size = 0;
+    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t40 = org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+    _t40->size = 0;
     _incUseStack(keys);
-    _t46->keys = keys;
+    _t40->keys = keys;
     _incUseStack(values);
-    _t46->values = values;
+    _t40->values = values;
     _incUseStack(hashes);
-    _t46->hashes = hashes;
-    return _t46;
+    _t40->hashes = hashes;
+    return _t40;
 }
 int64_t org_bau_HashMap_hashCode_1(i8_array* data) {
     if (_arrayLen(data) <= 0) {
@@ -2636,25 +2636,25 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     return result;
 }
 org_bau_List_List_Expr* org_bau_List_List_Expr_1(Expr_array* array) {
-    org_bau_List_List_Expr* _t42 = org_bau_List_List_Expr_new();
-    _incUseStack(array);
-    _t42->array = array;
-    _t42->size = 0;
-    return _t42;
-}
-org_bau_List_List_float* org_bau_List_List_float_1(float_array* array) {
-    org_bau_List_List_float* _t38 = org_bau_List_List_float_new();
+    org_bau_List_List_Expr* _t38 = org_bau_List_List_Expr_new();
     _incUseStack(array);
     _t38->array = array;
     _t38->size = 0;
     return _t38;
 }
-org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(org_bau_HashMap_HashMap_org_bau_String_string_Value_array* array) {
-    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t50 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+org_bau_List_List_float* org_bau_List_List_float_1(float_array* array) {
+    org_bau_List_List_float* _t36 = org_bau_List_List_float_new();
     _incUseStack(array);
-    _t50->array = array;
-    _t50->size = 0;
-    return _t50;
+    _t36->array = array;
+    _t36->size = 0;
+    return _t36;
+}
+org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(org_bau_HashMap_HashMap_org_bau_String_string_Value_array* array) {
+    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t42 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+    _incUseStack(array);
+    _t42->array = array;
+    _t42->size = 0;
+    return _t42;
 }
 org_bau_List_List_Expr* org_bau_List_newList_Expr_1(int64_t _T) {
     Expr_array* _t0 = Expr_array_new(4);

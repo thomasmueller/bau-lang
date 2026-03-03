@@ -8,6 +8,7 @@ var LIMIT: Int = 440000000
 var cache: IntArray = getCache2()
 
 fun main(args: Array<String>) {
+    println("Kotlin")
     for (i in 0 until LIMIT)
         if (isMunchausen(i))
             println(i)

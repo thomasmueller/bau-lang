@@ -298,17 +298,19 @@ public class Parser {
         if (functionContext.getType(targetModule, name) != null) {
             throw syntaxError("Type '" + name + "' was already defined");
         }
-        DataType type = DataType.newTraitType(targetModule, name);
+        boolean owned = match("owned");
+        MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
+        DataType type = DataType.newTraitType(targetModule, name, memoryType);
         FullName traitName = new FullName(targetModule, name);
-        type.traitDefinition = new Trait(traitName);
+        type.setTraitDefinition(new Trait(traitName));
         int functionId = 0;
         if (matchOp(":")) {
             while (true) {
                 FullName n = readIdentifierWithPossibleModule();
-                type.traitDefinition.requiredTraitNames.add(n);
+                type.getTraitDefinition().requiredTraitNames.add(n);
                 DataType required = program.getType(n.module, n.name);
                 if (required != null) {
-                    Trait tr = required.traitDefinition;
+                    Trait tr = required.getTraitDefinition();
                     if (tr == null) {
                         throw syntaxError("Type '" + name + "' is not a trait");
                     }
@@ -326,7 +328,7 @@ public class Parser {
                             functionId = d2.traitFunctionId + 1;
                         }
                         d2.returnType = def.returnType;
-                        type.traitDefinition.functions.add(d2);
+                        type.getTraitDefinition().functions.add(d2);
                         program.addFunction(d2);
                     }
                 }
@@ -353,7 +355,7 @@ public class Parser {
                     throw syntaxError("Template are not supported in traits");
                 }
                 def.traitFunctionId = functionId++;
-                type.traitDefinition.functions.add(def);
+                type.getTraitDefinition().functions.add(def);
                 program.addFunction(def);
             }
         }
@@ -397,6 +399,7 @@ public class Parser {
                 }
             }
         }
+        boolean owned = match("owned");
         int sizeOf = 0;
         ArrayList<FullName> traitNames = new ArrayList<>();
         if (matchOp(":")) {
@@ -415,9 +418,16 @@ public class Parser {
             return true;
         }
         MemoryType memoryType = name.charAt(0) > 'Z' ? MemoryType.COPY : MemoryType.REF_COUNT;
+        if (owned) {
+            if (memoryType == MemoryType.COPY) {
+                throw syntaxError("Value types can not be owned");
+            }
+            memoryType = MemoryType.OWNER;
+        }
         DataType type = DataType.newRegularType(targetModule, name, sizeOf, memoryType);
         // need to add it first, because one of the fields could be of this type
         program.addType(type);
+        int todoWriteOwned;
         program.addComment("type " + type.toString(), comment);
         lastComment = null;
         ArrayList<Variable> fields = new ArrayList<>();
@@ -438,9 +448,10 @@ public class Parser {
         functionContext.rewindStack(stackPos);
         type.traitNames.addAll(traitNames);
         defineConstructor(type);
-        if (!type.isCopyType()) {
-            defineConstructor(type.ownerType());
-        }
+        int test;
+//        if (!type.isCopyType()) {
+//            defineConstructor(type.ownerType());
+//        }
         return true;
     }
 
@@ -449,9 +460,11 @@ public class Parser {
         def.isConstructor = true;
         def.module = type.module();
         def.name = type.name();
-        if (type.memoryType() == MemoryType.OWNER) {
-            def.name += "_owned";
-        }
+
+        int todo;
+//        if (type.memoryType() == MemoryType.OWNER) {
+//            def.name += "_owned";
+//        }
         def.returnType = type;
         New n = new New(type, null);
         Variable result = assignTempVariable(def.list, n);
@@ -578,11 +591,12 @@ public class Parser {
                 }
                 callType = callType.arrayType();
             } else {
-                if (matchOp("+")) {
-                    // owned
-                    typeName = id + "+";
-                    callType = functionContext.getType(targetModule, typeName);
-                }
+                int todoTest;
+//                if (matchOp("+")) {
+//                    // owned
+//                    typeName = id + "+";
+//                    callType = functionContext.getType(targetModule, typeName);
+//                }
             }
         }
         if (callType != null && callType.template != null) {
@@ -966,15 +980,17 @@ public class Parser {
                 t = parseTemplatedType(t, params);
             }
         }
-        if (matchOp("+")) {
-            if (borrow) {
-                throw syntaxError("Borrow types don't need ':'");
-            }
-            if (t.memoryType() != MemoryType.REF_COUNT) {
-                throw syntaxError("Not a pointer type");
-            }
-            t = t.ownerType();
-        }
+
+        int test;
+//        if (matchOp("+")) {
+//            if (borrow) {
+//                throw syntaxError("Borrow types don't need ':'");
+//            }
+//            if (t.memoryType() != MemoryType.REF_COUNT) {
+//                throw syntaxError("Not a pointer type");
+//            }
+//            t = t.ownerType();
+//        }
         if (arraysOk && matchOp("[")) {
             if (!matchOp("]")) {
                 throw syntaxError("Expected ']', got '" + token + "' when reading a type");
@@ -2090,6 +2106,8 @@ public class Parser {
                 }
                 Expression cast = program.cast(expr, isNotNull, targetType);
                 if (cast == null) {
+; int test;
+program.cast(expr, isNotNull, targetType);
                     throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
                 }
                 call.args.set(i, cast);
@@ -2932,11 +2950,13 @@ public class Parser {
                     // the name of the constructor includes the type names
                     n = dataType.name();
                 }
-                if (matchOp("+")) {
-                    dataType = dataType.ownerType();
-                    // call the constructor of the owned type
-                    n += "_owned";
-                }
+                int test;
+//                if (matchOp("+")) {
+//                    dataType = dataType.ownerType();
+//                    // call the constructor of the owned type
+//                    n += "_owned";
+//                }
+
                 if (matchOp("[")) {
                     Expression arrayLength = parseExpression();
                     if (arrayLength.canThrowException() != null) {

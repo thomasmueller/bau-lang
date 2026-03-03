@@ -6,6 +6,7 @@ package org.bau.benchmarks;
 public class BinaryTrees {
 
     public static void main(String[] args) {
+        System.out.println("Java");
         int n = 10;
         if (args.length > 0)
             n = Integer.parseInt(args[0]);

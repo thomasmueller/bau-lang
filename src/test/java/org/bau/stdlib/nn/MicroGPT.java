@@ -1,4 +1,6 @@
 // https://gist.github.com/karpathy/8627fe009c40f57531cb18360106ce95
+// https://news.ycombinator.com/item?id=47202708
+// https://karpathy.github.io/2026/02/12/microgpt/
 package org.bau.stdlib.nn;
 
 import java.io.InputStream;
@@ -18,7 +20,6 @@ import java.util.stream.Collectors;
 public class MicroGPT {
 
     public static void main(String[] args) throws Exception {
-        // Download dataset if missing
         if (!Files.exists(Path.of("input.txt"))) {
             InputStream in = MicroGPT.class.getResourceAsStream("names.txt");
             Files.copy(in, Path.of("input.txt"));

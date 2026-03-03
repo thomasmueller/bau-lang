@@ -527,13 +527,13 @@ i8_array* string_1020;
 i8_array* string_1021;
 i8_array* string_1022;
 Token* Token_1(org_bau_List_List_i8* data) {
-    Token* _t3 = Token_new();
-    _t3->ttype = 0;
+    Token* _t2 = Token_new();
+    _t2->ttype = 0;
     _incUseStack(data);
-    _t3->data = data;
-    _t3->min = 0;
-    _t3->max = 0;
-    return _t3;
+    _t2->data = data;
+    _t2->min = 0;
+    _t2->max = 0;
+    return _t2;
 }
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos) {
     org_bau_Exception_exception _lastException;
@@ -661,10 +661,10 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 match match_0() {
-    match _t5 = match_new();
-    _t5.start = 0;
-    _t5.end = 0;
-    return _t5;
+    match _t3 = match_new();
+    _t3.start = 0;
+    _t3.end = 0;
+    return _t3;
 }
 match match_2(int64_t start, int64_t end) {
     match m = match_0();
@@ -780,11 +780,11 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     return _t0;
 }
 org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
-    org_bau_List_List_Token* _t6 = org_bau_List_List_Token_new();
+    org_bau_List_List_Token* _t4 = org_bau_List_List_Token_new();
     _incUseStack(array);
-    _t6->array = array;
-    _t6->size = 0;
-    return _t6;
+    _t4->array = array;
+    _t4->size = 0;
+    return _t4;
 }
 org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
     org_bau_List_List_i8* _t1 = org_bau_List_List_i8_new();

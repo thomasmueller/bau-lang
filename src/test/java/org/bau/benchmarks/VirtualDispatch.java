@@ -2,15 +2,16 @@ package org.bau.benchmarks;
 
 public class VirtualDispatch {
 
-    static final int SIZE = 1_000_000;
-    static final int ITERATIONS = 20;
-
     public static void main(String[] args) {
-        Expression[] expressions = new Expression[SIZE];
-        Statement[] statements = new Statement[SIZE];
-        for (int i = 0; i < SIZE; i++) {
+        System.out.println("Java");
+        int size = 20_000_000;
+        if (args.length > 0)
+            size = Integer.parseInt(args[0]);
+        Expression[] expressions = new Expression[size];
+        Statement[] statements = new Statement[size];
+        for (int i = 0; i < size; i++) {
             switch (random(i, 9)) {
-                case 0: expressions[i] = new Variable(); break;
+                case 0: expressions[i] = new Variable(random(i, 1000)); break;
                 case 1: expressions[i] = new NumberLiteral(); break;
                 case 2: expressions[i] = new StringLiteral(); break;
                 case 3: expressions[i] = new NewExpr(); break;
@@ -21,11 +22,11 @@ public class VirtualDispatch {
                 case 8: expressions[i] = new Comparison(); break;
                 default: throw new AssertionError();
             }
-            switch (random(i + SIZE, 8)) {
+            switch (random(i + size, 8)) {
                 case 0: statements[i] = new IfStmt(); break;
                 case 1: statements[i] = new WhileStmt(); break;
                 case 2: statements[i] = new DoWhileStmt(); break;
-                case 3: statements[i] = new Assignment(); break;
+                case 3: statements[i] = new Assignment(random(i, 2000)); break;
                 case 4: statements[i] = new SwitchStmt(); break;
                 case 5: statements[i] = new ReturnStmt(); break;
                 case 6: statements[i] = new BreakStmt(); break;
@@ -33,12 +34,9 @@ public class VirtualDispatch {
                 default: throw new AssertionError();
             }
         }
-        for (int test = 0; test < 5; test++) {
+        for (int test = 0; test < 3; test++) {
             long start = System.nanoTime();
-            long dummy = 0;
-            for (int i = 0; i < ITERATIONS; i++) {
-                dummy += run(expressions, statements);
-            }
+            long dummy = run(expressions, statements);
             long end = System.nanoTime();
             long timeMs = (end - start) / 1_000_000;
             System.out.println("Time " + timeMs + " ms; dummy: " + dummy);
@@ -50,6 +48,8 @@ public class VirtualDispatch {
         for (int i = 0; i < expressions.length; i++) {
             sum += expressions[i].eval();
             sum += expressions[i].hash();
+        }
+        for (int i = 0; i < statements.length; i++) {
             sum += statements[i].execute();
             sum += statements[i].hash();
         }
@@ -85,10 +85,11 @@ public class VirtualDispatch {
     // ===== Expression Implementations =====
 
     static class Variable implements LeftValue {
-        int value = 1;
+        int value;
+        Variable(int value) { this.value = value; }
         public int eval() { return value; }
         public int store(int v) { value = v; return v; }
-        public int hash() { return 11; }
+        public int hash() { return value + 11; }
     }
 
     static class NumberLiteral implements Expression {
@@ -149,9 +150,11 @@ public class VirtualDispatch {
     }
 
     static class Assignment implements Statement, Expression {
-        public int execute() { return 24; }
-        public int eval() { return 25; }
-        public int hash() { return 34; }
+        int value;
+        Assignment(int value) { this.value = value; }
+        public int execute() { return value + 24; }
+        public int eval() { return value + 25; }
+        public int hash() { return value + 34; }
     }
 
     static class SwitchStmt implements Statement {

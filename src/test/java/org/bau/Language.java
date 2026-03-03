@@ -7,13 +7,13 @@ https://github.com/NicoNex/tau
 
 r/C_Programming, r/compsci, r/compilers, r/embedded/
 
-
-Microgpt
-https://news.ycombinator.com/item?id=47202708
-https://karpathy.github.io/2026/02/12/microgpt/
-
+a type is either owned or not
+"a := &b" for non-owned is the same as "a := b" ?
 
 Traits
+
+int?
+string?
 
 value equality and comparison operator overloading, specially for strings
 reference equality via
@@ -27,6 +27,9 @@ code coverage tool
 assertions on the right?
 language server
 improved stdlib and add to readme
+
+In BigInt currently, move to Array:
+fun copyOfRange(a T[], from int, to int) T[]
 
 yn: input('Is the number larger than ' x ' ?')
 
@@ -50,12 +53,16 @@ is it allow to edit constants (string literals) in a C program?
 
 div by zero: change implementation (simplify)
 
-numberOf -> leadingZeros
+shorten stdlib method, eg.
+numberOfLeadingZeros -> leadingZeros
+isNotANumber -> isNaN
 
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim
 
 stdlib: add "diff" utility?
+
+csv vs tsv
 
 shell
 split, cat, tar

@@ -6,6 +6,7 @@ package org.bau.benchmarks;
 public class Fannkuch {
 
     public static void main(String[] args) {
+        System.out.println("Java");
         int n = (args.length > 0) ? Integer.parseInt(args[0]) : 4;
         System.out.println("Pfannkuchen(" + n + ") = " + fannkuch(n));
     }

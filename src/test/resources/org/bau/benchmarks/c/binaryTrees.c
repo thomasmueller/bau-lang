@@ -13,6 +13,7 @@ int nodeCount(treeNode* tree);
 void clear(treeNode* tree);
 
 int main(int argc, char* argv[]) {
+    printf("C\n");
     int n = 10;
     if (argc > 1) {
         n = atol(argv[1]);

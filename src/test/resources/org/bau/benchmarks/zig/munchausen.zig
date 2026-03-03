@@ -5,6 +5,7 @@ const std = @import("std");
 const LIMIT: u64 = 440_000_000;
 
 pub fn main() !void {
+    std.debug.print("Zig\n", .{});
     var stdout = std.fs.File.stdout().writerStreaming(&.{});
     const cache = getCache();
     var i: u64 = 0;

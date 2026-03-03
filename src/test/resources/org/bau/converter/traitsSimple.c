@@ -268,14 +268,10 @@ typedef struct Reader Reader;
 struct Reader;
 typedef struct Reader_array Reader_array;
 struct Reader_array;
-typedef struct Reader_owned Reader_owned;
-struct Reader_owned;
 typedef struct Writer Writer;
 struct Writer;
 typedef struct Writer_array Writer_array;
 struct Writer_array;
-typedef struct Writer_owned Writer_owned;
-struct Writer_owned;
 typedef struct Memory Memory;
 struct Memory;
 struct i8_array {
@@ -336,13 +332,6 @@ Reader_array* Reader_array_new(uint64_t len) {
     result->_refCount = 1;
     return result;
 }
-struct Reader_owned {
-};
-Reader_owned* Reader_owned_new() {
-    Reader_owned* result = _malloc(sizeof(Reader_owned));
-    _traceMalloc(result);
-    return result;
-}
 struct Writer {
     _typeMetaData* _type;
     int32_t _refCount;
@@ -367,13 +356,6 @@ Writer_array* Writer_array_new(uint64_t len) {
     memset(result->data, 0, sizeof(Writer*) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
-    return result;
-}
-struct Writer_owned {
-};
-Writer_owned* Writer_owned_new() {
-    Writer_owned* result = _malloc(sizeof(Writer_owned));
-    _traceMalloc(result);
     return result;
 }
 struct Memory {
@@ -406,10 +388,8 @@ void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void Reader_free(Reader* x);
 void Reader_array_free(Reader_array* x);
-void Reader_owned_free(Reader_owned* x);
 void Writer_free(Writer* x);
 void Writer_array_free(Writer_array* x);
-void Writer_owned_free(Writer_owned* x);
 void Memory_free(Memory* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
@@ -439,13 +419,6 @@ void Reader_array_free_0(Reader_array* x) {
 void Reader_array_free(Reader_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))Reader_array_free_0);
 }
-void Reader_owned_free_0(Reader_owned* x) {
-    _free(x); _traceFree(x);
-}
-void Reader_owned_free(Reader_owned* x) {
-    if (x == NULL) return;
-    _registerAndMaybeDrain(x, (void(*)(void*))Reader_owned_free_0);
-}
 void Writer_free_0(Writer* x) {
     _free(x); _traceFree(x);
 }
@@ -459,13 +432,6 @@ void Writer_array_free_0(Writer_array* x) {
 }
 void Writer_array_free(Writer_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))Writer_array_free_0);
-}
-void Writer_owned_free_0(Writer_owned* x) {
-    _free(x); _traceFree(x);
-}
-void Writer_owned_free(Writer_owned* x) {
-    if (x == NULL) return;
-    _registerAndMaybeDrain(x, (void(*)(void*))Writer_owned_free_0);
 }
 void Memory_free_0(Memory* x) {
     _decUse(x->array, int_array);
@@ -579,8 +545,8 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     printf("start\n");
-    int_array* _t2 = int_array_new(10);
-    Memory* mem = Memory_1(_t2);
+    int_array* _t1 = int_array_new(10);
+    Memory* mem = Memory_1(_t1);
     _incUseStack(((Reader*) mem));
     Reader* r = ((Reader*) mem);
     printf("write 10\n");
@@ -593,6 +559,6 @@ void _main() {
     _decUseStack(w, Writer);
     _decUseStack(r, Reader);
     _decUseStack(mem, Memory);
-    _decUseStack(_t2, int_array);
+    _decUseStack(_t1, int_array);
     _end();
 }

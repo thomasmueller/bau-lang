@@ -5,6 +5,7 @@ import org.bau.Int
 import org.bau.Env
 
 fun main()
+    println('Bau')
     n := 4
     if Env.argCount() > 1
         n = Int.parseInt(Env.arg(1))

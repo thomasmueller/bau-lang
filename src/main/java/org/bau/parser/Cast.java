@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -74,6 +75,11 @@ public class Cast implements Expression {
     @Override
     public boolean containsModifiableVariables() {
         return base.containsModifiableVariables();
+    }
+
+    @Override
+    public List<Expression> getUsedOwned() {
+        return base.getUsedOwned();
     }
 
 }

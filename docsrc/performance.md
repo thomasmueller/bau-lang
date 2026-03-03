@@ -164,7 +164,6 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Bau ============"
     cp ../src/test/resources/org/bau/benchmarks/bau/* .
-    find . -type f ! -name "*.?*" -delete
     java -jar bau.jar -O3 -useTmMalloc false *.bau
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./binaryTreesRefCount 20; done
@@ -172,15 +171,15 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./virtualDispatch; done
+    for i in {1..3}; do time ./virtualDispatchOwned; done
     java -jar bau.jar -useTmMalloc true -O3 *.bau
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./binaryTreesRefCount 20; done
     for i in {1..3}; do time ./linkedList; done
-    for i in {1..3}; do time ./virtualDispatch; done
 
     echo "== C ============"
     cp ../src/test/resources/org/bau/benchmarks/c/* .
-    find . -type f ! -name "*.?*" -delete
     gcc -O3 binaryTrees.c -o binaryTrees
     gcc -O3 fannkuch.c -o fannkuch
     gcc -O3 munchausen.c -o munchausen
@@ -194,7 +193,6 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Go ============"
     cp ../src/test/resources/org/bau/benchmarks/go/* .
-    find . -type f ! -name "*.?*" -delete
     go build -ldflags="-s -w" binaryTrees.go
     go build -ldflags="-s -w" fannkuch.go
     go build -ldflags="-s -w" munchausen.go
@@ -227,7 +225,6 @@ Compiling and Running the C, Java, and Bau versions:
     echo "== Nim ============"
     echo "requires: nimble install https://github.com/nim-lang/bigints"
     cp ../src/test/resources/org/bau/benchmarks/nim/* .
-    find . -type f ! -name "*.?*" -delete
     nim c -d:release binaryTrees.nim
     nim c -d:release fannkuch.nim
     nim c -d:release munchausen.nim
@@ -250,7 +247,6 @@ Compiling and Running the C, Java, and Bau versions:
     
     echo "== Rust ============"
     cp ../src/test/resources/org/bau/benchmarks/rust/*.rs .
-    find . -type f ! -name "*.?*" -delete
     rm -rf rust
     mkdir -p rust
     cp -R ../src/test/resources/org/bau/benchmarks/rust .
@@ -273,7 +269,6 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Swift ============"
     cp ../src/test/resources/org/bau/benchmarks/swift/*.swift .
-    find . -type f ! -name "*.?*" -delete
     mkdir -p swift
     cp -R ../src/test/resources/org/bau/benchmarks/swift .
     cd swift/piDigits
@@ -292,7 +287,6 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Vlang ============"
     cp ../src/test/resources/org/bau/benchmarks/vlang/* .
-    find . -type f ! -name "*.?*" -delete
     v -prod -force-bounds-checking binaryTrees.v
     v -prod -force-bounds-checking fannkuch.v
     v -prod -force-bounds-checking munchausen.v
@@ -306,7 +300,6 @@ Compiling and Running the C, Java, and Bau versions:
 
     echo "== Zig ============"
     cp ../src/test/resources/org/bau/benchmarks/zig/* .
-    find . -type f ! -name "*.?*" -delete
     zig build-exe -O ReleaseSafe binaryTrees.zig
     zig build-exe -O ReleaseSafe fannkuch.zig
     zig build-exe -O ReleaseSafe munchausen.zig

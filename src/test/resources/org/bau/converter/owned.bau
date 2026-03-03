@@ -1,5 +1,5 @@
 fun main()
-    x : Entry+()
+    x : Entry()
     x.key = 1
     x.value = 100
     x.print()
@@ -7,14 +7,14 @@ fun main()
     y.print()
     println('end')
 
-type Entry
+type Entry owned
     key int
     value int
 
-fun clear(n Entry+)
+fun clear(n Entry)
     println('clear ' n.key)
 
-fun Entry+ print()
+fun Entry print()
     println('key: ' key ' value: ' value)
 
 ## Expected

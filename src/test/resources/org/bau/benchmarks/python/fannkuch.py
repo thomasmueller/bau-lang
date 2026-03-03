@@ -10,6 +10,7 @@ def main():
     print(f"Pfannkuchen({n}) = {fannkuch(n)}")
 
 def fannkuch(n):
+    print("Python")
     perm1 = list(range(n))
     count = [0] * n
     perm = [0] * n

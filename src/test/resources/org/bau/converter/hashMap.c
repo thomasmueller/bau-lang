@@ -461,8 +461,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t2 = org_bau_HashMap_mix_1(i);
-                org_bau_HashMap_HashMap_int_int_put_4(map, _t2, i, i * 10);
+                int64_t _t1 = org_bau_HashMap_mix_1(i);
+                org_bau_HashMap_HashMap_int_int_put_4(map, _t1, i, i * 10);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;
@@ -476,9 +476,9 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t3 = org_bau_HashMap_mix_1(i);
-                int64_t _t4 = org_bau_HashMap_HashMap_int_int_get_3(map, _t3, i);
-                printf("%lld\n", (long long)_t4);
+                int64_t _t2 = org_bau_HashMap_mix_1(i);
+                int64_t _t3 = org_bau_HashMap_HashMap_int_int_get_3(map, _t2, i);
+                printf("%lld\n", (long long)_t3);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;

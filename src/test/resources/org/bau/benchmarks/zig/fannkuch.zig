@@ -4,6 +4,7 @@
 const std = @import("std");
 
 pub fn main() !void {
+    std.debug.print("Zig\n", .{});
     var stdout = std.fs.File.stdout().writerStreaming(&.{});
     var args = std.process.args();
     _ = args.next();

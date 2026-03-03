@@ -24,6 +24,7 @@ func is_munchausen(number: int): bool =
     total == number
 
 proc main() =
+    echo &"Nim"
     for i in 0 ..< MAX:
         if is_munchausen(i):
             echo i

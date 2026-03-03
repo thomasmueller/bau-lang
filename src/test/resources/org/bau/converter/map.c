@@ -606,15 +606,15 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
     return 1;
 }
 HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes) {
-    HashMap_str_str* _t3 = HashMap_str_str_new();
-    _t3->size = 0;
+    HashMap_str_str* _t2 = HashMap_str_str_new();
+    _t2->size = 0;
     _incUseStack(keys);
-    _t3->keys = keys;
+    _t2->keys = keys;
     _incUseStack(values);
-    _t3->values = values;
+    _t2->values = values;
     _incUseStack(hashes);
-    _t3->hashes = hashes;
-    return _t3;
+    _t2->hashes = hashes;
+    return _t2;
 }
 str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     str_copy(&key);

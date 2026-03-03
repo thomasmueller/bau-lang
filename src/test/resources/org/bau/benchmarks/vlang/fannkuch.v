@@ -4,6 +4,7 @@
 import os
 
 fn main() {
+    println('V')
     mut n := 4
     if os.args.len > 1 {
         n = os.args[1].int()

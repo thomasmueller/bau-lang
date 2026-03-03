@@ -4,6 +4,7 @@
 package org.bau.benchmarks
 
 fun main(args: Array<String>) {
+    println("Kotlin")
     var n = 10
     if (args.isNotEmpty())
         n = args[0].toInt()

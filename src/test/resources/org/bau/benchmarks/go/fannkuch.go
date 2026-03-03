@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+    fmt.Println("Go")
     flag.Parse()
     n := 4
     if flag.NArg() > 0 { n, _ = strconv.Atoi(flag.Arg(0)) }

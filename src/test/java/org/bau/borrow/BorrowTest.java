@@ -12,7 +12,7 @@ public class BorrowTest {
     @Test
     public void movedOk() {
         assertEquals("""
-                x : Entry_owned()
+                x : Entry()
                 x.key = 1
                 x.value = 100
                 print(x)
@@ -22,7 +22,7 @@ public class BorrowTest {
                 """,
                 new Parser("""
                         fun main()
-                            x : Entry+()
+                            x : Entry()
                             x.key = 1
                             x.value = 100
                             x.print()
@@ -30,14 +30,14 @@ public class BorrowTest {
                             y.print()
                             println('end')
 
-                        type Entry
+                        type Entry owned
                             key int
                             value int
 
-                        fun clear(n Entry+)
+                        fun clear(n Entry)
                             println('clear ' n.key)
 
-                        fun Entry+ print()
+                        fun Entry print()
                             println('key: ' key ' value: ' value)
                         """).parse().toString());
     }
@@ -47,7 +47,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : Entry+()
+                        x : Entry()
                         x.key = 1
                         x.value = 100
                         x.print()
@@ -55,14 +55,14 @@ public class BorrowTest {
                         x.print()
                         println('end')
 
-                    type Entry
+                    type Entry owned
                         key int
                         value int
 
-                    fun clear(n Entry+)
+                    fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry+ print()
+                    fun Entry print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();
@@ -76,7 +76,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : Entry+()
+                        x : Entry()
                         x.key = 1
                         x.value = 100
                         x.print()
@@ -84,14 +84,14 @@ public class BorrowTest {
                         x.print()
                         println('end')
 
-                    type Entry
+                    type Entry owned
                         key int
                         value int
 
-                    fun clear(n Entry+)
+                    fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry+ print()
+                    fun Entry print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();
@@ -105,7 +105,7 @@ public class BorrowTest {
         try {
             new Parser("""
                     fun main()
-                        x : Entry+()
+                        x : Entry()
                         x.key = 1
                         x.value = 100
                         y : &x
@@ -115,14 +115,14 @@ public class BorrowTest {
                         y.print()
                         println('end')
 
-                    type Entry
+                    type Entry owned
                         key int
                         value int
 
-                    fun clear(n Entry+)
+                    fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry+ print()
+                    fun Entry print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();

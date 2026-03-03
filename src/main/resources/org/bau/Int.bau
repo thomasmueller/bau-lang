@@ -108,6 +108,22 @@ fun sqrtInt(x int) const int
         g |= c
     return g
 
+fun isInt(value i8[]) int
+    if value.len
+        i := 0
+        digit := 0
+        if value[0] = ord('-')
+            i += 1
+        loop i < value.len
+            n : value[i]
+            if n >= ord('0') and n <= ord('9')
+                digit = 1
+            else
+                return 0
+            i += 1
+        return digit
+    return 0
+
 fun parseInt(value i8[]) int
     x := 0
     sign := 1

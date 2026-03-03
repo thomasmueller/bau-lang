@@ -23,7 +23,7 @@ func createLinkedList(len int) *Node {
 }
 
 func main() {
-    fmt.Println("Starting stress test...")
+    fmt.Println("Go")
     x := createLinkedList(50_000_000)
     count := 1_000_000
     len := 1000

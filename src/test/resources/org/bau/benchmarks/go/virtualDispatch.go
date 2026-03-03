@@ -1,12 +1,11 @@
 package main
 
 import (
+    "flag"
     "fmt"
     "time"
+    "strconv"
 )
-
-const SIZE = 1_000_000
-const ITERATIONS = 20
 
 // ===== Interfaces =====
 
@@ -32,15 +31,21 @@ type Statement interface {
 // ===== Benchmark =====
 
 func main() {
-    expressions := make([]Expression, 0, SIZE)
-    statements := make([]Statement, 0, SIZE)
+    fmt.Println("Go")
+    size := 20_000_000
+    flag.Parse()
+    if flag.NArg() > 0 {
+        size, _ = strconv.Atoi(flag.Arg(0))
+    }
+    expressions := make([]Expression, 0, size)
+    statements := make([]Statement, 0, size)
 
-    for i := 0; i < SIZE; i++ {
+    for i := 0; i < size; i++ {
         var expr Expression
 
         switch random(int32(i), 9) {
         case 0:
-            expr = &Variable{value: 1}
+            expr = &Variable{value: int32(random(int32(i), 1000))}
         case 1:
             expr = &NumberLiteral{}
         case 2:
@@ -64,7 +69,7 @@ func main() {
         expressions = append(expressions, expr)
 
         var stmt Statement
-        switch random(int32(i+SIZE), 8) {
+        switch random(int32(i + size), 8) {
         case 0:
             stmt = &IfStmt{}
         case 1:
@@ -72,7 +77,7 @@ func main() {
         case 2:
             stmt = &DoWhileStmt{}
         case 3:
-            stmt = &Assignment{}
+            stmt = &Assignment{value: int32(random(int32(i), 2000))}
         case 4:
             stmt = &SwitchStmt{}
         case 5:
@@ -88,16 +93,13 @@ func main() {
         statements = append(statements, stmt)
     }
 
-    for test := 0; test < 5; test++ {
+    for test := 0; test < 3; test++ {
         start := time.Now()
 
-        var dummy int64
-        for i := 0; i < ITERATIONS; i++ {
-            dummy += run(expressions, statements)
-        }
+        var dummy int64 = run(expressions, statements)
 
         duration := time.Since(start)
-        fmt.Printf("Run %d: %d ms; dummy: %d\n",
+        fmt.Printf("Run %d: %d ms; dummy: %d (Go)\n",
             test,
             duration.Milliseconds(),
             dummy)
@@ -110,6 +112,8 @@ func run(expressions []Expression, statements []Statement) int64 {
     for i := 0; i < len(expressions); i++ {
         sum += int64(expressions[i].Eval())
         sum += int64(expressions[i].Hash())
+    }
+    for i := 0; i < len(statements); i++ {
         sum += int64(statements[i].Execute())
         sum += int64(statements[i].Hash())
     }
@@ -133,7 +137,7 @@ type Variable struct {
     value int32
 }
 
-func (v *Variable) Hash() int32 { return 11 }
+func (v *Variable) Hash() int32 { return v.value + 11 }
 func (v *Variable) Eval() int32 { return v.value }
 func (v *Variable) Store(val int32) int32 {
     v.value = val
@@ -186,10 +190,12 @@ type DoWhileStmt struct{}
 func (d *DoWhileStmt) Hash() int32    { return 33 }
 func (d *DoWhileStmt) Execute() int32 { return 23 }
 
-type Assignment struct{}
-func (a *Assignment) Hash() int32    { return 34 }
-func (a *Assignment) Execute() int32 { return 24 }
-func (a *Assignment) Eval() int32    { return 25 }
+type Assignment struct {
+    value int32
+}
+func (a *Assignment) Hash() int32    { return a.value + 34 }
+func (a *Assignment) Execute() int32 { return a.value + 24 }
+func (a *Assignment) Eval() int32    { return a.value + 25 }
 
 type SwitchStmt struct{}
 func (s *SwitchStmt) Hash() int32    { return 36 }

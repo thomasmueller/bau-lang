@@ -303,8 +303,8 @@ Entry_owned* Entry_owned_new() {
 int __argc;
 char **__argv;
 /* functions */
+Entry_owned* Entry_0();
 void Entry_owned_print_1(Entry_owned* this);
-Entry_owned* Entry_owned_0();
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void Entry_owned_free(Entry_owned* x);
@@ -340,14 +340,14 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1003;
+Entry_owned* Entry_0() {
+    Entry_owned* _t0 = Entry_owned_new();
+    _t0->key = 0;
+    _t0->value = 0;
+    return _t0;
+}
 void Entry_owned_print_1(Entry_owned* this) {
     printf("key: %lld value: %lld\n", (long long)this->key, (long long)this->value);
-}
-Entry_owned* Entry_owned_0() {
-    Entry_owned* _t1 = Entry_owned_new();
-    _t1->key = 0;
-    _t1->value = 0;
-    return _t1;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
@@ -361,7 +361,7 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    Entry_owned* x = Entry_owned_0();
+    Entry_owned* x = Entry_0();
     x->key = 1;
     x->value = 100;
     Entry_owned_print_1(x);

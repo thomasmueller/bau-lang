@@ -27,6 +27,7 @@ proc stretch(depth: int) =
     echo &"stretch tree of depth {depth}\t check: {c}"
 
 proc main() =
+    echo &"Nim"
     let args = commandLineParams()
     var n = 10
     if args.len > 0:

@@ -210,7 +210,7 @@ public class Program {
             }
             if (source.isTrait()) {
                 // trait may have other traits
-                for (FullName n : source.traitDefinition.requiredTraitNames) {
+                for (FullName n : source.getTraitDefinition().requiredTraitNames) {
                     if (n.equals(target.getFullName())) {
                         // type has this trait
                         return new Cast(expr, target);
@@ -369,9 +369,10 @@ public class Program {
         if (!type.isArray()) {
         	dataTypeMap.put(type.arrayType().fullName(), type.arrayType());
         }
-        if (type.memoryType() == MemoryType.REF_COUNT) {
-            dataTypeMap.put(type.ownerType().fullName(), type.ownerType());
-        }
+        int test;
+//        if (type.memoryType() == MemoryType.REF_COUNT) {
+//            dataTypeMap.put(type.ownerType().fullName(), type.ownerType());
+//        }
         return type;
     }
 
@@ -535,7 +536,7 @@ public class Program {
                     buff.append(Statement.indent("int32_t _refCount;\n"));
                     buff.append(Statement.indent(t.baseType().toC() + "* data;\n"));
                 } else {
-                    if (!t.traitNames.isEmpty() || t.traitDefinition != null) {
+                    if (!t.traitNames.isEmpty() || t.getTraitDefinition() != null) {
                         buff.append(Statement.indent("_typeMetaData* _type;\n"));
                     }
                     if (t.memoryType() == MemoryType.REF_COUNT) {
@@ -562,10 +563,12 @@ public class Program {
                     buff.append(t.nameC() + "* " + t.nameC() + "_new() {\n");
                     buff.append(Statement.indent(t.nameC() + "* result = _malloc(sizeof(" + t.nameC() + "));\n"));
                     buff.append(Statement.indent("_traceMalloc(result);\n"));
-                    if (t.memoryType() == MemoryType.REF_COUNT) {
+                    if (t.memoryType() == MemoryType.OWNER || t.memoryType() == MemoryType.REF_COUNT) {
                         if (!t.traitNames.isEmpty()) {
                             buff.append(Statement.indent("result->_type = _typeMeta" + t.nameC() + ";\n"));
                         }
+                    }
+                    if (t.memoryType() == MemoryType.REF_COUNT) {
                         buff.append(Statement.indent("result->_refCount = 1;\n"));
                     }
                     buff.append(Statement.indent("return result;\n"));
@@ -892,7 +895,7 @@ public class Program {
                 ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
                 for (FullName tr : t.traitNames) {
                     int todoSupportModule;
-                    Trait trait = dataTypeMap.get(tr.name).traitDefinition;
+                    Trait trait = dataTypeMap.get(tr.name).getTraitDefinition();
                     for (FunctionDefinition def : trait.functions) {
                         traitFunctions.add(def);
                     }
@@ -938,7 +941,7 @@ public class Program {
                 String name = "_typeMeta" + t.nameC();
                 int maxFunctionId = 0;
                 for (FunctionDefinition tf : traitFunctions) {
-                    maxFunctionId = Math.max(maxFunctionId, tf.callType.traitDefinition.getFunctionOffset());
+                    maxFunctionId = Math.max(maxFunctionId, tf.callType.getTraitDefinition().getFunctionOffset());
                     maxFunctionId++;
                 }
                 buff.append(Statement.indent(name + " = malloc(sizeof(_typeMetaData) + " + maxFunctionId + " * sizeof(void(*)(void)));\n"));
@@ -958,7 +961,7 @@ public class Program {
                         n = "(void (*)())" + f2.functionNameC();
                     }
                     f2.used(this);
-                    i = Math.max(i, tf.callType.traitDefinition.getFunctionOffset());
+                    i = Math.max(i, tf.callType.getTraitDefinition().getFunctionOffset());
                     buff.append(Statement.indent(name + "->vtable[" + i + "] = " + n + ";\n"));
                     tf.traitFunctionId = i;
                     if (f2 != null) {
@@ -980,7 +983,7 @@ public class Program {
             }
             if (t.isUsed() && !t.traitNames.isEmpty()) {
                 for (DataType trait : t.traitTypes) {
-                    if (trait.isUsed() && !trait.traitDefinition.functions.isEmpty()) {
+                    if (trait.isUsed() && !trait.getTraitDefinition().functions.isEmpty()) {
                         typesWithTraitFunctions.add(t);
                         traitsWithFunctions.add(trait);
                     }
@@ -1020,14 +1023,14 @@ public class Program {
             while (usedSlots.get(i)) {
                 i++;
             }
-            trait.traitDefinition.setSlot(i);
+            trait.getTraitDefinition().setSlot(i);
             while (i >= maxFunctionCountForSlot.size()) {
                 maxFunctionCountForSlot.add(0);
             }
             int max = maxFunctionCountForSlot.get(i);
-            max = Math.max(max, trait.traitDefinition.functions.size());
+            max = Math.max(max, trait.getTraitDefinition().functions.size());
             maxFunctionCountForSlot.set(i, max);
-            trait.traitDefinition.setSlot(i);
+            trait.getTraitDefinition().setSlot(i);
         }
         traitFunctionOffsets = new int[maxFunctionCountForSlot.size()];
         int next = 0;
@@ -1037,7 +1040,7 @@ public class Program {
         }
         for (DataType trait : traitList) {
             int offset = traitFunctionOffsets[trait.getTraitSlot()];
-            trait.traitDefinition.setFunctionOffset(offset);
+            trait.getTraitDefinition().setFunctionOffset(offset);
         }
     }
 

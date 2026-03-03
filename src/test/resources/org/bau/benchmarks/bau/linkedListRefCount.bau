@@ -20,7 +20,7 @@ fun createLinkedList(len int) Node
     return head
 
 fun main()
-    println('Starting stress test...')
+    println('Bau')
     x := createLinkedList(50_000_000)
     count : 1_000_000
     len : 1000

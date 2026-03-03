@@ -88,3 +88,25 @@ fun putchar(x i8)
     native(```
     putchar(x & 0xff);
     ```)
+
+fun input() i8[]
+    return readLine(128)
+
+fun readLine(maxSize int) i8[]
+    buffer: i8[maxSize]
+    len := 0
+    native(```
+        char* result = fgets((char*) buffer->data, maxSize, stdin);
+        if (result) {
+            len = strlen((char*) buffer->data);
+        }
+    ```)
+    if len and buffer[len - 1] = ord('\n')
+        data: i8[len - 1]
+        for i := until(len - 1)
+            data[i] = buffer[i]
+        return data
+    return i8[0]
+
+
+

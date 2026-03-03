@@ -20,7 +20,7 @@ def create_linked_list(limit):
     return head
 
 def main():
-    print("Starting stress test...")
+    print("Python")
     x = create_linked_list(50_000_000)
     count = 1_000_000
     len = 1000

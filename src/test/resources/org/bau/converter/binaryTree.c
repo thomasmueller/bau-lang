@@ -424,8 +424,8 @@ void _main() {
         int64_t sum = 0;
         int64_t i = 1;
         while (i <= iterations) {
-            int64_t _t2 = count_1(depth);
-            sum += _t2;
+            int64_t _t1 = count_1(depth);
+            sum += _t1;
             i += 1;
         }
         printf("%lld trees of depth %lld; check: %lld\n", (long long)iterations, (long long)depth, (long long)sum);

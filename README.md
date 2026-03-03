@@ -5,11 +5,11 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-03-03: Owned types are now declared just using "owned". A type is now owned or not (previously, both versions where available).
 * 2026-02-24: Global constants and variables have additional restrictions for safety and clearness.
 * 2026-02-20: Memory management documentation and tests.
 * 2026-02-12: <a href="https://thomasmueller.github.io/bau-lang/at.html">New experimental tiny language "At" with separate playground.</a>
 * 2026-02-06: Regular loops now use the "loop" keyword instead of "while".
-* 2026-01-06: New <a href="docsrc/demo.md">demo programs: chess, sudoku solver, text editor, block game.</a>
 
 ## Highlights
 
@@ -458,13 +458,14 @@ To avoid cycles, explicitly set fields to `null`
         return result
 
 Where speed is critical, use single ownership,
-by adding `+` to the type, and borrow with `&`.
+by adding `owned` to the type and trait declarations,
+and borrow with `&`.
 
-    type Tree
-        left Tree+?
-        right Tree+?
+    type Tree owned
+        left Tree?
+        right Tree?
 
-    fun Tree+ nodeCount() int
+    fun Tree nodeCount() int
         result := 1
         l : &left
         if l

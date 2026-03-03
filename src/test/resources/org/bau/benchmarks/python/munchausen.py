@@ -3,6 +3,7 @@
 LIMIT = 440_000_000
 
 def main():
+    print("Python")
     cache: list[int] = get_cache()
     for n in range(0, LIMIT):
         if is_munchausen(n, cache):

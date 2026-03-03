@@ -25,7 +25,7 @@ public class Transpile {
                 useTmMalloc = Boolean.parseBoolean(args[++i]);
             } else if (a.equals("-traceRefCounts")) {
                 traceRefCounts = Boolean.parseBoolean(args[++i]);
-            } else if (a.startsWith("-I")) {
+            } else if (a.startsWith("-I") || a.startsWith("-O")) {
                 gccIncludeOptions.add(a);
             } else if (a.startsWith("-L") || a.startsWith("-l")) {
                 gccLinkOptions.add(a);

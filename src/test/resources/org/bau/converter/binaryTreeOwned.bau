@@ -4,7 +4,7 @@ fun main()
     minDepth : 1
     maxDepth : 3
     stretchDepth : maxDepth + 1
-    stretch Tree+? := with(stretchDepth)
+    stretch Tree? := with(stretchDepth)
     println('ownership / borrowing')
     if stretch
         println('stretch tree of depth ' stretchDepth ' check: ' stretch.nodeCount())
@@ -23,11 +23,11 @@ fun main()
         depth += 2
     println('long lived tree of depth ' maxDepth ' check: ' longLived.nodeCount())
 
-type Tree
-    left Tree+?
-    right Tree+?
+type Tree owned
+    left Tree?
+    right Tree?
 
-fun Tree+ nodeCount() int
+fun Tree nodeCount() int
     result := 1
     l : &left
     if l
@@ -42,10 +42,10 @@ fun count(depth int) int
     c := t.nodeCount()
     return c
 
-fun with(depth int) Tree+
+fun with(depth int) Tree
     if depth = 0
-        return Tree+(null, null)
-    return Tree+(with(depth - 1), with(depth - 1))
+        return Tree(null, null)
+    return Tree(with(depth - 1), with(depth - 1))
 
 ## Expected
 ownership / borrowing

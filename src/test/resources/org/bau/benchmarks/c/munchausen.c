@@ -10,6 +10,7 @@ int is_munchausen(int number);
 void set_cache();
 
 int main() {
+    printf("C\n");
     set_cache();
     for (int i = 0; i < LIMIT; i++)
         if (is_munchausen(i))

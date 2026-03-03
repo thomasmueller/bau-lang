@@ -58,6 +58,7 @@ fn stretch(depth: u32, allocator: Allocator) !void {
 }
 
 pub fn main() !void {
+    std.debug.print("Zig\n", .{});
     const allocator = std.heap.c_allocator;
     var n: u32 = 10;
     var args = std.process.args();

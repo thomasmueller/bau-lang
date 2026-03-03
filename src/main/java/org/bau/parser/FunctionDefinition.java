@@ -360,7 +360,7 @@ public class FunctionDefinition {
         collectTypes(new HashSet<>(), MemoryType.OWNER);
         collectTypes(new HashSet<>(), MemoryType.BORROW);
         for (DataType type : borrowedTypes) {
-            DataType ownerType = type.refCountBaseType().ownerType();
+            DataType ownerType = type.ownerType();
             if (freedOwnedTypes.contains(ownerType)) {
                 throw new IllegalStateException(
                         "Function " + getFunctionId() + ": borrowing " + type + " which is freed");

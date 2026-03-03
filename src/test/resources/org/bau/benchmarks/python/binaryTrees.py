@@ -28,6 +28,7 @@ def stretch(depth):
     print(f"stretch tree of depth {depth}\t check: {count(depth)}")
 
 def main():
+    print("Python")
     n = 10
     if len(sys.argv) > 1:
         n = int(sys.argv[1])
