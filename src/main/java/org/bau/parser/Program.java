@@ -122,7 +122,7 @@ public class Program {
      * @param var the variable
      */
     public void addGlobalVariable(Variable var) {
-        String id = Variable.getGlobalVariableId(var.module, var.name);
+        String id = Variable.getGlobalVariableId(var.module(), var.name());
         globalVariables.put(id, var);
     }
 
@@ -369,10 +369,6 @@ public class Program {
         if (!type.isArray()) {
         	dataTypeMap.put(type.arrayType().fullName(), type.arrayType());
         }
-        int test;
-//        if (type.memoryType() == MemoryType.REF_COUNT) {
-//            dataTypeMap.put(type.ownerType().fullName(), type.ownerType());
-//        }
         return type;
     }
 
@@ -793,7 +789,7 @@ public class Program {
             if (var.type().baseType() != DataType.INT_TYPE) {
                 throw new IllegalStateException("Only integer array constants are supported currently");
             }
-            Value data = var.constantValue;
+            Value data = var.constantValue();
             StringBuilder buff2 = new StringBuilder();
             for (int i = 0; i < data.len().intValue(); i++) {
                 if (i > 0) {
@@ -1097,7 +1093,7 @@ public class Program {
             m.setConstant(e.getKey(), v);
         }
         for (Entry<String, Variable> e : globalVariables.entrySet()) {
-            m.setGlobal(e.getValue().name, e.getValue().type().getZeroValue());
+            m.setGlobal(e.getValue().name(), e.getValue().type().getZeroValue());
         }
         ArrayList<Statement> l2 = new ArrayList<>();
         l2.addAll(initList);
@@ -1118,19 +1114,6 @@ public class Program {
 
     public long getTicksExecuted() {
         return ticksExecuted;
-    }
-
-    public String getModuleId(String module) {
-        if (module == null) {
-            return null;
-        }
-        // TODO use a reverse map
-        for (Entry<String, String> e : imports.entrySet()) {
-            if (module.equals(e.getValue())) {
-                return e.getKey();
-            }
-        }
-        return null;
     }
 
     public void addImport(String name, String as, ArrayList<String> entries) {
@@ -1208,7 +1191,7 @@ public class Program {
         }
     }
 
-    public static int catchCount(ArrayList<Statement> list) {
+    public static int catchCount(List<Statement> list) {
         int count = 0;
         for (Statement s : list) {
             if (s instanceof Catch) {
@@ -1218,7 +1201,7 @@ public class Program {
         return count;
     }
 
-    public static boolean hasReturn(ArrayList<Statement> list) {
+    public static boolean hasReturn(List<Statement> list) {
         for (Statement s : list) {
             if (s instanceof Return) {
                 return true;
@@ -1242,15 +1225,18 @@ public class Program {
                 break;
             } else if (s instanceof If) {
                 If ifStatement = (If) s;
-                for (List<Statement> l2 : ifStatement.listList) {
-                    // TODO we need to check all branches
-                    if (doesReturn(l2)) {
+                if (doesReturn(ifStatement.thenList)) {
+                    doesReturn = true;
+                    break;
+                }
+                if (ifStatement.elseList != null) {
+                    if (doesReturn(ifStatement.elseList)) {
                         doesReturn = true;
                         break;
                     }
                 }
-            } else if (s instanceof While) {
-                While whileStatement = (While) s;
+            } else if (s instanceof Loop) {
+                Loop whileStatement = (Loop) s;
                 if (doesReturn(whileStatement.list)) {
                     doesReturn = true;
                     break;

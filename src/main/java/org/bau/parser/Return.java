@@ -89,4 +89,9 @@ public class Return implements Statement {
         }
     }
 
+    @Override
+    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        // ignore
+    }
+
 }

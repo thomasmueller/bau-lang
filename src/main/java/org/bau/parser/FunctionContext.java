@@ -2,7 +2,9 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class FunctionContext {
 
@@ -13,6 +15,10 @@ public class FunctionContext {
     private final LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
     private int nextTempVariableId;
     private String currentFunctionName;
+
+    private HashMap<Statement, ArrayList<Statement>> predecessors = new HashMap<>();
+    private HashMap<Statement, ArrayList<Statement>> successors = new HashMap<>();
+    HashMap<Integer, Integer> statementIdMap = new HashMap<>();
 
     public FunctionContext(Program program, String functionName) {
         this.program = program;
@@ -97,12 +103,19 @@ public class FunctionContext {
     }
 
     public void addVariable(Variable var) {
-        String name = var.name;
+        String name = var.name();
         if (variables.containsKey(name)) {
             throw new IllegalStateException("Variable already exists: " + name);
         }
         variables.put(name, var);
         addIdentifier(name, var.type());
+    }
+
+    public void updateVariable(String name, Variable newVersion) {
+        if (variables.remove(name) == null) {
+            throw new IllegalStateException("Variable not found: " + name);
+        }
+        variables.put(name, newVersion);
     }
 
     public void addTemporaryType(DataType type) {
@@ -165,6 +178,9 @@ public class FunctionContext {
         if (var == null) {
             var = program.getGlobalVariable(module, name);
         }
+        if (var != null) {
+            var = var.cloneVariable();
+        }
         return var;
     }
 
@@ -189,6 +205,127 @@ public class FunctionContext {
             t = program.getType(module, name);
         }
         return t;
+    }
+
+    public void linkStatements(Statement a, Statement b) {
+        if (a == null || b == null) {
+            return;
+        }
+        ArrayList<Statement> list = predecessors.get(b);
+        if (list == null) {
+            list = new ArrayList<Statement>();
+            predecessors.put(b, list);
+        }
+if (list.contains(a)) {
+    int test;
+    throw new IllegalStateException();
+}
+        list.add(a);
+        list = successors.get(a);
+        if (list == null) {
+            list = new ArrayList<Statement>();
+            successors.put(a, list);
+        }
+if (list.contains(b)) {
+    int test;
+    throw new IllegalStateException();
+}
+        list.add(b);
+    }
+
+    public void linkList(List<Statement> list, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        // a:1 <=> b:1
+        // a:1 <=> if a>0 => then 1 => / => else 2 => / endif => phi
+        // a:1 <=> if a>0 => then 1 => / endif => phi
+        // a:1 <=> loop => phiAtStart => then 1 => first / endLoop != phi
+        // a:1 <=> loop a>0 => phiAtEnd / => phiAtStart => then 1 => / endLoop => phiAtEnd
+
+        Statement p = prev;
+        for (int i = 0; i < list.size(); i++) {
+            Statement a = list.get(i);
+            Statement n = next;
+            if (i > 0) {
+                p = list.get(i - 1);
+            }
+            if (i < list.size() - 1) {
+                n = list.get(i + 1);
+            }
+            a.link(this, p, n, breakTarget, continueTarget);
+        }
+    }
+
+    public void setVariableVersions(List<Statement> list, PhiBlock lastPhi) {
+        for (int i = 0; i < list.size(); i++) {
+            Statement s = list.get(i);
+            if (s instanceof PhiBlock) {
+                lastPhi = (PhiBlock) s;
+            }
+            s.setVariableVersions(this, lastPhi);
+        }
+    }
+
+    public List<Statement> getPrecedessors(Statement s) {
+        ArrayList<Statement> list = predecessors.get(s);
+        if (list == null) {
+            return List.of();
+        }
+        return list;
+    }
+
+    public void printLinks(String indentation, List<Statement> list) {
+        for (int i = 0; i < list.size(); i++) {
+            Statement a = list.get(i);
+            a.printLinks(indentation, this);
+        }
+        System.out.println();
+    }
+
+    public void printLinks(String indentation, Statement a) {
+        List<Statement> sl = successors.get(a);
+        List<Statement> pl = predecessors.get(a);
+        String txt = a.toString().trim();
+        if (txt.indexOf('\n') >= 0) {
+            txt = txt.substring(0, txt.indexOf('\n'));
+        }
+        int count = statementIdMap.computeIfAbsent(System.identityHashCode(a), key -> statementIdMap.size());
+        System.out.println("    " + count + ": " + indentation + txt);
+        StringBuilder buff = new StringBuilder();
+        buff.append("    ");
+        if (pl != null) {
+            buff.append("prev: ");
+            for (int i = 0; i < pl.size(); i++) {
+                Statement s = pl.get(i);
+                count = statementIdMap.computeIfAbsent(System.identityHashCode(s), key -> statementIdMap.size());
+                buff.append(count + " ");
+            }
+            if (pl != null && pl.size() > 1) {
+                if (!(a instanceof PhiBlock)) {
+                    buff.append(" NOT A PHI TARGET ");
+                    throw new IllegalStateException();
+                }
+                HashSet<Statement> set = new HashSet<>();
+                set.addAll(pl);
+                if (pl.size() != set.size()) {
+                    buff.append(" duplicate entries ");
+                    throw new IllegalStateException();
+                }
+            }
+        }
+        if (sl != null) {
+            buff.append("next: ");
+            for (int i = 0; i < sl.size(); i++) {
+                Statement s = sl.get(i);
+                count = statementIdMap.computeIfAbsent(System.identityHashCode(s), key -> statementIdMap.size());
+                buff.append(count + " ");
+            }
+            HashSet<Statement> set = new HashSet<>();
+            set.addAll(sl);
+            if (sl.size() != set.size()) {
+                buff.append(" duplicate entries ");
+                throw new IllegalStateException();
+            }
+        }
+        System.out.println(buff.toString());
     }
 
 }

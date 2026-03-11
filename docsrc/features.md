@@ -63,7 +63,7 @@
   (eg. unsigned division).
   This design does not affect performance or memory usage.
 
-### Syntax
+## Syntax
 
 * Spaces (indentation) is used to group statements. This reduces the number of lines.
   Tabs are not supported. The reason is that spaces are more common,
@@ -106,11 +106,6 @@
   then the variables before the first function (if any) are global
   variables, and those after a function are local variables.
 
-## Safety 
-* There is no way to write unsafe code, except by calling C methods.
-* Array bounds are check, except if array access is guaranteed to be 
-  inside the bounds. This is implemented using dependent types.
-  
 ## Memory Management
 * Reference counting is used for reference types.
 * Mark-and-sweep garbage collection is not used to avoid pauses.
@@ -119,8 +114,36 @@
 * The plan is to support weak references.
 * The plan is to support unique pointers, and arrays of pre-allocated objects 
   accessed via handlers and a generation
+  
+## Safety
+
+* This language is memory-save.
+  There is no way to write memory unsafe code, except by calling C methods.
+  
+### Array Bound Checks
+
+* Where array bound checks are needed, and the index is out of bounds,
+  the program panics.
+* Array bounds are check, except if array access is guaranteed to be 
+  inside the bounds. This is implemented using dependent types.
+  Internally, this language uses a symbolic reasoning engine for 
+  linear integer arithmetic, which is a bit more complex
+  that what most compilers use, but not as complex (and powerful) 
+  as eg. Ada SPARK.
+
+### Null Pointer Access
+
+* Possible null references need to be handled.
+  This is checked at compile time.
+  There is no way that null references can throw an exception or panic.
+
+### Division and Remainder (Modulo) By Zero
+
+* Potential integer division (`/`) by zero is detected at compile time
+  and not allowed.
 
 ## Exceptions and Panic
+
 * Exceptions need to be handled using `catch`, or re-thrown.
 * There is no `try` keyword: `catch` will catch all exceptions in the same scope.
   This is to simplify the code, and reduce the need of indentation.
@@ -130,12 +153,6 @@
   that may not have a negative value (because internally, this field
   is used to to flag whether the method was successful or not,
   and a negative value is used to indicate success).
-* Possible null references need to be handled. 
-  There is no way that null references can throw an exception or panic.
-* Potential integer division (`/`) by zero is detected at compile time
-  and not allowed.
-* Where array bound checks are needed, and the index is out of bounds,
-  the program panics.
 * If a type has a  `close()` function, it is called when the memory
   is freed. If this function re-adds a reference to the object,
   then the program panics.

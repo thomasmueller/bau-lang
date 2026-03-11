@@ -17,7 +17,7 @@ public interface LeftValue extends Expression {
 
     Value setValue(Memory memory, Value val, boolean incRefCount, boolean initial);
 
-    boolean isContant();
+    boolean isConstant();
 
     void incrementReassignCount();
 

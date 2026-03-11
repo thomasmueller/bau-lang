@@ -82,8 +82,8 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public Expression replace(Variable old, Expression with) {
         if (fieldName.equals("source")
-                && old.name.endsWith(".source")
-                && old.name.startsWith(base.toString() + ".")) {
+                && old.name().endsWith(".source")
+                && old.name().startsWith(base.toString() + ".")) {
             return with;
         }
         Expression b2 = base.replace(old, with);
@@ -222,7 +222,7 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public boolean isContant() {
+    public boolean isConstant() {
         return false;
     }
 

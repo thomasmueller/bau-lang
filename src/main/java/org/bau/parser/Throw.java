@@ -58,4 +58,9 @@ public class Throw implements Statement {
         expr.used(program);
     }
 
+    @Override
+    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        // ignore
+    }
+
 }

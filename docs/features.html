@@ -437,7 +437,7 @@ When needed, unsigned behavior is available through explicit operations
 (eg. unsigned division). This design does not affect performance or
 memory usage.</li>
 </ul>
-<h3 id="syntax">Syntax</h3>
+<h2 id="syntax">Syntax</h2>
 <ul>
 <li>Spaces (indentation) is used to group statements. This reduces the
 number of lines. Tabs are not supported. The reason is that spaces are
@@ -493,13 +493,6 @@ reason is that logical shifts are more common.</li>
 then the variables before the first function (if any) are global
 variables, and those after a function are local variables.</li>
 </ul>
-<h2 id="safety">Safety</h2>
-<ul>
-<li>There is no way to write unsafe code, except by calling C
-methods.</li>
-<li>Array bounds are check, except if array access is guaranteed to be
-inside the bounds. This is implemented using dependent types.</li>
-</ul>
 <h2 id="memory-management">Memory Management</h2>
 <ul>
 <li>Reference counting is used for reference types.</li>
@@ -510,6 +503,33 @@ possible.</li>
 <li>The plan is to support weak references.</li>
 <li>The plan is to support unique pointers, and arrays of pre-allocated
 objects accessed via handlers and a generation</li>
+</ul>
+<h2 id="safety">Safety</h2>
+<ul>
+<li>This language is memory-save. There is no way to write memory unsafe
+code, except by calling C methods.</li>
+</ul>
+<h3 id="array-bound-checks">Array Bound Checks</h3>
+<ul>
+<li>Where array bound checks are needed, and the index is out of bounds,
+the program panics.</li>
+<li>Array bounds are check, except if array access is guaranteed to be
+inside the bounds. This is implemented using dependent types.
+Internally, this language uses a symbolic reasoning engine for linear
+integer arithmetic, which is a bit more complex that what most compilers
+use, but not as complex (and powerful) as eg. Ada SPARK.</li>
+</ul>
+<p>### Null Pointer Access</p>
+<ul>
+<li>Possible null references need to be handled. This is checked at
+compile time. There is no way that null references can throw an
+exception or panic.</li>
+</ul>
+<h3 id="division-and-remainder-modulo-by-zero">Division and Remainder
+(Modulo) By Zero</h3>
+<ul>
+<li>Potential integer division (<code>/</code>) by zero is detected at
+compile time and not allowed.</li>
 </ul>
 <h2 id="exceptions-and-panic">Exceptions and Panic</h2>
 <ul>
@@ -524,12 +544,6 @@ Exception types need to have an integer field <code>exceptionType</code>
 that may not have a negative value (because internally, this field is
 used to to flag whether the method was successful or not, and a negative
 value is used to indicate success).</li>
-<li>Possible null references need to be handled. There is no way that
-null references can throw an exception or panic.</li>
-<li>Potential integer division (<code>/</code>) by zero is detected at
-compile time and not allowed.</li>
-<li>Where array bound checks are needed, and the index is out of bounds,
-the program panics.</li>
 <li>If a type has a <code>close()</code> function, it is called when the
 memory is freed. If this function re-adds a reference to the object,
 then the program panics.</li>

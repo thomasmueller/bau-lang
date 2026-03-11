@@ -223,7 +223,7 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public boolean isContant() {
+    public boolean isConstant() {
         return false;
     }
 

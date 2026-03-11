@@ -98,9 +98,9 @@ public class TernaryExpression implements Expression {
         }
         condition = condition.writeStatements(parser, assignment, target);
         If ifStatement = new If();
-        ifStatement.conditions.add(condition);
-        ifStatement.listList.add(ifTrueStatements);
-        ifStatement.autoClose(Collections.emptyList());
+        ifStatement.condition = condition;
+        ifStatement.thenList = ifTrueStatements;
+        ifStatement.thenAutoClose = Collections.emptyList();
         if (result != null && ifTrue != null) {
             Assignment assign = new Assignment();
             assign.initial = false;
@@ -110,8 +110,8 @@ public class TernaryExpression implements Expression {
             assign.value = ifTrue.writeStatements(parser, assignment, target);
             ifTrueStatements.add(assign);
         }
-        ifStatement.listList.add(ifFalseStatements);
-        ifStatement.autoClose(Collections.emptyList());
+        ifStatement.elseList = ifFalseStatements;
+        ifStatement.elseAutoClose = Collections.emptyList();
         if (result != null && ifFalse != null) {
             Assignment assign = new Assignment();
             assign.initial = false;
@@ -122,6 +122,7 @@ public class TernaryExpression implements Expression {
             ifFalseStatements.add(assign);
         }
         target.add(ifStatement);
+        target.add(new PhiBlock());
         return result;
     }
 

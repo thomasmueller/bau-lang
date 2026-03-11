@@ -44,4 +44,21 @@ public interface Statement {
 
     void used(Program program);
 
+    default void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        functionContext.linkStatements(this, next);
+    }
+
+    default void printLinks(String indentation, FunctionContext functionContext) {
+        functionContext.printLinks(indentation, this);
+    }
+
+    /**
+     * Set the version numbers of all the variables where needed.
+     *
+     * @param functionContext
+     * @param lastPhi the last phi node that needs new versions as well
+     */
+    default void setVariableVersions(FunctionContext functionContext, PhiBlock lastPhi) {
+    }
+
 }

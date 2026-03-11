@@ -7,13 +7,21 @@ https://github.com/NicoNex/tau
 
 r/C_Programming, r/compsci, r/compilers, r/embedded/
 
-a type is either owned or not
-"a := &b" for non-owned is the same as "a := b" ?
+try to estimate "complexity to learn"
 
-Traits
+verify traits can be used in modules
 
-int?
-string?
+see why Keka is faster
+
+ownership improvements & refcount reduction
+SSO will help
+MayRetain, MayRelease, MayEscape
+currently we only trace "MayRelease"; also need "MayEscape" (may be stored somewhere)
+https://en.wikipedia.org/wiki/Effect_system
+
+SSA form
+
+support "nullable" / boxed value types. specially "string?", but then also "int?"
 
 value equality and comparison operator overloading, specially for strings
 reference equality via
@@ -27,6 +35,9 @@ code coverage tool
 assertions on the right?
 language server
 improved stdlib and add to readme
+
+A programming language where the GPU is just another thread:
+https://www.cowleyforniastudios.com/2026/03/08/announcing-eyot/
 
 In BigInt currently, move to Array:
 fun copyOfRange(a T[], from int, to int) T[]
@@ -44,6 +55,10 @@ https://news.ycombinator.com/item?id=46925741
 * verify whitespace count (eg warn if whitespace doesn't match the expectation)
 
 * test setjmp / longjmp
+
+'==' for comparison, due to 'x = y = 10'
+
+make 'ord' function go away
 
 Maybe make parenthesis optional for statement-level function calls (eg. println),
 if the function doesn't return a value

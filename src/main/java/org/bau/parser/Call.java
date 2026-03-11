@@ -91,7 +91,7 @@ public class Call implements Statement, Expression, LeftValue {
             if (!def.isConstructor) {
                 e.getKey().setValue(m, e.getValue(), true, true);
             } else {
-                m.setLocal(e.getKey().name, e.getValue());
+                m.setLocal(e.getKey().name(), e.getValue());
             }
         }
         StatementResult r;
@@ -439,7 +439,7 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public boolean isContant() {
+    public boolean isConstant() {
         // can not assign
         throw new IllegalStateException();
     }

@@ -240,7 +240,7 @@ public class Assignment implements Statement {
     public void setConstantBounds(Solver solver, Variable v, Expression expr) {
         DataType type = value.type();
         if (type.memoryType() == MemoryType.OWNER) {
-            solver.removeRulesFor(Solver.variable(v.name));
+            solver.removeRulesFor(Solver.variable(v.name()));
         }
         if (type.isArray()) {
             if (value instanceof New) {
@@ -250,7 +250,7 @@ public class Assignment implements Statement {
                 Solver.Rule r = Operation.toRule(f, "=", n.arrayLength);
                 if (r != null) {
                     r.always = true;
-                    r.global = v.global;
+                    r.global = v.global();
                     solver.addRule(r);
                 }
             } else if (value instanceof StringLiteral) {
@@ -261,7 +261,7 @@ public class Assignment implements Statement {
                 Solver.Rule r = Operation.toRule(f, "=", len);
                 if (r != null) {
                     r.always = true;
-                    r.global = v.global;
+                    r.global = v.global();
                     solver.addRule(r);
                 }
             } else if (value instanceof ArrayConstant) {
@@ -272,7 +272,7 @@ public class Assignment implements Statement {
                 Solver.Rule r = Operation.toRule(f, "=", len);
                 if (r != null) {
                     r.always = true;
-                    r.global = v.global;
+                    r.global = v.global();
                     solver.addRule(r);
                 }
             } else if (value instanceof Variable) {
@@ -283,7 +283,7 @@ public class Assignment implements Statement {
                 Solver.Rule r = Operation.toRule(f1, "=", f2);
                 if (r != null) {
                     r.always = true;
-                    r.global = v.global;
+                    r.global = v.global();
                     solver.addRule(r);
                 }
             }
@@ -298,10 +298,59 @@ public class Assignment implements Statement {
             Solver.Rule r = Operation.toRule(v, "=", value);
             if (r != null) {
                 r.always = true;
-                r.global = v.global;
+                r.global = v.global();
                 solver.addRule(r);
             }
         }
+    }
+
+    public void cloneVariable(Parser parser) {
+        if (!Variable.DEBUG_VERSIONS) {
+            return;
+        }
+
+        int todo;
+
+        if (initial || isConstant || isGlobalScope) {
+            return;
+        }
+        if (!(leftValue instanceof Variable)) {
+            return;
+        }
+        Variable var = (Variable) leftValue;
+        if (var.global()) {
+            return;
+        }
+        Variable clone = var.cloneVariable();
+        parser.updateVariable(var.toString(), clone);
+        leftValue = clone;
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, PhiBlock phis) {
+        if (modify != null) {
+            int test;
+            // throw new IllegalStateException("need to explicitly convert i += 1 to i_2 = i_1 + 1");
+        }
+        value.setVariableVersions(functionContext, phis, this);
+        leftValue.setVariableVersions(functionContext, phis, this);
+        if (!(leftValue instanceof Variable)) {
+            return;
+        }
+        if (initial || isConstant || isGlobalScope) {
+            return;
+        }
+        Variable assignToVariable = (Variable) leftValue;
+        if (assignToVariable.global()) {
+            return;
+        }
+        if (phis.getLatestVersion(assignToVariable.name()) == null) {
+            System.out.println("??");
+            leftValue.setVariableVersions(functionContext, phis, this);
+        }
+        int latest = phis.getLatestVersion(assignToVariable.name());
+        assignToVariable.setVersion(latest + 1);
+        phis.setLatestVersion(assignToVariable.name(), assignToVariable.getVersion());
     }
 
 }

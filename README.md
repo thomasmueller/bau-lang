@@ -61,7 +61,7 @@ Assignment, comparison, operations
 * `and` `or` `not` `+` `-` `*` `/` `%`
 * `&` `|` `^` `~` `<<` `>>` bitwise
 
-Data types and miscellaneous
+Built-in types and misc
 * `int` `i32` `i16` `i8`, `float` `f32`
 * `#` comment, `##` block comment
 * `fun` `type` `enum` `const` `macro`
@@ -340,8 +340,10 @@ Types can have fields and functions:
 
     s : Square()
 
-`int` and other types that start with lowercase are copied when assigned;
-types that start with uppercase are referenced.
+`int` and other types that start with lowercase are copied when assigned
+(sometimes called `structs` in other languages);
+types that start with uppercase are referenced 
+(sometimes called `classes` in other languages).
 
 If a type has a `close` function, then it is called
 before the memory is freed.

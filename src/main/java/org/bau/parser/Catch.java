@@ -37,7 +37,7 @@ public class Catch implements Statement {
         if (val == null) {
             return StatementResult.OK;
         }
-        m.setLocal(var.name, val);
+        m.setLocal(var.name(), val);
         m.setGlobal(Memory.EXCEPTION, null);
         return Program.runSequence(m, list);
     }
@@ -90,6 +90,13 @@ public class Catch implements Statement {
             s.used(program);
         }
         var.type().used(program);
+    }
+
+
+    @Override
+    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        int todo;
+        // ignore
     }
 
 }

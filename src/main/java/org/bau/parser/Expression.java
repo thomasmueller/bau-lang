@@ -65,4 +65,8 @@ public interface Expression {
 
     boolean containsModifiableVariables();
 
+    default void setVariableVersions(FunctionContext functionContext, PhiBlock phis, Statement statement) {
+        int todo;
+    }
+
 }

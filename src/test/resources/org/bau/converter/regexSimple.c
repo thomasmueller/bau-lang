@@ -549,55 +549,63 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
         org_bau_Exception_exception _t1 = org_bau_Exception_exception_1(string_1000);
         _x0 = exception_int64_t_or_exception(_t1); _lastException = _x0.exception; goto catch0;
         org_bau_Exception_exception_free(&_t1);
-    } else if (_t0 == 2) {
-        int64_t _r0 = c == this->data->array->data[idx_2(0, _arrayLen(this->data->array))];
-        return ok_int64_t_or_exception(_r0);
-    } else if (_t0 == 3) {
-        while (1 == 1) {
-            int64_t i = 0;
-            while (i < this->data->size) {
-                int8_t min = this->data->array->data[idx_2(i, _arrayLen(this->data->array))];
-                int8_t max = this->data->array->data[idx_2(i + 1, _arrayLen(this->data->array))];
-                int64_t _t2 = c >= min;
-                if (_t2) {
-                    int64_t _t3 = c <= max;
-                    _t2 = _t3;
-                }
-                if (_t2) {
-                    return ok_int64_t_or_exception(1);
-                }
-                i += 1;
-                i += 1;
-            }
-            break;
-        }
-        return ok_int64_t_or_exception(0);
-    } else if (_t0 == 4) {
-        while (1 == 1) {
-            int64_t i = 0;
-            while (i < this->data->size) {
-                int8_t min = this->data->array->data[idx_2(i, _arrayLen(this->data->array))];
-                int8_t max = this->data->array->data[idx_2(i + 1, _arrayLen(this->data->array))];
-                int64_t _t4 = c >= min;
-                if (_t4) {
-                    int64_t _t5 = c <= max;
-                    _t4 = _t5;
-                }
-                if (_t4) {
-                    return ok_int64_t_or_exception(0);
-                }
-                i += 1;
-                i += 1;
-            }
-            break;
-        }
-        return ok_int64_t_or_exception(1);
-    } else if (_t0 == 5) {
-        return ok_int64_t_or_exception(1);
     } else {
-        org_bau_Exception_exception _t6 = org_bau_Exception_exception_1(string_1001);
-        _x1 = exception_int64_t_or_exception(_t6); _lastException = _x1.exception; goto catch0;
-        org_bau_Exception_exception_free(&_t6);
+        if (_t0 == 2) {
+            int64_t _r0 = c == this->data->array->data[idx_2(0, _arrayLen(this->data->array))];
+            return ok_int64_t_or_exception(_r0);
+        } else {
+            if (_t0 == 3) {
+                while (1 == 1) {
+                    int64_t i = 0;
+                    while (i < this->data->size) {
+                        int8_t min = this->data->array->data[idx_2(i, _arrayLen(this->data->array))];
+                        int8_t max = this->data->array->data[idx_2(i + 1, _arrayLen(this->data->array))];
+                        int64_t _t2 = c >= min;
+                        if (_t2) {
+                            int64_t _t3 = c <= max;
+                            _t2 = _t3;
+                        }
+                        if (_t2) {
+                            return ok_int64_t_or_exception(1);
+                        }
+                        i += 1;
+                        i += 1;
+                    }
+                    break;
+                }
+                return ok_int64_t_or_exception(0);
+            } else {
+                if (_t0 == 4) {
+                    while (1 == 1) {
+                        int64_t i = 0;
+                        while (i < this->data->size) {
+                            int8_t min = this->data->array->data[idx_2(i, _arrayLen(this->data->array))];
+                            int8_t max = this->data->array->data[idx_2(i + 1, _arrayLen(this->data->array))];
+                            int64_t _t4 = c >= min;
+                            if (_t4) {
+                                int64_t _t5 = c <= max;
+                                _t4 = _t5;
+                            }
+                            if (_t4) {
+                                return ok_int64_t_or_exception(0);
+                            }
+                            i += 1;
+                            i += 1;
+                        }
+                        break;
+                    }
+                    return ok_int64_t_or_exception(1);
+                } else {
+                    if (_t0 == 5) {
+                        return ok_int64_t_or_exception(1);
+                    } else {
+                        org_bau_Exception_exception _t6 = org_bau_Exception_exception_1(string_1001);
+                        _x1 = exception_int64_t_or_exception(_t6); _lastException = _x1.exception; goto catch0;
+                        org_bau_Exception_exception_free(&_t6);
+                    }
+                }
+            }
+        }
     }
     } while(0);
     catch0:

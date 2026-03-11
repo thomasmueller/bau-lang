@@ -463,13 +463,13 @@ public class Operation implements Expression {
             If ifStatement = new If();
             if ("or".equals(operator)) {
                 Expression not = new Operation(null, "not", var);
-                ifStatement.conditions.add(not);
+                ifStatement.condition = not;
             } else {
-                ifStatement.conditions.add(var);
+                ifStatement.condition = var;
             }
             ArrayList<Statement> list = new ArrayList<Statement>();
-            ifStatement.listList.add(list);
-            ifStatement.autoClose(Collections.emptyList());
+            ifStatement.thenList = list;
+            ifStatement.thenAutoClose = Collections.emptyList();
             Variable v2 = parser.assignTempVariable(list, right);
             Assignment assign = new Assignment();
             assign.initial = false;
@@ -479,6 +479,7 @@ public class Operation implements Expression {
             assign.value = v2;
             list.add(assign);
             target.add(ifStatement);
+            target.add(new PhiBlock());
             return var;
         } else {
             right = right.writeStatements(parser, false, target);
@@ -662,12 +663,12 @@ public class Operation implements Expression {
 
     public static Solver.Expr toSolverExpr(Expression expr) {
         if (expr instanceof Variable) {
-            return Solver.variable(((Variable) expr).name);
+            return Solver.variable(((Variable) expr).name());
         } else if(expr instanceof FieldAccess) {
             FieldAccess f = (FieldAccess) expr;
             if (f.base.type().isArray() && f.fieldName.equals("len")) {
                 if (f.base instanceof Variable) {
-                    return Solver.variable(((Variable) f.base).name + ".len");
+                    return Solver.variable(((Variable) f.base).name() + ".len");
                 } else if (f.base instanceof FieldAccess) {
                     return Solver.variable(f.toString());
                 }
@@ -698,6 +699,14 @@ public class Operation implements Expression {
             return left.containsModifiableVariables() || right.containsModifiableVariables();
         }
         return right.containsModifiableVariables();
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, PhiBlock phis, Statement statement) {
+        if (left != null) {
+            left.setVariableVersions(functionContext, phis, statement);
+        }
+        right.setVariableVersions(functionContext, phis, statement);
     }
 
 }

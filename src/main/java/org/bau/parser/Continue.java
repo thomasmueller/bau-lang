@@ -9,7 +9,7 @@ public class Continue implements Statement {
     Expression condition;
     // int continuedId;
     List<Statement> autoClose;
-    While loop;
+    Loop loop;
 
     @Override
     public Statement replace(Variable old, Expression with) {
@@ -86,4 +86,18 @@ public class Continue implements Statement {
             }
         }
     }
+
+    @Override
+    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        if (continueTarget == null) {
+            throw new IllegalStateException("Continue outside of a loop");
+        }
+        if (condition == null) {
+            // ignore
+        } else {
+            functionContext.linkStatements(this, next);
+        }
+        functionContext.linkStatements(this, continueTarget);
+    }
+
 }

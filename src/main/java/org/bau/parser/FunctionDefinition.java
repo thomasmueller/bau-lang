@@ -303,7 +303,7 @@ public class FunctionDefinition {
             if (i > first) {
                 buff.append(", ");
             }
-            buff.append(v.name);
+            buff.append(v.name());
             buff.append(' ');
             if (varArgs && i == parameters.size() - 1) {
                 buff.append(v.type().baseType());

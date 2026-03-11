@@ -56,7 +56,7 @@ test()
                     """).parse();
             fail();
         } catch (Exception e) {
-            assertTrue(e.getMessage().indexOf("'a' could be null here") > 0);
+            assertTrue(e.getMessage(), e.getMessage().indexOf("'a' could be null here") > 0);
         }
     }
 

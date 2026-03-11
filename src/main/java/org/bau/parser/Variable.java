@@ -12,20 +12,31 @@ import org.bau.runtime.Value.ValueNull;
 import org.bau.runtime.Value.ValueStruct;
 
 public class Variable implements Expression, LeftValue {
-    String name;
-    String module;
-    private DataType type;
+
+    public final static boolean DEBUG_VERSIONS = false;
+
+    private final String name;
+    private int version;
+    private final String module;
+    private final DataType type;
+    private final boolean global;
     private Expression length;
-    boolean isConstant;
-    Value constantValue;
-    public boolean global;
-    public boolean used;
+    private boolean isConstant;
+    private Value constantValue;
+    private boolean isInternal;
+
+    boolean used;
     int reassignCount;
     boolean skipIncrementDecrementRefCount;
-    boolean isInternal;
 
     public Variable(String name, DataType type) {
         this(null, name, false, type);
+    }
+
+    public static Variable newInternal(String constId, DataType type) {
+        Variable var = new Variable(constId, type);
+        var.isInternal = true;
+        return var;
     }
 
     public Variable(String module, String name, boolean global, DataType type) {
@@ -33,6 +44,29 @@ public class Variable implements Expression, LeftValue {
         this.name = name;
         this.global = global;
         this.type = type;
+    }
+
+    public Variable cloneVariable() {
+        if (!Variable.DEBUG_VERSIONS) {
+            return this;
+        }
+        if (isConstant || global) {
+            return this;
+        }
+        Variable next = new Variable(module, name, global, type);
+        next.isInternal = isInternal;
+        next.length = length;
+        // no need to copy: isConstant, constantValue, global because they can not be set.
+        // not copied on purpose: used, reassignCount, skipIncrementDecrementRefCount;
+        return next;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String module() {
+        return module;
     }
 
     public static String getGlobalVariableId(String module, String name) {
@@ -283,8 +317,13 @@ public class Variable implements Expression, LeftValue {
         return null;
     }
 
+    void setConstantValue(Value value) {
+        this.constantValue = value;
+        this.isConstant = true;
+    }
+
     @Override
-    public boolean isContant() {
+    public boolean isConstant() {
         return isConstant;
     }
 
@@ -314,7 +353,10 @@ public class Variable implements Expression, LeftValue {
         if (isInternal) {
             return "_" + name.substring(1);
         }
-        return Program.esc(name);
+        if (DEBUG_VERSIONS) {
+            return Program.esc(name()) + " /*_" + version + "*/";
+        }
+        return Program.esc(name());
     }
 
     @Override
@@ -331,6 +373,98 @@ public class Variable implements Expression, LeftValue {
     public List<Rule> getRules() {
         Rule r = Solver.rule(Solver.variable(toString()), "<>", Solver.number(0));
         return List.of(r);
+    }
+
+    public boolean global() {
+        return global;
+    }
+
+    public Value constantValue() {
+        return constantValue;
+    }
+
+    public void setVariableVersions(FunctionContext functionContext, PhiBlock phi, Statement statement) {
+        if (isConstant || global) {
+            return;
+        }
+        if (version > 0) {
+            return;
+        }
+        if (phi == null) {
+            throw new IllegalStateException();
+        }
+        Integer latest = phi.getCurrentVersion(name);
+        if (latest == null) {
+            phi.add(name);
+            setVariableVersionsInPhisRecursive(functionContext, phi, phi);
+            List<Integer> l2 = phi.getVersionList(name);
+            int max = 0;
+            if (l2.isEmpty()) {
+                // new variable
+            } else {
+                for (int i = 0; i < l2.size(); i++) {
+                    max = Math.max(max, l2.get(i));
+                }
+                if (l2.size() > 1) {
+                    max++;
+                }
+            }
+            phi.setCurrentVersion(name, max);
+            phi.setLatestVersion(name, max);
+            latest = phi.getCurrentVersion(name);
+            if (latest == null) {
+                throw new IllegalStateException();
+            }
+        }
+        version = latest;
+    }
+
+    private void setVariableVersionsInPhisRecursive(FunctionContext functionContext, PhiBlock setIn, Statement statement) {
+        List<Statement> list = functionContext.getPrecedessors(statement);
+        while (list.size() == 1) {
+            statement = list.get(0);
+            if (statement instanceof PhiBlock) {
+                break;
+            }
+            list = functionContext.getPrecedessors(statement);
+        }
+        for (Statement s : list) {
+            if (s instanceof PhiBlock) {
+                PhiBlock phi = (PhiBlock) s;
+                Integer current = phi.getCurrentVersion(name);
+                if (current != null) {
+                    if (current == -1) {
+                        // stop here
+                        continue;
+                    }
+                    setIn.getVersionList(name).add(current);
+                }
+                setVariableVersionsInPhisRecursive(functionContext, setIn, s);
+            } else {
+                boolean found = false;
+                if (s instanceof Assignment) {
+                    Assignment assign = (Assignment) s;
+                    if (assign.leftValue instanceof Variable) {
+                        Variable var = (Variable) assign.leftValue;
+                        if (var.name.equals(name)) {
+                            setIn.getVersionList(name).add(var.version);
+                            found = true;
+                        }
+                    }
+                }
+                if (!found) {
+                    setVariableVersions(functionContext, setIn, s);
+                }
+            }
+        }
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
 }

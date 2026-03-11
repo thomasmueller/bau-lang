@@ -8,60 +8,53 @@ import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
 public class If implements Statement {
-    ArrayList<Expression> conditions = new ArrayList<>();
-    ArrayList<ArrayList<Statement>> listList = new ArrayList<>();
-    ArrayList<List<Statement>> autoClose = new ArrayList<>();
+    Expression condition;
+    List<Statement> thenList;
+    List<Statement> thenAutoClose;
+    List<Statement> elseList;
+    List<Statement> elseAutoClose;
 
     @Override
     public If replace(Variable old, Expression with) {
         If c = new If();
-        c.conditions = new ArrayList<>(conditions);
-        for (int i = 0; i < conditions.size(); i++) {
-            c.conditions.set(i, c.conditions.get(i).replace(old, with));
+        c.condition = condition.replace(old, with);
+        c.thenList = new ArrayList<>();
+        for (int j = 0; j < thenList.size(); j++) {
+            c.thenList.add(thenList.get(j).replace(old, with));
         }
-        c.listList = new ArrayList<>();
-        c.autoClose = new ArrayList<>();
-        for (int i = 0; i < listList.size(); i++) {
-            ArrayList<Statement> l2 = new ArrayList<>();
-            ArrayList<Statement> list = listList.get(i);
-            for (int j = 0; j < list.size(); j++) {
-                l2.add(list.get(j).replace(old, with));
-            }
-            c.listList.add(l2);
+        c.thenAutoClose = new ArrayList<>();
+        for (int j = 0; j < thenAutoClose.size(); j++) {
+            c.thenAutoClose.add(thenAutoClose.get(j).replace(old, with));
         }
-        for (int i = 0; i < autoClose.size(); i++) {
-            ArrayList<Statement> l2 = new ArrayList<>();
-            List<Statement> list = autoClose.get(i);
-            for (int j = 0; j < list.size(); j++) {
-                l2.add(list.get(j).replace(old, with));
+        if (elseList != null) {
+            c.elseList = new ArrayList<>();
+            for (int j = 0; j < elseList.size(); j++) {
+                c.elseList.add(elseList.get(j).replace(old, with));
             }
-            c.autoClose.add(l2);
+            c.elseAutoClose = new ArrayList<>();
+            for (int j = 0; j < elseAutoClose.size(); j++) {
+                c.elseAutoClose.add(elseAutoClose.get(j).replace(old, with));
+            }
         }
         return c;
     }
 
     @Override
     public StatementResult run(Memory m) {
-        ArrayList<Statement> list = null;
+        List<Statement> list = null;
         List<Statement> ac = null;
-        for (int i = 0; i < conditions.size(); i++) {
-            Expression cond = conditions.get(i);
-            Value value = cond.eval(m);
-            if (value == null) {
-                // eg. due to an uncompiled function
-                return StatementResult.TIMEOUT;
-            }
-            long v = value.longValue();
-            if (v != 0) {
-                list = listList.get(i);
-                ac = autoClose.get(i);
-                break;
-            }
+        Value value = condition.eval(m);
+        if (value == null) {
+            // eg. due to an uncompiled function
+            return StatementResult.TIMEOUT;
         }
-        if (list == null && listList.size() > conditions.size()) {
-            // else
-            list = listList.get(listList.size() - 1);
-            ac = autoClose.get(listList.size() - 1);
+        long v = value.longValue();
+        if (v != 0) {
+            list = thenList;
+            ac = thenAutoClose;
+        } else if (elseList != null) {
+            list = elseList;
+            ac = elseAutoClose;
         }
         if (list == null) {
             return StatementResult.OK;
@@ -74,63 +67,56 @@ public class If implements Statement {
 
     @Override
     public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
-        for (int i = 0; i < listList.size(); i++) {
-            ArrayList<Statement> list = listList.get(i);
-            Program.collectTypes(list, set, memoryType);
-        }
-        for (int i = 0; i < autoClose.size(); i++) {
-            List<Statement> list = autoClose.get(i);
-            Program.collectTypes(list, set, memoryType);
+        Program.collectTypes(thenList, set, memoryType);
+        Program.collectTypes(thenAutoClose, set, memoryType);
+        if (elseList != null) {
+            Program.collectTypes(elseList, set, memoryType);
+            Program.collectTypes(elseAutoClose, set, memoryType);
         }
     }
 
     @Override
     public void optimize(ProgramContext context) {
-        for (int i = 0; i < listList.size(); i++) {
-            for (Statement s : listList.get(i)) {
-                s.optimize(context);
-            }
-            for (Statement s : autoClose.get(i)) {
-                s.optimize(context);
-            }
+        for (Statement s : thenList) {
+            s.optimize(context);
         }
+        for (Statement s : thenAutoClose) {
+            s.optimize(context);
+        }
+        if (elseList != null) {
+            for (Statement s : elseList) {
+                s.optimize(context);
+            }
+            for (Statement s : elseAutoClose) {
+                s.optimize(context);
+            }        }
     }
 
     public String toC() {
         StringBuilder buff = new StringBuilder();
         buff.append("if (");
-        buff.append(conditions.get(0).toC()).append(") {\n");
-        for (int i = 0; i < conditions.size(); i++) {
-            if (i > 0) {
-                buff.append("} else if (");
-                buff.append(conditions.get(i).toC()).append(") {\n");
-            }
-            ArrayList<Statement> list = listList.get(i);
-            boolean hasReturn = Program.hasReturn(list);
-            int catchCount = Program.catchCount(list);
-            for (int j = 0; j < catchCount; j++) {
-                buff.append(Statement.indent("do { do {\n"));
-            }
-            for (Statement s : list) {
+        buff.append(condition.toC()).append(") {\n");
+        boolean hasReturn = Program.hasReturn(thenList);
+        int catchCount = Program.catchCount(thenList);
+        for (int j = 0; j < catchCount; j++) {
+            buff.append(Statement.indent("do { do {\n"));
+        }
+        for (Statement s : thenList) {
+            buff.append(Statement.indent(s.toC()));
+        }
+        if (!hasReturn) {
+            for (Statement s : thenAutoClose) {
                 buff.append(Statement.indent(s.toC()));
-            }
-            if (!hasReturn) {
-                List<Statement> autoCloseList = autoClose.get(i);
-                for (Statement s : autoCloseList) {
-                    buff.append(Statement.indent(s.toC()));
-                }
             }
         }
-        if (listList.size() > conditions.size()) {
+        if (elseList != null) {
             buff.append("} else {\n");
-            ArrayList<Statement> list = listList.get(listList.size() - 1);
-            boolean hasReturn = Program.hasReturn(list);
-            for (Statement s : list) {
+            hasReturn = Program.hasReturn(elseList);
+            for (Statement s : elseList) {
                 buff.append(Statement.indent(s.toC()));
             }
             if (!hasReturn) {
-                List<Statement> autoCloseList = autoClose.get(listList.size() - 1);
-                for (Statement s : autoCloseList) {
+                for (Statement s : elseAutoClose) {
                     buff.append(Statement.indent(s.toC()));
                 }
             }
@@ -142,45 +128,70 @@ public class If implements Statement {
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append("if ");
-        buff.append(conditions.get(0).toString()).append("\n");
-        for (int i = 0; i < conditions.size(); i++) {
-            if (i > 0) {
-                buff.append("elif ");
-                buff.append(conditions.get(i).toString()).append("\n");
-            }
-            ArrayList<Statement> list = listList.get(i);
-            for(Statement s : list) {
-                buff.append(Statement.indent(s.toString()));
-            }
+        buff.append(condition.toString()).append("\n");
+        for(Statement s : thenList) {
+            buff.append(Statement.indent(s.toString()));
         }
-        if (listList.size() > conditions.size()) {
+        if (elseList != null) {
             buff.append("else\n");
-            ArrayList<Statement> list = listList.get(listList.size() - 1);
-            for(Statement s : list) {
+            for (Statement s : elseList) {
                 buff.append(Statement.indent(s.toString()));
             }
         }
         return buff.toString();
     }
 
-    public void autoClose(List<Statement> autoClose) {
-        this.autoClose.add(autoClose);
+    @Override
+    public void used(Program program) {
+        condition.used(program);
+        for (Statement s : thenList) {
+            s.used(program);
+        }
+        for (Statement s : thenAutoClose) {
+            s.used(program);
+        }
+        if (elseList != null) {
+            for (Statement s : elseList) {
+                s.used(program);
+            }
+            for (Statement s : elseAutoClose) {
+                s.used(program);
+            }
+        }
     }
 
     @Override
-    public void used(Program program) {
-        for (Expression e : conditions) {
-            e.used(program);
+    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
+        // TODO link last (then and else) with next,
+        // break (including nested) with loop next,
+        // continue (including nested) with loop head,
+        // throw (included nested) with catch
+        if (thenList.size() > 0) {
+            functionContext.linkStatements(this, thenList.get(0));
+            functionContext.linkList(thenList, prev, next, breakTarget, continueTarget);
         }
-        for (ArrayList<Statement> l : listList) {
-            for (Statement s : l) {
-                s.used(program);
-            }
+        if (elseList == null || elseList.size() == 0) {
+            functionContext.linkStatements(this, next);
+        } else {
+            functionContext.linkStatements(this, elseList.get(0));
+            functionContext.linkList(elseList, prev, next, breakTarget, continueTarget);
         }
-        for (List<Statement> l : autoClose) {
-            for (Statement s : l) {
-                s.used(program);
-            }
+    }
+
+    @Override
+    public void printLinks(String indentation, FunctionContext functionContext) {
+        functionContext.printLinks(indentation, this);
+        functionContext.printLinks(indentation + "    ", thenList);
+        if (elseList != null) {
+            functionContext.printLinks(indentation + "    ", elseList);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, PhiBlock lastPhi) {
+        functionContext.setVariableVersions(thenList, lastPhi);
+        if (elseList != null) {
+            functionContext.setVariableVersions(elseList, lastPhi);
         }
     }
 

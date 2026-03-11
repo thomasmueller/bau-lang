@@ -154,17 +154,17 @@ public class SvgUtils {
             }
         }
         int[][] poly = new int[polys.size()][];
-        int polyCount = 0;
+        // int polyCount = 0;
         for (int i = 0; i < polys.size(); i++) {
             ArrayList<Double> p = polys.get(i);
             int[] co = new int[p.size()];
             for (int j = 0; j < p.size(); j++) {
                 co[j] = (int) (p.get(j).doubleValue() * factor);
-                polyCount++;
+                // polyCount++;
             }
             poly[i] = co;
         }
-        System.out.println("polys: " + polyCount);
+        // System.out.println("polys: " + polyCount);
         return poly;
     }
 

@@ -810,26 +810,40 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
             int64_t _t2 = e1;
             if (_t2 == 51) {
                 return 1004;
-            } else if (_t2 == 53) {
-                return 1007;
-            } else if (_t2 == 54) {
-                return 1008;
+            } else {
+                if (_t2 == 53) {
+                    return 1007;
+                } else {
+                    if (_t2 == 54) {
+                        return 1008;
+                    }
+                }
             }
             return key;
         }
         int64_t _t3 = e1;
         if (_t3 == 65) {
             return 1002;
-        } else if (_t3 == 66) {
-            return 1003;
-        } else if (_t3 == 67) {
-            return 1001;
-        } else if (_t3 == 68) {
-            return 1000;
-        } else if (_t3 == 70) {
-            return 1006;
-        } else if (_t3 == 72) {
-            return 1005;
+        } else {
+            if (_t3 == 66) {
+                return 1003;
+            } else {
+                if (_t3 == 67) {
+                    return 1001;
+                } else {
+                    if (_t3 == 68) {
+                        return 1000;
+                    } else {
+                        if (_t3 == 70) {
+                            return 1006;
+                        } else {
+                            if (_t3 == 72) {
+                                return 1005;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return key;
     }
@@ -1083,14 +1097,22 @@ void _main() {
                 int64_t _t46 = key;
                 if (_t46 == 1000) {
                     tempPos -= 1;
-                } else if (_t46 == 1001) {
-                    tempPos += 1;
-                } else if ((_t46 == 32) || (_t46 == 1002)) {
-                    tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
-                } else if (_t46 == 27) {
-                    org_bau_Env_exit_1(0);
-                } else if (_t46 == 1003) {
-                    running = 0;
+                } else {
+                    if (_t46 == 1001) {
+                        tempPos += 1;
+                    } else {
+                        if ((_t46 == 32) || (_t46 == 1002)) {
+                            tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
+                        } else {
+                            if (_t46 == 27) {
+                                org_bau_Env_exit_1(0);
+                            } else {
+                                if (_t46 == 1003) {
+                                    running = 0;
+                                }
+                            }
+                        }
+                    }
                 }
                 int64_t _t47 = canPlace_2(tempPos, tempRot);
                 if (_t47) {

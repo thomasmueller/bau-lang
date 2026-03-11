@@ -466,31 +466,41 @@ int64_t evaluateBoard_1(int64_t black) {
                 int64_t _t0 = getPiece_1(b);
                 if (_t0 == 1) {
                     sc = 10000000;
-                } else if (_t0 == 2) {
-                    sc = 1000;
-                } else if (_t0 == 3) {
-                    sc = 500;
-                } else if (_t0 == 5) {
-                    int64_t _t1 = getPossibleMoves_2(i, 0);
-                    int64_t _t2 = org_bau_Int_bitCount_1(_t1);
-                    sc = _t2;
-                    sc += 320;
-                } else if (_t0 == 4) {
-                    int64_t _t3 = getPossibleMoves_2(i, 0);
-                    int64_t _t4 = org_bau_Int_bitCount_1(_t3);
-                    sc = _t4;
-                    sc += 330;
-                } else if (_t0 == 6) {
-                    sc = 100;
-                    if (turn > 40) {
-                        int64_t _t5 = 0;
-                        int64_t _t6 = isBlack_1(b);
-                        if (_t6) {
-                            _t5 = (idiv_2(i, 8)) - 1;
+                } else {
+                    if (_t0 == 2) {
+                        sc = 1000;
+                    } else {
+                        if (_t0 == 3) {
+                            sc = 500;
                         } else {
-                            _t5 = 6 - (idiv_2(i, 8));
+                            if (_t0 == 5) {
+                                int64_t _t1 = getPossibleMoves_2(i, 0);
+                                int64_t _t2 = org_bau_Int_bitCount_1(_t1);
+                                sc = _t2;
+                                sc += 320;
+                            } else {
+                                if (_t0 == 4) {
+                                    int64_t _t3 = getPossibleMoves_2(i, 0);
+                                    int64_t _t4 = org_bau_Int_bitCount_1(_t3);
+                                    sc = _t4;
+                                    sc += 330;
+                                } else {
+                                    if (_t0 == 6) {
+                                        sc = 100;
+                                        if (turn > 40) {
+                                            int64_t _t5 = 0;
+                                            int64_t _t6 = isBlack_1(b);
+                                            if (_t6) {
+                                                _t5 = (idiv_2(i, 8)) - 1;
+                                            } else {
+                                                _t5 = 6 - (idiv_2(i, 8));
+                                            }
+                                            sc += shiftLeft_2(1, _t5);
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        sc += shiftLeft_2(1, _t5);
                     }
                 }
                 int64_t _t7 = isBlack_1(b);
@@ -1271,26 +1281,40 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
             int64_t _t2 = e1;
             if (_t2 == 51) {
                 return 1004;
-            } else if (_t2 == 53) {
-                return 1007;
-            } else if (_t2 == 54) {
-                return 1008;
+            } else {
+                if (_t2 == 53) {
+                    return 1007;
+                } else {
+                    if (_t2 == 54) {
+                        return 1008;
+                    }
+                }
             }
             return key;
         }
         int64_t _t3 = e1;
         if (_t3 == 65) {
             return 1002;
-        } else if (_t3 == 66) {
-            return 1003;
-        } else if (_t3 == 67) {
-            return 1001;
-        } else if (_t3 == 68) {
-            return 1000;
-        } else if (_t3 == 70) {
-            return 1006;
-        } else if (_t3 == 72) {
-            return 1005;
+        } else {
+            if (_t3 == 66) {
+                return 1003;
+            } else {
+                if (_t3 == 67) {
+                    return 1001;
+                } else {
+                    if (_t3 == 68) {
+                        return 1000;
+                    } else {
+                        if (_t3 == 70) {
+                            return 1006;
+                        } else {
+                            if (_t3 == 72) {
+                                return 1005;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return key;
     }
@@ -1597,109 +1621,125 @@ void _main() {
         int64_t _t9 = key;
         if (_t9 == 113) {
             break;
-        } else if (_t9 == 32) {
-            if (state == 0) {
-                int64_t p = xx + ( 8 * yy );
-                int64_t _t10 = board->data[idx_2(p, _arrayLen(board))] == 0;
-                if (!(_t10)) {
-                    int64_t _t11 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
-                    _t10 = _t11;
-                }
-                if (_t10) {
-                    continue;
-                }
-                from = p;
-                state = 1;
-                int64_t moves = getPossibleMoves_2(p, 0);
-                while (moves != 0) {
-                    int64_t target = org_bau_Int_numberOfTrailingZeros_1(moves);
-                    board->data[idx_2(target, _arrayLen(board))] |= 16;
-                    moves ^= shiftLeft_2(1, target);
-                }
-                refreshScreen_0();
-            } else {
-                if (state == 1) {
+        } else {
+            if (_t9 == 32) {
+                if (state == 0) {
                     int64_t p = xx + ( 8 * yy );
-                    int64_t allowed = (board->data[idx_2(p, _arrayLen(board))] & 16) != 0;
-                    if (64 > 0) {
-                        while (1 == 1) {
-                            int64_t i = 0;
-                            while (1) {
-                                board->data[idx_2(i, _arrayLen(board))] &= -17;
-                                int64_t _next = i + 1;
-                                if (_next >= 64) {
-                                    break;
-                                }
-                                i = _next;
-                            }
-                            break;
-                        }
+                    int64_t _t10 = board->data[idx_2(p, _arrayLen(board))] == 0;
+                    if (!(_t10)) {
+                        int64_t _t11 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
+                        _t10 = _t11;
                     }
-                    if (allowed) {
-                        int64_t _t12 = move_2(from, p);
-                        lastWhite = _t12;
-                        showCursor = 0;
-                        refreshScreen_0();
-                        int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
-                        if (move != 0) {
-                            lastBlack = move;
-                            int64_t _t13 = move_1(move);
-                            ;
-                        }
+                    if (_t10) {
+                        continue;
                     }
-                    showCursor = 1;
+                    from = p;
+                    state = 1;
+                    int64_t moves = getPossibleMoves_2(p, 0);
+                    while (moves != 0) {
+                        int64_t target = org_bau_Int_numberOfTrailingZeros_1(moves);
+                        board->data[idx_2(target, _arrayLen(board))] |= 16;
+                        moves ^= shiftLeft_2(1, target);
+                    }
                     refreshScreen_0();
-                    state = 0;
+                } else {
+                    if (state == 1) {
+                        int64_t p = xx + ( 8 * yy );
+                        int64_t allowed = (board->data[idx_2(p, _arrayLen(board))] & 16) != 0;
+                        if (64 > 0) {
+                            while (1 == 1) {
+                                int64_t i = 0;
+                                while (1) {
+                                    board->data[idx_2(i, _arrayLen(board))] &= -17;
+                                    int64_t _next = i + 1;
+                                    if (_next >= 64) {
+                                        break;
+                                    }
+                                    i = _next;
+                                }
+                                break;
+                            }
+                        }
+                        if (allowed) {
+                            int64_t _t12 = move_2(from, p);
+                            lastWhite = _t12;
+                            showCursor = 0;
+                            refreshScreen_0();
+                            int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
+                            if (move != 0) {
+                                lastBlack = move;
+                                int64_t _t13 = move_1(move);
+                                ;
+                            }
+                        }
+                        showCursor = 1;
+                        refreshScreen_0();
+                        state = 0;
+                    }
+                }
+            } else {
+                if (_t9 == 99) {
+                    int64_t p = xx + ( 8 * yy );
+                    if (state == 0) {
+                        from = p;
+                        state = 1;
+                    } else {
+                        int64_t _t14 = move_2(from, p);
+                        lastWhite = _t14;
+                        refreshScreen_0();
+                        state = 0;
+                    }
+                } else {
+                    if (_t9 == 117) {
+                        int64_t _t15 = lastBlack != 0;
+                        if (_t15) {
+                            int64_t _t16 = lastWhite != 0;
+                            _t15 = _t16;
+                        }
+                        if (_t15) {
+                            undo_1(lastBlack);
+                            undo_1(lastWhite);
+                            refreshScreen_0();
+                        }
+                        lastBlack = 0;
+                        lastWhite = 0;
+                    } else {
+                        if (_t9 == 115) {
+                            blackTurn = !(blackTurn);
+                            showCursor = 0;
+                            refreshScreen_0();
+                            int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
+                            if (move != 0) {
+                                int64_t _t17 = move_1(move);
+                                ;
+                            }
+                            showCursor = 1;
+                            refreshScreen_0();
+                            state = 0;
+                        } else {
+                            if (_t9 == 1001) {
+                                int64_t _t18 = org_bau_Int_min_2(7, xx + 1);
+                                xx = _t18;
+                            } else {
+                                if (_t9 == 1000) {
+                                    int64_t _t19 = org_bau_Int_max_2(0, xx - 1);
+                                    xx = _t19;
+                                } else {
+                                    if (_t9 == 1002) {
+                                        int64_t _t20 = org_bau_Int_max_2(0, yy - 1);
+                                        yy = _t20;
+                                    } else {
+                                        if (_t9 == 1003) {
+                                            int64_t _t21 = org_bau_Int_min_2(7, yy + 1);
+                                            yy = _t21;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        } else if (_t9 == 99) {
-            int64_t p = xx + ( 8 * yy );
-            if (state == 0) {
-                from = p;
-                state = 1;
-            } else {
-                int64_t _t14 = move_2(from, p);
-                lastWhite = _t14;
-                refreshScreen_0();
-                state = 0;
-            }
-        } else if (_t9 == 117) {
-            int64_t _t15 = lastBlack != 0;
-            if (_t15) {
-                int64_t _t16 = lastWhite != 0;
-                _t15 = _t16;
-            }
-            if (_t15) {
-                undo_1(lastBlack);
-                undo_1(lastWhite);
-                refreshScreen_0();
-            }
-            lastBlack = 0;
-            lastWhite = 0;
-        } else if (_t9 == 115) {
-            blackTurn = !(blackTurn);
-            showCursor = 0;
-            refreshScreen_0();
-            int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
-            if (move != 0) {
-                int64_t _t17 = move_1(move);
-                ;
-            }
-            showCursor = 1;
-            refreshScreen_0();
-            state = 0;
-        } else if (_t9 == 1001) {
-            int64_t _t18 = org_bau_Int_min_2(7, xx + 1);
-            xx = _t18;
-        } else if (_t9 == 1000) {
-            int64_t _t19 = org_bau_Int_max_2(0, xx - 1);
-            xx = _t19;
-        } else if (_t9 == 1002) {
-            int64_t _t20 = org_bau_Int_max_2(0, yy - 1);
-            yy = _t20;
-        } else if (_t9 == 1003) {
-            int64_t _t21 = org_bau_Int_min_2(7, yy + 1);
-            yy = _t21;
         }
     }
     _decUseStack(_t3, i8_array);

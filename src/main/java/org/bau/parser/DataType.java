@@ -52,7 +52,7 @@ public class DataType {
     public List<Variable> fields = new ArrayList<>();
 
     private DataType borrowType;
-    private DataType ownerType2;
+    private DataType ownerType;
 
     public LinkedHashMap<String, Long> enumValues;
     FunctionDefinition autoClose;
@@ -222,12 +222,7 @@ public class DataType {
     }
 
     public String id() {
-        String n = name;
-        int todo;
-//        if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
-//            n += "+";
-//        }
-        return n;
+        return name;
     }
 
     public String idC() {
@@ -365,7 +360,7 @@ public class DataType {
     public DataType getFieldDataType(String f) {
         // TODO use a map, not a loop
         for (Variable v : fields) {
-            if (v.name.equals(f)) {
+            if (v.name().equals(f)) {
                 return v.type();
             }
         }
@@ -421,11 +416,10 @@ public class DataType {
         if (memoryType == MemoryType.OWNER) {
             return this;
         } else if (memoryType == MemoryType.BORROW) {
-            int todoRemove2;
-            if (ownerType2 == null) {
+            if (ownerType == null) {
                 throw new IllegalStateException();
             }
-            return ownerType2;
+            return ownerType;
         } else {
             throw new IllegalStateException();
         }
@@ -437,12 +431,11 @@ public class DataType {
         } else if (memoryType == MemoryType.OWNER) {
             if (borrowType == null) {
                 borrowType = new DataType(module, name, sizeOf, false, null, false, MemoryType.BORROW);
-                borrowType.ownerType2 = this;
+                borrowType.ownerType = this;
                 borrowType.fields = fields;
             }
             return borrowType;
         } else {
-            int todoReturnThis;
             throw new IllegalStateException();
         }
 
@@ -467,8 +460,8 @@ public class DataType {
         if (notNullType != null && notNullType.getTraitDefinition() != null) {
             return notNullType.getTraitDefinition();
         }
-        if (ownerType2 != null) {
-            return ownerType2.getTraitDefinition();
+        if (ownerType != null) {
+            return ownerType.getTraitDefinition();
         }
         return null;
     }
@@ -517,13 +510,12 @@ public class DataType {
         if (traitDefinition != null) {
             return true;
         }
-        if (ownerType2 != null && ownerType2.isTrait()) {
+        if (ownerType != null && ownerType.isTrait()) {
             return true;
         }
         if (notNullType != null && notNullType.isTrait()) {
             return true;
         }
-        int todoCheckOnOwnerOrBorrowMaybe;
         if (isArray()) {
             return arrayBaseType.isTrait();
         }
@@ -541,7 +533,6 @@ public class DataType {
                 return true;
             }
         }
-        int todoCheckOnOwnerOrBorrowMaybe;
         return false;
     }
 

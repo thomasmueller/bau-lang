@@ -321,12 +321,16 @@ void _main() {
                 int64_t _t0 = get_1(a);
                 if (_t0 == 0) {
                     printf("...is sunday\n");
-                } else if (_t0 == 1) {
-                    printf("...is monday\n");
-                } else if ((_t0 == 2) || (_t0 == 3)) {
-                    printf("...is tuesday or wednesday\n");
                 } else {
-                    printf("...is some other day\n");
+                    if (_t0 == 1) {
+                        printf("...is monday\n");
+                    } else {
+                        if ((_t0 == 2) || (_t0 == 3)) {
+                            printf("...is tuesday or wednesday\n");
+                        } else {
+                            printf("...is some other day\n");
+                        }
+                    }
                 }
                 int64_t _next = a + 1;
                 if (_next >= 7) {

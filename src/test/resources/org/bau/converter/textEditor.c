@@ -637,73 +637,77 @@ void find_0() {
         int64_t _t0 = key;
         if ((((_t0 == 3) || (_t0 == 17)) || (_t0 == 27)) || (_t0 == 13)) {
             break;
-        } else if (((_t0 == 127) || (_t0 == 8)) || (_t0 == 1004)) {
-            if (_arrayLen(findText.data) > 0) {
-                i8_array* _t1 = i8_array_new(_arrayLen(findText.data) - 1);
-                _incUseStack(_t1);
-                i8_array* new = _t1;
-                if (_arrayLen(new) > 0) {
-                    while (1 == 1) {
-                        int64_t i = 0;
-                        while (1) {
-                            new->data[i] = findText.data->data[idx_2(i, _arrayLen(findText.data))];
-                            int64_t _next = i + 1;
-                            if (_next >= _arrayLen(new)) {
-                                break;
-                            }
-                            i = _next;
-                        }
-                        break;
-                    }
-                }
-                org_bau_String_string _t2 = org_bau_String_string_1(new);
-                org_bau_String_string_copy(&_t2);
-                org_bau_String_string_free(&findText);
-                findText = _t2;
-                org_bau_String_string_free(&_t2);
-                _decUseStack(new, i8_array);
-                _decUseStack(_t1, i8_array);
-            }
-        } else if (_t0 == 1003) {
-            foundX = 10;
-            foundY = 10;
         } else {
-            int64_t _t3 = key >= 32;
-            if (_t3) {
-                int64_t _t4 = key <= 255;
-                _t3 = _t4;
-            }
-            int64_t _t5 = _t3;
-            if (_t5) {
-                int64_t _t6 = _arrayLen(findText.data) < 100;
-                _t5 = _t6;
-            }
-            if (_t5) {
-                i8_array* _t7 = i8_array_new(_arrayLen(findText.data) + 1);
-                _incUseStack(_t7);
-                i8_array* new = _t7;
+            if (((_t0 == 127) || (_t0 == 8)) || (_t0 == 1004)) {
                 if (_arrayLen(findText.data) > 0) {
-                    while (1 == 1) {
-                        int64_t i = 0;
-                        while (1) {
-                            new->data[i] = findText.data->data[i];
-                            int64_t _next = i + 1;
-                            if (_next >= _arrayLen(findText.data)) {
+                    i8_array* _t1 = i8_array_new(_arrayLen(findText.data) - 1);
+                    _incUseStack(_t1);
+                    i8_array* new = _t1;
+                    if (_arrayLen(new) > 0) {
+                        while (1 == 1) {
+                            int64_t i = 0;
+                            while (1) {
+                                new->data[i] = findText.data->data[idx_2(i, _arrayLen(findText.data))];
+                                int64_t _next = i + 1;
+                                if (_next >= _arrayLen(new)) {
+                                    break;
+                                }
+                                i = _next;
+                            }
+                            break;
+                        }
+                    }
+                    org_bau_String_string _t2 = org_bau_String_string_1(new);
+                    org_bau_String_string_copy(&_t2);
+                    org_bau_String_string_free(&findText);
+                    findText = _t2;
+                    org_bau_String_string_free(&_t2);
+                    _decUseStack(new, i8_array);
+                    _decUseStack(_t1, i8_array);
+                }
+            } else {
+                if (_t0 == 1003) {
+                    foundX = 10;
+                    foundY = 10;
+                } else {
+                    int64_t _t3 = key >= 32;
+                    if (_t3) {
+                        int64_t _t4 = key <= 255;
+                        _t3 = _t4;
+                    }
+                    int64_t _t5 = _t3;
+                    if (_t5) {
+                        int64_t _t6 = _arrayLen(findText.data) < 100;
+                        _t5 = _t6;
+                    }
+                    if (_t5) {
+                        i8_array* _t7 = i8_array_new(_arrayLen(findText.data) + 1);
+                        _incUseStack(_t7);
+                        i8_array* new = _t7;
+                        if (_arrayLen(findText.data) > 0) {
+                            while (1 == 1) {
+                                int64_t i = 0;
+                                while (1) {
+                                    new->data[i] = findText.data->data[i];
+                                    int64_t _next = i + 1;
+                                    if (_next >= _arrayLen(findText.data)) {
+                                        break;
+                                    }
+                                    i = _next;
+                                }
                                 break;
                             }
-                            i = _next;
                         }
-                        break;
+                        new->data[idx_2(_arrayLen(new) - 1, _arrayLen(new))] = key;
+                        org_bau_String_string _t8 = org_bau_String_string_1(new);
+                        org_bau_String_string_copy(&_t8);
+                        org_bau_String_string_free(&findText);
+                        findText = _t8;
+                        org_bau_String_string_free(&_t8);
+                        _decUseStack(new, i8_array);
+                        _decUseStack(_t7, i8_array);
                     }
                 }
-                new->data[idx_2(_arrayLen(new) - 1, _arrayLen(new))] = key;
-                org_bau_String_string _t8 = org_bau_String_string_1(new);
-                org_bau_String_string_copy(&_t8);
-                org_bau_String_string_free(&findText);
-                findText = _t8;
-                org_bau_String_string_free(&_t8);
-                _decUseStack(new, i8_array);
-                _decUseStack(_t7, i8_array);
             }
         }
     }
@@ -1462,26 +1466,40 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
             int64_t _t2 = e1;
             if (_t2 == 51) {
                 return 1004;
-            } else if (_t2 == 53) {
-                return 1007;
-            } else if (_t2 == 54) {
-                return 1008;
+            } else {
+                if (_t2 == 53) {
+                    return 1007;
+                } else {
+                    if (_t2 == 54) {
+                        return 1008;
+                    }
+                }
             }
             return key;
         }
         int64_t _t3 = e1;
         if (_t3 == 65) {
             return 1002;
-        } else if (_t3 == 66) {
-            return 1003;
-        } else if (_t3 == 67) {
-            return 1001;
-        } else if (_t3 == 68) {
-            return 1000;
-        } else if (_t3 == 70) {
-            return 1006;
-        } else if (_t3 == 72) {
-            return 1005;
+        } else {
+            if (_t3 == 66) {
+                return 1003;
+            } else {
+                if (_t3 == 67) {
+                    return 1001;
+                } else {
+                    if (_t3 == 68) {
+                        return 1000;
+                    } else {
+                        if (_t3 == 70) {
+                            return 1006;
+                        } else {
+                            if (_t3 == 72) {
+                                return 1005;
+                            }
+                        }
+                    }
+                }
+            }
         }
         return key;
     }
@@ -1925,119 +1943,139 @@ void _main() {
                 break;
             }
             mode = 0;
-        } else if (_t21 == 13) {
-            insertNewline_0();
-        } else if (_t21 == 19) {
-            save_0();
-        } else if (_t21 == 6) {
-            find_0();
-        } else if (((_t21 == 127) || (_t21 == 8)) || (_t21 == 1004)) {
-            removeByte_0();
-            if (cursorX > 1) {
-                cursorX -= 1;
+        } else {
+            if (_t21 == 13) {
+                insertNewline_0();
             } else {
-                if (offsetX > 0) {
-                    offsetX -= 1;
-                }
-            }
-        } else if (_t21 == 1007) {
-            if (currentWindowSize.rows > 0) {
-                while (1 == 1) {
-                    int64_t i = 0;
-                    while (1) {
-                        up_0();
-                        int64_t _next = i + 1;
-                        if (_next >= currentWindowSize.rows) {
-                            break;
-                        }
-                        i = _next;
-                    }
-                    break;
-                }
-            }
-        } else if (_t21 == 1008) {
-            if (currentWindowSize.rows > 0) {
-                while (1 == 1) {
-                    int64_t i = 0;
-                    while (1) {
-                        down_0();
-                        int64_t _next = i + 1;
-                        if (_next >= currentWindowSize.rows) {
-                            break;
-                        }
-                        i = _next;
-                    }
-                    break;
-                }
-            }
-        } else if (_t21 == 1002) {
-            up_0();
-        } else if (_t21 == 1003) {
-            down_0();
-        } else if (_t21 == 1000) {
-            if (cursorX > 1) {
-                cursorX -= 1;
-            } else {
-                if (offsetX > 0) {
-                    offsetX -= 1;
+                if (_t21 == 19) {
+                    save_0();
                 } else {
-                    int64_t _t23 = cursorY > 2;
-                    if (!(_t23)) {
-                        int64_t _t24 = offsetY > 0;
-                        _t23 = _t24;
-                    }
-                    if (_t23) {
-                        if (cursorY > 2) {
-                            cursorY -= 1;
+                    if (_t21 == 6) {
+                        find_0();
+                    } else {
+                        if (((_t21 == 127) || (_t21 == 8)) || (_t21 == 1004)) {
+                            removeByte_0();
+                            if (cursorX > 1) {
+                                cursorX -= 1;
+                            } else {
+                                if (offsetX > 0) {
+                                    offsetX -= 1;
+                                }
+                            }
                         } else {
-                            if (offsetY > 0) {
-                                offsetY -= 1;
+                            if (_t21 == 1007) {
+                                if (currentWindowSize.rows > 0) {
+                                    while (1 == 1) {
+                                        int64_t i = 0;
+                                        while (1) {
+                                            up_0();
+                                            int64_t _next = i + 1;
+                                            if (_next >= currentWindowSize.rows) {
+                                                break;
+                                            }
+                                            i = _next;
+                                        }
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if (_t21 == 1008) {
+                                    if (currentWindowSize.rows > 0) {
+                                        while (1 == 1) {
+                                            int64_t i = 0;
+                                            while (1) {
+                                                down_0();
+                                                int64_t _next = i + 1;
+                                                if (_next >= currentWindowSize.rows) {
+                                                    break;
+                                                }
+                                                i = _next;
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    if (_t21 == 1002) {
+                                        up_0();
+                                    } else {
+                                        if (_t21 == 1003) {
+                                            down_0();
+                                        } else {
+                                            if (_t21 == 1000) {
+                                                if (cursorX > 1) {
+                                                    cursorX -= 1;
+                                                } else {
+                                                    if (offsetX > 0) {
+                                                        offsetX -= 1;
+                                                    } else {
+                                                        int64_t _t23 = cursorY > 2;
+                                                        if (!(_t23)) {
+                                                            int64_t _t24 = offsetY > 0;
+                                                            _t23 = _t24;
+                                                        }
+                                                        if (_t23) {
+                                                            if (cursorY > 2) {
+                                                                cursorY -= 1;
+                                                            } else {
+                                                                if (offsetY > 0) {
+                                                                    offsetY -= 1;
+                                                                }
+                                                            }
+                                                            int64_t y = ( cursorY + offsetY ) - 2;
+                                                            org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+                                                            org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
+                                                            cursorX = _arrayLen(line.data) + 1;
+                                                            while (cursorX >= currentWindowSize.columns) {
+                                                                cursorX -= 1;
+                                                                offsetX += 1;
+                                                            }
+                                                            org_bau_String_string_free(&line);
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                if (_t21 == 1001) {
+                                                    int64_t x = ( cursorX + offsetX ) - 1;
+                                                    int64_t y = ( cursorY + offsetY ) - 2;
+                                                    org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
+                                                    org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
+                                                    if (x < _arrayLen(line.data)) {
+                                                        if (cursorX < currentWindowSize.columns) {
+                                                            cursorX += 1;
+                                                        } else {
+                                                            offsetX += 1;
+                                                        }
+                                                    } else {
+                                                        if (y < lines->size) {
+                                                            cursorX = 1;
+                                                            offsetX = 0;
+                                                            if (cursorY < ( currentWindowSize.rows - 1 )) {
+                                                                cursorY += 1;
+                                                            } else {
+                                                                if (( cursorY + offsetY ) < currentFile.lines->size) {
+                                                                    offsetY += 1;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    org_bau_String_string_free(&line);
+                                                } else {
+                                                    int8_t _t25 = i8_1(key);
+                                                    insertByte_1(_t25);
+                                                    if (cursorX < currentWindowSize.columns) {
+                                                        cursorX += 1;
+                                                    } else {
+                                                        offsetX += 1;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
-                        int64_t y = ( cursorY + offsetY ) - 2;
-                        org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
-                        org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
-                        cursorX = _arrayLen(line.data) + 1;
-                        while (cursorX >= currentWindowSize.columns) {
-                            cursorX -= 1;
-                            offsetX += 1;
-                        }
-                        org_bau_String_string_free(&line);
                     }
                 }
-            }
-        } else if (_t21 == 1001) {
-            int64_t x = ( cursorX + offsetX ) - 1;
-            int64_t y = ( cursorY + offsetY ) - 2;
-            org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);
-            org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
-            if (x < _arrayLen(line.data)) {
-                if (cursorX < currentWindowSize.columns) {
-                    cursorX += 1;
-                } else {
-                    offsetX += 1;
-                }
-            } else {
-                if (y < lines->size) {
-                    cursorX = 1;
-                    offsetX = 0;
-                    if (cursorY < ( currentWindowSize.rows - 1 )) {
-                        cursorY += 1;
-                    } else {
-                        if (( cursorY + offsetY ) < currentFile.lines->size) {
-                            offsetY += 1;
-                        }
-                    }
-                }
-            }
-            org_bau_String_string_free(&line);
-        } else {
-            int8_t _t25 = i8_1(key);
-            insertByte_1(_t25);
-            if (cursorX < currentWindowSize.columns) {
-                cursorX += 1;
-            } else {
-                offsetX += 1;
             }
         }
     }

@@ -30,12 +30,12 @@ public class Free implements Statement {
             return StatementResult.OK;
         }
         Value val;
-        if (var.global) {
-            val = m.getGlobal(var.name);
-            m.setGlobal(var.name, null);
+        if (var.global()) {
+            val = m.getGlobal(var.name());
+            m.setGlobal(var.name(), null);
         } else {
-            val = m.getLocal(var.name);
-            m.setLocal(var.name, null);
+            val = m.getLocal(var.name());
+            m.setLocal(var.name(), null);
         }
         if (val == null) {
             return StatementResult.OK;
@@ -75,12 +75,12 @@ public class Free implements Statement {
 
     private static StatementResult free(Variable var, Memory m) {
         Value val;
-        if (var.global) {
-            val = m.getGlobal(var.name);
-            m.setGlobal(var.name, null);
+        if (var.global()) {
+            val = m.getGlobal(var.name());
+            m.setGlobal(var.name(), null);
         } else {
-            val = m.getLocal(var.name);
-            m.setLocal(var.name, null);
+            val = m.getLocal(var.name());
+            m.setLocal(var.name(), null);
         }
         if (val == null) {
             return StatementResult.OK;
@@ -91,7 +91,7 @@ public class Free implements Statement {
     private static StatementResult free(Value val, DataType type, Memory m) {
         Value.ValueStruct struct = (Value.ValueStruct) val;
         for (Variable f : type.fields) {
-            Value v = struct.get(f.name);
+            Value v = struct.get(f.name());
             if (f.type().needIncDec()) {
                 StatementResult result = decRefCount(v, f.type(), m);
                 if (result == StatementResult.PANIC) {
@@ -111,7 +111,7 @@ public class Free implements Statement {
     public void collectTypes(HashSet<DataType> set, MemoryType memoryType) {
         if (memoryType == MemoryType.OWNER) {
             if (var.type().memoryType() == MemoryType.OWNER) {
-                if (var.skipIncrementDecrementRefCount && var.name.equals("this")) {
+                if (var.skipIncrementDecrementRefCount && var.name().equals("this")) {
                     // skip the "this" pointer
                 } else {
                     set.add(var.type());
@@ -156,7 +156,7 @@ public class Free implements Statement {
 
     @Override
     public String toString() {
-        return "# free " + var.name;
+        return "# free " + var.name();
     }
 
     @Override
