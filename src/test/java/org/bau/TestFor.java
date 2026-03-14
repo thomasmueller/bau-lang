@@ -32,7 +32,7 @@ loop 1 = 1
     a := 0
     loop a < 10
         println(a)
-        a += 1
+        a = a + 1
     break
                 """,
                 new Parser("""

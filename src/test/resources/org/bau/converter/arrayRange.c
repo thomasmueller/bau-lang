@@ -328,7 +328,7 @@ void test_0() {
     int64_t sum = 0;
     i = 0;
     while (1) {
-        sum += data->data[i];
+        sum = sum + data->data[i];
         int64_t next = i + 1;
         if (next >= 10) {
             break;

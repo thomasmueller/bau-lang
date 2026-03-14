@@ -308,9 +308,6 @@ public class Assignment implements Statement {
         if (!Variable.DEBUG_VERSIONS) {
             return;
         }
-
-        int todo;
-
         if (initial || isConstant || isGlobalScope) {
             return;
         }
@@ -326,31 +323,39 @@ public class Assignment implements Statement {
         leftValue = clone;
     }
 
-    @Override
-    public void setVariableVersions(FunctionContext functionContext, PhiBlock phis) {
-        if (modify != null) {
-            int test;
-            // throw new IllegalStateException("need to explicitly convert i += 1 to i_2 = i_1 + 1");
+    public void convertToExpandedForm() {
+        if (modify != null && (leftValue instanceof Variable)) {
+            Variable v = (Variable) leftValue;
+            value = new Operation(v.cloneVariable(), modify, value);
+            modify = null;
+
+
         }
-        value.setVariableVersions(functionContext, phis, this);
-        leftValue.setVariableVersions(functionContext, phis, this);
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        value.setVariableVersions(functionContext, basicBlock);
+
         if (!(leftValue instanceof Variable)) {
             return;
         }
-        if (initial || isConstant || isGlobalScope) {
+        if (isConstant || isGlobalScope) {
             return;
         }
         Variable assignToVariable = (Variable) leftValue;
         if (assignToVariable.global()) {
             return;
         }
-        if (phis.getLatestVersion(assignToVariable.name()) == null) {
-            System.out.println("??");
-            leftValue.setVariableVersions(functionContext, phis, this);
+        String name = assignToVariable.name();
+        int v;
+        if (initial) {
+            v = 0;
+        } else {
+            v = functionContext.nextVariableVersion(name);
         }
-        int latest = phis.getLatestVersion(assignToVariable.name());
-        assignToVariable.setVersion(latest + 1);
-        phis.setLatestVersion(assignToVariable.name(), assignToVariable.getVersion());
+        basicBlock.setVariableVersion(name, v);
+        assignToVariable.setVersion(v);
     }
 
 }

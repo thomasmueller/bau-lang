@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.bau.runtime.Memory;
 
@@ -30,6 +31,8 @@ public class PhiBlock implements Statement {
     HashMap<String, Integer> latest = new HashMap<>();
     HashMap<String, List<Integer>> versions = new HashMap<>();
 
+    private BasicBlock basicBlock;
+
     @Override
     public Statement replace(Variable old, Expression with) {
         return this;
@@ -46,14 +49,27 @@ public class PhiBlock implements Statement {
 
     @Override
     public String toC() {
+        if (basicBlock != null) {
+            return basicBlock.toC();
+        }
         if (Variable.DEBUG_VERSIONS) {
-            StringBuilder buff = new StringBuilder();
-            buff.append("/* \n");
-            buff.append("current " + current).append("\n");
-            buff.append("phis " + versions).append("\n");
-            buff.append("latest " + latest).append("\n");
-            buff.append("*/ \n");
-            return buff.toString();
+            // Original SSA1 debug output
+            for (String n : versions.keySet()) {
+                TreeSet<Integer> set = new TreeSet<>();
+                set.addAll(versions.get(n));
+                versions.put(n, new ArrayList<Integer>(set));
+            }
+            if (current.size() != 0 || versions.size() != 0 || latest.size() != 0) {
+                StringBuilder buff = new StringBuilder();
+                buff.append("/*\n");
+                buff.append("current " + current).append("\n");
+                buff.append("phis " + versions).append("\n");
+                buff.append("latest " + latest).append("\n");
+                buff.append("*/\n");
+                return buff.toString();
+            } else {
+                return "/* empty phis */\n";
+            }
         }
         return "";
     }
@@ -95,6 +111,10 @@ public class PhiBlock implements Statement {
 
     public Integer getLatestVersion(String name) {
         return latest.get(name);
+    }
+
+    public void setBasicBlock(BasicBlock basicBlock) {
+        this.basicBlock = basicBlock;
     }
 
 }

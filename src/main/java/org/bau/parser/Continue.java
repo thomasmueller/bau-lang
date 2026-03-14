@@ -100,4 +100,23 @@ public class Continue implements Statement {
         functionContext.linkStatements(this, continueTarget);
     }
 
+    @Override
+    public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        if (continueTarget == null) {
+            throw new IllegalStateException("Continue outside of a loop");
+        }
+        BasicBlock after = functionContext.newBasicBlock();
+        if (condition == null) {
+            // what comes next if never executed: use an orphaned block
+            functionContext.linkBasicBlocks(this, current);
+            current.addSuccessor(continueTarget);
+        } else {
+            current.addSuccessor(after);
+            functionContext.linkBasicBlocks(this, after);
+            after.addSuccessor(continueTarget);
+        }
+        return after;
+    }
+
 }

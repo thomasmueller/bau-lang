@@ -353,7 +353,7 @@ void test_0() {
         int64_t i = 0;
         while (i < 10) {
             List_int_add_2(list, i);
-            i += 1;
+            i = i + 1;
         }
         break;
     }

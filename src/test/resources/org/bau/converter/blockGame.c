@@ -503,11 +503,11 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
         if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first += 1;
+        first = first + 1;
         if (last < 1) {
             break;
         }
-        last -= 1;
+        last = last - 1;
     }
 }
 int64_t org_bau_DateTime_getNanoTime_0() {
@@ -538,7 +538,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     p = pos;
     if (n < 0) {
         buff->data[p] = 45;
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -553,7 +553,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     while (1) {
         buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -662,7 +662,7 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
     this->len += add;
 }
 int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
+    randomSeed = randomSeed + -7046029254386353131;
     int64_t z = randomSeed;
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
@@ -1085,7 +1085,7 @@ void _main() {
                 if (!(_t43)) {
                     break;
                 }
-                tick -= 1;
+                tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
                 int64_t _t45 = org_bau_os_Terminal_keyboardHit_0();
                 if (!(_t45)) {
@@ -1096,10 +1096,10 @@ void _main() {
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
                 int64_t _t46 = key;
                 if (_t46 == 1000) {
-                    tempPos -= 1;
+                    tempPos = tempPos - 1;
                 } else {
                     if (_t46 == 1001) {
-                        tempPos += 1;
+                        tempPos = tempPos + 1;
                     } else {
                         if ((_t46 == 32) || (_t46 == 1002)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
@@ -1125,7 +1125,7 @@ void _main() {
             }
             int64_t _t48 = canPlace_2(position + 14, rotation);
             if (_t48) {
-                position += 14;
+                position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
                 continue;
@@ -1152,18 +1152,18 @@ void _main() {
                     }
                 }
                 if (found) {
-                    i += 1;
-                    score += 1;
+                    i = i + 1;
+                    score = score + 1;
                     if (score > highScore) {
                         highScore = score;
                     }
                     int64_t k = ( i * 14 ) - 14;
                     while (k >= 0) {
                         FIELD->data[idx_2(k + 14, _arrayLen(FIELD))] = FIELD->data[idx_2(k, _arrayLen(FIELD))];
-                        k -= 1;
+                        k = k - 1;
                     }
                 }
-                i -= 1;
+                i = i - 1;
             }
             refreshScreen_0();
             int64_t _t49 = org_bau_Utils_random_1(7);

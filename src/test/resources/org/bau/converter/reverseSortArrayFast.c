@@ -376,7 +376,7 @@ int64_t org_bau_Int_parseInt_1(i8_array* value) {
         int64_t i = 0;
         if (value->data[0] == 45) {
             sign = -1;
-            i += 1;
+            i = i + 1;
         }
         while (i < _arrayLen(value)) {
             int8_t n = value->data[idx_2(i, _arrayLen(value))];
@@ -386,10 +386,10 @@ int64_t org_bau_Int_parseInt_1(i8_array* value) {
                 _t0 = _t1;
             }
             if (_t0) {
-                x *= 10;
-                x += n - 48;
+                x = x * 10;
+                x = x + ( n - 48 );
             }
-            i += 1;
+            i = i + 1;
         }
         int64_t _r0 = sign * x;
         return _r0;
@@ -397,7 +397,7 @@ int64_t org_bau_Int_parseInt_1(i8_array* value) {
     return 0;
 }
 int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
+    randomSeed = randomSeed + -7046029254386353131;
     int64_t z = randomSeed;
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
@@ -412,11 +412,11 @@ void reverse_int_array_int_3(int_array* buff, int64_t first, int64_t last) {
         if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first += 1;
+        first = first + 1;
         if (last < 1) {
             break;
         }
-        last -= 1;
+        last = last - 1;
     }
 }
 void shellSort_int_array_int_1(int_array* a) {
@@ -466,7 +466,7 @@ void shellSort_int_array_int_1(int_array* a) {
             if (( i + 1 ) >= _arrayLen(a)) {
                 break;
             }
-            i += 1;
+            i = i + 1;
         }
     }
 }
@@ -540,7 +540,7 @@ void _main() {
                 }
                 reverse_int_array_int_3(test, 0, _arrayLen(test) - 1);
                 shellSort_int_array_int_1(test);
-                sum += test->data[0];
+                sum = sum + test->data[0];
                 int64_t _next = loop + 1;
                 if (_next >= repeat) {
                     break;

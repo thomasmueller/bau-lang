@@ -313,7 +313,7 @@ void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
                 break;
             }
         }
-        n -= 1;
+        n = n - 1;
         if (swapped == 0) {
             break;
         }

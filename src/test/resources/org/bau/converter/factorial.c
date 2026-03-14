@@ -342,7 +342,7 @@ void _main() {
     while (i <= 10) {
         int64_t _t0 = factorial_1(i);
         printf("Factorial of %lld = %lld\n", (long long)i, (long long)_t0);
-        i += 1;
+        i = i + 1;
     }
     _end();
 }

@@ -331,8 +331,8 @@ void test_0() {
     while (1 == 1) {
         int64_t i = 0;
         while (i < 20) {
-            sum += data->data[i];
-            i += 1;
+            sum = sum + data->data[i];
+            i = i + 1;
         }
         break;
     }

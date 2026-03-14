@@ -420,7 +420,7 @@ void _main() {
             org_bau_Exception_exception_free(&e);
         } while(0);
         skip0:;
-        i += 1;
+        i = i + 1;
     }
     _end();
 }

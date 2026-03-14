@@ -299,7 +299,7 @@ double E;
 double LOG10;
 double LOG2;
 int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
+    randomSeed = randomSeed + -7046029254386353131;
     int64_t z = randomSeed;
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;

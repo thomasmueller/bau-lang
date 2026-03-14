@@ -354,7 +354,9 @@ public class Variable implements Expression, LeftValue {
             return "_" + name.substring(1);
         }
         if (DEBUG_VERSIONS) {
-            return Program.esc(name()) + " /*_" + version + "*/";
+            if (version != 0) {
+                return Program.esc(name()) + " /* " + name + "_" + version + " */";
+            }
         }
         return Program.esc(name());
     }
@@ -383,80 +385,11 @@ public class Variable implements Expression, LeftValue {
         return constantValue;
     }
 
-    public void setVariableVersions(FunctionContext functionContext, PhiBlock phi, Statement statement) {
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
         if (isConstant || global) {
             return;
         }
-        if (version > 0) {
-            return;
-        }
-        if (phi == null) {
-            throw new IllegalStateException();
-        }
-        Integer latest = phi.getCurrentVersion(name);
-        if (latest == null) {
-            phi.add(name);
-            setVariableVersionsInPhisRecursive(functionContext, phi, phi);
-            List<Integer> l2 = phi.getVersionList(name);
-            int max = 0;
-            if (l2.isEmpty()) {
-                // new variable
-            } else {
-                for (int i = 0; i < l2.size(); i++) {
-                    max = Math.max(max, l2.get(i));
-                }
-                if (l2.size() > 1) {
-                    max++;
-                }
-            }
-            phi.setCurrentVersion(name, max);
-            phi.setLatestVersion(name, max);
-            latest = phi.getCurrentVersion(name);
-            if (latest == null) {
-                throw new IllegalStateException();
-            }
-        }
-        version = latest;
-    }
-
-    private void setVariableVersionsInPhisRecursive(FunctionContext functionContext, PhiBlock setIn, Statement statement) {
-        List<Statement> list = functionContext.getPrecedessors(statement);
-        while (list.size() == 1) {
-            statement = list.get(0);
-            if (statement instanceof PhiBlock) {
-                break;
-            }
-            list = functionContext.getPrecedessors(statement);
-        }
-        for (Statement s : list) {
-            if (s instanceof PhiBlock) {
-                PhiBlock phi = (PhiBlock) s;
-                Integer current = phi.getCurrentVersion(name);
-                if (current != null) {
-                    if (current == -1) {
-                        // stop here
-                        continue;
-                    }
-                    setIn.getVersionList(name).add(current);
-                }
-                setVariableVersionsInPhisRecursive(functionContext, setIn, s);
-            } else {
-                boolean found = false;
-                if (s instanceof Assignment) {
-                    Assignment assign = (Assignment) s;
-                    if (assign.leftValue instanceof Variable) {
-                        Variable var = (Variable) assign.leftValue;
-                        if (var.name.equals(name)) {
-                            setIn.getVersionList(name).add(var.version);
-                            found = true;
-                        }
-                    }
-                }
-                if (!found) {
-                    setVariableVersions(functionContext, setIn, s);
-                }
-            }
-        }
+        version = basicBlock.getVersion(functionContext, name);
     }
 
     public void setVersion(int version) {

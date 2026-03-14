@@ -477,13 +477,13 @@ int64_t evaluateBoard_1(int64_t black) {
                                 int64_t _t1 = getPossibleMoves_2(i, 0);
                                 int64_t _t2 = org_bau_Int_bitCount_1(_t1);
                                 sc = _t2;
-                                sc += 320;
+                                sc = sc + 320;
                             } else {
                                 if (_t0 == 4) {
                                     int64_t _t3 = getPossibleMoves_2(i, 0);
                                     int64_t _t4 = org_bau_Int_bitCount_1(_t3);
                                     sc = _t4;
-                                    sc += 330;
+                                    sc = sc + 330;
                                 } else {
                                     if (_t0 == 6) {
                                         sc = 100;
@@ -495,7 +495,7 @@ int64_t evaluateBoard_1(int64_t black) {
                                             } else {
                                                 _t5 = 6 - (idiv_2(i, 8));
                                             }
-                                            sc += shiftLeft_2(1, _t5);
+                                            sc = sc + ( shiftLeft_2(1, _t5) );
                                         }
                                     }
                                 }
@@ -507,7 +507,7 @@ int64_t evaluateBoard_1(int64_t black) {
                 if (_t7 != black) {
                     sc = - sc;
                 }
-                sum += sc;
+                sum = sum + sc;
                 int64_t _next = i + 1;
                 if (_next >= 64) {
                     break;
@@ -559,13 +559,13 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
     }
     if (_t6) {
         int64_t _t8 = slide_4(from, maxDist, 1, 1);
-        result |= _t8;
+        result = result | _t8;
         int64_t _t9 = slide_4(from, maxDist, -1, -1);
-        result |= _t9;
+        result = result | _t9;
         int64_t _t10 = slide_4(from, maxDist, 1, -1);
-        result |= _t10;
+        result = result | _t10;
         int64_t _t11 = slide_4(from, maxDist, -1, 1);
-        result |= _t11;
+        result = result | _t11;
     }
     int64_t _t12 = p == 1;
     if (!(_t12)) {
@@ -579,31 +579,31 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
     }
     if (_t14) {
         int64_t _t16 = slide_4(from, maxDist, 1, 0);
-        result |= _t16;
+        result = result | _t16;
         int64_t _t17 = slide_4(from, maxDist, -1, 0);
-        result |= _t17;
+        result = result | _t17;
         int64_t _t18 = slide_4(from, maxDist, 0, 1);
-        result |= _t18;
+        result = result | _t18;
         int64_t _t19 = slide_4(from, maxDist, 0, -1);
-        result |= _t19;
+        result = result | _t19;
     }
     if (p == 5) {
         int64_t _t20 = slide_4(from, maxDist, 1, 2);
-        result |= _t20;
+        result = result | _t20;
         int64_t _t21 = slide_4(from, maxDist, 2, 1);
-        result |= _t21;
+        result = result | _t21;
         int64_t _t22 = slide_4(from, maxDist, -1, -2);
-        result |= _t22;
+        result = result | _t22;
         int64_t _t23 = slide_4(from, maxDist, -2, -1);
-        result |= _t23;
+        result = result | _t23;
         int64_t _t24 = slide_4(from, maxDist, 1, -2);
-        result |= _t24;
+        result = result | _t24;
         int64_t _t25 = slide_4(from, maxDist, 2, -1);
-        result |= _t25;
+        result = result | _t25;
         int64_t _t26 = slide_4(from, maxDist, -1, 2);
-        result |= _t26;
+        result = result | _t26;
         int64_t _t27 = slide_4(from, maxDist, -2, 1);
-        result |= _t27;
+        result = result | _t27;
     } else {
         if (p == 6) {
             int64_t _t28 = 0;
@@ -642,7 +642,7 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
                     dist = 2;
                 }
                 int64_t _t37 = slide_4(from, dist, 0, dir);
-                result |= _t37;
+                result = result | _t37;
                 int64_t _t38 = result != 0;
                 if (_t38) {
                     int64_t _t39 = board->data[idx_2(from + ( dir * 8 ), _arrayLen(board))] != 0;
@@ -654,10 +654,10 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
             }
             if (( idiv_2(pawnMoved2, 8) ) == ( idiv_2(from, 8) )) {
                 if (pawnMoved2 == ( from - 1 )) {
-                    result |= shiftLeft_2(1, (from - 1));
+                    result = result | ( shiftLeft_2(1, (from - 1)) );
                 } else {
                     if (pawnMoved2 == ( from + 1 )) {
-                        result |= shiftLeft_2(1, (from + 1));
+                        result = result | ( shiftLeft_2(1, (from + 1)) );
                     }
                 }
             }
@@ -668,7 +668,7 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
                 _t40 = _t41;
             }
             if (_t40) {
-                result |= capture;
+                result = result | capture;
             }
             int64_t _t42 = slide_4(from, maxDist, -1, dir);
             capture = _t42;
@@ -678,7 +678,7 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
                 _t43 = _t44;
             }
             if (_t43) {
-                result |= capture;
+                result = result | capture;
             }
         }
     }
@@ -708,9 +708,9 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
             }
             if (_t50) {
                 int64_t rook = slide_4(from - 4, 8, 1, 0);
-                rook >>= from - 3;
+                rook = shiftRight_int_2(rook, from - 3);
                 if ((rook & 7) == 7) {
-                    result |= shiftLeft_2(1, (from - 2));
+                    result = result | ( shiftLeft_2(1, (from - 2)) );
                 }
             }
             int64_t _t52 = (r & 2) == 0;
@@ -720,9 +720,9 @@ int64_t getPossibleMoves_2(int64_t from, int64_t attacksOnly) {
             }
             if (_t52) {
                 int64_t rook = slide_4(from + 3, 8, -1, 0);
-                rook >>= from + 1;
+                rook = shiftRight_int_2(rook, from + 1);
                 if ((rook & 3) == 3) {
-                    result |= shiftLeft_2(1, (from + 2));
+                    result = result | ( shiftLeft_2(1, (from + 2)) );
                 }
             }
         }
@@ -817,7 +817,7 @@ int64_t move_1(int64_t move) {
     return _t0;
 }
 int64_t move_2(int64_t source, int64_t target) {
-    turn += 1;
+    turn = turn + 1;
     int64_t captured = board->data[idx_2(target, _arrayLen(board))];
     int64_t oldCastlingFlags = castlingFlags;
     updateCastlingRights_1(source);
@@ -865,7 +865,7 @@ int64_t move_2(int64_t source, int64_t target) {
         } else {
             _t6 = 2;
         }
-        castlingFlags |= shiftLeft_2(3, _t6);
+        castlingFlags = castlingFlags | ( shiftLeft_2(3, _t6) );
         int64_t _t7 = org_bau_Int_abs_1((source & 7) - (target & 7));
         if (_t7 > 1) {
             if (target > source) {
@@ -931,7 +931,7 @@ int64_t negamax_5(int64_t top, int64_t depth, int64_t black, int64_t alpha, int6
                             int64_t moves = getPossibleMoves_2(i, attackOnly);
                             while (moves != 0) {
                                 int64_t target = org_bau_Int_numberOfTrailingZeros_1(moves);
-                                moves ^= shiftLeft_2(1, target);
+                                moves = moves ^ ( shiftLeft_2(1, target) );
                                 int64_t capture = 0;
                                 if (board->data[idx_2(target, _arrayLen(board))] != 0) {
                                     capture = 1;
@@ -989,11 +989,11 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
         if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first += 1;
+        first = first + 1;
         if (last < 1) {
             break;
         }
-        last -= 1;
+        last = last - 1;
     }
 }
 void org_bau_Env_atExit_1(void  (*callback_0)()) {
@@ -1025,7 +1025,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     p = pos;
     if (n < 0) {
         buff->data[p] = 45;
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -1040,7 +1040,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     while (1) {
         buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -1065,7 +1065,7 @@ int64_t org_bau_Int_bitCount_1(int64_t x) {
     return _r0;
 }
 int64_t org_bau_Int_bitCountI32_1(int32_t x) {
-    x -= (shiftRight_i32_2(x, 1)) & 1431655765;
+    x = x - (shiftRight_i32_2(x, 1)) & 1431655765;
     x = (x & 858993459) + ((shiftRight_i32_2(x, 2)) & 858993459);
     x = ((x + (shiftRight_i32_2(x, 4))) & 252645135) * 16843009;
     int64_t _r0 = shiftRight_i32_2(x, 24);
@@ -1349,7 +1349,7 @@ void refreshScreen_0() {
                         while (1) {
                             int64_t b = board->data[idx_2(x + ( 8 * y ), _arrayLen(board))];
                             int64_t allowed = (b & 16) != 0;
-                            b &= -17;
+                            b = b & -17;
                             if (allowed) {
                                 org_bau_String_StringBuilder_append_2(buff, string_1034);
                             } else {
@@ -1434,8 +1434,8 @@ int64_t slide_4(int64_t from, int64_t maxDist, int64_t xo, int64_t yo) {
     int64_t result = 0;
     int64_t i = 1;
     while (1) {
-        x += xo;
-        y += yo;
+        x = x + xo;
+        y = y + yo;
         int64_t _t0 = i > maxDist;
         if (!(_t0)) {
             int64_t _t1 = x < 0;
@@ -1464,17 +1464,17 @@ int64_t slide_4(int64_t from, int64_t maxDist, int64_t xo, int64_t yo) {
         if (b != 0) {
             int64_t _t8 = isBlack_1(b);
             if (_t8 != isBlack) {
-                result |= shiftLeft_2(1, p);
+                result = result | ( shiftLeft_2(1, p) );
             }
             break;
         }
-        result |= shiftLeft_2(1, p);
-        i += 1;
+        result = result | ( shiftLeft_2(1, p) );
+        i = i + 1;
     }
     return result;
 }
 void undo_1(int64_t move) {
-    turn -= 1;
+    turn = turn - 1;
     int64_t old = (shiftRight_int_2(move, 40)) & 255;
     pawnMoved2 = (shiftRight_int_2(move, 32)) & 255;
     int64_t captured = (shiftRight_int_2(move, 24)) & 255;
@@ -1541,7 +1541,7 @@ void updateCastlingRights_1(int64_t pos) {
             } else {
                 _t4 = 2;
             }
-            castlingFlags |= shiftLeft_2(which, _t4);
+            castlingFlags = castlingFlags | ( shiftLeft_2(which, _t4) );
         }
     }
 }
@@ -1639,7 +1639,7 @@ void _main() {
                     while (moves != 0) {
                         int64_t target = org_bau_Int_numberOfTrailingZeros_1(moves);
                         board->data[idx_2(target, _arrayLen(board))] |= 16;
-                        moves ^= shiftLeft_2(1, target);
+                        moves = moves ^ ( shiftLeft_2(1, target) );
                     }
                     refreshScreen_0();
                 } else {

@@ -49,7 +49,7 @@ loop 1
     break a > 10
     continue a < 10
     println(a)
-    a += 1
+    a = a + 1
 println('end')
                 """,
                 new Parser("a:=1\n" +
@@ -89,7 +89,7 @@ a := 1
 loop 1
     break a > 10
     println(a)
-    a += 1
+    a = a + 1
 println('end')
                 """,
                 new Parser("a:=1\n" +

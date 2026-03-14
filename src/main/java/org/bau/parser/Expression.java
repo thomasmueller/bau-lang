@@ -69,4 +69,8 @@ public interface Expression {
         int todo;
     }
 
+    default void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        int todo;
+    }
+
 }

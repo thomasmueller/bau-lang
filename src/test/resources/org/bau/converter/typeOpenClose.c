@@ -384,7 +384,7 @@ void _main() {
             break;
         }
         File_use_1(f);
-        i += 1;
+        i = i + 1;
         _decUseStack(f, File);
     }
     _end();

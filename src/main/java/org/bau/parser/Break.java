@@ -99,4 +99,23 @@ public class Break implements Statement {
         functionContext.linkStatements(this, breakTarget);
     }
 
+    @Override
+    public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        if (breakTarget == null) {
+            throw new IllegalStateException("Break outside of a loop");
+        }
+        BasicBlock after = functionContext.newBasicBlock();
+        if (condition == null) {
+            // what comes next if never executed: use an orphaned block
+            functionContext.linkBasicBlocks(this, current);
+            current.addSuccessor(breakTarget);
+        } else {
+            current.addSuccessor(after);
+            functionContext.linkBasicBlocks(this, after);
+            after.addSuccessor(breakTarget);
+        }
+        return after;
+    }
+
 }

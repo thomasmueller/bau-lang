@@ -333,15 +333,15 @@ int64_t fibonacciIterative_1(int64_t n) {
             r1 = r0;
             r0 = r;
             r = r1 + r0;
-            ticks += 1;
-            i += 1;
+            ticks = ticks + 1;
+            i = i + 1;
         }
         break;
     }
     return r;
 }
 int64_t fibonacciRecursive_1(int64_t n) {
-    ticks += 1;
+    ticks = ticks + 1;
     if (n < 2) {
         return n;
     }

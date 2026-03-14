@@ -350,19 +350,19 @@ int64_t primeSum_1(int64_t limit) {
             int64_t j = i * i;
             while (j <= limit) {
                 BitField_set_2(sieve, j);
-                j += i;
+                j = j + i;
             }
         }
-        i += 2;
+        i = i + 2;
     }
     int64_t sum = 2;
     i = 3;
     while (i <= limit) {
         int64_t _t1 = BitField_get_2(sieve, i);
         if (!(_t1)) {
-            sum += i;
+            sum = sum + i;
         }
-        i += 2;
+        i = i + 2;
     }
     _decUseStack(sieve, BitField);
     return sum;

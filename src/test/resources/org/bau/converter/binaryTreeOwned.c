@@ -360,12 +360,12 @@ int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     Tree_owned* l = this->left;
     if (l) {
         int64_t _t0 = Tree_owned_nodeCount_1(l);
-        result += _t0;
+        result = result + _t0;
     }
     Tree_owned* r = this->right;
     if (r) {
         int64_t _t1 = Tree_owned_nodeCount_1(r);
-        result += _t1;
+        result = result + _t1;
     }
     return result;
 }
@@ -421,12 +421,12 @@ void _main() {
         while (i <= iterations) {
             Tree_owned* t = with_1(depth);
             int64_t _t2 = Tree_owned_nodeCount_1(t);
-            check += _t2;
-            i += 1;
+            check = check + _t2;
+            i = i + 1;
             Tree_owned_free(t);
         }
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
-        depth += 2;
+        depth = depth + 2;
     }
     int64_t _t3 = Tree_owned_nodeCount_1(longLived);
     printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t3);

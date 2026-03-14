@@ -299,6 +299,7 @@ int32_t murmur3_32_1(i8_array* data);
 int32_t rotLefti32_2(int32_t x, int64_t n);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int32_t shiftRight_i32_2(int32_t a, int64_t b);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free_0(i8_array* x) {
@@ -348,8 +349,8 @@ i8_array* hex_2(int64_t x, int64_t len) {
             c = ( 97 + (y & 15) ) - 10;
         }
         data->data[idx_2(i, _arrayLen(data))] = c;
-        y >>= 4;
-        i -= 1;
+        y = shiftRight_int_2(y, 4);
+        i = i - 1;
     }
     _decUseStack(_t0, i8_array);
     return data;
@@ -373,11 +374,11 @@ int32_t murmur3_32_1(i8_array* data) {
         int64_t j = 0;
         while (1) {
             int32_t x = i32_1(((data->data[j] & 255)) | (shiftLeft_2((data->data[j + 1] & 255), 8)) | (shiftLeft_2((data->data[j + 2] & 255), 16)) | (shiftLeft_2((data->data[j + 3] & 255), 24)));
-            x *= -862048943;
+            x = x * -862048943;
             int32_t _t0 = rotLefti32_2(x, 15);
             x = _t0;
-            x *= 461845907;
-            h ^= x;
+            x = x * 461845907;
+            h = h ^ x;
             int32_t _t1 = rotLefti32_2(h, 13);
             h = _t1;
             h = ( h * 5 ) + 3864292196;
@@ -391,7 +392,7 @@ int32_t murmur3_32_1(i8_array* data) {
     }
     int32_t x = 0;
     if (i < ( _arrayLen(data) - 4 )) {
-        i += 4;
+        i = i + 4;
     }
     int64_t _t2 = i < _arrayLen(data);
     if (_t2) {
@@ -401,26 +402,26 @@ int32_t murmur3_32_1(i8_array* data) {
     if (_t2) {
         int64_t s = 0;
         while (1) {
-            x ^= shiftLeft_2((data->data[i] & 255), s);
+            x = x ^ ( shiftLeft_2((data->data[i] & 255), s) );
             int64_t n = i + 1;
             if (n >= _arrayLen(data)) {
                 break;
             }
             i = n;
-            s += 8;
+            s = s + 8;
         }
-        x *= -862048943;
+        x = x * -862048943;
         int32_t _t4 = rotLefti32_2(x, 15);
         x = _t4;
-        x *= 461845907;
-        h ^= x;
+        x = x * 461845907;
+        h = h ^ x;
     }
-    h ^= _arrayLen(data);
-    h ^= shiftRight_i32_2(h, 16);
-    h *= 0x85ebca6b;
-    h ^= shiftRight_i32_2(h, 13);
-    h *= 0xc2b2ae35;
-    h ^= shiftRight_i32_2(h, 16);
+    h = h ^ _arrayLen(data);
+    h = h ^ ( shiftRight_i32_2(h, 16) );
+    h = h * 2246822507;
+    h = h ^ ( shiftRight_i32_2(h, 13) );
+    h = h * 3266489909;
+    h = h ^ ( shiftRight_i32_2(h, 16) );
     return h;
 }
 int32_t rotLefti32_2(int32_t x, int64_t n) {
@@ -432,6 +433,9 @@ int64_t shiftLeft_2(int64_t a, int64_t b) {
 }
 int32_t shiftRight_i32_2(int32_t a, int64_t b) {
     return ((uint32_t) a) >> b;
+}
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
 }
 void _main();
 int main(int _argc, char *_argv[]) {

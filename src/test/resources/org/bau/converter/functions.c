@@ -362,7 +362,7 @@ int64_t sum_var(int64_t a, int _vaCount,...) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                sum += b->data[i];
+                sum = sum + b->data[i];
                 int64_t _next = i + 1;
                 if (_next >= _arrayLen(b)) {
                     break;

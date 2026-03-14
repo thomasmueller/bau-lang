@@ -369,7 +369,7 @@ int64_t solve_1(i8_array* c) {
         if (c->data[idx_2(i, _arrayLen(c))] == 46) {
             break;
         }
-        i += 1;
+        i = i + 1;
     }
     if (i >= _arrayLen(c)) {
         return 1;
@@ -390,7 +390,7 @@ int64_t solve_1(i8_array* c) {
             if (c->data[idx_2((( idiv_2(n3, 9) ) * 10) + (imod_2(n3, 9)), _arrayLen(c))] == k) {
                 break;
             }
-            j += 1;
+            j = j + 1;
         }
         if (j >= 9) {
             c->data[idx_2(i, _arrayLen(c))] = k;
@@ -400,7 +400,7 @@ int64_t solve_1(i8_array* c) {
             }
             c->data[idx_2(i, _arrayLen(c))] = 46;
         }
-        k += 1;
+        k = k + 1;
     }
     return 0;
 }

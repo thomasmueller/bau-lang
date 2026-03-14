@@ -179,6 +179,29 @@ public class If implements Statement {
     }
 
     @Override
+    public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        functionContext.linkBasicBlocks(this, current);
+        if (thenList.isEmpty() && elseList.isEmpty()) {
+            return current;
+        }
+        BasicBlock after = functionContext.newBasicBlock();
+        if (!thenList.isEmpty()) {
+            BasicBlock t = functionContext.newBasicBlock();
+            current.addSuccessor(t);
+            t = functionContext.linkBasicBlocks(thenList, t, breakTarget, continueTarget);
+            t.addSuccessor(after);
+        }
+        if (elseList != null && !elseList.isEmpty()) {
+            BasicBlock e = functionContext.newBasicBlock();
+            current.addSuccessor(e);
+            e = functionContext.linkBasicBlocks(elseList, e, breakTarget, continueTarget);
+            e.addSuccessor(after);
+        }
+        return after;
+    }
+
+    @Override
     public void printLinks(String indentation, FunctionContext functionContext) {
         functionContext.printLinks(indentation, this);
         functionContext.printLinks(indentation + "    ", thenList);
@@ -188,10 +211,9 @@ public class If implements Statement {
     }
 
     @Override
-    public void setVariableVersions(FunctionContext functionContext, PhiBlock lastPhi) {
-        functionContext.setVariableVersions(thenList, lastPhi);
-        if (elseList != null) {
-            functionContext.setVariableVersions(elseList, lastPhi);
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (condition != null) {
+            condition.setVariableVersions(functionContext, basicBlock);
         }
     }
 

@@ -310,7 +310,7 @@ int64_t isMunchausen_1(int64_t number) {
     int64_t total = 0;
     while (n > 0) {
         int64_t digit = imod_2(n, 10);
-        total += cache->data[digit];
+        total = total + cache->data[digit];
         if (total > number) {
             return 0;
         }

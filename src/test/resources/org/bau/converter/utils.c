@@ -438,13 +438,13 @@ int64_t org_bau_Int_sqrtInt_1(int64_t x) {
             _t0 = _t1;
         }
         if (_t0) {
-            g ^= c;
+            g = g ^ c;
         }
-        c >>= 1;
+        c = shiftRight_int_2(c, 1);
         if (c == 0) {
             break;
         }
-        g |= c;
+        g = g | c;
     }
     return g;
 }
@@ -475,9 +475,9 @@ double org_bau_Math_exp_1(double x) {
     while (1 == 1) {
         int64_t i = 1;
         while (i < 22) {
-            term *= x / i;
-            approx += term;
-            i += 1;
+            term = term * ( x / i );
+            approx = approx + term;
+            i = i + 1;
         }
         break;
     }
@@ -524,9 +524,9 @@ double org_bau_Math_log_1(double x) {
         int64_t i = 2;
         while (i < 30) {
             sign = - sign;
-            term *= base;
-            result += sign * term / i;
-            i += 1;
+            term = term * base;
+            result = result + ( sign * term / i );
+            i = i + 1;
         }
         break;
     }
@@ -551,7 +551,7 @@ double org_bau_Math_sqrt_1(double x) {
     return _t12;
 }
 int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
+    randomSeed = randomSeed + -7046029254386353131;
     int64_t z = randomSeed;
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
@@ -605,7 +605,7 @@ void _main() {
         while (i < 4) {
             double _t36 = org_bau_Math_sqrt_1(i);
             printf("%.9f\n", _t36);
-            i += 1;
+            i = i + 1;
         }
         break;
     }

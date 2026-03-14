@@ -749,8 +749,8 @@ int64_t hashCode_1(i8_array* data) {
         int64_t x = 0;
         int64_t s = 0;
         while (1) {
-            x ^= shiftLeft_2((data->data[i] & 255), s);
-            s += 8;
+            x = x ^ ( shiftLeft_2((data->data[i] & 255), s) );
+            s = s + 8;
             int64_t n = i + 1;
             if (n >= _arrayLen(data)) {
                 break;

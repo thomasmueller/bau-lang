@@ -316,16 +316,16 @@ void insertionSort_int_array_int_1(int_array* a) {
                     break;
                 }
                 a->data[idx_2(j + 1, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
-                j -= 1;
+                j = j - 1;
             }
             a->data[idx_2(j + 1, _arrayLen(a))] = t;
-            i += 1;
+            i = i + 1;
         }
         break;
     }
 }
 int64_t org_bau_Utils_random_0() {
-    randomSeed += 0x9e3779b97f4a7c15;
+    randomSeed = randomSeed + -7046029254386353131;
     int64_t z = randomSeed;
     z = (z ^ (shiftRight_int_2(z, 30))) * -4658895280553007687;
     z = (z ^ (shiftRight_int_2(z, 27))) * -7723592293110705685;
@@ -355,10 +355,10 @@ void shellSort_int_array_int_1(int_array* a) {
                         break;
                     }
                     a->data[idx_2(j + g, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
-                    j -= g;
+                    j = j - g;
                 }
                 a->data[idx_2(j + g, _arrayLen(a))] = t;
-                i += 1;
+                i = i + 1;
             }
             break;
         }

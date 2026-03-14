@@ -422,7 +422,7 @@ void _main() {
             break;
         }
         printf("  dec a\n");
-        a -= 1;
+        a = a - 1;
     }
     a = 1;
     b = 1;
@@ -438,7 +438,7 @@ void _main() {
             break;
         }
         printf("  dec b\n");
-        b -= 1;
+        b = b - 1;
     }
     a = 1;
     b = 1;
@@ -455,10 +455,10 @@ void _main() {
         }
         if (a > 0) {
             printf("  dec a\n");
-            a -= 1;
+            a = a - 1;
         } else {
             printf("  dec b\n");
-            b -= 1;
+            b = b - 1;
         }
     }
     _end();

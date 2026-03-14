@@ -709,4 +709,12 @@ public class Operation implements Expression {
         right.setVariableVersions(functionContext, phis, statement);
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (left != null) {
+            left.setVariableVersions(functionContext, basicBlock);
+        }
+        right.setVariableVersions(functionContext, basicBlock);
+    }
+
 }

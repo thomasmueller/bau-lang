@@ -298,11 +298,11 @@ void _main() {
                 break;
             }
             if (a == 2) {
-                a += 1;
+                a = a + 1;
                 continue;
             }
             printf("%lld\n", (long long)a);
-            a += 1;
+            a = a + 1;
         }
         break;
     }

@@ -17,8 +17,13 @@ public class FunctionContext {
     private String currentFunctionName;
 
     private HashMap<Statement, ArrayList<Statement>> predecessors = new HashMap<>();
-    private HashMap<Statement, ArrayList<Statement>> successors = new HashMap<>();
+    HashMap<Statement, ArrayList<Statement>> successors = new HashMap<>();
     HashMap<Integer, Integer> statementIdMap = new HashMap<>();
+
+    ArrayList<BasicBlock> blockList = new ArrayList<>();
+    HashMap<Statement, BasicBlock> blockMap = new HashMap<>();
+
+    HashMap<String, Integer> variableVersions = new HashMap<>();
 
     public FunctionContext(Program program, String functionName) {
         this.program = program;
@@ -254,13 +259,49 @@ if (list.contains(b)) {
         }
     }
 
-    public void setVariableVersions(List<Statement> list, PhiBlock lastPhi) {
-        for (int i = 0; i < list.size(); i++) {
-            Statement s = list.get(i);
-            if (s instanceof PhiBlock) {
-                lastPhi = (PhiBlock) s;
+    public BasicBlock linkBasicBlocks(List<Statement> list, BasicBlock current, BasicBlock breakTarget, BasicBlock continueTarget) {
+        if (blockList.isEmpty()) {
+            current = newBasicBlock();
+        }
+        for (Statement s : list) {
+            current = s.linkBasicBlocks(this, current, breakTarget, continueTarget);
+        }
+        return current;
+    }
+
+    public BasicBlock linkBasicBlocks(Statement statement, BasicBlock current) {
+        if (statement != null) {
+            if (statement instanceof PhiBlock) {
+                ((PhiBlock) statement).setBasicBlock(current);
             }
-            s.setVariableVersions(this, lastPhi);
+            if (statement instanceof Loop) {
+                ((Loop) statement).setBasicBlock(current);
+            }
+            current.list.add(statement);
+        }
+        return current;
+    }
+
+    public void printBasicBlocks() {
+        for (BasicBlock b : blockList) {
+            System.out.println(b);
+        }
+    }
+
+    public BasicBlock newBasicBlock() {
+        BasicBlock b = new BasicBlock();
+        b.id = blockList.size();
+        blockList.add(b);
+        return b;
+    }
+
+
+    public void setBasicBlocksVariableVersions() {
+        for (BasicBlock b : blockList) {
+            b.setVariableVersions(this);
+        }
+        for (BasicBlock b : blockList) {
+            b.fillPhis();
         }
     }
 
@@ -326,6 +367,44 @@ if (list.contains(b)) {
             }
         }
         System.out.println(buff.toString());
+    }
+
+    public void addPhiVersion(Statement start, String name, int version) {
+        List<Statement> sl = successors.get(start);
+        if (sl == null) {
+            return;
+        }
+        while (sl.size() == 1) {
+            start = sl.get(0);
+            if (start instanceof PhiBlock) {
+                break;
+            }
+            sl = successors.get(start);
+            if (sl == null) {
+                return;
+            }
+        }
+        for (Statement s : sl) {
+            if (s instanceof PhiBlock) {
+                PhiBlock phi = (PhiBlock) s;
+                if (phi.getCurrentVersion(name) != null) {
+                    phi.getVersionList(name).add(version);
+                } else {
+                    addPhiVersion(s, name, version);
+                }
+            } else {
+                addPhiVersion(s, name, version);
+            }
+        }
+    }
+
+    public int nextVariableVersion(String name) {
+        Integer v = variableVersions.get(name);
+        if (v == null) {
+            v = 1;
+        }
+        variableVersions.put(name, v + 1);
+        return v;
     }
 
 }

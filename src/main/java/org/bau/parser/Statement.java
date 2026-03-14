@@ -48,17 +48,17 @@ public interface Statement {
         functionContext.linkStatements(this, next);
     }
 
+    default BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        return functionContext.linkBasicBlocks(this, current);
+    }
+
     default void printLinks(String indentation, FunctionContext functionContext) {
         functionContext.printLinks(indentation, this);
     }
 
-    /**
-     * Set the version numbers of all the variables where needed.
-     *
-     * @param functionContext
-     * @param lastPhi the last phi node that needs new versions as well
-     */
-    default void setVariableVersions(FunctionContext functionContext, PhiBlock lastPhi) {
+    default void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        // ignore
     }
 
 }

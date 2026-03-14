@@ -1463,7 +1463,7 @@ void At_read_1(At* this) {
                 if (_t22) {
                     double _t24 = float_1(c - 48);
                     v = ( v * 10 ) + _t24;
-                    div *= 10;
+                    div = div * 10;
                 } else {
                     int64_t _t25 = c == 46;
                     if (_t25) {
@@ -1879,7 +1879,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                                                     }
                                                     Expr* _t37 = org_bau_List_List_Expr_get_2(expr->list, i);
                                                     Value* r = At_runExpr_2(this, _t37);
-                                                    totalLen += r->list->size;
+                                                    totalLen = totalLen + r->list->size;
                                                     int64_t _next = i + 1;
                                                     if (_next >= org_bau_List_List_Expr_len_1(expr->list)) {
                                                         _decUseStack(r, Value);
@@ -2272,11 +2272,11 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
         if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first += 1;
+        first = first + 1;
         if (last < 1) {
             break;
         }
-        last -= 1;
+        last = last - 1;
     }
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Expr* org_bau_HashMap_HashMap_org_bau_String_string_Expr_3(org_bau_String_string_array* keys, Expr_array* values, int_array* hashes) {
@@ -2328,8 +2328,8 @@ int64_t org_bau_HashMap_hashCode_1(i8_array* data) {
         int64_t x = 0;
         int64_t s = 0;
         while (1) {
-            x ^= shiftLeft_2((data->data[i] & 255), s);
-            s += 8;
+            x = x ^ ( shiftLeft_2((data->data[i] & 255), s) );
+            s = s + 8;
             int64_t n = i + 1;
             if (n >= _arrayLen(data)) {
                 break;
@@ -2577,7 +2577,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     p = pos;
     if (n < 0) {
         buff->data[p] = 45;
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -2592,7 +2592,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     while (1) {
         buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -2788,7 +2788,7 @@ void org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_remov
         _incUseStack(this->array->data[idx_2(pos + 1, _arrayLen(this->array))]);
         _decUse(this->array->data[idx_2(pos, _arrayLen(this->array))], org_bau_HashMap_HashMap_org_bau_String_string_Value);
         this->array->data[idx_2(pos, _arrayLen(this->array))] = this->array->data[idx_2(pos + 1, _arrayLen(this->array))];
-        pos += 1;
+        pos = pos + 1;
     }
     this->size -= 1;
     _decUse(this->array->data[idx_2(pos, _arrayLen(this->array))], org_bau_HashMap_HashMap_org_bau_String_string_Value);
@@ -2804,24 +2804,24 @@ int64_t org_bau_Math_appendFloat_3(double n, i8_array* buff, int64_t pos) {
     if (_t0) {
         while (n > 1.0E20) {
             n = n / 1.0E20;
-            e += 20;
+            e = e + 20;
         }
         while (n < 1.0E-20) {
-            n *= 1.0E20;
-            e -= 20;
+            n = n * 1.0E20;
+            e = e - 20;
         }
         while (n >= 10) {
             n = n / 10;
-            e += 1;
+            e = e + 1;
         }
         while (n < 1) {
-            n *= 10;
-            e -= 1;
+            n = n * 10;
+            e = e - 1;
         }
         int64_t _t2 = org_bau_Math_appendFloat_3(n, buff, pos);
         pos = _t2;
         buff->data[idx_2(pos, _arrayLen(buff))] = 69;
-        pos += 1;
+        pos = pos + 1;
         int64_t _t3 = org_bau_Int_appendInt_3(e, buff, pos);
         pos = _t3;
         return pos;
@@ -2830,7 +2830,7 @@ int64_t org_bau_Math_appendFloat_3(double n, i8_array* buff, int64_t pos) {
     int64_t _t5 = org_bau_Int_appendInt_3(_t4, buff, pos);
     pos = _t5;
     buff->data[idx_2(pos, _arrayLen(buff))] = 46;
-    pos += 1;
+    pos = pos + 1;
     int64_t _t6 = int_1(n);
     n = (n - _t6) * 10;
     int64_t y = int_1(n * 100000000000000000);
@@ -2843,9 +2843,9 @@ int64_t org_bau_Math_appendFloat_3(double n, i8_array* buff, int64_t pos) {
                 }
                 int64_t x = idiv_2(y, 100000000000000000);
                 buff->data[idx_2(pos, _arrayLen(buff))] = 48 + (imod_2(x, 10));
-                pos += 1;
-                y -= x * 100000000000000000;
-                y *= 10;
+                pos = pos + 1;
+                y = y - ( x * 100000000000000000 );
+                y = y * 10;
                 int64_t _next = i + 1;
                 if (_next >= 19) {
                     break;

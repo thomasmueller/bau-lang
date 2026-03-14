@@ -454,4 +454,11 @@ public class Call implements Statement, Expression, LeftValue {
         return false;
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        for (Expression a : args) {
+            a.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
 }

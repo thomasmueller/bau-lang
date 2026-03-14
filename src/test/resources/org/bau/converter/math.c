@@ -420,7 +420,7 @@ int64_t org_bau_Int_powInt_2(int64_t base, int64_t exponent) {
     int64_t b = base;
     while (exponent > 0) {
         if ((exponent & 1) == 1) {
-            result *= b;
+            result = result * b;
             int64_t _t0 = result > 2147483648;
             if (!(_t0)) {
                 int64_t _t1 = result < -2147483648;
@@ -430,9 +430,9 @@ int64_t org_bau_Int_powInt_2(int64_t base, int64_t exponent) {
                 return -1;
             }
         }
-        exponent >>= 1;
+        exponent = shiftRight_int_2(exponent, 1);
         if (exponent > 0) {
-            b *= b;
+            b = b * b;
             int64_t _t2 = b > 2147483648;
             if (!(_t2)) {
                 int64_t _t3 = b < -2147483648;
@@ -459,13 +459,13 @@ int64_t org_bau_Int_sqrtInt_1(int64_t x) {
             _t0 = _t1;
         }
         if (_t0) {
-            g ^= c;
+            g = g ^ c;
         }
-        c >>= 1;
+        c = shiftRight_int_2(c, 1);
         if (c == 0) {
             break;
         }
-        g |= c;
+        g = g | c;
     }
     return g;
 }
@@ -507,11 +507,11 @@ double org_bau_Math_atan_1(double x) {
     while (1 == 1) {
         int64_t n = 3;
         while (n < 32) {
-            p *= x * x;
-            approx += sign * p / n;
+            p = p * ( x * x );
+            approx = approx + ( sign * p / n );
             sign = - sign;
-            n += 1;
-            n += 1;
+            n = n + 1;
+            n = n + 1;
         }
         break;
     }
@@ -548,11 +548,11 @@ int64_t org_bau_Math_convertDoubleToLongBits_1(double x) {
     }
     int64_t exp = 0;
     while (x >= 4294967296) {
-        exp += 32;
+        exp = exp + 32;
         x = x / 4294967296;
     }
     while (x >= 2) {
-        exp += 1;
+        exp = exp + 1;
         x = x / 2;
     }
     while (1 == 1) {
@@ -564,8 +564,8 @@ int64_t org_bau_Math_convertDoubleToLongBits_1(double x) {
         if (!(_t3)) {
             break;
         }
-        exp -= 32;
-        x *= 4294967296;
+        exp = exp - 32;
+        x = x * 4294967296;
     }
     while (1 == 1) {
         int64_t _t5 = x < 1;
@@ -576,8 +576,8 @@ int64_t org_bau_Math_convertDoubleToLongBits_1(double x) {
         if (!(_t5)) {
             break;
         }
-        exp -= 1;
-        x += x;
+        exp = exp - 1;
+        x = x + x;
     }
     int64_t _t7 = int_1(x * 4503599627370496);
     int64_t fraction = shiftRight_int_2(shiftLeft_2(_t7, 11), 11);
@@ -613,34 +613,34 @@ double org_bau_Math_convertLongBitsToDouble_1(int64_t x) {
         int64_t i = 0;
         while (i < 52) {
             if ((fraction & 1) == 1) {
-                result += 1;
+                result = result + 1;
             }
             result = result / 2;
-            fraction >>= 1;
-            i += 1;
+            fraction = shiftRight_int_2(fraction, 1);
+            i = i + 1;
         }
         break;
     }
     if (exp == 0) {
-        result *= 2;
+        result = result * 2;
     } else {
-        result += 1;
+        result = result + 1;
     }
-    exp -= 1023;
+    exp = exp - 1023;
     while (exp <= -32) {
         result = result / 4294967296;
-        exp += 32;
+        exp = exp + 32;
     }
     while (exp < 0) {
         result = result / 2;
-        exp += 1;
+        exp = exp + 1;
     }
     while (exp >= 32) {
         result = result * 4294967296;
-        exp -= 32;
+        exp = exp - 32;
     }
     while (exp > 0) {
-        result += result;
+        result = result + result;
         exp = -1;
     }
     if (sign == 0) {
@@ -681,9 +681,9 @@ double org_bau_Math_exp_1(double x) {
     while (1 == 1) {
         int64_t i = 1;
         while (i < 22) {
-            term *= x / i;
-            approx += term;
-            i += 1;
+            term = term * ( x / i );
+            approx = approx + term;
+            i = i + 1;
         }
         break;
     }
@@ -771,9 +771,9 @@ double org_bau_Math_log_1(double x) {
         int64_t i = 2;
         while (i < 30) {
             sign = - sign;
-            term *= base;
-            result += sign * term / i;
-            i += 1;
+            term = term * base;
+            result = result + ( sign * term / i );
+            i = i + 1;
         }
         break;
     }
@@ -985,7 +985,7 @@ double org_bau_Math_sin_1(double x) {
     }
     if (x > 6.283185307179586) {
         double _t2 = org_bau_Math_floor_1(x / 6.283185307179586);
-        x -= _t2 * 6.283185307179586;
+        x = x - ( _t2 * 6.283185307179586 );
     }
     if (x > 3.141592653589793) {
         double _t3 = org_bau_Math_sin_1(x - 3.141592653589793);
@@ -1001,11 +1001,11 @@ double org_bau_Math_sin_1(double x) {
     while (1 == 1) {
         int64_t n = 2;
         while (n < 24) {
-            approx += sign * p;
-            p *= x * x / (n * (n + 1));
+            approx = approx + ( sign * p );
+            p = p * ( x * x / (n * (n + 1)) );
             sign = - sign;
-            n += 1;
-            n += 1;
+            n = n + 1;
+            n = n + 1;
         }
         break;
     }
@@ -1127,7 +1127,7 @@ void _main() {
         printf("asin   %.9f = %.9f\n", x, _t46);
         double _t47 = org_bau_Math_acos_1(x);
         printf("acos   %.9f = %.9f\n", x, _t47);
-        x += 0.5;
+        x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
@@ -1139,7 +1139,7 @@ void _main() {
         printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t50);
         double _t51 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
         printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t51);
-        x += 0.5;
+        x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
@@ -1151,9 +1151,9 @@ void _main() {
             printf("min %.9f\n", _t53);
             double _t54 = org_bau_Math_maxFloat_2(x, y);
             printf("max %.9f\n", _t54);
-            y += 0.5;
+            y = y + 0.5;
         }
-        x += 0.5;
+        x = x + 0.5;
     }
     _end();
 }

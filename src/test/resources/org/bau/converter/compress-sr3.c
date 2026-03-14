@@ -428,7 +428,7 @@ void compress_0() {
         } else {
             cxt = c1 | ((shiftRight_int_2(r, 16)) & 16128);
         }
-        cxt *= 258;
+        cxt = cxt * 258;
         if (inPos >= _arrayLen(global->input)) {
             writeBit_2(cxt, 1);
             writeBit_2(cxt + 1, 0);
@@ -436,7 +436,7 @@ void compress_0() {
             break;
         }
         int64_t c = global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255;
-        inPos += 1;
+        inPos = inPos + 1;
         int64_t comp3 = (c * 65793) ^ r;
         if (( comp3 & 255 ) == 0) {
             writeBit_2(cxt, 0);
@@ -484,7 +484,7 @@ void decompress_0() {
         } else {
             cxt = c1 | ((shiftRight_int_2(r, 16)) & 16128);
         }
-        cxt *= 258;
+        cxt = cxt * 258;
         int64_t _t1 = readBit_1(cxt);
         if (_t1 == 1) {
             int64_t _t2 = readBit_1(cxt + 1);
@@ -512,7 +512,7 @@ void decompress_0() {
             }
         }
         global->output->data[idx_2(outPos, _arrayLen(global->output))] = c1;
-        outPos += 1;
+        outPos = outPos + 1;
         h = (( h * (shiftLeft_2(5, di1)) ) + c1 + 1) & 16777215;
     }
     _decUseStack(t4, int_array);
@@ -524,7 +524,7 @@ void flush_0() {
     global->output->data[idx_2(outPos + 2, _arrayLen(global->output))] = 0xff;
     global->output->data[idx_2(outPos + 3, _arrayLen(global->output))] = 0xff;
     global->output->data[idx_2(outPos + 4, _arrayLen(global->output))] = 0xff;
-    outPos += 8;
+    outPos = outPos + 8;
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
@@ -536,7 +536,7 @@ void initRead_0() {
             int64_t i = 0;
             while (1) {
                 x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255)) & 4294967295;
-                inPos += 1;
+                inPos = inPos + 1;
                 int64_t _next = i + 1;
                 if (_next >= 4) {
                     break;
@@ -652,7 +652,7 @@ int64_t readBit_1(int64_t cxt) {
         x1 = (shiftLeft_2(x1, 8)) & 4294967295;
         x2 = ((shiftLeft_2(x2, 8)) + 255) & 4294967295;
         x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255)) & 4294967295;
-        inPos += 1;
+        inPos = inPos + 1;
     }
     return bit;
 }
@@ -660,22 +660,22 @@ int64_t readByte_1(int64_t cxt) {
     int64_t hi = 1;
     int64_t lo = 1;
     int64_t _t0 = readBit_1(cxt + hi);
-    hi += hi + _t0;
+    hi = hi + ( hi + _t0 );
     int64_t _t1 = readBit_1(cxt + hi);
-    hi += hi + _t1;
+    hi = hi + ( hi + _t1 );
     int64_t _t2 = readBit_1(cxt + hi);
-    hi += hi + _t2;
+    hi = hi + ( hi + _t2 );
     int64_t _t3 = readBit_1(cxt + hi);
-    hi += hi + _t3;
-    cxt += 15 * (hi - 15);
+    hi = hi + ( hi + _t3 );
+    cxt = cxt + ( 15 * (hi - 15) );
     int64_t _t4 = readBit_1(cxt + lo);
-    lo += lo + _t4;
+    lo = lo + ( lo + _t4 );
     int64_t _t5 = readBit_1(cxt + lo);
-    lo += lo + _t5;
+    lo = lo + ( lo + _t5 );
     int64_t _t6 = readBit_1(cxt + lo);
-    lo += lo + _t6;
+    lo = lo + ( lo + _t6 );
     int64_t _t7 = readBit_1(cxt + lo);
-    lo += lo + _t7;
+    lo = lo + ( lo + _t7 );
     int64_t _r0 = (shiftLeft_2((hi - 16), 4)) | (lo - 16);
     return _r0;
 }
@@ -707,7 +707,7 @@ void writeBit_2(int64_t cxt, int64_t bit) {
     update_2(cxt, bit);
     while (((x1 ^ x2) & 4278190080) == 0) {
         global->output->data[idx_2(outPos, _arrayLen(global->output))] = shiftRight_int_2(x2, 24);
-        outPos += 1;
+        outPos = outPos + 1;
         x1 = (shiftLeft_2(x1, 8)) & 4294967295;
         x2 = ((shiftLeft_2(x2, 8)) + 255) & 4294967295;
     }
@@ -718,7 +718,7 @@ void writeByte_2(int64_t cxt, int64_t x) {
     writeBit_2(cxt + (shiftRight_int_2(b, 3)), (shiftRight_int_2(b, 2)) & 1);
     writeBit_2(cxt + (shiftRight_int_2(b, 2)), (shiftRight_int_2(b, 1)) & 1);
     writeBit_2(cxt + (shiftRight_int_2(b, 1)), b & 1);
-    cxt += 15 * (b - 15);
+    cxt = cxt + ( 15 * (b - 15) );
     b = (x & 15) | 16;
     writeBit_2(cxt + 1, (shiftRight_int_2(b, 3)) & 1);
     writeBit_2(cxt + (shiftRight_int_2(b, 3)), (shiftRight_int_2(b, 2)) & 1);

@@ -376,7 +376,7 @@ i8_array* string_1008;
 void divisionByZeroBreak_0() {
     int64_t y = -1;
     while (y < 2) {
-        y += 1;
+        y = y + 1;
         if (y == 0) {
             break;
         }
@@ -387,7 +387,7 @@ void divisionByZeroBreak_0() {
 void divisionByZeroBreak2_0() {
     int64_t y = -1;
     while (y < 2) {
-        y += 1;
+        y = y + 1;
         if (y == 0) {
             break;
         }
@@ -398,7 +398,7 @@ void divisionByZeroBreak2_0() {
 void divisionByZeroContinue_0() {
     int64_t y = -1;
     while (y < 2) {
-        y += 1;
+        y = y + 1;
         if (y == 0) {
             continue;
         }
@@ -409,7 +409,7 @@ void divisionByZeroContinue_0() {
 void divisionByZeroContinue2_0() {
     int64_t y = -1;
     while (y < 2) {
-        y += 1;
+        y = y + 1;
         if (y == 0) {
             continue;
         }
@@ -420,7 +420,7 @@ void divisionByZeroContinue2_0() {
 void divisionByZeroReturn_0() {
     int64_t y = -1;
     while (y < 2) {
-        y += 1;
+        y = y + 1;
         if (y == 0) {
             return;
         }

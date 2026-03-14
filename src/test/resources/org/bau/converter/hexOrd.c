@@ -294,6 +294,7 @@ char **__argv;
 /* functions */
 i8_array* hex_2(int64_t x, int64_t len);
 int64_t idx_2(int64_t x, int64_t len);
+int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void i8_array_free_0(i8_array* x) {
@@ -330,8 +331,8 @@ i8_array* hex_2(int64_t x, int64_t len) {
             c = ( 97 + (y & 15) ) - 10;
         }
         data->data[idx_2(i, _arrayLen(data))] = c;
-        y >>= 4;
-        i -= 1;
+        y = shiftRight_int_2(y, 4);
+        i = i - 1;
     }
     _decUseStack(_t0, i8_array);
     return data;
@@ -339,6 +340,9 @@ i8_array* hex_2(int64_t x, int64_t len) {
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
+}
+int64_t shiftRight_int_2(int64_t a, int64_t b) {
+    return ((uint64_t) a) >> b;
 }
 void _main();
 int main(int _argc, char *_argv[]) {

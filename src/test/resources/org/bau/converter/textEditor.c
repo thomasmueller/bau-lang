@@ -608,10 +608,10 @@ org_bau_os_Terminal_windowSize currentWindowSize;
 fileContent currentFile;
 void down_0() {
     if (cursorY < ( currentWindowSize.rows - 1 )) {
-        cursorY += 1;
+        cursorY = cursorY + 1;
     } else {
         if (( cursorY + offsetY ) < currentFile.lines->size) {
-            offsetY += 1;
+            offsetY = offsetY + 1;
         }
     }
 }
@@ -847,14 +847,14 @@ void insertNewline_0() {
         if (!(_t2)) {
             break;
         }
-        indent += 1;
+        indent = indent + 1;
     }
     cursorX = 1 + indent;
     if (cursorY < ( currentWindowSize.rows - 1 )) {
-        cursorY += 1;
+        cursorY = cursorY + 1;
     } else {
         if (( cursorY + offsetY ) < currentFile.lines->size) {
-            offsetY += 1;
+            offsetY = offsetY + 1;
         }
     }
     org_bau_String_string_free(&line2);
@@ -872,11 +872,11 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
         if (first >= ( _arrayLen(buff) - 1 )) {
             break;
         }
-        first += 1;
+        first = first + 1;
         if (last < 1) {
             break;
         }
-        last -= 1;
+        last = last - 1;
     }
 }
 i8_array* org_bau_Env_arg_1(int64_t index) {
@@ -969,7 +969,7 @@ int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer,
         if (l == 0) {
             return count;
         } else {
-            count += l;
+            count = count + l;
         }
     }
 }
@@ -996,7 +996,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     p = pos;
     if (n < 0) {
         buff->data[p] = 45;
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -1011,7 +1011,7 @@ int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos) {
     while (1) {
         buff->data[p] = 48 - (imod_2(n, 10));
         n = idiv_2(n, 10);
-        pos += 1;
+        pos = pos + 1;
         if (pos >= _arrayLen(buff)) {
             return pos;
         }
@@ -1127,7 +1127,7 @@ void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_Str
     while (p > index) {
         org_bau_String_string_copy(&this->array->data[idx_2(p - 1, _arrayLen(this->array))]);
         this->array->data[idx_2(p, _arrayLen(this->array))] = this->array->data[idx_2(p - 1, _arrayLen(this->array))];
-        p -= 1;
+        p = p - 1;
     }
     org_bau_String_string_copy(&x);
     this->array->data[idx_2(index, _arrayLen(this->array))] = x;
@@ -1137,7 +1137,7 @@ void org_bau_List_List_org_bau_String_string_remove_2(org_bau_List_List_org_bau_
     while (pos < ( this->size - 1 )) {
         org_bau_String_string_copy(&this->array->data[idx_2(pos + 1, _arrayLen(this->array))]);
         this->array->data[idx_2(pos, _arrayLen(this->array))] = this->array->data[idx_2(pos + 1, _arrayLen(this->array))];
-        pos += 1;
+        pos = pos + 1;
     }
     this->size -= 1;
     this->array->data[idx_2(pos, _arrayLen(this->array))] = org_bau_String_string_new();
@@ -1620,7 +1620,7 @@ void refreshScreen_0() {
                                 ch->data[0] = c;
                                 org_bau_String_StringBuilder_append_2(buff, ch);
                                 if (remainingHighlight > 0) {
-                                    remainingHighlight -= 1;
+                                    remainingHighlight = remainingHighlight - 1;
                                     if (remainingHighlight == 0) {
                                         org_bau_String_StringBuilder_append_2(buff, string_1028);
                                     }
@@ -1716,16 +1716,16 @@ void removeByte_0() {
             }
         }
         if (cursorY > 2) {
-            cursorY -= 1;
+            cursorY = cursorY - 1;
         } else {
             if (offsetY > 0) {
-                offsetY -= 1;
+                offsetY = offsetY - 1;
             }
         }
-        cursorX += _arrayLen(last.data) + 1;
+        cursorX = cursorX + ( _arrayLen(last.data) + 1 );
         while (cursorX >= currentWindowSize.columns) {
-            cursorX -= 1;
-            offsetX += 1;
+            cursorX = cursorX - 1;
+            offsetX = offsetX + 1;
         }
         org_bau_String_string _t1 = org_bau_String_string_1(new);
         org_bau_String_string_copy(&_t1);
@@ -1783,7 +1783,7 @@ void save_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                size += _arrayLen(lines->array->data[idx_2(i, _arrayLen(lines->array))].data);
+                size = size + _arrayLen(lines->array->data[idx_2(i, _arrayLen(lines->array))].data);
                 int64_t _next = i + 1;
                 if (_next >= lines->size) {
                     break;
@@ -1826,10 +1826,10 @@ void save_0() {
 }
 void up_0() {
     if (cursorY > 2) {
-        cursorY -= 1;
+        cursorY = cursorY - 1;
     } else {
         if (offsetY > 0) {
-            offsetY -= 1;
+            offsetY = offsetY - 1;
         }
     }
 }
@@ -1956,10 +1956,10 @@ void _main() {
                         if (((_t21 == 127) || (_t21 == 8)) || (_t21 == 1004)) {
                             removeByte_0();
                             if (cursorX > 1) {
-                                cursorX -= 1;
+                                cursorX = cursorX - 1;
                             } else {
                                 if (offsetX > 0) {
-                                    offsetX -= 1;
+                                    offsetX = offsetX - 1;
                                 }
                             }
                         } else {
@@ -2003,10 +2003,10 @@ void _main() {
                                         } else {
                                             if (_t21 == 1000) {
                                                 if (cursorX > 1) {
-                                                    cursorX -= 1;
+                                                    cursorX = cursorX - 1;
                                                 } else {
                                                     if (offsetX > 0) {
-                                                        offsetX -= 1;
+                                                        offsetX = offsetX - 1;
                                                     } else {
                                                         int64_t _t23 = cursorY > 2;
                                                         if (!(_t23)) {
@@ -2015,10 +2015,10 @@ void _main() {
                                                         }
                                                         if (_t23) {
                                                             if (cursorY > 2) {
-                                                                cursorY -= 1;
+                                                                cursorY = cursorY - 1;
                                                             } else {
                                                                 if (offsetY > 0) {
-                                                                    offsetY -= 1;
+                                                                    offsetY = offsetY - 1;
                                                                 }
                                                             }
                                                             int64_t y = ( cursorY + offsetY ) - 2;
@@ -2026,8 +2026,8 @@ void _main() {
                                                             org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
                                                             cursorX = _arrayLen(line.data) + 1;
                                                             while (cursorX >= currentWindowSize.columns) {
-                                                                cursorX -= 1;
-                                                                offsetX += 1;
+                                                                cursorX = cursorX - 1;
+                                                                offsetX = offsetX + 1;
                                                             }
                                                             org_bau_String_string_free(&line);
                                                         }
@@ -2041,19 +2041,19 @@ void _main() {
                                                     org_bau_String_string line = lines->array->data[idx_2(y, _arrayLen(lines->array))];
                                                     if (x < _arrayLen(line.data)) {
                                                         if (cursorX < currentWindowSize.columns) {
-                                                            cursorX += 1;
+                                                            cursorX = cursorX + 1;
                                                         } else {
-                                                            offsetX += 1;
+                                                            offsetX = offsetX + 1;
                                                         }
                                                     } else {
                                                         if (y < lines->size) {
                                                             cursorX = 1;
                                                             offsetX = 0;
                                                             if (cursorY < ( currentWindowSize.rows - 1 )) {
-                                                                cursorY += 1;
+                                                                cursorY = cursorY + 1;
                                                             } else {
                                                                 if (( cursorY + offsetY ) < currentFile.lines->size) {
-                                                                    offsetY += 1;
+                                                                    offsetY = offsetY + 1;
                                                                 }
                                                             }
                                                         }
@@ -2063,9 +2063,9 @@ void _main() {
                                                     int8_t _t25 = i8_1(key);
                                                     insertByte_1(_t25);
                                                     if (cursorX < currentWindowSize.columns) {
-                                                        cursorX += 1;
+                                                        cursorX = cursorX + 1;
                                                     } else {
-                                                        offsetX += 1;
+                                                        offsetX = offsetX + 1;
                                                     }
                                                 }
                                             }

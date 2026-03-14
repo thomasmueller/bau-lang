@@ -11,6 +11,7 @@ public class Loop implements Statement {
     ArrayList<Statement> listContinue = new ArrayList<>();
     List<Statement> autoClose;
     Expression condition;
+    BasicBlock basicBlock;
 
     @Override
     public Statement replace(Variable old, Expression with) {
@@ -74,6 +75,9 @@ public class Loop implements Statement {
 
     public String toC() {
         StringBuilder buff = new StringBuilder();
+        if (basicBlock != null) {
+            buff.append(basicBlock.toC());
+        }
         buff.append("while (" + condition.toC() + ") {\n");
         boolean hasReturn = Program.hasReturn(list);
         int catchCount = Program.catchCount(list);
@@ -156,6 +160,36 @@ public class Loop implements Statement {
     }
 
     @Override
+    public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        BasicBlock next = functionContext.newBasicBlock();
+        current.addSuccessor(next);
+        current = next;
+        functionContext.linkBasicBlocks(this, current);
+        BasicBlock after = functionContext.newBasicBlock();
+        breakTarget = after;
+        BasicBlock loopHead = current;
+        continueTarget = current;
+        if (listContinue.size() > 0) {
+            continueTarget = functionContext.newBasicBlock();
+        }
+        if (list.size() > 0) {
+            BasicBlock loop = functionContext.newBasicBlock();
+            current.addSuccessor(loop);
+            current = loop;
+            current = functionContext.linkBasicBlocks(list, current, breakTarget, continueTarget);
+        }
+        if (listContinue.size() > 0) {
+            current.addSuccessor(continueTarget);
+            current = continueTarget;
+            current = functionContext.linkBasicBlocks(list, current, breakTarget, continueTarget);
+        }
+        loopHead.addSuccessor(breakTarget);
+        current.addSuccessor(next);
+        return breakTarget;
+    }
+
+    @Override
     public void printLinks(String indentation, FunctionContext functionContext) {
         functionContext.printLinks(indentation, this);
         functionContext.printLinks(indentation + "    ", list);
@@ -163,13 +197,14 @@ public class Loop implements Statement {
     }
 
     @Override
-    public void setVariableVersions(FunctionContext functionContext, PhiBlock lastPhi) {
-        ArrayList<Statement> combined = new ArrayList<>();
-        combined.addAll(list);
-        combined.addAll(listContinue);
-        if (combined.size() > 0) {
-            functionContext.setVariableVersions(combined, lastPhi);
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (condition != null) {
+            condition.setVariableVersions(functionContext, basicBlock);
         }
+    }
+
+    public void setBasicBlock(BasicBlock basicBlock) {
+        this.basicBlock = basicBlock;
     }
 
 }

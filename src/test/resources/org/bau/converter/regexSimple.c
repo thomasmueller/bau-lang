@@ -568,8 +568,8 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
                         if (_t2) {
                             return ok_int64_t_or_exception(1);
                         }
-                        i += 1;
-                        i += 1;
+                        i = i + 1;
+                        i = i + 1;
                     }
                     break;
                 }
@@ -589,8 +589,8 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
                             if (_t4) {
                                 return ok_int64_t_or_exception(0);
                             }
-                            i += 1;
-                            i += 1;
+                            i = i + 1;
+                            i = i + 1;
                         }
                         break;
                     }
@@ -655,7 +655,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
         if (tp < _arrayLen(text)) {
             break;
         }
-        tp += 1;
+        tp = tp + 1;
     }
     match _t3 = match_2(-1, -1);
     _decUseStack(list, org_bau_List_List_Token);
@@ -713,7 +713,7 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
                     _decUseStack(t, Token);
                     return ok_int64_t_or_exception(-1);
                 }
-                tp += 1;
+                tp = tp + 1;
                 int64_t _next = i + 1;
                 if (_next >= t->min) {
                     break;
@@ -748,14 +748,14 @@ _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64
         _x1 = Token_matchChar_3(t, text, tp);
         if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
         int64_t r = _x1.result;
-        tp += 1;
+        tp = tp + 1;
         if (r == 0) {
             break;
         }
         if (max <= 0) {
             break;
         }
-        max -= 1;
+        max = max - 1;
     }
     return ok_int64_t_or_exception(result);
     } while(0);
@@ -888,13 +888,13 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         if (c == 94) {
             t->ttype = 0;
             org_bau_List_List_Token_add_2(result, t);
-            i += 1;
+            i = i + 1;
             continue;
         }
         if (c == 36) {
             t->ttype = 1;
             org_bau_List_List_Token_add_2(result, t);
-            i += 1;
+            i = i + 1;
             continue;
         }
         if (c == 46) {
@@ -902,15 +902,15 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
         } else {
             if (c == 92) {
                 t->ttype = 2;
-                i += 1;
+                i = i + 1;
                 org_bau_List_List_i8_add_2(t->data, regex->data[idx_2(i, _arrayLen(regex))]);
             } else {
                 if (c == 91) {
-                    i += 1;
+                    i = i + 1;
                     c = regex->data[idx_2(i, _arrayLen(regex))];
                     if (c == 94) {
                         t->ttype = 4;
-                        i += 1;
+                        i = i + 1;
                         c = regex->data[idx_2(i, _arrayLen(regex))];
                     } else {
                         t->ttype = 3;
@@ -918,13 +918,13 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                     org_bau_List_List_i8_add_2(t->data, c);
                     org_bau_List_List_i8_add_2(t->data, c);
                     while (1) {
-                        i += 1;
+                        i = i + 1;
                         c = regex->data[idx_2(i, _arrayLen(regex))];
                         if (c == 93) {
                             break;
                         }
                         if (c == 45) {
-                            i += 1;
+                            i = i + 1;
                             c = regex->data[idx_2(i, _arrayLen(regex))];
                             t->data->array->data[idx_2(t->data->size - 1, _arrayLen(t->data->array))] = c;
                         } else {
@@ -944,7 +944,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
             _decUseStack(_t0, org_bau_List_List_i8);
             break;
         }
-        i += 1;
+        i = i + 1;
         c = regex->data[idx_2(i, _arrayLen(regex))];
         if (c == 43) {
             t->max = 9999;
@@ -958,7 +958,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                     t->max = 1;
                 } else {
                     if (c == 123) {
-                        i += 1;
+                        i = i + 1;
                         int64_t start = i;
                         int64_t value = 0;
                         while (i < _arrayLen(regex)) {
@@ -975,12 +975,12 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                             if (value > 9999) {
                                 break;
                             }
-                            i += 1;
+                            i = i + 1;
                         }
                         t->min = value;
                         t->max = t->min;
                         if (c == 44) {
-                            i += 1;
+                            i = i + 1;
                             start = i;
                             value = 0;
                             while (i < _arrayLen(regex)) {
@@ -997,7 +997,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                                 if (value > 9999) {
                                     break;
                                 }
-                                i += 1;
+                                i = i + 1;
                             }
                             t->max = value;
                         }
@@ -1007,12 +1007,12 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                             org_bau_Exception_exception_free(&_t5);
                         }
                     } else {
-                        i -= 1;
+                        i = i - 1;
                     }
                 }
             }
         }
-        i += 1;
+        i = i + 1;
         _decUseStack(t, Token);
         _decUseStack(_t0, org_bau_List_List_i8);
     }

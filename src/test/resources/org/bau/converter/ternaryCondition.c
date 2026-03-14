@@ -360,7 +360,7 @@ void _main() {
             printf("abs(%lld)= %lld\n", (long long)i, (long long)_t1);
             i8_array* _t2 = typeName_int_1(1);
             printf("typeName: %.*s\n", _arrayLen(_t2), _t2->data);
-            i += 1;
+            i = i + 1;
             _decUseStack(_t2, i8_array);
         }
         break;

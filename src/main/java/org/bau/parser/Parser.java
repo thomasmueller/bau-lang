@@ -732,14 +732,23 @@ public class Parser {
                 throw syntaxError("Function does not return or throw");
             }
         }
-        Statement end = new Return(null);
-        if (Variable.DEBUG_VERSIONS) {
-            functionContext.linkList(currentFunctionDefinition.list, null, end, null, null);
-            PhiBlock lastPhis = new PhiBlock();
-            int todo;
-            currentFunctionDefinition.list.add(0, lastPhis);
-            functionContext.setVariableVersions(currentFunctionDefinition.list, lastPhis);
-            functionContext.printLinks("", currentFunctionDefinition.list);
+        if (Variable.DEBUG_VERSIONS && functionContext.blockList.isEmpty()) {
+            BasicBlock header = functionContext.newBasicBlock();
+            for (Variable v : currentFunctionDefinition.parameters) {
+                header.setVariableVersion(v.name(), 0);
+            }
+            functionContext.linkBasicBlocks(currentFunctionDefinition.list, header, null, null);
+            functionContext.printBasicBlocks();
+            functionContext.setBasicBlocksVariableVersions();
+
+            functionContext.printBasicBlocks();
+//            functionContext.linkList(currentFunctionDefinition.list, null, end, null, null);
+//            PhiBlock lastPhis = new PhiBlock();
+//            int todo;
+//            currentFunctionDefinition.list.add(0, lastPhis);
+//            functionContext.setVariableVersions(currentFunctionDefinition.list, lastPhis);
+//            functionContext.setPhiVersions(currentFunctionDefinition.list);
+//            functionContext.printLinks("", currentFunctionDefinition.list);
         }
 
         currentFunctionDefinition = null;
@@ -1457,6 +1466,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1477,6 +1487,7 @@ public class Parser {
                         verifyNotZero(expr);
                     }
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1497,6 +1508,7 @@ public class Parser {
                         verifyNotZero(expr);
                     }
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1512,6 +1524,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1527,6 +1540,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1542,6 +1556,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1557,6 +1572,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1572,6 +1588,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1587,6 +1604,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1602,6 +1620,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     throw syntaxError("The type of the variable is different than the type of the expression");
                 }
+                convertToExpandedForm(s);
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
@@ -1611,6 +1630,16 @@ public class Parser {
             }
         }
         throw syntaxError("Expected a statement, got '" + token + "'");
+    }
+
+    private void convertToExpandedForm(Assignment s) {
+        if (s.modify != null && s.leftValue instanceof Variable) {
+            s.convertToExpandedForm();
+//            Variable v = (Variable) s.leftValue;
+//            s.value = new Operation(v.cloneVariable(), s.modify)
+        }
+        // TODO Auto-generated method stub
+
     }
 
     void updateVariable(String name, Variable newVersion) {

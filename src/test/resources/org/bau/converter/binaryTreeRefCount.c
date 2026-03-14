@@ -362,13 +362,13 @@ int64_t Tree_nodeCount_1(Tree* this) {
     Tree* l = this->left;
     if (l != NULL) {
         int64_t _t0 = Tree_nodeCount_1(l);
-        result += _t0;
+        result = result + _t0;
     }
     _incUseStack(this->right);
     Tree* r = this->right;
     if (r != NULL) {
         int64_t _t1 = Tree_nodeCount_1(r);
-        result += _t1;
+        result = result + _t1;
     }
     _decUseStack(r, Tree);
     _decUseStack(l, Tree);
@@ -424,12 +424,12 @@ void _main() {
         while (i <= iterations) {
             Tree* t = with_1(depth);
             int64_t _t2 = Tree_nodeCount_1(t);
-            check += _t2;
-            i += 1;
+            check = check + _t2;
+            i = i + 1;
             _decUseStack(t, Tree);
         }
         printf("%lld trees of depth %lld check: %lld\n", (long long)iterations, (long long)depth, (long long)check);
-        depth += 2;
+        depth = depth + 2;
     }
     int64_t _t3 = Tree_nodeCount_1(longLived);
     printf("long lived tree of depth %lld check: %lld\n", (long long)3, (long long)_t3);

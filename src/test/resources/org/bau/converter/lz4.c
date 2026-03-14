@@ -513,7 +513,7 @@ int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer,
         if (l == 0) {
             return count;
         } else {
-            count += l;
+            count = count + l;
         }
     }
 }
@@ -564,8 +564,8 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
         if (literalLen == 15) {
             while (1) {
                 int64_t x = inData->data[idx_2(p, _arrayLen(inData))] & 255;
-                p += 1;
-                literalLen += x;
+                p = p + 1;
+                literalLen = literalLen + x;
                 if (x != 255) {
                     break;
                 }
@@ -589,7 +589,7 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
             while (1) {
                 int64_t x = org_bau_compress_Lz4_read8_2(inData, s);
                 org_bau_compress_Lz4_write8_3(outData, o, x);
-                n += 8;
+                n = n + 8;
                 if (n >= literalLen) {
                     break;
                 }
@@ -609,13 +609,13 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
                 int64_t i = 0;
                 while (i < literalLen) {
                     outData->data[idx_2(outPos + i, _arrayLen(outData))] = inData->data[idx_2(p + i, _arrayLen(inData))];
-                    i += 1;
+                    i = i + 1;
                 }
                 break;
             }
         }
-        outPos += literalLen;
-        p += literalLen;
+        outPos = outPos + literalLen;
+        p = p + literalLen;
         if (( p + 1 ) >= inLen) {
             break;
         }
@@ -626,7 +626,7 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
         if (offset > outPos) {
             return -1;
         }
-        p += 2;
+        p = p + 2;
         if (p >= ( inLen - 1 )) {
             break;
         }
@@ -634,14 +634,14 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
         if (runLen == 15) {
             while (1) {
                 int64_t x = inData->data[idx_2(p, _arrayLen(inData))] & 255;
-                p += 1;
-                runLen += x;
+                p = p + 1;
+                runLen = runLen + x;
                 if (x != 255) {
                     break;
                 }
             }
         }
-        runLen += 4;
+        runLen = runLen + 4;
         if (offset >= 8) {
             next = outPos - offset;
             if (next >= ( _arrayLen(outData) - 8 )) {
@@ -664,7 +664,7 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
             while (1) {
                 int64_t x = org_bau_compress_Lz4_read8_2(outData, s);
                 org_bau_compress_Lz4_write8_3(outData, o, x);
-                n += 8;
+                n = n + 8;
                 if (n >= runLen) {
                     break;
                 }
@@ -684,12 +684,12 @@ int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, 
                 int64_t i = 0;
                 while (i < runLen) {
                     outData->data[idx_2(outPos + i, _arrayLen(outData))] = outData->data[idx_2(( outPos + i ) - offset, _arrayLen(outData))];
-                    i += 1;
+                    i = i + 1;
                 }
                 break;
             }
         }
-        outPos += runLen;
+        outPos = outPos + runLen;
     }
     return outPos;
 }
@@ -734,7 +734,7 @@ int64_t org_bau_compress_Lz4_runLenCountFast_4(i8_array* data, int64_t aLen, int
         int64_t diff = ax ^ bx;
         if (diff != 0) {
             int64_t _t0 = org_bau_compress_Lz4_countTrailingZeros_1(diff);
-            runLen += shiftRight_int_2(_t0, 3);
+            runLen = runLen + ( shiftRight_int_2(_t0, 3) );
             return runLen;
         }
         int64_t next = ai + 8;
@@ -750,7 +750,7 @@ int64_t org_bau_compress_Lz4_runLenCountFast_4(i8_array* data, int64_t aLen, int
             break;
         }
         bi = next;
-        runLen += 8;
+        runLen = runLen + 8;
     }
     return runLen;
 }
@@ -812,11 +812,11 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
                 }
                 if (next < ( _arrayLen(inData) - 8 )) {
                     inPos = next;
-                    literalLen += step;
-                    searchMatch += 1;
+                    literalLen = literalLen + step;
+                    searchMatch = searchMatch + 1;
                     continue;
                 }
-                literalLen += inLen - inPos;
+                literalLen = literalLen + ( inLen - inPos );
                 inPos = inLen;
                 continue;
             } else {
@@ -841,23 +841,23 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
                     int64_t next = inPos + step;
                     if (next < ( _arrayLen(inData) - 8 )) {
                         inPos = next;
-                        literalLen += step;
-                        searchMatch += 1;
+                        literalLen = literalLen + step;
+                        searchMatch = searchMatch + 1;
                         continue;
                     }
-                    literalLen += inLen - inPos;
+                    literalLen = literalLen + ( inLen - inPos );
                     inPos = inLen;
                     continue;
                 }
             }
         } else {
-            literalLen += inLen - inPos;
+            literalLen = literalLen + ( inLen - inPos );
             inPos = inLen;
             runLen = 4;
             candidatePos = 0;
         }
         int64_t tagPos = outPos;
-        outPos += 1;
+        outPos = outPos + 1;
         while (1) {
             if (candidatePos <= 0) {
                 break;
@@ -871,7 +871,7 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
             if (inData->data[inPos - 1] != inData->data[candidatePos - 1]) {
                 break;
             }
-            runLen += 1;
+            runLen = runLen + 1;
             int64_t next = inPos - 1;
             if (next < 0) {
                 return -1;
@@ -879,18 +879,18 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
             if (next < ( _arrayLen(inData) - 7 )) {
                 inPos = next;
             }
-            literalLen -= 1;
-            candidatePos -= 1;
+            literalLen = literalLen - 1;
+            candidatePos = candidatePos - 1;
         }
         int64_t copyLen = literalLen;
         if (literalLen >= 15) {
             while (( literalLen - 15 ) >= 255) {
                 outData->data[idx_2(outPos, _arrayLen(outData))] = 0xff;
-                outPos += 1;
-                literalLen -= 0xff;
+                outPos = outPos + 1;
+                literalLen = literalLen - 255;
             }
             outData->data[idx_2(outPos, _arrayLen(outData))] = literalLen - 15;
-            outPos += 1;
+            outPos = outPos + 1;
             literalLen = 0xf;
         }
         int64_t s = 0;
@@ -912,7 +912,7 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
         while (1) {
             int64_t x = org_bau_compress_Lz4_read8_2(inData, s);
             org_bau_compress_Lz4_write8_3(outData, o, x);
-            n += 8;
+            n = n + 8;
             if (n >= copyLen) {
                 break;
             }
@@ -927,27 +927,27 @@ int64_t org_bau_compress_Lz4_LZ4Compress_compressBlock_5(org_bau_compress_Lz4_LZ
             }
             o = next;
         }
-        outPos += copyLen;
+        outPos = outPos + copyLen;
         if (inPos < inLen) {
             int64_t offset = inPos - candidatePos;
             outData->data[idx_2(outPos, _arrayLen(outData))] = offset;
             outData->data[idx_2(outPos + 1, _arrayLen(outData))] = shiftRight_int_2(offset, 8);
-            outPos += 2;
+            outPos = outPos + 2;
         } else {
             int64_t tag = shiftLeft_2(literalLen, 4);
             outData->data[idx_2(tagPos, _arrayLen(outData))] = tag;
             break;
         }
         int64_t skipLen = runLen;
-        runLen -= 4;
+        runLen = runLen - 4;
         if (runLen >= 15) {
             while (( runLen - 15 ) >= 255) {
                 outData->data[idx_2(outPos, _arrayLen(outData))] = 0xff;
-                outPos += 1;
-                runLen -= 0xff;
+                outPos = outPos + 1;
+                runLen = runLen - 255;
             }
             outData->data[idx_2(outPos, _arrayLen(outData))] = runLen - 15;
-            outPos += 1;
+            outPos = outPos + 1;
             runLen = 0xf;
         }
         int64_t tag = (shiftLeft_2(literalLen, 4)) | runLen;
@@ -1016,9 +1016,9 @@ int32_t org_bau_compress_Lz4_XXHash_update_4(org_bau_compress_Lz4_XXHash* this, 
         int32_t _t17 = org_bau_compress_Lz4_rotateLeft32_2(this->v2, 7);
         int32_t _t18 = org_bau_compress_Lz4_rotateLeft32_2(this->v3, 12);
         int32_t _t19 = org_bau_compress_Lz4_rotateLeft32_2(this->v4, 18);
-        h32 += ( _t16 + _t17 ) + _t18 + _t19;
+        h32 = h32 + ( _t16 + _t17 ) + _t18 + _t19;
     } else {
-        h32 += this->v3 + 374761393;
+        h32 = h32 + ( this->v3 + 374761393 );
     }
     if (( pos + 4 ) <= end) {
         if (_arrayLen(buf) < 4) {
@@ -1096,7 +1096,7 @@ int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_arra
         if (read == 0) {
             break;
         }
-        totalSize += read;
+        totalSize = totalSize + read;
         int64_t end = 0;
         if (read < 16) {
             end = read;
@@ -1260,7 +1260,7 @@ int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_ar
             break;
         }
         int64_t uncompressed = (shiftRight_i32_2(blockSize, 31)) & 1;
-        blockSize &= 0x7fffffff;
+        blockSize = blockSize & 2147483647;
         if (blockSize > 4194304) {
             _decUseStack(outBlock, i8_array);
             _decUseStack(_t6, i8_array);
@@ -1278,12 +1278,12 @@ int64_t org_bau_compress_Lz4Tool_decompressFile_2(i8_array* inputFileName, i8_ar
         if (uncompressed) {
             int64_t _t9 = org_bau_File_File_write_4(out, block, 0, blockSize);
             ;
-            outputFileSize += blockSize;
+            outputFileSize = outputFileSize + blockSize;
         } else {
             int64_t size = org_bau_compress_Lz4_decompressBlock_4(block, blockSize, outBlock, 0);
             int64_t _t10 = org_bau_File_File_write_4(out, outBlock, 0, size);
             ;
-            outputFileSize += size;
+            outputFileSize = outputFileSize + size;
         }
     }
     _decUseStack(outBlock, i8_array);
@@ -1317,8 +1317,8 @@ i8_array* org_bau_compress_Lz4Tool_hex_2(int64_t x, int64_t len) {
             c = ( 97 + (y & 15) ) - 10;
         }
         data->data[idx_2(i, _arrayLen(data))] = c;
-        y >>= 4;
-        i -= 1;
+        y = shiftRight_int_2(y, 4);
+        i = i - 1;
     }
     _decUseStack(_t0, i8_array);
     return data;
