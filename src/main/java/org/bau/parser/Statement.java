@@ -44,17 +44,20 @@ public interface Statement {
 
     void used(Program program);
 
-    default void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        functionContext.linkStatements(this, next);
-    }
+    DataType canThrowException();
 
     default BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
-        return functionContext.linkBasicBlocks(this, current);
-    }
-
-    default void printLinks(String indentation, FunctionContext functionContext) {
-        functionContext.printLinks(indentation, this);
+        if (canThrowException() != null) {
+            BasicBlock next = functionContext.newBasicBlock();
+            functionContext.addCatchPredecessor(next);
+            current.addSuccessor(next);
+            current = next;
+            functionContext.linkBasicBlocks(this, current);
+            return next;
+        } else {
+            return functionContext.linkBasicBlocks(this, current);
+        }
     }
 
     default void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {

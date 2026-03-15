@@ -46,4 +46,9 @@ public class NativeCode implements Statement {
     public void used(Program program) {
     }
 
+    @Override
+    public DataType canThrowException() {
+        return null;
+    }
+
 }

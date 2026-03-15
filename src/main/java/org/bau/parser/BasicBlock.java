@@ -2,6 +2,8 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 // basic block, with one entry, and one exit
 // (but possibly multiple predecessors and successors)
@@ -11,9 +13,10 @@ public class BasicBlock {
     ArrayList<BasicBlock> predecessors = new ArrayList<>();
     ArrayList<BasicBlock> successors = new ArrayList<>();
     ArrayList<Statement> list = new ArrayList<>();
+    String recursing;
     HashMap<String, Integer> localVersions = new HashMap<>();
     HashMap<String, Integer> phiVersions = new HashMap<>();
-    HashMap<String, ArrayList<Integer>> phiSources = new HashMap<>();
+    HashMap<String, HashSet<Integer>> phiSources = new HashMap<>();
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
@@ -35,9 +38,6 @@ public class BasicBlock {
                 }
                 buff.append(predecessors.get(i).id);
             }
-        }
-        for(String n : localVersions.keySet()) {
-            buff.append("local " + n + "_" + localVersions.get(n) + "\n");
         }
         buff.append(":\n");
         if (!phiVersions.isEmpty()) {
@@ -64,23 +64,19 @@ public class BasicBlock {
         if (processed) {
             return;
         }
-        System.out.println("process variables in block #" + id);
         for (Statement s : list) {
             s.setVariableVersions(functionContext, this);
         }
-        System.out.println("process variables in block #" + id + " done: " + localVersions.toString());
         processed = true;
     }
 
     public void setVariableVersion(String name, int v) {
-        System.out.println("      block #" + id + " " + name + " =" + v);
         localVersions.put(name, v);
     }
 
     public int getVersion(FunctionContext functionContext, String name) {
         Integer v = localVersions.get(name);
         if (v != null) {
-            System.out.println("    getV of #" + id + " for " + name + " = " + v);
             return v;
         }
         if (predecessors.size() == 1) {
@@ -89,37 +85,48 @@ public class BasicBlock {
         v = functionContext.nextVariableVersion(name);
         localVersions.put(name, v);
         phiVersions.put(name, v);
-        phiSources.put(name, new ArrayList<>());
+        phiSources.put(name, new HashSet<>());
         return v;
     }
 
     public void fillPhis() {
+        if (predecessors.isEmpty()) {
+            // orphaned - we can ignore
+            return;
+        }
         for (String n : phiVersions.keySet()) {
-            ArrayList<Integer> list = phiSources.get(n);
-            if (list.size() > 0) {
+            HashSet<Integer> set = phiSources.get(n);
+            if (set.size() > 0) {
                 continue;
             }
             for (BasicBlock b : predecessors) {
-                b.fillPhiVersionsRecursive(n, list, 0);
+                set.addAll(b.fillPhiVersionsRecursive(n, 0));
+            }
+            set.remove(phiVersions.get(n));
+            if (set.size() == 0) {
+                throw new IllegalStateException();
             }
         }
     }
 
-    private void fillPhiVersionsRecursive(String n, ArrayList<Integer> list, int depth) {
-        if (depth > 20) {
-            System.out.println("?");
+    private Set<Integer> fillPhiVersionsRecursive(String n, int depth) {
+        if (depth >= 10000) {
+            throw new IllegalStateException();
         }
         Integer v = localVersions.get(n);
         if (v != null) {
-            if (v >= 0 && !list.contains(v)) {
-                list.add(v);
-            }
+            return Set.of(v);
         } else {
-            // prevent endless recursion
-            localVersions.put(n, -1);
-            for (BasicBlock b : predecessors) {
-                b.fillPhiVersionsRecursive(n, list, depth + 1);
+            if (n.equals(recursing)) {
+                return Set.of();
             }
+            recursing = n;
+            HashSet<Integer> s = new HashSet<>();
+            for (BasicBlock b : predecessors) {
+                s.addAll(b.fillPhiVersionsRecursive(n, depth + 1));
+            }
+            recursing = null;
+            return s;
         }
     }
 

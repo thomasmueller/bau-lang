@@ -308,7 +308,7 @@ public class Assignment implements Statement {
         if (!Variable.DEBUG_VERSIONS) {
             return;
         }
-        if (initial || isConstant || isGlobalScope) {
+        if (isConstant || isGlobalScope) {
             return;
         }
         if (!(leftValue instanceof Variable)) {
@@ -340,11 +340,8 @@ public class Assignment implements Statement {
         if (!(leftValue instanceof Variable)) {
             return;
         }
-        if (isConstant || isGlobalScope) {
-            return;
-        }
         Variable assignToVariable = (Variable) leftValue;
-        if (assignToVariable.global()) {
+        if (assignToVariable.global() || assignToVariable.isConstant()) {
             return;
         }
         String name = assignToVariable.name();
@@ -356,6 +353,11 @@ public class Assignment implements Statement {
         }
         basicBlock.setVariableVersion(name, v);
         assignToVariable.setVersion(v);
+    }
+
+    @Override
+    public DataType canThrowException() {
+        return value.canThrowException();
     }
 
 }

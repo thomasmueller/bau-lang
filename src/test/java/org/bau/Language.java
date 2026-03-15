@@ -7,6 +7,9 @@ https://github.com/NicoNex/tau
 
 r/C_Programming, r/compsci, r/compilers, r/embedded/
 
+limit exceptions: only one per function, can not catch locally,
+   not in conditions, not in return,...
+
 try to estimate "complexity to learn"
 
 verify traits can be used in modules

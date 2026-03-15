@@ -92,11 +92,26 @@ public class Catch implements Statement {
         var.type().used(program);
     }
 
+    @Override
+    public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
+            BasicBlock continueTarget) {
+        BasicBlock catchBlock = functionContext.newBasicBlock();
+        ArrayList<BasicBlock> throwList = functionContext.getCatchPredecessors();
+        for(BasicBlock b : throwList) {
+            b.addSuccessor(catchBlock);
+        }
+        throwList.clear();
+        functionContext.linkBasicBlocks(this, catchBlock);
+        catchBlock = functionContext.linkBasicBlocks(list, catchBlock, null, null);
+
+        BasicBlock next = functionContext.newBasicBlock();
+        catchBlock.addSuccessor(next);
+        return next;
+    }
 
     @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        int todo;
-        // ignore
+    public DataType canThrowException() {
+        return null;
     }
 
 }

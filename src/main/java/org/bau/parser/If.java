@@ -161,24 +161,6 @@ public class If implements Statement {
     }
 
     @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        // TODO link last (then and else) with next,
-        // break (including nested) with loop next,
-        // continue (including nested) with loop head,
-        // throw (included nested) with catch
-        if (thenList.size() > 0) {
-            functionContext.linkStatements(this, thenList.get(0));
-            functionContext.linkList(thenList, prev, next, breakTarget, continueTarget);
-        }
-        if (elseList == null || elseList.size() == 0) {
-            functionContext.linkStatements(this, next);
-        } else {
-            functionContext.linkStatements(this, elseList.get(0));
-            functionContext.linkList(elseList, prev, next, breakTarget, continueTarget);
-        }
-    }
-
-    @Override
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
         functionContext.linkBasicBlocks(this, current);
@@ -198,16 +180,8 @@ public class If implements Statement {
             e = functionContext.linkBasicBlocks(elseList, e, breakTarget, continueTarget);
             e.addSuccessor(after);
         }
+        current.addSuccessor(after);
         return after;
-    }
-
-    @Override
-    public void printLinks(String indentation, FunctionContext functionContext) {
-        functionContext.printLinks(indentation, this);
-        functionContext.printLinks(indentation + "    ", thenList);
-        if (elseList != null) {
-            functionContext.printLinks(indentation + "    ", elseList);
-        }
     }
 
     @Override
@@ -215,6 +189,14 @@ public class If implements Statement {
         if (condition != null) {
             condition.setVariableVersions(functionContext, basicBlock);
         }
+    }
+
+    @Override
+    public DataType canThrowException() {
+        if (condition == null) {
+            return null;
+        }
+        return condition.canThrowException();
     }
 
 }

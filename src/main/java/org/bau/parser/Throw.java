@@ -59,8 +59,8 @@ public class Throw implements Statement {
     }
 
     @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        // ignore
+    public DataType canThrowException() {
+        return expr.type();
     }
 
 }

@@ -164,4 +164,9 @@ public class Free implements Statement {
         var.type().used(program);
     }
 
+    @Override
+    public DataType canThrowException() {
+        return null;
+    }
+
 }

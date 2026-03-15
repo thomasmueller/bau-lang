@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.bau.runtime.Memory;
 
@@ -52,25 +51,6 @@ public class PhiBlock implements Statement {
         if (basicBlock != null) {
             return basicBlock.toC();
         }
-        if (Variable.DEBUG_VERSIONS) {
-            // Original SSA1 debug output
-            for (String n : versions.keySet()) {
-                TreeSet<Integer> set = new TreeSet<>();
-                set.addAll(versions.get(n));
-                versions.put(n, new ArrayList<Integer>(set));
-            }
-            if (current.size() != 0 || versions.size() != 0 || latest.size() != 0) {
-                StringBuilder buff = new StringBuilder();
-                buff.append("/*\n");
-                buff.append("current " + current).append("\n");
-                buff.append("phis " + versions).append("\n");
-                buff.append("latest " + latest).append("\n");
-                buff.append("*/\n");
-                return buff.toString();
-            } else {
-                return "/* empty phis */\n";
-            }
-        }
         return "";
     }
 
@@ -105,16 +85,13 @@ public class PhiBlock implements Statement {
         return versions.get(name);
     }
 
-    public void setLatestVersion(String name, int version) {
-        latest.put(name, version);
-    }
-
-    public Integer getLatestVersion(String name) {
-        return latest.get(name);
-    }
-
     public void setBasicBlock(BasicBlock basicBlock) {
         this.basicBlock = basicBlock;
+    }
+
+    @Override
+    public DataType canThrowException() {
+        return null;
     }
 
 }

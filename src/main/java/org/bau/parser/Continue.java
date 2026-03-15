@@ -88,19 +88,6 @@ public class Continue implements Statement {
     }
 
     @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        if (continueTarget == null) {
-            throw new IllegalStateException("Continue outside of a loop");
-        }
-        if (condition == null) {
-            // ignore
-        } else {
-            functionContext.linkStatements(this, next);
-        }
-        functionContext.linkStatements(this, continueTarget);
-    }
-
-    @Override
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
         if (continueTarget == null) {
@@ -117,6 +104,14 @@ public class Continue implements Statement {
             after.addSuccessor(continueTarget);
         }
         return after;
+    }
+
+    @Override
+    public DataType canThrowException() {
+        if (condition == null) {
+            return null;
+        }
+        return condition.canThrowException();
     }
 
 }

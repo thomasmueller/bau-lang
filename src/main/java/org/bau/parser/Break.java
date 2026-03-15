@@ -86,18 +86,6 @@ public class Break implements Statement {
         }
     }
 
-    @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        if (breakTarget == null) {
-            throw new IllegalStateException("Break outside of a loop");
-        }
-        if (condition == null) {
-            // ignore
-        } else {
-            functionContext.linkStatements(this, next);
-        }
-        functionContext.linkStatements(this, breakTarget);
-    }
 
     @Override
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
@@ -117,5 +105,14 @@ public class Break implements Statement {
         }
         return after;
     }
+
+    @Override
+    public DataType canThrowException() {
+        if (condition == null) {
+            return null;
+        }
+        return condition.canThrowException();
+    }
+
 
 }

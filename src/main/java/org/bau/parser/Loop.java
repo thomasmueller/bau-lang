@@ -139,27 +139,6 @@ public class Loop implements Statement {
     }
 
     @Override
-    public void link(FunctionContext functionContext, Statement prev, Statement next, Statement breakTarget, Statement continueTarget) {
-        // TODO link continue (including nested) with this,
-        // break (included nested) with next
-        // throw (included nested) with catch
-        int todo;
-        ArrayList<Statement> combined = new ArrayList<>();
-        combined.addAll(list);
-        combined.addAll(listContinue);
-        if (combined.size() > 0) {
-            breakTarget = next;
-            continueTarget = listContinue.size() != 0 ? listContinue.get(0) : prev;
-            functionContext.linkList(combined, prev, prev, breakTarget, continueTarget);
-            functionContext.linkStatements(this, combined.get(0));
-            if (!condition.toString().equals("1")) {
-                // endless loops never exit here
-                functionContext.linkStatements(this, next);
-            }
-        }
-    }
-
-    @Override
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
         BasicBlock next = functionContext.newBasicBlock();
@@ -182,18 +161,11 @@ public class Loop implements Statement {
         if (listContinue.size() > 0) {
             current.addSuccessor(continueTarget);
             current = continueTarget;
-            current = functionContext.linkBasicBlocks(list, current, breakTarget, continueTarget);
+            current = functionContext.linkBasicBlocks(listContinue, current, breakTarget, continueTarget);
         }
         loopHead.addSuccessor(breakTarget);
         current.addSuccessor(next);
         return breakTarget;
-    }
-
-    @Override
-    public void printLinks(String indentation, FunctionContext functionContext) {
-        functionContext.printLinks(indentation, this);
-        functionContext.printLinks(indentation + "    ", list);
-        functionContext.printLinks(indentation + "    ", listContinue);
     }
 
     @Override
@@ -205,6 +177,14 @@ public class Loop implements Statement {
 
     public void setBasicBlock(BasicBlock basicBlock) {
         this.basicBlock = basicBlock;
+    }
+
+    @Override
+    public DataType canThrowException() {
+        if (condition == null) {
+            return null;
+        }
+        return condition.canThrowException();
     }
 
 }

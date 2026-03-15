@@ -742,13 +742,6 @@ public class Parser {
             functionContext.setBasicBlocksVariableVersions();
 
             functionContext.printBasicBlocks();
-//            functionContext.linkList(currentFunctionDefinition.list, null, end, null, null);
-//            PhiBlock lastPhis = new PhiBlock();
-//            int todo;
-//            currentFunctionDefinition.list.add(0, lastPhis);
-//            functionContext.setVariableVersions(currentFunctionDefinition.list, lastPhis);
-//            functionContext.setPhiVersions(currentFunctionDefinition.list);
-//            functionContext.printLinks("", currentFunctionDefinition.list);
         }
 
         currentFunctionDefinition = null;
@@ -2270,6 +2263,9 @@ public class Parser {
         Catch catchStat = new Catch();
         String id = readIdentifier();
         Variable var = new Variable(id, exceptionType);
+        if (exceptionType == null) {
+            throw syntaxError("Exception type is not known");
+        }
         functionContext.addVariable(var);
         catchStat.var = var;
         boolean sameLine;
@@ -2298,6 +2294,9 @@ public class Parser {
     }
 
     private void parseThrow(ArrayList<Statement> target) {
+        if (currentFunctionDefinition.exceptionType == null) {
+            throw syntaxError("This method does not throw an exception (local exceptions are not supported)");
+        }
         Throw t = new Throw();
         if (matchOp("\n") || matchOp(";")) {
             target.add(t);
@@ -2305,6 +2304,7 @@ public class Parser {
             return;
         }
         t.expr = parseExpression(target);
+        exceptionType = t.expr.type();
         // theoretically, the exception could be caught in this method
         // so we can not verify that the exception type matches the one
         // declared in the function
@@ -2592,9 +2592,6 @@ public class Parser {
         stackPosLoop = stackPos;
         Loop outerLoop = new Loop();
 
-        int test;
-        // outerLoop.list.add(new PhiBlock());
-
         ArrayList<Variable> oldArgs = new ArrayList<>();
         ArrayList<Expression> newArgs = new ArrayList<>();
         for (int i = 0; i < functionDef.parameters.size(); i++) {
@@ -2649,6 +2646,10 @@ public class Parser {
                 wrappingIf = new If();
                 wrappingIf.condition = condition;
             }
+            if (stat instanceof Assignment) {
+                // need to make sure we have our own copy of all variables,
+                ((Assignment) stat).cloneVariable(this);
+            }
         }
         startBlock(true, comp);
         outerLoop.condition = comp;
@@ -2657,6 +2658,10 @@ public class Parser {
             s = s.replace(old, var);
             for (int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
+            }
+            if (s instanceof Assignment) {
+                // need to make sure we have our own copy of all variables,
+                ((Assignment) s).cloneVariable(this);
             }
             if (s instanceof Loop) {
                 Loop w = (Loop) s;
@@ -2680,8 +2685,12 @@ public class Parser {
                 break;
             }
             s = s.replace(old, var);
-            for(int k = 0; k < oldArgs.size(); k++) {
+            for (int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
+            }
+            if (s instanceof Assignment) {
+                // need to make sure we have our own copy of all variables,
+                ((Assignment) s).cloneVariable(this);
             }
             s.setBounds(solver, depth, true);
             loop.list.add(s);
