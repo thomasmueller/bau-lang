@@ -175,6 +175,13 @@ public class Loop implements Statement {
         }
     }
 
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (condition != null) {
+            condition.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
     public void setBasicBlock(BasicBlock basicBlock) {
         this.basicBlock = basicBlock;
     }

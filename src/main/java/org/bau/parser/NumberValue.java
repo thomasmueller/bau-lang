@@ -121,4 +121,12 @@ public class NumberValue implements Expression {
         return false;
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+    }
+
 }

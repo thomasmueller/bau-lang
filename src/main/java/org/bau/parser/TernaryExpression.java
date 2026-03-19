@@ -145,4 +145,30 @@ public class TernaryExpression implements Expression {
         return condition.containsModifiableVariables() || ifTrue.containsModifiableVariables() || ifFalse.containsModifiableVariables();
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        condition.setVariableVersions(functionContext, basicBlock);
+        ifTrue.setVariableVersions(functionContext, basicBlock);
+        for (Statement s : ifTrueStatements) {
+            s.setVariableVersions(functionContext, basicBlock);
+        }
+        ifFalse.setVariableVersions(functionContext, basicBlock);
+        for (Statement s : ifFalseStatements) {
+            s.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        condition.setVariableVersions(name, oldVersion, newVersion);
+        ifTrue.setVariableVersions(name, oldVersion, newVersion);
+        for (Statement s : ifTrueStatements) {
+            s.setVariableVersions(name, oldVersion, newVersion);
+        }
+        ifFalse.setVariableVersions(name, oldVersion, newVersion);
+        for (Statement s : ifFalseStatements) {
+            s.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
 }

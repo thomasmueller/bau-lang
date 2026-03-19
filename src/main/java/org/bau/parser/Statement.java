@@ -64,4 +64,10 @@ public interface Statement {
         // ignore
     }
 
+    default void skipIncrementDecrementRefCount(String varName) {
+        // ignore
+    }
+
+    void setVariableVersions(String name, int oldVersion, int newVersion);
+
 }

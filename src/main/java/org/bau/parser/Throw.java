@@ -54,6 +54,20 @@ public class Throw implements Statement {
     }
 
     @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (expr != null) {
+            expr.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (expr != null) {
+            expr.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
+    @Override
     public void used(Program program) {
         expr.used(program);
     }

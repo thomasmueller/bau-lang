@@ -19,6 +19,8 @@ public interface LeftValue extends Expression {
 
     boolean isConstant();
 
-    void incrementReassignCount();
+    default void incrementReassignCount() {
+        // ignore
+    }
 
 }

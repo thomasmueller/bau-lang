@@ -709,4 +709,12 @@ public class Operation implements Expression {
         right.setVariableVersions(functionContext, basicBlock);
     }
 
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (left != null) {
+            left.setVariableVersions(name, oldVersion, newVersion);
+        }
+        right.setVariableVersions(name, oldVersion, newVersion);
+    }
+
 }

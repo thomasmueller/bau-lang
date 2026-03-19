@@ -13,6 +13,7 @@ import org.bau.runtime.Value.ValueStruct;
 
 public class Variable implements Expression, LeftValue {
 
+    public final static boolean SSA_FORM = true;
     public final static boolean DEBUG_VERSIONS = false;
 
     private final String name;
@@ -47,7 +48,7 @@ public class Variable implements Expression, LeftValue {
     }
 
     public Variable cloneVariable() {
-        if (!Variable.DEBUG_VERSIONS) {
+        if (!Variable.SSA_FORM) {
             return this;
         }
         if (isConstant || global) {
@@ -347,18 +348,20 @@ public class Variable implements Expression, LeftValue {
     }
 
     public String nameC() {
+        String result;
         if (type.isFunctionPointer) {
-            return Program.esc(name) + "_" + type.functionPointerArgs.size();
-        }
-        if (isInternal) {
-            return "_" + name.substring(1);
+            result = Program.esc(name) + "_" + type.functionPointerArgs.size();
+        } else if (isInternal) {
+            result = "_" + name.substring(1);
+        } else {
+            result = Program.esc(name());
         }
         if (DEBUG_VERSIONS) {
-            if (version != 0) {
-                return Program.esc(name()) + " /* " + name + "_" + version + " */";
+            if (version >= 0) {
+                result += " /* " + name + "_" + version + " */";
             }
         }
-        return Program.esc(name());
+        return result;
     }
 
     @Override
@@ -392,8 +395,18 @@ public class Variable implements Expression, LeftValue {
         version = basicBlock.getVersion(functionContext, name);
     }
 
-    public void setVersion(int version) {
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (this.name.equals(name)) {
+            if (version == oldVersion) {
+                version = newVersion;
+            }
+        }
+    }
+
+    public Variable setVersion(int version) {
         this.version = version;
+        return this;
     }
 
     public int getVersion() {

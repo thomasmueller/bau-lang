@@ -121,11 +121,10 @@ public class StringLiteral implements Expression {
                 indent = Math.min(indent, i - start);
             }
         }
-//
-//        int indent = 0;
-//        while (text.charAt(text.length() - indent - 1) != '\n') {
-//            indent++;
-//        }
+        //        int indent = 0;
+        //        while (text.charAt(text.length() - indent - 1) != '\n') {
+        //            indent++;
+        //        }
         StringBuilder buff = new StringBuilder();
         int begin = 1;
         int start = 1;
@@ -158,6 +157,14 @@ public class StringLiteral implements Expression {
     @Override
     public boolean containsModifiableVariables() {
         return false;
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
 }

@@ -445,11 +445,6 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public void incrementReassignCount() {
-        // ignore
-    }
-
-    @Override
     public boolean containsModifiableVariables() {
         return false;
     }
@@ -458,6 +453,13 @@ public class Call implements Statement, Expression, LeftValue {
     public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
         for (Expression a : args) {
             a.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        for (Expression a : args) {
+            a.setVariableVersions(name, oldVersion, newVersion);
         }
     }
 

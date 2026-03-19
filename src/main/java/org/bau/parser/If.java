@@ -192,6 +192,13 @@ public class If implements Statement {
     }
 
     @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (condition != null) {
+            condition.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
+    @Override
     public DataType canThrowException() {
         if (condition == null) {
             return null;

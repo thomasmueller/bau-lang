@@ -82,4 +82,14 @@ public class Cast implements Expression {
         return base.getUsedOwned();
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        base.setVariableVersions(functionContext, basicBlock);
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        base.setVariableVersions(name, oldVersion, newVersion);
+    }
+
 }

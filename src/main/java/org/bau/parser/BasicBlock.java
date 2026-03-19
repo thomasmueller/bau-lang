@@ -3,6 +3,7 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 // basic block, with one entry, and one exit
@@ -21,6 +22,9 @@ public class BasicBlock {
     public String toString() {
         StringBuilder buff = new StringBuilder();
         buff.append("Basic block #" + id);
+        if (!localVersions.isEmpty()) {
+            buff.append("; local " + localVersions);
+        }
         if (successors.size() > 0) {
             buff.append("; successors: ");
             for (int i = 0; i < successors.size(); i++) {
@@ -130,7 +134,65 @@ public class BasicBlock {
         }
     }
 
+    public void collectTrivialPhis(HashMap<String, int[]> map) {
+        for (String n : phiVersions.keySet()) {
+            HashSet<Integer> set = phiSources.get(n);
+            if (set.size() == 1) {
+                map.put(n, new int[] { phiVersions.get(n), set.iterator().next() });
+            }
+        }
+    }
+
+    public void collectPhis(HashMap<Variable, Set<Integer>> map) {
+        for (String n : phiVersions.keySet()) {
+            Variable v = new Variable(n, null);
+            v.setVersion(phiVersions.get(n));
+            map.put(v, phiSources.get(n));
+        }
+    }
+
+    public void removeTrivialPhis(HashMap<String, int[]> map) {
+        for (String n : map.keySet()) {
+            int[] fromTo = map.get(n);
+            if (phiVersions.containsKey(n)) {
+                int old = phiVersions.get(n);
+                if (old == fromTo[0]) {
+                    phiVersions.remove(n);
+                    HashSet<Integer> set = phiSources.remove(n);
+                    if (set.size() != 1 || set.iterator().next() != fromTo[1]) {
+                        throw new IllegalStateException();
+                    }
+                }
+            }
+            if (phiSources.containsKey(n)) {
+                HashSet<Integer> old = phiSources.get(n);
+                if (old.contains(fromTo[0])) {
+                    old.remove(fromTo[0]);
+                    old.add(fromTo[1]);
+                }
+                phiSources.get(n).remove(phiVersions.get(n));
+            }
+            replaceVariableVersion(n, fromTo[0], fromTo[1]);
+        }
+    }
+
+    void replaceVariableVersion(String n, int oldVersion, int newVersion) {
+        if (localVersions.containsKey(n)) {
+            int old = localVersions.get(n);
+            if (old == oldVersion) {
+                localVersions.put(n, newVersion);
+            }
+        }
+        for (int i = 0; i < list.size(); i++) {
+            Statement s = list.get(i);
+            s.setVariableVersions(n, oldVersion, newVersion);
+        }
+    }
+
     public String toC() {
+        if (!Variable.DEBUG_VERSIONS) {
+            return "";
+        }
         StringBuilder buff = new StringBuilder();
         if (!phiVersions.isEmpty()) {
             buff.append("// basic block #" + id + "\n");
@@ -140,4 +202,32 @@ public class BasicBlock {
         }
         return buff.toString();
     }
+
+    Set<Integer> collectOuterVersionsRecursively(
+            String varName, Set<BasicBlock> visiting,
+            Map<Integer, BasicBlock> versionToPhiBlock) {
+        // collect all reachable non-phi versions
+        Set<Integer> result = new HashSet<>();
+        Set<Integer> sources = phiSources.get(varName);
+        if (sources == null) {
+            return result;
+        }
+        for (int srcVersion : sources) {
+            BasicBlock srcPhiBlock = versionToPhiBlock.get(srcVersion);
+            if (srcPhiBlock == null) {
+                // local assign
+                result.add(srcVersion);
+            } else if (!visiting.contains(srcPhiBlock)) {
+                // not yet on the stack: follow
+                visiting.add(srcPhiBlock);
+                result.addAll(
+                        srcPhiBlock.collectOuterVersionsRecursively(
+                                varName, visiting, versionToPhiBlock));
+                visiting.remove(srcPhiBlock);
+            }
+            // else srcPhiBlock is in visiting; skip
+        }
+        return result;
+    }
+
 }

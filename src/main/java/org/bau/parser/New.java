@@ -146,4 +146,18 @@ public class New implements Expression {
         return arrayLength.containsModifiableVariables();
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (arrayLength != null) {
+            arrayLength.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (arrayLength != null) {
+            arrayLength.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
 }

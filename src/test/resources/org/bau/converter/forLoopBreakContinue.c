@@ -21,7 +21,7 @@ static inline int _clzll(uint64_t x) {
 #endif
 }
 // malloc =============================
-#define ASSERT(A)   
+#define ASSERT(A)
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
 size_t tmmalloc_nextAllocate = 32 * 1024 * 1024;
 int tmmalloc_arenaRemaining = 0;
@@ -92,14 +92,14 @@ void tmmalloc_freeAll() {
 void* tmmalloc(size_t sizeBytes) {
     if (sizeBytes == 0) return 0;
     // 8 bytes more for metadata; round up, and convert to i64
-    uint64_t size = (sizeBytes + 8 + 7) >> 3;  
+    uint64_t size = (sizeBytes + 8 + 7) >> 3;
     if (size < 3) size = 3;
     int index0;
     int result = tmmalloc_sizeClassRoundUp(size);
     index0 = result > 63 ? 63 : result;
     // return tmmalloc_larger(size, index0); 
-    if ((tmmalloc_levelBitmap & (1ULL << index0)) == 1) {
-        return tmmalloc_larger(size, index0);        
+    if ((tmmalloc_levelBitmap & (1ULL << index0)) != 0) {
+        return tmmalloc_larger(size, index0);
     }
     if (size <= 16) {
         if (tmmalloc_arenaRemaining < size) {
@@ -120,7 +120,7 @@ void* tmmalloc(size_t sizeBytes) {
         }
         if (tmmalloc_arenaRemaining >= size ) {
             uint64_t* result = tmmalloc_arenaStart;
-            // prev may be free already        
+            // prev may be free already
             uint64_t old = tmmalloc_arenaStart[0] >> 32 << 32;
             if (tmmalloc_arenaRemaining - size >= 3) {
                 tmmalloc_arenaStart[0] = old | (size << 1);
@@ -175,7 +175,7 @@ void* tmmalloc_larger(int size, int index0) {
 void tmfree(void* ptr) {
     if (ptr == 0) return;
     uint64_t* block = (uint64_t*) ptr;
-    block -= 1;    
+    block -= 1;
     uint64_t header = block[0];
     ASSERT((block[0] & 1) == 0);
     uint64_t size = (((1L << 32) - 1) & header) >> 1;
@@ -251,8 +251,26 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
             free(n);
         } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
 /* types */
+typedef struct i8_array i8_array;
+struct i8_array;
 typedef struct int_array int_array;
 struct int_array;
+struct i8_array {
+    int32_t len;
+    int32_t _refCount;
+    int8_t* data;
+};
+i8_array* i8_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
 struct int_array {
     int32_t len;
     int32_t _refCount;
@@ -274,13 +292,46 @@ int_array* int_array_new(uint64_t len) {
 int __argc;
 char **__argv;
 /* functions */
+int64_t idx_2(int64_t x, int64_t len);
+int64_t test_2(int64_t p, i8_array* data);
+void write_1(i8_array* d);
+void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
+void i8_array_free_0(i8_array* x) {
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void i8_array_free(i8_array* x) {
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void int_array_free(int_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
+}
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    return arrayOutOfBounds(x, len);
+}
+int64_t test_2(int64_t p, i8_array* data) {
+    while (p == 0) {
+        if (p <= 0) {
+            while (1) {
+                write_1(data);
+                break;
+            }
+        }
+        if (p > 1) {
+            write_1(data);
+        }
+        p = 1;
+    }
+    return p;
+}
+void write_1(i8_array* d) {
+    d->data[idx_2(0, _arrayLen(d))] = 1;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
@@ -306,5 +357,9 @@ void _main() {
         }
         break;
     }
+    i8_array* _t0 = i8_array_new(2);
+    int64_t _t1 = test_2(0, _t0);
+    ;
+    _decUseStack(_t0, i8_array);
     _end();
 }

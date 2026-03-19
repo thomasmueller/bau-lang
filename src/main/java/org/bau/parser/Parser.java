@@ -732,16 +732,17 @@ public class Parser {
                 throw syntaxError("Function does not return or throw");
             }
         }
-        if (Variable.DEBUG_VERSIONS && functionContext.blockList.isEmpty()) {
+        if (Variable.SSA_FORM && functionContext.blockList.isEmpty()) {
             BasicBlock header = functionContext.newBasicBlock();
             for (Variable v : currentFunctionDefinition.parameters) {
                 header.setVariableVersion(v.name(), 0);
             }
             functionContext.linkBasicBlocks(currentFunctionDefinition.list, header, null, null);
-            functionContext.printBasicBlocks();
             functionContext.setBasicBlocksVariableVersions();
-
-            functionContext.printBasicBlocks();
+            functionContext.optimizeSkipIncrementDecrementRefCounts(currentFunctionDefinition);
+            if (Variable.DEBUG_VERSIONS) {
+                functionContext.printBasicBlocks();
+            }
         }
 
         currentFunctionDefinition = null;

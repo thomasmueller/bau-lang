@@ -97,4 +97,27 @@ public class Return implements Statement {
         return expr.canThrowException();
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (expr != null) {
+            expr.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (expr != null) {
+            expr.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
+    @Override
+    public void skipIncrementDecrementRefCount(String varName) {
+        if (autoClose != null) {
+            for (Statement s : autoClose) {
+                s.skipIncrementDecrementRefCount(varName);
+            }
+        }
+    }
+
 }

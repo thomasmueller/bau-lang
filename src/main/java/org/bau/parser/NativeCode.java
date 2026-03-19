@@ -51,4 +51,8 @@ public class NativeCode implements Statement {
         return null;
     }
 
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+    }
+
 }

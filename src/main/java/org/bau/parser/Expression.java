@@ -65,7 +65,7 @@ public interface Expression {
 
     boolean containsModifiableVariables();
 
-    default void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
-    }
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock);
 
+    public void setVariableVersions(String name, int oldVersion, int newVersion);
 }

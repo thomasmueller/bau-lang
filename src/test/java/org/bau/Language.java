@@ -5,6 +5,23 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+skip ref count updates (skipIncrementDecrementRefCount) on:
+
+- assigned (moved) to another variable, and then not used laster:
+  no decrement / increment is needed
+  (would also work for method calls, but then the method needs to know this)
+
+- not moved or transfered at all: can be freed at the end (known dec of 1 => 0)
+
+- objects that don't escape: convert to ownership and call free
+
+- detect that one variable (or version of a variable) is an alias of another
+
+- "ownership forwarding":
+  for x = y, and y is never used later, x doesn't need in and y doesn't need dec
+
+- inc + dec and no escaping in-between (requires escape detection)
+
 r/C_Programming, r/compsci, r/compilers, r/embedded/
 
 limit exceptions: only one per function, can not catch locally,
@@ -14,15 +31,10 @@ try to estimate "complexity to learn"
 
 verify traits can be used in modules
 
-see why Keka is faster
-
 ownership improvements & refcount reduction
-SSO will help
 MayRetain, MayRelease, MayEscape
 currently we only trace "MayRelease"; also need "MayEscape" (may be stored somewhere)
 https://en.wikipedia.org/wiki/Effect_system
-
-SSA form
 
 support "nullable" / boxed value types. specially "string?", but then also "int?"
 

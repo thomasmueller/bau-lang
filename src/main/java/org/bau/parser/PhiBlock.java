@@ -26,10 +26,6 @@ a0: 1; a3 := a0; a1 := a0; while condition { a2: a1 + 1; a1 = a3 = a2 } a4: a3 +
  */
 public class PhiBlock implements Statement {
 
-    HashMap<String, Integer> current = new HashMap<>();
-    HashMap<String, Integer> latest = new HashMap<>();
-    HashMap<String, List<Integer>> versions = new HashMap<>();
-
     private BasicBlock basicBlock;
 
     @Override
@@ -67,24 +63,6 @@ public class PhiBlock implements Statement {
     public void used(Program program) {
     }
 
-    public void setCurrentVersion(String name, int version) {
-        current.put(name, version);
-    }
-
-    public Integer getCurrentVersion(String name) {
-        return current.get(name);
-    }
-
-    public void add(String name) {
-        versions.put(name, new ArrayList<Integer>());
-        current.put(name, -1);
-        latest.put(name, -1);
-    }
-
-    public List<Integer> getVersionList(String name) {
-        return versions.get(name);
-    }
-
     public void setBasicBlock(BasicBlock basicBlock) {
         this.basicBlock = basicBlock;
     }
@@ -92,6 +70,10 @@ public class PhiBlock implements Statement {
     @Override
     public DataType canThrowException() {
         return null;
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
 }

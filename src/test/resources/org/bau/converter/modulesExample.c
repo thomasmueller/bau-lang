@@ -23,7 +23,7 @@ static inline int _clzll(uint64_t x) {
 #endif
 }
 // malloc =============================
-#define ASSERT(A)   
+#define ASSERT(A)
 // #define ASSERT(A)   do{if(!(A)){printf("Assertion %s, line %d\n",#A,__LINE__);exit(1);}}while(0)
 size_t tmmalloc_nextAllocate = 32 * 1024 * 1024;
 int tmmalloc_arenaRemaining = 0;
@@ -94,14 +94,14 @@ void tmmalloc_freeAll() {
 void* tmmalloc(size_t sizeBytes) {
     if (sizeBytes == 0) return 0;
     // 8 bytes more for metadata; round up, and convert to i64
-    uint64_t size = (sizeBytes + 8 + 7) >> 3;  
+    uint64_t size = (sizeBytes + 8 + 7) >> 3;
     if (size < 3) size = 3;
     int index0;
     int result = tmmalloc_sizeClassRoundUp(size);
     index0 = result > 63 ? 63 : result;
     // return tmmalloc_larger(size, index0); 
-    if ((tmmalloc_levelBitmap & (1ULL << index0)) == 1) {
-        return tmmalloc_larger(size, index0);        
+    if ((tmmalloc_levelBitmap & (1ULL << index0)) != 0) {
+        return tmmalloc_larger(size, index0);
     }
     if (size <= 16) {
         if (tmmalloc_arenaRemaining < size) {
@@ -122,7 +122,7 @@ void* tmmalloc(size_t sizeBytes) {
         }
         if (tmmalloc_arenaRemaining >= size ) {
             uint64_t* result = tmmalloc_arenaStart;
-            // prev may be free already        
+            // prev may be free already
             uint64_t old = tmmalloc_arenaStart[0] >> 32 << 32;
             if (tmmalloc_arenaRemaining - size >= 3) {
                 tmmalloc_arenaStart[0] = old | (size << 1);
@@ -177,7 +177,7 @@ void* tmmalloc_larger(int size, int index0) {
 void tmfree(void* ptr) {
     if (ptr == 0) return;
     uint64_t* block = (uint64_t*) ptr;
-    block -= 1;    
+    block -= 1;
     uint64_t header = block[0];
     ASSERT((block[0] & 1) == 0);
     uint64_t size = (((1L << 32) - 1) & header) >> 1;

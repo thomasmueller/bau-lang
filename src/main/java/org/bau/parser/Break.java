@@ -86,7 +86,6 @@ public class Break implements Statement {
         }
     }
 
-
     @Override
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
@@ -104,6 +103,20 @@ public class Break implements Statement {
             after.addSuccessor(breakTarget);
         }
         return after;
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (condition != null) {
+            condition.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (condition != null) {
+            condition.setVariableVersions(name, oldVersion, newVersion);
+        }
     }
 
     @Override

@@ -169,4 +169,20 @@ public class Free implements Statement {
         return null;
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        var.setVariableVersions(functionContext, basicBlock);
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        var.setVariableVersions(name, oldVersion, newVersion);
+    }
+
+    @Override
+    public void skipIncrementDecrementRefCount(String varName) {
+        if (var.name().equals(varName)) {
+            var.skipIncrementDecrementRefCount = true;
+        }
+    }
 }

@@ -1,9 +1,14 @@
 package org.bau.parser;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class FunctionContext {
 
@@ -254,6 +259,79 @@ public class FunctionContext {
         for (BasicBlock b : blockList) {
             b.fillPhis();
         }
+        while (true) {
+            // try to remove trival phis
+            HashMap<String, int[]> map = new HashMap<>();
+            for (BasicBlock b : blockList) {
+                b.collectTrivialPhis(map);
+            }
+            if (map.isEmpty()) {
+                break;
+            }
+            for (BasicBlock b : blockList) {
+                b.removeTrivialPhis(map);
+            }
+        }
+        // additional
+        Set<String> varNames = new HashSet<>();
+        for (BasicBlock b : blockList) {
+            varNames.addAll(b.phiVersions.keySet());
+        }
+        for (String var : varNames) {
+            removeRedundantPhisForVar(var);
+        }
+    }
+
+    private void removeRedundantPhisForVar(String varName) {
+        Map<Integer, BasicBlock> versionToPhiBlock = new HashMap<>();
+        for (BasicBlock block : blockList) {
+            Integer outVer = block.phiVersions.get(varName);
+            if (outVer != null)
+                versionToPhiBlock.put(outVer, block);
+        }
+        Deque<BasicBlock> worklist = new ArrayDeque<>();
+        Set<BasicBlock> inWorklist = new HashSet<>();
+        for (BasicBlock block : blockList) {
+            if (block.phiVersions.containsKey(varName)) {
+                worklist.add(block);
+                inWorklist.add(block);
+            }
+        }
+        while (!worklist.isEmpty()) {
+            BasicBlock block = worklist.poll();
+            inWorklist.remove(block);
+            if (!block.phiVersions.containsKey(varName)) {
+                continue;
+            }
+            Set<Integer> outerVersions = block.collectOuterVersionsRecursively(
+                varName, new HashSet<>(Set.of(block)), versionToPhiBlock);
+            if (outerVersions.size() == 1) {
+                int oldVersion   = block.phiVersions.get(varName);
+                int newVersion = outerVersions.iterator().next();
+                for (BasicBlock b : blockList) {
+                    b.replaceVariableVersion(varName, oldVersion, newVersion);
+                }
+                replaceVersion(varName, oldVersion, newVersion,
+                               worklist, inWorklist);
+                versionToPhiBlock.remove(oldVersion);
+                block.phiVersions.remove(varName);
+                block.phiSources.remove(varName);
+            }
+        }
+    }
+
+    private void replaceVersion(
+            String varName, int oldVersion, int newVersion,
+            Deque<BasicBlock> worklist, Set<BasicBlock> inWorklist) {
+        for (BasicBlock b : blockList) {
+            Set<Integer> sources = b.phiSources.get(varName);
+            if (sources != null && sources.remove(oldVersion)) {
+                sources.add(newVersion);
+                // re-add into worklist: might now be redundant
+                if (b.phiVersions.containsKey(varName) && inWorklist.add(b))
+                    worklist.add(b);
+            }
+        }
     }
 
     public int nextVariableVersion(String name) {
@@ -271,6 +349,56 @@ public class FunctionContext {
 
     public ArrayList<BasicBlock> getCatchPredecessors() {
         return catchPredecessors;
+    }
+
+    public void optimizeSkipIncrementDecrementRefCounts(FunctionDefinition def) {
+        List<Statement> autoClose = def.autoClose;
+        for (int i = 0; i < autoClose.size(); i++) {
+            Statement s = autoClose.get(i);
+            if (s instanceof Free) {
+                Free free = (Free) s;
+                if (free.var.type() == def.returnType) {
+                    continue;
+                }
+                for (int j = 0; j < def.parameters.size(); j++) {
+                    if (def.varArgs && j == def.parameters.size() - 1) {
+                        // var arg array needs to be freed
+                        continue;
+                    }
+                    Variable p = def.parameters.get(j);
+                    String varName = free.var.name();
+                    if (p.name().equals(varName)) {
+                        if (countVersions(varName) == 1) {
+                            free.var.skipIncrementDecrementRefCount = true;
+                            skipIncrementDecrementRefCount(varName);
+                            p.skipIncrementDecrementRefCount = true;
+                        } else {
+                            System.out.println("versions: " + varName + " " + countVersions(varName));
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void skipIncrementDecrementRefCount(String varName) {
+        for (BasicBlock b : blockList) {
+            for(Statement s : b.list) {
+                s.skipIncrementDecrementRefCount(varName);
+            }
+        }
+    }
+
+    private int countVersions(String varName) {
+        HashSet<Integer> versions = new HashSet<>();
+        for (BasicBlock b : blockList) {
+            Integer v = b.localVersions.get(varName);
+            if (v != null) {
+                versions.add(v);
+            }
+        }
+        return versions.size();
     }
 
 }

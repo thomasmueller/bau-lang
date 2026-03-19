@@ -233,11 +233,6 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void incrementReassignCount() {
-        // ignore
-    }
-
-    @Override
     public List<Rule> getRules() {
         if ("len".equals(fieldName)) {
             Rule r = Solver.rule(Solver.variable(toString()), ">", Solver.number(0));
@@ -249,6 +244,24 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public boolean containsModifiableVariables() {
         return true;
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (base.type().isArray() && "len".equals(fieldName)) {
+            // array can't be re-assigned, so we don't need to set the version
+            return;
+        }
+        base.setVariableVersions(functionContext, basicBlock);
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (base.type().isArray() && "len".equals(fieldName)) {
+            // array can't be re-assigned, so we don't need to set the version
+            return;
+        }
+        base.setVariableVersions(name, oldVersion, newVersion);
     }
 
 }

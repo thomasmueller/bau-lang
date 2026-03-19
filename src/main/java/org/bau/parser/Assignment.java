@@ -305,7 +305,7 @@ public class Assignment implements Statement {
     }
 
     public void cloneVariable(Parser parser) {
-        if (!Variable.DEBUG_VERSIONS) {
+        if (!Variable.SSA_FORM) {
             return;
         }
         if (isConstant || isGlobalScope) {
@@ -323,6 +323,12 @@ public class Assignment implements Statement {
         leftValue = clone;
     }
 
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        leftValue.setVariableVersions(name, oldVersion, newVersion);
+        value.setVariableVersions(name, oldVersion, newVersion);
+    }
+
     public void convertToExpandedForm() {
         if (modify != null && (leftValue instanceof Variable)) {
             Variable v = (Variable) leftValue;
@@ -336,7 +342,6 @@ public class Assignment implements Statement {
     @Override
     public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
         value.setVariableVersions(functionContext, basicBlock);
-
         if (!(leftValue instanceof Variable)) {
             return;
         }

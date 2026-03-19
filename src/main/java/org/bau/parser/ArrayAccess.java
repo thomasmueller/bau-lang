@@ -239,13 +239,18 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void incrementReassignCount() {
-        // ignore
+    public boolean containsModifiableVariables() {
+        return base.containsModifiableVariables();
     }
 
     @Override
-    public boolean containsModifiableVariables() {
-        return base.containsModifiableVariables();
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        arrayIndex.setVariableVersions(functionContext, basicBlock);
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        arrayIndex.setVariableVersions(name, oldVersion, newVersion);
     }
 
 }

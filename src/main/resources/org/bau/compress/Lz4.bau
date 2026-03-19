@@ -211,7 +211,6 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         outPos += runLen
     return outPos
 
-
 fun hash5(data i8[], pos 0..data.len - 7) i32
     x : read8(data, pos)
     prime5bytes : 889523592379

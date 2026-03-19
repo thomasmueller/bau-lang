@@ -114,4 +114,13 @@ public class Catch implements Statement {
         return null;
     }
 
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        basicBlock.setVariableVersion(var.name(), var.getVersion());
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+    }
+
 }

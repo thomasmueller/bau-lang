@@ -26,8 +26,8 @@ which results in simple code and high productivity.
 | Benchmark    |  Bau |   C  |  Go  | Java |  Nim | PyPy | Rust | Swift| Vlang|  Zig |
 |--------------|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|
 | Binary Trees |  3.5 |  3.3 |  6.8 |  2.0 |  4.0 |  5.5 |  4.1 | 10.8 |  4.5 |  4.5 |
-| Fannkuch     |  1.4 |  1.5 |  1.5 |  1.8 |  1.5 |  3.7 |  1.4 |  1.7 |  1.5 |  1.6 |
-| SpeedTest    |  1.2 |  1.2 |  1.9 |  2.7 |  1.6 | 10.2 |  1.2 |  1.4 |  1.3 |  1.2 |
+| Fannkuch     |  1.5 |  1.5 |  1.5 |  1.8 |  1.5 |  3.7 |  1.4 |  1.7 |  1.5 |  1.6 |
+| SpeedTest    |  1.3 |  1.2 |  1.9 |  2.7 |  1.6 | 10.2 |  1.2 |  1.4 |  1.3 |  1.2 |
 | Pi Digits    |  1.3 |  0.4 |  0.6 |  1.9 | 24.0 |  1.4 |  1.0 |  5.0 |  3.2 |  3.1 |
 | Mandelbrot   |  1.8 |  1.8 |  1.8 |  2.1 |  1.9 |  9.8 |  2.0 |  9.8 |  1.8 |  9.4 |
 
@@ -83,7 +83,7 @@ It is sometimes slower, and sometimes faster, than Java, Go, and Rust.
  * Go: Version 1.25.2 darwin/arm64 is use.
  * Java: OpenJDK version 25 2025-09-16 is used.
  * Nim: Version 2.2.4 is used.
- * Python: PyPy is used; CPython is around 10 times slower. The version used is PyPy 7.3.17 with GCC Apple LLVM 16.0.0.
+ * Python: PyPy is used here, even thought it is not supported by all frameworks; CPython is around 10 times slower. The version used is PyPy 7.3.17 with GCC Apple LLVM 16.0.0.
  * Rust: RustC version 1.90.0 is used.
  * Swift: Apple Swift version 6.1.2 is used.
  * Vlang: Version 0.4.12 is used. Notice that V used the <a href="https://en.wikipedia.org/wiki/Boehm_garbage_collector">Boehm GC library</a>.
