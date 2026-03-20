@@ -1,4 +1,4 @@
-# Language Integrated Query
+# Language Integrated Query
 
 Support for language integrated query is work in progress.
 Here the implementation and usage of what is currently working:
