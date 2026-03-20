@@ -25,10 +25,10 @@ fun HashMap(K, V) put(hash int, key K, value V)
                 this.put(oh[i], ok[i], ov[i])
     p := hash & (keys.len - 1)
     loop
-        if hashes[p] = hash and key.equals(keys[p])
+        if hashes[p] == hash and key.equals(keys[p])
             values[p] = value
             return
-        elif hashes[p] = 0
+        elif hashes[p] == 0
             size += 1
             keys[p] = key
             hashes[p] = hash
@@ -39,19 +39,19 @@ fun HashMap(K, V) put(hash int, key K, value V)
 fun HashMap(K, V) get(hash int, key K) V?
     p := hash & (keys.len - 1)
     loop
-        if hashes[p] = 0
+        if hashes[p] == 0
             return values[p]
-        elif hashes[p] = hash and key.equals(keys[p])
+        elif hashes[p] == hash and key.equals(keys[p])
             return values[p]
         p = (p + 1) & (keys.len - 1)
 
 fun HashMap(K, V) remove(hash int, key K) int
     p := hash & (keys.len - 1)
     loop
-        if hashes[p] = 0
+        if hashes[p] == 0
             # not found
             return 0
-        elif hashes[p] = hash and key.equals(keys[p])
+        elif hashes[p] == hash and key.equals(keys[p])
             keys[p] = 0
             hashes[p] = 0
             values[p] = 0
@@ -61,7 +61,7 @@ fun HashMap(K, V) remove(hash int, key K) int
     p2 := (p + 1) & (keys.len - 1)
     loop
         h2 := hashes[p2]
-        break h2 = 0
+        break h2 == 0
         pb := h2 & (keys.len - 1)
         canMove := 0
         if pb <= p2

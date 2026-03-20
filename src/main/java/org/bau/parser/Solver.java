@@ -75,7 +75,7 @@ public class Solver {
             return isTrue(r2);
         }
         switch (rule.type) {
-        case "=":
+        case "==":
             return r == Result.EQUAL;
         case ">=":
             return r == Result.EQUAL || r == Result.LARGER;
@@ -113,13 +113,13 @@ public class Solver {
         if (r.global && parentSolver != null) {
             parentSolver.addRule(r);
         }
-//        if (r.type.equals("=") || r.type.equals("<>")) {
+//        if (r.type.equals("==") || r.type.equals("<>")) {
 //            // remove previous assignments, if they are values
 //            if (r.right instanceof Number) {
 //                for (int i = 0; i < rules.size(); i++) {
 //                    Rule r0 = rules.get(i);
 //                    if (r0.left.equals(r.left) || r0.right.equals(r.left)) {
-////                        if (r0.always || (!r0.type.equals("<>") && !r0.type.equals("="))) {
+////                        if (r0.always || (!r0.type.equals("<>") && !r0.type.equals("=="))) {
 ////                            continue;
 ////                        }
 //                        rules.remove(i);
@@ -142,7 +142,7 @@ public class Solver {
             long ln = ((Number) r.left).value;
             long rn = ((Number) r.right).value;
             switch (r.type) {
-            case "=":
+            case "==":
                 return ln == rn;
             case "<":
                 return ln < rn;
@@ -267,7 +267,7 @@ public class Solver {
                 if (r2 == null) {
                     continue;
                 }
-                if (r2.type.equals("=")) {
+                if (r2.type.equals("==")) {
                     if (!target.contains(r2.right)) {
                         target.add(r2.right);
                         addAllEqualExpr(r2.right, target);
@@ -313,14 +313,14 @@ public class Solver {
                     return true;
                 }
                 // equal or same comparison direction
-                if ("=".equals(r2.type) ||
+                if ("==".equals(r2.type) ||
                         type.equals(r2.type) ||
                         (type + "=").equals(r2.type)) {
                     if (r2.right instanceof Variable) {
                         alternativeVars.add((Variable) r2.right);
                     } else if (r2.right instanceof Operation) {
                         if (recursionDepth < 1) {
-                            // if we test for, "b >= ..." and find "b = (a + 1)"
+                            // if we test for, "b >= ..." and find "b == (a + 1)"
                             // then we can test for "(a + 1) >= ..." instead,
                             // solving for "a".
                             // this is "a >= -1", and then test for that.
@@ -377,7 +377,7 @@ public class Solver {
         Result r = e1.compareTo(e2);
         if (t1.equals(t2)) {
             switch (t1) {
-            case "=":
+            case "==":
                 return r == Result.EQUAL;
             case ">=":
                 return r == Result.SMALLER || r == Result.EQUAL;
@@ -391,7 +391,7 @@ public class Solver {
         switch (t1) {
         case ">=":
             switch (t2) {
-            case "=":
+            case "==":
                 return r == Result.SMALLER || r == Result.EQUAL;
             }
             break;
@@ -399,7 +399,7 @@ public class Solver {
             switch (t2) {
             case "<":
                 return r == Result.EQUAL;
-            case "=":
+            case "==":
                 return r == Result.LARGER || r == Result.EQUAL;
             }
             break;
@@ -500,7 +500,7 @@ public class Solver {
 
     public static String reverse(String type) {
         switch (type) {
-        case "=":
+        case "==":
         case "<>":
             return type;
         case ">":
@@ -563,7 +563,7 @@ public class Solver {
             result.left = left;
             result.right = right;
             switch (type) {
-            case "=":
+            case "==":
                 result.type = "<>";
                 break;
             case "<":
@@ -579,7 +579,7 @@ public class Solver {
                 result.type = ">";
                 break;
             case "<>":
-                result.type = "=";
+                result.type = "==";
                 break;
             default:
                 throw new IllegalArgumentException();

@@ -47,7 +47,7 @@ Here the implementation and usage of what is currently working:
     fun main()
         for i := until(3)
             query : newQuery(Address).
-                where(it.id = i and it.name.len < 20).
+                where(it.id == i and it.name.len < 20).
                 orderBy(it.name).then(it.id)
             println(query.name)
             println(query.condition)

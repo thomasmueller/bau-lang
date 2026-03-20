@@ -48,7 +48,7 @@ fun indexOf1(s i8[], find i8[]) int
     for i := until(s.len - find.len + 1)
         j := 0
         loop
-            if j = find.len
+            if j == find.len
                 return i
             break s[i + j] <> find[j]
             j += 1
@@ -139,7 +139,7 @@ fun str(s i8[]) string
 fun split(s i8[], delimiter i8[]) List(string)
     list := newList(string)
     next := indexOf(s, delimiter)
-    if delimiter.len = 0 or next < 0
+    if delimiter.len == 0 or next < 0
         list.add(str(s))
         return list
     index := 0

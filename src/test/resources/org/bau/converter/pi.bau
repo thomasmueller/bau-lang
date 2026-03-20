@@ -18,7 +18,7 @@ fun main()
         eliminateDigit(d)
         buff[i % 10] = ord('0') + d
         i += 1
-        if i % 10 = 0
+        if i % 10 == 0
             println(buff ' : ' i)
 
 acc bigInt := 0

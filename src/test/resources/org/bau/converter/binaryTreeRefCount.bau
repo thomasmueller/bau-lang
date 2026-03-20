@@ -43,7 +43,7 @@ fun count(depth int) int
     return c
 
 fun with(depth int) Tree
-    if depth = 0
+    if depth == 0
         return Tree(null, null)
     return Tree(with(depth - 1), with(depth - 1))
 

@@ -27,10 +27,10 @@ fun HashMap(K, V) put(key K, value V)
     hash : key.hashCode()
     p := hash & (keys.len - 1)
     loop 1
-        if hashes[p] = hash and key.equals(keys[p])
+        if hashes[p] == hash and key.equals(keys[p])
             values[p] = value
             return
-        elif hashes[p] = 0
+        elif hashes[p] == 0
             size += 1
             keys[p] = key
             hashes[p] = hash
@@ -42,9 +42,9 @@ fun HashMap(K, V) get(key K) V
     hash : key.hashCode()
     p := hash & (keys.len - 1)
     loop 1
-        if hashes[p] = 0
+        if hashes[p] == 0
             return values[p]
-        elif hashes[p] = hash and key.equals(keys[p])
+        elif hashes[p] == hash and key.equals(keys[p])
             return values[p]
         p = (p + 1) & (keys.len - 1)
 
@@ -52,10 +52,10 @@ fun HashMap(K, V) remove(key K) int
     hash : key.hashCode()
     p := hash & (keys.len - 1)
     loop 1
-        if hashes[p] = 0
+        if hashes[p] == 0
             # not found
             return 0
-        elif hashes[p] = hash and key.equals(keys[p])
+        elif hashes[p] == hash and key.equals(keys[p])
             keys[p] = null
             hashes[p] = 0
             values[p] = null
@@ -65,7 +65,7 @@ fun HashMap(K, V) remove(key K) int
     p2 := (p + 1) & (keys.len - 1)
     loop 1
         h2 := hashes[p2]
-        break h2 = 0
+        break h2 == 0
         pb := h2 & (keys.len - 1)
         canMove := 0
         if pb <= p2
@@ -133,10 +133,10 @@ type str
     value i8[]
   
 fun int equals(other int) int
-    return this = other
+    return this == other
 
 fun str equals(other str) int
-    return this.value.len = other.value.len
+    return this.value.len == other.value.len
 
 fun str hashCode() int
     return hashCode(this.value)

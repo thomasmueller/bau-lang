@@ -18,7 +18,7 @@ fun arithmeticRightShift(x int, n int) const int
 fun numberOfLeadingZeros(x int) const int
     native(`return x == 0 ? 64 : _clzll(x);`)
     if x <= 0
-        return when(x = 0, 64, 0)
+        return when(x == 0, 64, 0)
     n := 63
     shift := 32
     loop shift > 0
@@ -39,12 +39,12 @@ fun bitCountI32(x i32) const int
     
 fun numberOfTrailingZeros(x int) const int
     native(`return x == 0 ? 64 : _ctzll(x);`)
-    if x = 0
+    if x == 0
         return 64
     return bitCount(x ^ (x - 1)) - 1
 
 fun divUnsignedOr0(dividend int, divisor int) int
-    if divisor = 0
+    if divisor == 0
         return 0
     # From Hacker's Delight
     if divisor < 0
@@ -56,7 +56,7 @@ fun divUnsignedOr0(dividend int, divisor int) int
 fun compareUnsigned(a int, b int) int
     a += 0x8000000000000000
     b += 0x8000000000000000
-    if a = b
+    if a == b
         return 0
     if a < b
         return -1
@@ -83,7 +83,7 @@ fun powInt(base int, exponent int) const int
     result := 1
     b := base
     loop exponent > 0
-        if (exponent & 1) = 1
+        if (exponent & 1) == 1
             result *= b
             if result > (1 << 31) or result < -(1 << 31)
                 return -1
@@ -104,7 +104,7 @@ fun sqrtInt(x int) const int
         if t > x or t < 0
             g ^= c
         c >>= 1
-        break c = 0
+        break c == 0
         g |= c
     return g
 
@@ -112,7 +112,7 @@ fun isInt(value i8[]) int
     if value.len
         i := 0
         digit := 0
-        if value[0] = ord('-')
+        if value[0] == ord('-')
             i += 1
         loop i < value.len
             n : value[i]
@@ -129,7 +129,7 @@ fun parseInt(value i8[]) int
     sign := 1
     if value.len
         i := 0
-        if value[0] = ord('-')
+        if value[0] == ord('-')
             sign = -1
             i += 1
         loop i < value.len
@@ -177,7 +177,7 @@ fun appendInt(n int, buff i8[], pos int) int
             return pos
         if pos < 0
             return 0
-        break n = 0
+        break n == 0
         p = pos
     end : pos
     Arrays.reverse(buff, start, p)
@@ -196,7 +196,7 @@ fun intToString(n int) i8[]
 # throws an exception if the string does not match [0-9]+
 fun parsePositiveInt(s i8[]) int throws exception
     result := 0
-    if s.len = 0
+    if s.len == 0
         throw exception(s)
     for i := until(s.len)
         c : s[i]

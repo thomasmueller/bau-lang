@@ -62,7 +62,7 @@ fun File readFully(buffer i8[], pos int, len int) int
     count := 0
     loop
         l := this.read(buffer, count + pos, len - count)
-        if l = 0
+        if l == 0
             return count
         else
             count += l
@@ -101,7 +101,7 @@ fun readLine(maxSize int) i8[]
             len = strlen((char*) buffer->data);
         }
     ```)
-    if len and buffer[len - 1] = ord('\n')
+    if len and buffer[len - 1] == ord('\n')
         data: i8[len - 1]
         for i := until(len - 1)
             data[i] = buffer[i]

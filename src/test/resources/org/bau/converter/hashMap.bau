@@ -3,7 +3,7 @@ import org.bau.HashMap
     mix
 
 fun int equals(o int) int
-    return this = o
+    return this == o
 
 fun main()
     map : newHashMap(int, int)

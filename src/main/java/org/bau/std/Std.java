@@ -183,7 +183,7 @@ public class Std {
         String type = "fun until(lessThan int) 0 .. lessThan\n"
                 + "  if lessThan > 0\n"
                 + "    _ := 0 .. lessThan\n"
-                + "    loop 1 = 1\n"
+                + "    loop\n"
                 + "      return _\n"
                 + "      _next : _ + 1\n"
                 + "      break _next >= lessThan\n"

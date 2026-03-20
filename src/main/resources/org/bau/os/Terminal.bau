@@ -134,15 +134,15 @@ fun readEditorKey() int
         if key <> keyCode.ESC
             return key
         e0 : readByte()
-        if e0 = 0
+        if e0 == 0
             return key
         e1 : readByte()
-        if e1 = 0
+        if e1 == 0
             return key
-        if e0 = ord('O')
-            if e1 = ord('H')
+        if e0 == ord('O')
+            if e1 == ord('H')
                 return keyCode.HOME_KEY
-            elif e1 = ord('F')
+            elif e1 == ord('F')
                 return keyCode.END_KEY
             return key
         if e0 <> ord('[')

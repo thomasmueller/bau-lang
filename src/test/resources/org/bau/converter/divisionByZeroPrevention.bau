@@ -2,7 +2,7 @@ import org.bau.Exception
     exception
 
 fun divisionByZeroThrow(sum int, count int) int throws exception
-    if count = 0
+    if count == 0
         throw exception('Can not get the average with count 0')
     z : sum / count
     println('throw: ' z)
@@ -12,7 +12,7 @@ fun divisionByZeroContinue()
     y := -1
     loop y < 2
         y += 1
-        if y = 0
+        if y == 0
             continue
         z := 10 / y
         println('cont: ' z)
@@ -21,7 +21,7 @@ fun divisionByZeroContinue2()
     y := -1
     loop y < 2
         y += 1
-        continue y = 0
+        continue y == 0
         z := 10 / y
         println('cont2: ' z)
 
@@ -29,7 +29,7 @@ fun divisionByZeroBreak()
     y := -1
     loop y < 2
         y += 1
-        if y = 0
+        if y == 0
             break
         z := 10 / y
         println('break: ' z)
@@ -38,7 +38,7 @@ fun divisionByZeroBreak2()
     y := -1
     loop y < 2
         y += 1
-        break y = 0
+        break y == 0
         z := 10 / y
         println('break2: ' z)
 
@@ -46,7 +46,7 @@ fun divisionByZeroReturn()
     y := -1
     loop y < 2
         y += 1
-        if y = 0
+        if y == 0
             return
         z := 10 / y
         println('ret: ' z)

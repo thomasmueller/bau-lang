@@ -28,7 +28,7 @@ public class TestFor {
     @Test
     public void forLoop() {
         assertEquals("""
-loop 1 = 1
+loop 1 == 1
     a := 0
     loop a < 10
         println(a)

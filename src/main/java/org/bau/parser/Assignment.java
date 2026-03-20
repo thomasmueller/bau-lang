@@ -60,13 +60,13 @@ public class Assignment implements Statement {
                     r.depth = depth;
                     solver.addRule(r);
                 } else {
-                    Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "=", Operation.toSolverExpr(value));
+                    Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "==", Operation.toSolverExpr(value));
                     if (r.isComplete()) {
                         solver.addRule(r);
                     }
                 }
             } else {
-                Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "=", Operation.toSolverExpr(value));
+                Solver.Rule r = Solver.rule(Operation.toSolverExpr(leftValue), "==", Operation.toSolverExpr(value));
                 if (r.isComplete()) {
                     solver.addRule(r);
                 }
@@ -247,7 +247,7 @@ public class Assignment implements Statement {
                 New n = (New) value;
                 v.setConstantLength(n.arrayLength);
                 FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
-                Solver.Rule r = Operation.toRule(f, "=", n.arrayLength);
+                Solver.Rule r = Operation.toRule(f, "==", n.arrayLength);
                 if (r != null) {
                     r.always = true;
                     r.global = v.global();
@@ -258,7 +258,7 @@ public class Assignment implements Statement {
                 NumberValue len = new NumberValue(n.array.len(), DataType.INT_TYPE, false);
                 v.setConstantLength(len);
                 FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
-                Solver.Rule r = Operation.toRule(f, "=", len);
+                Solver.Rule r = Operation.toRule(f, "==", len);
                 if (r != null) {
                     r.always = true;
                     r.global = v.global();
@@ -269,7 +269,7 @@ public class Assignment implements Statement {
                 NumberValue len = new NumberValue(n.len(), DataType.INT_TYPE, false);
                 v.setConstantLength(len);
                 FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
-                Solver.Rule r = Operation.toRule(f, "=", len);
+                Solver.Rule r = Operation.toRule(f, "==", len);
                 if (r != null) {
                     r.always = true;
                     r.global = v.global();
@@ -280,7 +280,7 @@ public class Assignment implements Statement {
                 v.copyConstant(v2);
                 FieldAccess f1 = new FieldAccess(v2, "len", DataType.INT_TYPE);
                 FieldAccess f2 = new FieldAccess(v, "len", DataType.INT_TYPE);
-                Solver.Rule r = Operation.toRule(f1, "=", f2);
+                Solver.Rule r = Operation.toRule(f1, "==", f2);
                 if (r != null) {
                     r.always = true;
                     r.global = v.global();
@@ -295,7 +295,7 @@ public class Assignment implements Statement {
             r.always = true;
             solver.addRule(r);
         } else {
-            Solver.Rule r = Operation.toRule(v, "=", value);
+            Solver.Rule r = Operation.toRule(v, "==", value);
             if (r != null) {
                 r.always = true;
                 r.global = v.global();

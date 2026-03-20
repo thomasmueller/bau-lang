@@ -25,7 +25,7 @@ fun isMunchausen(number int) int
         if total > number
             return 0
         n /= 10
-    return total = number
+    return total == number
 
 LIMIT : 4400
 cache : getCache()

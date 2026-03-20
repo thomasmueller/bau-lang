@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-03-20: Equality tests now use `==` instead of `=` for clarity.
 * 2026-03-20: Work-in-progress: <a href="docsrc/linq.md">support for LINQ</a>.
 * 2026-03-20: Support for map/filter (list comprehension) on generic types.
 * 2026-03-03: Owned types are now declared just using "owned". A type is now owned or not (previously, both versions where available).
@@ -59,7 +60,7 @@ Control flow
 Assignment, comparison, operations
 * `:` constant, `:=` variable
 * `=` `+=` `-=` `*=` `/=` etc. update
-* `=` `<` `>` `<=` `>=` `<>`
+* `==` `<` `>` `<=` `>=` `<>`
 * `and` `or` `not` `+` `-` `*` `/` `%`
 * `&` `|` `^` `~` `<<` `>>` bitwise
 
@@ -113,9 +114,9 @@ Spaces group statements into blocks.
 `elif` (else if) and `else` are optional.
 At expression level, `=` compares values.
 
-    if a = 0
+    if a == 0
         println('zero')
-    elif a = 1
+    elif a == 1
         println('one')
     else
         println('many')
@@ -149,7 +150,7 @@ They may have a condition:
 
     # prints 1 to 4
     for i := range(1, 10)
-        break i = 5
+        break i == 5
         println(i)
 
 ### Comments
@@ -458,7 +459,7 @@ Division by zero is not possible at runtime.
 
     # does compile
     fun average(sum int, count int) int
-        if count = 0
+        if count == 0
             return 0
         return sum / count
 

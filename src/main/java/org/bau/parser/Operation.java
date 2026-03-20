@@ -135,7 +135,7 @@ public class Operation implements Expression {
         case "or":
         case "not":
             return DataType.INT_TYPE;
-        case "=":
+        case "==":
         case "<>":
             if (left instanceof NullValue || right instanceof NullValue) {
                 return DataType.INT_TYPE;
@@ -228,7 +228,7 @@ public class Operation implements Expression {
         case "<=":
             result = l.longValue() <= r.longValue() ? 1 : 0;
             break;
-        case "=":
+        case "==":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
                 if (l instanceof Value.ValueRef && l.get().longValue() == 0) {
                     l = ValueNull.INSTANCE;
@@ -305,7 +305,7 @@ public class Operation implements Expression {
         case "<=":
             longResult = l.doubleValue() <= r.doubleValue() ? 1 : 0;
             break;
-        case "=":
+        case "==":
             if (l == ValueNull.INSTANCE || r == ValueNull.INSTANCE) {
                 if (l instanceof Value.ValueRef && l.get().longValue() == 0) {
                     l = ValueNull.INSTANCE;
@@ -429,7 +429,7 @@ public class Operation implements Expression {
         } else if ("or".equals(op)) {
             return "(" + left.toC() + ") || (" + right.toC() + ")";
         }
-        if ("=".equals(op)) {
+        if ("==".equals(op)) {
             op = "==";
         } else if ("<>".equals(op)) {
             op = "!=";
@@ -503,7 +503,7 @@ public class Operation implements Expression {
 
     public static boolean isComparison(String operator) {
         switch(operator) {
-        case "=":
+        case "==":
         case "<>":
         case "<=":
         case ">=":
@@ -533,7 +533,7 @@ public class Operation implements Expression {
         case "&":
         case "|":
             return 40;
-        case "=":
+        case "==":
         case "<>":
         case "<=":
         case ">=":
@@ -636,7 +636,7 @@ public class Operation implements Expression {
             list.addAll(left.getRules());
             list.addAll(right.getRules());
             break;
-        case "=":
+        case "==":
         case "<=":
         case ">=":
         case "<":

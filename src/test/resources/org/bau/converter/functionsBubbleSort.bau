@@ -9,7 +9,7 @@ fun bubbleSort(T type, array T..)
                 array[i + 1] = tmp
                 swapped = 1
         n -= 1
-        break swapped = 0
+        break swapped == 0
     for i:= until(array.len)
         println(array[i])
 

@@ -163,7 +163,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public void setOwnedBoundsToNull(Solver solver, int depth, boolean loop) {
         if (type != null && type.memoryType() == MemoryType.OWNER) {
-            Solver.Rule r = Operation.toRule(this, "=", NumberValue.ZERO);
+            Solver.Rule r = Operation.toRule(this, "==", NumberValue.ZERO);
             r.depth = depth;
             solver.removeRulesFor(r.left);
             solver.addRule(r);

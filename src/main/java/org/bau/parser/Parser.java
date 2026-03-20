@@ -2501,7 +2501,7 @@ public class Parser {
                 Expression condition = null;
                 while (true) {
                     Expression caseExpr = parseExpression();
-                    Expression cond = new Operation(switchExpr, "=", caseExpr);
+                    Expression cond = new Operation(switchExpr, "==", caseExpr);
                     if (condition == null) {
                         condition = cond;
                     } else {
@@ -2706,10 +2706,10 @@ public class Parser {
         }
         Operation comp = new Operation(
                 new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false),
-                "=",
+                "==",
                 new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
                 );
-        comp.operator = "=";
+        comp.operator = "==";
         Variable var = new Variable(variableName, call.type());
         if (var.type().isRange()) {
             setRangeBounds(var);
@@ -2923,7 +2923,7 @@ public class Parser {
             loop.list.add(b);
             loop.condition = new Operation(
                     new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false),
-                    "=",
+                    "==",
                     new NumberValue(new Value.ValueInt(1), program.getType(null, DataType.INT), false)
                     );
         }
@@ -3722,7 +3722,7 @@ public class Parser {
         assign.type = type;
         assign.leftValue = var;
         assign.value = expr;
-        Solver.Rule r = Operation.toRule(var, "=", expr);
+        Solver.Rule r = Operation.toRule(var, "==", expr);
         if (r != null) {
             r.depth = depth;
             r.always = true;

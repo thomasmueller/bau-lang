@@ -224,7 +224,7 @@ fun At run(programCode i8[]) string
         e : program.get(i)
         if e
             result = runExpr(e)
-    if out.data.len = 0 and result.list.size > 0
+    if out.data.len == 0 and result.list.size > 0
         out.append(convertToString(result).data)
     return str(out.data)
 
@@ -232,17 +232,17 @@ fun At parseExpr(min int) Expr
     prim := parsePrimary()
     loop
         power := -1
-        if token.data.len = 0
+        if token.data.len == 0
             return prim
         op := newExpr(OPERATION, token.data, valueOf(0))
         op.list.add(prim)
         right := 1
-        if token.charAt(0) = ord(':')
+        if token.charAt(0) == ord(':')
             if op.list.array[0].exprType <> VARIABLE and op.list.array[0].name.charAt(0) <> ord('.')
                 return prim
             power = 10
             right = -1
-        elif token.charAt(0) = ord('.')
+        elif token.charAt(0) == ord('.')
             power = 60
         elif token.charAt(0) < ord('a') or token.charAt(0) > ord('z')
             power = int(operator(token, 1, 0, 0))
@@ -255,7 +255,7 @@ fun At parseExpr(min int) Expr
 
 fun At parsePrimary() Expr
     v : value
-    if token.data.len = 0
+    if token.data.len == 0
         return newExpr(LITERAL, '', valueOf(0))
     elif match('@', 'while')
         e := newExpr(LOOP, '', valueOf(0))
@@ -291,7 +291,7 @@ fun At parsePrimary() Expr
         return e
     elif match('{', '{')
         e := newExpr(BLOCK, '', valueOf(0))
-        loop match('}', '}') = 0 and pos < code.data.len
+        loop match('}', '}') == 0 and pos < code.data.len
             e.list.add(parseExpr(0))
             match(';', ';')
         return e
@@ -302,7 +302,7 @@ fun At parsePrimary() Expr
         id = str('>')
     else
         read()
-    if (hasFunction(id) or id.charAt(0) = ord('>')) and match('(', '(')
+    if (hasFunction(id) or id.charAt(0) == ord('>')) and match('(', '(')
         e := newExpr(CALL, id.data, valueOf(0))
         loop (not match(')', ')')) and pos < code.len()
             e.list.add(parseExpr(0))
@@ -320,7 +320,7 @@ fun At read()
     token = str('')
     loop pos < code.data.len
         c : code.charAt(pos)
-        if c = ord(' ') or c = ord('\n')
+        if c == ord(' ') or c == ord('\n')
             pos += 1
         else
             break
@@ -328,11 +328,11 @@ fun At read()
         return
     start : pos
     c := code.charAt(pos)
-    if (c >= ord('a') and c <= ord('z')) or (c >= ord('A') and c <= ord('Z')) or c = ord('_')
+    if (c >= ord('a') and c <= ord('z')) or (c >= ord('A') and c <= ord('Z')) or c == ord('_')
         pos += 1
         loop pos < code.data.len
             c = code.charAt(pos)
-            if (c >= ord('a') and c <= ord('z')) or (c >= ord('A') and c <= ord('Z')) or c = ord('_') or (c >= ord('0') and c <= ord('9'))
+            if (c >= ord('a') and c <= ord('z')) or (c >= ord('A') and c <= ord('Z')) or c == ord('_') or (c >= ord('0') and c <= ord('9'))
                 pos += 1
             else
                 break
@@ -346,7 +346,7 @@ fun At read()
             if c >= ord('0') and c <= ord('9')
                 v = v * 10 + float(c - ord('0'))
                 div *= 10
-            elif c = ord('.') and div = 0
+            elif c == ord('.') and div == 0
                 div = 1
             else
                 break
@@ -355,11 +355,11 @@ fun At read()
             v /= div
         value = valueOf(v)
         token = str('0')
-    elif c = ord('\'')
+    elif c == ord('\'')
         pos += 1
         value = Value(newList(float))
         loop
-            if pos >= code.len() or code.charAt(pos) = ord('\'')
+            if pos >= code.len() or code.charAt(pos) == ord('\'')
                 pos += 1
                 break pos >= code.len() or code.charAt(pos) <> ord('\'')
             value.list.add(float(code.charAt(pos)))
@@ -371,9 +371,9 @@ fun At read()
         pos += 1
         if pos < code.data.len
             c = code.charAt(pos)
-            if (first = ord('<') and (c = ord('<') or c = ord('=') or c = ord('>'))) or 
-                    (first = ord('*') and c = ord('*')) or 
-                    (first = ord('>') and (c = ord('=') or c = ord('>')))
+            if (first == ord('<') and (c == ord('<') or c == ord('=') or c == ord('>'))) or 
+                    (first == ord('*') and c == ord('*')) or 
+                    (first == ord('>') and (c == ord('=') or c == ord('>')))
                 pos += 1
         token = code.substring(start, pos)
 
@@ -384,9 +384,9 @@ fun valueOf(v float) Value
     return Value(list)
 
 fun convertToString(array Value) string
-    if array.len() = 1
+    if array.len() == 1
         x : array.get(0)
-        if x = int(x)
+        if x == int(x)
             return str(intToString(int(x)))
         return str(floatToString(x))
     buff := StringBuilder(i8[16])
@@ -400,11 +400,11 @@ fun convertToString(array Value) string
 
 fun At runExpr(expr Expr) Value
     result := valueOf(0)
-    if expr = null
+    if expr == null
         return result
-    if expr.exprType = LITERAL
+    if expr.exprType == LITERAL
         result = expr.value
-    elif expr.exprType = VARIABLE
+    elif expr.exprType == VARIABLE
         map := global
         if expr.name.charAt(0) > ord('Z')
             map = local
@@ -413,41 +413,41 @@ fun At runExpr(expr Expr) Value
             result = r
         else
             result = valueOf(0)
-    elif expr.exprType = IF
+    elif expr.exprType == IF
         cond : runExpr(expr.list.get(0))
         if int(cond.get(0)) <> 0
             result = runExpr(expr.list.get(1))
         elif expr.list.len() > 2
             result = runExpr(expr.list.get(2))
-    elif expr.exprType = REPEAT
+    elif expr.exprType == REPEAT
         c : int(runExpr(expr.list.get(0)).list.get(0))
         for i := until(c)
             break hasReturnValue or counter <= 0
             counter -= 1
             put(local, str('_'), valueOf(float(i)))
             result = runExpr(expr.list.get(1))
-    elif expr.exprType = LOOP
+    elif expr.exprType == LOOP
         loop
-            break int(runExpr(expr.list.get(0)).get(0)) = 0 
+            break int(runExpr(expr.list.get(0)).get(0)) == 0 
             break hasReturnValue or counter <= 0
             counter -= 1
             result = runExpr(expr.list.get(1))
-    elif expr.exprType = RETURN
+    elif expr.exprType == RETURN
         result = runExpr(expr.list.get(0))
         returnValue = result
         hasReturnValue = 1
-    elif expr.exprType = CALL
-        if expr.name.charAt(0) = ord('>')
+    elif expr.exprType == CALL
+        if expr.name.charAt(0) == ord('>')
             for i := until(expr.list.len())
                 out.append(convertToString(runExpr(expr.list.get(i))).data)
             out.append('\n')
         else
             result = call(expr.name, expr.list.array)
-    elif expr.exprType = BLOCK
+    elif expr.exprType == BLOCK
         for i := until(expr.list.len())
             result = runExpr(expr.list.get(i))
             break hasReturnValue
-    elif expr.exprType = LIST
+    elif expr.exprType == LIST
         totalLen := 0
         for i := until(expr.list.len())
             break hasReturnValue
@@ -459,21 +459,21 @@ fun At runExpr(expr Expr) Value
             r : runExpr(expr.list.get(i))
             for j := until(r.list.len())
                 result.list.add(r.list.get(j))
-        if result.list.size = 0
+        if result.list.size == 0
             result = valueOf(0)
-    elif expr.exprType = OPERATION
+    elif expr.exprType == OPERATION
         left : expr.list.get(0)
         right : expr.list.get(1)
         if not left
             return valueOf(0)
         if not right
             return valueOf(0)
-        if expr.name.charAt(0) = ord(':')
+        if expr.name.charAt(0) == ord(':')
             name := str('')
             arrayIndex Expr? := null
-            if left.exprType = VARIABLE
+            if left.exprType == VARIABLE
                 name = left.name
-            elif left.exprType = OPERATION and left.name.charAt(0) = ord('.')
+            elif left.exprType == OPERATION and left.name.charAt(0) == ord('.')
                 name = left.list.get(0).name
                 arrayIndex = left.list.get(1)
             map := global
@@ -496,9 +496,9 @@ fun At runExpr(expr Expr) Value
             return v
         lo : runExpr(left)
         r : runExpr(right).get(0)
-        if expr.name.charAt(0) = ord('.')
+        if expr.name.charAt(0) == ord('.')
             if r < 0 or r >= float(lo.len())
-                if r = -1
+                if r == -1
                     return valueOf(float(lo.len()))
                 return valueOf(0)
             return valueOf(lo.get(int(r)))
@@ -507,7 +507,7 @@ fun At runExpr(expr Expr) Value
 
 fun At call(name string, argList Expr[]) Value
     m : getFunction(name)
-    if m = null
+    if m == null
         return valueOf(0)
     newLocal := newHashMap(string, Value)
     for i := until(m.size - 1)
@@ -546,7 +546,7 @@ fun At operator(op string, precedence int, l float, r float) float
         res = float(int(l) | int(r))
         power = 20
     elif op.equals(str('='))
-        if l = r
+        if l == r
             res = 1
         power = 30
     elif op.equals(str('<>'))

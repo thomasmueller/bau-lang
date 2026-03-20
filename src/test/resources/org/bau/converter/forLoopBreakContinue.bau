@@ -2,7 +2,7 @@ fun write(d i8[])
     d[0] = 1
 
 fun test(p int, data i8[]) int
-    loop p = 0
+    loop p == 0
         if p <= 0
             loop
                 write(data)
@@ -20,8 +20,8 @@ fun range(from int, to int) int
 
 fun main()
     for a := range(0, 10)
-        break a = 5
-        continue a = 2
+        break a == 5
+        continue a == 2
         println(a)
     test(0, i8[2])
 

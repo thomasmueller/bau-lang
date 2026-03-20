@@ -21,7 +21,7 @@ fun main()
     in.close()
     output : i8[input.len * 10]
     global = Sr3(input, output)
-    if Env.arg(1)[0] = ord('c')
+    if Env.arg(1)[0] == ord('c')
         output[0] = ord('s')
         output[1] = ord('R')
         output[2] = 2
@@ -60,12 +60,12 @@ fun update(cxt int, bit int)
 fun writeBit(cxt int, bit int)
     p := probability(cxt)
     xmid := (x1 + (((x2 - x1) & 0xffffffff) >> 12) * p) & 0xffffffff
-    if bit = 1
+    if bit == 1
         x2 = xmid
     else
         x1 = (xmid + 1) & 0xffffffff
     update(cxt, bit)
-    loop ((x1 ^ x2) & 0xff000000) = 0
+    loop ((x1 ^ x2) & 0xff000000) == 0
         global.output[outPos] = x2 >> 24
         outPos += 1
         x1 = (x1 << 8) & 0xffffffff
@@ -117,12 +117,12 @@ fun readBit(cxt int) int
     bit := 0
     if x <= xmid
         bit = 1
-    if bit = 1
+    if bit == 1
         x2 = xmid
     else
         x1 = xmid + 1
     update(cxt, bit)
-    loop ((x1 ^ x2) & 0xff000000) = 0
+    loop ((x1 ^ x2) & 0xff000000) == 0
         x1 = (x1 << 8) & 0xffffffff
         x2 = ((x2 << 8) + 255) & 0xffffffff
         x = ((x << 8) + (global.input[inPos] & 0xff)) & 0xffffffff
@@ -149,18 +149,18 @@ fun compress()
         c := global.input[inPos] & 0xff
         inPos += 1
         comp3 := (c * 0x010101) ^ r
-        if comp3 & 0xff = 0
+        if comp3 & 0xff == 0
             # match first
             writeBit(cxt, 0)
             if (r & 0xffffffff) < 0x3f000000
                 t4[h] += 0x01000000
-        elif comp3 & 0xff00 = 0
+        elif comp3 & 0xff00 == 0
             # match second
             writeBit(cxt, 1)
             writeBit(cxt + 1, 1)
             writeBit(cxt + 2, 0)
             t4[h] = (r & 0xff0000) | ((r << 8) & 0xff00) | c | 0x01000000
-        elif comp3 & 0xff0000 = 0
+        elif comp3 & 0xff0000 == 0
             # match third
             writeBit(cxt, 1)
             writeBit(cxt + 1, 1)
@@ -188,9 +188,9 @@ fun decompress()
         else
             cxt = c1 | ((r >> 16) & 0x3f00)
         cxt *= 258
-        if readBit(cxt) = 1
-            if readBit(cxt + 1) = 1
-                if readBit(cxt + 2) = 1
+        if readBit(cxt) == 1
+            if readBit(cxt + 1) == 1
+                if readBit(cxt + 2) == 1
                     # match third
                     c1 = (r >> 16) & 0xff
                     t4[h] = ((r << 8) & 0xffff00) | c1 | 0x01000000
@@ -201,7 +201,7 @@ fun decompress()
             else
                 # literal
                 c1 = readByte(cxt + 2)
-                if c1 = (r & 0xff)
+                if c1 == (r & 0xff)
                     break; # EOF
                 t4[h] = ((r << 8) & 0xffff00) | c1
         else

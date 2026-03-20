@@ -16,7 +16,7 @@ fun main()
 fun solve(c i8[]) int
     i := 0
     loop i < c.len
-        break c[i] = ord('.')
+        break c[i] == ord('.')
         i += 1
     if i >= c.len
         return 1
@@ -26,14 +26,14 @@ fun solve(c i8[]) int
         loop j < 9
             m : (i / 10) * 9 + i % 10
             # a digit in the same row matches
-            break c[((m / 9) * 10) + j] = k
+            break c[((m / 9) * 10) + j] == k
             # a digit in the same column matches
-            break c[(m % 9) + 10 * j] = k
+            break c[(m % 9) + 10 * j] == k
             # house
             h : (((m / 27) % 3) * 3) + ((m % 9) / 3)
             n3 : h * 3 + (h / 3) * 18 + (j % 3) + (j / 3) * 9
             # a digit in the same house matches
-            break c[(n3 / 9 * 10) + (n3 % 9)] = k
+            break c[(n3 / 9 * 10) + (n3 % 9)] == k
             j += 1
         if j >= 9
             c[i] = k

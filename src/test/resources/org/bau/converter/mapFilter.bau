@@ -75,10 +75,10 @@ fun int[] filterInt(condition int) macro int[]
     return result
 
 fun main()
-    list : rangeList(0, 10).filter(it % 2 = 0).map(it * it)
+    list : rangeList(0, 10).filter(it % 2 == 0).map(it * it)
     for i := until(list.size)
         println(i ': ' list.get(i))
-    array : range(0, 10).filterInt(it % 2 = 0).mapInt(it * it)
+    array : range(0, 10).filterInt(it % 2 == 0).mapInt(it * it)
     for i := until(array.len)
         println(i ': ' array[i])
 

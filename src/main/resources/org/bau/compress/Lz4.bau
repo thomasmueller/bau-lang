@@ -127,7 +127,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         break next >= inData.len
         p = next
         literalLen := tag >> 4
-        if literalLen = 0xf
+        if literalLen == 0xf
             loop
                 x := inData[p] & 0xff
                 p += 1
@@ -164,7 +164,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         if p + 1 >= inLen
             break
         offset := (inData[p] & 0xff) | ((inData[p + 1] & 0xff) << 8)
-        if offset = 0
+        if offset == 0
             return -1
         if offset > outPos
             return -1
@@ -172,7 +172,7 @@ fun decompressBlock(inData i8[], inLen int, outData i8[], outPos int) int
         if p >= inLen - 1
             break
         runLen := tag & 0xf
-        if runLen = 0xf
+        if runLen == 0xf
             loop
                 x := inData[p] & 0xff
                 p += 1
@@ -250,13 +250,13 @@ fun runLenCountFast(data i8[], aLen 0..data.len - 7, ai 0..data.len - 7, bi 0..d
         break next > data.len - 8
         bi = next
         runLen += 8
-    #loop ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+    #loop ai + runLen < aLen - 16 and data[ai + runLen] == data[bi + runLen]
     #    runLen += 1
     return runLen
 
 fun runLenCountSlow(data i8[], aLen 0..data.len - 7, ai int, bi int) int
     runLen := 0
-    loop ai + runLen < aLen - 16 and data[ai + runLen] = data[bi + runLen]
+    loop ai + runLen < aLen - 16 and data[ai + runLen] == data[bi + runLen]
         runLen += 1
     return runLen
 

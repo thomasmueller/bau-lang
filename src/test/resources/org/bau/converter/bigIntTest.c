@@ -1439,29 +1439,29 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1017 = str_const("assertion failed: ", 18);
-    string_1018 = str_const("toInt(add(newBigInt(123), newBigInt(456))) = 579", 48);
-    string_1019 = str_const("toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) = 579", 97);
-    string_1020 = str_const("toInt(sub(newBigInt(1000), newBigInt(250))) = 750", 49);
-    string_1021 = str_const("toInt(sub(newBigInt(250), newBigInt(1000))) = -750", 50);
-    string_1022 = str_const("toInt(mul(newBigInt(20), newBigInt(5))) = 100", 45);
-    string_1023 = str_const("toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) = 100", 94);
-    string_1024 = str_const("toInt(div(newBigInt(100), newBigInt(5))) = 20", 45);
-    string_1025 = str_const("toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) = 20", 77);
-    string_1026 = str_const("toInt(shiftLeft(newBigInt(1), 3)) = 8", 37);
-    string_1027 = str_const("toInt(shiftRight(newBigInt(16), 2)) = 4", 39);
-    string_1028 = str_const("toInt(neg(newBigInt(50))) = -50", 31);
-    string_1029 = str_const("toInt(neg(neg(newBigInt(50)))) = 50", 35);
-    string_1030 = str_const("compare(newBigInt(10), newBigInt(20)) = -1", 42);
-    string_1031 = str_const("compare(newBigInt(10), newBigInt(-20)) = 1", 42);
-    string_1032 = str_const("compare(newBigInt(10), newBigInt(10)) = 0", 41);
-    string_1033 = str_const("signum(newBigInt(123)) = 1", 26);
-    string_1034 = str_const("signum(newBigInt(0)) = 0", 24);
-    string_1035 = str_const("signum(newBigInt(-123)) = -1", 28);
-    string_1036 = str_const("len(newBigInt(1)) = 1", 21);
-    string_1037 = str_const("len(newBigInt(2)) = 2", 21);
-    string_1038 = str_const("len(newBigInt(255)) = 8", 23);
-    string_1039 = str_const("len(newBigInt(256)) = 9", 23);
-    string_1040 = str_const("len(shiftLeft(newBigInt(256), 100)) = 109", 41);
+    string_1018 = str_const("toInt(add(newBigInt(123), newBigInt(456))) == 579", 49);
+    string_1019 = str_const("toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) == 579", 98);
+    string_1020 = str_const("toInt(sub(newBigInt(1000), newBigInt(250))) == 750", 50);
+    string_1021 = str_const("toInt(sub(newBigInt(250), newBigInt(1000))) == -750", 51);
+    string_1022 = str_const("toInt(mul(newBigInt(20), newBigInt(5))) == 100", 46);
+    string_1023 = str_const("toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) == 100", 95);
+    string_1024 = str_const("toInt(div(newBigInt(100), newBigInt(5))) == 20", 46);
+    string_1025 = str_const("toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) == 20", 78);
+    string_1026 = str_const("toInt(shiftLeft(newBigInt(1), 3)) == 8", 38);
+    string_1027 = str_const("toInt(shiftRight(newBigInt(16), 2)) == 4", 40);
+    string_1028 = str_const("toInt(neg(newBigInt(50))) == -50", 32);
+    string_1029 = str_const("toInt(neg(neg(newBigInt(50)))) == 50", 36);
+    string_1030 = str_const("compare(newBigInt(10), newBigInt(20)) == -1", 43);
+    string_1031 = str_const("compare(newBigInt(10), newBigInt(-20)) == 1", 43);
+    string_1032 = str_const("compare(newBigInt(10), newBigInt(10)) == 0", 42);
+    string_1033 = str_const("signum(newBigInt(123)) == 1", 27);
+    string_1034 = str_const("signum(newBigInt(0)) == 0", 25);
+    string_1035 = str_const("signum(newBigInt(-123)) == -1", 29);
+    string_1036 = str_const("len(newBigInt(1)) == 1", 22);
+    string_1037 = str_const("len(newBigInt(2)) == 2", 22);
+    string_1038 = str_const("len(newBigInt(255)) == 8", 24);
+    string_1039 = str_const("len(newBigInt(256)) == 9", 24);
+    string_1040 = str_const("len(shiftLeft(newBigInt(256), 100)) == 109", 42);
     _main();
     return 0;
 }
@@ -1476,7 +1476,7 @@ void _main() {
     org_bau_BigInt_bigInt _t5 = org_bau_BigInt_bigInt_add_2(_t3, _t4);
     int64_t _t6 = org_bau_BigInt_bigInt_toInt_1(_t5);
     if (!(( _t6 == 579 ))) {
-        printf("assertion failed: toInt(add(newBigInt(123), newBigInt(456))) = 579\n");
+        printf("assertion failed: toInt(add(newBigInt(123), newBigInt(456))) == 579\n");
     } else {
     }
     org_bau_BigInt_bigInt _t7 = org_bau_BigInt_newBigInt_1(123);
@@ -1487,7 +1487,7 @@ void _main() {
     org_bau_BigInt_bigInt _t12 = org_bau_BigInt_bigInt_shiftRight_2(_t11, 100);
     int64_t _t13 = org_bau_BigInt_bigInt_toInt_1(_t12);
     if (!(( _t13 == 579 ))) {
-        printf("assertion failed: toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) = 579\n");
+        printf("assertion failed: toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) == 579\n");
     } else {
     }
     org_bau_BigInt_bigInt _t14 = org_bau_BigInt_newBigInt_1(1000);
@@ -1495,7 +1495,7 @@ void _main() {
     org_bau_BigInt_bigInt _t16 = org_bau_BigInt_bigInt_sub_2(_t14, _t15);
     int64_t _t17 = org_bau_BigInt_bigInt_toInt_1(_t16);
     if (!(( _t17 == 750 ))) {
-        printf("assertion failed: toInt(sub(newBigInt(1000), newBigInt(250))) = 750\n");
+        printf("assertion failed: toInt(sub(newBigInt(1000), newBigInt(250))) == 750\n");
     } else {
     }
     org_bau_BigInt_bigInt _t18 = org_bau_BigInt_newBigInt_1(250);
@@ -1503,7 +1503,7 @@ void _main() {
     org_bau_BigInt_bigInt _t20 = org_bau_BigInt_bigInt_sub_2(_t18, _t19);
     int64_t _t21 = org_bau_BigInt_bigInt_toInt_1(_t20);
     if (!(( _t21 == -750 ))) {
-        printf("assertion failed: toInt(sub(newBigInt(250), newBigInt(1000))) = -750\n");
+        printf("assertion failed: toInt(sub(newBigInt(250), newBigInt(1000))) == -750\n");
     } else {
     }
     org_bau_BigInt_bigInt _t22 = org_bau_BigInt_newBigInt_1(20);
@@ -1511,7 +1511,7 @@ void _main() {
     org_bau_BigInt_bigInt _t24 = org_bau_BigInt_bigInt_mul_2(_t22, _t23);
     int64_t _t25 = org_bau_BigInt_bigInt_toInt_1(_t24);
     if (!(( _t25 == 100 ))) {
-        printf("assertion failed: toInt(mul(newBigInt(20), newBigInt(5))) = 100\n");
+        printf("assertion failed: toInt(mul(newBigInt(20), newBigInt(5))) == 100\n");
     } else {
     }
     org_bau_BigInt_bigInt _t26 = org_bau_BigInt_newBigInt_1(20);
@@ -1522,7 +1522,7 @@ void _main() {
     org_bau_BigInt_bigInt _t31 = org_bau_BigInt_bigInt_shiftRight_2(_t30, 200);
     int64_t _t32 = org_bau_BigInt_bigInt_toInt_1(_t31);
     if (!(( _t32 == 100 ))) {
-        printf("assertion failed: toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) = 100\n");
+        printf("assertion failed: toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) == 100\n");
     } else {
     }
     org_bau_BigInt_bigInt _t33 = org_bau_BigInt_newBigInt_1(100);
@@ -1530,7 +1530,7 @@ void _main() {
     org_bau_BigInt_bigInt _t35 = org_bau_BigInt_bigInt_div_2(_t33, _t34);
     int64_t _t36 = org_bau_BigInt_bigInt_toInt_1(_t35);
     if (!(( _t36 == 20 ))) {
-        printf("assertion failed: toInt(div(newBigInt(100), newBigInt(5))) = 20\n");
+        printf("assertion failed: toInt(div(newBigInt(100), newBigInt(5))) == 20\n");
     } else {
     }
     org_bau_BigInt_bigInt _t37 = org_bau_BigInt_newBigInt_1(100);
@@ -1540,28 +1540,28 @@ void _main() {
     org_bau_BigInt_bigInt _t41 = org_bau_BigInt_bigInt_div_2(_t38, _t40);
     int64_t _t42 = org_bau_BigInt_bigInt_toInt_1(_t41);
     if (!(( _t42 == 20 ))) {
-        printf("assertion failed: toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) = 20\n");
+        printf("assertion failed: toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) == 20\n");
     } else {
     }
     org_bau_BigInt_bigInt _t43 = org_bau_BigInt_newBigInt_1(1);
     org_bau_BigInt_bigInt _t44 = org_bau_BigInt_bigInt_shiftLeft_2(_t43, 3);
     int64_t _t45 = org_bau_BigInt_bigInt_toInt_1(_t44);
     if (!(( _t45 == 8 ))) {
-        printf("assertion failed: toInt(shiftLeft(newBigInt(1), 3)) = 8\n");
+        printf("assertion failed: toInt(shiftLeft(newBigInt(1), 3)) == 8\n");
     } else {
     }
     org_bau_BigInt_bigInt _t46 = org_bau_BigInt_newBigInt_1(16);
     org_bau_BigInt_bigInt _t47 = org_bau_BigInt_bigInt_shiftRight_2(_t46, 2);
     int64_t _t48 = org_bau_BigInt_bigInt_toInt_1(_t47);
     if (!(( _t48 == 4 ))) {
-        printf("assertion failed: toInt(shiftRight(newBigInt(16), 2)) = 4\n");
+        printf("assertion failed: toInt(shiftRight(newBigInt(16), 2)) == 4\n");
     } else {
     }
     org_bau_BigInt_bigInt _t49 = org_bau_BigInt_newBigInt_1(50);
     org_bau_BigInt_bigInt _t50 = org_bau_BigInt_bigInt_neg_1(_t49);
     int64_t _t51 = org_bau_BigInt_bigInt_toInt_1(_t50);
     if (!(( _t51 == -50 ))) {
-        printf("assertion failed: toInt(neg(newBigInt(50))) = -50\n");
+        printf("assertion failed: toInt(neg(newBigInt(50))) == -50\n");
     } else {
     }
     org_bau_BigInt_bigInt _t52 = org_bau_BigInt_newBigInt_1(50);
@@ -1569,77 +1569,77 @@ void _main() {
     org_bau_BigInt_bigInt _t54 = org_bau_BigInt_bigInt_neg_1(_t53);
     int64_t _t55 = org_bau_BigInt_bigInt_toInt_1(_t54);
     if (!(( _t55 == 50 ))) {
-        printf("assertion failed: toInt(neg(neg(newBigInt(50)))) = 50\n");
+        printf("assertion failed: toInt(neg(neg(newBigInt(50)))) == 50\n");
     } else {
     }
     org_bau_BigInt_bigInt _t56 = org_bau_BigInt_newBigInt_1(10);
     org_bau_BigInt_bigInt _t57 = org_bau_BigInt_newBigInt_1(20);
     int64_t _t58 = org_bau_BigInt_bigInt_compare_2(_t56, _t57);
     if (!(( _t58 == -1 ))) {
-        printf("assertion failed: compare(newBigInt(10), newBigInt(20)) = -1\n");
+        printf("assertion failed: compare(newBigInt(10), newBigInt(20)) == -1\n");
     } else {
     }
     org_bau_BigInt_bigInt _t59 = org_bau_BigInt_newBigInt_1(10);
     org_bau_BigInt_bigInt _t60 = org_bau_BigInt_newBigInt_1(-20);
     int64_t _t61 = org_bau_BigInt_bigInt_compare_2(_t59, _t60);
     if (!(( _t61 == 1 ))) {
-        printf("assertion failed: compare(newBigInt(10), newBigInt(-20)) = 1\n");
+        printf("assertion failed: compare(newBigInt(10), newBigInt(-20)) == 1\n");
     } else {
     }
     org_bau_BigInt_bigInt _t62 = org_bau_BigInt_newBigInt_1(10);
     org_bau_BigInt_bigInt _t63 = org_bau_BigInt_newBigInt_1(10);
     int64_t _t64 = org_bau_BigInt_bigInt_compare_2(_t62, _t63);
     if (!(( _t64 == 0 ))) {
-        printf("assertion failed: compare(newBigInt(10), newBigInt(10)) = 0\n");
+        printf("assertion failed: compare(newBigInt(10), newBigInt(10)) == 0\n");
     } else {
     }
     org_bau_BigInt_bigInt _t65 = org_bau_BigInt_newBigInt_1(123);
     int64_t _t66 = org_bau_BigInt_bigInt_signum_1(_t65);
     if (!(( _t66 == 1 ))) {
-        printf("assertion failed: signum(newBigInt(123)) = 1\n");
+        printf("assertion failed: signum(newBigInt(123)) == 1\n");
     } else {
     }
     org_bau_BigInt_bigInt _t67 = org_bau_BigInt_newBigInt_1(0);
     int64_t _t68 = org_bau_BigInt_bigInt_signum_1(_t67);
     if (!(( _t68 == 0 ))) {
-        printf("assertion failed: signum(newBigInt(0)) = 0\n");
+        printf("assertion failed: signum(newBigInt(0)) == 0\n");
     } else {
     }
     org_bau_BigInt_bigInt _t69 = org_bau_BigInt_newBigInt_1(-123);
     int64_t _t70 = org_bau_BigInt_bigInt_signum_1(_t69);
     if (!(( _t70 == -1 ))) {
-        printf("assertion failed: signum(newBigInt(-123)) = -1\n");
+        printf("assertion failed: signum(newBigInt(-123)) == -1\n");
     } else {
     }
     org_bau_BigInt_bigInt _t71 = org_bau_BigInt_newBigInt_1(1);
     int64_t _t72 = org_bau_BigInt_bigInt_len_1(_t71);
     if (!(( _t72 == 1 ))) {
-        printf("assertion failed: len(newBigInt(1)) = 1\n");
+        printf("assertion failed: len(newBigInt(1)) == 1\n");
     } else {
     }
     org_bau_BigInt_bigInt _t73 = org_bau_BigInt_newBigInt_1(2);
     int64_t _t74 = org_bau_BigInt_bigInt_len_1(_t73);
     if (!(( _t74 == 2 ))) {
-        printf("assertion failed: len(newBigInt(2)) = 2\n");
+        printf("assertion failed: len(newBigInt(2)) == 2\n");
     } else {
     }
     org_bau_BigInt_bigInt _t75 = org_bau_BigInt_newBigInt_1(255);
     int64_t _t76 = org_bau_BigInt_bigInt_len_1(_t75);
     if (!(( _t76 == 8 ))) {
-        printf("assertion failed: len(newBigInt(255)) = 8\n");
+        printf("assertion failed: len(newBigInt(255)) == 8\n");
     } else {
     }
     org_bau_BigInt_bigInt _t77 = org_bau_BigInt_newBigInt_1(256);
     int64_t _t78 = org_bau_BigInt_bigInt_len_1(_t77);
     if (!(( _t78 == 9 ))) {
-        printf("assertion failed: len(newBigInt(256)) = 9\n");
+        printf("assertion failed: len(newBigInt(256)) == 9\n");
     } else {
     }
     org_bau_BigInt_bigInt _t79 = org_bau_BigInt_newBigInt_1(256);
     org_bau_BigInt_bigInt _t80 = org_bau_BigInt_bigInt_shiftLeft_2(_t79, 100);
     int64_t _t81 = org_bau_BigInt_bigInt_len_1(_t80);
     if (!(( _t81 == 109 ))) {
-        printf("assertion failed: len(shiftLeft(newBigInt(256), 100)) = 109\n");
+        printf("assertion failed: len(shiftLeft(newBigInt(256), 100)) == 109\n");
     } else {
     }
     org_bau_BigInt_bigInt _t82 = org_bau_BigInt_newBigInt_1(1234);

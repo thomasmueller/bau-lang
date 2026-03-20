@@ -19,24 +19,24 @@ public class SolverTest {
         Solver s;
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("x"), "+", number(1))));
+        s.addRule(rule(variable("a"), "==", operation(variable("x"), "+", number(1))));
         assertTrue(s.isTrue(rule(variable("a"), ">", variable("x"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("x"), "-", number(1))));
+        s.addRule(rule(variable("a"), "==", operation(variable("x"), "-", number(1))));
         assertTrue(s.isTrue(rule(variable("a"), "<", variable("x"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("x"), "-", number(-1))));
+        s.addRule(rule(variable("a"), "==", operation(variable("x"), "-", number(-1))));
         assertTrue(s.isTrue(rule(variable("a"), ">=", variable("x"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("x"), "+", number(-1))));
+        s.addRule(rule(variable("a"), "==", operation(variable("x"), "+", number(-1))));
         assertTrue(s.isTrue(rule(variable("a"), "<=", variable("x"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("x"), "+", number(0))));
-        assertTrue(s.isTrue(rule(variable("a"), "=", variable("x"))));
+        s.addRule(rule(variable("a"), "==", operation(variable("x"), "+", number(0))));
+        assertTrue(s.isTrue(rule(variable("a"), "==", variable("x"))));
 
     }
 
@@ -59,27 +59,27 @@ public class SolverTest {
         assertTrue(s.isTrue(rule(number(0), "<", operation(number(4), "-", number(3)))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
+        s.addRule(rule(variable("a"), "==", number(1)));
         assertTrue(s.isTrue(rule(variable("a"), ">", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
+        s.addRule(rule(variable("a"), "==", number(1)));
         assertFalse(s.isTrue(rule(variable("a"), "<", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(0)));
+        s.addRule(rule(variable("a"), "==", number(0)));
         assertTrue(s.isTrue(rule(variable("a"), "<=", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(0)));
+        s.addRule(rule(variable("a"), "==", number(0)));
         assertTrue(s.isTrue(rule(variable("a"), "<=", number(1))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
+        s.addRule(rule(variable("a"), "==", number(1)));
         assertFalse(s.isTrue(rule(variable("a"), "<=", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
+        s.addRule(rule(variable("a"), "==", number(1)));
         assertTrue(s.isTrue(rule(variable("a"), ">=", number(0))));
 
         s = new Solver();
@@ -138,24 +138,24 @@ public class SolverTest {
 
         s = new Solver();
         s.addRule(rule(variable("a"), ">=", number(0)));
-        s.addRule(rule(variable("b"), "=", operation(variable("a"), "+", number(1))));
+        s.addRule(rule(variable("b"), "==", operation(variable("a"), "+", number(1))));
         assertTrue(s.isTrue(rule(variable("b"), ">=", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("0t0.len"), "=", number(10)));
-        s.addRule(rule(variable("0t0.len"), "=", variable("result.len")));
+        s.addRule(rule(variable("0t0.len"), "==", number(10)));
+        s.addRule(rule(variable("0t0.len"), "==", variable("result.len")));
         s.addRule(rule(variable("i"), "<", number(10)));
         assertTrue(s.isTrue(rule(variable("i"), "<", variable("result.len"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
-        s.addRule(rule(variable("b"), "=", variable("a")));
-        assertTrue(s.isTrue(rule(variable("b"), "=", number(1))));
+        s.addRule(rule(variable("a"), "==", number(1)));
+        s.addRule(rule(variable("b"), "==", variable("a")));
+        assertTrue(s.isTrue(rule(variable("b"), "==", number(1))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", number(1)));
-        s.addRule(rule(variable("a"), "=", variable("b")));
-        assertTrue(s.isTrue(rule(variable("b"), "=", number(1))));
+        s.addRule(rule(variable("a"), "==", number(1)));
+        s.addRule(rule(variable("a"), "==", variable("b")));
+        assertTrue(s.isTrue(rule(variable("b"), "==", number(1))));
 
         s = new Solver();
         s.addRule(rule(variable("a"), ">", number(0)));
@@ -170,17 +170,17 @@ public class SolverTest {
         s = new Solver();
         s.addRule(rule(variable("a"), ">", number(0)));
         s.addRule(rule(variable("b"), "<", variable("a")));
-        assertFalse(s.isTrue(rule(variable("b"), "=", number(0))));
+        assertFalse(s.isTrue(rule(variable("b"), "==", number(0))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("b"), "+", number(1))));
-        s.addRule(rule(variable("b"), "=", number(10)));
-        assertTrue(s.isTrue(rule(variable("a"), "=", number(11))));
+        s.addRule(rule(variable("a"), "==", operation(variable("b"), "+", number(1))));
+        s.addRule(rule(variable("b"), "==", number(10)));
+        assertTrue(s.isTrue(rule(variable("a"), "==", number(11))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", operation(variable("b"), "+", number(1))));
-        s.addRule(rule(variable("b"), "=", number(11)));
-        assertFalse(s.isTrue(rule(variable("a"), "=", number(11))));
+        s.addRule(rule(variable("a"), "==", operation(variable("b"), "+", number(1))));
+        s.addRule(rule(variable("b"), "==", number(11)));
+        assertFalse(s.isTrue(rule(variable("a"), "==", number(11))));
 
     }
 
@@ -189,11 +189,11 @@ public class SolverTest {
         Solver s;
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", variable("b")));
-        assertTrue(s.isTrue(rule(variable("a"), "=", variable("b"))));
+        s.addRule(rule(variable("a"), "==", variable("b")));
+        assertTrue(s.isTrue(rule(variable("a"), "==", variable("b"))));
 
         s = new Solver();
-        s.addRule(rule(variable("a"), "=", variable("b")));
+        s.addRule(rule(variable("a"), "==", variable("b")));
         assertFalse(s.isTrue(rule(variable("a"), "<", variable("b"))));
 
         s = new Solver();

@@ -15,11 +15,11 @@ fun main() int
         return 0
     a1 : Env.arg(1)
     a2 : Env.arg(2)
-    if args = 4 and is(a1, '-d')
+    if args == 4 and is(a1, '-d')
         println('Decompressed ' decompressFile(a2, Env.arg(3)) ' bytes')
-    elif args = 4 and is(a1, '-1')
+    elif args == 4 and is(a1, '-1')
         println('Compressed ' compressFile(a2, Env.arg(3), 1) ' bytes')
-    elif args = 3 and is(a1, '-h')
+    elif args == 3 and is(a1, '-h')
         println(hex(xxhashFile(a2), 8))
     return 0
 
@@ -83,7 +83,7 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
     if version <> 1
         return -1
     blockIndependanceFlag : (flags >> 5) & 1
-    if blockIndependanceFlag = 0
+    if blockIndependanceFlag == 0
         return -1
     blockChecksumFlag : (flags >> 4) & 1
     if blockChecksumFlag
@@ -113,7 +113,7 @@ fun decompressFile(inputFileName i8[], outputFileName i8[]) int
         # readExact
         in.readFully(header, 0, 4)
         blockSize := Lz4.read4(header, 0)
-        break blockSize = 0
+        break blockSize == 0
         uncompressed : (blockSize >> 31) & 1
         blockSize &= 0x7fffffff
         # println('uncomp ' blockSize ' out ' outputFileSize)
@@ -153,7 +153,7 @@ fun compressFile(inputFileName i8[], outputFileName i8[], level int) int
     totalSize := 0
     loop
         read : in.readFully(block, 0, blockSize)
-        break read = 0
+        break read == 0
         totalSize += read
         end := 0
         if read < 16

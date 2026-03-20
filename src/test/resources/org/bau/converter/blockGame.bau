@@ -108,7 +108,7 @@ fun main()
             loop i > 0
                 found := 1
                 for j := until(WIDTH)
-                    if FIELD[i * WIDTH + j] = 0
+                    if FIELD[i * WIDTH + j] == 0
                         found = 0
                         break
                 if found

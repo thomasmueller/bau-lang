@@ -89,11 +89,11 @@
 ### If Elif Else
 
     for i := range(1, 10)
-        if i = 0
+        if i == 0
             println('zero')
-        elif i = 1
+        elif i == 1
             println('one')
-        elif i = 2
+        elif i == 2
             println('two')
         else
             println('many')
@@ -188,11 +188,11 @@
             return _
     
     fun isPrime(x int) int
-        if (x & 1) = 0
+        if (x & 1) == 0
             return 0
         i := 3
         while i * i <= x
-            if x % i = 0
+            if x % i == 0
                 return 0
             i += 2
         return 1

@@ -33,9 +33,9 @@ fun refreshScreen()
     curX := cursorX
     curY := cursorY
     buff.append('\x1b[7m')
-    if mode = editMode.quitAgain
+    if mode == editMode.quitAgain
         buff.append('File is modified. Quit without saving with Ctrl-Q')
-    elif mode = editMode.find
+    elif mode == editMode.find
         buff.append('Find (Esc/Up/Down/Enter): ')
         buff.append(findText.data)
         curX = 27 + findText.data.len
@@ -58,8 +58,8 @@ fun refreshScreen()
             for x := until(currentWindowSize.columns)
                 break x + offsetX >= line.data.len
                 c := line.data[x + offsetX]
-                break c = ord('\n')
-                if findText.data.len > 0 and findText.data[0] = c and remainingHighlight = 0
+                break c == ord('\n')
+                if findText.data.len > 0 and findText.data[0] == c and remainingHighlight == 0
                     if line.data.len - x - offsetX >= findText.data.len
                         found := 1
                         for i := until(findText.data.len)
@@ -76,7 +76,7 @@ fun refreshScreen()
                 buff.append(ch)
                 if remainingHighlight > 0
                     remainingHighlight -= 1
-                    if remainingHighlight = 0
+                    if remainingHighlight == 0
                         buff.append('\x1b[0m')
         buff.append('\x1b[0m')
         buff.append('\x1b[0K\r\n')
@@ -103,7 +103,7 @@ fun insertNewline()
     lines.add(y, line1)
     lines.array[y + 1] = line2
     indent := 0
-    loop line1.data.len > indent and line1.data[indent] = ord(' ')
+    loop line1.data.len > indent and line1.data[indent] == ord(' ')
         indent += 1
     cursorX = 1 + indent
     if cursorY < currentWindowSize.rows - 1
@@ -142,8 +142,8 @@ fun removeByte()
     x : cursorX + offsetX - 1
     if line.data.len < x
         return
-    if x = 0 
-        if y = 0
+    if x == 0 
+        if y == 0
             return
         # combine lines
         last : lines.array[y - 1]
@@ -249,14 +249,14 @@ fun main()
         refreshScreen()
         key := Terminal.readEditorKey()
         break key < 0
-        continue key = 0
+        continue key == 0
         switch key
         case keyCode.CTRL_C, keyCode.CTRL_Q
             break not currentFile.modified
             mode = editMode.quitAgain
             refreshScreen()
             key = Terminal.readEditorKey()
-            break key = keyCode.CTRL_Q
+            break key == keyCode.CTRL_Q
             mode = editMode.normal
         case keyCode.ENTER
             insertNewline()

@@ -26,7 +26,7 @@ fun Token matchChar(text i8[], pos int) int throws exception
     case tokenType.START, tokenType.END
         throw exception('Start or end in wrong location')
     case tokenType.MATCH
-        return c = data.array[0]
+        return c == data.array[0]
     case tokenType.LIST
         for i := range(0, data.size)
             min : data.array[i]
@@ -66,26 +66,26 @@ fun parse(regex i8[]) List(Token) throws exception
         t := Token(newList(i8))
         t.min = 1
         t.max = 1
-        if c = ord('^')
+        if c == ord('^')
             t.ttype = tokenType.START
             result.add(t)
             i += 1
             continue
-        if c = ord('$')
+        if c == ord('$')
             t.ttype = tokenType.END
             result.add(t)
             i += 1
             continue;
-        if c = ord('.')
+        if c == ord('.')
             t.ttype = tokenType.ANY
-        elif c = ord('\\')
+        elif c == ord('\\')
             t.ttype = tokenType.MATCH
             i += 1
             t.data.add(regex[i])
-        elif c = ord('[')
+        elif c == ord('[')
             i += 1
             c = regex[i]
-            if c = ord('^')
+            if c == ord('^')
                 t.ttype = tokenType.NOT_LIST
                 i += 1
                 c = regex[i]
@@ -96,8 +96,8 @@ fun parse(regex i8[]) List(Token) throws exception
             loop 1
                 i += 1
                 c = regex[i]
-                break c = ord(']')
-                if c = ord('-')
+                break c == ord(']')
+                if c == ord('-')
                     i += 1
                     c = regex[i]
                     t.data.array[t.data.size - 1] = c
@@ -111,15 +111,15 @@ fun parse(regex i8[]) List(Token) throws exception
         break i + 1 >= regex.len
         i += 1
         c = regex[i];
-        if c = ord('+')
+        if c == ord('+')
             t.max = 9999
-        elif c = ord('*')
+        elif c == ord('*')
             t.min = 0
             t.max = 9999
-        elif c = ord('?')
+        elif c == ord('?')
             t.min = 0
             t.max = 1
-        elif c = ord('{')
+        elif c == ord('{')
             i += 1
             start := i
             value := 0
@@ -131,7 +131,7 @@ fun parse(regex i8[]) List(Token) throws exception
                 i += 1
             t.min = value
             t.max = t.min
-            if c = ord(',')
+            if c == ord(',')
                 i += 1
                 start = i
                 value = 0
@@ -157,7 +157,7 @@ fun matchStar(t Token, list List(Token), rp int, text i8[], tp int, max int) int
             result = end
         r := t.matchChar(text, tp)
         tp += 1
-        break r = 0
+        break r == 0
         break max <= 0
         max -= 1
     return result
@@ -168,8 +168,8 @@ fun matchHere(list List(Token), rp int, text i8[], tp int) int throws exception
     t : list.array[rp]
     if not t
         return tp
-    if t.ttype = tokenType.END
-        if tp = text.len
+    if t.ttype == tokenType.END
+        if tp == text.len
             return tp
         return -1
     for i := until(t.min)
@@ -183,7 +183,7 @@ fun find(text i8[], regex i8[]) match throws exception
     if list.size > 0
         e : list.array[0]
         if e
-            if e.ttype = tokenType.START
+            if e.ttype == tokenType.START
                 end := matchHere(list, 1, text, 0)
                 if end >= 0
                     return match(0, end)
@@ -199,7 +199,7 @@ fun find(text i8[], regex i8[]) match throws exception
 
 fun matches(text i8[], regex i8[]) int throws exception
     result : find(text, regex)
-    return result.start = 0 and result.end = text.len
+    return result.start == 0 and result.end == text.len
 
 fun test()
     println(matches('hello', 'hell.*'))

@@ -61,19 +61,19 @@ println('end')
                         "println('end')\n").parse().toString());
         assertEquals("""
 a := 1
-if a = 0
+if a == 0
     println('zero')
 else
-    if a = 1
+    if a == 1
         println('one')
     else
         println('other')
 println('done')
                 """,
                 new Parser("a := 1\n" +
-                        "if a=0\n" +
+                        "if a == 0\n" +
                         "    println('zero')\n" +
-                        "elif a=1\n" +
+                        "elif a == 1\n" +
                         "    println('one')\n" +
                         "else\n" +
                         "    println('other')\n" +
