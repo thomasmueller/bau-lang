@@ -463,4 +463,13 @@ public class Call implements Statement, Expression, LeftValue {
         }
     }
 
+    @Override
+    public List<Variable> getVariables() {
+        ArrayList<Variable> list = new ArrayList<>();
+        for (Expression a : args) {
+            list.addAll(a.getVariables());
+        }
+        return list;
+    }
+
 }

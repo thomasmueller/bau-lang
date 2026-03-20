@@ -756,9 +756,23 @@ public class Parser {
     private boolean parseFunctionDeclaration(String targetModule, FunctionDefinition def) {
         boolean varArgs = false;
         boolean template = false;
+        DataType hack = null;
         if (!matchOp(")")) {
             while (true) {
                 String name = readIdentifier();
+                if (matchOp("(")) {
+                    int hack3;
+                    if (matchOp("?")) {
+                        // anything goes
+                        hack = DataType.INT_TYPE;
+                    } else {
+                        hack = readType(true);
+                    }
+                    def.hack = hack;
+                    if (!matchOp(")")) {
+                        throw syntaxError("Expected ')'");
+                    }
+                }
                 DataType type;
                 if (DataType.isGenericTypeName(token) && !template) {
                     template = true;
@@ -822,6 +836,10 @@ public class Parser {
         }
         if (match("macro")) {
             def.macro = true;
+        }
+        if (hack != null && !def.macro) {
+            int hack2;
+            throw syntaxError("Hacks are only allowed in macros");
         }
         if (matchOp("\n")) {
             // void
@@ -1804,7 +1822,12 @@ public class Parser {
         DataType type = def.returnType;
         boolean isGeneric = type != null && DataType.isGenericTypeName(type.name());
         int stackPos = functionContext.getStackPos();
-        Variable it = new Variable("it", DataType.INT_TYPE);
+        DataType itType = DataType.INT_TYPE;
+        if (def.hack != null) {
+            int hack;
+            itType = def.hack;
+        }
+        Variable it = new Variable("it", itType);
         functionContext.addVariable(it);
         for (int i = 0;; i++) {
             if (matchOp(")")) {
@@ -1840,10 +1863,34 @@ public class Parser {
             StringLiteral sourceCode = new StringLiteral(p.toString(), type2, program);
             params.add(sourceVar);
             args.add(sourceCode);
-
+            List<Variable> vars = p.getVariables();
+            int index = 0;
+            for (Variable v : vars) {
+                if (v.name().equals("it")) {
+                    continue;
+                }
+                Variable px = new Variable(var.name() + ".param" + index, type2);
+                index++;
+                params.add(px);
+                Expression pe = program.cast(v, false, type2);
+                if (pe == null) {
+                    pe = new NullValue(type2);
+                }
+                args.add(pe);
+            }
+            while (index < 10) {
+                Variable px = new Variable(var.name() + ".param" + index, type2);
+                params.add(px);
+                args.add(new NullValue(type2));
+                index++;
+            }
+            Variable pc = new Variable(var.name() + ".paramCount", DataType.INT_TYPE);
+            params.add(pc);
+            args.add(NumberValue.valueOf(index));
+            // needs to be done at the very end at the end,
+            // otherwise fields are not expanded
             params.add(var);
             args.add(p);
-
             // dangling ',' is supported
             lastWasComma = matchOp(",");
             // new line after operation
@@ -1865,7 +1912,7 @@ public class Parser {
             // the second block is the phi block
         } else {
             ifStatement = new If();
-            ifStatement.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+            ifStatement.condition = NumberValue.valueOf(1);
             ifStatement.thenList = def.list;
         }
         Expression condition = ifStatement.condition;
@@ -1981,7 +2028,7 @@ public class Parser {
                 templateParams.add(t.fullName());
                 // we add a dummy value for each type parameter,
                 // to simplify the parser a bit
-                Expression p = new NumberValue(ValueInt.ZERO, program.getType(null, DataType.INT), false);
+                Expression p = NumberValue.ZERO;
                 call.args.add(p);
             } else {
                 Expression p = parseExpression();
@@ -3227,11 +3274,18 @@ public class Parser {
                     }
                     if (type == null) {
                         if (currentFunctionDefinition != null
-                                && currentFunctionDefinition.macro
-                                && "source".equals(f)) {
-                            type = program.getType(null, DataType.I8).arrayType();
+                                && currentFunctionDefinition.macro) {
+                            if ("source".equals(f)) {
+                                type = program.getType(null, DataType.I8).arrayType();
+                            } else if ("paramCount".equals(f)) {
+                                type = DataType.INT_TYPE;
+                            } else if (f.startsWith("param")) {
+                                type = program.getType(null, DataType.I8).arrayType();
+                            } else {
+                                throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");
+                            }
                         } else {
-                            throw syntaxError("Field '" + f + "' not found in type '" + vt + "'");
+                            throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");
                         }
                     }
                     v = new FieldAccess(v, f, type);

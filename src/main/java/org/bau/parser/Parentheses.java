@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -87,6 +88,11 @@ public class Parentheses implements Expression {
     @Override
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
         base.setVariableVersions(name, oldVersion, newVersion);
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        return base.getVariables();
     }
 
 }

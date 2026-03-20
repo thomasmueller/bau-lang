@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-03-20: Work-in-progress: <a href="docsrc/linq.md">support for LINQ</a>.
 * 2026-03-20: Support for map/filter (list comprehension) on generic types.
 * 2026-03-03: Owned types are now declared just using "owned". A type is now owned or not (previously, both versions where available).
 * 2026-02-24: Global constants and variables have additional restrictions for safety and clearness.

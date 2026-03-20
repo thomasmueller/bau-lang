@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.parser.Statement.StatementResult;
 import org.bau.runtime.Memory;
@@ -251,6 +252,14 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
         arrayIndex.setVariableVersions(name, oldVersion, newVersion);
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        ArrayList<Variable> list = new ArrayList<>();
+        list.addAll(base.getVariables());
+        list.addAll(arrayIndex.getVariables());
+        return list;
     }
 
 }

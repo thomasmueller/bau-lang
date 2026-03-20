@@ -413,4 +413,9 @@ public class Variable implements Expression, LeftValue {
         return version;
     }
 
+    @Override
+    public List<Variable> getVariables() {
+        return List.of(this);
+    }
+
 }

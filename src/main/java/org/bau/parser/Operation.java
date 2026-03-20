@@ -717,4 +717,14 @@ public class Operation implements Expression {
         right.setVariableVersions(name, oldVersion, newVersion);
     }
 
+    @Override
+    public List<Variable> getVariables() {
+        ArrayList<Variable> list = new ArrayList<>();
+        if (left != null) {
+            list.addAll(left.getVariables());
+        }
+        list.addAll(right.getVariables());
+        return list;
+    }
+
 }

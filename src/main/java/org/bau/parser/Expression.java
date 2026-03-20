@@ -68,4 +68,9 @@ public interface Expression {
     public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock);
 
     public void setVariableVersions(String name, int oldVersion, int newVersion);
+
+    default List<Variable> getVariables() {
+        return List.of();
+    }
+
 }

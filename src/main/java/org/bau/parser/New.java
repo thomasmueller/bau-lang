@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -158,6 +159,11 @@ public class New implements Expression {
         if (arrayLength != null) {
             arrayLength.setVariableVersions(name, oldVersion, newVersion);
         }
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        return arrayLength.getVariables();
     }
 
 }

@@ -33,6 +33,7 @@ public class FunctionDefinition {
     public boolean isConstructor;
     public boolean isFunctionPointer;
     int traitFunctionId;
+    public DataType hack;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;

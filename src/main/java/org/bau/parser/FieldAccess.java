@@ -85,6 +85,14 @@ public class FieldAccess implements Expression, LeftValue {
                 && old.name().endsWith(".source")
                 && old.name().startsWith(base.toString() + ".")) {
             return with;
+        } else if (fieldName.equals("paramCount")
+                && old.name().endsWith(".paramCount")
+                && old.name().startsWith(base.toString() + ".")) {
+            return with;
+        } else if (fieldName.startsWith("param")
+                && old.name().endsWith("." + fieldName)
+                && old.name().startsWith(base.toString() + ".")) {
+            return with;
         }
         Expression b2 = base.replace(old, with);
         if (b2 == base) {
@@ -262,6 +270,11 @@ public class FieldAccess implements Expression, LeftValue {
             return;
         }
         base.setVariableVersions(name, oldVersion, newVersion);
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        return base.getVariables();
     }
 
 }

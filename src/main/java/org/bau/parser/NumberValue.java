@@ -20,6 +20,10 @@ public class NumberValue implements Expression {
         this.hex = hex;
     }
 
+    public static NumberValue valueOf(int value) {
+        return new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+    }
+
     @Override
     public Value eval(Memory memory) {
         return value;

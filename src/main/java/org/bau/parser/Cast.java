@@ -92,4 +92,9 @@ public class Cast implements Expression {
         base.setVariableVersions(name, oldVersion, newVersion);
     }
 
+    @Override
+    public List<Variable> getVariables() {
+        return base.getVariables();
+    }
+
 }

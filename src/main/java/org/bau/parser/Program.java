@@ -223,7 +223,11 @@ public class Program {
         } else if (source.equals(target)) {
             return expr;
         } else if (source.isRange()) {
-            return expr;
+            if (!target.isArray()) {
+                return expr;
+            } else {
+                source = DataType.INT_TYPE;
+            }
         }
         // 'convertIntToString(int x) org.bau.String'
         String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();

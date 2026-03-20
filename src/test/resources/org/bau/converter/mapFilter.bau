@@ -17,7 +17,7 @@ fun List(T) add(x T)
 fun List(T) get(x int) T?
     return array[x]
 
-fun List(T) filter(condition int) macro List(T)
+fun List(T) filter(condition(T) int) macro List(T)
     result : newList(T)
     i := 0
     while i < this.size
