@@ -36,6 +36,8 @@ public class TernaryExpression implements Expression {
             StatementResult result = Program.runSequence(memory, list);
             if (result == StatementResult.PANIC) {
                 return new ValuePanic(memory.getGlobal(Memory.PANIC).toString());
+            } else if (result == null) {
+                return null;
             }
         }
         if (returnExpr != null) {

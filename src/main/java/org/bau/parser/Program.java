@@ -1283,6 +1283,8 @@ public class Program {
                 }
             } else if (n == StatementResult.PANIC) {
                 return n;
+            } else if (n == null) {
+                return null;
             }
         }
         return StatementResult.OK;

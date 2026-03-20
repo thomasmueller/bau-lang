@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValuePanic;
 
 public class Loop implements Statement {
     ArrayList<Statement> list = new ArrayList<>();
@@ -35,7 +37,11 @@ public class Loop implements Statement {
         }
         outer:
         while (true) {
-            long v = condition.eval(m).longValue();
+            Value va = condition.eval(m);
+            if (va == null) {
+                return null;
+            }
+            long v = va.longValue();
             if (v != 1) {
                 break;
             }
