@@ -748,7 +748,7 @@ public class Parser {
         currentFunctionDefinition = null;
         if (def.macro) {
             Templates.checkMacroFunction(def);
-            program.addFunctionTemplate(null, module, def.name, def);
+            program.addFunctionTemplate(callType, module, def.name, def);
         }
         return true;
     }
@@ -1298,9 +1298,30 @@ public class Parser {
                 }
                 Call call = new Call();
                 call.statement = true;
-                Expression expr = parseCall(null, m, identifier, call, true);
+                Expression expr;
+                DataType t = null;
+                while (true) {
+                    expr = parseCall(t, m, identifier, call, true);
+                    expr = expr.writeStatements(this, false, target);
+                    if (expr == null) {
+                        // eg. ternary expression
+                        break;
+                    }
+                    t = expr.type();
+                    if (t == null || !matchOp(".")) {
+                        break;
+                    }
+                    // chained call
+                    call = new Call();
+                    call.statement = true;
+                    call.args.add(expr);
+                    matchOp("\n");
+                    identifier = readIdentifier();
+                    if (!matchOp("(")) {
+                        throw syntaxError("Only method calls are supported here");
+                    }
+                }
                 readEndOfStatement();
-                expr = expr.writeStatements(this, false, target);
                 if (expr instanceof Call) {
                     target.add((Call) expr);
                 }
@@ -1771,18 +1792,25 @@ public class Parser {
         }
     }
 
-    private Expression parseMacro(FunctionDefinition def) {
+    private Expression parseMacroCall(Call call, FunctionDefinition def) {
         boolean lastWasComma = false;
         int pi = 0;
+        if (def.callType != null) {
+            // first argument is "this", so skip it
+            pi++;
+        }
         ArrayList<Variable> params = new ArrayList<>();
         ArrayList<Expression> args = new ArrayList<>();
         DataType type = def.returnType;
         boolean isGeneric = type != null && DataType.isGenericTypeName(type.name());
-        while (true) {
+        int stackPos = functionContext.getStackPos();
+        Variable it = new Variable("it", DataType.INT_TYPE);
+        functionContext.addVariable(it);
+        for (int i = 0;; i++) {
             if (matchOp(")")) {
                 break;
             }
-            boolean checkComma = !lastWasComma && pi > 0;
+            boolean checkComma = !lastWasComma && i > 0;
             if (checkComma) {
                 Expression last = args.get(args.size() - 1);
                 if (!last.isEasyToRead()) {
@@ -1822,42 +1850,64 @@ public class Parser {
             matchOp("\n");
             pi++;
         }
+        ArrayList<Statement> list = new ArrayList<Statement>();
+        TernaryExpression result = expandMacro(call, def, type, params, args, list);
+        functionContext.rewindStack(stackPos);
+        return result;
+    }
+
+    private TernaryExpression expandMacro(Call call, FunctionDefinition def, DataType type, ArrayList<Variable> params, ArrayList<Expression> args, ArrayList<Statement> list) {
         TernaryExpression ternary = new TernaryExpression();
         ternary.type = type;
-        for (Statement s : def.list) {
-            if (s instanceof If) {
-                If ifStatement = (If) s;
-                Expression condition = ifStatement.condition;
-                ternary.condition = replaceAll(condition, params, args);
-                List<Statement> ifTrue = ifStatement.thenList;
-                for (int i = 0; i < ifTrue.size(); i++) {
-                    Statement s2 = ifTrue.get(i);
-                    if (s2 instanceof Return) {
-                        Return r = (Return) s2;
-                        ternary.ifTrue = replaceAll(r.expr, params, args);
-                        break;
-                    }
-                    s2 = replaceAll(s2, params, args);
-                    ternary.ifTrueStatements.add(s2);
+        If ifStatement = null;
+        if (def.list.size() == 2 && def.list.get(0) instanceof If) {
+            ifStatement = (If) def.list.get(0);
+            // the second block is the phi block
+        } else {
+            ifStatement = new If();
+            ifStatement.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+            ifStatement.thenList = def.list;
+        }
+        Expression condition = ifStatement.condition;
+        ternary.condition = replaceAll(condition, params, args);
+        if (def.callType != null) {
+            Assignment setThis = new Assignment();
+            setThis.leftValue = new Variable("this", def.callType);
+            setThis.type = def.callType;
+            setThis.initial = true;
+            setThis.isConstant = true;
+            setThis.value = call.args.get(0);
+            setThis.value = setThis.value.writeStatements(this, true, ternary.ifTrueStatements);
+            ternary.ifTrueStatements.add(setThis);
+        }
+        List<Statement> ifTrue = ifStatement.thenList;
+        for (int i = 0; i < ifTrue.size(); i++) {
+            Statement s2 = ifTrue.get(i);
+            if (s2 instanceof Return) {
+                Return r = (Return) s2;
+                ternary.ifTrue = replaceAll(r.expr, params, args);
+                break;
+            }
+            s2 = replaceAll(s2, params, args);
+            ternary.ifTrueStatements.add(s2);
+        }
+        if (ifStatement.elseList != null) {
+            List<Statement> ifFalse = ifStatement.elseList;
+            for (int i = 0; i < ifFalse.size(); i++) {
+                Statement s2 = ifFalse.get(i);
+                if (s2 instanceof Return) {
+                    Return r = (Return) s2;
+                    ternary.ifFalse = replaceAll(r.expr, params, args);
+                    break;
                 }
-                if (ifStatement.elseList != null) {
-                    List<Statement> ifFalse = ifStatement.elseList;
-                    for (int i = 0; i < ifFalse.size(); i++) {
-                        Statement s2 = ifFalse.get(i);
-                        if (s2 instanceof Return) {
-                            Return r = (Return) s2;
-                            ternary.ifFalse = replaceAll(r.expr, params, args);
-                            break;
-                        }
-                        s2 = replaceAll(s2, params, args);
-                        ternary.ifFalseStatements.add(s2);
-                    }
-                }
+                s2 = replaceAll(s2, params, args);
+                ternary.ifFalseStatements.add(s2);
             }
         }
+        list.add(ifStatement);
         if (ternary.condition == null) {
             ternary.condition = new NumberValue(new ValueInt(1), DataType.INT_TYPE, false);
-            ternary.ifTrueStatements.addAll(def.list);
+            ternary.ifTrueStatements.addAll(list);
         }
         return ternary;
     }
@@ -1901,7 +1951,7 @@ public class Parser {
             template = program.getFunctionTemplate(type, null, identifier);
         }
         if (template != null && template.macro) {
-            return parseMacro(template);
+            return parseMacroCall(call, template);
         }
         ArrayList<String> templateNames = new ArrayList<>();
         ArrayList<String> templateParams = new ArrayList<>();
@@ -3166,7 +3216,6 @@ public class Parser {
                     matchOp("\n");
                     Call call = new Call();
                     call.args.add(v);
-                    // TODO support chained calls?
                     v = parseCall(vt, module, f, call, true);
                     vt = v.type();
                 } else {

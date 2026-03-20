@@ -206,6 +206,11 @@ public class TestCompare {
     }
 
     @Test
+    public void mapFilter() throws IOException {
+        test("mapFilter");
+    }
+
+    @Test
     public void math() throws IOException {
         test("math");
     }

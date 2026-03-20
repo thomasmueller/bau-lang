@@ -98,7 +98,7 @@ public class BasicBlock {
             // orphaned - we can ignore
             return;
         }
-        for (String n : phiVersions.keySet()) {
+        for (String n : new ArrayList<>(phiVersions.keySet())) {
             HashSet<Integer> set = phiSources.get(n);
             if (set.size() > 0) {
                 continue;
@@ -108,7 +108,11 @@ public class BasicBlock {
             }
             set.remove(phiVersions.get(n));
             if (set.size() == 0) {
-                throw new IllegalStateException();
+                int todo;
+                localVersions.remove(n);
+                phiSources.remove(n);
+                phiVersions.remove(n);
+                // throw new IllegalStateException();
             }
         }
     }

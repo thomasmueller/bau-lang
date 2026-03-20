@@ -5,6 +5,101 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+document operator-at-end or ( for multi-line statements:
+https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
+
+Functional vs Imperative
+Expression based vs Statement based
+
+List comprehension
+=> support "it"
+
+Higher-order functions via templating + compile time evaluation
+
+
+IEnumerable<int> ns = Enumerable.Range(0, 100)
+    .Where(x => x * x > 3)
+    .Select(x => x * 2);
+
+Java
+List<Integer> ns = IntStream.range(0, 100)          // same as Enumerable.Range
+           .filter(x -> x * x > 3)   // Where(...)
+           .mapToObj(x -> x * 2)    // Select(...), keep it as Integer
+           .collect(Collectors.toList()); // collect into a List
+
+Python
+s: list[int] = [2 * x for x in range(100) if x ** 2 > 3]
+
+Scala
+val s = for (x <- 0 to 100; if x*x > 3) yield 2*x
+
+Rust? Java?
+
+fun range(start int, end int) int[]
+    list : int[end - start]
+    for i := until(end - start)
+        list[i] = i + start
+    return list
+
+fun int[] print()
+    for i := until(this.len)
+        println(this[i])
+
+range(1, 10).
+    print()
+
+---
+fun one() int
+    return 1
+
+fun int print()
+    println(this)
+
+one().print()
+---
+
+fromTo(1, 10).print()
+
+fun range(start int, end int) int[]
+    list : int[end - start]
+    for i := until(end - start)
+        list[i] = i + start
+    return list
+
+fun int[] filter(condition(T) int) macro int[]
+    result : int[this.len]
+    j := 0
+    for i := this.len
+        _ : this[i]
+        if condition
+            result[j] = x
+            j += 1
+    return result
+
+range(1, 10).filter(< 5)
+
+-------------
+macro T[] filter(condition(T) bool) T[]
+-------------
+
+fun int[] map(map T) macro int[]
+
+
+fun when(cond int, a T, b T) macro T
+    if cond
+        return a
+    else
+        return b
+
+text : 'Hello'
+for i := until(10)
+    println(when(i < text.len, text[i], 0))
+
+
+
+
+
+
 skip ref count updates (skipIncrementDecrementRefCount) on:
 
 - assigned (moved) to another variable, and then not used laster:

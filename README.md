@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-03-20: Support for map/filter (list comprehension) on generic types.
 * 2026-03-03: Owned types are now declared just using "owned". A type is now owned or not (previously, both versions where available).
 * 2026-02-24: Global constants and variables have additional restrictions for safety and clearness.
 * 2026-02-20: Memory management documentation and tests.
@@ -283,7 +284,7 @@ The name of the type is available using `T.name`.
 with the implementation,
 and so parameters are only evaluated when needed:
 
-    fun if(cond int, a T, b T) macro T
+    fun when(cond int, a T, b T) macro T
         if cond
             return a
         else
@@ -291,7 +292,7 @@ and so parameters are only evaluated when needed:
 
     text : 'Hello'
     for i := until(10)
-        println(if(i < text.len, text[i], 0))
+        println(when(i < text.len, text[i], 0))
 
 The source code of the parameter is available
 using `.source`:
@@ -302,6 +303,27 @@ using `.source`:
 
     for i := until(10)
         assert(i < 5)
+
+Macro functions on types can be called with an `it` argument.
+It is replaced at compile time:
+
+    fun range(start int, end int) int[]
+        list : int[end - start]
+        for i := until(end - start)
+            list[i] = i + start
+        return list
+    
+    fun int[] map(value int) macro int[]
+        result : int[this.len]
+        i := 0
+        while i < this.len
+            it : this[i]
+            result[i] = value
+            i += 1
+        return result
+
+    # calculate the squares of 0..9
+    m : range(0, 10).map(it * it)
 
 ### Array Access
 

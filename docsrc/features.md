@@ -7,6 +7,7 @@
 |Memory Safety         |&check;|&check;|       |       |&check;|&check;|&check;|&check;|&check;|
 |Easy to Learn and Use |&check;|&check;|       |       |&check;|&check;|&check;|       |&check;|
 |Concise Syntax        |&check;|&check;|       |       |       |       |       |       |       |
+|Indentation-Based     |&check;|&check;|       |       |       |       |       |       |       |
 |Vendor Independent    |&check;|&check;|&check;|&check;|       |       |       |&check;|       |
 |Strongly Typed        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Fast Execution        |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|&check;|
@@ -22,18 +23,17 @@
 |Compile-Time Execution|&check;|       |       |&check;|       |       |       |&check;|&check;|
 |Custom "For" Loops    |&check;|&check;|       |&check;|&check;|&check;|       |&check;|&check;|
 |Function Pointers     |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
-|Indentation-Based     |&check;|&check;|       |       |       |       |       |       |       |
-|Interfaces            |  TODO |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
+|Interfaces / Traits   |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
+|Map, Filter           |&check;|&check;|       |&check;|&check;|&check;|       |&check;|&check;|
 |Multiple Threads      |  TODO |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Reflection            |       |&check;|       |       |&check;|&check;|       |       |&check;|
 |High-Order Functions  |       |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|
-|Map, Filter           |       |&check;|       |&check;|&check;|&check;|       |&check;|&check;|
 |Coroutines            |       |&check;|       |&check;|       |&check;|&check;|&check;|&check;|
 |String Interpolation  |       |&check;|       |       |       |&check;|       |&check;|&check;|
 |Goto                  |       |       |&check;|&check;|       |&check;|&check;|       |       |
 |Multiple Inheritance  |       |&check;|       |&check;|       |       |       |       |       |
+|Unsigned Integers     |       |       |&check;|&check;|       |&check;|&check;|&check;|&check;|
 |Tail-Call Optimization|       |       |       |       |       |       |       |       |       |
-|Unsigned integer types|       |       |&check;|&check;|       |&check;|&check;|&check;|&check;|
 
 ## Non-Features
 
@@ -44,7 +44,6 @@
   for example high-order functions, functional composition,
   closures. This is on purpose, to avoid choice friction,
   and to simplify learning and using the language.
-* `map`, `filter`, etc are not supported. One problem here is exception handling.
 * Reflection is not supported.
 * Tail calls are only optimized by the C compiler.
 * Multi-threading support is limited to what C supports.
