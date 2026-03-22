@@ -606,15 +606,15 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
     return 1;
 }
 HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes) {
-    HashMap_str_str* _t2 = HashMap_str_str_new();
-    _t2->size = 0;
+    HashMap_str_str* _t5 = HashMap_str_str_new();
+    _t5->size = 0;
     _incUseStack(keys);
-    _t2->keys = keys;
+    _t5->keys = keys;
     _incUseStack(values);
-    _t2->values = values;
+    _t5->values = values;
     _incUseStack(hashes);
-    _t2->hashes = hashes;
-    return _t2;
+    _t5->hashes = hashes;
+    return _t5;
 }
 str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     str_copy(&key);
@@ -781,23 +781,23 @@ int64_t mix_1(int64_t z) {
     return _r0;
 }
 HashMap_int_int* newHashMap_int_int_2(int64_t _K, int64_t _V) {
-    int_array* _t0 = int_array_new(4);
-    int_array* _t1 = int_array_new(4);
     int_array* _t2 = int_array_new(4);
-    HashMap_int_int* result = HashMap_int_int_3(_t0, _t1, _t2);
+    int_array* _t3 = int_array_new(4);
+    int_array* _t4 = int_array_new(4);
+    HashMap_int_int* result = HashMap_int_int_3(_t2, _t3, _t4);
+    _decUseStack(_t4, int_array);
+    _decUseStack(_t3, int_array);
     _decUseStack(_t2, int_array);
-    _decUseStack(_t1, int_array);
-    _decUseStack(_t0, int_array);
     return result;
 }
 HashMap_str_str* newHashMap_str_str_2(int64_t _K, int64_t _V) {
-    str_array* _t0 = str_array_new(4);
-    str_array* _t1 = str_array_new(4);
-    int_array* _t2 = int_array_new(4);
-    HashMap_str_str* result = HashMap_str_str_3(_t0, _t1, _t2);
-    _decUseStack(_t2, int_array);
-    _decUseStack(_t1, str_array);
-    _decUseStack(_t0, str_array);
+    str_array* _t6 = str_array_new(4);
+    str_array* _t7 = str_array_new(4);
+    int_array* _t8 = int_array_new(4);
+    HashMap_str_str* result = HashMap_str_str_3(_t6, _t7, _t8);
+    _decUseStack(_t8, int_array);
+    _decUseStack(_t7, str_array);
+    _decUseStack(_t6, str_array);
     return result;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {

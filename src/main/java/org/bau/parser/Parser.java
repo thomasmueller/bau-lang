@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -350,7 +351,7 @@ public class Parser {
                 Variable var = new Variable("this", type);
                 var.setConstantValue(null);
                 def.parameters.add(var);
-                boolean template = parseFunctionDeclaration(targetModule, def);
+                boolean template = parseFunctionDeclaration(false, targetModule, def);
                 if (template) {
                     throw syntaxError("Template are not supported in traits");
                 }
@@ -575,9 +576,18 @@ public class Parser {
         currentLoop = null;
         int defIndent = indent;
         isGlobalScope = false;
-        String id = readIdentifier();
+        DataType callType;
+        String id = null;
+        boolean template = DataType.isGenericTypeName(token);
+        if (template) {
+            DataType type = DataType.newEmptyType(targetModule, token);
+            functionContext.addTemporaryType(type);
+            callType = readType(true);
+        } else {
+            id = readIdentifier();
+            callType = functionContext.getType(targetModule, id);
+        }
         String typeName = id;
-        DataType callType = functionContext.getType(targetModule, id);
         if (callType != null) {
             if (matchOp("[")) {
                 if (!matchOp("]")) {
@@ -620,7 +630,7 @@ public class Parser {
             matchOp("\n");
             def.name = id;
         } else {
-            if (callType == null) {
+            if (callType == null && !template) {
                 throw syntaxError("Type not found: " + typeName);
             }
             def.callType = callType;
@@ -639,7 +649,7 @@ public class Parser {
             def.parameters.add(var);
             functionContext.addVariable(var);
         }
-        boolean template = parseFunctionDeclaration(targetModule, def);
+        template = parseFunctionDeclaration(template, targetModule, def);
         FunctionDefinition old = program.getFunctionIfExists(def.callType, def.module, def.name, def.parameters.size());
         if (old != null) {
             if (old.list.isEmpty()) {
@@ -650,7 +660,7 @@ public class Parser {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
         }
-        if (scanPhase && !def.macro) {
+        if (scanPhase) {
             if (template) {
                 parseFunctionTemplate(defIndent, def);
                 functionContext.rewindStack(stackPos);
@@ -753,28 +763,23 @@ public class Parser {
         return true;
     }
 
-    private boolean parseFunctionDeclaration(String targetModule, FunctionDefinition def) {
+    private boolean parseFunctionDeclaration(boolean template, String targetModule, FunctionDefinition def) {
         boolean varArgs = false;
-        boolean template = false;
-        DataType hack = null;
+        DataType itType = null;
         if (!matchOp(")")) {
+            HashSet<String> templateTypes = new HashSet<>();
             while (true) {
                 String name = readIdentifier();
                 if (matchOp("(")) {
-                    int hack3;
-                    if (matchOp("?")) {
-                        // anything goes
-                        hack = DataType.INT_TYPE;
-                    } else {
-                        hack = readType(true);
-                    }
-                    def.hack = hack;
+                    itType = readType(true);
+                    def.itType = itType;
                     if (!matchOp(")")) {
                         throw syntaxError("Expected ')'");
                     }
                 }
                 DataType type;
-                if (DataType.isGenericTypeName(token) && !template) {
+                if (DataType.isGenericTypeName(token) && !templateTypes.contains(token)) {
+                    templateTypes.add(token);
                     template = true;
                     type = DataType.newEmptyType(targetModule, token);
                     functionContext.addTemporaryType(type);
@@ -789,6 +794,7 @@ public class Parser {
                 } else if (match("type")) {
                     template = true;
                     type = program.getType(null, DataType.TYPE);
+                    templateTypes.add(name);
                     DataType t = DataType.newEmptyType(targetModule, name);
                     functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
@@ -837,8 +843,7 @@ public class Parser {
         if (match("macro")) {
             def.macro = true;
         }
-        if (hack != null && !def.macro) {
-            int hack2;
+        if (itType != null && !def.macro) {
             throw syntaxError("Hacks are only allowed in macros");
         }
         if (matchOp("\n")) {
@@ -1239,6 +1244,9 @@ public class Parser {
                     expr = new NullValue(targetType);
                 }
                 expr = expr.writeStatements(this, true, target);
+                if (expr == null) {
+                    throw syntaxError("Expression required");
+                }
                 Value constValue = eval(expr, true);
                 if (constValue != null) {
                     if (constValue.isArray() || constValue instanceof Value.ValueRef) {
@@ -1417,18 +1425,26 @@ public class Parser {
                         matchOp("\n");
                         Call call = new Call();
                         call.args.add(left);
-                        parseCall(left.type(), m, f, call, true);
-                        if (".".equals(token)) {
-                            // chained call
-                            left = call;
-                        } else {
-                            readEndOfStatement();
-                            call.statement = true;
-                            Expression expr = call.writeStatements(this, false, target);
-                            if (expr instanceof Call) {
-                                // could return a variable
-                                target.add((Call) call);
+                        Expression expr = parseCall(left.type(), m, f, call, true);
+                        if (expr instanceof Call) {
+                            call = (Call) expr;
+                            if (".".equals(token)) {
+                                // chained call
+                                left = call;
+                            } else {
+                                readEndOfStatement();
+                                call.statement = true;
+                                expr = call.writeStatements(this, false, target);
+                                if (expr instanceof Call) {
+                                    // could return a variable
+                                    target.add((Call) call);
+                                }
+                                return;
                             }
+                        } else {
+                            // eg calling a macro that doesn't return anything
+                            expr.writeStatements(this, false, target);
+                            readEndOfStatement();
                             return;
                         }
                     } else {
@@ -1810,99 +1826,6 @@ public class Parser {
         }
     }
 
-    private Expression parseMacroCall(Call call, FunctionDefinition def) {
-        boolean lastWasComma = false;
-        int pi = 0;
-        if (def.callType != null) {
-            // first argument is "this", so skip it
-            pi++;
-        }
-        ArrayList<Variable> params = new ArrayList<>();
-        ArrayList<Expression> args = new ArrayList<>();
-        DataType type = def.returnType;
-        boolean isGeneric = type != null && DataType.isGenericTypeName(type.name());
-        int stackPos = functionContext.getStackPos();
-        DataType itType = DataType.INT_TYPE;
-        if (def.hack != null) {
-            int hack;
-            itType = def.hack;
-        }
-        Variable it = new Variable("it", itType);
-        functionContext.addVariable(it);
-        for (int i = 0;; i++) {
-            if (matchOp(")")) {
-                break;
-            }
-            boolean checkComma = !lastWasComma && i > 0;
-            if (checkComma) {
-                Expression last = args.get(args.size() - 1);
-                if (!last.isEasyToRead()) {
-                    throw syntaxError("Expected ',' after '" + last
-                            + "' or parentheses around the expression, to make it easier to read");
-                }
-            }
-            Expression p = parseExpression();
-            if (checkComma) {
-                if (!p.isEasyToRead()) {
-                    throw syntaxError("Expected ',' before '" + p
-                            + "' or parentheses around the expression, to make it easier to read");
-                }
-            }
-            Variable var = def.parameters.get(pi);
-            // replace generic types
-            if (isGeneric) {
-                def.parameters.get(pi);
-                if (var.type().name().equals(type.name())) {
-                    type = p.type();
-                }
-            }
-            // first source code, so that we replace that first
-            // (otherwise, the variable is replaced in the field)
-            DataType type2 = program.getType(null, DataType.I8).arrayType();
-            Variable sourceVar = new Variable(var.name() + ".source", type2);
-            StringLiteral sourceCode = new StringLiteral(p.toString(), type2, program);
-            params.add(sourceVar);
-            args.add(sourceCode);
-            List<Variable> vars = p.getVariables();
-            int index = 0;
-            for (Variable v : vars) {
-                if (v.name().equals("it")) {
-                    continue;
-                }
-                Variable px = new Variable(var.name() + ".param" + index, type2);
-                index++;
-                params.add(px);
-                Expression pe = program.cast(v, false, type2);
-                if (pe == null) {
-                    pe = new NullValue(type2);
-                }
-                args.add(pe);
-            }
-            while (index < 10) {
-                Variable px = new Variable(var.name() + ".param" + index, type2);
-                params.add(px);
-                args.add(new NullValue(type2));
-                index++;
-            }
-            Variable pc = new Variable(var.name() + ".paramCount", DataType.INT_TYPE);
-            params.add(pc);
-            args.add(NumberValue.valueOf(index));
-            // needs to be done at the very end at the end,
-            // otherwise fields are not expanded
-            params.add(var);
-            args.add(p);
-            // dangling ',' is supported
-            lastWasComma = matchOp(",");
-            // new line after operation
-            matchOp("\n");
-            pi++;
-        }
-        ArrayList<Statement> list = new ArrayList<Statement>();
-        TernaryExpression result = expandMacro(call, def, type, params, args, list);
-        functionContext.rewindStack(stackPos);
-        return result;
-    }
-
     private TernaryExpression expandMacro(Call call, FunctionDefinition def, DataType type, ArrayList<Variable> params, ArrayList<Expression> args, ArrayList<Statement> list) {
         TernaryExpression ternary = new TernaryExpression();
         ternary.type = type;
@@ -1919,8 +1842,13 @@ public class Parser {
         ternary.condition = replaceAll(condition, params, args);
         if (def.callType != null) {
             Assignment setThis = new Assignment();
-            setThis.leftValue = new Variable("this", def.callType);
-            setThis.type = def.callType;
+            // cannot use def.callType because it might be generic
+            DataType ct = call.args.get(0).type();
+            if (def.itType == null && ct.isArray()) {
+                def.itType = ct.baseType();
+            }
+            setThis.leftValue = new Variable("this", ct);
+            setThis.type = ct;
             setThis.initial = true;
             setThis.isConstant = true;
             setThis.value = call.args.get(0);
@@ -1997,18 +1925,60 @@ public class Parser {
         if (template == null) {
             template = program.getFunctionTemplate(type, null, identifier);
         }
-        if (template != null && template.macro) {
-            return parseMacroCall(call, template);
-        }
         ArrayList<String> templateNames = new ArrayList<>();
         ArrayList<String> templateParams = new ArrayList<>();
+        if (template != null && template.callType != null) {
+            // fill in template params from call type, if generic
+            DataType t = template.callType;
+            if (DataType.isGenericTypeName(t.name())) {
+                templateNames.add(t.name());
+                templateParams.add(type.name());
+                if (t.isArray()) {
+                    templateNames.add(t.baseType().name());
+                    templateParams.add(type.baseType().name());
+                }
+            }
+        }
+        if (template != null && template.macro) {
+            if (!templateNames.isEmpty()) {
+                String code = template.template;
+                code = Templates.convertTemplate(code, templateNames, templateParams);
+                String header = template.toString();
+                header = Templates.convertTemplate(header, "type", "int");
+                header = Templates.convertTemplate(header, templateNames, templateParams);
+                code = header.trim() + "\n" + code;
+                try {
+                    Parser p = new Parser(program, module, code, template.lineOffset);
+                    p.scanPhase = false;
+                    p.read();
+                    p.parseFunctionDefinition(module);
+                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, template.name, template.parameters.size());
+                } catch (IllegalStateException e) {
+                    throw syntaxError("Error parsing template: " + e.getMessage(), e);
+                }
+                String templateCode = template.template;
+                template = call.def;
+                template.template = templateCode;
+            }
+        }
         boolean lastWasComma = false;
-        int pi = 0;
+        int pi = call.args.size(); // including 'this'
+        int paramIndex = 0; // excluding 'this'
+        int stackPos = functionContext.getStackPos();
+        if (template != null && template.macro) {
+            DataType itType = DataType.INT_TYPE;
+            if (template.itType != null) {
+                itType = template.itType;
+            }
+            Variable it = new Variable("it", itType);
+            functionContext.addVariable(it);
+        }
+        HashSet<String> templateTypes = new HashSet<>();
         while (true) {
             if (matchOp(")")) {
                 break;
             }
-            boolean checkComma = !lastWasComma && pi > 0;
+            boolean checkComma = !lastWasComma && paramIndex > 0;
             if (checkComma) {
                 Expression last = call.args.get(call.args.size() - 1);
                 if (!last.isEasyToRead()) {
@@ -2036,14 +2006,15 @@ public class Parser {
                     // template without explicit type parameters
                     // TODO this is not quite correct:
                     // we should probably have have a flag "templateWithoutExplicityParams"
-                    if (templateNames.isEmpty()) {
-                        DataType t = template.parameters.get(pi).type();
-                        if (template.varArgs && pi == template.parameters.size() - 1) {
-                            // the last parameters of a varargs function is an array type
-                            t = t.baseType();
-                        }
-                        String typeName = t.name();
-                        if (DataType.isGenericTypeName(typeName)) {
+                    DataType t = template.parameters.get(pi).type();
+                    if (template.varArgs && pi == template.parameters.size() - 1) {
+                        // the last parameters of a varargs function is an array type
+                        t = t.baseType();
+                    }
+                    String typeName = t.name();
+                    if (DataType.isGenericTypeName(typeName)) {
+                        if (!templateTypes.contains(typeName)) {
+                            templateTypes.add(typeName);
                             templateNames.add(typeName);
                             DataType pt = p.type();
                             templateParams.add(pt.fullName());
@@ -2074,10 +2045,11 @@ public class Parser {
             // new line after operation
             matchOp("\n");
             pi++;
+            paramIndex++;
         }
         if (template != null) {
             String fullName = identifier;
-            for(String t : templateParams) {
+            for (String t : templateParams) {
                 fullName += "_" + t.replace('.', '_').replace("[]", "_array");
             }
             call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
@@ -2091,6 +2063,7 @@ public class Parser {
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code, template.lineOffset);
+                    p.scanPhase = false;
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
@@ -2231,6 +2204,57 @@ public class Parser {
         }
         // owned variables are now null
         call.setBounds(solver, depth, false);
+
+        if (call.def.macro) {
+
+            ArrayList<Variable> params = new ArrayList<>();
+            ArrayList<Expression> args = new ArrayList<>();
+
+            int argCount = call.args.size();
+            for (int i = 0; i < argCount; i++) {
+                if (i == 0 && call.def.callType != null) {
+                    // don't expand "this"
+                    i++;
+                }
+                Expression p = call.args.get(i);
+                Variable var = call.def.parameters.get(i);
+                DataType type2 = program.getType(null, DataType.I8).arrayType();
+                Variable sourceVar = new Variable(var.name() + ".source", type2);
+                StringLiteral sourceCode = new StringLiteral(p.toString(), type2, program);
+                params.add(sourceVar);
+                args.add(sourceCode);
+                Variable astVar = new Variable(var.name() + ".ast", type2);
+                StringLiteral astCode = new StringLiteral(p.toAST(), type2, program);
+                params.add(astVar);
+                args.add(astCode);
+                List<Variable> vars = p.getVariables();
+                Expression varsCode = new NullValue(type2);
+                for (Variable v : vars) {
+                    if (v.name().equals("it")) {
+                        continue;
+                    }
+                    Expression pe = program.cast(v, false, type2);
+                    if (pe != null) {
+                        varsCode = pe;
+                    }
+                }
+                Variable varsVar = new Variable(var.name() + ".values", type2);
+                params.add(varsVar);
+                args.add(varsCode);
+                // needs to be done at the very end at the end,
+                // otherwise fields are not expanded
+                params.add(var);
+                args.add(p);
+            }
+            ArrayList<Statement> list = new ArrayList<Statement>();
+            type = call.def.returnType;
+            TernaryExpression result = expandMacro(call, call.def, type, params, args, list);
+            functionContext.rewindStack(stackPos);
+            return result;
+        }
+
+        functionContext.rewindStack(stackPos);
+
         return call;
     }
 
@@ -3277,9 +3301,9 @@ public class Parser {
                                 && currentFunctionDefinition.macro) {
                             if ("source".equals(f)) {
                                 type = program.getType(null, DataType.I8).arrayType();
-                            } else if ("paramCount".equals(f)) {
+                            } else if ("ast".equals(f)) {
                                 type = DataType.INT_TYPE;
-                            } else if (f.startsWith("param")) {
+                            } else if ("values".equals(f)) {
                                 type = program.getType(null, DataType.I8).arrayType();
                             } else {
                                 throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");

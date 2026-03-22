@@ -104,4 +104,9 @@ public class Borrow implements Expression {
         base.setVariableVersions(name, oldVersion, newVersion);
     }
 
+    @Override
+    public String toAST() {
+        throw new IllegalStateException();
+    }
+
 }

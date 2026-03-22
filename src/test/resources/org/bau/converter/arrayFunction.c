@@ -310,9 +310,9 @@ float_array* float_array_new(uint64_t len) {
 int __argc;
 char **__argv;
 /* functions */
-float_array* arrayOf_float_var(int64_t _T, int _vaCount,...);
-i8_array* arrayOf_i8_var(int64_t _T, int _vaCount,...);
-int_array* arrayOf_int_var(int64_t _T, int _vaCount,...);
+float_array* arrayOf_float_float_var(int64_t _T, int _vaCount,...);
+i8_array* arrayOf_i8_int_var(int64_t _T, int _vaCount,...);
+int_array* arrayOf_int_int_var(int64_t _T, int _vaCount,...);
 float_array* array_float_var(int _vaCount,...);
 int_array* array_int_var(int _vaCount,...);
 void fill_1(int_array* data);
@@ -352,7 +352,7 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
-float_array* arrayOf_float_var(int64_t _T, int _vaCount,...) {
+float_array* arrayOf_float_float_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     float_array* entries = float_array_new(_vaCount);
     va_start(_vaList, _vaCount);
@@ -362,7 +362,7 @@ float_array* arrayOf_float_var(int64_t _T, int _vaCount,...) {
     va_end(_vaList);
     return entries;
 }
-i8_array* arrayOf_i8_var(int64_t _T, int _vaCount,...) {
+i8_array* arrayOf_i8_int_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     i8_array* entries = i8_array_new(_vaCount);
     va_start(_vaList, _vaCount);
@@ -372,7 +372,7 @@ i8_array* arrayOf_i8_var(int64_t _T, int _vaCount,...) {
     va_end(_vaList);
     return entries;
 }
-int_array* arrayOf_int_var(int64_t _T, int _vaCount,...) {
+int_array* arrayOf_int_int_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     int_array* entries = int_array_new(_vaCount);
     va_start(_vaList, _vaCount);
@@ -450,7 +450,7 @@ void _main() {
             break;
         }
     }
-    i8_array* a = arrayOf_i8_var(0, /* argCount */ 5, 0, 1, 2, 3, 44);
+    i8_array* a = arrayOf_i8_int_var(0, /* argCount */ 5, 0, 1, 2, 3, 44);
     if (_arrayLen(a) > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -495,9 +495,9 @@ void _main() {
             break;
         }
     }
-    int_array* x = arrayOf_int_var(0, /* argCount */ 4, 0, 1, 2, 3);
-    float_array* y = arrayOf_float_var(0, /* argCount */ 3, 1.0, 2.0, 3.0);
-    i8_array* z = arrayOf_i8_var(0, /* argCount */ 3, 1, 0, 44);
+    int_array* x = arrayOf_int_int_var(0, /* argCount */ 4, 0, 1, 2, 3);
+    float_array* y = arrayOf_float_float_var(0, /* argCount */ 3, 1.0, 2.0, 3.0);
+    i8_array* z = arrayOf_i8_int_var(0, /* argCount */ 3, 1, 0, 44);
     printf("len %d\n", _arrayLen(z));
     if (_arrayLen(z) > 0) {
         while (1 == 1) {

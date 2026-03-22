@@ -472,4 +472,17 @@ public class Call implements Statement, Expression, LeftValue {
         return list;
     }
 
+    @Override
+    public String toAST() {
+        StringBuilder buff = new StringBuilder();
+        buff.append("call(");
+        buff.append(def.name);
+        for (Expression a : args) {
+            buff.append(",");
+            buff.append(a.toAST());
+        }
+        buff.append(")");
+        return buff.toString();
+    }
+
 }

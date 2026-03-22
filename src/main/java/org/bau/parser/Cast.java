@@ -97,4 +97,9 @@ public class Cast implements Expression {
         return base.getVariables();
     }
 
+    @Override
+    public String toAST() {
+        return "cast(" + base.toAST() + "," + targetType + ")";
+    }
+
 }

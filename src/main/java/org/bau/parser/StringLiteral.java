@@ -167,4 +167,10 @@ public class StringLiteral implements Expression {
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
+    @Override
+    public String toAST() {
+        byte[] data = value.getBytes(StandardCharsets.UTF_8);
+        return "'" + data.length + ":" + value + "'";
+    }
+
 }

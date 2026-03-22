@@ -99,4 +99,9 @@ public class FunctionPointer implements Expression {
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
+    @Override
+    public String toAST() {
+        throw new IllegalStateException();
+    }
+
 }

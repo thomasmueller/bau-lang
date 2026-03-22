@@ -50,12 +50,13 @@ for i := range(1, 10)
         value: 'typesAndConstants',
         label: 'Types and Constants',
         code: `PI : 3.1415
-println('Pi: ' PI)
 
-a : 10_000_000
-b : 3
-println('integer a/b: ', a / b)
-println('float   a/b: ', float(a) / b)
+fun main()
+    println('Pi: ' PI)
+    a : 10_000_000
+    b : 3
+    println('integer a/b: ', a / b)
+    println('float   a/b: ', float(a) / b)
 `
     },
     {

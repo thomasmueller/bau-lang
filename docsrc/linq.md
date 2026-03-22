@@ -54,4 +54,65 @@ Here the implementation and usage of what is currently working:
             println(query.orderBy)
             println(query.orderBy2)
             result : query.execute()
+
+Sorting an array by an expression, printing the AST, capturing values:
+
+    import org.bau.Int
+    
+    type Point
+        x int
+        y float
         
+    fun append(a i8[], b i8[]) i8[]
+        result : i8[a.len + b.len]
+        for i := until(a.len)
+            result[i] = a[i]
+        for i := until(b.len)
+            result[i + a.len] = b[i]
+        return result
+    
+    fun convertIntToI8Array(x int) i8[]
+        return Int.intToString(x)
+    
+    fun T[] sort(by(T) U) macro
+        a : this
+        println('sorting by: ' by.source)
+        println('AST form  : ' by.ast)
+        println('values    : ' by.values)
+        h := 16
+        loop a.len > h / 16
+            h = h + h + h / 4 + 16
+        loop h > 15
+            h = (h - 16) / 9 * 4
+            g : (h + 15) / 16
+            i := g
+            loop i < a.len
+                old := a[i]
+                it := a[i]
+                t : by
+                j := i - g
+                loop j >= 0
+                    it = a[j]
+                    o : by
+                    break o <= t
+                    a[j + g] = a[j]
+                    j -= g
+                a[j + g] = old
+                i += 1
+    
+    fun main()
+        println('c is: ' append(-10, -2))
+        list : Point[2]
+        list[0] = Point()
+        list[1] = Point()
+        list[0].x = 10
+        list[0].y = 1
+        list[1].x = 20
+        list[1].y = 2
+        println('testing')
+        for j := until(3)
+            capturedValue : j
+            list.sort(-it.y + it.x + capturedValue)
+            for i := until(list.len)
+                println(i ': x=' list[i].x ' y=' list[i].y)
+        println('done')

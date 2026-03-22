@@ -319,10 +319,10 @@ org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
     return _t0;
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
-    int_array* _t0 = int_array_new(4);
-    org_bau_List_List_int* _t1 = org_bau_List_List_int_1(_t0);
-    _decUseStack(_t0, int_array);
-    return _t1;
+    int_array* _t1 = int_array_new(4);
+    org_bau_List_List_int* _t2 = org_bau_List_List_int_1(_t1);
+    _decUseStack(_t1, int_array);
+    return _t2;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {

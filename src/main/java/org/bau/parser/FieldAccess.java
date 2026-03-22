@@ -85,12 +85,12 @@ public class FieldAccess implements Expression, LeftValue {
                 && old.name().endsWith(".source")
                 && old.name().startsWith(base.toString() + ".")) {
             return with;
-        } else if (fieldName.equals("paramCount")
-                && old.name().endsWith(".paramCount")
+        } else if (fieldName.equals("ast")
+                && old.name().endsWith(".ast")
                 && old.name().startsWith(base.toString() + ".")) {
             return with;
-        } else if (fieldName.startsWith("param")
-                && old.name().endsWith("." + fieldName)
+        } else if (fieldName.startsWith("values")
+                && old.name().endsWith(".values")
                 && old.name().startsWith(base.toString() + ".")) {
             return with;
         }
@@ -275,6 +275,11 @@ public class FieldAccess implements Expression, LeftValue {
     @Override
     public List<Variable> getVariables() {
         return base.getVariables();
+    }
+
+    @Override
+    public String toAST() {
+        return "field(" + base.toAST() + "," + fieldName + ")";
     }
 
 }

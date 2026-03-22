@@ -418,4 +418,9 @@ public class Variable implements Expression, LeftValue {
         return List.of(this);
     }
 
+    @Override
+    public String toAST() {
+        return "var(" + name + ")";
+    }
+
 }

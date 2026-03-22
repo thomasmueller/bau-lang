@@ -95,4 +95,9 @@ public class Parentheses implements Expression {
         return base.getVariables();
     }
 
+    @Override
+    public String toAST() {
+        return "(" + base + ")";
+    }
+
 }

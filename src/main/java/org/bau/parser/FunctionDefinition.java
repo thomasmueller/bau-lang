@@ -33,7 +33,9 @@ public class FunctionDefinition {
     public boolean isConstructor;
     public boolean isFunctionPointer;
     int traitFunctionId;
-    public DataType hack;
+
+    // the type of the "it" variable
+    public DataType itType;
 
     public FunctionDefinition(int lineOffset) {
         this.lineOffset = lineOffset;
@@ -305,6 +307,11 @@ public class FunctionDefinition {
                 buff.append(", ");
             }
             buff.append(v.name());
+            if (i == first && itType != null) {
+                buff.append('(');
+                buff.append(itType.name());
+                buff.append(')');
+            }
             buff.append(' ');
             if (varArgs && i == parameters.size() - 1) {
                 buff.append(v.type().baseType());
@@ -316,6 +323,9 @@ public class FunctionDefinition {
         buff.append(")");
         if (constExpr) {
             buff.append(" const");
+        }
+        if (macro) {
+            buff.append(" macro");
         }
         if (returnType != null) {
             buff.append(' ');

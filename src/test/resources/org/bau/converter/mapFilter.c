@@ -346,7 +346,7 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1002;
+i8_array* string_1004;
 List_int* List_int_1(int_array* array) {
     List_int* _t0 = List_int_new();
     _incUseStack(array);
@@ -395,10 +395,10 @@ int64_t imod_2(int64_t a, int64_t b) {
     return 0;
 }
 List_int* newList_int_1(int64_t _T) {
-    int_array* _t0 = int_array_new(4);
-    List_int* _t1 = List_int_1(_t0);
-    _decUseStack(_t0, int_array);
-    return _t1;
+    int_array* _t1 = int_array_new(4);
+    List_int* _t2 = List_int_1(_t1);
+    _decUseStack(_t1, int_array);
+    return _t2;
 }
 int_array* range_2(int64_t start, int64_t end) {
     int_array* _t0 = int_array_new(end - start);
@@ -444,14 +444,14 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1002 = str_const(": ", 2);
+    string_1004 = str_const(": ", 2);
     _main();
     return 0;
 }
 void _main() {
-    List_int* _t5 = NULL;
+    List_int* _t4 = NULL;
     if (1) {
-        List_int* _t4 = NULL;
+        List_int* _t3 = NULL;
         if (1) {
             List_int* this = rangeList_2(0, 10);
             List_int* result = newList_int_1(0);
@@ -464,12 +464,12 @@ void _main() {
                 i = i + 1;
             }
             _incUseStack(result);
-            _decUseStack(_t4, List_int);
-            _t4 = result;
+            _decUseStack(_t3, List_int);
+            _t3 = result;
         } else {
         }
-        _incUseStack(_t4);
-        List_int* this = _t4;
+        _incUseStack(_t3);
+        List_int* this = _t3;
         List_int* result = newList_int_1(0);
         int64_t i = 0;
         while (i < this->size) {
@@ -478,18 +478,18 @@ void _main() {
             i = i + 1;
         }
         _incUseStack(result);
-        _decUseStack(_t5, List_int);
-        _t5 = result;
+        _decUseStack(_t4, List_int);
+        _t4 = result;
     } else {
     }
-    _incUseStack(_t5);
-    List_int* list = _t5;
+    _incUseStack(_t4);
+    List_int* list = _t4;
     if (list->size > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t6 = List_int_get_2(list, i);
-                printf("%lld: %lld\n", (long long)i, (long long)_t6);
+                int64_t _t5 = List_int_get_2(list, i);
+                printf("%lld: %lld\n", (long long)i, (long long)_t5);
                 int64_t _next = i + 1;
                 if (_next >= list->size) {
                     break;
@@ -499,14 +499,14 @@ void _main() {
             break;
         }
     }
-    int_array* _t8 = NULL;
+    int_array* _t7 = NULL;
     if (1) {
-        int_array* _t7 = NULL;
+        int_array* _t6 = NULL;
         if (1) {
             int_array* this = range_2(0, 10);
-            int_array* _t2 = int_array_new(_arrayLen(this));
-            _incUseStack(_t2);
-            int_array* temp = _t2;
+            int_array* _t0 = int_array_new(_arrayLen(this));
+            _incUseStack(_t0);
+            int_array* temp = _t0;
             int64_t j = 0;
             int64_t i = 0;
             while (i < _arrayLen(this)) {
@@ -517,24 +517,24 @@ void _main() {
                 }
                 i = i + 1;
             }
-            int_array* _t3 = int_array_new(j);
-            _incUseStack(_t3);
-            int_array* result = _t3;
+            int_array* _t1 = int_array_new(j);
+            _incUseStack(_t1);
+            int_array* result = _t1;
             i = 0;
             while (i < j) {
                 result->data[idx_2(i, _arrayLen(result))] = temp->data[idx_2(i, _arrayLen(temp))];
                 i = i + 1;
             }
             _incUseStack(result);
-            _decUseStack(_t7, int_array);
-            _t7 = result;
+            _decUseStack(_t6, int_array);
+            _t6 = result;
         } else {
         }
-        _incUseStack(_t7);
-        int_array* this = _t7;
-        int_array* _t1 = int_array_new(_arrayLen(this));
-        _incUseStack(_t1);
-        int_array* result = _t1;
+        _incUseStack(_t6);
+        int_array* this = _t6;
+        int_array* _t0 = int_array_new(_arrayLen(this));
+        _incUseStack(_t0);
+        int_array* result = _t0;
         int64_t i = 0;
         while (i < _arrayLen(this)) {
             int64_t it = this->data[idx_2(i, _arrayLen(this))];
@@ -542,12 +542,12 @@ void _main() {
             i = i + 1;
         }
         _incUseStack(result);
-        _decUseStack(_t8, int_array);
-        _t8 = result;
+        _decUseStack(_t7, int_array);
+        _t7 = result;
     } else {
     }
-    _incUseStack(_t8);
-    int_array* array = _t8;
+    _incUseStack(_t7);
+    int_array* array = _t7;
     if (_arrayLen(array) > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -563,8 +563,8 @@ void _main() {
         }
     }
     _decUseStack(array, int_array);
-    _decUseStack(_t8, int_array);
+    _decUseStack(_t7, int_array);
     _decUseStack(list, List_int);
-    _decUseStack(_t5, List_int);
+    _decUseStack(_t4, List_int);
     _end();
 }

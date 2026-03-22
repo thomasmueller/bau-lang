@@ -341,14 +341,14 @@ int64_t org_bau_HashMap_mix_1(int64_t z) {
     return _r0;
 }
 org_bau_HashMap_HashMap_int_int* org_bau_HashMap_newHashMap_int_int_2(int64_t _K, int64_t _V) {
-    int_array* _t0 = int_array_new(4);
     int_array* _t1 = int_array_new(4);
     int_array* _t2 = int_array_new(4);
-    org_bau_HashMap_HashMap_int_int* _t3 = org_bau_HashMap_HashMap_int_int_3(_t0, _t1, _t2);
+    int_array* _t3 = int_array_new(4);
+    org_bau_HashMap_HashMap_int_int* _t4 = org_bau_HashMap_HashMap_int_int_3(_t1, _t2, _t3);
+    _decUseStack(_t3, int_array);
     _decUseStack(_t2, int_array);
     _decUseStack(_t1, int_array);
-    _decUseStack(_t0, int_array);
-    return _t3;
+    return _t4;
 }
 int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key) {
     int64_t p = hash & (_arrayLen(this->keys) - 1);
@@ -461,8 +461,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t1 = org_bau_HashMap_mix_1(i);
-                org_bau_HashMap_HashMap_int_int_put_4(map, _t1, i, i * 10);
+                int64_t _t5 = org_bau_HashMap_mix_1(i);
+                org_bau_HashMap_HashMap_int_int_put_4(map, _t5, i, i * 10);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;
@@ -476,9 +476,9 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t2 = org_bau_HashMap_mix_1(i);
-                int64_t _t3 = org_bau_HashMap_HashMap_int_int_get_3(map, _t2, i);
-                printf("%lld\n", (long long)_t3);
+                int64_t _t6 = org_bau_HashMap_mix_1(i);
+                int64_t _t7 = org_bau_HashMap_HashMap_int_int_get_3(map, _t6, i);
+                printf("%lld\n", (long long)_t7);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;

@@ -274,7 +274,7 @@ int_array* int_array_new(uint64_t len) {
 int __argc;
 char **__argv;
 /* functions */
-void bubbleSort_int_var(int64_t _T, int _vaCount,...);
+void bubbleSort_int_int_var(int64_t _T, int _vaCount,...);
 void int_array_free(int_array* x);
 void int_array_free_0(int_array* x) {
     _free(x->data); _traceFree(x->data);
@@ -283,7 +283,7 @@ void int_array_free_0(int_array* x) {
 void int_array_free(int_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
-void bubbleSort_int_var(int64_t _T, int _vaCount,...) {
+void bubbleSort_int_int_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     int_array* array = int_array_new(_vaCount);
     va_start(_vaList, _vaCount);
@@ -343,6 +343,6 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    bubbleSort_int_var(0, /* argCount */ 3, 1, 3, 2);
+    bubbleSort_int_int_var(0, /* argCount */ 3, 1, 3, 2);
     _end();
 }

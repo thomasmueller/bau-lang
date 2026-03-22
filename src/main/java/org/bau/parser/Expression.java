@@ -73,4 +73,6 @@ public interface Expression {
         return List.of();
     }
 
+    public String toAST();
+
 }

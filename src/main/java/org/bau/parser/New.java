@@ -166,4 +166,9 @@ public class New implements Expression {
         return arrayLength.getVariables();
     }
 
+    @Override
+    public String toAST() {
+        return "new(" + type.name() + ")";
+    }
+
 }

@@ -108,11 +108,9 @@ public class BasicBlock {
             }
             set.remove(phiVersions.get(n));
             if (set.size() == 0) {
-                int todo;
                 localVersions.remove(n);
                 phiSources.remove(n);
                 phiVersions.remove(n);
-                // throw new IllegalStateException();
             }
         }
     }

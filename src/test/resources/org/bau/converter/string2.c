@@ -423,10 +423,10 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     return _t2;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
-    org_bau_String_string_array* _t0 = org_bau_String_string_array_new(4);
-    org_bau_List_List_org_bau_String_string* _t1 = org_bau_List_List_org_bau_String_string_1(_t0);
-    _decUseStack(_t0, org_bau_String_string_array);
-    return _t1;
+    org_bau_String_string_array* _t3 = org_bau_String_string_array_new(4);
+    org_bau_List_List_org_bau_String_string* _t4 = org_bau_List_List_org_bau_String_string_1(_t3);
+    _decUseStack(_t3, org_bau_String_string_array);
+    return _t4;
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     if (this->size >= _arrayLen(this->array)) {

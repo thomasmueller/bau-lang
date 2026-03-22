@@ -87,4 +87,10 @@ public class NullValue implements Expression {
     @Override
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
+
+    @Override
+    public String toAST() {
+        return "null";
+    }
+
 }

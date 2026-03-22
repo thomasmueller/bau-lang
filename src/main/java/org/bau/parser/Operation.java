@@ -727,4 +727,17 @@ public class Operation implements Expression {
         return list;
     }
 
+    @Override
+    public String toAST() {
+        StringBuilder buff = new StringBuilder();
+        buff.append(operator).append("(");
+        if (left != null) {
+            buff.append(left.toAST());
+        }
+        buff.append(",");
+        buff.append(right.toAST());
+        buff.append(")");
+        return buff.toString();
+    }
+
 }

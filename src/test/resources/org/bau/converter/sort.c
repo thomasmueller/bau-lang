@@ -346,12 +346,12 @@ void shellSort_int_array_int_1(int_array* a) {
                 int64_t t = a->data[idx_2(i, _arrayLen(a))];
                 int64_t j = i - g;
                 while (1 == 1) {
-                    int64_t _t0 = j >= 0;
-                    if (_t0) {
-                        int64_t _t1 = a->data[idx_2(j, _arrayLen(a))] > t;
-                        _t0 = _t1;
+                    int64_t _t2 = j >= 0;
+                    if (_t2) {
+                        int64_t _t3 = a->data[idx_2(j, _arrayLen(a))] > t;
+                        _t2 = _t3;
                     }
-                    if (!(_t0)) {
+                    if (!(_t2)) {
                         break;
                     }
                     a->data[idx_2(j + g, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];

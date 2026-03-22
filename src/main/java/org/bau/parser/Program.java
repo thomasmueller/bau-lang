@@ -100,6 +100,16 @@ public class Program {
 
     public FunctionDefinition getFunctionTemplate(DataType type, String module, String name) {
         String id = FunctionDefinition.getFunctionId(type, module, name, 0);
+        FunctionDefinition def = functionTemplates.get(id);
+        if (def != null || type == null) {
+            return def;
+        }
+        // generic T function
+        DataType t2 = DataType.newEmptyType(module, "T");
+        if (type.isArray()) {
+            t2 = t2.arrayType();
+        }
+        id = FunctionDefinition.getFunctionId(t2, module, name, 0);
         return functionTemplates.get(id);
     }
 

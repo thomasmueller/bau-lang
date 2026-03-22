@@ -19,6 +19,9 @@ public class TernaryExpression implements Expression {
 
     @Override
     public Value eval(Memory memory) {
+        if (memory == null) {
+            return null;
+        }
         Value v = condition.eval(memory);
         if (v == null || v instanceof ValuePanic) {
             return v;
@@ -171,6 +174,11 @@ public class TernaryExpression implements Expression {
         for (Statement s : ifFalseStatements) {
             s.setVariableVersions(name, oldVersion, newVersion);
         }
+    }
+
+    @Override
+    public String toAST() {
+        throw new IllegalStateException();
     }
 
 }

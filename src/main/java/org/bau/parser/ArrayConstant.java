@@ -100,4 +100,10 @@ public class ArrayConstant implements Expression {
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
+    @Override
+    public String toAST() {
+        throw new IllegalStateException();
+        // return "arrayConstant(" + data + ")";
+    }
+
 }

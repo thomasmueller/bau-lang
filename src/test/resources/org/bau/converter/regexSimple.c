@@ -802,16 +802,16 @@ org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
     return _t1;
 }
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T) {
-    Token_array* _t0 = Token_array_new(4);
-    org_bau_List_List_Token* _t1 = org_bau_List_List_Token_1(_t0);
-    _decUseStack(_t0, Token_array);
-    return _t1;
+    Token_array* _t5 = Token_array_new(4);
+    org_bau_List_List_Token* _t6 = org_bau_List_List_Token_1(_t5);
+    _decUseStack(_t5, Token_array);
+    return _t6;
 }
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T) {
-    i8_array* _t0 = i8_array_new(4);
-    org_bau_List_List_i8* _t1 = org_bau_List_List_i8_1(_t0);
-    _decUseStack(_t0, i8_array);
-    return _t1;
+    i8_array* _t7 = i8_array_new(4);
+    org_bau_List_List_i8* _t8 = org_bau_List_List_i8_1(_t7);
+    _decUseStack(_t7, i8_array);
+    return _t8;
 }
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     if (this->size >= _arrayLen(this->array)) {

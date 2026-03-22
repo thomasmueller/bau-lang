@@ -133,4 +133,9 @@ public class NumberValue implements Expression {
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
+    @Override
+    public String toAST() {
+        return "0(" + value.toString() + ")";
+    }
+
 }
