@@ -6,13 +6,15 @@ Here the implementation and usage of what is currently working:
     import org.bau.Int
     import org.bau.String
     
-    type Any
-    
     type Query(T)
         name i8[]
         condition i8[]
         orderBy i8[]
         orderBy2 i8[]
+    
+    type Address
+        id int
+        name i8[]
     
     fun newQuery(T type) Query(T)
         result : Query(T)(T.name, i8[0], i8[0], i8[0])
@@ -23,16 +25,13 @@ Here the implementation and usage of what is currently working:
     
     fun Query(T) where(condition(T) int) macro Query(T)
         this.condition = condition.source
-        if condition.paramCount > 0
-            p0 : condition.param0
-            # TODO support parameters
         return this
     
-    fun Query(T) orderBy(column(T) Any) macro Query(T)
+    fun Query(T) orderBy(column(T) U) macro Query(T)
         this.orderBy = column.source
         return this
     
-    fun Query(T) then(column(T) Any) macro Query(T)
+    fun Query(T) thenBy(column(T) U) macro Query(T)
         this.orderBy2 = column.source
         return this
     
@@ -40,15 +39,20 @@ Here the implementation and usage of what is currently working:
         result := newList(T)
         return result
     
-    type Address
-        id int
-        name i8[]
-    
     fun main()
+        println('one ')
+        aa : Address[0]
+        bb : newList(Address)
         for i := until(3)
-            query : newQuery(Address).
-                where(it.id == i and it.name.len < 20).
-                orderBy(it.name).then(it.id)
+            println('two ' i)
+            query := newQuery(Address)
+            println('4 ' i)
+            query = query.where(i == 1)
+            println('5 ' i)
+            query = query.orderBy(it.name)
+            println('6 ' i)
+            query = query.thenBy(it.id)
+            println('7 ' i)
             println(query.name)
             println(query.condition)
             println(query.orderBy)

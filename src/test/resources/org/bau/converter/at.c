@@ -826,30 +826,30 @@ int64_t VARIABLE;
 int64_t RETURN;
 int64_t LIST;
 At* At_9(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value, Value* returnValue) {
-    At* _t45 = At_new();
+    At* _t79 = At_new();
     _incUseStack(global);
-    _t45->global = global;
+    _t79->global = global;
     _incUseStack(local);
-    _t45->local = local;
+    _t79->local = local;
     _incUseStack(functions);
-    _t45->functions = functions;
+    _t79->functions = functions;
     _incUseStack(stack);
-    _t45->stack = stack;
+    _t79->stack = stack;
     _incUseStack(out);
-    _t45->out = out;
+    _t79->out = out;
     org_bau_String_string_copy(&code);
-    _t45->code = code;
+    _t79->code = code;
     org_bau_String_string_copy(&token);
-    _t45->token = token;
+    _t79->token = token;
     _incUseStack(value);
-    _t45->value = value;
-    _t45->pos = 0;
+    _t79->value = value;
+    _t79->pos = 0;
     _incUseStack(returnValue);
-    _t45->returnValue = returnValue;
-    _t45->hasReturnValue = 0;
-    _t45->counter = 0;
-    _t45->inOperator = 0;
-    return _t45;
+    _t79->returnValue = returnValue;
+    _t79->hasReturnValue = 0;
+    _t79->counter = 0;
+    _t79->inOperator = 0;
+    return _t79;
 }
 Value* At_call_3(At* this, org_bau_String_string name, Expr_array* argList) {
     org_bau_List_List_Expr* m = At_getFunction_2(this, name);
@@ -2108,21 +2108,21 @@ void At_setFunction_3(At* this, org_bau_String_string name, Expr* expr) {
     org_bau_HashMap_HashMap_org_bau_String_string_Expr_put_4(this->functions, _t0, name, expr);
 }
 Expr* Expr_3(org_bau_String_string name, Value* value, org_bau_List_List_Expr* list) {
-    Expr* _t41 = Expr_new();
-    _t41->exprType = 0;
+    Expr* _t47 = Expr_new();
+    _t47->exprType = 0;
     org_bau_String_string_copy(&name);
-    _t41->name = name;
+    _t47->name = name;
     _incUseStack(value);
-    _t41->value = value;
+    _t47->value = value;
     _incUseStack(list);
-    _t41->list = list;
-    return _t41;
+    _t47->list = list;
+    return _t47;
 }
 Value* Value_1(org_bau_List_List_float* list) {
-    Value* _t39 = Value_new();
+    Value* _t43 = Value_new();
     _incUseStack(list);
-    _t39->list = list;
-    return _t39;
+    _t43->list = list;
+    return _t43;
 }
 void Value_add_2(Value* this, double x) {
     org_bau_List_List_float_add_2(this->list, x);
@@ -2280,26 +2280,26 @@ void org_bau_Arrays_reverse_i8_array_i8_3(i8_array* buff, int64_t first, int64_t
     }
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Expr* org_bau_HashMap_HashMap_org_bau_String_string_Expr_3(org_bau_String_string_array* keys, Expr_array* values, int_array* hashes) {
-    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t43 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_new();
-    _t43->size = 0;
+    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t62 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_new();
+    _t62->size = 0;
     _incUseStack(keys);
-    _t43->keys = keys;
+    _t62->keys = keys;
     _incUseStack(values);
-    _t43->values = values;
+    _t62->values = values;
     _incUseStack(hashes);
-    _t43->hashes = hashes;
-    return _t43;
+    _t62->hashes = hashes;
+    return _t62;
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_HashMap_HashMap_org_bau_String_string_Value_3(org_bau_String_string_array* keys, Value_array* values, int_array* hashes) {
-    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t42 = org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
-    _t42->size = 0;
+    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t48 = org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+    _t48->size = 0;
     _incUseStack(keys);
-    _t42->keys = keys;
+    _t48->keys = keys;
     _incUseStack(values);
-    _t42->values = values;
+    _t48->values = values;
     _incUseStack(hashes);
-    _t42->hashes = hashes;
-    return _t42;
+    _t48->hashes = hashes;
+    return _t48;
 }
 int64_t org_bau_HashMap_hashCode_1(i8_array* data) {
     if (_arrayLen(data) <= 0) {
@@ -2342,58 +2342,62 @@ int64_t org_bau_HashMap_hashCode_1(i8_array* data) {
     return _r0;
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Expr* org_bau_HashMap_newHashMap_org_bau_String_string_Expr_2(int64_t _K, int64_t _V) {
-    org_bau_String_string_array* _t54 = org_bau_String_string_array_new(4);
-    Expr_array* _t55 = Expr_array_new(4);
-    int_array* _t56 = int_array_new(4);
-    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t57 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_3(_t54, _t55, _t56);
-    _decUseStack(_t56, int_array);
-    _decUseStack(_t55, Expr_array);
-    _decUseStack(_t54, org_bau_String_string_array);
-    return _t57;
+    org_bau_String_string_array* _t88 = org_bau_String_string_array_new(4);
+    Expr_array* _t89 = Expr_array_new(4);
+    int_array* _t90 = int_array_new(4);
+    org_bau_HashMap_HashMap_org_bau_String_string_Expr* _t91 = org_bau_HashMap_HashMap_org_bau_String_string_Expr_3(_t88, _t89, _t90);
+    _decUseStack(_t90, int_array);
+    _decUseStack(_t89, Expr_array);
+    _decUseStack(_t88, org_bau_String_string_array);
+    return _t91;
 }
 org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_HashMap_newHashMap_org_bau_String_string_Value_2(int64_t _K, int64_t _V) {
-    org_bau_String_string_array* _t46 = org_bau_String_string_array_new(4);
-    Value_array* _t47 = Value_array_new(4);
-    int_array* _t48 = int_array_new(4);
-    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t49 = org_bau_HashMap_HashMap_org_bau_String_string_Value_3(_t46, _t47, _t48);
-    _decUseStack(_t48, int_array);
-    _decUseStack(_t47, Value_array);
-    _decUseStack(_t46, org_bau_String_string_array);
-    return _t49;
+    org_bau_String_string_array* _t80 = org_bau_String_string_array_new(4);
+    Value_array* _t81 = Value_array_new(4);
+    int_array* _t82 = int_array_new(4);
+    org_bau_HashMap_HashMap_org_bau_String_string_Value* _t83 = org_bau_HashMap_HashMap_org_bau_String_string_Value_3(_t80, _t81, _t82);
+    _decUseStack(_t82, int_array);
+    _decUseStack(_t81, Value_array);
+    _decUseStack(_t80, org_bau_String_string_array);
+    return _t83;
 }
 Expr* org_bau_HashMap_HashMap_org_bau_String_string_Expr_get_3(org_bau_HashMap_HashMap_org_bau_String_string_Expr* this, int64_t hash, org_bau_String_string key) {
+    org_bau_String_string_copy(&key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
         if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
             _incUseStack(this->values->data[idx_2(p, _arrayLen(this->values))]);
             Expr* _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
+            org_bau_String_string_free(&key);
             return _r0;
         } else {
-            int64_t _t0 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t0) {
-                int64_t _t1 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t0 = _t1;
+            int64_t _t68 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t68) {
+                int64_t _t69 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t68 = _t69;
             }
-            if (_t0) {
+            if (_t68) {
                 _incUseStack(this->values->data[idx_2(p, _arrayLen(this->values))]);
                 Expr* _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
+                org_bau_String_string_free(&key);
                 return _r1;
             }
         }
         p = (p + 1) & (_arrayLen(this->keys) - 1);
     }
+    org_bau_String_string_free(&key);
 }
 void org_bau_HashMap_HashMap_org_bau_String_string_Expr_put_4(org_bau_HashMap_HashMap_org_bau_String_string_Expr* this, int64_t hash, org_bau_String_string key, Expr* value) {
     if (( this->size * 2 ) >= _arrayLen(this->keys)) {
-        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t0);
-        org_bau_String_string_array* kn = _t0;
-        Expr_array* _t1 = Expr_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t1);
-        Expr_array* vn = _t1;
-        int_array* _t2 = int_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t2);
-        int_array* hn = _t2;
+        org_bau_String_string_array* _t63 = org_bau_String_string_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t63);
+        org_bau_String_string_array* kn = _t63;
+        Expr_array* _t64 = Expr_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t64);
+        Expr_array* vn = _t64;
+        int_array* _t65 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t65);
+        int_array* hn = _t65;
         _incUseStack(this->keys);
         org_bau_String_string_array* ok = this->keys;
         _incUseStack(this->hashes);
@@ -2429,20 +2433,20 @@ void org_bau_HashMap_HashMap_org_bau_String_string_Expr_put_4(org_bau_HashMap_Ha
         _decUseStack(oh, int_array);
         _decUseStack(ok, org_bau_String_string_array);
         _decUseStack(hn, int_array);
-        _decUseStack(_t2, int_array);
+        _decUseStack(_t65, int_array);
         _decUseStack(vn, Expr_array);
-        _decUseStack(_t1, Expr_array);
+        _decUseStack(_t64, Expr_array);
         _decUseStack(kn, org_bau_String_string_array);
-        _decUseStack(_t0, org_bau_String_string_array);
+        _decUseStack(_t63, org_bau_String_string_array);
     }
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t3 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t3) {
-            int64_t _t4 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t3 = _t4;
+        int64_t _t66 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t66) {
+            int64_t _t67 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t66 = _t67;
         }
-        if (_t3) {
+        if (_t66) {
             _incUseStack(value);
             _decUse(this->values->data[idx_2(p, _arrayLen(this->values))], Expr);
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
@@ -2463,38 +2467,42 @@ void org_bau_HashMap_HashMap_org_bau_String_string_Expr_put_4(org_bau_HashMap_Ha
     }
 }
 Value* org_bau_HashMap_HashMap_org_bau_String_string_Value_get_3(org_bau_HashMap_HashMap_org_bau_String_string_Value* this, int64_t hash, org_bau_String_string key) {
+    org_bau_String_string_copy(&key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
         if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
             _incUseStack(this->values->data[idx_2(p, _arrayLen(this->values))]);
             Value* _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
+            org_bau_String_string_free(&key);
             return _r0;
         } else {
-            int64_t _t0 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t0) {
-                int64_t _t1 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t0 = _t1;
+            int64_t _t54 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t54) {
+                int64_t _t55 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t54 = _t55;
             }
-            if (_t0) {
+            if (_t54) {
                 _incUseStack(this->values->data[idx_2(p, _arrayLen(this->values))]);
                 Value* _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
+                org_bau_String_string_free(&key);
                 return _r1;
             }
         }
         p = (p + 1) & (_arrayLen(this->keys) - 1);
     }
+    org_bau_String_string_free(&key);
 }
 void org_bau_HashMap_HashMap_org_bau_String_string_Value_put_4(org_bau_HashMap_HashMap_org_bau_String_string_Value* this, int64_t hash, org_bau_String_string key, Value* value) {
     if (( this->size * 2 ) >= _arrayLen(this->keys)) {
-        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t0);
-        org_bau_String_string_array* kn = _t0;
-        Value_array* _t1 = Value_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t1);
-        Value_array* vn = _t1;
-        int_array* _t2 = int_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t2);
-        int_array* hn = _t2;
+        org_bau_String_string_array* _t49 = org_bau_String_string_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t49);
+        org_bau_String_string_array* kn = _t49;
+        Value_array* _t50 = Value_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t50);
+        Value_array* vn = _t50;
+        int_array* _t51 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t51);
+        int_array* hn = _t51;
         _incUseStack(this->keys);
         org_bau_String_string_array* ok = this->keys;
         _incUseStack(this->hashes);
@@ -2530,20 +2538,20 @@ void org_bau_HashMap_HashMap_org_bau_String_string_Value_put_4(org_bau_HashMap_H
         _decUseStack(oh, int_array);
         _decUseStack(ok, org_bau_String_string_array);
         _decUseStack(hn, int_array);
-        _decUseStack(_t2, int_array);
+        _decUseStack(_t51, int_array);
         _decUseStack(vn, Value_array);
-        _decUseStack(_t1, Value_array);
+        _decUseStack(_t50, Value_array);
         _decUseStack(kn, org_bau_String_string_array);
-        _decUseStack(_t0, org_bau_String_string_array);
+        _decUseStack(_t49, org_bau_String_string_array);
     }
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t3 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t3) {
-            int64_t _t4 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t3 = _t4;
+        int64_t _t52 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t52) {
+            int64_t _t53 = org_bau_String_string_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t52 = _t53;
         }
-        if (_t3) {
+        if (_t52) {
             _incUseStack(value);
             _decUse(this->values->data[idx_2(p, _arrayLen(this->values))], Value);
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
@@ -2636,49 +2644,50 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     return result;
 }
 org_bau_List_List_Expr* org_bau_List_List_Expr_1(Expr_array* array) {
-    org_bau_List_List_Expr* _t40 = org_bau_List_List_Expr_new();
-    _incUseStack(array);
-    _t40->array = array;
-    _t40->size = 0;
-    return _t40;
-}
-org_bau_List_List_float* org_bau_List_List_float_1(float_array* array) {
-    org_bau_List_List_float* _t38 = org_bau_List_List_float_new();
-    _incUseStack(array);
-    _t38->array = array;
-    _t38->size = 0;
-    return _t38;
-}
-org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(org_bau_HashMap_HashMap_org_bau_String_string_Value_array* array) {
-    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t44 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+    org_bau_List_List_Expr* _t44 = org_bau_List_List_Expr_new();
     _incUseStack(array);
     _t44->array = array;
     _t44->size = 0;
     return _t44;
 }
+org_bau_List_List_float* org_bau_List_List_float_1(float_array* array) {
+    org_bau_List_List_float* _t40 = org_bau_List_List_float_new();
+    _incUseStack(array);
+    _t40->array = array;
+    _t40->size = 0;
+    return _t40;
+}
+org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(org_bau_HashMap_HashMap_org_bau_String_string_Value_array* array) {
+    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t76 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_new();
+    _incUseStack(array);
+    _t76->array = array;
+    _t76->size = 0;
+    return _t76;
+}
 org_bau_List_List_Expr* org_bau_List_newList_Expr_1(int64_t _T) {
-    Expr_array* _t52 = Expr_array_new(4);
-    org_bau_List_List_Expr* _t53 = org_bau_List_List_Expr_1(_t52);
-    _decUseStack(_t52, Expr_array);
-    return _t53;
+    Expr_array* _t86 = Expr_array_new(4);
+    org_bau_List_List_Expr* _t87 = org_bau_List_List_Expr_1(_t86);
+    _decUseStack(_t86, Expr_array);
+    return _t87;
 }
 org_bau_List_List_float* org_bau_List_newList_float_1(int64_t _T) {
-    float_array* _t50 = float_array_new(4);
-    org_bau_List_List_float* _t51 = org_bau_List_List_float_1(_t50);
-    _decUseStack(_t50, float_array);
-    return _t51;
+    float_array* _t84 = float_array_new(4);
+    org_bau_List_List_float* _t85 = org_bau_List_List_float_1(_t84);
+    _decUseStack(_t84, float_array);
+    return _t85;
 }
 org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_List_newList_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(int64_t _T) {
-    org_bau_HashMap_HashMap_org_bau_String_string_Value_array* _t58 = org_bau_HashMap_HashMap_org_bau_String_string_Value_array_new(4);
-    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t59 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(_t58);
-    _decUseStack(_t58, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
-    return _t59;
+    org_bau_HashMap_HashMap_org_bau_String_string_Value_array* _t92 = org_bau_HashMap_HashMap_org_bau_String_string_Value_array_new(4);
+    org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* _t93 = org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_1(_t92);
+    _decUseStack(_t92, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
+    return _t93;
 }
 void org_bau_List_List_Expr_add_2(org_bau_List_List_Expr* this, Expr* x) {
+    _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Expr_array* _t0 = Expr_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t0);
-        Expr_array* n = _t0;
+        Expr_array* _t45 = Expr_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t45);
+        Expr_array* n = _t45;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -2699,17 +2708,18 @@ void org_bau_List_List_Expr_add_2(org_bau_List_List_Expr* this, Expr* x) {
         _decUse(this->array, Expr_array);
         this->array = n;
         _decUseStack(n, Expr_array);
-        _decUseStack(_t0, Expr_array);
+        _decUseStack(_t45, Expr_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Expr);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
+    _decUseStack(x, Expr);
 }
 Expr* org_bau_List_List_Expr_get_2(org_bau_List_List_Expr* this, int64_t x) {
     _incUseStack(this->array->data[idx_2(x, _arrayLen(this->array))]);
-    Expr* _r0 = this->array->data[idx_2(x, _arrayLen(this->array))];
-    return _r0;
+    Expr* _r1 = this->array->data[idx_2(x, _arrayLen(this->array))];
+    return _r1;
 }
 int64_t org_bau_List_List_Expr_len_1(org_bau_List_List_Expr* this) {
     int64_t _r0 = this->size;
@@ -2717,9 +2727,9 @@ int64_t org_bau_List_List_Expr_len_1(org_bau_List_List_Expr* this) {
 }
 void org_bau_List_List_float_add_2(org_bau_List_List_float* this, double x) {
     if (this->size >= _arrayLen(this->array)) {
-        float_array* _t0 = float_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t0);
-        float_array* n = _t0;
+        float_array* _t41 = float_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t41);
+        float_array* n = _t41;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -2738,24 +2748,25 @@ void org_bau_List_List_float_add_2(org_bau_List_List_float* this, double x) {
         _decUse(this->array, float_array);
         this->array = n;
         _decUseStack(n, float_array);
-        _decUseStack(_t0, float_array);
+        _decUseStack(_t41, float_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
 }
 double org_bau_List_List_float_get_2(org_bau_List_List_float* this, int64_t x) {
-    double _r0 = this->array->data[idx_2(x, _arrayLen(this->array))];
-    return _r0;
+    double _r1 = this->array->data[idx_2(x, _arrayLen(this->array))];
+    return _r1;
 }
 int64_t org_bau_List_List_float_len_1(org_bau_List_List_float* this) {
     int64_t _r0 = this->size;
     return _r0;
 }
 void org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_add_2(org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* this, org_bau_HashMap_HashMap_org_bau_String_string_Value* x) {
+    _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_HashMap_HashMap_org_bau_String_string_Value_array* _t0 = org_bau_HashMap_HashMap_org_bau_String_string_Value_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t0);
-        org_bau_HashMap_HashMap_org_bau_String_string_Value_array* n = _t0;
+        org_bau_HashMap_HashMap_org_bau_String_string_Value_array* _t77 = org_bau_HashMap_HashMap_org_bau_String_string_Value_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t77);
+        org_bau_HashMap_HashMap_org_bau_String_string_Value_array* n = _t77;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -2776,12 +2787,13 @@ void org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_add_2
         _decUse(this->array, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
         this->array = n;
         _decUseStack(n, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
-        _decUseStack(_t0, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
+        _decUseStack(_t77, org_bau_HashMap_HashMap_org_bau_String_string_Value_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], org_bau_HashMap_HashMap_org_bau_String_string_Value);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
+    _decUseStack(x, org_bau_HashMap_HashMap_org_bau_String_string_Value);
 }
 void org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value_remove_2(org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* this, int64_t pos) {
     while (pos < ( this->size - 1 )) {

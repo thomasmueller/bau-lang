@@ -660,13 +660,13 @@ public class Parser {
                 throw syntaxError("Function '" + def.name + "' already has an implementation");
             }
         }
-        if (scanPhase) {
-            if (template) {
-                parseFunctionTemplate(defIndent, def);
-                functionContext.rewindStack(stackPos);
-                currentFunctionDefinition = null;
-                return true;
-            }
+        if (scanPhase && template) {
+            parseFunctionTemplate(defIndent, def);
+            functionContext.rewindStack(stackPos);
+            currentFunctionDefinition = null;
+            return true;
+        }
+        if (scanPhase || template) {
             int startCode = lastPos;
             String s = parseBlock(defIndent);
             String header = text.substring(startParse, startCode).trim() + "\n";
@@ -897,6 +897,13 @@ public class Parser {
         for (String p : t.parameters) {
             buff.append("_@@").append(p + "_").append("@@");
         }
+        for (String p : t.parameters) {
+            String find = t.name() + "(" + p + ")";
+            String replace = t.name() + "_@@" + p + "_@@";
+            if (functionName.indexOf(find) >= 0) {
+                functionName = functionName.replace(find, replace);
+            }
+        }
         buff.append(" " + functionName + "\n");
         buff.append(code);
         t.lineOffset = getLine(lastPos);
@@ -1058,6 +1065,7 @@ public class Parser {
             code = "type " + typeId + "\n" + code;
             try {
                 Parser p = new Parser(program, module, code, t.lineOffset);
+                p.scanPhase = false;
                 p.read();
                 p.parseTypeDefinition(t.module());
                 while (p.type != TokenType.END) {
@@ -1941,9 +1949,9 @@ public class Parser {
         }
         if (template != null && template.macro) {
             if (!templateNames.isEmpty()) {
-                String code = template.template;
+                String code = template.getCode();
                 code = Templates.convertTemplate(code, templateNames, templateParams);
-                String header = template.toString();
+                String header = template.toHeaderString();
                 header = Templates.convertTemplate(header, "type", "int");
                 header = Templates.convertTemplate(header, templateNames, templateParams);
                 code = header.trim() + "\n" + code;
@@ -2054,9 +2062,9 @@ public class Parser {
             }
             call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
             if (call.def == null) {
-                String code = template.template;
+                String code = template.getCode();
                 code = Templates.convertTemplate(code, templateNames, templateParams);
-                String header = template.toString();
+                String header = template.toHeaderString();
                 header = Templates.convertTemplate(header, template.name, fullName);
                 header = Templates.convertTemplate(header, "type", "int");
                 header = Templates.convertTemplate(header, templateNames, templateParams);
@@ -2214,7 +2222,7 @@ public class Parser {
             for (int i = 0; i < argCount; i++) {
                 if (i == 0 && call.def.callType != null) {
                     // don't expand "this"
-                    i++;
+                    continue;
                 }
                 Expression p = call.args.get(i);
                 Variable var = call.def.parameters.get(i);

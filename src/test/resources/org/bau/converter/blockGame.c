@@ -849,10 +849,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_1(i8_array* data) {
-    org_bau_os_Terminal_termIos _t39 = org_bau_os_Terminal_termIos_new();
+    org_bau_os_Terminal_termIos _t41 = org_bau_os_Terminal_termIos_new();
     _incUseStack(data);
-    _t39.data = data;
-    return _t39;
+    _t41.data = data;
+    return _t41;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -996,8 +996,8 @@ void _main() {
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
     queueByte = 0;
-    i8_array* _t41 = i8_array_new(0);
-    oldTermIos = org_bau_os_Terminal_termIos_1(_t41);
+    i8_array* _t43 = i8_array_new(0);
+    oldTermIos = org_bau_os_Terminal_termIos_1(_t43);
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;
     WIDTH = 14;
     HEIGHT = 24;
@@ -1007,20 +1007,20 @@ void _main() {
     rotation = 0;
     running = 0;
     blockType = 0;
-    i8_array* _t42 = i8_array_new(336);
-    _incUseStack(_t42);
-    FIELD = _t42;
+    i8_array* _t44 = i8_array_new(336);
+    _incUseStack(_t44);
+    FIELD = _t44;
     _incUseStack(string_1028);
     shapes = string_1028;
     _incUseStack(string_1029);
     rotated = string_1029;
-    int64_t _t43 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t43)) {
+    int64_t _t45 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t45)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t44 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t44);
+    int64_t _t46 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t46);
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -1077,45 +1077,45 @@ void _main() {
             updateBlock_1(0);
             int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t45 = tick > 0;
-                if (_t45) {
-                    int64_t _t46 = running;
-                    _t45 = _t46;
+                int64_t _t47 = tick > 0;
+                if (_t47) {
+                    int64_t _t48 = running;
+                    _t47 = _t48;
                 }
-                if (!(_t45)) {
+                if (!(_t47)) {
                     break;
                 }
                 tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t47 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t47)) {
+                int64_t _t49 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t49)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t48 = key;
-                if (_t48 == 1000) {
+                int64_t _t50 = key;
+                if (_t50 == 1000) {
                     tempPos = tempPos - 1;
                 } else {
-                    if (_t48 == 1001) {
+                    if (_t50 == 1001) {
                         tempPos = tempPos + 1;
                     } else {
-                        if ((_t48 == 32) || (_t48 == 1002)) {
+                        if ((_t50 == 32) || (_t50 == 1002)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                         } else {
-                            if (_t48 == 27) {
+                            if (_t50 == 27) {
                                 org_bau_Env_exit_1(0);
                             } else {
-                                if (_t48 == 1003) {
+                                if (_t50 == 1003) {
                                     running = 0;
                                 }
                             }
                         }
                     }
                 }
-                int64_t _t49 = canPlace_2(tempPos, tempRot);
-                if (_t49) {
+                int64_t _t51 = canPlace_2(tempPos, tempRot);
+                if (_t51) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1123,8 +1123,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t50 = canPlace_2(position + 14, rotation);
-            if (_t50) {
+            int64_t _t52 = canPlace_2(position + 14, rotation);
+            if (_t52) {
                 position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1166,8 +1166,8 @@ void _main() {
                 i = i - 1;
             }
             refreshScreen_0();
-            int64_t _t51 = org_bau_Utils_random_1(7);
-            rotation = _t51;
+            int64_t _t53 = org_bau_Utils_random_1(7);
+            rotation = _t53;
             blockType = rotation + 1;
             if (position < 28) {
                 break;
@@ -1176,9 +1176,9 @@ void _main() {
             running = 1;
         }
     }
-    _decUseStack(_t41, i8_array);
+    _decUseStack(_t43, i8_array);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t42, i8_array);
+    _decUseStack(_t44, i8_array);
     _decUseStack(FIELD, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);

@@ -91,7 +91,7 @@ fun random(x i32, max i32) int
     ux = ((ux >> 16) ^ ux) * 0x45d9f3b
     ux = ((ux >> 16) ^ ux) * 0x45d9f3b
     ux = (ux >> 16) ^ ux
-    if max = 0
+    if max == 0
         return 0
     # println('result ' ((ux & 0xffffffff) % max))
     return (ux & 0xfffffff) % max

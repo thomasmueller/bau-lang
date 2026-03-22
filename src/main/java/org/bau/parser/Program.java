@@ -52,9 +52,9 @@ public class Program {
     TreeMap<String, Trait> traits = new TreeMap<>();
     int[] traitFunctionOffsets = new int[0];
 
-    TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
-
     TreeSet<String> includes = new TreeSet<>();
+
+    TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
 
     HashMap<String, FunctionDefinition> functionTemplates = new HashMap<>();
 
@@ -171,6 +171,11 @@ public class Program {
     }
 
     public void addFunction(FunctionDefinition def) {
+        if (def.macro) {
+            // TODO now we add both a function and a template -
+            // this is not needed
+            addFunctionTemplate(def.callType, def.module, def.name, def);
+        }
         String id = def.getFunctionId();
         if (functions.containsKey(id)) {
             throw new IllegalStateException("Function already exists: " + id);

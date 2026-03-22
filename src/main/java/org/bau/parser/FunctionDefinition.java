@@ -284,9 +284,9 @@ public class FunctionDefinition {
         this.autoClose = autoClose;
     }
 
-    public String toString() {
-        if (header != null && code != null) {
-            return header + code;
+    public String toHeaderString() {
+        if (header != null) {
+            return header;
         }
         StringBuilder buff = new StringBuilder();
         if (comment != null) {
@@ -335,6 +335,12 @@ public class FunctionDefinition {
             buff.append(" throws ");
             buff.append(exceptionType);
         }
+        return buff.toString();
+    }
+
+    public String toString() {
+        StringBuilder buff = new StringBuilder();
+        buff.append(toHeaderString());
         if (code != null) {
             buff.append("\n");
             buff.append(code);
@@ -429,6 +435,16 @@ public class FunctionDefinition {
 
     public String nameC() {
         return name;
+    }
+
+    public String getCode() {
+        if (code != null) {
+            return code;
+        }
+        if (template != null) {
+            return template;
+        }
+        throw new IllegalStateException();
     }
 
 }

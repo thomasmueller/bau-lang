@@ -423,16 +423,17 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     return _t2;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
-    org_bau_String_string_array* _t3 = org_bau_String_string_array_new(4);
-    org_bau_List_List_org_bau_String_string* _t4 = org_bau_List_List_org_bau_String_string_1(_t3);
-    _decUseStack(_t3, org_bau_String_string_array);
-    return _t4;
+    org_bau_String_string_array* _t5 = org_bau_String_string_array_new(4);
+    org_bau_List_List_org_bau_String_string* _t6 = org_bau_List_List_org_bau_String_string_1(_t5);
+    _decUseStack(_t5, org_bau_String_string_array);
+    return _t6;
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
+    org_bau_String_string_copy(&x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_String_string_array* _t0 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t0);
-        org_bau_String_string_array* n = _t0;
+        org_bau_String_string_array* _t3 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t3);
+        org_bau_String_string_array* n = _t3;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -452,16 +453,17 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         _decUse(this->array, org_bau_String_string_array);
         this->array = n;
         _decUseStack(n, org_bau_String_string_array);
-        _decUseStack(_t0, org_bau_String_string_array);
+        _decUseStack(_t3, org_bau_String_string_array);
     }
     org_bau_String_string_copy(&x);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
+    org_bau_String_string_free(&x);
 }
 org_bau_String_string org_bau_List_List_org_bau_String_string_get_2(org_bau_List_List_org_bau_String_string* this, int64_t x) {
     org_bau_String_string_copy(&this->array->data[idx_2(x, _arrayLen(this->array))]);
-    org_bau_String_string _r0 = this->array->data[idx_2(x, _arrayLen(this->array))];
-    return _r0;
+    org_bau_String_string _r1 = this->array->data[idx_2(x, _arrayLen(this->array))];
+    return _r1;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
     org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();

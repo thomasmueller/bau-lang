@@ -30,11 +30,11 @@ fun main()
             if Tr + Ti <= limit * limit
                 byteAcc |= 0x01
             bitNum += 1
-            if bitNum = 8
+            if bitNum == 8
                 File.putchar(byteAcc)
                 byteAcc = 0
                 bitNum = 0
-            elif x = w - 1
+            elif x == w - 1
                 byteAcc <<= 8 - (w % 8)
                 File.putchar(byteAcc)
                 byteAcc = 0

@@ -38,13 +38,13 @@ fun fannkuch(n int) int
             f += 1
         if f > flips
             flips = f
-        if (nperm & 1) = 0
+        if (nperm & 1) == 0
             checksum += f
         else
             checksum -= f
         # Use incremental change to generate another permutation
         loop
-            if r = n
+            if r == n
                 println(checksum)
                 return flips
             p0 := perm1[0]
