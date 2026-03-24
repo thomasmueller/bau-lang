@@ -9,17 +9,25 @@ Raspberry Pi:
 
 ##
 
-type Sqlite3
+type Sqlite
     name i8[]
     error i8[]
     db int
+    stmt int
 
-fun open(name i8[]) Sqlite3?
-    result: Sqlite3(name, i8[0])
+fun open(name i8[]) Sqlite?
+    result: Sqlite(name, i8[0])
     native(`#include <sqlite3.h>
+        char n[256];
+        for (int i = 0; i < 256; i++) {
+            n[i] = 0;
+            if (i < name->len) {
+                n[i] = name->data[i];
+            }
+        }
         sqlite3 *db;
         char *errmsg = NULL;
-        if (sqlite3_open(name, &db) != SQLITE_OK) {
+        if (sqlite3_open(n, &db) != SQLITE_OK) {
             // TODO sqlite3_errmsg(db);
         } else {
             result->db = (uint64_t) db;
@@ -27,19 +35,96 @@ fun open(name i8[]) Sqlite3?
     `)
     return result
 
-fun Sqlite3 execute(sql i8[])
+fun Sqlite execute(sql i8[])
     if db == 0
         return
     native(`
+        char n[256];
+        for (int i = 0; i < 256; i++) {
+            n[i] = 0;
+            if (i < sql->len) {
+                n[i] = sql->data[i];
+            }
+        }    
+        sqlite3 *db = (sqlite3*) (this->db);
         char *errmsg = NULL;
         // ignore errors 
-        sqlite3_exec(db, sql->data, NULL, NULL, &errmsg);
+        sqlite3_exec(db, n, NULL, NULL, &errmsg);
     `)
 
-fun Sqlite3 close()
+fun Sqlite prepare(sql i8[]) int
+    if db == 0
+        return 0
+    result := 0
+    native(`
+        sqlite3 *db = (sqlite3*) (this->db);
+        char *errmsg = NULL;
+        sqlite3_stmt *stmt;
+        // ignore errors
+        char n[256];
+        for (int i = 0; i < 256; i++) {
+            n[i] = 0;
+            if (i < sql->len) {
+                n[i] = sql->data[i];
+            }
+        }
+        result = sqlite3_prepare_v2(db, n, -1, &stmt, NULL);
+        if (result == SQLITE_OK) {
+            this->stmt = (uint64_t) stmt;
+        }
+    `)
+    return result
+
+fun Sqlite nextRow() int
+    if db == 0 or stmt == 0
+        return 0
+    result := 0
+    native(`
+        sqlite3_stmt *stmt = (sqlite3_stmt*) (this->stmt);
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            result = 1;
+        }
+    `)
+    return result
+
+fun Sqlite getInt(column int) int
+    if db == 0 or stmt == 0
+        return 0
+    result := 0
+    native(`
+        sqlite3_stmt *stmt = (sqlite3_stmt*) (this->stmt);
+        result = sqlite3_column_int(stmt, column);
+    `)
+    return result
+
+fun Sqlite getString(column int) i8[]
+    if db == 0 or stmt == 0
+        return i8[0]
+    result : i8[256]
+    len := 0
+    native(`
+        sqlite3_stmt *stmt = (sqlite3_stmt*) (this->stmt);
+        const unsigned char *text = sqlite3_column_text(stmt, column);
+        if (text) {
+            for (int i = 0; i < 255; i++) {
+                if (text[i] == 0) {
+                    break;
+                }
+                result->data[i] = text[i];
+                len = i + 1;
+            }
+        }
+    `)
+    result2 : i8[len]
+    for i := until(len)
+        result2[i] = result[i]
+    return result2
+
+fun Sqlite close()
     if db == 0
         return
-    native(`sqlite3_close(db);`)
+    native(`
+        sqlite3 *db = (sqlite3*) (this->db);
+        sqlite3_close(db);
+    `)
     db = 0
-    
-    
