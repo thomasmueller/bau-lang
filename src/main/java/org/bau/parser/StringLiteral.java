@@ -15,7 +15,16 @@ public class StringLiteral implements Expression {
     long reference;
     private boolean used;
 
-    public StringLiteral(String value, DataType type, Program program) {
+    public static StringLiteral buildStringLiteral(String value, DataType type, Program program) {
+        StringLiteral n = program.getStringLiteral(value);
+        if (n != null) {
+            return n;
+        }
+        n = new StringLiteral(value, type, program);
+        return n;
+    }
+
+    private StringLiteral(String value, DataType type, Program program) {
         this.value = value;
         this.type = type;
         this.reference = program.addStringConstant(value, this);

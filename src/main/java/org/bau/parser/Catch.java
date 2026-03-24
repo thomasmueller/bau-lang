@@ -123,4 +123,14 @@ public class Catch implements Statement {
     public void setVariableVersions(String name, int oldVersion, int newVersion) {
     }
 
+    @Override
+    public List<Variable> getDeclaredVariables() {
+        ArrayList<Variable> result = new ArrayList<>();
+        result.add(var);
+        for (Statement s : list) {
+            result.addAll(s.getDeclaredVariables());
+        }
+        return result;
+    }
+
 }

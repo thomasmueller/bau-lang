@@ -101,11 +101,6 @@ public class TernaryExpression implements Expression {
                     new NullValue(type);
             result = parser.assignTempVariable(target, init, type);
         }
-        condition = condition.writeStatements(parser, assignment, target);
-        If ifStatement = new If();
-        ifStatement.condition = condition;
-        ifStatement.thenList = ifTrueStatements;
-        ifStatement.thenAutoClose = Collections.emptyList();
         if (result != null && ifTrue != null) {
             Assignment assign = new Assignment();
             assign.initial = false;
@@ -115,8 +110,6 @@ public class TernaryExpression implements Expression {
             assign.value = ifTrue.writeStatements(parser, assignment, target);
             ifTrueStatements.add(assign);
         }
-        ifStatement.elseList = ifFalseStatements;
-        ifStatement.elseAutoClose = Collections.emptyList();
         if (result != null && ifFalse != null) {
             Assignment assign = new Assignment();
             assign.initial = false;
@@ -126,6 +119,22 @@ public class TernaryExpression implements Expression {
             assign.value = ifFalse.writeStatements(parser, assignment, target);
             ifFalseStatements.add(assign);
         }
+        condition = condition.writeStatements(parser, assignment, target);
+        Value v = condition.eval(null);
+        if (v != null) {
+            // optimization to emit less code
+            if (v.longValue() == 1) {
+                ifFalseStatements.clear();
+            } else {
+                ifTrueStatements.clear();
+            }
+        }
+        If ifStatement = new If();
+        ifStatement.condition = condition;
+        ifStatement.thenList = ifTrueStatements;
+        ifStatement.thenAutoClose = Collections.emptyList();
+        ifStatement.elseList = ifFalseStatements;
+        ifStatement.elseAutoClose = Collections.emptyList();
         target.add(ifStatement);
         target.add(new PhiBlock());
         return result;

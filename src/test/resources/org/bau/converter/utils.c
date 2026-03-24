@@ -363,9 +363,9 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1000;
-i8_array* string_1009;
-i8_array* string_1013;
+i8_array* string_1010;
 i8_array* string_1014;
+i8_array* string_1015;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -570,9 +570,9 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("-", 1);
-    string_1009 = str_const(".", 1);
-    string_1013 = str_const(" ", 1);
-    string_1014 = str_const(":", 1);
+    string_1010 = str_const(".", 1);
+    string_1014 = str_const(" ", 1);
+    string_1015 = str_const(":", 1);
     _main();
     return 0;
 }

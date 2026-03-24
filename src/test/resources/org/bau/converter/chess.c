@@ -410,9 +410,9 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1008;
 i8_array* string_1009;
-i8_array* string_1011;
+i8_array* string_1010;
+i8_array* string_1012;
 i8_array* string_1046;
 i8_array* string_1047;
 i8_array* string_1048;
@@ -1408,7 +1408,7 @@ void refreshScreen_0() {
     org_bau_String_StringBuilder_append_2(buff, string_1058);
     i8_array* _t5 = org_bau_Int_intToString_1(( 1 + ( 3 * xx ) ) + 3);
     org_bau_String_StringBuilder_append_2(buff, _t5);
-    org_bau_String_StringBuilder_append_2(buff, string_1011);
+    org_bau_String_StringBuilder_append_2(buff, string_1012);
     if (showCursor) {
         org_bau_String_StringBuilder_append_2(buff, string_1059);
     }
@@ -1550,9 +1550,9 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1008 = str_const("Exit code ", 10);
-    string_1009 = str_const("; will now cause a stack overflow", 33);
-    string_1011 = str_const("H", 1);
+    string_1009 = str_const("Exit code ", 10);
+    string_1010 = str_const("; will now cause a stack overflow", 33);
+    string_1012 = str_const("H", 1);
     string_1046 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
     string_1047 = str_const("   a  b  c  d  e  f  g  h  \x0d\n", 29);
     string_1048 = str_const(" ", 1);

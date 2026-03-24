@@ -447,4 +447,12 @@ public class FunctionDefinition {
         throw new IllegalStateException();
     }
 
+    public List<Variable> getDeclaredVariables() {
+        ArrayList<Variable> result = new ArrayList<>();
+        for(Statement s : list) {
+            result.addAll(s.getDeclaredVariables());
+        }
+        return result;
+    }
+
 }

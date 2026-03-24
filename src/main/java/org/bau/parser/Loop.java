@@ -199,4 +199,13 @@ public class Loop implements Statement {
         return condition.canThrowException();
     }
 
+    @Override
+    public List<Variable> getDeclaredVariables() {
+        ArrayList<Variable> result = new ArrayList<>();
+        for(Statement s : list) {
+            result.addAll(s.getDeclaredVariables());
+        }
+        return result;
+    }
+
 }

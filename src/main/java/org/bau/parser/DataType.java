@@ -536,4 +536,12 @@ public class DataType {
         return false;
     }
 
+    public String[] getFieldNames() {
+        String[] result = new String[fields.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = fields.get(i).name();
+        }
+        return result;
+    }
+
 }

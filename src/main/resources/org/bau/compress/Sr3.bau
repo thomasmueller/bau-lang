@@ -1,3 +1,5 @@
+module org.bau.compress.Sr3
+
 import org.bau.File
     openFile
 import org.bau.Env

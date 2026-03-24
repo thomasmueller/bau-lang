@@ -296,8 +296,9 @@ and so parameters are only evaluated when needed:
     for i := until(10)
         println(when(i < text.len, text[i], 0))
 
-The source code of the parameter is available
-using `.source`:
+The source code of the first parameter is available using `.source`. 
+The AST (abstract syntax tree) is available using `.ast`,
+and the bound values using `.values`.
 
     fun assert(x int) macro
         if not x

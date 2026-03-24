@@ -37,6 +37,7 @@ public class Service {
             String s = new String(data, StandardCharsets.UTF_8);
             System.out.println("Parsing =======================================");
             boolean sdl = s.contains("import org.bau.graphics.SDL");
+            boolean sqlite3 = s.contains("import org.bau.db.Sqlite3");
             Parser p = new Parser(s);
             String c;
             String markdown;
@@ -84,6 +85,9 @@ public class Service {
                     "-L/opt/homebrew/lib"));
             if (sdl) {
                 gcc.add("-lSDL3");
+            }
+            if (sqlite3) {
+                gcc.add("-lsqlite3");
             }
             exitCode = runProcess(gcc.toArray(new String[0]));
             File f2 = new File("a.out");

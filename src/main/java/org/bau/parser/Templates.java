@@ -9,7 +9,7 @@ public class Templates {
         // currently there are no checks
     }
 
-    static String convertTemplate(String template, List<String> find, List<String> replace) {
+    static String convertTemplate(String template, List<String> find, List<String> replace, Program program) {
         StringBuilder buff = new StringBuilder();
         Parser p = new Parser(template);
         int pos = 0;
@@ -26,15 +26,27 @@ public class Templates {
                 String f = find.get(i);
                 String r = replace.get(i);
                 if (p.token.equals(f)) {
-                    String n = "";
-                    if (p.text.length() >= p2 + ".name".length()) {
-                        n = p.text.substring(pos, p2 + ".name".length());
-                    }
-                    if (n.equals(".name")) {
-                        p.read();
-                        p.read();
-                        pos = p.pos;
-                        buff.append(" '" + StringLiteral.escape(r) + "' ");
+                    if (p.text.charAt(p2) == '.') {
+                        String next = p.text.substring(pos);
+                        if (next.startsWith(".name") && !Character.isJavaIdentifierPart(next.charAt(5))) {
+                            p.read();
+                            p.read();
+                            pos = p.pos;
+                            buff.append(" '" + StringLiteral.escape(r) + "' ");
+                        } else if (next.startsWith(".fieldCount") && !Character.isJavaIdentifierPart(next.charAt(11))) {
+                            p.read();
+                            p.read();
+                            pos = p.pos;
+                            buff.append(" " + getFieldNames(r, program).length + " ");
+                        } else if (next.startsWith(".fieldNames") && !Character.isJavaIdentifierPart(next.charAt(11))) {
+                            p.read();
+                            p.read();
+                            pos = p.pos;
+                            buff.append(" '" + StringLiteral.escape(String.join(",", getFieldNames(r, program))) + "' ");
+                        } else {
+                            // do not replace anything else
+                            buff.append(raw.replace(f, r));
+                        }
                     } else {
                         buff.append(raw.replace(f, r));
                     }
@@ -58,8 +70,22 @@ public class Templates {
         return buff.toString();
     }
 
-    static String convertTemplate(String template, String find, String replace) {
-        return convertTemplate(template, Collections.singletonList(find), Collections.singletonList(replace));
+    private static String[] getFieldNames(String typeName, Program program) {
+        String module = null;
+        int lastDot = typeName.lastIndexOf('.');
+        if (lastDot >= 0) {
+            module = typeName.substring(0, lastDot);
+            typeName = typeName.substring(lastDot + 1);
+        }
+        DataType type = program.getType(module, typeName);
+        if (type == null || type.isArray() || type.isFunctionPointer || type.isTrait() || type.isNumber()) {
+            return new String[0];
+        }
+        return type.getFieldNames();
+    }
+
+    static String convertTemplate(String template, String find, String replace, Program program) {
+        return convertTemplate(template, Collections.singletonList(find), Collections.singletonList(replace), program);
     }
 
 }

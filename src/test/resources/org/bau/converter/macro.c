@@ -322,10 +322,10 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
-i8_array* string_1009;
 i8_array* string_1010;
-i8_array* string_1015;
+i8_array* string_1011;
 i8_array* string_1016;
+i8_array* string_1017;
 void exit_1(int64_t code) {
     exit(code);
     exit_1(code);
@@ -343,10 +343,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("expensive calculation with param: ", 34);
     string_1001 = str_const("not zero", 8);
     string_1002 = str_const("zero", 4);
-    string_1009 = str_const(": ", 2);
-    string_1010 = str_const("assertion failed", 16);
-    string_1015 = str_const("next", 4);
-    string_1016 = str_const("end", 3);
+    string_1010 = str_const(": ", 2);
+    string_1011 = str_const("assertion failed", 16);
+    string_1016 = str_const("next", 4);
+    string_1017 = str_const("end", 3);
     _main();
     return 0;
 }

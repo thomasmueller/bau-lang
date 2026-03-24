@@ -327,11 +327,11 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1010;
 i8_array* string_1011;
 i8_array* string_1012;
 i8_array* string_1013;
 i8_array* string_1014;
+i8_array* string_1015;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -478,11 +478,11 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1010 = str_const("repeat ", 7);
-    string_1011 = str_const(" count ", 7);
-    string_1012 = str_const("first ", 6);
-    string_1013 = str_const(" last ", 6);
-    string_1014 = str_const("sum ", 4);
+    string_1011 = str_const("repeat ", 7);
+    string_1012 = str_const(" count ", 7);
+    string_1013 = str_const("first ", 6);
+    string_1014 = str_const(" last ", 6);
+    string_1015 = str_const("sum ", 4);
     _main();
     return 0;
 }

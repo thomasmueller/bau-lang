@@ -1,0 +1,45 @@
+module org.bau.db.Sqlite3
+
+## 
+
+Mac OS:
+    gcc -O3 ... -lsqlite3 
+
+Raspberry Pi:
+
+##
+
+type Sqlite3
+    name i8[]
+    error i8[]
+    db int
+
+fun open(name i8[]) Sqlite3?
+    result: Sqlite3(name, i8[0])
+    native(`#include <sqlite3.h>
+        sqlite3 *db;
+        char *errmsg = NULL;
+        if (sqlite3_open(name, &db) != SQLITE_OK) {
+            // TODO sqlite3_errmsg(db);
+        } else {
+            result->db = (uint64_t) db;
+        }
+    `)
+    return result
+
+fun Sqlite3 execute(sql i8[])
+    if db == 0
+        return
+    native(`
+        char *errmsg = NULL;
+        // ignore errors 
+        sqlite3_exec(db, sql->data, NULL, NULL, &errmsg);
+    `)
+
+fun Sqlite3 close()
+    if db == 0
+        return
+    native(`sqlite3_close(db);`)
+    db = 0
+    
+    

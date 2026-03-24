@@ -8,6 +8,12 @@ https://github.com/NicoNex/tau
 document operator-at-end or ( for multi-line statements:
 https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
 
+debug macro like in rust
+https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro
+
+Support "until" inside macro functions ("For loops in macros are currently not supported")
+
+flat AST (prefix encoded AST; polish notation): x + (y * 3) => +, var, x, *, var, y, num, 3
 reflection to iterate over the fields of a (generic) type; construct objects, set and read values.
 rename variables in macro to ensure there is no collision
 support more than one variable (.source is fine, .ast is fine, but .values is not)

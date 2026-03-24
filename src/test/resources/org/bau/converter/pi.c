@@ -408,7 +408,7 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1034;
+i8_array* string_1035;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -1410,7 +1410,7 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1034 = str_const(" : ", 3);
+    string_1035 = str_const(" : ", 3);
     _main();
     return 0;
 }

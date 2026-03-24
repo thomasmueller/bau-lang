@@ -120,3 +120,96 @@ Sorting an array by an expression, printing the AST, capturing values:
             for i := until(list.len)
                 println(i ': x=' list[i].x ' y=' list[i].y)
         println('done')
+
+Serialization of values:
+
+    import org.bau.Int
+    import org.bau.Math
+    import org.bau.String
+    
+    type point
+        x int
+        y float
+    
+    fun convertIntToI8Array(x int) i8[]
+        return Int.intToString(x)
+    
+    fun convertFloatToI8Array(x int) i8[]
+        return Math.floatToString(x)
+    
+    fun convertPointToI8Array(x point) i8[]
+        return 'I am a Point!'
+    
+    fun printField(field int, name i8[], x T) macro
+        if T.fieldCount > 2
+            if field > 2
+                printFieldMany(field, name, x)
+            else
+                printFieldFew(field, name, x)
+        else
+            printFieldFew(field, name, x)
+    
+    fun printFieldFew(field int, name i8[], x T)
+        if field == 0
+            z : x.0
+            println('  ' name ' = ' z)
+            printMe(z)
+        elif field == 1
+            z : x.1
+            println('  ' name ' = ' z)
+            printMe(z)
+        elif field == 2
+            z : x.2
+            println('  ' name ' = ' z)
+            printMe(z)
+    
+    fun printFieldMany(field int, name i8[], x T)
+        if field == 3
+            z : x.0
+            println('  ' name ' = ' z)
+            printMe(z)
+        elif field == 4
+            z : x.1
+            println('  ' name ' = ' z)
+            printMe(z)
+        elif field == 5
+            z : x.2
+            println('  ' name ' = ' z)
+            printMe(z)
+    
+    fun printMe(x T) macro
+        if T.fieldCount == 0
+            println('Type :' T.name)
+            text i8[] := x
+            println(T.name ' = ' text)
+            println()
+        else
+            println('Type :' T.name)
+            println(T.name ' = {')
+            j := 0
+            fieldNames : T.fieldNames
+            i := 0
+            while i < T.fieldCount
+                start : j
+                loop j < fieldNames.len and fieldNames[j] <> ord(',')
+                    j += 1
+                len : j - start
+                fn : i8[len]
+                k := 0
+                loop k < len
+                    fn[k] = fieldNames[k + start]
+                    k += 1
+                j += 1
+                # println('  field ' fn)
+                printField(i, fn, x)
+                i += 1
+            println('}')
+            println()
+    
+    fun main()
+        y : 101
+        printMe(y)
+        p : point()
+        p.x = 10
+        p.y = -22.4
+        printMe(p)

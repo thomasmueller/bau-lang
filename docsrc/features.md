@@ -25,6 +25,7 @@
 |Function Pointers     |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Interfaces / Traits   |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Map, Filter           |&check;|&check;|       |&check;|&check;|&check;|       |&check;|&check;|
+|LINQ-like Queries     |&check;|&check;|       |&check;|       |&check;|       |&check;|       |
 |Multiple Threads      |  TODO |&check;|&check;|&check;|&check;|&check;|&check;|&check;|&check;|
 |Reflection            |       |&check;|       |       |&check;|&check;|       |       |&check;|
 |High-Order Functions  |       |&check;|       |&check;|&check;|&check;|&check;|&check;|&check;|

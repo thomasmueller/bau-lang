@@ -14,7 +14,6 @@ import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueArray;
 import org.bau.runtime.Value.ValueException;
 import org.bau.runtime.Value.ValueI8Array;
-import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValuePanic;
 import org.bau.runtime.Value.ValueRef;
 import org.bau.std.Std;
@@ -1061,7 +1060,7 @@ public class Parser {
             for (int i = 0; i < t.parameters.size(); i++) {
                 with.add(params.get(i).fullName());
             }
-            code = Templates.convertTemplate(code, t.parameters, with);
+            code = Templates.convertTemplate(code, t.parameters, with, program);
             code = "type " + typeId + "\n" + code;
             try {
                 Parser p = new Parser(program, module, code, t.lineOffset);
@@ -1834,17 +1833,48 @@ public class Parser {
         }
     }
 
-    private TernaryExpression expandMacro(Call call, FunctionDefinition def, DataType type, ArrayList<Variable> params, ArrayList<Expression> args, ArrayList<Statement> list) {
+    private TernaryExpression expandMacro(Call call, FunctionDefinition def,
+            DataType type, ArrayList<Variable> params,
+            ArrayList<Expression> args) {
         TernaryExpression ternary = new TernaryExpression();
         ternary.type = type;
         If ifStatement = null;
-        if (def.list.size() == 2 && def.list.get(0) instanceof If) {
-            ifStatement = (If) def.list.get(0);
+
+        // replace all local variables, except for "it"
+        // (hygienic macros)
+        List<Variable> localVars = call.def.getDeclaredVariables();
+        Variable itVar = null;
+        for(Variable v : localVars) {
+            if (v.name().equals("it")) {
+                itVar = v;
+            }
+        }
+        if(itVar != null) {
+            localVars.remove(itVar);
+        }
+        ArrayList<Statement> list = def.list;
+        if (localVars.size() != 0) {
+            ArrayList<Variable> v2 = new ArrayList<>();
+            for (Variable old : localVars) {
+                Variable var = new Variable("_" + old.name(), old.type());
+                v2.add(var);
+            }
+            for (int j = 0; j < localVars.size(); j++) {
+                for (int i = 0; i < list.size(); i++) {
+                    Statement s = list.get(i);
+                    s = s.replace(localVars.get(j), v2.get(j));
+                    list.set(i, s);
+                }
+            }
+        }
+
+        if (list.size() == 2 && list.get(0) instanceof If) {
+            ifStatement = (If) list.get(0);
             // the second block is the phi block
         } else {
             ifStatement = new If();
             ifStatement.condition = NumberValue.valueOf(1);
-            ifStatement.thenList = def.list;
+            ifStatement.thenList = list;
         }
         Expression condition = ifStatement.condition;
         ternary.condition = replaceAll(condition, params, args);
@@ -1886,11 +1916,6 @@ public class Parser {
                 s2 = replaceAll(s2, params, args);
                 ternary.ifFalseStatements.add(s2);
             }
-        }
-        list.add(ifStatement);
-        if (ternary.condition == null) {
-            ternary.condition = new NumberValue(new ValueInt(1), DataType.INT_TYPE, false);
-            ternary.ifTrueStatements.addAll(list);
         }
         return ternary;
     }
@@ -1950,10 +1975,10 @@ public class Parser {
         if (template != null && template.macro) {
             if (!templateNames.isEmpty()) {
                 String code = template.getCode();
-                code = Templates.convertTemplate(code, templateNames, templateParams);
+                code = Templates.convertTemplate(code, templateNames, templateParams, program);
                 String header = template.toHeaderString();
-                header = Templates.convertTemplate(header, "type", "int");
-                header = Templates.convertTemplate(header, templateNames, templateParams);
+                header = Templates.convertTemplate(header, "type", "int", program);
+                header = Templates.convertTemplate(header, templateNames, templateParams, program);
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code, template.lineOffset);
@@ -2063,11 +2088,11 @@ public class Parser {
             call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
             if (call.def == null) {
                 String code = template.getCode();
-                code = Templates.convertTemplate(code, templateNames, templateParams);
+                code = Templates.convertTemplate(code, templateNames, templateParams, program);
                 String header = template.toHeaderString();
-                header = Templates.convertTemplate(header, template.name, fullName);
-                header = Templates.convertTemplate(header, "type", "int");
-                header = Templates.convertTemplate(header, templateNames, templateParams);
+                header = Templates.convertTemplate(header, template.name, fullName, program);
+                header = Templates.convertTemplate(header, "type", "int", program);
+                header = Templates.convertTemplate(header, templateNames, templateParams, program);
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code, template.lineOffset);
@@ -2228,35 +2253,57 @@ public class Parser {
                 Variable var = call.def.parameters.get(i);
                 DataType type2 = program.getType(null, DataType.I8).arrayType();
                 Variable sourceVar = new Variable(var.name() + ".source", type2);
-                StringLiteral sourceCode = new StringLiteral(p.toString(), type2, program);
+                StringLiteral sourceCode = StringLiteral.buildStringLiteral(p.toString(), type2, program);
                 params.add(sourceVar);
                 args.add(sourceCode);
                 Variable astVar = new Variable(var.name() + ".ast", type2);
-                StringLiteral astCode = new StringLiteral(p.toAST(), type2, program);
+                StringLiteral astCode = StringLiteral.buildStringLiteral(p.toAST(), type2, program);
                 params.add(astVar);
                 args.add(astCode);
                 List<Variable> vars = p.getVariables();
-                Expression varsCode = new NullValue(type2);
+                ArrayList<Expression> valueList = new ArrayList<>();
                 for (Variable v : vars) {
                     if (v.name().equals("it")) {
                         continue;
                     }
-                    Expression pe = program.cast(v, false, type2);
-                    if (pe != null) {
-                        varsCode = pe;
+                    Expression e = program.cast(v, false, type2);
+                    if (e == null) {
+                        valueList.add(StringLiteral.buildStringLiteral("", type2, program));
+                    } else {
+                        valueList.add(e);
                     }
                 }
                 Variable varsVar = new Variable(var.name() + ".values", type2);
+                Expression varExpr;
+                if (valueList.isEmpty()) {
+                    varExpr = StringLiteral.buildStringLiteral("", type2, program);
+                } else {
+                    String join = "appendValue";
+                    FunctionDefinition append = program.getFunctionIfExists(null, null, join, 2);
+                    // append(append(append(null, a), b), c)
+                    if (append != null) {
+                        Expression last = StringLiteral.buildStringLiteral("", type2, program);
+                        while (valueList.size() > 0) {
+                            Expression a = valueList.remove(0);
+                            Call appendCall = new Call();
+                            appendCall.def = append;
+                            appendCall.args.add(last);
+                            appendCall.args.add(a);
+                            last = appendCall;
+                        }
+                        valueList.add(last);
+                    }
+                    varExpr = valueList.get(0);
+                }
                 params.add(varsVar);
-                args.add(varsCode);
+                args.add(varExpr);
                 // needs to be done at the very end at the end,
                 // otherwise fields are not expanded
                 params.add(var);
                 args.add(p);
             }
-            ArrayList<Statement> list = new ArrayList<Statement>();
             type = call.def.returnType;
-            TernaryExpression result = expandMacro(call, call.def, type, params, args, list);
+            TernaryExpression result = expandMacro(call, call.def, type, params, args);
             functionContext.rewindStack(stackPos);
             return result;
         }
@@ -2692,6 +2739,9 @@ public class Parser {
     }
 
     private void parseFor(ArrayList<Statement> target) {
+        if (currentFunctionDefinition.macro) {
+            throw syntaxError("For loops in macros are currently not supported");
+        }
         int loopIndent = indent;
         String variableName = readIdentifier();
         if (!matchOp(":=")) {
@@ -3100,7 +3150,7 @@ public class Parser {
             DataType type = program.getType(null, DataType.I8).arrayType();
             Expression expr = program.getStringLiteral(n);
             if (expr == null) {
-                expr = new StringLiteral(n, type, program);
+                expr = StringLiteral.buildStringLiteral(n, type, program);
             }
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
@@ -3224,7 +3274,7 @@ public class Parser {
                         ValueI8Array str = (ValueI8Array) val;
                         String s = str.toString();
                         DataType type = program.getType(null, DataType.I8).arrayType();
-                        expr = new StringLiteral(s, type, program);
+                        expr = StringLiteral.buildStringLiteral(s, type, program);
                         return expr;
                     } else if (val instanceof ValueArray) {
                         if (call.type().baseType().isNumber()) {
@@ -3290,7 +3340,21 @@ public class Parser {
                     verifyNullAccess(v);
                 }
                 matchOp("\n");
-                String f = readIdentifier();
+                String f;
+                if (v instanceof Variable && type == TokenType.INTEGER) {
+                    int index = Integer.parseInt(token);
+                    read();
+                    String[] fieldNames = vt.getFieldNames();
+                    if (fieldNames.length == 0) {
+                        return v;
+                    } else if (index >= 0 && index < fieldNames.length) {
+                        f = fieldNames[index];
+                    } else {
+                        f = fieldNames[0];
+                    }
+                } else {
+                    f = readIdentifier();
+                }
                 if (matchOp("(")) {
                     matchOp("\n");
                     Call call = new Call();

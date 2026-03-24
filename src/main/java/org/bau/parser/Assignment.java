@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -363,6 +364,14 @@ public class Assignment implements Statement {
     @Override
     public DataType canThrowException() {
         return value.canThrowException();
+    }
+
+    @Override
+    public List<Variable> getDeclaredVariables() {
+        if (!initial || isGlobalScope) {
+            return List.of();
+        }
+        return leftValue.getVariables();
     }
 
 }

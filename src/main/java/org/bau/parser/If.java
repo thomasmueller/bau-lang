@@ -206,4 +206,18 @@ public class If implements Statement {
         return condition.canThrowException();
     }
 
+    @Override
+    public List<Variable> getDeclaredVariables() {
+        ArrayList<Variable> result = new ArrayList<>();
+        for(Statement s : thenList) {
+            result.addAll(s.getDeclaredVariables());
+        }
+        if (elseList != null) {
+            for(Statement s : elseList) {
+                result.addAll(s.getDeclaredVariables());
+            }
+        }
+        return result;
+    }
+
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.jar.Attributes.Name;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -409,6 +410,10 @@ public class Call implements Statement, Expression, LeftValue {
         } else {
             program.getFunctionById(def.getFunctionId()).used(program);
         }
+int test;
+if(def.name.startsWith("appendValue")) {
+    System.out.println("??");
+}
         for (Expression e : args) {
             e.used(program);
         }

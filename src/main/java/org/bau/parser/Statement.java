@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.HashSet;
+import java.util.List;
 
 import org.bau.runtime.Memory;
 
@@ -70,4 +71,7 @@ public interface Statement {
 
     void setVariableVersions(String name, int oldVersion, int newVersion);
 
+    default List<Variable> getDeclaredVariables() {
+        return List.of();
+    }
 }

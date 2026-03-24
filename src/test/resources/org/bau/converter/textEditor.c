@@ -566,7 +566,7 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
-i8_array* string_1011;
+i8_array* string_1008;
 i8_array* string_1013;
 i8_array* string_1024;
 i8_array* string_1025;
@@ -1266,16 +1266,16 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     }
     if (_t2) {
         _decUseStack(s, i8_array);
-        return string_1011;
+        return string_1008;
     }
     if (_arrayLen(s) <= 0) {
         _decUseStack(s, i8_array);
-        return string_1011;
+        return string_1008;
     }
     int64_t i = 0;
     if (start >= _arrayLen(s)) {
         _decUseStack(s, i8_array);
-        return string_1011;
+        return string_1008;
     }
     if (start < 0) {
         start = 0;
@@ -1845,7 +1845,7 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("Exit code ", 10);
     string_1001 = str_const("; will now cause a stack overflow", 33);
     string_1002 = str_const("\n", 1);
-    string_1011 = str_const("", 0);
+    string_1008 = str_const("", 0);
     string_1013 = str_const("H", 1);
     string_1024 = str_const(" ", 1);
     string_1025 = str_const("\x1b[?25l\x1b[H", 9);

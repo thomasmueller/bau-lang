@@ -50,7 +50,6 @@ fun open() SDL?
             SDL_Delay(1);
         }
         SDL_Delay(5000);
-        
     `)
     return result
 
