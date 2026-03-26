@@ -5,7 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* 2026-03-25: Improved <a href="docsrc/macro.md">macro</a> features: `ast`, `values`, `line`.
+* 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 
 For older changes see <a href="docsrc/changes.md">Change Log</a>
 
