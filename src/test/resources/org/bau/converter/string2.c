@@ -397,20 +397,20 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
-i8_array* string_1004;
-i8_array* string_1005;
-i8_array* string_1006;
-i8_array* string_1007;
 i8_array* string_1008;
 i8_array* string_1009;
 i8_array* string_1010;
 i8_array* string_1011;
 i8_array* string_1012;
 i8_array* string_1013;
+i8_array* string_1014;
+i8_array* string_1015;
+i8_array* string_1016;
+i8_array* string_1017;
+i8_array* string_1018;
+i8_array* string_1019;
+i8_array* string_1020;
+i8_array* string_1021;
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
@@ -423,10 +423,10 @@ org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string
     return _t2;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
-    org_bau_String_string_array* _t5 = org_bau_String_string_array_new(4);
-    org_bau_List_List_org_bau_String_string* _t6 = org_bau_List_List_org_bau_String_string_1(_t5);
-    _decUseStack(_t5, org_bau_String_string_array);
-    return _t6;
+    org_bau_String_string_array* _t14 = org_bau_String_string_array_new(4);
+    org_bau_List_List_org_bau_String_string* _t15 = org_bau_List_List_org_bau_String_string_1(_t14);
+    _decUseStack(_t14, org_bau_String_string_array);
+    return _t15;
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     org_bau_String_string_copy(&x);
@@ -623,16 +623,16 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
     }
     if (_t2) {
         _decUseStack(s, i8_array);
-        return string_1000;
+        return string_1009;
     }
     if (_arrayLen(s) <= 0) {
         _decUseStack(s, i8_array);
-        return string_1000;
+        return string_1009;
     }
     int64_t i = 0;
     if (start >= _arrayLen(s)) {
         _decUseStack(s, i8_array);
-        return string_1000;
+        return string_1009;
     }
     if (start < 0) {
         start = 0;
@@ -723,17 +723,17 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
     this->len += add;
 }
 void test_0() {
-    _incUseStack(string_1001);
-    i8_array* x = string_1001;
-    int64_t _t0 = org_bau_String_indexOf_2(x, string_1003);
+    _incUseStack(string_1010);
+    i8_array* x = string_1010;
+    int64_t _t0 = org_bau_String_indexOf_2(x, string_1012);
     printf("indexOf ll: %lld\n", (long long)_t0);
-    i8_array* _t1 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1006);
+    i8_array* _t1 = org_bau_String_replaceAll_3(string_1010, string_1014, string_1015);
     printf("l ->L : %.*s\n", _arrayLen(_t1), _t1->data);
-    i8_array* _t2 = org_bau_String_replaceAll_3(string_1001, string_1005, string_1008);
+    i8_array* _t2 = org_bau_String_replaceAll_3(string_1010, string_1014, string_1017);
     printf("l ->LL: %.*s\n", _arrayLen(_t2), _t2->data);
-    i8_array* _t3 = org_bau_String_replaceAll_3(string_1001, string_1003, string_1006);
+    i8_array* _t3 = org_bau_String_replaceAll_3(string_1010, string_1012, string_1015);
     printf("ll->L : %.*s\n", _arrayLen(_t3), _t3->data);
-    org_bau_List_List_org_bau_String_string* list = org_bau_String_split_2(string_1010, string_1011);
+    org_bau_List_List_org_bau_String_string* list = org_bau_String_split_2(string_1019, string_1008);
     if (list->size > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -762,20 +762,20 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("", 0);
-    string_1001 = str_const("hello world", 11);
-    string_1002 = str_const("indexOf ll: ", 12);
-    string_1003 = str_const("ll", 2);
-    string_1004 = str_const("l ->L : ", 8);
-    string_1005 = str_const("l", 1);
-    string_1006 = str_const("L", 1);
-    string_1007 = str_const("l ->LL: ", 8);
-    string_1008 = str_const("LL", 2);
-    string_1009 = str_const("ll->L : ", 8);
-    string_1010 = str_const("hello,world,!", 13);
-    string_1011 = str_const(",", 1);
-    string_1012 = str_const("#", 1);
-    string_1013 = str_const(": ", 2);
+    string_1008 = str_const(",", 1);
+    string_1009 = str_const("", 0);
+    string_1010 = str_const("hello world", 11);
+    string_1011 = str_const("indexOf ll: ", 12);
+    string_1012 = str_const("ll", 2);
+    string_1013 = str_const("l ->L : ", 8);
+    string_1014 = str_const("l", 1);
+    string_1015 = str_const("L", 1);
+    string_1016 = str_const("l ->LL: ", 8);
+    string_1017 = str_const("LL", 2);
+    string_1018 = str_const("ll->L : ", 8);
+    string_1019 = str_const("hello,world,!", 13);
+    string_1020 = str_const("#", 1);
+    string_1021 = str_const(": ", 2);
     _main();
     return 0;
 }
@@ -799,5 +799,8 @@ Insert an entry to the list at the given index
 
 fun List(T) get(x int) T?
 Insert an entry to the list at the given index
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
 
 */

@@ -349,9 +349,9 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
-i8_array* string_1002;
+i8_array* string_1009;
+i8_array* string_1010;
+i8_array* string_1011;
 float_array* arrayOf_float_float_var(int64_t _T, int _vaCount,...) {
     va_list _vaList;
     float_array* entries = float_array_new(_vaCount);
@@ -425,9 +425,9 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("len ", 4);
-    string_1001 = str_const("len of hello is ", 16);
-    string_1002 = str_const("hello", 5);
+    string_1009 = str_const("len ", 4);
+    string_1010 = str_const("len of hello is ", 16);
+    string_1011 = str_const("hello", 5);
     _main();
     return 0;
 }
@@ -513,8 +513,8 @@ void _main() {
             break;
         }
     }
-    int64_t _t1 = i8_array_len_1(string_1002);
-    printf("len of hello is %lld\n", (long long)_t1);
+    int64_t _t10 = i8_array_len_1(string_1011);
+    printf("len of hello is %lld\n", (long long)_t10);
     _decUseStack(z, i8_array);
     _decUseStack(y, float_array);
     _decUseStack(x, int_array);
@@ -525,3 +525,9 @@ void _main() {
     _decUseStack(_t0, int_array);
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/

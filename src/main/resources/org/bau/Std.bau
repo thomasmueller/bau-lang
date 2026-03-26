@@ -5,3 +5,89 @@ fun ord(s i8[]) const int
     if s.len <= 0
         return 0
     return s[0]!
+
+fun convertIntToI8Array(x int) i8[]
+    len := 1
+    if x >= 0
+        x = -x
+        len = 0
+    n := x
+    loop
+        len += 1
+        n /= 10
+        break n >= 0
+    buff : i8[len]
+    buff[0] = ord('-')
+    loop
+        len -= 1
+        buff[len] = ord('0') - (x % 10)
+        x /= 10
+        break x >= 0
+    return buff
+
+fun convertFloatToI8Array(n float) i8[]
+    if n <> n
+        return 'NaN'
+    elif n == 1.0 / 0
+        return 'Infinity'
+    elif n == -1.0 / 0
+        return '-Infinity'
+    pos, e := 0
+    if n < 0
+        pos = 1
+        n = -n
+    if n <> 0 and (n >= 1e8 or n <= 1e-3)
+        loop n >= 10
+            n /= 10
+            e += 1
+        loop n < 1
+            n *= 10
+            e -= 1
+    aa : convertIntToI8Array(int(n))
+    b := int(((n - int(n)) * 1_000_000_000_000_000_000) + 1_000_000_000_000_000_000)
+    loop b >= 100 and b % 10 == 0
+        b /= 10
+    bb : convertIntToI8Array(b)
+    ee : convertIntToI8Array(e)
+    len := pos + aa.len + bb.len
+    if e <> 0
+        len += 1 + ee.len
+    buff : i8[len]
+    buff[0] = ord('-')
+    for i := until(aa.len)
+        buff[pos + i] = aa[i]
+    for i := until(bb.len)
+        buff[pos + aa.len + i] = bb[i]
+    buff[pos + aa.len] = ord('.')
+    if e <> 0
+        buff[pos + aa.len + bb.len] = ord('e')
+        for i := until(ee.len)
+            buff[pos + aa.len + bb.len + 1 + i] = ee[i]
+    return buff
+
+fun appendValue(a i8[], b i8[]) i8[]
+    if b.len == 0
+        return a
+    newLen := a.len + b.len + 2
+    if a.len > 0
+        newLen += 1
+    for i := until(b.len)
+        if b[i] == ord('"')
+            newLen += 1
+    result : i8[newLen]
+    for i := until(a.len)
+        result[i] = a[i]
+    j := a.len
+    if a.len > 0
+        result[j] = ord(',')
+        j += 1
+    result[j] = ord('"')
+    j += 1
+    for i := until(b.len)
+        result[j] = b[i]
+        j += 1
+        if b[i] == ord('"')
+            result[j] = ord('"')
+            j += 1   
+    result[j] = ord('"')
+    return result

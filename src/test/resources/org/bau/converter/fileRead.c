@@ -343,9 +343,9 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
+i8_array* string_1010;
+i8_array* string_1011;
+i8_array* string_1012;
 org_bau_File_File* org_bau_File_File_0() {
     org_bau_File_File* _t0 = org_bau_File_File_new();
     _t0->filePointer = 0;
@@ -390,7 +390,7 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
     return 0;
 }
 void test_0() {
-    org_bau_File_File* file = org_bau_File_openFile_2(string_1001, string_1002);
+    org_bau_File_File* file = org_bau_File_openFile_2(string_1010, string_1011);
     if (!(file)) {
         printf("file not found\n");
         return;
@@ -411,9 +411,9 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1001 = str_const("hello.txt", 9);
-    string_1002 = str_const("r", 1);
-    string_1003 = str_const("file not found", 14);
+    string_1010 = str_const("hello.txt", 9);
+    string_1011 = str_const("r", 1);
+    string_1012 = str_const("file not found", 14);
     _main();
     return 0;
 }

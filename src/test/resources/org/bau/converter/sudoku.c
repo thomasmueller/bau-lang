@@ -324,9 +324,9 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1005;
-i8_array* string_1006;
-i8_array* string_1008;
+i8_array* string_1011;
+i8_array* string_1012;
+i8_array* string_1014;
 int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
     if (a == 0) return 0;
@@ -409,27 +409,27 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1005 = str_const("Expected one argument: \"<line1> <line2> ... <line9>\"", 52);
-    string_1006 = str_const("where each line is 9 characters: 0-9, or . for unknown.", 55);
-    string_1008 = str_const("No solution found", 17);
+    string_1011 = str_const("Expected one argument: \"<line1> <line2> ... <line9>\"", 52);
+    string_1012 = str_const("where each line is 9 characters: 0-9, or . for unknown.", 55);
+    string_1014 = str_const("No solution found", 17);
     _main();
     return 0;
 }
 void _main() {
-    int64_t _t0 = org_bau_Env_argCount_0();
-    int64_t _t1 = _t0 != 2;
-    if (!(_t1)) {
-        int64_t _t2 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
-        _t1 = _t2;
+    int64_t _t9 = org_bau_Env_argCount_0();
+    int64_t _t10 = _t9 != 2;
+    if (!(_t10)) {
+        int64_t _t11 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
+        _t10 = _t11;
     }
-    if (_t1) {
+    if (_t10) {
         printf("Expected one argument: \"<line1> <line2> ... <line9>\"\n");
         printf("where each line is 9 characters: 0-9, or . for unknown.\n");
         return;
     }
     i8_array* c = org_bau_Env_arg_1(1);
-    int64_t _t3 = solve_1(c);
-    if (_t3) {
+    int64_t _t12 = solve_1(c);
+    if (_t12) {
         if (8 > 0) {
             while (1 == 1) {
                 int64_t i = 0;

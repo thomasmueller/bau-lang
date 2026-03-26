@@ -363,9 +363,9 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1000;
-i8_array* string_1010;
-i8_array* string_1014;
-i8_array* string_1015;
+i8_array* string_1005;
+i8_array* string_1019;
+i8_array* string_1020;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -382,15 +382,15 @@ int64_t int_1(int64_t x) {
     return x;
 }
 org_bau_DateTime_dateTime org_bau_DateTime_dateTime_0() {
-    org_bau_DateTime_dateTime _t33 = org_bau_DateTime_dateTime_new();
-    _t33.year = 0;
-    _t33.month = 0;
-    _t33.day = 0;
-    _t33.hour = 0;
-    _t33.minute = 0;
-    _t33.second = 0;
-    _t33.millis = 0;
-    return _t33;
+    org_bau_DateTime_dateTime _t42 = org_bau_DateTime_dateTime_new();
+    _t42.year = 0;
+    _t42.month = 0;
+    _t42.day = 0;
+    _t42.hour = 0;
+    _t42.minute = 0;
+    _t42.second = 0;
+    _t42.millis = 0;
+    return _t42;
 }
 org_bau_DateTime_dateTime org_bau_DateTime_getDateTime_0() {
     time_t current;
@@ -450,18 +450,18 @@ int64_t org_bau_Int_sqrtInt_1(int64_t x) {
 }
 double org_bau_Math_exp_1(double x) {
     return exp(x);
-    int64_t _t7 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t8 = _t7;
-    if (!(_t8)) {
-        int64_t _t9 = x == (1.0 / 0.0);
-        _t8 = _t9;
+    int64_t _t16 = org_bau_Math_isNotANumber_1(x);
+    int64_t _t17 = _t16;
+    if (!(_t17)) {
+        int64_t _t18 = x == (1.0 / 0.0);
+        _t17 = _t18;
     }
-    if (_t8) {
+    if (_t17) {
         return x;
     } else {
         if (x < 0) {
-            double _t10 = org_bau_Math_exp_1(- x);
-            double _r0 = 1 / _t10;
+            double _t19 = org_bau_Math_exp_1(- x);
+            double _r0 = 1 / _t19;
             return _r0;
         }
     }
@@ -496,24 +496,24 @@ double org_bau_Math_log_1(double x) {
         if (x == (1.0 / 0.0)) {
             return x;
         } else {
-            int64_t _t3 = x <= 0;
-            if (!(_t3)) {
-                int64_t _t4 = org_bau_Math_isNotANumber_1(x);
-                _t3 = _t4;
+            int64_t _t12 = x <= 0;
+            if (!(_t12)) {
+                int64_t _t13 = org_bau_Math_isNotANumber_1(x);
+                _t12 = _t13;
             }
-            if (_t3) {
+            if (_t12) {
                 return (0.0 / 0.0);
             }
         }
     }
     if (x < 0.7) {
-        double _t5 = org_bau_Math_log_1(2 * x);
-        double _r0 = _t5 - 0.6931471805599453;
+        double _t14 = org_bau_Math_log_1(2 * x);
+        double _r0 = _t14 - 0.6931471805599453;
         return _r0;
     }
     if (x >= 1.5) {
-        double _t6 = org_bau_Math_log_1(x / 2);
-        double _r1 = _t6 + 0.6931471805599453;
+        double _t15 = org_bau_Math_log_1(x / 2);
+        double _r1 = _t15 + 0.6931471805599453;
         return _r1;
     }
     double base = x - 1;
@@ -535,20 +535,20 @@ double org_bau_Math_log_1(double x) {
 double org_bau_Math_sqrt_1(double x) {
     return sqrt(x);
     int64_t x2 = int_1(x);
-    int64_t _t1 = x2 > 0;
-    if (_t1) {
-        int64_t _t2 = x2 == x;
-        _t1 = _t2;
+    int64_t _t10 = x2 > 0;
+    if (_t10) {
+        int64_t _t11 = x2 == x;
+        _t10 = _t11;
     }
-    if (_t1) {
+    if (_t10) {
         int64_t exact = org_bau_Int_sqrtInt_1(x2);
         if (( exact * exact ) == x) {
             return exact;
         }
     }
-    double _t11 = org_bau_Math_log_1(x);
-    double _t12 = org_bau_Math_exp_1(_t11 / 2);
-    return _t12;
+    double _t20 = org_bau_Math_log_1(x);
+    double _t21 = org_bau_Math_exp_1(_t20 / 2);
+    return _t21;
 }
 int64_t org_bau_Utils_random_0() {
     randomSeed = randomSeed + -7046029254386353131;
@@ -570,9 +570,9 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("-", 1);
-    string_1010 = str_const(".", 1);
-    string_1014 = str_const(" ", 1);
-    string_1015 = str_const(":", 1);
+    string_1005 = str_const(".", 1);
+    string_1019 = str_const(" ", 1);
+    string_1020 = str_const(":", 1);
     _main();
     return 0;
 }
@@ -595,16 +595,16 @@ void _main() {
     printf("%lld\n", (long long)a);
     org_bau_DateTime_dateTime c = org_bau_DateTime_getDateTime_0();
     printf("%d-%lld-%lld %lld:%lld:%lld.%lld\n", c.year, (long long)c.month, (long long)c.day, (long long)c.hour, (long long)c.minute, (long long)c.second, (long long)c.millis);
-    int64_t _t34 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t34);
-    int64_t _t35 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t35);
+    int64_t _t43 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t43);
+    int64_t _t44 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t44);
     printf("%.9f\n", 3.141592653589793);
     while (1 == 1) {
         int64_t i = 2;
         while (i < 4) {
-            double _t36 = org_bau_Math_sqrt_1(i);
-            printf("%.9f\n", _t36);
+            double _t45 = org_bau_Math_sqrt_1(i);
+            printf("%.9f\n", _t45);
             i = i + 1;
         }
         break;

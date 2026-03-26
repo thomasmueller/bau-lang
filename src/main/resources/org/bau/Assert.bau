@@ -1,0 +1,15 @@
+module org.bau.Assert
+import org.bau.Env
+
+fun assert(x int) macro
+    if not x
+        source : x.source
+        line : x.line
+        values : x.values
+        module : x.module
+        println('assertion failed at line ' line ': ' source)
+        if values.len
+            println('for values ' values)
+        if module.len
+            println('in module ' module)
+        Env.exit(1)

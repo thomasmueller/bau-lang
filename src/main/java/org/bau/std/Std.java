@@ -197,15 +197,19 @@ public class Std {
         if (program.getImport("Std") != null) {
             return;
         }
+        ArrayList<String> list = new ArrayList<>();
         String stdModule = "org.bau.Std";
+        // prevent recursion
+        program.addImport(stdModule, "Std", list);
         String moduleSource = program.readModule(stdModule);
         Parser p = new Parser(program, stdModule, moduleSource, 0);
         // disable the scan phase -- otherwise we would register recursively
         p.setScanPhase(false);
         p.parse();
         p.isImport = true;
-        ArrayList<String> list = new ArrayList<>();
         list.add("ord");
+        list.add("convertIntToI8Array");
+        list.add("appendValue");
         program.addImport(stdModule, "Std", list);
     }
 

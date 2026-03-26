@@ -295,3 +295,9 @@ void _main() {
     printf("%.9f\n", 6.6);
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/

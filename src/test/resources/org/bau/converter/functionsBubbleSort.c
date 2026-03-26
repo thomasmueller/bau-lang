@@ -346,3 +346,9 @@ void _main() {
     bubbleSort_int_int_var(0, /* argCount */ 3, 1, 3, 2);
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/

@@ -352,3 +352,9 @@ void _main() {
     test_0();
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/

@@ -436,10 +436,10 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1002;
-i8_array* string_1003;
-i8_array* string_1004;
-i8_array* string_1005;
+i8_array* string_1011;
+i8_array* string_1012;
+i8_array* string_1013;
+i8_array* string_1014;
 HashMap_int_int* HashMap_int_int_3(int_array* keys, int_array* values, int_array* hashes) {
     HashMap_int_int* _t1 = HashMap_int_int_new();
     _t1->size = 0;
@@ -459,12 +459,12 @@ int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key) {
             int64_t _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
             return _r0;
         } else {
-            int64_t _t7 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t7) {
-                int64_t _t8 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t7 = _t8;
+            int64_t _t16 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t16) {
+                int64_t _t17 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t16 = _t17;
             }
-            if (_t7) {
+            if (_t16) {
                 int64_t _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 return _r1;
             }
@@ -527,12 +527,12 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t5 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t5) {
-            int64_t _t6 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t5 = _t6;
+        int64_t _t14 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t14) {
+            int64_t _t15 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t14 = _t15;
         }
-        if (_t5) {
+        if (_t14) {
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
         } else {
@@ -554,12 +554,12 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
         if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
             return 0;
         } else {
-            int64_t _t9 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t9) {
-                int64_t _t10 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t9 = _t10;
+            int64_t _t18 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t18) {
+                int64_t _t19 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t18 = _t19;
             }
-            if (_t9) {
+            if (_t18) {
                 this->keys->data[idx_2(p, _arrayLen(this->keys))] = 0;
                 this->hashes->data[idx_2(p, _arrayLen(this->hashes))] = 0;
                 this->values->data[idx_2(p, _arrayLen(this->values))] = 0;
@@ -578,19 +578,19 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
         int64_t pb = h2 & (_arrayLen(this->keys) - 1);
         int64_t canMove = 0;
         if (pb <= p2) {
-            int64_t _t11 = (pb <= p);
-            if (_t11) {
-                int64_t _t12 = (p2 >= p);
-                _t11 = _t12;
+            int64_t _t20 = (pb <= p);
+            if (_t20) {
+                int64_t _t21 = (p2 >= p);
+                _t20 = _t21;
             }
-            canMove = _t11;
+            canMove = _t20;
         } else {
-            int64_t _t13 = pb <= p;
-            if (!(_t13)) {
-                int64_t _t14 = p2 > p;
-                _t13 = _t14;
+            int64_t _t22 = pb <= p;
+            if (!(_t22)) {
+                int64_t _t23 = p2 > p;
+                _t22 = _t23;
             }
-            canMove = _t13;
+            canMove = _t22;
         }
         if (canMove) {
             this->keys->data[idx_2(p, _arrayLen(this->keys))] = this->keys->data[idx_2(p2, _arrayLen(this->keys))];
@@ -606,15 +606,15 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
     return 1;
 }
 HashMap_str_str* HashMap_str_str_3(str_array* keys, str_array* values, int_array* hashes) {
-    HashMap_str_str* _t18 = HashMap_str_str_new();
-    _t18->size = 0;
+    HashMap_str_str* _t27 = HashMap_str_str_new();
+    _t27->size = 0;
     _incUseStack(keys);
-    _t18->keys = keys;
+    _t27->keys = keys;
     _incUseStack(values);
-    _t18->values = values;
+    _t27->values = values;
     _incUseStack(hashes);
-    _t18->hashes = hashes;
-    return _t18;
+    _t27->hashes = hashes;
+    return _t27;
 }
 str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
     str_copy(&key);
@@ -627,12 +627,12 @@ str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
             str_free(&key);
             return _r0;
         } else {
-            int64_t _t24 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t24) {
-                int64_t _t25 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t24 = _t25;
+            int64_t _t33 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t33) {
+                int64_t _t34 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t33 = _t34;
             }
-            if (_t24) {
+            if (_t33) {
                 str_copy(&this->values->data[idx_2(p, _arrayLen(this->values))]);
                 str _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 str_free(&key);
@@ -645,15 +645,15 @@ str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
 }
 void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
     if (( this->size * 2 ) >= _arrayLen(this->keys)) {
-        str_array* _t19 = str_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t19);
-        str_array* kn = _t19;
-        str_array* _t20 = str_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t20);
-        str_array* vn = _t20;
-        int_array* _t21 = int_array_new(_arrayLen(this->keys) * 2);
-        _incUseStack(_t21);
-        int_array* hn = _t21;
+        str_array* _t28 = str_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t28);
+        str_array* kn = _t28;
+        str_array* _t29 = str_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t29);
+        str_array* vn = _t29;
+        int_array* _t30 = int_array_new(_arrayLen(this->keys) * 2);
+        _incUseStack(_t30);
+        int_array* hn = _t30;
         _incUseStack(this->keys);
         str_array* ok = this->keys;
         _incUseStack(this->hashes);
@@ -689,21 +689,21 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
         _decUseStack(oh, int_array);
         _decUseStack(ok, str_array);
         _decUseStack(hn, int_array);
-        _decUseStack(_t21, int_array);
+        _decUseStack(_t30, int_array);
         _decUseStack(vn, str_array);
-        _decUseStack(_t20, str_array);
+        _decUseStack(_t29, str_array);
         _decUseStack(kn, str_array);
-        _decUseStack(_t19, str_array);
+        _decUseStack(_t28, str_array);
     }
     int64_t hash = str_hashCode_1(key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t22 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t22) {
-            int64_t _t23 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t22 = _t23;
+        int64_t _t31 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t31) {
+            int64_t _t32 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t31 = _t32;
         }
-        if (_t22) {
+        if (_t31) {
             str_copy(&value);
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
@@ -781,23 +781,23 @@ int64_t mix_1(int64_t z) {
     return _r0;
 }
 HashMap_int_int* newHashMap_int_int_2(int64_t _K, int64_t _V) {
-    int_array* _t15 = int_array_new(4);
-    int_array* _t16 = int_array_new(4);
-    int_array* _t17 = int_array_new(4);
-    HashMap_int_int* result = HashMap_int_int_3(_t15, _t16, _t17);
-    _decUseStack(_t17, int_array);
-    _decUseStack(_t16, int_array);
-    _decUseStack(_t15, int_array);
+    int_array* _t24 = int_array_new(4);
+    int_array* _t25 = int_array_new(4);
+    int_array* _t26 = int_array_new(4);
+    HashMap_int_int* result = HashMap_int_int_3(_t24, _t25, _t26);
+    _decUseStack(_t26, int_array);
+    _decUseStack(_t25, int_array);
+    _decUseStack(_t24, int_array);
     return result;
 }
 HashMap_str_str* newHashMap_str_str_2(int64_t _K, int64_t _V) {
-    str_array* _t32 = str_array_new(4);
-    str_array* _t33 = str_array_new(4);
-    int_array* _t34 = int_array_new(4);
-    HashMap_str_str* result = HashMap_str_str_3(_t32, _t33, _t34);
-    _decUseStack(_t34, int_array);
-    _decUseStack(_t33, str_array);
-    _decUseStack(_t32, str_array);
+    str_array* _t41 = str_array_new(4);
+    str_array* _t42 = str_array_new(4);
+    int_array* _t43 = int_array_new(4);
+    HashMap_str_str* result = HashMap_str_str_3(_t41, _t42, _t43);
+    _decUseStack(_t43, int_array);
+    _decUseStack(_t42, str_array);
+    _decUseStack(_t41, str_array);
     return result;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
@@ -845,7 +845,7 @@ void test_0() {
         }
     }
     HashMap_str_str* map2 = newHashMap_str_str_2(0, 0);
-    str a = str_1(string_1004);
+    str a = str_1(string_1013);
     str b = str_1(string_1001);
     HashMap_str_str_put_3(map2, a, b);
     str c = HashMap_str_str_get_2(map2, a);
@@ -863,10 +863,10 @@ int main(int _argc, char *_argv[]) {
     __argv = _argv;
     string_1000 = str_const("hash of hello: ", 15);
     string_1001 = str_const("hello", 5);
-    string_1002 = str_const("int map[", 8);
-    string_1003 = str_const("]=", 2);
-    string_1004 = str_const("h", 1);
-    string_1005 = str_const("str map[", 8);
+    string_1011 = str_const("int map[", 8);
+    string_1012 = str_const("]=", 2);
+    string_1013 = str_const("h", 1);
+    string_1014 = str_const("str map[", 8);
     _main();
     return 0;
 }
@@ -878,5 +878,8 @@ void _main() {
 
 fun hashCode(data i8[]) int
 4 bytes at a time if possible
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
 
 */

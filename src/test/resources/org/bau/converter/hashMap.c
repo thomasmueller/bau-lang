@@ -341,14 +341,14 @@ int64_t org_bau_HashMap_mix_1(int64_t z) {
     return _r0;
 }
 org_bau_HashMap_HashMap_int_int* org_bau_HashMap_newHashMap_int_int_2(int64_t _K, int64_t _V) {
-    int_array* _t14 = int_array_new(4);
-    int_array* _t15 = int_array_new(4);
-    int_array* _t16 = int_array_new(4);
-    org_bau_HashMap_HashMap_int_int* _t17 = org_bau_HashMap_HashMap_int_int_3(_t14, _t15, _t16);
-    _decUseStack(_t16, int_array);
-    _decUseStack(_t15, int_array);
-    _decUseStack(_t14, int_array);
-    return _t17;
+    int_array* _t23 = int_array_new(4);
+    int_array* _t24 = int_array_new(4);
+    int_array* _t25 = int_array_new(4);
+    org_bau_HashMap_HashMap_int_int* _t26 = org_bau_HashMap_HashMap_int_int_3(_t23, _t24, _t25);
+    _decUseStack(_t25, int_array);
+    _decUseStack(_t24, int_array);
+    _decUseStack(_t23, int_array);
+    return _t26;
 }
 int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* this, int64_t hash, int64_t key) {
     int64_t p = hash & (_arrayLen(this->keys) - 1);
@@ -357,12 +357,12 @@ int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* t
             int64_t _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
             return _r0;
         } else {
-            int64_t _t6 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t6) {
-                int64_t _t7 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t6 = _t7;
+            int64_t _t15 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t15) {
+                int64_t _t16 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t15 = _t16;
             }
-            if (_t6) {
+            if (_t15) {
                 int64_t _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 return _r1;
             }
@@ -424,12 +424,12 @@ void org_bau_HashMap_HashMap_int_int_put_4(org_bau_HashMap_HashMap_int_int* this
     }
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t4 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t4) {
-            int64_t _t5 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t4 = _t5;
+        int64_t _t13 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t13) {
+            int64_t _t14 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t13 = _t14;
         }
-        if (_t4) {
+        if (_t13) {
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
         } else {
@@ -461,8 +461,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t18 = org_bau_HashMap_mix_1(i);
-                org_bau_HashMap_HashMap_int_int_put_4(map, _t18, i, i * 10);
+                int64_t _t27 = org_bau_HashMap_mix_1(i);
+                org_bau_HashMap_HashMap_int_int_put_4(map, _t27, i, i * 10);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;
@@ -476,9 +476,9 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t19 = org_bau_HashMap_mix_1(i);
-                int64_t _t20 = org_bau_HashMap_HashMap_int_int_get_3(map, _t19, i);
-                printf("%lld\n", (long long)_t20);
+                int64_t _t28 = org_bau_HashMap_mix_1(i);
+                int64_t _t29 = org_bau_HashMap_HashMap_int_int_get_3(map, _t28, i);
+                printf("%lld\n", (long long)_t29);
                 int64_t _next = i + 1;
                 if (_next >= 5) {
                     break;
@@ -495,5 +495,8 @@ void _main() {
 
 fun hashCode(data i8[]) int
 4 bytes at a time if possible
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
 
 */

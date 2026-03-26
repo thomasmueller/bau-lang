@@ -346,7 +346,7 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1005;
+i8_array* string_1014;
 List_int* List_int_1(int_array* array) {
     List_int* _t0 = List_int_new();
     _incUseStack(array);
@@ -395,10 +395,10 @@ int64_t imod_2(int64_t a, int64_t b) {
     return 0;
 }
 List_int* newList_int_1(int64_t _T) {
-    int_array* _t2 = int_array_new(4);
-    List_int* _t3 = List_int_1(_t2);
-    _decUseStack(_t2, int_array);
-    return _t3;
+    int_array* _t11 = int_array_new(4);
+    List_int* _t12 = List_int_1(_t11);
+    _decUseStack(_t11, int_array);
+    return _t12;
 }
 int_array* range_2(int64_t start, int64_t end) {
     int_array* _t0 = int_array_new(end - start);
@@ -444,14 +444,14 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1005 = str_const(": ", 2);
+    string_1014 = str_const(": ", 2);
     _main();
     return 0;
 }
 void _main() {
-    List_int* _t5 = NULL;
+    List_int* _t14 = NULL;
     if (1) {
-        List_int* _t4 = NULL;
+        List_int* _t13 = NULL;
         if (1) {
             List_int* this = rangeList_2(0, 10);
             List_int* _u_result = newList_int_1(0);
@@ -464,12 +464,12 @@ void _main() {
                 _u_i = _u_i + 1;
             }
             _incUseStack(_u_result);
-            _decUseStack(_t4, List_int);
-            _t4 = _u_result;
+            _decUseStack(_t13, List_int);
+            _t13 = _u_result;
         } else {
         }
-        _incUseStack(_t4);
-        List_int* this = _t4;
+        _incUseStack(_t13);
+        List_int* this = _t13;
         List_int* _u_result = newList_int_1(0);
         int64_t _u_i = 0;
         while (_u_i < this->size) {
@@ -478,18 +478,18 @@ void _main() {
             _u_i = _u_i + 1;
         }
         _incUseStack(_u_result);
-        _decUseStack(_t5, List_int);
-        _t5 = _u_result;
+        _decUseStack(_t14, List_int);
+        _t14 = _u_result;
     } else {
     }
-    _incUseStack(_t5);
-    List_int* list = _t5;
+    _incUseStack(_t14);
+    List_int* list = _t14;
     if (list->size > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t6 = List_int_get_2(list, i);
-                printf("%lld: %lld\n", (long long)i, (long long)_t6);
+                int64_t _t15 = List_int_get_2(list, i);
+                printf("%lld: %lld\n", (long long)i, (long long)_t15);
                 int64_t _next = i + 1;
                 if (_next >= list->size) {
                     break;
@@ -499,9 +499,9 @@ void _main() {
             break;
         }
     }
-    int_array* _t8 = NULL;
+    int_array* _t17 = NULL;
     if (1) {
-        int_array* _t7 = NULL;
+        int_array* _t16 = NULL;
         if (1) {
             int_array* this = range_2(0, 10);
             int_array* _0t0 = int_array_new(_arrayLen(this));
@@ -526,12 +526,12 @@ void _main() {
                 _u_i = _u_i + 1;
             }
             _incUseStack(_u_result);
-            _decUseStack(_t7, int_array);
-            _t7 = _u_result;
+            _decUseStack(_t16, int_array);
+            _t16 = _u_result;
         } else {
         }
-        _incUseStack(_t7);
-        int_array* this = _t7;
+        _incUseStack(_t16);
+        int_array* this = _t16;
         int_array* _0t0 = int_array_new(_arrayLen(this));
         _incUseStack(_0t0);
         int_array* _u_result = _0t0;
@@ -542,12 +542,12 @@ void _main() {
             _u_i = _u_i + 1;
         }
         _incUseStack(_u_result);
-        _decUseStack(_t8, int_array);
-        _t8 = _u_result;
+        _decUseStack(_t17, int_array);
+        _t17 = _u_result;
     } else {
     }
-    _incUseStack(_t8);
-    int_array* array = _t8;
+    _incUseStack(_t17);
+    int_array* array = _t17;
     if (_arrayLen(array) > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -563,8 +563,14 @@ void _main() {
         }
     }
     _decUseStack(array, int_array);
-    _decUseStack(_t8, int_array);
+    _decUseStack(_t17, int_array);
     _decUseStack(list, List_int);
-    _decUseStack(_t5, List_int);
+    _decUseStack(_t14, List_int);
     _end();
 }
+/*
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
+
+*/

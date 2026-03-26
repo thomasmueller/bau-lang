@@ -319,10 +319,10 @@ org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
     return _t0;
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
-    int_array* _t3 = int_array_new(4);
-    org_bau_List_List_int* _t4 = org_bau_List_List_int_1(_t3);
-    _decUseStack(_t3, int_array);
-    return _t4;
+    int_array* _t12 = int_array_new(4);
+    org_bau_List_List_int* _t13 = org_bau_List_List_int_1(_t12);
+    _decUseStack(_t12, int_array);
+    return _t13;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {
@@ -385,5 +385,8 @@ Insert an entry to the list at the given index
 
 fun List(T) get(x int) T?
 Insert an entry to the list at the given index
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
 
 */

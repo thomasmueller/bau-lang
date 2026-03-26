@@ -518,22 +518,22 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1000;
-i8_array* string_1001;
-i8_array* string_1017;
-i8_array* string_1018;
-i8_array* string_1019;
-i8_array* string_1020;
-i8_array* string_1021;
+i8_array* string_1009;
+i8_array* string_1010;
 i8_array* string_1022;
+i8_array* string_1023;
+i8_array* string_1024;
+i8_array* string_1025;
+i8_array* string_1026;
+i8_array* string_1027;
 Token* Token_1(org_bau_List_List_i8* data) {
-    Token* _t4 = Token_new();
-    _t4->ttype = 0;
+    Token* _t13 = Token_new();
+    _t13->ttype = 0;
     _incUseStack(data);
-    _t4->data = data;
-    _t4->min = 0;
-    _t4->max = 0;
-    return _t4;
+    _t13->data = data;
+    _t13->min = 0;
+    _t13->max = 0;
+    return _t13;
 }
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos) {
     org_bau_Exception_exception _lastException;
@@ -546,7 +546,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
     int8_t c = text->data[idx_2(pos, _arrayLen(text))];
     int64_t _t0 = this->ttype;
     if ((_t0 == 0) || (_t0 == 1)) {
-        org_bau_Exception_exception _t1 = org_bau_Exception_exception_1(string_1000);
+        org_bau_Exception_exception _t1 = org_bau_Exception_exception_1(string_1009);
         _x0 = exception_int64_t_or_exception(_t1); _lastException = _x0.exception; goto catch0;
         org_bau_Exception_exception_free(&_t1);
     } else {
@@ -599,7 +599,7 @@ _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos
                     if (_t0 == 5) {
                         return ok_int64_t_or_exception(1);
                     } else {
-                        org_bau_Exception_exception _t6 = org_bau_Exception_exception_1(string_1001);
+                        org_bau_Exception_exception _t6 = org_bau_Exception_exception_1(string_1010);
                         _x1 = exception_int64_t_or_exception(_t6); _lastException = _x1.exception; goto catch0;
                         org_bau_Exception_exception_free(&_t6);
                     }
@@ -669,10 +669,10 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 match match_0() {
-    match _t5 = match_new();
-    _t5.start = 0;
-    _t5.end = 0;
-    return _t5;
+    match _t14 = match_new();
+    _t14.start = 0;
+    _t14.end = 0;
+    return _t14;
 }
 match match_2(int64_t start, int64_t end) {
     match m = match_0();
@@ -788,11 +788,11 @@ org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
     return _t0;
 }
 org_bau_List_List_Token* org_bau_List_List_Token_1(Token_array* array) {
-    org_bau_List_List_Token* _t6 = org_bau_List_List_Token_new();
+    org_bau_List_List_Token* _t15 = org_bau_List_List_Token_new();
     _incUseStack(array);
-    _t6->array = array;
-    _t6->size = 0;
-    return _t6;
+    _t15->array = array;
+    _t15->size = 0;
+    return _t15;
 }
 org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
     org_bau_List_List_i8* _t1 = org_bau_List_List_i8_new();
@@ -802,23 +802,23 @@ org_bau_List_List_i8* org_bau_List_List_i8_1(i8_array* array) {
     return _t1;
 }
 org_bau_List_List_Token* org_bau_List_newList_Token_1(int64_t _T) {
-    Token_array* _t9 = Token_array_new(4);
-    org_bau_List_List_Token* _t10 = org_bau_List_List_Token_1(_t9);
-    _decUseStack(_t9, Token_array);
-    return _t10;
+    Token_array* _t18 = Token_array_new(4);
+    org_bau_List_List_Token* _t19 = org_bau_List_List_Token_1(_t18);
+    _decUseStack(_t18, Token_array);
+    return _t19;
 }
 org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T) {
-    i8_array* _t11 = i8_array_new(4);
-    org_bau_List_List_i8* _t12 = org_bau_List_List_i8_1(_t11);
-    _decUseStack(_t11, i8_array);
-    return _t12;
+    i8_array* _t20 = i8_array_new(4);
+    org_bau_List_List_i8* _t21 = org_bau_List_List_i8_1(_t20);
+    _decUseStack(_t20, i8_array);
+    return _t21;
 }
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Token_array* _t7 = Token_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t7);
-        Token_array* n = _t7;
+        Token_array* _t16 = Token_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t16);
+        Token_array* n = _t16;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -839,7 +839,7 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
         _decUse(this->array, Token_array);
         this->array = n;
         _decUseStack(n, Token_array);
-        _decUseStack(_t7, Token_array);
+        _decUseStack(_t16, Token_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Token);
@@ -1004,7 +1004,7 @@ _org_bau_List_List_Token_or_exception parse_1(i8_array* regex) {
                             t->max = value;
                         }
                         if (c != 125) {
-                            org_bau_Exception_exception _t5 = org_bau_Exception_exception_1(string_1017);
+                            org_bau_Exception_exception _t5 = org_bau_Exception_exception_1(string_1022);
                             _x0 = exception_org_bau_List_List_Token_or_exception(_t5); _lastException = _x0.exception; goto catch0;
                             org_bau_Exception_exception_free(&_t5);
                         }
@@ -1028,11 +1028,11 @@ void test_0() {
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
     do { do {
-    _x0 = matches_2(string_1018, string_1019);
+    _x0 = matches_2(string_1023, string_1024);
     if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
     int64_t _t0 = _x0.result;
     printf("%lld\n", (long long)_t0);
-    _x1 = matches_2(string_1020, string_1021);
+    _x1 = matches_2(string_1025, string_1026);
     if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
     int64_t _t1 = _x1.result;
     printf("%lld\n", (long long)_t1);
@@ -1050,14 +1050,14 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("Start or end in wrong location", 30);
-    string_1001 = str_const("Unknown token type", 18);
-    string_1017 = str_const("Expected }", 10);
-    string_1018 = str_const("hello", 5);
-    string_1019 = str_const("hell.*", 6);
-    string_1020 = str_const("hello world", 11);
-    string_1021 = str_const("hell[o-z] world", 15);
-    string_1022 = str_const("exception ", 10);
+    string_1009 = str_const("Start or end in wrong location", 30);
+    string_1010 = str_const("Unknown token type", 18);
+    string_1022 = str_const("Expected }", 10);
+    string_1023 = str_const("hello", 5);
+    string_1024 = str_const("hell.*", 6);
+    string_1025 = str_const("hello world", 11);
+    string_1026 = str_const("hell[o-z] world", 15);
+    string_1027 = str_const("exception ", 10);
     _main();
     return 0;
 }

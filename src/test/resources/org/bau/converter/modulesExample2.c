@@ -330,8 +330,8 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    int64_t _t33 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t33);
+    int64_t _t42 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t42);
     printf("%.9f\n", 3.141592653589793);
     _end();
 }

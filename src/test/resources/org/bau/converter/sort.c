@@ -307,12 +307,12 @@ void insertionSort_int_array_int_1(int_array* a) {
             int64_t t = a->data[idx_2(i, _arrayLen(a))];
             int64_t j = i - 1;
             while (1 == 1) {
-                int64_t _t0 = j >= 0;
-                if (_t0) {
-                    int64_t _t1 = a->data[idx_2(j, _arrayLen(a))] > t;
-                    _t0 = _t1;
+                int64_t _t9 = j >= 0;
+                if (_t9) {
+                    int64_t _t10 = a->data[idx_2(j, _arrayLen(a))] > t;
+                    _t9 = _t10;
                 }
-                if (!(_t0)) {
+                if (!(_t9)) {
                     break;
                 }
                 a->data[idx_2(j + 1, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
@@ -346,12 +346,12 @@ void shellSort_int_array_int_1(int_array* a) {
                 int64_t t = a->data[idx_2(i, _arrayLen(a))];
                 int64_t j = i - g;
                 while (1 == 1) {
-                    int64_t _t2 = j >= 0;
-                    if (_t2) {
-                        int64_t _t3 = a->data[idx_2(j, _arrayLen(a))] > t;
-                        _t2 = _t3;
+                    int64_t _t11 = j >= 0;
+                    if (_t11) {
+                        int64_t _t12 = a->data[idx_2(j, _arrayLen(a))] > t;
+                        _t11 = _t12;
                     }
-                    if (!(_t2)) {
+                    if (!(_t11)) {
                         break;
                     }
                     a->data[idx_2(j + g, _arrayLen(a))] = a->data[idx_2(j, _arrayLen(a))];
@@ -460,5 +460,8 @@ Pseudo-random number between 0 and smallerThan (excluding).
 
 fun setRandomSeed(seed int)
 Set the random seed.
+
+fun ord(s i8[]) const int
+The value of the first byte in the string. 0 if the string is empty.
 
 */

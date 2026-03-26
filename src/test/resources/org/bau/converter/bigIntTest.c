@@ -425,16 +425,7 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1033;
-i8_array* string_1034;
-i8_array* string_1036;
-i8_array* string_1038;
-i8_array* string_1040;
-i8_array* string_1042;
-i8_array* string_1044;
-i8_array* string_1046;
-i8_array* string_1048;
-i8_array* string_1050;
+i8_array* string_1051;
 i8_array* string_1052;
 i8_array* string_1054;
 i8_array* string_1056;
@@ -449,6 +440,15 @@ i8_array* string_1072;
 i8_array* string_1074;
 i8_array* string_1076;
 i8_array* string_1078;
+i8_array* string_1080;
+i8_array* string_1082;
+i8_array* string_1084;
+i8_array* string_1086;
+i8_array* string_1088;
+i8_array* string_1090;
+i8_array* string_1092;
+i8_array* string_1094;
+i8_array* string_1096;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -518,11 +518,11 @@ org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b) {
     return _t4;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_1(i32_array* data) {
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_bigInt_new();
-    _t1.negative = 0;
+    org_bau_BigInt_bigInt _t10 = org_bau_BigInt_bigInt_new();
+    _t10.negative = 0;
     _incUseStack(data);
-    _t1.data = data;
-    return _t1;
+    _t10.data = data;
+    return _t10;
 }
 i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen) {
     _incUseStack(a);
@@ -565,46 +565,46 @@ i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen) {
 i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to) {
     _incUseStack(a);
     int64_t len = to - from;
-    i32_array* _t3 = i32_array_new(len);
-    _incUseStack(_t3);
-    i32_array* x = _t3;
+    i32_array* _t12 = i32_array_new(len);
+    _incUseStack(_t12);
+    i32_array* x = _t12;
     int64_t i = 0;
     while (1 == 1) {
-        int64_t _t4 = ( i + from ) < to;
-        if (_t4) {
-            int64_t _t5 = i < _arrayLen(a);
-            _t4 = _t5;
+        int64_t _t13 = ( i + from ) < to;
+        if (_t13) {
+            int64_t _t14 = i < _arrayLen(a);
+            _t13 = _t14;
         }
-        if (!(_t4)) {
+        if (!(_t13)) {
             break;
         }
         x->data[idx_2(i, _arrayLen(x))] = a->data[idx_2(i + from, _arrayLen(a))];
         i = i + 1;
     }
-    _decUseStack(_t3, i32_array);
+    _decUseStack(_t12, i32_array);
     _decUseStack(a, i32_array);
     return x;
 }
 i8_array* org_bau_BigInt_copyOfRange_i8_array_i8_3(i8_array* a, int64_t from, int64_t to) {
     _incUseStack(a);
     int64_t len = to - from;
-    i8_array* _t6 = i8_array_new(len);
-    _incUseStack(_t6);
-    i8_array* x = _t6;
+    i8_array* _t15 = i8_array_new(len);
+    _incUseStack(_t15);
+    i8_array* x = _t15;
     int64_t i = 0;
     while (1 == 1) {
-        int64_t _t7 = ( i + from ) < to;
-        if (_t7) {
-            int64_t _t8 = i < _arrayLen(a);
-            _t7 = _t8;
+        int64_t _t16 = ( i + from ) < to;
+        if (_t16) {
+            int64_t _t17 = i < _arrayLen(a);
+            _t16 = _t17;
         }
-        if (!(_t7)) {
+        if (!(_t16)) {
             break;
         }
         x->data[idx_2(i, _arrayLen(x))] = a->data[idx_2(i + from, _arrayLen(a))];
         i = i + 1;
     }
-    _decUseStack(_t6, i8_array);
+    _decUseStack(_t15, i8_array);
     _decUseStack(a, i8_array);
     return x;
 }
@@ -799,10 +799,10 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t
     return result;
 }
 org_bau_BigInt_str org_bau_BigInt_str_1(i8_array* data) {
-    org_bau_BigInt_str _t2 = org_bau_BigInt_str_new();
+    org_bau_BigInt_str _t11 = org_bau_BigInt_str_new();
     _incUseStack(data);
-    _t2.data = data;
-    return _t2;
+    _t11.data = data;
+    return _t11;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b) {
     i32_array* result = org_bau_BigInt_copyOf_2(a, _arrayLen(a));
@@ -1438,30 +1438,30 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1033 = str_const("assertion failed: ", 18);
-    string_1034 = str_const("toInt(add(newBigInt(123), newBigInt(456))) == 579", 49);
-    string_1036 = str_const("toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) == 579", 98);
-    string_1038 = str_const("toInt(sub(newBigInt(1000), newBigInt(250))) == 750", 50);
-    string_1040 = str_const("toInt(sub(newBigInt(250), newBigInt(1000))) == -750", 51);
-    string_1042 = str_const("toInt(mul(newBigInt(20), newBigInt(5))) == 100", 46);
-    string_1044 = str_const("toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) == 100", 95);
-    string_1046 = str_const("toInt(div(newBigInt(100), newBigInt(5))) == 20", 46);
-    string_1048 = str_const("toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) == 20", 78);
-    string_1050 = str_const("toInt(shiftLeft(newBigInt(1), 3)) == 8", 38);
-    string_1052 = str_const("toInt(shiftRight(newBigInt(16), 2)) == 4", 40);
-    string_1054 = str_const("toInt(neg(newBigInt(50))) == -50", 32);
-    string_1056 = str_const("toInt(neg(neg(newBigInt(50)))) == 50", 36);
-    string_1058 = str_const("compare(newBigInt(10), newBigInt(20)) == -1", 43);
-    string_1060 = str_const("compare(newBigInt(10), newBigInt(-20)) == 1", 43);
-    string_1062 = str_const("compare(newBigInt(10), newBigInt(10)) == 0", 42);
-    string_1064 = str_const("signum(newBigInt(123)) == 1", 27);
-    string_1066 = str_const("signum(newBigInt(0)) == 0", 25);
-    string_1068 = str_const("signum(newBigInt(-123)) == -1", 29);
-    string_1070 = str_const("len(newBigInt(1)) == 1", 22);
-    string_1072 = str_const("len(newBigInt(2)) == 2", 22);
-    string_1074 = str_const("len(newBigInt(255)) == 8", 24);
-    string_1076 = str_const("len(newBigInt(256)) == 9", 24);
-    string_1078 = str_const("len(shiftLeft(newBigInt(256), 100)) == 109", 42);
+    string_1051 = str_const("assertion failed: ", 18);
+    string_1052 = str_const("toInt(add(newBigInt(123), newBigInt(456))) == 579", 49);
+    string_1054 = str_const("toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) == 579", 98);
+    string_1056 = str_const("toInt(sub(newBigInt(1000), newBigInt(250))) == 750", 50);
+    string_1058 = str_const("toInt(sub(newBigInt(250), newBigInt(1000))) == -750", 51);
+    string_1060 = str_const("toInt(mul(newBigInt(20), newBigInt(5))) == 100", 46);
+    string_1062 = str_const("toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) == 100", 95);
+    string_1064 = str_const("toInt(div(newBigInt(100), newBigInt(5))) == 20", 46);
+    string_1066 = str_const("toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) == 20", 78);
+    string_1068 = str_const("toInt(shiftLeft(newBigInt(1), 3)) == 8", 38);
+    string_1070 = str_const("toInt(shiftRight(newBigInt(16), 2)) == 4", 40);
+    string_1072 = str_const("toInt(neg(newBigInt(50))) == -50", 32);
+    string_1074 = str_const("toInt(neg(neg(newBigInt(50)))) == 50", 36);
+    string_1076 = str_const("compare(newBigInt(10), newBigInt(20)) == -1", 43);
+    string_1078 = str_const("compare(newBigInt(10), newBigInt(-20)) == 1", 43);
+    string_1080 = str_const("compare(newBigInt(10), newBigInt(10)) == 0", 42);
+    string_1082 = str_const("signum(newBigInt(123)) == 1", 27);
+    string_1084 = str_const("signum(newBigInt(0)) == 0", 25);
+    string_1086 = str_const("signum(newBigInt(-123)) == -1", 29);
+    string_1088 = str_const("len(newBigInt(1)) == 1", 22);
+    string_1090 = str_const("len(newBigInt(2)) == 2", 22);
+    string_1092 = str_const("len(newBigInt(255)) == 8", 24);
+    string_1094 = str_const("len(newBigInt(256)) == 9", 24);
+    string_1096 = str_const("len(shiftLeft(newBigInt(256), 100)) == 109", 42);
     _main();
     return 0;
 }
@@ -1471,246 +1471,246 @@ void _main() {
     MAX_INT = 0x7fffffffffffffff;
     MIN_I32 = -2147483648;
     MAX_I32 = 4294967295;
-    org_bau_BigInt_bigInt _t9 = org_bau_BigInt_newBigInt_1(123);
-    org_bau_BigInt_bigInt _t10 = org_bau_BigInt_newBigInt_1(456);
-    org_bau_BigInt_bigInt _t11 = org_bau_BigInt_bigInt_add_2(_t9, _t10);
-    int64_t _t12 = org_bau_BigInt_bigInt_toInt_1(_t11);
-    if (!(( _t12 == 579 ))) {
+    org_bau_BigInt_bigInt _t18 = org_bau_BigInt_newBigInt_1(123);
+    org_bau_BigInt_bigInt _t19 = org_bau_BigInt_newBigInt_1(456);
+    org_bau_BigInt_bigInt _t20 = org_bau_BigInt_bigInt_add_2(_t18, _t19);
+    int64_t _t21 = org_bau_BigInt_bigInt_toInt_1(_t20);
+    if (!(( _t21 == 579 ))) {
         printf("assertion failed: toInt(add(newBigInt(123), newBigInt(456))) == 579\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t13 = org_bau_BigInt_newBigInt_1(123);
-    org_bau_BigInt_bigInt _t14 = org_bau_BigInt_bigInt_shiftLeft_2(_t13, 100);
-    org_bau_BigInt_bigInt _t15 = org_bau_BigInt_newBigInt_1(456);
-    org_bau_BigInt_bigInt _t16 = org_bau_BigInt_bigInt_shiftLeft_2(_t15, 100);
-    org_bau_BigInt_bigInt _t17 = org_bau_BigInt_bigInt_add_2(_t14, _t16);
-    org_bau_BigInt_bigInt _t18 = org_bau_BigInt_bigInt_shiftRight_2(_t17, 100);
-    int64_t _t19 = org_bau_BigInt_bigInt_toInt_1(_t18);
-    if (!(( _t19 == 579 ))) {
+    org_bau_BigInt_bigInt _t22 = org_bau_BigInt_newBigInt_1(123);
+    org_bau_BigInt_bigInt _t23 = org_bau_BigInt_bigInt_shiftLeft_2(_t22, 100);
+    org_bau_BigInt_bigInt _t24 = org_bau_BigInt_newBigInt_1(456);
+    org_bau_BigInt_bigInt _t25 = org_bau_BigInt_bigInt_shiftLeft_2(_t24, 100);
+    org_bau_BigInt_bigInt _t26 = org_bau_BigInt_bigInt_add_2(_t23, _t25);
+    org_bau_BigInt_bigInt _t27 = org_bau_BigInt_bigInt_shiftRight_2(_t26, 100);
+    int64_t _t28 = org_bau_BigInt_bigInt_toInt_1(_t27);
+    if (!(( _t28 == 579 ))) {
         printf("assertion failed: toInt(shiftRight(add(shiftLeft(newBigInt(123), 100), shiftLeft(newBigInt(456), 100)), 100)) == 579\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t20 = org_bau_BigInt_newBigInt_1(1000);
-    org_bau_BigInt_bigInt _t21 = org_bau_BigInt_newBigInt_1(250);
-    org_bau_BigInt_bigInt _t22 = org_bau_BigInt_bigInt_sub_2(_t20, _t21);
-    int64_t _t23 = org_bau_BigInt_bigInt_toInt_1(_t22);
-    if (!(( _t23 == 750 ))) {
+    org_bau_BigInt_bigInt _t29 = org_bau_BigInt_newBigInt_1(1000);
+    org_bau_BigInt_bigInt _t30 = org_bau_BigInt_newBigInt_1(250);
+    org_bau_BigInt_bigInt _t31 = org_bau_BigInt_bigInt_sub_2(_t29, _t30);
+    int64_t _t32 = org_bau_BigInt_bigInt_toInt_1(_t31);
+    if (!(( _t32 == 750 ))) {
         printf("assertion failed: toInt(sub(newBigInt(1000), newBigInt(250))) == 750\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t24 = org_bau_BigInt_newBigInt_1(250);
-    org_bau_BigInt_bigInt _t25 = org_bau_BigInt_newBigInt_1(1000);
-    org_bau_BigInt_bigInt _t26 = org_bau_BigInt_bigInt_sub_2(_t24, _t25);
-    int64_t _t27 = org_bau_BigInt_bigInt_toInt_1(_t26);
-    if (!(( _t27 == -750 ))) {
+    org_bau_BigInt_bigInt _t33 = org_bau_BigInt_newBigInt_1(250);
+    org_bau_BigInt_bigInt _t34 = org_bau_BigInt_newBigInt_1(1000);
+    org_bau_BigInt_bigInt _t35 = org_bau_BigInt_bigInt_sub_2(_t33, _t34);
+    int64_t _t36 = org_bau_BigInt_bigInt_toInt_1(_t35);
+    if (!(( _t36 == -750 ))) {
         printf("assertion failed: toInt(sub(newBigInt(250), newBigInt(1000))) == -750\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t28 = org_bau_BigInt_newBigInt_1(20);
-    org_bau_BigInt_bigInt _t29 = org_bau_BigInt_newBigInt_1(5);
-    org_bau_BigInt_bigInt _t30 = org_bau_BigInt_bigInt_mul_2(_t28, _t29);
-    int64_t _t31 = org_bau_BigInt_bigInt_toInt_1(_t30);
-    if (!(( _t31 == 100 ))) {
+    org_bau_BigInt_bigInt _t37 = org_bau_BigInt_newBigInt_1(20);
+    org_bau_BigInt_bigInt _t38 = org_bau_BigInt_newBigInt_1(5);
+    org_bau_BigInt_bigInt _t39 = org_bau_BigInt_bigInt_mul_2(_t37, _t38);
+    int64_t _t40 = org_bau_BigInt_bigInt_toInt_1(_t39);
+    if (!(( _t40 == 100 ))) {
         printf("assertion failed: toInt(mul(newBigInt(20), newBigInt(5))) == 100\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t32 = org_bau_BigInt_newBigInt_1(20);
-    org_bau_BigInt_bigInt _t33 = org_bau_BigInt_bigInt_shiftLeft_2(_t32, 100);
-    org_bau_BigInt_bigInt _t34 = org_bau_BigInt_newBigInt_1(5);
-    org_bau_BigInt_bigInt _t35 = org_bau_BigInt_bigInt_shiftLeft_2(_t34, 100);
-    org_bau_BigInt_bigInt _t36 = org_bau_BigInt_bigInt_mul_2(_t33, _t35);
-    org_bau_BigInt_bigInt _t37 = org_bau_BigInt_bigInt_shiftRight_2(_t36, 200);
-    int64_t _t38 = org_bau_BigInt_bigInt_toInt_1(_t37);
-    if (!(( _t38 == 100 ))) {
+    org_bau_BigInt_bigInt _t41 = org_bau_BigInt_newBigInt_1(20);
+    org_bau_BigInt_bigInt _t42 = org_bau_BigInt_bigInt_shiftLeft_2(_t41, 100);
+    org_bau_BigInt_bigInt _t43 = org_bau_BigInt_newBigInt_1(5);
+    org_bau_BigInt_bigInt _t44 = org_bau_BigInt_bigInt_shiftLeft_2(_t43, 100);
+    org_bau_BigInt_bigInt _t45 = org_bau_BigInt_bigInt_mul_2(_t42, _t44);
+    org_bau_BigInt_bigInt _t46 = org_bau_BigInt_bigInt_shiftRight_2(_t45, 200);
+    int64_t _t47 = org_bau_BigInt_bigInt_toInt_1(_t46);
+    if (!(( _t47 == 100 ))) {
         printf("assertion failed: toInt(shiftRight(mul(shiftLeft(newBigInt(20), 100), shiftLeft(newBigInt(5), 100)), 200)) == 100\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t39 = org_bau_BigInt_newBigInt_1(100);
-    org_bau_BigInt_bigInt _t40 = org_bau_BigInt_newBigInt_1(5);
-    org_bau_BigInt_bigInt _t41 = org_bau_BigInt_bigInt_div_2(_t39, _t40);
-    int64_t _t42 = org_bau_BigInt_bigInt_toInt_1(_t41);
-    if (!(( _t42 == 20 ))) {
+    org_bau_BigInt_bigInt _t48 = org_bau_BigInt_newBigInt_1(100);
+    org_bau_BigInt_bigInt _t49 = org_bau_BigInt_newBigInt_1(5);
+    org_bau_BigInt_bigInt _t50 = org_bau_BigInt_bigInt_div_2(_t48, _t49);
+    int64_t _t51 = org_bau_BigInt_bigInt_toInt_1(_t50);
+    if (!(( _t51 == 20 ))) {
         printf("assertion failed: toInt(div(newBigInt(100), newBigInt(5))) == 20\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t43 = org_bau_BigInt_newBigInt_1(100);
-    org_bau_BigInt_bigInt _t44 = org_bau_BigInt_bigInt_shiftLeft_2(_t43, 100);
-    org_bau_BigInt_bigInt _t45 = org_bau_BigInt_newBigInt_1(5);
-    org_bau_BigInt_bigInt _t46 = org_bau_BigInt_bigInt_shiftLeft_2(_t45, 100);
-    org_bau_BigInt_bigInt _t47 = org_bau_BigInt_bigInt_div_2(_t44, _t46);
-    int64_t _t48 = org_bau_BigInt_bigInt_toInt_1(_t47);
-    if (!(( _t48 == 20 ))) {
+    org_bau_BigInt_bigInt _t52 = org_bau_BigInt_newBigInt_1(100);
+    org_bau_BigInt_bigInt _t53 = org_bau_BigInt_bigInt_shiftLeft_2(_t52, 100);
+    org_bau_BigInt_bigInt _t54 = org_bau_BigInt_newBigInt_1(5);
+    org_bau_BigInt_bigInt _t55 = org_bau_BigInt_bigInt_shiftLeft_2(_t54, 100);
+    org_bau_BigInt_bigInt _t56 = org_bau_BigInt_bigInt_div_2(_t53, _t55);
+    int64_t _t57 = org_bau_BigInt_bigInt_toInt_1(_t56);
+    if (!(( _t57 == 20 ))) {
         printf("assertion failed: toInt(div(shiftLeft(newBigInt(100), 100), shiftLeft(newBigInt(5), 100))) == 20\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t49 = org_bau_BigInt_newBigInt_1(1);
-    org_bau_BigInt_bigInt _t50 = org_bau_BigInt_bigInt_shiftLeft_2(_t49, 3);
-    int64_t _t51 = org_bau_BigInt_bigInt_toInt_1(_t50);
-    if (!(( _t51 == 8 ))) {
+    org_bau_BigInt_bigInt _t58 = org_bau_BigInt_newBigInt_1(1);
+    org_bau_BigInt_bigInt _t59 = org_bau_BigInt_bigInt_shiftLeft_2(_t58, 3);
+    int64_t _t60 = org_bau_BigInt_bigInt_toInt_1(_t59);
+    if (!(( _t60 == 8 ))) {
         printf("assertion failed: toInt(shiftLeft(newBigInt(1), 3)) == 8\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t52 = org_bau_BigInt_newBigInt_1(16);
-    org_bau_BigInt_bigInt _t53 = org_bau_BigInt_bigInt_shiftRight_2(_t52, 2);
-    int64_t _t54 = org_bau_BigInt_bigInt_toInt_1(_t53);
-    if (!(( _t54 == 4 ))) {
+    org_bau_BigInt_bigInt _t61 = org_bau_BigInt_newBigInt_1(16);
+    org_bau_BigInt_bigInt _t62 = org_bau_BigInt_bigInt_shiftRight_2(_t61, 2);
+    int64_t _t63 = org_bau_BigInt_bigInt_toInt_1(_t62);
+    if (!(( _t63 == 4 ))) {
         printf("assertion failed: toInt(shiftRight(newBigInt(16), 2)) == 4\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t55 = org_bau_BigInt_newBigInt_1(50);
-    org_bau_BigInt_bigInt _t56 = org_bau_BigInt_bigInt_neg_1(_t55);
-    int64_t _t57 = org_bau_BigInt_bigInt_toInt_1(_t56);
-    if (!(( _t57 == -50 ))) {
+    org_bau_BigInt_bigInt _t64 = org_bau_BigInt_newBigInt_1(50);
+    org_bau_BigInt_bigInt _t65 = org_bau_BigInt_bigInt_neg_1(_t64);
+    int64_t _t66 = org_bau_BigInt_bigInt_toInt_1(_t65);
+    if (!(( _t66 == -50 ))) {
         printf("assertion failed: toInt(neg(newBigInt(50))) == -50\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t58 = org_bau_BigInt_newBigInt_1(50);
-    org_bau_BigInt_bigInt _t59 = org_bau_BigInt_bigInt_neg_1(_t58);
-    org_bau_BigInt_bigInt _t60 = org_bau_BigInt_bigInt_neg_1(_t59);
-    int64_t _t61 = org_bau_BigInt_bigInt_toInt_1(_t60);
-    if (!(( _t61 == 50 ))) {
+    org_bau_BigInt_bigInt _t67 = org_bau_BigInt_newBigInt_1(50);
+    org_bau_BigInt_bigInt _t68 = org_bau_BigInt_bigInt_neg_1(_t67);
+    org_bau_BigInt_bigInt _t69 = org_bau_BigInt_bigInt_neg_1(_t68);
+    int64_t _t70 = org_bau_BigInt_bigInt_toInt_1(_t69);
+    if (!(( _t70 == 50 ))) {
         printf("assertion failed: toInt(neg(neg(newBigInt(50)))) == 50\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t62 = org_bau_BigInt_newBigInt_1(10);
-    org_bau_BigInt_bigInt _t63 = org_bau_BigInt_newBigInt_1(20);
-    int64_t _t64 = org_bau_BigInt_bigInt_compare_2(_t62, _t63);
-    if (!(( _t64 == -1 ))) {
+    org_bau_BigInt_bigInt _t71 = org_bau_BigInt_newBigInt_1(10);
+    org_bau_BigInt_bigInt _t72 = org_bau_BigInt_newBigInt_1(20);
+    int64_t _t73 = org_bau_BigInt_bigInt_compare_2(_t71, _t72);
+    if (!(( _t73 == -1 ))) {
         printf("assertion failed: compare(newBigInt(10), newBigInt(20)) == -1\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t65 = org_bau_BigInt_newBigInt_1(10);
-    org_bau_BigInt_bigInt _t66 = org_bau_BigInt_newBigInt_1(-20);
-    int64_t _t67 = org_bau_BigInt_bigInt_compare_2(_t65, _t66);
-    if (!(( _t67 == 1 ))) {
+    org_bau_BigInt_bigInt _t74 = org_bau_BigInt_newBigInt_1(10);
+    org_bau_BigInt_bigInt _t75 = org_bau_BigInt_newBigInt_1(-20);
+    int64_t _t76 = org_bau_BigInt_bigInt_compare_2(_t74, _t75);
+    if (!(( _t76 == 1 ))) {
         printf("assertion failed: compare(newBigInt(10), newBigInt(-20)) == 1\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t68 = org_bau_BigInt_newBigInt_1(10);
-    org_bau_BigInt_bigInt _t69 = org_bau_BigInt_newBigInt_1(10);
-    int64_t _t70 = org_bau_BigInt_bigInt_compare_2(_t68, _t69);
-    if (!(( _t70 == 0 ))) {
+    org_bau_BigInt_bigInt _t77 = org_bau_BigInt_newBigInt_1(10);
+    org_bau_BigInt_bigInt _t78 = org_bau_BigInt_newBigInt_1(10);
+    int64_t _t79 = org_bau_BigInt_bigInt_compare_2(_t77, _t78);
+    if (!(( _t79 == 0 ))) {
         printf("assertion failed: compare(newBigInt(10), newBigInt(10)) == 0\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t71 = org_bau_BigInt_newBigInt_1(123);
-    int64_t _t72 = org_bau_BigInt_bigInt_signum_1(_t71);
-    if (!(( _t72 == 1 ))) {
+    org_bau_BigInt_bigInt _t80 = org_bau_BigInt_newBigInt_1(123);
+    int64_t _t81 = org_bau_BigInt_bigInt_signum_1(_t80);
+    if (!(( _t81 == 1 ))) {
         printf("assertion failed: signum(newBigInt(123)) == 1\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t73 = org_bau_BigInt_newBigInt_1(0);
-    int64_t _t74 = org_bau_BigInt_bigInt_signum_1(_t73);
-    if (!(( _t74 == 0 ))) {
+    org_bau_BigInt_bigInt _t82 = org_bau_BigInt_newBigInt_1(0);
+    int64_t _t83 = org_bau_BigInt_bigInt_signum_1(_t82);
+    if (!(( _t83 == 0 ))) {
         printf("assertion failed: signum(newBigInt(0)) == 0\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t75 = org_bau_BigInt_newBigInt_1(-123);
-    int64_t _t76 = org_bau_BigInt_bigInt_signum_1(_t75);
-    if (!(( _t76 == -1 ))) {
+    org_bau_BigInt_bigInt _t84 = org_bau_BigInt_newBigInt_1(-123);
+    int64_t _t85 = org_bau_BigInt_bigInt_signum_1(_t84);
+    if (!(( _t85 == -1 ))) {
         printf("assertion failed: signum(newBigInt(-123)) == -1\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t77 = org_bau_BigInt_newBigInt_1(1);
-    int64_t _t78 = org_bau_BigInt_bigInt_len_1(_t77);
-    if (!(( _t78 == 1 ))) {
+    org_bau_BigInt_bigInt _t86 = org_bau_BigInt_newBigInt_1(1);
+    int64_t _t87 = org_bau_BigInt_bigInt_len_1(_t86);
+    if (!(( _t87 == 1 ))) {
         printf("assertion failed: len(newBigInt(1)) == 1\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t79 = org_bau_BigInt_newBigInt_1(2);
-    int64_t _t80 = org_bau_BigInt_bigInt_len_1(_t79);
-    if (!(( _t80 == 2 ))) {
+    org_bau_BigInt_bigInt _t88 = org_bau_BigInt_newBigInt_1(2);
+    int64_t _t89 = org_bau_BigInt_bigInt_len_1(_t88);
+    if (!(( _t89 == 2 ))) {
         printf("assertion failed: len(newBigInt(2)) == 2\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t81 = org_bau_BigInt_newBigInt_1(255);
-    int64_t _t82 = org_bau_BigInt_bigInt_len_1(_t81);
-    if (!(( _t82 == 8 ))) {
+    org_bau_BigInt_bigInt _t90 = org_bau_BigInt_newBigInt_1(255);
+    int64_t _t91 = org_bau_BigInt_bigInt_len_1(_t90);
+    if (!(( _t91 == 8 ))) {
         printf("assertion failed: len(newBigInt(255)) == 8\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t83 = org_bau_BigInt_newBigInt_1(256);
-    int64_t _t84 = org_bau_BigInt_bigInt_len_1(_t83);
-    if (!(( _t84 == 9 ))) {
+    org_bau_BigInt_bigInt _t92 = org_bau_BigInt_newBigInt_1(256);
+    int64_t _t93 = org_bau_BigInt_bigInt_len_1(_t92);
+    if (!(( _t93 == 9 ))) {
         printf("assertion failed: len(newBigInt(256)) == 9\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t85 = org_bau_BigInt_newBigInt_1(256);
-    org_bau_BigInt_bigInt _t86 = org_bau_BigInt_bigInt_shiftLeft_2(_t85, 100);
-    int64_t _t87 = org_bau_BigInt_bigInt_len_1(_t86);
-    if (!(( _t87 == 109 ))) {
+    org_bau_BigInt_bigInt _t94 = org_bau_BigInt_newBigInt_1(256);
+    org_bau_BigInt_bigInt _t95 = org_bau_BigInt_bigInt_shiftLeft_2(_t94, 100);
+    int64_t _t96 = org_bau_BigInt_bigInt_len_1(_t95);
+    if (!(( _t96 == 109 ))) {
         printf("assertion failed: len(shiftLeft(newBigInt(256), 100)) == 109\n");
     } else {
     }
-    org_bau_BigInt_bigInt _t88 = org_bau_BigInt_newBigInt_1(1234);
-    org_bau_BigInt_bigInt _t89 = org_bau_BigInt_bigInt_shiftLeft_2(_t88, 100);
-    org_bau_BigInt_bigInt _t90 = org_bau_BigInt_newBigInt_1(5678);
-    org_bau_BigInt_bigInt _t91 = org_bau_BigInt_bigInt_shiftLeft_2(_t90, 100);
-    org_bau_BigInt_bigInt _t92 = org_bau_BigInt_bigInt_mul_2(_t89, _t91);
-    i8_array* _t93 = org_bau_BigInt_bigInt_toStr_1(_t92);
-    printf("%.*s\n", _arrayLen(_t93), _t93->data);
-    _decUseStack(_t93, i8_array);
+    org_bau_BigInt_bigInt _t97 = org_bau_BigInt_newBigInt_1(1234);
+    org_bau_BigInt_bigInt _t98 = org_bau_BigInt_bigInt_shiftLeft_2(_t97, 100);
+    org_bau_BigInt_bigInt _t99 = org_bau_BigInt_newBigInt_1(5678);
+    org_bau_BigInt_bigInt _t100 = org_bau_BigInt_bigInt_shiftLeft_2(_t99, 100);
+    org_bau_BigInt_bigInt _t101 = org_bau_BigInt_bigInt_mul_2(_t98, _t100);
+    i8_array* _t102 = org_bau_BigInt_bigInt_toStr_1(_t101);
+    printf("%.*s\n", _arrayLen(_t102), _t102->data);
+    _decUseStack(_t102, i8_array);
+    org_bau_BigInt_bigInt_free(&_t101);
+    org_bau_BigInt_bigInt_free(&_t100);
+    org_bau_BigInt_bigInt_free(&_t99);
+    org_bau_BigInt_bigInt_free(&_t98);
+    org_bau_BigInt_bigInt_free(&_t97);
+    org_bau_BigInt_bigInt_free(&_t95);
+    org_bau_BigInt_bigInt_free(&_t94);
     org_bau_BigInt_bigInt_free(&_t92);
-    org_bau_BigInt_bigInt_free(&_t91);
     org_bau_BigInt_bigInt_free(&_t90);
-    org_bau_BigInt_bigInt_free(&_t89);
     org_bau_BigInt_bigInt_free(&_t88);
     org_bau_BigInt_bigInt_free(&_t86);
-    org_bau_BigInt_bigInt_free(&_t85);
-    org_bau_BigInt_bigInt_free(&_t83);
-    org_bau_BigInt_bigInt_free(&_t81);
-    org_bau_BigInt_bigInt_free(&_t79);
+    org_bau_BigInt_bigInt_free(&_t84);
+    org_bau_BigInt_bigInt_free(&_t82);
+    org_bau_BigInt_bigInt_free(&_t80);
+    org_bau_BigInt_bigInt_free(&_t78);
     org_bau_BigInt_bigInt_free(&_t77);
     org_bau_BigInt_bigInt_free(&_t75);
-    org_bau_BigInt_bigInt_free(&_t73);
+    org_bau_BigInt_bigInt_free(&_t74);
+    org_bau_BigInt_bigInt_free(&_t72);
     org_bau_BigInt_bigInt_free(&_t71);
     org_bau_BigInt_bigInt_free(&_t69);
     org_bau_BigInt_bigInt_free(&_t68);
-    org_bau_BigInt_bigInt_free(&_t66);
+    org_bau_BigInt_bigInt_free(&_t67);
     org_bau_BigInt_bigInt_free(&_t65);
-    org_bau_BigInt_bigInt_free(&_t63);
+    org_bau_BigInt_bigInt_free(&_t64);
     org_bau_BigInt_bigInt_free(&_t62);
-    org_bau_BigInt_bigInt_free(&_t60);
+    org_bau_BigInt_bigInt_free(&_t61);
     org_bau_BigInt_bigInt_free(&_t59);
     org_bau_BigInt_bigInt_free(&_t58);
     org_bau_BigInt_bigInt_free(&_t56);
     org_bau_BigInt_bigInt_free(&_t55);
+    org_bau_BigInt_bigInt_free(&_t54);
     org_bau_BigInt_bigInt_free(&_t53);
     org_bau_BigInt_bigInt_free(&_t52);
     org_bau_BigInt_bigInt_free(&_t50);
     org_bau_BigInt_bigInt_free(&_t49);
-    org_bau_BigInt_bigInt_free(&_t47);
+    org_bau_BigInt_bigInt_free(&_t48);
     org_bau_BigInt_bigInt_free(&_t46);
     org_bau_BigInt_bigInt_free(&_t45);
     org_bau_BigInt_bigInt_free(&_t44);
     org_bau_BigInt_bigInt_free(&_t43);
+    org_bau_BigInt_bigInt_free(&_t42);
     org_bau_BigInt_bigInt_free(&_t41);
-    org_bau_BigInt_bigInt_free(&_t40);
     org_bau_BigInt_bigInt_free(&_t39);
+    org_bau_BigInt_bigInt_free(&_t38);
     org_bau_BigInt_bigInt_free(&_t37);
-    org_bau_BigInt_bigInt_free(&_t36);
     org_bau_BigInt_bigInt_free(&_t35);
     org_bau_BigInt_bigInt_free(&_t34);
     org_bau_BigInt_bigInt_free(&_t33);
-    org_bau_BigInt_bigInt_free(&_t32);
+    org_bau_BigInt_bigInt_free(&_t31);
     org_bau_BigInt_bigInt_free(&_t30);
     org_bau_BigInt_bigInt_free(&_t29);
-    org_bau_BigInt_bigInt_free(&_t28);
+    org_bau_BigInt_bigInt_free(&_t27);
     org_bau_BigInt_bigInt_free(&_t26);
     org_bau_BigInt_bigInt_free(&_t25);
     org_bau_BigInt_bigInt_free(&_t24);
+    org_bau_BigInt_bigInt_free(&_t23);
     org_bau_BigInt_bigInt_free(&_t22);
-    org_bau_BigInt_bigInt_free(&_t21);
     org_bau_BigInt_bigInt_free(&_t20);
+    org_bau_BigInt_bigInt_free(&_t19);
     org_bau_BigInt_bigInt_free(&_t18);
-    org_bau_BigInt_bigInt_free(&_t17);
-    org_bau_BigInt_bigInt_free(&_t16);
-    org_bau_BigInt_bigInt_free(&_t15);
-    org_bau_BigInt_bigInt_free(&_t14);
-    org_bau_BigInt_bigInt_free(&_t13);
-    org_bau_BigInt_bigInt_free(&_t11);
-    org_bau_BigInt_bigInt_free(&_t10);
-    org_bau_BigInt_bigInt_free(&_t9);
     _end();
 }
 /*

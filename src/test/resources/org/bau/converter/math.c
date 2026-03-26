@@ -297,6 +297,7 @@ char **__argv;
 /* functions */
 double float_1(double x);
 int64_t idiv_2(int64_t a, int64_t b);
+int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
 int64_t int_1(int64_t x);
 void operations_2(int64_t a, int64_t b);
@@ -324,6 +325,8 @@ double org_bau_Math_signum_1(double x);
 double org_bau_Math_sin_1(double x);
 double org_bau_Math_sqrt_1(double x);
 double org_bau_Math_tan_1(double x);
+i8_array* org_bau_Std_convertFloatToI8Array_1(double n);
+i8_array* org_bau_Std_convertIntToI8Array_1(int64_t x);
 int64_t shiftLeft_2(int64_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
@@ -350,11 +353,9 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1014;
-i8_array* string_1015;
-i8_array* string_1016;
-i8_array* string_1017;
-i8_array* string_1018;
+i8_array* string_1002;
+i8_array* string_1003;
+i8_array* string_1004;
 i8_array* string_1019;
 i8_array* string_1020;
 i8_array* string_1021;
@@ -377,6 +378,17 @@ i8_array* string_1037;
 i8_array* string_1038;
 i8_array* string_1039;
 i8_array* string_1040;
+i8_array* string_1041;
+i8_array* string_1042;
+i8_array* string_1043;
+i8_array* string_1044;
+i8_array* string_1045;
+i8_array* string_1046;
+i8_array* string_1047;
+i8_array* string_1048;
+i8_array* string_1049;
+i8_array* string_1050;
+i8_array* string_1051;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -396,6 +408,10 @@ int64_t idiv_2(int64_t a, int64_t b) {
     if (b != 0) return a / b;
     if (a == 0) return 0;
     return a > 0 ? LLONG_MAX : LLONG_MIN;
+}
+int64_t idx_2(int64_t x, int64_t len) {
+    if (x >= 0 && x < len) return x;
+    return arrayOutOfBounds(x, len);
 }
 int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
@@ -656,18 +672,18 @@ double org_bau_Math_cos_1(double x) {
 }
 double org_bau_Math_exp_1(double x) {
     return exp(x);
-    int64_t _t7 = org_bau_Math_isNotANumber_1(x);
-    int64_t _t8 = _t7;
-    if (!(_t8)) {
-        int64_t _t9 = x == (1.0 / 0.0);
-        _t8 = _t9;
+    int64_t _t16 = org_bau_Math_isNotANumber_1(x);
+    int64_t _t17 = _t16;
+    if (!(_t17)) {
+        int64_t _t18 = x == (1.0 / 0.0);
+        _t17 = _t18;
     }
-    if (_t8) {
+    if (_t17) {
         return x;
     } else {
         if (x < 0) {
-            double _t10 = org_bau_Math_exp_1(- x);
-            double _r0 = 1 / _t10;
+            double _t19 = org_bau_Math_exp_1(- x);
+            double _r0 = 1 / _t19;
             return _r0;
         }
     }
@@ -691,44 +707,44 @@ double org_bau_Math_exp_1(double x) {
 }
 double org_bau_Math_floor_1(double x) {
     return floor(x);
-    int64_t _t25 = x <= (-9223372036854775807LL-1LL);
-    if (!(_t25)) {
-        int64_t _t26 = x >= 9223372036854775807;
-        _t25 = _t26;
+    int64_t _t34 = x <= (-9223372036854775807LL-1LL);
+    if (!(_t34)) {
+        int64_t _t35 = x >= 9223372036854775807;
+        _t34 = _t35;
     }
-    int64_t _t27 = _t25;
-    if (!(_t27)) {
-        int64_t _t28 = org_bau_Math_isNotANumber_1(x);
-        _t27 = _t28;
+    int64_t _t36 = _t34;
+    if (!(_t36)) {
+        int64_t _t37 = org_bau_Math_isNotANumber_1(x);
+        _t36 = _t37;
     }
-    int64_t _t29 = _t27;
-    if (!(_t29)) {
-        int64_t _t30 = x == 0;
-        _t29 = _t30;
+    int64_t _t38 = _t36;
+    if (!(_t38)) {
+        int64_t _t39 = x == 0;
+        _t38 = _t39;
     }
-    if (_t29) {
+    if (_t38) {
         return x;
     }
     int64_t i = int_1(x);
     double d = float_1(i);
-    int64_t _t31 = d == x;
-    if (!(_t31)) {
-        int64_t _t32 = x >= 0;
-        _t31 = _t32;
+    int64_t _t40 = d == x;
+    if (!(_t40)) {
+        int64_t _t41 = x >= 0;
+        _t40 = _t41;
     }
-    if (_t31) {
+    if (_t40) {
         return d;
     }
     double _r0 = d - 1;
     return _r0;
 }
 int64_t org_bau_Math_isNegativeZero_1(double x) {
-    int64_t _t14 = (x == 0.0);
-    if (_t14) {
-        int64_t _t15 = (( 1.0 / x ) == (-1.0 / 0.0));
-        _t14 = _t15;
+    int64_t _t23 = (x == 0.0);
+    if (_t23) {
+        int64_t _t24 = (( 1.0 / x ) == (-1.0 / 0.0));
+        _t23 = _t24;
     }
-    return _t14;
+    return _t23;
 }
 int64_t org_bau_Math_isNotANumber_1(double x) {
     return isnan(x);
@@ -743,24 +759,24 @@ double org_bau_Math_log_1(double x) {
         if (x == (1.0 / 0.0)) {
             return x;
         } else {
-            int64_t _t3 = x <= 0;
-            if (!(_t3)) {
-                int64_t _t4 = org_bau_Math_isNotANumber_1(x);
-                _t3 = _t4;
+            int64_t _t12 = x <= 0;
+            if (!(_t12)) {
+                int64_t _t13 = org_bau_Math_isNotANumber_1(x);
+                _t12 = _t13;
             }
-            if (_t3) {
+            if (_t12) {
                 return (0.0 / 0.0);
             }
         }
     }
     if (x < 0.7) {
-        double _t5 = org_bau_Math_log_1(2 * x);
-        double _r0 = _t5 - 0.6931471805599453;
+        double _t14 = org_bau_Math_log_1(2 * x);
+        double _r0 = _t14 - 0.6931471805599453;
         return _r0;
     }
     if (x >= 1.5) {
-        double _t6 = org_bau_Math_log_1(x / 2);
-        double _r1 = _t6 + 0.6931471805599453;
+        double _t15 = org_bau_Math_log_1(x / 2);
+        double _r1 = _t15 + 0.6931471805599453;
         return _r1;
     }
     double base = x - 1;
@@ -787,21 +803,21 @@ double org_bau_Math_log10_1(double x) {
 }
 double org_bau_Math_maxFloat_2(double a, double b) {
     return fmax(a, b);
-    int64_t _t13 = org_bau_Math_isNotANumber_1(a);
-    if (_t13) {
+    int64_t _t22 = org_bau_Math_isNotANumber_1(a);
+    if (_t22) {
         return a;
     }
-    int64_t _t16 = a == b;
-    if (_t16) {
-        int64_t _t17 = a == 0;
-        _t16 = _t17;
+    int64_t _t25 = a == b;
+    if (_t25) {
+        int64_t _t26 = a == 0;
+        _t25 = _t26;
     }
-    int64_t _t18 = _t16;
-    if (_t18) {
-        int64_t _t19 = org_bau_Math_isNegativeZero_1(a);
-        _t18 = _t19;
+    int64_t _t27 = _t25;
+    if (_t27) {
+        int64_t _t28 = org_bau_Math_isNegativeZero_1(a);
+        _t27 = _t28;
     }
-    if (_t18) {
+    if (_t27) {
         return b;
     }
     if (a >= b) {
@@ -811,21 +827,21 @@ double org_bau_Math_maxFloat_2(double a, double b) {
 }
 double org_bau_Math_minFloat_2(double a, double b) {
     return fmin(a, b);
-    int64_t _t20 = org_bau_Math_isNotANumber_1(a);
-    if (_t20) {
+    int64_t _t29 = org_bau_Math_isNotANumber_1(a);
+    if (_t29) {
         return a;
     }
-    int64_t _t21 = a == b;
-    if (_t21) {
-        int64_t _t22 = a == 0;
-        _t21 = _t22;
+    int64_t _t30 = a == b;
+    if (_t30) {
+        int64_t _t31 = a == 0;
+        _t30 = _t31;
     }
-    int64_t _t23 = _t21;
-    if (_t23) {
-        int64_t _t24 = org_bau_Math_isNegativeZero_1(b);
-        _t23 = _t24;
+    int64_t _t32 = _t30;
+    if (_t32) {
+        int64_t _t33 = org_bau_Math_isNegativeZero_1(b);
+        _t32 = _t33;
     }
-    if (_t23) {
+    if (_t32) {
         return b;
     }
     if (a <= b) {
@@ -1014,20 +1030,20 @@ double org_bau_Math_sin_1(double x) {
 double org_bau_Math_sqrt_1(double x) {
     return sqrt(x);
     int64_t x2 = int_1(x);
-    int64_t _t1 = x2 > 0;
-    if (_t1) {
-        int64_t _t2 = x2 == x;
-        _t1 = _t2;
+    int64_t _t10 = x2 > 0;
+    if (_t10) {
+        int64_t _t11 = x2 == x;
+        _t10 = _t11;
     }
-    if (_t1) {
+    if (_t10) {
         int64_t exact = org_bau_Int_sqrtInt_1(x2);
         if (( exact * exact ) == x) {
             return exact;
         }
     }
-    double _t11 = org_bau_Math_log_1(x);
-    double _t12 = org_bau_Math_exp_1(_t11 / 2);
-    return _t12;
+    double _t20 = org_bau_Math_log_1(x);
+    double _t21 = org_bau_Math_exp_1(_t20 / 2);
+    return _t21;
 }
 double org_bau_Math_tan_1(double x) {
     return tan(x);
@@ -1035,6 +1051,145 @@ double org_bau_Math_tan_1(double x) {
     double _t1 = org_bau_Math_cos_1(x);
     double _r0 = _t0 / _t1;
     return _r0;
+}
+i8_array* org_bau_Std_convertFloatToI8Array_1(double n) {
+    if (n != n) {
+        return string_1002;
+    } else {
+        if (n == (1.0 / 0.0)) {
+            return string_1003;
+        } else {
+            if (n == (-1.0 / 0.0)) {
+                return string_1004;
+            }
+        }
+    }
+    int64_t pos = 0;
+    int64_t e = 0;
+    if (n < 0) {
+        pos = 1;
+        n = - n;
+    }
+    int64_t _t2 = n != 0;
+    if (_t2) {
+        int64_t _t3 = ((n >= 1.0E8) || (n <= 0.001));
+        _t2 = _t3;
+    }
+    if (_t2) {
+        while (n >= 10) {
+            n = n / 10;
+            e = e + 1;
+        }
+        while (n < 1) {
+            n = n * 10;
+            e = e - 1;
+        }
+    }
+    int64_t _t4 = int_1(n);
+    i8_array* aa = org_bau_Std_convertIntToI8Array_1(_t4);
+    int64_t _t5 = int_1(n);
+    int64_t b = int_1(((n - _t5) * 1000000000000000000) + 1000000000000000000);
+    while (1 == 1) {
+        int64_t _t6 = b >= 100;
+        if (_t6) {
+            int64_t _t7 = ( imod_2(b, 10) ) == 0;
+            _t6 = _t7;
+        }
+        if (!(_t6)) {
+            break;
+        }
+        b = idiv_2(b, 10);
+    }
+    i8_array* bb = org_bau_Std_convertIntToI8Array_1(b);
+    i8_array* ee = org_bau_Std_convertIntToI8Array_1(e);
+    int64_t len = ( pos + _arrayLen(aa) ) + _arrayLen(bb);
+    if (e != 0) {
+        len = len + ( 1 + _arrayLen(ee) );
+    }
+    i8_array* _t8 = i8_array_new(len);
+    _incUseStack(_t8);
+    i8_array* buff = _t8;
+    buff->data[idx_2(0, _arrayLen(buff))] = 45;
+    if (_arrayLen(aa) > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                buff->data[idx_2(pos + i, _arrayLen(buff))] = aa->data[i];
+                int64_t _next = i + 1;
+                if (_next >= _arrayLen(aa)) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    if (_arrayLen(bb) > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                buff->data[idx_2(( pos + _arrayLen(aa) ) + i, _arrayLen(buff))] = bb->data[i];
+                int64_t _next = i + 1;
+                if (_next >= _arrayLen(bb)) {
+                    break;
+                }
+                i = _next;
+            }
+            break;
+        }
+    }
+    buff->data[idx_2(pos + _arrayLen(aa), _arrayLen(buff))] = 46;
+    if (e != 0) {
+        buff->data[idx_2(( pos + _arrayLen(aa) ) + _arrayLen(bb), _arrayLen(buff))] = 101;
+        if (_arrayLen(ee) > 0) {
+            while (1 == 1) {
+                int64_t i = 0;
+                while (1) {
+                    buff->data[idx_2(( pos + _arrayLen(aa) ) + _arrayLen(bb) + 1 + i, _arrayLen(buff))] = ee->data[i];
+                    int64_t _next = i + 1;
+                    if (_next >= _arrayLen(ee)) {
+                        break;
+                    }
+                    i = _next;
+                }
+                break;
+            }
+        }
+    }
+    _decUseStack(_t8, i8_array);
+    _decUseStack(ee, i8_array);
+    _decUseStack(bb, i8_array);
+    _decUseStack(aa, i8_array);
+    return buff;
+}
+i8_array* org_bau_Std_convertIntToI8Array_1(int64_t x) {
+    int64_t len = 1;
+    if (x >= 0) {
+        x = - x;
+        len = 0;
+    }
+    int64_t n = x;
+    while (1) {
+        len = len + 1;
+        n = idiv_2(n, 10);
+        if (n >= 0) {
+            break;
+        }
+    }
+    i8_array* _t1 = i8_array_new(len);
+    _incUseStack(_t1);
+    i8_array* buff = _t1;
+    buff->data[idx_2(0, _arrayLen(buff))] = 45;
+    while (1) {
+        len = len - 1;
+        buff->data[idx_2(len, _arrayLen(buff))] = 48 - (imod_2(x, 10));
+        x = idiv_2(x, 10);
+        if (x >= 0) {
+            break;
+        }
+    }
+    _decUseStack(_t1, i8_array);
+    return buff;
 }
 int64_t shiftLeft_2(int64_t a, int64_t b) {
     return a << b;
@@ -1047,33 +1202,42 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1014 = str_const("  / ", 4);
-    string_1015 = str_const(" = ", 3);
-    string_1016 = str_const("  % ", 4);
-    string_1017 = str_const(" >> ", 4);
-    string_1018 = str_const(" << ", 4);
-    string_1019 = str_const("signum ", 7);
-    string_1020 = str_const("abs    ", 7);
-    string_1021 = str_const("floor  ", 7);
-    string_1022 = str_const("ceil   ", 7);
-    string_1023 = str_const("round  ", 7);
-    string_1024 = str_const("exp    ", 7);
-    string_1025 = str_const("log    ", 7);
-    string_1026 = str_const("log10  ", 7);
-    string_1027 = str_const("sqrt   ", 7);
-    string_1028 = str_const("sin    ", 7);
-    string_1029 = str_const("cos    ", 7);
-    string_1030 = str_const("tan    ", 7);
-    string_1031 = str_const("atan   ", 7);
-    string_1032 = str_const("asin   ", 7);
-    string_1033 = str_const("acos   ", 7);
-    string_1034 = str_const("isNotANumber   ", 15);
-    string_1035 = str_const("isNegativeZero ", 15);
-    string_1036 = str_const("convertDoubleToLongBits ", 24);
-    string_1037 = str_const("convertLongBitsToDouble ", 24);
-    string_1038 = str_const("pow ", 4);
-    string_1039 = str_const("min ", 4);
-    string_1040 = str_const("max ", 4);
+    string_1002 = str_const("NaN", 3);
+    string_1003 = str_const("Infinity", 8);
+    string_1004 = str_const("-Infinity", 9);
+    string_1019 = str_const("  / ", 4);
+    string_1020 = str_const(" = ", 3);
+    string_1021 = str_const("  % ", 4);
+    string_1022 = str_const(" >> ", 4);
+    string_1023 = str_const(" << ", 4);
+    string_1024 = str_const("NaN  ", 5);
+    string_1025 = str_const("Inf  ", 5);
+    string_1026 = str_const("-Inf ", 5);
+    string_1027 = str_const("0    ", 5);
+    string_1028 = str_const(" ", 1);
+    string_1029 = str_const(", ", 2);
+    string_1030 = str_const("signum ", 7);
+    string_1031 = str_const("abs    ", 7);
+    string_1032 = str_const("floor  ", 7);
+    string_1033 = str_const("ceil   ", 7);
+    string_1034 = str_const("round  ", 7);
+    string_1035 = str_const("exp    ", 7);
+    string_1036 = str_const("log    ", 7);
+    string_1037 = str_const("log10  ", 7);
+    string_1038 = str_const("sqrt   ", 7);
+    string_1039 = str_const("sin    ", 7);
+    string_1040 = str_const("cos    ", 7);
+    string_1041 = str_const("tan    ", 7);
+    string_1042 = str_const("atan   ", 7);
+    string_1043 = str_const("asin   ", 7);
+    string_1044 = str_const("acos   ", 7);
+    string_1045 = str_const("isNotANumber   ", 15);
+    string_1046 = str_const("isNegativeZero ", 15);
+    string_1047 = str_const("convertDoubleToLongBits ", 24);
+    string_1048 = str_const("convertLongBitsToDouble ", 24);
+    string_1049 = str_const("pow ", 4);
+    string_1050 = str_const("min ", 4);
+    string_1051 = str_const("max ", 4);
     _main();
     return 0;
 }
@@ -1090,71 +1254,127 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
+    i8_array* _t42 = org_bau_Std_convertFloatToI8Array_1((0.0 / 0.0));
+    printf("NaN  %.*s\n", _arrayLen(_t42), _t42->data);
+    i8_array* _t43 = org_bau_Std_convertFloatToI8Array_1((1.0 / 0.0));
+    printf("Inf  %.*s\n", _arrayLen(_t43), _t43->data);
+    i8_array* _t44 = org_bau_Std_convertFloatToI8Array_1((-1.0 / 0.0));
+    printf("-Inf %.*s\n", _arrayLen(_t44), _t44->data);
+    i8_array* _t45 = org_bau_Std_convertFloatToI8Array_1(0);
+    printf("0    %.*s\n", _arrayLen(_t45), _t45->data);
+    double x = 1.0;
+    if (25 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                i8_array* _t46 = org_bau_Std_convertFloatToI8Array_1(x);
+                i8_array* _t47 = org_bau_Std_convertFloatToI8Array_1(- x);
+                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t46), _t46->data, _arrayLen(_t47), _t47->data);
+                x = x * 12345678901234;
+                int64_t _next = i + 1;
+                if (_next >= 25) {
+                    _decUseStack(_t47, i8_array);
+                    _decUseStack(_t46, i8_array);
+                    break;
+                }
+                i = _next;
+                _decUseStack(_t47, i8_array);
+                _decUseStack(_t46, i8_array);
+            }
+            break;
+        }
+    }
+    x = 10;
+    if (25 > 0) {
+        while (1 == 1) {
+            int64_t i = 0;
+            while (1) {
+                i8_array* _t48 = org_bau_Std_convertFloatToI8Array_1(x);
+                i8_array* _t49 = org_bau_Std_convertFloatToI8Array_1(- x);
+                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t48), _t48->data, _arrayLen(_t49), _t49->data);
+                x = x * 12;
+                int64_t _next = i + 1;
+                if (_next >= 25) {
+                    _decUseStack(_t49, i8_array);
+                    _decUseStack(_t48, i8_array);
+                    break;
+                }
+                i = _next;
+                _decUseStack(_t49, i8_array);
+                _decUseStack(_t48, i8_array);
+            }
+            break;
+        }
+    }
     operations_2(0, 0);
     operations_2(1, 0);
     operations_2(-1, 0);
     operations_2(3, -50);
-    double x = -1.0;
+    x = -1.0;
     x = -1;
     while (x <= 1) {
-        double _t33 = org_bau_Math_signum_1(x);
-        printf("signum %.9f = %.9f\n", x, _t33);
-        double _t34 = org_bau_Math_abs_1(x);
-        printf("abs    %.9f = %.9f\n", x, _t34);
-        double _t35 = org_bau_Math_floor_1(x);
-        printf("floor  %.9f = %.9f\n", x, _t35);
-        double _t36 = org_bau_Math_ceil_1(x);
-        printf("ceil   %.9f = %.9f\n", x, _t36);
-        double _t37 = org_bau_Math_round_1(x);
-        printf("round  %.9f = %.9f\n", x, _t37);
-        double _t38 = org_bau_Math_exp_1(x);
-        printf("exp    %.9f = %.9f\n", x, _t38);
-        double _t39 = org_bau_Math_log_1(x);
-        printf("log    %.9f = %.9f\n", x, _t39);
-        double _t40 = org_bau_Math_log10_1(x);
-        printf("log10  %.9f = %.9f\n", x, _t40);
-        double _t41 = org_bau_Math_sqrt_1(x);
-        printf("sqrt   %.9f = %.9f\n", x, _t41);
-        double _t42 = org_bau_Math_sin_1(x);
-        printf("sin    %.9f = %.9f\n", x, _t42);
-        double _t43 = org_bau_Math_cos_1(x);
-        printf("cos    %.9f = %.9f\n", x, _t43);
-        double _t44 = org_bau_Math_tan_1(x);
-        printf("tan    %.9f = %.9f\n", x, _t44);
-        double _t45 = org_bau_Math_atan_1(x);
-        printf("atan   %.9f = %.9f\n", x, _t45);
-        double _t46 = org_bau_Math_asin_1(x);
-        printf("asin   %.9f = %.9f\n", x, _t46);
-        double _t47 = org_bau_Math_acos_1(x);
-        printf("acos   %.9f = %.9f\n", x, _t47);
+        double _t50 = org_bau_Math_signum_1(x);
+        printf("signum %.9f = %.9f\n", x, _t50);
+        double _t51 = org_bau_Math_abs_1(x);
+        printf("abs    %.9f = %.9f\n", x, _t51);
+        double _t52 = org_bau_Math_floor_1(x);
+        printf("floor  %.9f = %.9f\n", x, _t52);
+        double _t53 = org_bau_Math_ceil_1(x);
+        printf("ceil   %.9f = %.9f\n", x, _t53);
+        double _t54 = org_bau_Math_round_1(x);
+        printf("round  %.9f = %.9f\n", x, _t54);
+        double _t55 = org_bau_Math_exp_1(x);
+        printf("exp    %.9f = %.9f\n", x, _t55);
+        double _t56 = org_bau_Math_log_1(x);
+        printf("log    %.9f = %.9f\n", x, _t56);
+        double _t57 = org_bau_Math_log10_1(x);
+        printf("log10  %.9f = %.9f\n", x, _t57);
+        double _t58 = org_bau_Math_sqrt_1(x);
+        printf("sqrt   %.9f = %.9f\n", x, _t58);
+        double _t59 = org_bau_Math_sin_1(x);
+        printf("sin    %.9f = %.9f\n", x, _t59);
+        double _t60 = org_bau_Math_cos_1(x);
+        printf("cos    %.9f = %.9f\n", x, _t60);
+        double _t61 = org_bau_Math_tan_1(x);
+        printf("tan    %.9f = %.9f\n", x, _t61);
+        double _t62 = org_bau_Math_atan_1(x);
+        printf("atan   %.9f = %.9f\n", x, _t62);
+        double _t63 = org_bau_Math_asin_1(x);
+        printf("asin   %.9f = %.9f\n", x, _t63);
+        double _t64 = org_bau_Math_acos_1(x);
+        printf("acos   %.9f = %.9f\n", x, _t64);
         x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
-        int64_t _t48 = org_bau_Math_isNotANumber_1(x);
-        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t48);
-        int64_t _t49 = org_bau_Math_isNegativeZero_1(x);
-        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t49);
-        int64_t _t50 = org_bau_Math_convertDoubleToLongBits_1(x);
-        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t50);
-        double _t51 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
-        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t51);
+        int64_t _t65 = org_bau_Math_isNotANumber_1(x);
+        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t65);
+        int64_t _t66 = org_bau_Math_isNegativeZero_1(x);
+        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t66);
+        int64_t _t67 = org_bau_Math_convertDoubleToLongBits_1(x);
+        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t67);
+        double _t68 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
+        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t68);
         x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
         double y = -1.0;
         while (y <= 1) {
-            double _t52 = org_bau_Math_pow_2(x, y);
-            printf("pow %.9f\n", _t52);
-            double _t53 = org_bau_Math_minFloat_2(x, y);
-            printf("min %.9f\n", _t53);
-            double _t54 = org_bau_Math_maxFloat_2(x, y);
-            printf("max %.9f\n", _t54);
+            double _t69 = org_bau_Math_pow_2(x, y);
+            printf("pow %.9f\n", _t69);
+            double _t70 = org_bau_Math_minFloat_2(x, y);
+            printf("min %.9f\n", _t70);
+            double _t71 = org_bau_Math_maxFloat_2(x, y);
+            printf("max %.9f\n", _t71);
             y = y + 0.5;
         }
         x = x + 0.5;
     }
+    _decUseStack(_t45, i8_array);
+    _decUseStack(_t44, i8_array);
+    _decUseStack(_t43, i8_array);
+    _decUseStack(_t42, i8_array);
     _end();
 }
 /*

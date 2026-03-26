@@ -1,0 +1,11 @@
+module org.bau.Debug
+
+fun debug(x T) macro T
+    source : x.source
+    line : x.line
+    values : x.values
+    module : x.module
+    result : x
+    println('debug line ' line ': ' source ' == ' result ' for ' values)
+    return x
+

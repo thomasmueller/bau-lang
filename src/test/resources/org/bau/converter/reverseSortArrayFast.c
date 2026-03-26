@@ -327,11 +327,11 @@ i8_array* str_const(char* data, uint32_t len) {
     memcpy(result->data, data, sizeof(char) * len);
     return result;
 }
-i8_array* string_1011;
-i8_array* string_1012;
-i8_array* string_1013;
-i8_array* string_1014;
-i8_array* string_1015;
+i8_array* string_1018;
+i8_array* string_1019;
+i8_array* string_1020;
+i8_array* string_1021;
+i8_array* string_1022;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -478,11 +478,11 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1011 = str_const("repeat ", 7);
-    string_1012 = str_const(" count ", 7);
-    string_1013 = str_const("first ", 6);
-    string_1014 = str_const(" last ", 6);
-    string_1015 = str_const("sum ", 4);
+    string_1018 = str_const("repeat ", 7);
+    string_1019 = str_const(" count ", 7);
+    string_1020 = str_const("first ", 6);
+    string_1021 = str_const(" last ", 6);
+    string_1022 = str_const("sum ", 4);
     _main();
     return 0;
 }
@@ -494,24 +494,24 @@ void _main() {
     MAX_I32 = 4294967295;
     int64_t repeat = 10;
     int64_t count = 10;
-    int64_t _t1 = org_bau_Env_argCount_0();
-    if (_t1 > 1) {
-        i8_array* _t2 = org_bau_Env_arg_1(1);
-        int64_t _t3 = org_bau_Int_parseInt_1(_t2);
-        repeat = _t3;
-        _decUseStack(_t2, i8_array);
+    int64_t _t10 = org_bau_Env_argCount_0();
+    if (_t10 > 1) {
+        i8_array* _t11 = org_bau_Env_arg_1(1);
+        int64_t _t12 = org_bau_Int_parseInt_1(_t11);
+        repeat = _t12;
+        _decUseStack(_t11, i8_array);
     }
-    int64_t _t4 = org_bau_Env_argCount_0();
-    if (_t4 > 2) {
-        i8_array* _t5 = org_bau_Env_arg_1(2);
-        int64_t _t6 = org_bau_Int_parseInt_1(_t5);
-        count = _t6;
-        _decUseStack(_t5, i8_array);
+    int64_t _t13 = org_bau_Env_argCount_0();
+    if (_t13 > 2) {
+        i8_array* _t14 = org_bau_Env_arg_1(2);
+        int64_t _t15 = org_bau_Int_parseInt_1(_t14);
+        count = _t15;
+        _decUseStack(_t14, i8_array);
     }
     printf("repeat %lld count %lld\n", (long long)repeat, (long long)count);
-    int_array* _t7 = int_array_new(count);
-    _incUseStack(_t7);
-    int_array* test = _t7;
+    int_array* _t16 = int_array_new(count);
+    _incUseStack(_t16);
+    int_array* test = _t16;
     if (_arrayLen(test) <= 1) {
         return;
     }
@@ -519,8 +519,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t8 = org_bau_Utils_random_0();
-                test->data[i] = _t8;
+                int64_t _t17 = org_bau_Utils_random_0();
+                test->data[i] = _t17;
                 int64_t _next = i + 1;
                 if (_next >= _arrayLen(test)) {
                     break;
@@ -552,13 +552,10 @@ void _main() {
     }
     printf("sum %lld\n", (long long)sum);
     _decUseStack(test, int_array);
-    _decUseStack(_t7, int_array);
+    _decUseStack(_t16, int_array);
     _end();
 }
 /*
-
-type exception
-An exception
 
 fun getRandomSeed() int
 Get the random seed.
@@ -571,6 +568,9 @@ Pseudo-random number between 0 and smallerThan (excluding).
 
 fun setRandomSeed(seed int)
 Set the random seed.
+
+type exception
+An exception
 
 fun ord(s i8[]) const int
 The value of the first byte in the string. 0 if the string is empty.
