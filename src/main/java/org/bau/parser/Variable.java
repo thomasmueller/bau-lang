@@ -2,6 +2,7 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bau.parser.Solver.Rule;
 import org.bau.parser.Statement.StatementResult;
@@ -420,7 +421,24 @@ public class Variable implements Expression, LeftValue {
 
     @Override
     public String toAST() {
-        return "var(" + name + ")";
+        return "\"var\",\"" + name + "\"";
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, version);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Variable other = (Variable) obj;
+        return Objects.equals(name, other.name) && version == other.version;
     }
 
 }

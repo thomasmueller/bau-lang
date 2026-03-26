@@ -730,13 +730,14 @@ public class Operation implements Expression {
     @Override
     public String toAST() {
         StringBuilder buff = new StringBuilder();
-        buff.append(operator).append("(");
+        buff.append("\"" + operator + "\",");
         if (left != null) {
             buff.append(left.toAST());
+            buff.append(",");
+        } else {
+            buff.append("\"\",");
         }
-        buff.append(",");
         buff.append(right.toAST());
-        buff.append(")");
         return buff.toString();
     }
 

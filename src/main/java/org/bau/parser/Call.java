@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.jar.Attributes.Name;
 
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
@@ -122,14 +121,16 @@ public class Call implements Statement, Expression, LeftValue {
     @Override
     public StatementResult run(Memory m) {
         if ("println".equals(def.name)) {
-            for (Expression e : args) {
-                Value v = e.eval(m);
-                if (v instanceof Value.ValueRef) {
-                    v = m.getHeap(v.longValue());
+            if (!m.evaluateOnlyConstExpr()) {
+                for (Expression e : args) {
+                    Value v = e.eval(m);
+                    if (v instanceof Value.ValueRef) {
+                        v = m.getHeap(v.longValue());
+                    }
+                    m.print(v);
                 }
-                m.print(v);
+                m.println();
             }
-            m.println();
         } else {
             try {
                 Value v = eval(m);
@@ -410,10 +411,6 @@ public class Call implements Statement, Expression, LeftValue {
         } else {
             program.getFunctionById(def.getFunctionId()).used(program);
         }
-int test;
-if(def.name.startsWith("appendValue")) {
-    System.out.println("??");
-}
         for (Expression e : args) {
             e.used(program);
         }
@@ -480,13 +477,13 @@ if(def.name.startsWith("appendValue")) {
     @Override
     public String toAST() {
         StringBuilder buff = new StringBuilder();
-        buff.append("call(");
-        buff.append(def.name);
+        buff.append("\"call\",");
+        buff.append("\"" + def.name + "\",");
+        buff.append("\"" + args.size() + "\"");
         for (Expression a : args) {
             buff.append(",");
             buff.append(a.toAST());
         }
-        buff.append(")");
         return buff.toString();
     }
 

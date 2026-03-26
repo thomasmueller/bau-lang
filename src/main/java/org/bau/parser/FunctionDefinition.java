@@ -340,7 +340,7 @@ public class FunctionDefinition {
 
     public String toString() {
         StringBuilder buff = new StringBuilder();
-        buff.append(toHeaderString());
+        buff.append(toHeaderString().trim());
         if (code != null) {
             buff.append("\n");
             buff.append(code);

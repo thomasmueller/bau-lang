@@ -103,7 +103,6 @@ public class ArrayConstant implements Expression {
     @Override
     public String toAST() {
         throw new IllegalStateException();
-        // return "arrayConstant(" + data + ")";
     }
 
 }

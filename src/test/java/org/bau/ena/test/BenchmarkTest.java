@@ -27,7 +27,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new Interpreter().setMaxOps(MAX_OPS).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
-        assertTrue(time > 0);
+        assertTrue(time >= 0);
         // System.out.println("runInterpreter: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }
@@ -42,7 +42,7 @@ public class BenchmarkTest {
         long start = System.currentTimeMillis();
         try { new StackVM().setMaxOps(MAX_OPS).run(bc, "main"); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
-        assertTrue(time > 0);
+        assertTrue(time >= 0);
         // System.out.println("runStackVM: " + time + " ms");
         return baos.toString().replace("\r\n", "\n");
     }

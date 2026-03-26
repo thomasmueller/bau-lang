@@ -245,8 +245,14 @@ public class Program {
             }
         }
         // 'convertIntToString(int x) org.bau.String'
+        String module = source.module();
+        if (source.isNumber()) {
+            // for numbers (int, float, etc) use org.bau.Std
+            Std.registerStd(this);
+            module = "org.bau.Std";
+        }
         String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();
-        FunctionDefinition fromFunction = getFunctionIfExists(null, source.module(), convertFunctionName, 1);
+        FunctionDefinition fromFunction = getFunctionIfExists(null, module, convertFunctionName, 1);
         if (fromFunction != null) {
             Call call = new Call();
             call.args.add(expr);

@@ -93,6 +93,14 @@ public class FieldAccess implements Expression, LeftValue {
                 && old.name().endsWith(".values")
                 && old.name().startsWith(base.toString() + ".")) {
             return with;
+        } else if (fieldName.startsWith("line")
+                && old.name().endsWith(".line")
+                && old.name().startsWith(base.toString() + ".")) {
+            return with;
+        } else if (fieldName.startsWith("module")
+                && old.name().endsWith(".module")
+                && old.name().startsWith(base.toString() + ".")) {
+            return with;
         }
         Expression b2 = base.replace(old, with);
         if (b2 == base) {
@@ -279,7 +287,7 @@ public class FieldAccess implements Expression, LeftValue {
 
     @Override
     public String toAST() {
-        return "field(" + base.toAST() + "," + fieldName + ")";
+        return "\"field\"," + base.toAST() + "," + fieldName;
     }
 
 }

@@ -168,7 +168,7 @@ public class New implements Expression {
 
     @Override
     public String toAST() {
-        return "new(" + type.name() + ")";
+        return "\"new\",\"" + type.name() + "\"";
     }
 
 }

@@ -20,8 +20,8 @@ public class NumberValue implements Expression {
         this.hex = hex;
     }
 
-    public static NumberValue valueOf(int value) {
-        return new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+    public static NumberValue valueOf(long value) {
+        return new NumberValue(new Value.ValueInt(value), DataType.INT_TYPE, false);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class NumberValue implements Expression {
 
     @Override
     public String toAST() {
-        return "0(" + value.toString() + ")";
+        return "\"num\",\"" + value.toString() + "\"";
     }
 
 }

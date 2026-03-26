@@ -5,11 +5,15 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+use the conversion functions in println
+
 document operator-at-end or ( for multi-line statements:
 https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
 
 debug macro like in rust
 https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro
+line number, file name
+power assert
 
 Support "until" inside macro functions ("For loops in macros are currently not supported")
 

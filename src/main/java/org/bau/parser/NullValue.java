@@ -90,7 +90,7 @@ public class NullValue implements Expression {
 
     @Override
     public String toAST() {
-        return "null";
+        return "\"null\"";
     }
 
 }

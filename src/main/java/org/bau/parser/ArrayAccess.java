@@ -264,7 +264,7 @@ public class ArrayAccess implements Expression, LeftValue {
 
     @Override
     public String toAST() {
-        return "array(" + base.toAST() + "," + arrayIndex.toAST() + ")";
+        return "\"array\"," + base.toAST() + "," + arrayIndex.toAST();
     }
 
 }

@@ -99,7 +99,7 @@ public class Cast implements Expression {
 
     @Override
     public String toAST() {
-        return "cast(" + base.toAST() + "," + targetType + ")";
+        return "\"cast\"," + base.toAST() + ",\"" + targetType + "\"";
     }
 
 }

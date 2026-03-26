@@ -97,7 +97,7 @@ public class Parentheses implements Expression {
 
     @Override
     public String toAST() {
-        return "(" + base + ")";
+        return base.toAST();
     }
 
 }

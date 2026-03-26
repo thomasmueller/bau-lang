@@ -3,6 +3,7 @@ package org.bau.parser;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -1951,6 +1952,7 @@ public class Parser {
     }
 
     private Expression parseCall(DataType type, String module, String identifier, Call call, boolean nonMacroCall) {
+        int lineNumber = getLine(lastPos);
         if (type != null && type.module() != null) {
             module = type.module();
         }
@@ -2050,6 +2052,10 @@ public class Parser {
                             templateTypes.add(typeName);
                             templateNames.add(typeName);
                             DataType pt = p.type();
+                            if (pt.isRange()) {
+                                // generics on ranges are not supported
+                                pt = DataType.INT_TYPE;
+                            }
                             templateParams.add(pt.fullName());
                             if (t.isArray()) {
                                 // also replace the non-array version
@@ -2251,38 +2257,59 @@ public class Parser {
                 }
                 Expression p = call.args.get(i);
                 Variable var = call.def.parameters.get(i);
-                DataType type2 = program.getType(null, DataType.I8).arrayType();
-                Variable sourceVar = new Variable(var.name() + ".source", type2);
-                StringLiteral sourceCode = StringLiteral.buildStringLiteral(p.toString(), type2, program);
+                Variable lineVar = new Variable(var.name() + ".line", DataType.INT_TYPE);
+                params.add(lineVar);
+                args.add(NumberValue.valueOf(lineNumber));
+                DataType strType = program.getType(null, DataType.I8).arrayType();
+                Variable moduleVar = new Variable(var.name() + ".module", strType);
+                String m = this.module == null ? "" : this.module;
+                StringLiteral moduleValue = StringLiteral.buildStringLiteral(m, strType, program);
+                params.add(moduleVar);
+                args.add(moduleValue);
+                Variable sourceVar = new Variable(var.name() + ".source", strType);
+                StringLiteral sourceValue = StringLiteral.buildStringLiteral(p.toString(), strType, program);
                 params.add(sourceVar);
-                args.add(sourceCode);
-                Variable astVar = new Variable(var.name() + ".ast", type2);
-                StringLiteral astCode = StringLiteral.buildStringLiteral(p.toAST(), type2, program);
+                args.add(sourceValue);
+                Variable astVar = new Variable(var.name() + ".ast", strType);
+                StringLiteral astValue = StringLiteral.buildStringLiteral(p.toAST(), strType, program);
                 params.add(astVar);
-                args.add(astCode);
+                args.add(astValue);
                 List<Variable> vars = p.getVariables();
+                // deduplicate
+                vars = new ArrayList<>(new HashSet<Variable>(vars));
+                vars.sort(new Comparator<Variable>() {
+                    @Override
+                    public int compare(Variable o1, Variable o2) {
+                        return o1.name().compareTo(o2.name());
+                    }
+                });
                 ArrayList<Expression> valueList = new ArrayList<>();
                 for (Variable v : vars) {
                     if (v.name().equals("it")) {
                         continue;
                     }
-                    Expression e = program.cast(v, false, type2);
+                    Expression e = program.cast(v, false, strType);
+                    valueList.add(StringLiteral.buildStringLiteral(v.name(), strType, program));
                     if (e == null) {
-                        valueList.add(StringLiteral.buildStringLiteral("", type2, program));
+                        valueList.add(StringLiteral.buildStringLiteral("?", strType, program));
                     } else {
                         valueList.add(e);
                     }
                 }
-                Variable varsVar = new Variable(var.name() + ".values", type2);
+                Variable varsVar = new Variable(var.name() + ".values", strType);
                 Expression varExpr;
                 if (valueList.isEmpty()) {
-                    varExpr = StringLiteral.buildStringLiteral("", type2, program);
+                    varExpr = StringLiteral.buildStringLiteral("", strType, program);
                 } else {
                     String join = "appendValue";
-                    FunctionDefinition append = program.getFunctionIfExists(null, null, join, 2);
-                    // append(append(append(null, a), b), c)
+                    FunctionDefinition append = program.getFunctionIfExists(null, "org.bau.Std", join, 2);
+                    // append(append(append(append(null, a), b), c))
+                    // that way, the append function could double the array size when needed,
+                    // store the length at the end, and in the last call truncate;
+                    // and in this way, use O(n) instead of O(n^2) time
                     if (append != null) {
-                        Expression last = StringLiteral.buildStringLiteral("", type2, program);
+                        Expression last = StringLiteral.buildStringLiteral("", strType, program);
+                        valueList.add(last);
                         while (valueList.size() > 0) {
                             Expression a = valueList.remove(0);
                             Call appendCall = new Call();
@@ -2739,7 +2766,7 @@ public class Parser {
     }
 
     private void parseFor(ArrayList<Statement> target) {
-        if (currentFunctionDefinition.macro) {
+        if (currentFunctionDefinition != null && currentFunctionDefinition.macro) {
             throw syntaxError("For loops in macros are currently not supported");
         }
         int loopIndent = indent;
@@ -3168,7 +3195,10 @@ public class Parser {
             }
             Variable thisVar = functionContext.getVariable(null, "this");
             String m = null;
-            if ("ord".equals(n)) {
+            if ("ord".equals(n)
+                    || "appendValue".equals(n)
+                    || "convertIntToI8Array".equals(n)
+                    || "convertFloatToI8Array".equals(n)) {
                 Std.registerStd(program);
                 m = "org.bau.Std";
                 read();
@@ -3374,9 +3404,13 @@ public class Parser {
                             if ("source".equals(f)) {
                                 type = program.getType(null, DataType.I8).arrayType();
                             } else if ("ast".equals(f)) {
-                                type = DataType.INT_TYPE;
+                                type = program.getType(null, DataType.I8).arrayType();
                             } else if ("values".equals(f)) {
                                 type = program.getType(null, DataType.I8).arrayType();
+                            } else if ("module".equals(f)) {
+                                type = program.getType(null, DataType.I8).arrayType();
+                            } else if ("line".equals(f)) {
+                                type = DataType.INT_TYPE;
                             } else {
                                 throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");
                             }

@@ -179,7 +179,16 @@ public class StringLiteral implements Expression {
     @Override
     public String toAST() {
         byte[] data = value.getBytes(StandardCharsets.UTF_8);
-        return "'" + data.length + ":" + value + "'";
+        StringBuilder buff = new StringBuilder();
+        buff.append("\"str\",\"");
+        for(byte b : data) {
+            buff.append(b);
+            if (b == '\"') {
+                buff.append(b);
+            }
+        }
+        buff.append("\"");
+        return buff.toString();
     }
 
 }

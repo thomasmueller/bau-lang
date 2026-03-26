@@ -19,7 +19,7 @@ public class TestFor {
                     """).parse();
             fail();
         } catch (IllegalStateException e) {
-            assertEquals("'break' statement outside of a loop at line 4:\n"
+            assertEquals("'break' statement outside of a loop at line 3:\n"
                     + "  break\n"
                     + "       ^", e.getMessage());
         }
