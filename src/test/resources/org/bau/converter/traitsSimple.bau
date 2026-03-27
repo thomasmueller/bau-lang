@@ -34,7 +34,8 @@ fun put(w Writer, x int)
     
 fun main()
     println('start')
-    mem : Memory(int[10])
+    mem : Memory()
+    mem.array = int[10]
     r Reader : mem
     # r.read()
     println('write 10');
@@ -49,4 +50,4 @@ start
 write 10
 writing
 reading
-read {array=*2, pos=0}
+read {array=*4, pos=0}

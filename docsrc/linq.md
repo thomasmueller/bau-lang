@@ -227,10 +227,14 @@ Serialization of values:
         data i8[]
     
     fun convertI8ArrayToText(t i8[]) text
-        return text(t)
+        result : text()
+        result.data = t
+        return result
     
     fun convertIntToText(t int) text
-        return text(t)
+        result : text()
+        result.data = t
+        return result
     
     fun convertTextToI8Array(t text) i8[]
         return t.data
@@ -242,7 +246,7 @@ Serialization of values:
         data i8[]
     
     fun newInstance(T type, data i8[]) macro T
-        r T: Record(data)
+        r T: Record()
         return r # this will call the conversion method
     
     fun printText(array text..)
@@ -265,18 +269,22 @@ Serialization of values:
         orderBy text
     
     fun from(T type) Query(T)
-        return Query(T)(null, T.name, text(i8[0]), text(i8[0]))
+        result : Query(T)(text(), text(), text())
+        result.tableName = T.name
+        return result
     
     fun Query(T) in(db Sqlite) Query(T)
         this.db = db
         return this
     
     fun Query(T) where(condition(T) int) macro Query(T)
-        this.condition = text(condition.source)
+        this.condition = text()
+        this.condition.data = condition.source
         return this
     
     fun Query(T) orderBy(column(T) U) macro Query(T)
-        this.orderBy = text(column.source)
+        this.orderBy = text()
+        this.orderBy.data = column.source
         return this
     
     fun setField(row T, c int, n text)
@@ -301,7 +309,8 @@ Serialization of values:
                 c := 0
                 loop c < cols
                     if db
-                        n : text(db.getString(c))
+                        n : text()
+                        n.data = db.getString(c);
                         setField(row, c, n)
                     c += 1
                 result.add(row)
@@ -315,7 +324,7 @@ Serialization of values:
     
     fun convertRecordToUsers(r Record) Users
         # de-serialization
-        return Users(text(i8[0]))
+        return Users(text())
     
     fun main()
         db : Sqlite3.open('demo.db')

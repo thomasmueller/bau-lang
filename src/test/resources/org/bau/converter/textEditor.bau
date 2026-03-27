@@ -26,7 +26,8 @@ enum editMode
     find  
 
 fun refreshScreen()
-    buff := StringBuilder(i8[32])
+    buff := StringBuilder()
+    buff.data = i8[32]
     currentWindowSize = getWindowSize()
     # hide cursor, go home
     buff.append('\x1b[?25l\x1b[H')
@@ -98,8 +99,10 @@ fun insertNewline()
     x := cursorX + offsetX - 1
     if x >= line.data.len
         x = line.data.len
-    line1 : string(substring(line.data, 0, x))
-    line2 : string(substring(line.data, x, line.data.len))
+    line1 : string()
+    line1.data = substring(line.data, 0, x)
+    line2 : string()
+    line2.data = substring(line.data, x, line.data.len)
     lines.add(y, line1)
     lines.array[y + 1] = line2
     indent := 0
@@ -124,7 +127,9 @@ fun insertByte(add i8)
         for i := until(line.data.len)
             new[i] = line.data[i]
         new[x] = add
-        lines.array[y] = string(new)
+        n : string()
+        n.data = new
+        lines.array[y] = n
     else
         new : i8[line.data.len + 1]
         for i := until(line.data.len)
@@ -132,7 +137,9 @@ fun insertByte(add i8)
         for i := until(x)
             new[i] = line.data[i]
         new[x] = add          
-        lines.array[y] = string(new)
+        n : string()
+        n.data = new
+        lines.array[y] = n        
 
 fun removeByte()
     currentFile.modified = 1
@@ -160,7 +167,9 @@ fun removeByte()
         loop cursorX >= currentWindowSize.columns
             cursorX -= 1
             offsetX += 1
-        lines.array[y - 1] = string(new)
+        s : string()
+        s.data = new
+        lines.array[y - 1] = s
         lines.remove(y)
         return
     new : i8[line.data.len - 1]
@@ -169,7 +178,9 @@ fun removeByte()
             new[i - 1] = line.data[i]
     for i := until(x - 1)
         new[i] = line.data[i]
-    lines.array[y] = string(new)
+    s : string()
+    s.data = new
+    lines.array[y] = s
 
 fun find()
     mode = editMode.find
@@ -185,7 +196,8 @@ fun find()
                 new : i8[findText.data.len - 1]
                 for i := until(new.len)
                     new[i] = findText.data[i]
-                findText = string(new)
+                findText = string()
+                findText.data = new
         case keyCode.ARROW_DOWN
             foundX = 10
             foundY = 10
@@ -195,7 +207,8 @@ fun find()
                 for i := until(findText.data.len)
                     new[i] = findText.data[i]
                 new[new.len - 1] = key
-                findText = string(new)
+                findText = string()
+                findText.data = new
     mode = editMode.normal
 
 fun up()
@@ -215,7 +228,8 @@ fun save()
     size := lines.size
     for i := until(lines.size)
         size += lines.array[i].data.len
-    data : StringBuilder(i8[size])
+    data : StringBuilder()
+    data.data = i8[size];
     for i := until(lines.size)
         data.append(lines.array[i].data)
         data.append('\n')
@@ -243,7 +257,9 @@ fun main()
     f.readFully(fileData, 0, f.len())
     f.close()
     lines : String.split(fileData, '\n')
-    currentFile = fileContent(fileName, fileData, lines)
+    currentFile = fileContent(lines)
+    currentFile.fileName = fileName
+    currentFile.data = fileData
     Terminal.enableRawMode(refreshScreen)
     loop
         refreshScreen()
@@ -322,9 +338,9 @@ fun main()
 cursorY := 2; cursorX := 1
 offsetY := 0; offsetX := 0
 foundX := 0 ; foundY := 0
-findText := string(i8[0])
+findText := string()
 mode := editMode.normal
 currentWindowSize := getWindowSize()
-currentFile := fileContent(i8[0], i8[0], newList(string))
+currentFile := fileContent(newList(string))
 
 ## Expected

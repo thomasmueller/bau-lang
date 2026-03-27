@@ -27,7 +27,8 @@ fun canPlace(pos int, rot int) int
     return 1
 
 fun refreshScreen()
-    buff := String.StringBuilder(i8[32])
+    buff : String.StringBuilder()
+    buff.data = i8[32]
     # hide cursor, go home
     buff.append('\x1b[?25l\x1b[H\x1b[0m')
     # clear line from cursor right; newline

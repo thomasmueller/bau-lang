@@ -7,7 +7,10 @@ type HashMap(K, V)
     hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-    result : HashMap(K, V)(K[4], V[4], int[4])
+    result : HashMap(K, V)()
+    result.keys = K[4]
+    result.values = V[4]
+    result.hashes = int[4]
     return result
 
 fun HashMap(K, V) put(key K, value V)
@@ -150,8 +153,10 @@ fun test()
             map.remove(i - 10)
         println('int map[' i ']=' map.get(i))
     map2 := newHashMap(str, str)
-    a : str('h')
-    b : str('hello')
+    a : str()
+    a.value = 'h'
+    b : str()
+    b.value = 'hello'
     map2.put(a, b)
     c : map2.get(a)
     println('str map[' a.value ']=' c.value)

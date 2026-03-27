@@ -16,7 +16,8 @@ type Sqlite
     stmt int
 
 fun open(name i8[]) Sqlite?
-    result: Sqlite(name, i8[0])
+    result: Sqlite()
+    result.name = name
     native(`#include <sqlite3.h>
         char n[256];
         for (int i = 0; i < 256; i++) {

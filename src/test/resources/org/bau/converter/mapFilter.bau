@@ -3,7 +3,9 @@ type List(T)
     size int
 
 fun newList(T type) List(T)
-    return List(T)(T[4])
+    result : List(T)()
+    result.array = T[4]
+    return result
 
 fun List(T) add(x T)
     if size >= array.len

@@ -288,7 +288,7 @@ int __argc;
 char **__argv;
 /* functions */
 int64_t idx_2(int64_t x, int64_t len);
-org_bau_List_List_int* org_bau_List_List_int_1(int_array* array);
+org_bau_List_List_int* org_bau_List_List_int_0();
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T);
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x);
 void int_array_free(int_array* x);
@@ -311,18 +311,20 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
-org_bau_List_List_int* org_bau_List_List_int_1(int_array* array) {
+org_bau_List_List_int* org_bau_List_List_int_0() {
     org_bau_List_List_int* _t0 = org_bau_List_List_int_new();
-    _incUseStack(array);
-    _t0->array = array;
+    _t0->array = int_array_new(0);
     _t0->size = 0;
     return _t0;
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
+    org_bau_List_List_int* result = org_bau_List_List_int_0();
     int_array* _t12 = int_array_new(4);
-    org_bau_List_List_int* _t13 = org_bau_List_List_int_1(_t12);
+    _incUseStack(_t12);
+    _decUse(result->array, int_array);
+    result->array = _t12;
     _decUseStack(_t12, int_array);
-    return _t13;
+    return result;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {

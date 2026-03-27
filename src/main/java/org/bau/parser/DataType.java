@@ -139,9 +139,11 @@ public class DataType {
 
     public Expression nullExpression() {
         if (isNumber) {
-            return new NumberValue(ValueInt.ZERO, this, false);
+            return NumberValue.ZERO;
         } else if (!isPointer()) {
             return new New(this, null);
+        } else if (isArray()) {
+            return new New(this, NumberValue.ZERO);
         } else {
             return new NullValue(this);
         }

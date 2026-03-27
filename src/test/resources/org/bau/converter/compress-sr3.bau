@@ -20,7 +20,9 @@ fun main()
         state[i] = 1 << 31
     in.close()
     output : i8[input.len * 10]
-    global = Sr3(input, output)
+    global = Sr3()
+    global.input = input
+    global.output = output
     if Env.arg(1)[0] == ord('c')
         output[0] = ord('s')
         output[1] = ord('R')
@@ -232,4 +234,4 @@ x2 := 0xffffffff
 x := 0
 inPos := 0
 outPos := 0
-global := Sr3(i8[0], i8[0])
+global := Sr3()

@@ -3,6 +3,7 @@ import org.bau.List
     newList
 import org.bau.Exception
     exception
+    newException
 
 enum tokenType
     START
@@ -24,7 +25,7 @@ fun Token matchChar(text i8[], pos int) int throws exception
     c := text[pos]
     switch ttype
     case tokenType.START, tokenType.END
-        throw exception('Start or end in wrong location')
+        throw newException('Start or end in wrong location')
     case tokenType.MATCH
         return c == data.array[0]
     case tokenType.LIST
@@ -46,7 +47,7 @@ fun Token matchChar(text i8[], pos int) int throws exception
     case tokenType.ANY
         return 1
     else
-        throw exception('Unknown token type')
+        throw newException('Unknown token type')
 
 type match
     start int
@@ -143,7 +144,7 @@ fun parse(regex i8[]) List(Token) throws exception
                     i += 1
                 t.max = value
             if c <> ord('}')
-                throw exception('Expected }')
+                throw newException('Expected }')
         else
             i -= 1
         i += 1

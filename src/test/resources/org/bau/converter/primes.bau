@@ -4,7 +4,9 @@ type BitField
     data int[]
 
 fun newBitField(len int) BitField
-    return BitField(int[(len + 63) / 64])
+    result : BitField()
+    result.data = int[(len + 63) / 64]
+    return result
 
 fun BitField set(index int)
     data[index >> 6] |= 1 << (index & 0x3f)

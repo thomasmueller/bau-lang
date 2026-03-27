@@ -376,7 +376,7 @@ Memory* Memory_new() {
 int __argc;
 char **__argv;
 /* functions */
-Memory* Memory_1(int_array* array);
+Memory* Memory_0();
 int64_t Memory_read_1(Memory* this);
 void Memory_write_2(Memory* this, int64_t x);
 int64_t Reader_read_1(Reader* this);
@@ -455,10 +455,9 @@ i8_array* string_1003;
 i8_array* string_1004;
 i8_array* string_1005;
 i8_array* string_1006;
-Memory* Memory_1(int_array* array) {
+Memory* Memory_0() {
     Memory* _t0 = Memory_new();
-    _incUseStack(array);
-    _t0->array = array;
+    _t0->array = int_array_new(0);
     _t0->pos = 0;
     return _t0;
 }
@@ -545,8 +544,11 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     printf("start\n");
+    Memory* mem = Memory_0();
     int_array* _t1 = int_array_new(10);
-    Memory* mem = Memory_1(_t1);
+    _incUseStack(_t1);
+    _decUse(mem->array, int_array);
+    mem->array = _t1;
     _incUseStack(((Reader*) mem));
     Reader* r = ((Reader*) mem);
     printf("write 10\n");
@@ -558,7 +560,7 @@ void _main() {
     printf("read %lld\n", (long long)x);
     _decUseStack(w, Writer);
     _decUseStack(r, Reader);
-    _decUseStack(mem, Memory);
     _decUseStack(_t1, int_array);
+    _decUseStack(mem, Memory);
     _end();
 }

@@ -36,7 +36,7 @@ enum keyCode
     PAGE_UP
     PAGE_DOWN
 
-oldTermIos := termIos(i8[0])
+oldTermIos := termIos()
 
 fun doNothing()
 
@@ -70,7 +70,9 @@ fun enableRawMode(refreshScreen fun())
     native(`#include <termios.h>
         size = sizeof(struct termios);
     `)
-    oldTermIos = termIos(i8[size])
+    n : termIos()
+    n.data = i8[size]
+    oldTermIos = n
     native(`#include <termios.h>
         struct termios old;
         if (tcgetattr(0, &old) == -1) return;

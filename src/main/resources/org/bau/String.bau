@@ -62,6 +62,11 @@ type StringBuilder
     data i8[]
     len int
 
+fun newStringBuilder(len int) StringBuilder
+    result : StringBuilder()
+    result.data = i8[len]
+    return result
+
 fun StringBuilder len() int
     return len
 
@@ -122,7 +127,7 @@ fun replaceAll(s i8[], before i8[], after i8[]) i8[]
     next := indexOf(s, before)
     if before.len <= 0 or next < 0
         return s
-    buff := StringBuilder(i8[s.len])
+    buff := newStringBuilder(s.len)
     index := 0
     loop
         buff.append(s, index, next)
@@ -134,7 +139,9 @@ fun replaceAll(s i8[], before i8[], after i8[]) i8[]
     return buff.data
 
 fun str(s i8[]) string
-    return string(s)
+    result : string()
+    result.data = s
+    return result
 
 fun split(s i8[], delimiter i8[]) List(string)
     list := newList(string)

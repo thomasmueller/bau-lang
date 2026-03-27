@@ -5,3 +5,7 @@ type exception
   exceptionType int
   message i8[]
 
+fun newException(message i8[]) exception
+    result : exception()
+    result.message = message
+    return result

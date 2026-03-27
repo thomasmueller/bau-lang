@@ -3,6 +3,7 @@ import org.bau.Utils
     when
 import org.bau.Exception
     exception
+    newException
 import org.bau.Arrays
 
 MIN_INT : 0x8000000000000000
@@ -196,10 +197,10 @@ fun intToString(n int) i8[]
 fun parsePositiveInt(s i8[]) int throws exception
     result := 0
     if s.len == 0
-        throw exception(s)
+        throw newException(s)
     for i := until(s.len)
         c : s[i]
         if c <= ord('0') or c >= ord('9')
-            throw exception(s)
+            throw newException(s)
         result = result * 10 + c - ord('0')
     return result

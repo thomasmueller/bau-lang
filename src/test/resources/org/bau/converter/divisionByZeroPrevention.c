@@ -328,7 +328,8 @@ void divisionByZeroContinue2_0();
 void divisionByZeroReturn_0();
 _int64_t_or_exception divisionByZeroThrow_2(int64_t sum, int64_t count);
 int64_t idiv_2(int64_t a, int64_t b);
-org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
+org_bau_Exception_exception org_bau_Exception_exception_0();
+org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
 void org_bau_Exception_exception_free(org_bau_Exception_exception* x);
@@ -433,7 +434,7 @@ _int64_t_or_exception divisionByZeroThrow_2(int64_t sum, int64_t count) {
     _int64_t_or_exception _x0;
     do {
     if (count == 0) {
-        org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1005);
+        org_bau_Exception_exception _t0 = org_bau_Exception_newException_1(string_1005);
         _x0 = exception_int64_t_or_exception(_t0); _lastException = _x0.exception; goto catch0;
         org_bau_Exception_exception_free(&_t0);
     }
@@ -449,12 +450,18 @@ int64_t idiv_2(int64_t a, int64_t b) {
     if (a == 0) return 0;
     return a > 0 ? LLONG_MAX : LLONG_MIN;
 }
-org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
+org_bau_Exception_exception org_bau_Exception_exception_0() {
     org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
     _t0.exceptionType = 0;
-    _incUseStack(message);
-    _t0.message = message;
+    _t0.message = i8_array_new(0);
     return _t0;
+}
+org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message) {
+    org_bau_Exception_exception result = org_bau_Exception_exception_0();
+    _incUseStack(message);
+    _decUse(result.message, i8_array);
+    result.message = message;
+    return result;
 }
 void _main();
 int main(int _argc, char *_argv[]) {

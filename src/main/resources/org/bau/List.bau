@@ -7,7 +7,9 @@ type List(T)
 
 # Create a new list
 fun newList(T type) List(T)
-    return List(T)(T[4])
+    result : List(T)()
+    result.array = T[4]
+    return result
 
 fun List(T) len() int
     return size

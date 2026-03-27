@@ -25,7 +25,8 @@ fun List(T) add(x T)
 
 # Test function
 fun test()
-    list := List(int)(int[1])
+    list := List(int)()
+    list.array = int[1]
     for i := range(0 10)
         list.add(i)
     for i := until(list.size)

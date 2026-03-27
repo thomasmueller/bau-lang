@@ -344,7 +344,7 @@ void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
 int64_t org_bau_File_File_readFully_4(org_bau_File_File* this, i8_array* buffer, int64_t pos, int64_t len);
 int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
-org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable);
+org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_0();
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0();
 int64_t org_bau_compress_Lz4_countTrailingZeros_1(int64_t x);
 int64_t org_bau_compress_Lz4_decompressBlock_4(i8_array* inData, int64_t inLen, i8_array* outData, int64_t outPos);
@@ -526,10 +526,9 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     }
     return 0;
 }
-org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_1(int_array* hashTable) {
+org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_0() {
     org_bau_compress_Lz4_LZ4Compress* _t1 = org_bau_compress_Lz4_LZ4Compress_new();
-    _incUseStack(hashTable);
-    _t1->hashTable = hashTable;
+    _t1->hashTable = int_array_new(0);
     return _t1;
 }
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0() {
@@ -700,8 +699,11 @@ int32_t org_bau_compress_Lz4_hash5_2(i8_array* data, int64_t pos) {
     return _t0;
 }
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_newLZ4Compress_0() {
+    org_bau_compress_Lz4_LZ4Compress* x = org_bau_compress_Lz4_LZ4Compress_0();
     int_array* _t0 = int_array_new(4096);
-    org_bau_compress_Lz4_LZ4Compress* x = org_bau_compress_Lz4_LZ4Compress_1(_t0);
+    _incUseStack(_t0);
+    _decUse(x->hashTable, int_array);
+    x->hashTable = _t0;
     _decUseStack(_t0, int_array);
     return x;
 }

@@ -287,7 +287,7 @@ BitField* BitField_new() {
 int __argc;
 char **__argv;
 /* functions */
-BitField* BitField_1(int_array* data);
+BitField* BitField_0();
 int64_t BitField_get_2(BitField* this, int64_t index);
 void BitField_set_2(BitField* this, int64_t index);
 int64_t idiv_2(int64_t a, int64_t b);
@@ -313,10 +313,9 @@ void BitField_free(BitField* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))BitField_free_0);
 }
 int64_t randomSeed;
-BitField* BitField_1(int_array* data) {
+BitField* BitField_0() {
     BitField* _t0 = BitField_new();
-    _incUseStack(data);
-    _t0->data = data;
+    _t0->data = int_array_new(0);
     return _t0;
 }
 int64_t BitField_get_2(BitField* this, int64_t index) {
@@ -336,10 +335,13 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 BitField* newBitField_1(int64_t len) {
+    BitField* result = BitField_0();
     int_array* _t0 = int_array_new(idiv_2((len + 63), 64));
-    BitField* _t1 = BitField_1(_t0);
+    _incUseStack(_t0);
+    _decUse(result->data, int_array);
+    result->data = _t0;
     _decUseStack(_t0, int_array);
-    return _t1;
+    return result;
 }
 int64_t primeSum_1(int64_t limit) {
     BitField* sieve = newBitField_1(limit + 1);

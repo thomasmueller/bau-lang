@@ -109,7 +109,8 @@ pawnMoved2 := 0
 turn := 0
 
 fun refreshScreen()
-    buff : String.StringBuilder(i8[32])
+    buff : String.StringBuilder()
+    buff.data = i8[32]
     # hide cursor, go home
     buff.append('\x1b[?25l\x1b[H\x1b[0m')
     buff.append('   a  b  c  d  e  f  g  h  \r\n')

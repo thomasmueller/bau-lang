@@ -7,15 +7,14 @@ https://github.com/NicoNex/tau
 
 reflection to iterate over the fields of a (generic) type; construct objects, set and read values.
 
-auto-initialize arrays with an empty array?
-
 make 'ord' optional
+
+instead of null = empty array, use static struct i8_array EMPTY = { .len = 0, ._refCount = INF, .data = NULL };
 
 move array copy methods:
     BigInt.copyOf, copyOfRange
 move string types:
     BigInt str
-
 
 String
 
@@ -1364,9 +1363,13 @@ https://stackoverflow.com/questions/368385/implementing-raii-in-pure-c
 void scoped(int * pvariable) {
 int watched __attribute__((cleanup (scoped)));
 
-
 https://borretti.me/article/introducing-austral
 https://eev.ee/blog/2016/12/01/lets-stop-copying-c/
+
+data compression / deflate:
+https://news.ycombinator.com/item?id=47499262
+puff.c (included in the zlib source)
+https://github.com/madler/zlib/blob/develop/contrib/puff/puff.c
 
  */
 public class Language {

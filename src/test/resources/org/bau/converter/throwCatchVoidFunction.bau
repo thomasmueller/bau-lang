@@ -1,9 +1,10 @@
 import org.bau.Exception
     exception
+    newException
 
 fun print(x int) throws exception
     if x > 5
-        throw exception('Value too large')
+        throw newException('Value too large')
     println('x = ' x);
 
 i := 0

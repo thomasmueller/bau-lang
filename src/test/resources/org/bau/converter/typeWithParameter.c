@@ -287,7 +287,7 @@ List_int* List_int_new() {
 int __argc;
 char **__argv;
 /* functions */
-List_int* List_int_1(int_array* array);
+List_int* List_int_0();
 void List_int_add_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 void test_0();
@@ -307,10 +307,9 @@ void List_int_free_0(List_int* x) {
 void List_int_free(List_int* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))List_int_free_0);
 }
-List_int* List_int_1(int_array* array) {
+List_int* List_int_0() {
     List_int* _t0 = List_int_new();
-    _incUseStack(array);
-    _t0->array = array;
+    _t0->array = int_array_new(0);
     _t0->size = 0;
     return _t0;
 }
@@ -333,14 +332,17 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 void test_0() {
+    List_int* intList = List_int_0();
     int_array* _t0 = int_array_new(4);
-    List_int* intList = List_int_1(_t0);
+    _incUseStack(_t0);
+    _decUse(intList->array, int_array);
+    intList->array = _t0;
     List_int_add_2(intList, 10);
     List_int_add_2(intList, 20);
     printf("%lld\n", (long long)intList->array->data[idx_2(0, _arrayLen(intList->array))]);
     printf("%lld\n", (long long)intList->array->data[idx_2(1, _arrayLen(intList->array))]);
-    _decUseStack(intList, List_int);
     _decUseStack(_t0, int_array);
+    _decUseStack(intList, List_int);
 }
 void _main();
 int main(int _argc, char *_argv[]) {

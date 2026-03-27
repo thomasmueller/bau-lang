@@ -107,7 +107,7 @@ Conversion functions change the type, and may truncate.
 `if` starts a condition.
 Spaces group statements into blocks.
 `elif` (else if) and `else` are optional.
-At expression level, `=` compares values.
+At expression level, `==` compares values.
 
     if a == 0
         println('zero')
@@ -210,7 +210,7 @@ If expressions are complex, then `,` or `()` are needed:
 
 ### Operators
 
-`=` `<` `>` `<=` `>=` `<>` compare two values and return `1` or `0`.
+`==` `<` `>` `<=` `>=` `<>` compare two values and return `1` or `0`.
 `not` inverts a comparison. `and` `or` combine comparisons;
 the right side is only evaluated when needed.
 Integer `+` `-` `*` wrap around on over- / underflow.
@@ -225,7 +225,7 @@ The operator precedence is:
 
 * `or`
 * `and`
-* `=` `<>` `<=` `>=` `<` `>`
+* `==` `<>` `<=` `>=` `<` `>`
 * `^` `&` `|`
 * `<<` `>>`
 * `+` `-`

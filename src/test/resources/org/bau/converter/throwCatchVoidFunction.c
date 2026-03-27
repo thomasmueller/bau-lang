@@ -318,7 +318,8 @@ _or_exception exception_or_exception(org_bau_Exception_exception exception) {
 int __argc;
 char **__argv;
 /* functions */
-org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message);
+org_bau_Exception_exception org_bau_Exception_exception_0();
+org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message);
 _or_exception print_1(int64_t x);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
@@ -358,19 +359,25 @@ i8_array* str_const(char* data, uint32_t len) {
 i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
-org_bau_Exception_exception org_bau_Exception_exception_1(i8_array* message) {
+org_bau_Exception_exception org_bau_Exception_exception_0() {
     org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
     _t0.exceptionType = 0;
-    _incUseStack(message);
-    _t0.message = message;
+    _t0.message = i8_array_new(0);
     return _t0;
+}
+org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message) {
+    org_bau_Exception_exception result = org_bau_Exception_exception_0();
+    _incUseStack(message);
+    _decUse(result.message, i8_array);
+    result.message = message;
+    return result;
 }
 _or_exception print_1(int64_t x) {
     org_bau_Exception_exception _lastException;
     _or_exception _x0;
     do {
     if (x > 5) {
-        org_bau_Exception_exception _t0 = org_bau_Exception_exception_1(string_1000);
+        org_bau_Exception_exception _t0 = org_bau_Exception_newException_1(string_1000);
         _x0 = exception_or_exception(_t0); _lastException = _x0.exception; goto catch0;
         org_bau_Exception_exception_free(&_t0);
     }

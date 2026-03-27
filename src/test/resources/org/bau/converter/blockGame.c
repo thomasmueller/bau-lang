@@ -336,7 +336,7 @@ void org_bau_Env_atExit_1(void  (*callback_0)());
 void org_bau_Env_exit_1(int64_t code);
 int64_t org_bau_Int_appendInt_3(int64_t n, i8_array* buff, int64_t pos);
 i8_array* org_bau_Int_intToString_1(int64_t n);
-org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data);
+org_bau_String_StringBuilder* org_bau_String_StringBuilder_0();
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b);
 void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i8_array* b, int64_t start, int64_t end);
 int64_t org_bau_Utils_random_0();
@@ -351,7 +351,7 @@ int64_t org_bau_os_Terminal_isTerminal_0();
 int64_t org_bau_os_Terminal_keyboardHit_0();
 int64_t org_bau_os_Terminal_readByte_0();
 int64_t org_bau_os_Terminal_readEditorKey_0();
-org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_1(i8_array* data);
+org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0();
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x);
 void org_bau_os_Terminal_writeToTerminal_2(i8_array* data, int64_t len);
 void refreshScreen_0();
@@ -593,10 +593,9 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     _decUseStack(_t0, i8_array);
     return result;
 }
-org_bau_String_StringBuilder* org_bau_String_StringBuilder_1(i8_array* data) {
+org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
     org_bau_String_StringBuilder* _t44 = org_bau_String_StringBuilder_new();
-    _incUseStack(data);
-    _t44->data = data;
+    _t44->data = i8_array_new(0);
     _t44->len = 0;
     return _t44;
 }
@@ -714,11 +713,14 @@ void org_bau_os_Terminal_enableRawMode_1(void  (*refreshScreen_0)()) {
     org_bau_Env_atExit_1(org_bau_os_Terminal_disableRawMode_0);
     int64_t size = 0;
     size = sizeof(struct termios);
+    org_bau_os_Terminal_termIos n = org_bau_os_Terminal_termIos_0();
     i8_array* _t0 = i8_array_new(size);
-    org_bau_os_Terminal_termIos _t1 = org_bau_os_Terminal_termIos_1(_t0);
-    org_bau_os_Terminal_termIos_copy(&_t1);
+    _incUseStack(_t0);
+    _decUse(n.data, i8_array);
+    n.data = _t0;
+    org_bau_os_Terminal_termIos_copy(&n);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    oldTermIos = _t1;
+    oldTermIos = n;
     struct termios old;
             if (tcgetattr(0, &old) == -1) return;
             memcpy(oldTermIos.data, &old, size);
@@ -733,8 +735,8 @@ void org_bau_os_Terminal_enableRawMode_1(void  (*refreshScreen_0)()) {
             if (tcsetattr(0, TCSAFLUSH, &raw) < 0) return;
     org_bau_os_Signal_signal_2(28, org_bau_os_Terminal_windowSizeChanged_1);
     org_bau_os_Terminal_windowSizeChanged_1(0);
-    org_bau_os_Terminal_termIos_free(&_t1);
     _decUseStack(_t0, i8_array);
+    org_bau_os_Terminal_termIos_free(&n);
 }
 int64_t org_bau_os_Terminal_isTerminal_0() {
     return isatty(0);
@@ -845,11 +847,10 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         return key;
     }
 }
-org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_1(i8_array* data) {
-    org_bau_os_Terminal_termIos _t50 = org_bau_os_Terminal_termIos_new();
-    _incUseStack(data);
-    _t50.data = data;
-    return _t50;
+org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0() {
+    org_bau_os_Terminal_termIos _t49 = org_bau_os_Terminal_termIos_new();
+    _t49.data = i8_array_new(0);
+    return _t49;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -858,8 +859,11 @@ void org_bau_os_Terminal_writeToTerminal_2(i8_array* data, int64_t len) {
     write(1, data->data, len);
 }
 void refreshScreen_0() {
+    org_bau_String_StringBuilder* buff = org_bau_String_StringBuilder_0();
     i8_array* _t0 = i8_array_new(32);
-    org_bau_String_StringBuilder* buff = org_bau_String_StringBuilder_1(_t0);
+    _incUseStack(_t0);
+    _decUse(buff->data, i8_array);
+    buff->data = _t0;
     org_bau_String_StringBuilder_append_2(buff, string_1034);
     org_bau_String_StringBuilder_append_2(buff, string_1035);
     org_bau_String_StringBuilder_append_2(buff, string_1036);
@@ -912,8 +916,8 @@ void refreshScreen_0() {
     org_bau_os_Terminal_writeToTerminal_2(buff->data, buff->len);
     _decUseStack(_t2, i8_array);
     _decUseStack(_t1, i8_array);
-    _decUseStack(buff, org_bau_String_StringBuilder);
     _decUseStack(_t0, i8_array);
+    _decUseStack(buff, org_bau_String_StringBuilder);
 }
 int64_t shiftRight_int_2(int64_t a, int64_t b) {
     return ((uint64_t) a) >> b;
@@ -991,8 +995,7 @@ void _main() {
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
     queueByte = 0;
-    i8_array* _t52 = i8_array_new(0);
-    oldTermIos = org_bau_os_Terminal_termIos_1(_t52);
+    oldTermIos = org_bau_os_Terminal_termIos_0();
     refreshScreenCallback_0 = org_bau_os_Terminal_doNothing_0;
     WIDTH = 14;
     HEIGHT = 24;
@@ -1002,20 +1005,20 @@ void _main() {
     rotation = 0;
     running = 0;
     blockType = 0;
-    i8_array* _t53 = i8_array_new(336);
-    _incUseStack(_t53);
-    FIELD = _t53;
+    i8_array* _t51 = i8_array_new(336);
+    _incUseStack(_t51);
+    FIELD = _t51;
     _incUseStack(string_1031);
     shapes = string_1031;
     _incUseStack(string_1032);
     rotated = string_1032;
-    int64_t _t54 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t54)) {
+    int64_t _t52 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t52)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t55 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t55);
+    int64_t _t53 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t53);
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -1072,45 +1075,45 @@ void _main() {
             updateBlock_1(0);
             int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t56 = tick > 0;
-                if (_t56) {
-                    int64_t _t57 = running;
-                    _t56 = _t57;
+                int64_t _t54 = tick > 0;
+                if (_t54) {
+                    int64_t _t55 = running;
+                    _t54 = _t55;
                 }
-                if (!(_t56)) {
+                if (!(_t54)) {
                     break;
                 }
                 tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t58 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t58)) {
+                int64_t _t56 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t56)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t59 = key;
-                if (_t59 == 1000) {
+                int64_t _t57 = key;
+                if (_t57 == 1000) {
                     tempPos = tempPos - 1;
                 } else {
-                    if (_t59 == 1001) {
+                    if (_t57 == 1001) {
                         tempPos = tempPos + 1;
                     } else {
-                        if ((_t59 == 32) || (_t59 == 1002)) {
+                        if ((_t57 == 32) || (_t57 == 1002)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                         } else {
-                            if (_t59 == 27) {
+                            if (_t57 == 27) {
                                 org_bau_Env_exit_1(0);
                             } else {
-                                if (_t59 == 1003) {
+                                if (_t57 == 1003) {
                                     running = 0;
                                 }
                             }
                         }
                     }
                 }
-                int64_t _t60 = canPlace_2(tempPos, tempRot);
-                if (_t60) {
+                int64_t _t58 = canPlace_2(tempPos, tempRot);
+                if (_t58) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1118,8 +1121,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t61 = canPlace_2(position + 14, rotation);
-            if (_t61) {
+            int64_t _t59 = canPlace_2(position + 14, rotation);
+            if (_t59) {
                 position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1161,8 +1164,8 @@ void _main() {
                 i = i - 1;
             }
             refreshScreen_0();
-            int64_t _t62 = org_bau_Utils_random_1(7);
-            rotation = _t62;
+            int64_t _t60 = org_bau_Utils_random_1(7);
+            rotation = _t60;
             blockType = rotation + 1;
             if (position < 28) {
                 break;
@@ -1171,9 +1174,8 @@ void _main() {
             running = 1;
         }
     }
-    _decUseStack(_t52, i8_array);
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t53, i8_array);
+    _decUseStack(_t51, i8_array);
     _decUseStack(FIELD, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);

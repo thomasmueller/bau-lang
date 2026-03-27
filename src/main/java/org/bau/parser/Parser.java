@@ -470,6 +470,8 @@ public class Parser {
             assign.leftValue = new FieldAccess(result, var.name(), var.type());
             if (var.type().isCopyType() && var.type().isNumber()) {
                 assign.value = var.type().nullExpression();
+            } else if (var.type().isArray()) {
+                assign.value = var.type().nullExpression();
             } else {
                 Variable arg = new Variable(var.name(), var.type());
                 def.parameters.add(arg);

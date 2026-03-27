@@ -61,7 +61,8 @@ fun newBigIntShorten(data i32[], negative int) bigInt
     if newLen == 0
         negative = 0
     d2 : when(newLen == data.len, data, copyOf(data, newLen))
-    result : bigInt(d2)
+    result : bigInt()
+    result.data = d2
     result.negative = negative
     return result
 
@@ -71,32 +72,37 @@ fun convertIntToBigInt(value int) bigInt
 # create a new bigInt
 fun newBigInt(value int) bigInt
     if value == 0 
-        return bigInt(i32[0])
+        return bigInt()
     elif value < 0 
         if value >= MIN_I32 << 1
-            x : bigInt(i32[1])
+            x : bigInt()
+            x.data = i32[1]
             x.data[0] = -value
             x.negative = 1
             return x
         elif value > MIN_INT 
-            x : bigInt(i32[2])
+            x : bigInt()
+            x.data = i32[2]
             x.data[0] = -value
             x.data[1] = -value >> 32
             x.negative = 1
             return x
         else 
-            x : bigInt(i32[2])
+            x : bigInt()
+            x.data = i32[2]
             x.data[0] = 0
             x.data[1] = 0x80000000
             x.negative = 1
             return x
     else 
         if value < 1 << 32
-            x : bigInt(i32[1])
+            x : bigInt()
+            x.data = i32[1]
             x.data[0] = value
             return x
         else
-            x : bigInt(i32[2])
+            x : bigInt()
+            x.data = i32[2]
             x.data[0] = value
             x.data[1] = value >> 32 
             return x
@@ -105,7 +111,8 @@ fun newBigInt(value int) bigInt
 fun bigInt neg() bigInt
     if data.len == 0
         return this
-    x : bigInt(data)
+    x : bigInt()
+    x.data = data
     x.negative = not negative
     return x
 
@@ -197,10 +204,14 @@ fun add(a i32[], b i32[]) bigInt
         result[i] = i32(z)
         carry = z >> 32
     if carry == 0
-        return bigInt(result)
+        res : bigInt()
+        res.data = result
+        return res
     r2 : copyOf(result, result.len + 1)
     r2[r2.len - 1] = 1
-    return bigInt(r2)
+    res : bigInt()
+    res.data = r2
+    return res
 
 # subion
 fun bigInt sub(other bigInt) bigInt
@@ -284,7 +295,9 @@ fun mul(a i32[], b i32[]) bigInt
 
 fun mulSmall(a i32, b i32[]) bigInt
     if a == 1
-        return bigInt(b)
+        res : bigInt()
+        res.data = b
+        return res
     newSize := b.len
     if (b[b.len - 1] | a) >> 16 <> 0
         newSize += 1
@@ -386,12 +399,15 @@ fun bigInt div(other bigInt) bigInt
         un[j + n - 1] = int(t)
         q[j] = int(qhat)
         j -= 1
-    return bigInt(q)
+    res : bigInt()
+    res.data = q
+    return res
 
 # convert to string
 fun bigInt toStr() i8[]
     n := this
-    buff := str(i8[50])
+    buff := str()
+    buff.data = i8[50]
     start := 0
     if negative
         buff.data[0] = ord('-')
@@ -404,7 +420,9 @@ fun bigInt toStr() i8[]
         remainder := n.sub(next.mul(group))
         val : remainder.toInt()
         if i + 9 >= buff.data.len
-            buff = str(copyOfRange(buff.data, 0, buff.data.len * 2))
+            b2 : str()
+            b2.data = copyOfRange(buff.data, 0, buff.data.len * 2)
+            buff = b2
         i = intToStr(val, buff.data, i, 9)
         n = next
         break n.signum() == 0

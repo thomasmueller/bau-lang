@@ -1,9 +1,10 @@
 import org.bau.Exception
     exception
+    newException
 
 fun divisionByZeroThrow(sum int, count int) int throws exception
     if count == 0
-        throw exception('Can not get the average with count 0')
+        throw newException('Can not get the average with count 0')
     z : sum / count
     println('throw: ' z)
     return z

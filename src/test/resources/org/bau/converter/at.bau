@@ -173,9 +173,9 @@ fun newAt() At
     local : newHashMap(string, Value)
     functions : newHashMap(string, Expr)
     stack : newList(HashMap(string, Value))
-    out : StringBuilder(i8[0])
-    code : string(i8[0])
-    token : string(i8[0])
+    out : StringBuilder()
+    code : string()
+    token : string()
     value : valueOf(0)
     returnValue := valueOf(0)
     return At(global, local, functions, stack, out, code, token, value, returnValue)
@@ -218,7 +218,8 @@ fun At run(programCode i8[]) string
         else
             program.add(parseExpr(0))
         match(',', ';')
-    out = StringBuilder(i8[16])
+    out = StringBuilder()
+    out.data = i8[16]
     result := valueOf(0)
     for i := until(program.size)
         e : program.get(i)
@@ -378,7 +379,8 @@ fun At read()
         token = code.substring(start, pos)
 
 fun valueOf(v float) Value
-    list := List(float)(float[1])
+    list : List(float)()
+    list.array = float[1]
     list.size = 1
     list.array[0] = v
     return Value(list)
@@ -389,7 +391,8 @@ fun convertToString(array Value) string
         if x == int(x)
             return str(intToString(int(x)))
         return str(floatToString(x))
-    buff := StringBuilder(i8[16])
+    buff := StringBuilder()
+    buff.data = i8[16]
     for i := until(array.len())
         d : array.get(i)
         if d > 0

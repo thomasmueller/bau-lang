@@ -10,7 +10,8 @@ fun List(T) add(x T)
     size += 1
 
 fun test()
-    intList := List(int)(int[4])
+    intList := List(int)()
+    intList.array = int[4]
     intList.add(10)
     intList.add(20)
     println(intList.array[0])
