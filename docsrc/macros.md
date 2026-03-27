@@ -21,7 +21,7 @@ Macros are replaced at compile time
 with the macro implementation, and parameters are only evaluated when needed.
 Macros have access to the source code of the arguments.
 
-### For Loops
+### For Loops
 
 There are built-in macros `range` and `until`:
 

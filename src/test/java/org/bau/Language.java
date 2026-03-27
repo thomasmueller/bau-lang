@@ -5,23 +5,31 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-use the conversion functions in println
+reflection to iterate over the fields of a (generic) type; construct objects, set and read values.
 
-document operator-at-end or ( for multi-line statements:
-https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
+auto-initialize arrays with an empty array?
+
+make 'ord' optional
+
+move array copy methods:
+    BigInt.copyOf, copyOfRange
+move string types:
+    BigInt str
+
+
+String
 
 debug macro like in rust
 https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro
 line number, file name
 power assert
 
-Support "until" inside macro functions ("For loops in macros are currently not supported")
+use the conversion functions in println
 
-flat AST (prefix encoded AST; polish notation): x + (y * 3) => +, var, x, *, var, y, num, 3
-reflection to iterate over the fields of a (generic) type; construct objects, set and read values.
-rename variables in macro to ensure there is no collision
-support more than one variable (.source is fine, .ast is fine, but .values is not)
-  using the "concat" function (add it to the stdlib)
+document operator-at-end or ( for multi-line statements:
+https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
+
+Support "until" inside macro functions ("For loops in macros are currently not supported")
 
 Functional vs Imperative
 Expression based vs Statement based

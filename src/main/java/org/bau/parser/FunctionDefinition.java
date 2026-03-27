@@ -222,7 +222,18 @@ public class FunctionDefinition {
             if (v.type().baseType().isNumber() && v.type().baseType().sizeOf() <= 1) {
                 buff.append("    " + Statement.indent(v.nameC() + "->data[_vaI] = (" + v.type().baseType().toC() + ") va_arg(_vaList, int);\n"));
             } else {
-                buff.append("    " + Statement.indent(v.nameC() + "->data[_vaI] = va_arg(_vaList, " + v.type().baseType().toC() + ");\n"));
+                DataType type = v.type().baseType();
+                buff.append("    " + Statement.indent(v.nameC() + "->data[_vaI] = va_arg(_vaList, " + type.toC() + ");\n"));
+                // copy of FieldAccess
+                String s = v.nameC() + "->data[_vaI]";
+                if (type.needIncDec()) {
+                    if (type.memoryType() == MemoryType.REF_COUNT) {
+                        buff.append("    " + Statement.indent(Free.INC_USE + "(" + s + ");\n"));
+                    } else if (type.needFree()) {
+                    }
+                } else if (type.needFree()) {
+                    buff.append("    " + Statement.indent(type.toC() + "_copy(&" + s + ");\n"));
+                }
             }
             buff.append(Statement.indent("}\n"));
             buff.append(Statement.indent("va_end(_vaList);\n"));

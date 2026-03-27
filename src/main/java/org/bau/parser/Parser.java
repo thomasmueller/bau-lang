@@ -1428,7 +1428,22 @@ public class Parser {
                     if (left.type().isPointer()) {
                         verifyNullAccess(left);
                     }
-                    String f = readIdentifier();
+                    String f;
+                    if (left instanceof Variable && type == TokenType.INTEGER) {
+                        int index = Integer.parseInt(token);
+                        read();
+                        DataType vt = left.type();
+                        String[] fieldNames = vt.getFieldNames();
+                        if (fieldNames.length == 0) {
+                            throw syntaxError("Field '" + index + "' not found in type '" + left.type() + "'");
+                        } else if (index >= 0 && index < fieldNames.length) {
+                            f = fieldNames[index];
+                        } else {
+                            f = fieldNames[0];
+                        }
+                    } else {
+                        f = readIdentifier();
+                    }
                     if (matchOp("(")) {
                         matchOp("\n");
                         Call call = new Call();
@@ -1506,6 +1521,12 @@ public class Parser {
                 if (s.value instanceof NullValue) {
                     // for templates, we want to support assignment to null
                     s.value = left.type().nullExpression();
+                }
+                if (!areTypesCompatible(s.value, s.leftValue.type())) {
+                    Expression e2 = program.cast(s.value, false, s.leftValue.type());
+                    if (e2 != null) {
+                        s.value = e2;
+                    }
                 }
                 verifyBounds(s);
                 s.setBounds(solver, depth, false);
@@ -1692,11 +1713,7 @@ public class Parser {
     private void convertToExpandedForm(Assignment s) {
         if (s.modify != null && s.leftValue instanceof Variable) {
             s.convertToExpandedForm();
-//            Variable v = (Variable) s.leftValue;
-//            s.value = new Operation(v.cloneVariable(), s.modify)
         }
-        // TODO Auto-generated method stub
-
     }
 
     void updateVariable(String name, Variable newVersion) {
@@ -3376,6 +3393,7 @@ public class Parser {
                     read();
                     String[] fieldNames = vt.getFieldNames();
                     if (fieldNames.length == 0) {
+                        // no fields
                         return v;
                     } else if (index >= 0 && index < fieldNames.length) {
                         f = fieldNames[index];

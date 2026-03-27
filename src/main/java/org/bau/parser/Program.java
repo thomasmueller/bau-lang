@@ -247,9 +247,21 @@ public class Program {
         // 'convertIntToString(int x) org.bau.String'
         String module = source.module();
         if (source.isNumber()) {
-            // for numbers (int, float, etc) use org.bau.Std
+            // for numbers (int, float, etc) use org.bau.Std,
             Std.registerStd(this);
             module = "org.bau.Std";
+            // for non-array number types assume int or float
+            if (!source.isArray()) {
+                if (source.isFloatingPoint()) {
+                    if (source.sizeOf() != 8) {
+                        source = getType(null, DataType.FLOAT);
+                    }
+                } else {
+                    if (source.sizeOf() != 8) {
+                        source = DataType.INT_TYPE;
+                    }
+                }
+            }
         }
         String convertFunctionName = "convert" + source.getCamelCaseName() + "To" + target.getCamelCaseName();
         FunctionDefinition fromFunction = getFunctionIfExists(null, module, convertFunctionName, 1);

@@ -213,3 +213,120 @@ Serialization of values:
         p.x = 10
         p.y = -22.4
         printMe(p)
+
+# SQLite Examle
+
+    import org.bau.db.Sqlite3
+        Sqlite
+    import org.bau.Int
+    import org.bau.String
+    
+    # generic methods
+    
+    type text
+        data i8[]
+    
+    fun convertI8ArrayToText(t i8[]) text
+        return text(t)
+    
+    fun convertIntToText(t int) text
+        return text(t)
+    
+    fun convertTextToI8Array(t text) i8[]
+        return t.data
+    
+    fun convertTextToInt(t text) int
+        return Int.parseInt(t.data)
+    
+    type Record
+        data i8[]
+    
+    fun newInstance(T type, data i8[]) macro T
+        r T: Record(data)
+        return r # this will call the conversion method
+    
+    fun printText(array text..)
+        size := 0
+        for i := until(array.len)
+            size += array[i].data.len
+        converted : i8[size]
+        pos := 0
+        for i := until(array.len)
+            t : array[i]
+            for j := until(t.data.len)
+                converted[pos] = t.data[j]
+                pos += 1
+        println(converted)
+        
+    type Query(T)
+        db Sqlite?
+        tableName text
+        condition text
+        orderBy text
+    
+    fun from(T type) Query(T)
+        return Query(T)(null, T.name, text(i8[0]), text(i8[0]))
+    
+    fun Query(T) in(db Sqlite) Query(T)
+        this.db = db
+        return this
+    
+    fun Query(T) where(condition(T) int) macro Query(T)
+        this.condition = text(condition.source)
+        return this
+    
+    fun Query(T) orderBy(column(T) U) macro Query(T)
+        this.orderBy = text(column.source)
+        return this
+    
+    fun setField(row T, c int, n text)
+        if c == 0
+            row.0 = n
+        elif c == 1
+            row.1 = n
+        elif c == 2
+            row.2 = n
+    
+    fun Query(T) select() macro List(T)
+        printText('from    ' tableName)
+        printText('where   ' condition)
+        printText('orderBy ' orderBy)
+        result := newList(T)
+        if db <> null
+            fieldNames : T.fieldNames
+            db.prepare('select id, name from users')
+            cols : T.fieldCount
+            loop db.nextRow()
+                row : newInstance(T, i8[0])
+                c := 0
+                loop c < cols
+                    if db
+                        n : text(db.getString(c))
+                        setField(row, c, n)
+                    c += 1
+                result.add(row)
+        return result
+    
+    # application code
+    
+    type Users
+        id int
+        name text
+    
+    fun convertRecordToUsers(r Record) Users
+        # de-serialization
+        return Users(text(i8[0]))
+    
+    fun main()
+        db : Sqlite3.open('demo.db')
+        if db == null
+            return
+        db.execute('drop table if exists users')
+        db.execute('create table users(id int primary key, name text)')
+        db.execute(`insert into users values(0, 'hello'), (1, 'world')`)
+        
+        list : from(Users).in(db).where(it.id < 10).orderBy(it.name).select()
+        for i := until(list.size)
+            u : list.get(i)
+            break u == null
+            printText('id: ' u.id ', name: ' u.name)
