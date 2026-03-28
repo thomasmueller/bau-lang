@@ -11,7 +11,8 @@ Some use cases are:
 * sorting, 
 * filter and map (list comprehension),
 * serialization,
-* language integrated query.
+* language integrated query,
+* compile-time reflection.
 
 ## Using Macros
 
@@ -68,6 +69,49 @@ The `debug` macro prints the expression value, source code, and variable values 
     y := debug(x * x)
     
     > debug line 2: x * x == 100 for "x","-10"
+
+### Language Integrated Query
+
+Macros can be used to generate SQL queries,
+and access databases in a type-safe way. 
+
+    import org.bau.db.Sqlite3
+        Sqlite
+        Record
+        text
+        printText
+    import org.bau.Int
+    import org.bau.String
+    
+    type User
+        id int
+        name text
+    
+    fun main()
+        db : Sqlite3.open('demo.db')
+        if db == null
+            return
+        db.dropTable(User)
+        db.createTable(User)
+        db.insert(newUser(0, 'This'))
+        db.insert(newUser(1, 'Is'))
+        db.insert(newUser(2, 'Better'))
+        list : db.from(User).where(it.id > 0).orderBy(it.name).select()
+        for i := until(list.size)
+            u : list.get(i)
+            break u == null
+            printText('id: ' u.id '; name: ' u.name)
+    
+    # help function for inserting
+    fun newUser(id int, name text) User
+        u : User(name)
+        u.id = id
+        return u
+    
+    # helper function for de-serialization
+    fun convertRecordToUser(r Record) User
+        return User(text())
+
 
 ## Implementing Macros
 

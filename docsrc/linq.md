@@ -1,72 +1,102 @@
 # Language Integrated Query
 
-Support for language integrated query is work in progress.
-Here the implementation and usage of what is currently working:
+Simple and typesafe language integrated queries (LINQ)
+for both database and collection backends are supported.
+The LINQ implementation internally uses macros and templates.
 
-    import org.bau.Int
-    import org.bau.String
+## SQL Backend
+
+    import org.bau.db.Sqlite3
+        Record
+        text
     
-    type Query(T)
-        name i8[]
-        condition i8[]
-        orderBy i8[]
-        orderBy2 i8[]
-    
-    type Address
+    type Customer
         id int
-        name i8[]
-    
-    fun newQuery(T type) Query(T)
-        result : Query(T)(T.name, i8[0], i8[0], i8[0])
-        return result
-    
-    fun convertIntToI8Array(x int) i8[]
-        return Int.intToString(x)
-    
-    fun Query(T) where(condition(T) int) macro Query(T)
-        this.condition = condition.source
-        return this
-    
-    fun Query(T) orderBy(column(T) U) macro Query(T)
-        this.orderBy = column.source
-        return this
-    
-    fun Query(T) thenBy(column(T) U) macro Query(T)
-        this.orderBy2 = column.source
-        return this
-    
-    fun Query(T) execute() macro List(T)
-        result := newList(T)
-        return result
+        name text
     
     fun main()
-        println('one ')
-        aa : Address[0]
-        bb : newList(Address)
-        for i := until(3)
-            println('two ' i)
-            query := newQuery(Address)
-            println('4 ' i)
-            query = query.where(i == 1)
-            println('5 ' i)
-            query = query.orderBy(it.name)
-            println('6 ' i)
-            query = query.thenBy(it.id)
-            println('7 ' i)
-            println(query.name)
-            println(query.condition)
-            println(query.orderBy)
-            println(query.orderBy2)
-            result : query.execute()
+        db : Sqlite3.open('demo.db')
+        if db 
+            db.dropTable(Customer)
+            db.createTable(Customer)
+            db.insert(newCustomer(0, 'James'))
+            db.insert(newCustomer(1, 'Sarah'))
+            db.insert(newCustomer(2, 'David'))
+            list : db.from(Customer).where(it.id > 0).
+                    orderBy(it.name).select()
+            for i := until(list.size)
+                u : list.get(i)
+                break u == null
+                println('id: ' u.id '; name: ' u.name.data)
+    
+    fun newCustomer(id int, name text) Customer
+        u : Customer(name)
+        u.id = id
+        return u
+    
+    # helper function for de-serialization
+    fun convertRecordToCustomer(r Record) Customer
+        return Customer(text())
 
-Sorting an array by an expression, printing the AST, capturing values:
+## Collection Backend
+
+The collection backend has similar features:
+
+    import org.bau.List
+        newList
+    import org.bau.FilterMap
+        from
+    
+    type Point
+        x int
+        y int
+    
+    fun main()
+        list : newList(Point)
+        list.add(newPoint(1, 10))
+        list.add(newPoint(3, 300))
+        # for each entry that has y > 100
+        # calculate x * y, and store
+        # the result in a list of integers
+        l2 : from(Point, list).where(it.y > 100).
+            map(it.x * it.y).select()
+        for i := until(l2.len())
+            println(l2.get(i))
+    
+    fun newPoint(x int, y int) Point
+        p : Point()
+        p.x = x
+        p.y = y
+        return p
+
+## Advanced Features
+
+Here is an example implementation that shows how to capture values
+printing the AST of the parameter expression, and sort entries:
 
     import org.bau.Int
     
     type Point
         x int
         y float
-        
+
+    fun main()
+        println('c is: ' append(-10, -2))
+        list : Point[2]
+        list[0] = Point()
+        list[1] = Point()
+        list[0].x = 10
+        list[0].y = 1
+        list[1].x = 20
+        list[1].y = 2
+        println('testing')
+        for j := until(3)
+            capturedValue : j
+            list.sort(-it.y + it.x + capturedValue)
+            for i := until(list.len)
+                println(i ': x=' list[i].x ' y=' list[i].y)
+        println('done')
+
     fun append(a i8[], b i8[]) i8[]
         result : i8[a.len + b.len]
         for i := until(a.len)
@@ -104,238 +134,3 @@ Sorting an array by an expression, printing the AST, capturing values:
                 a[j + g] = old
                 i += 1
     
-    fun main()
-        println('c is: ' append(-10, -2))
-        list : Point[2]
-        list[0] = Point()
-        list[1] = Point()
-        list[0].x = 10
-        list[0].y = 1
-        list[1].x = 20
-        list[1].y = 2
-        println('testing')
-        for j := until(3)
-            capturedValue : j
-            list.sort(-it.y + it.x + capturedValue)
-            for i := until(list.len)
-                println(i ': x=' list[i].x ' y=' list[i].y)
-        println('done')
-
-Serialization of values:
-
-    import org.bau.Int
-    import org.bau.Math
-    import org.bau.String
-    
-    type point
-        x int
-        y float
-    
-    fun convertIntToI8Array(x int) i8[]
-        return Int.intToString(x)
-    
-    fun convertFloatToI8Array(x int) i8[]
-        return Math.floatToString(x)
-    
-    fun convertPointToI8Array(x point) i8[]
-        return 'I am a Point!'
-    
-    fun printField(field int, name i8[], x T) macro
-        if T.fieldCount > 2
-            if field > 2
-                printFieldMany(field, name, x)
-            else
-                printFieldFew(field, name, x)
-        else
-            printFieldFew(field, name, x)
-    
-    fun printFieldFew(field int, name i8[], x T)
-        if field == 0
-            z : x.0
-            println('  ' name ' = ' z)
-            printMe(z)
-        elif field == 1
-            z : x.1
-            println('  ' name ' = ' z)
-            printMe(z)
-        elif field == 2
-            z : x.2
-            println('  ' name ' = ' z)
-            printMe(z)
-    
-    fun printFieldMany(field int, name i8[], x T)
-        if field == 3
-            z : x.0
-            println('  ' name ' = ' z)
-            printMe(z)
-        elif field == 4
-            z : x.1
-            println('  ' name ' = ' z)
-            printMe(z)
-        elif field == 5
-            z : x.2
-            println('  ' name ' = ' z)
-            printMe(z)
-    
-    fun printMe(x T) macro
-        if T.fieldCount == 0
-            println('Type :' T.name)
-            text i8[] := x
-            println(T.name ' = ' text)
-            println()
-        else
-            println('Type :' T.name)
-            println(T.name ' = {')
-            j := 0
-            fieldNames : T.fieldNames
-            i := 0
-            while i < T.fieldCount
-                start : j
-                loop j < fieldNames.len and fieldNames[j] <> ord(',')
-                    j += 1
-                len : j - start
-                fn : i8[len]
-                k := 0
-                loop k < len
-                    fn[k] = fieldNames[k + start]
-                    k += 1
-                j += 1
-                # println('  field ' fn)
-                printField(i, fn, x)
-                i += 1
-            println('}')
-            println()
-    
-    fun main()
-        y : 101
-        printMe(y)
-        p : point()
-        p.x = 10
-        p.y = -22.4
-        printMe(p)
-
-# SQLite Examle
-
-    import org.bau.db.Sqlite3
-        Sqlite
-    import org.bau.Int
-    import org.bau.String
-    
-    # generic methods
-    
-    type text
-        data i8[]
-    
-    fun convertI8ArrayToText(t i8[]) text
-        result : text()
-        result.data = t
-        return result
-    
-    fun convertIntToText(t int) text
-        result : text()
-        result.data = t
-        return result
-    
-    fun convertTextToI8Array(t text) i8[]
-        return t.data
-    
-    fun convertTextToInt(t text) int
-        return Int.parseInt(t.data)
-    
-    type Record
-        data i8[]
-    
-    fun newInstance(T type, data i8[]) macro T
-        r T: Record()
-        return r # this will call the conversion method
-    
-    fun printText(array text..)
-        size := 0
-        for i := until(array.len)
-            size += array[i].data.len
-        converted : i8[size]
-        pos := 0
-        for i := until(array.len)
-            t : array[i]
-            for j := until(t.data.len)
-                converted[pos] = t.data[j]
-                pos += 1
-        println(converted)
-        
-    type Query(T)
-        db Sqlite?
-        tableName text
-        condition text
-        orderBy text
-    
-    fun from(T type) Query(T)
-        result : Query(T)(text(), text(), text())
-        result.tableName = T.name
-        return result
-    
-    fun Query(T) in(db Sqlite) Query(T)
-        this.db = db
-        return this
-    
-    fun Query(T) where(condition(T) int) macro Query(T)
-        this.condition = text()
-        this.condition.data = condition.source
-        return this
-    
-    fun Query(T) orderBy(column(T) U) macro Query(T)
-        this.orderBy = text()
-        this.orderBy.data = column.source
-        return this
-    
-    fun setField(row T, c int, n text)
-        if c == 0
-            row.0 = n
-        elif c == 1
-            row.1 = n
-        elif c == 2
-            row.2 = n
-    
-    fun Query(T) select() macro List(T)
-        printText('from    ' tableName)
-        printText('where   ' condition)
-        printText('orderBy ' orderBy)
-        result := newList(T)
-        if db <> null
-            fieldNames : T.fieldNames
-            db.prepare('select id, name from users')
-            cols : T.fieldCount
-            loop db.nextRow()
-                row : newInstance(T, i8[0])
-                c := 0
-                loop c < cols
-                    if db
-                        n : text()
-                        n.data = db.getString(c);
-                        setField(row, c, n)
-                    c += 1
-                result.add(row)
-        return result
-    
-    # application code
-    
-    type Users
-        id int
-        name text
-    
-    fun convertRecordToUsers(r Record) Users
-        # de-serialization
-        return Users(text())
-    
-    fun main()
-        db : Sqlite3.open('demo.db')
-        if db == null
-            return
-        db.execute('drop table if exists users')
-        db.execute('create table users(id int primary key, name text)')
-        db.execute(`insert into users values(0, 'hello'), (1, 'world')`)
-        
-        list : from(Users).in(db).where(it.id < 10).orderBy(it.name).select()
-        for i := until(list.size)
-            u : list.get(i)
-            break u == null
-            printText('id: ' u.id ', name: ' u.name)
