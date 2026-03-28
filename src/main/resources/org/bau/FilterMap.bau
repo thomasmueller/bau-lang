@@ -1,0 +1,36 @@
+module org.bau.FilterMap
+import org.bau.List
+    List
+
+type FilterMap(T)
+    list List(T)
+
+fun from(T type, list List(T)) FilterMap(T)
+    result : FilterMap(T)(list)
+    return result
+
+fun FilterMap(T) where(condition(T) int) macro FilterMap(T)
+    result : List(T)()
+    result.array = T[list.size]
+    i := 0
+    loop i < list.size
+        it : list.array[i]
+        if condition
+            result.add(it)
+        i += 1
+    this.list = result        
+    return this
+
+fun FilterMap(T) map(expression(T) U) macro FilterMap(U)
+    result : List(U)()
+    result.array = U[list.size]
+    i := 0
+    loop i < list.size
+        it : list.array[i]
+        x : expression
+        result.add(x)
+        i += 1
+    return from(U, result)
+
+fun FilterMap(T) select() List(T)
+    return this.list

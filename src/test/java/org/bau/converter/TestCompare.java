@@ -186,6 +186,11 @@ public class TestCompare {
     }
 
     @Test
+    public void linqSqlite() throws IOException {
+        test("linqSqlite");
+    }
+
+    @Test
     public void literals() throws IOException {
         test("literals");
     }

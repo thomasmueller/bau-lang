@@ -5,11 +5,7 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-reflection to iterate over the fields of a (generic) type; construct objects, set and read values.
-
 make 'ord' optional
-
-instead of null = empty array, use static struct i8_array EMPTY = { .len = 0, ._refCount = INF, .data = NULL };
 
 move array copy methods:
     BigInt.copyOf, copyOfRange
@@ -17,6 +13,8 @@ move string types:
     BigInt str
 
 String
+
+instead of null = empty array, use static struct i8_array EMPTY = { .len = 0, ._refCount = INF, .data = NULL };
 
 debug macro like in rust
 https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro

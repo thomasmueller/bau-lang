@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-03-28: First complete LINQ (Language Integrated Query) example using SQLite.
 * 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 
 For older changes see <a href="docsrc/changes.md">Change Log</a>
@@ -15,6 +16,8 @@ For older changes see <a href="docsrc/changes.md">Change Log</a>
 * <a href="docsrc/conciseSyntax.md">Concise syntax inspired by Python</a>.
 * <a href="docsrc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * <a href="docsrc/memory.md">Memory management</a> using reference counting by default. Low memory usage; no GC pauses.
+* <a href="docsrc/linq.md">LINQ-style</a> typesafe querying for SQL and collection backends.
+* <a href="docsrc/macros.md">Macros</a> to avoid repetitive code and improve readability.
 * Runs everywhere: transpiles to C. No runtime library needed.
 * Null pointer errors and division by zero are prevented at compile time.
 * Avoid runtime array bounds checks using static analysis.
@@ -273,7 +276,10 @@ Internally, these functions are templates.
     fun array(entries T..) T[]
         return entries
 
-The name of the type is available using `T.name`.
+The name of the type is available using `T.name`,
+the field count using `T.fieldCount`,
+the comma separated field names using `T.fieldNames`,
+and the comma separated field names using `T.fieldTypes`.
 
 ### Macro Functions
 

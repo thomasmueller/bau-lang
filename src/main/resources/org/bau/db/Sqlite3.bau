@@ -1,4 +1,10 @@
 module org.bau.db.Sqlite3
+import org.bau.Int
+import org.bau.String
+    StringBuilder
+    newStringBuilder
+    split
+import org.bau.List
 
 ## 
 
@@ -14,6 +20,12 @@ type Sqlite
     error i8[]
     db int
     stmt int
+
+type text
+    data i8[]
+
+type Record
+    data i8[]
 
 fun open(name i8[]) Sqlite?
     result: Sqlite()
@@ -129,3 +141,179 @@ fun Sqlite close()
         sqlite3_close(db);
     `)
     db = 0
+
+fun convertI8ArrayToText(t i8[]) text
+    result : text()
+    result.data = t
+    return result
+
+fun convertIntToText(t int) text
+    result : text()
+    result.data = t
+    return result
+
+fun convertTextToI8Array(t text) i8[]
+    return t.data
+
+fun convertTextToInt(t text) int
+    return Int.parseInt(t.data)
+
+fun newInstance(T type, data i8[]) macro T
+    r T: Record()
+    return r # this will call the conversion method
+
+fun printText(array text..)
+    size := 0
+    for i := until(array.len)
+        size += array[i].data.len
+    converted : i8[size]
+    pos := 0
+    for i := until(array.len)
+        t : array[i]
+        for j := until(t.data.len)
+            converted[pos] = t.data[j]
+            pos += 1
+    println(converted)
+    
+type Query(T)
+    db Sqlite
+    tableName text
+    condition text
+    orderBy text
+
+fun Sqlite from(T type) Query(T)
+    result : Query(T)(this, text(), text(), text())
+    result.tableName = T.name
+    return result
+
+fun Sqlite dropTable(T type)
+    buff : newStringBuilder(16)
+    buff.append('drop table if exists ')
+    buff.append(T.name)
+    sql : buff.toString().data
+    this.execute(sql)
+
+fun Sqlite createTable(T type)
+    buff : newStringBuilder(16)
+    buff.append('create table if not exists ')
+    buff.append(T.name)
+    buff.append('(')
+    len : T.fieldCount
+    names : T.fieldNames
+    nameList : split(names, ',')
+    types : T.fieldTypes
+    typeList : split(types, ',')
+    for i := until(len)
+        if i > 0
+            buff.append(', ')
+        buff.append(nameList.get(i).data)
+        buff.append(' ')
+        t : typeList.get(i).data
+        tn : split(t, '.')
+        buff.append(tn.get(tn.len() - 1).data)
+    buff.append(')')
+    sql : buff.toString().data
+    this.execute(sql)
+
+fun getValue(row T, c int) i8[]
+    if c == 0
+        return row.0
+    elif c == 1
+        return row.1
+    elif c == 2
+        return row.2
+    return i8[0]
+
+fun quote(s i8[]) i8[]
+    result : i8[2 + s.len * 2]
+    result[0] = ord('\'')
+    pos := 1
+    for i := until(s.len)
+        result[pos] = s[i]
+        pos += 1
+        if s[i] == ord('\'')
+            result[pos] = s[i]
+            pos += 1
+    result[pos] = ord('\'')
+    pos += 1
+    copy : i8[pos]
+    for i := until(pos)
+        copy[i] = result[i]
+    return copy
+
+fun Sqlite insert(x T)
+    buff : newStringBuilder(16)
+    buff.append('insert into ')
+    buff.append(T.name)
+    buff.append('(')
+    len : T.fieldCount
+    names : T.fieldNames
+    nameList : split(names, ',')
+    for i := until(len)
+        if i > 0
+            buff.append(', ')
+        buff.append(nameList.get(i).data)
+    buff.append(') values(')
+    for i := until(len)
+        if i > 0
+            buff.append(', ')
+        buff.append(quote(getValue(x, i)))
+    buff.append(')')
+    sql : buff.toString().data
+    this.execute(sql)
+
+fun Query(T) where(condition(T) int) macro Query(T)
+    this.condition = text()
+    this.condition.data = condition.source
+    return this
+
+fun Query(T) orderBy(column(T) U) macro Query(T)
+    this.orderBy = text()
+    this.orderBy.data = column.source
+    return this
+
+fun setField(row T, c int, n text)
+    if c == 0
+        row.0 = n
+    elif c == 1
+        row.1 = n
+    elif c == 2
+        row.2 = n
+
+fun cleanIt(expr i8[])
+    loop
+        p := String.indexOf(expr, 'it.')
+        break p < 0
+        expr[p] = ord(' ')
+        expr[p + 1] = ord(' ')
+        expr[p + 2] = ord(' ')
+
+fun Query(T) select() List(T)
+    buff : newStringBuilder(16)
+    buff.append('select * from ')
+    buff.append(tableName)
+    if condition.data.len
+        cleanIt(condition.data)
+        buff.append(' where ')
+        buff.append(condition.data)
+    if orderBy.data.len
+        cleanIt(orderBy.data)
+        buff.append(' order by ')
+        buff.append(orderBy.data)
+    sql : buff.toString().data
+    result := newList(T)
+    if db <> null
+        fieldNames : T.fieldNames
+        db.prepare(sql)
+        cols : T.fieldCount
+        loop db.nextRow()
+            row : newInstance(T, i8[0])
+            c := 0
+            loop c < cols
+                if db
+                    n : text()
+                    n.data = db.getString(c);
+                    setField(row, c, n)
+                c += 1
+            result.add(row)
+    return result

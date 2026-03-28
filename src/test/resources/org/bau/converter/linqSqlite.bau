@@ -1,0 +1,32 @@
+import org.bau.db.Sqlite3
+    Record
+    text
+
+type Customer
+    id int
+    name text
+
+fun main()
+    db : Sqlite3.open('demo.db')
+    if db 
+        db.dropTable(Customer)
+        db.createTable(Customer)
+        db.insert(newCustomer(0, 'James'))
+        db.insert(newCustomer(1, 'Sarah'))
+        db.insert(newCustomer(2, 'David'))
+        list : db.from(Customer).where(it.id > 0).
+                orderBy(it.name).select()
+        for i := until(list.size)
+            u : list.get(i)
+            break u == null
+            println('id: ' u.id '; name: ' u.name.data)
+
+fun newCustomer(id int, name text) Customer
+    u : Customer(name)
+    u.id = id
+    return u
+
+# helper function for de-serialization
+fun convertRecordToCustomer(r Record) Customer
+    return Customer(text())
+

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.bau.runtime.Value;
-import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValueNull;
 
 public class DataType {
@@ -542,6 +541,14 @@ public class DataType {
         String[] result = new String[fields.size()];
         for (int i = 0; i < result.length; i++) {
             result[i] = fields.get(i).name();
+        }
+        return result;
+    }
+
+    public String[] getFieldTypes() {
+        String[] result = new String[fields.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = fields.get(i).type().fullName();
         }
         return result;
     }

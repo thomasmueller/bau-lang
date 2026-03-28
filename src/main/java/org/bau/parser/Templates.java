@@ -37,12 +37,17 @@ public class Templates {
                             p.read();
                             p.read();
                             pos = p.pos;
-                            buff.append(" " + getFieldNames(r, program).length + " ");
+                            buff.append(" " + getFields(r, false, program).length + " ");
                         } else if (next.startsWith(".fieldNames") && !Character.isJavaIdentifierPart(next.charAt(11))) {
                             p.read();
                             p.read();
                             pos = p.pos;
-                            buff.append(" '" + StringLiteral.escape(String.join(",", getFieldNames(r, program))) + "' ");
+                            buff.append(" '" + StringLiteral.escape(String.join(",", getFields(r, false, program))) + "' ");
+                        } else if (next.startsWith(".fieldTypes") && !Character.isJavaIdentifierPart(next.charAt(11))) {
+                            p.read();
+                            p.read();
+                            pos = p.pos;
+                            buff.append(" '" + StringLiteral.escape(String.join(",", getFields(r, true, program))) + "' ");
                         } else {
                             // do not replace anything else
                             buff.append(raw.replace(f, r));
@@ -70,7 +75,7 @@ public class Templates {
         return buff.toString();
     }
 
-    private static String[] getFieldNames(String typeName, Program program) {
+    private static String[] getFields(String typeName, boolean types, Program program) {
         String module = null;
         int lastDot = typeName.lastIndexOf('.');
         if (lastDot >= 0) {
@@ -81,7 +86,11 @@ public class Templates {
         if (type == null || type.isArray() || type.isFunctionPointer || type.isTrait() || type.isNumber()) {
             return new String[0];
         }
-        return type.getFieldNames();
+        if (types) {
+            return type.getFieldTypes();
+        } else {
+            return type.getFieldNames();
+        }
     }
 
     static String convertTemplate(String template, String find, String replace, Program program) {

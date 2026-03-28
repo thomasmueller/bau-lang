@@ -2,6 +2,8 @@ package org.bau;
 
 /*
 
+https://ori-lang.com/guide/20-memory-model/
+
 https://www.reddit.com/r/ProgrammingLanguages/comments/1gkn7aw/what_else_is_there_besides_borrow_checking_and_gc/
 
 https://verdagon.dev/grimoire/grimoire

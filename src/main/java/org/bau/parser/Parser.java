@@ -846,7 +846,7 @@ public class Parser {
             def.macro = true;
         }
         if (itType != null && !def.macro) {
-            throw syntaxError("Hacks are only allowed in macros");
+            throw syntaxError("Types on 'it' parameters are only allowed in macros");
         }
         if (matchOp("\n")) {
             // void
@@ -1274,10 +1274,11 @@ public class Parser {
                 s.isGlobalScope = isGlobalScope;
                 s.initial = true;
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, false, targetType);
-                    if (expr == null) {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                    Expression e = program.cast(expr, false, targetType);
+                    if (e == null) {
+                        throw syntaxError("The type of the variable is different than the type of the expression, and there is no matching convert method");
                     }
+                    expr = e;
                 }
                 s.value = expr;
                 boolean global = isGlobalScope;
@@ -2400,7 +2401,12 @@ public class Parser {
         }
         DataType type = currentFunctionDefinition.returnType;
         if (!areTypesCompatible(b.expr, type)) {
-            throw syntaxError("Incompatible types: " + b.expr.type() + "; required: " + currentFunctionDefinition.returnType);
+            Expression e2 = program.cast(b.expr, false, type);
+            if (e2 != null) {
+                b.expr = e2;
+            } else {
+                throw syntaxError("Incompatible types: " + b.expr.type() + "; required: " + currentFunctionDefinition.returnType);
+            }
         }
         if (type.isTrait() && b.expr.type().implementsTrait(type)) {
             b.expr = new Cast(b.expr, type);
