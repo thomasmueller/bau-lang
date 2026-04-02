@@ -3,11 +3,12 @@ package org.bau.std;
 import java.util.ArrayList;
 
 import org.bau.parser.DataType;
+import org.bau.parser.FullName;
 import org.bau.parser.FunctionDefinition;
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
-import org.bau.parser.Return;
-import org.bau.parser.Variable;
+import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Return;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -16,16 +17,15 @@ public class Std {
     private final static boolean ARRAY_BOUND_CHECK = true;
 
     public static void register(Program prog) {
-        DataType i8 = prog.addType(DataType.newNumberType(DataType.I8, 1));
-        DataType i16 = prog.addType(DataType.newNumberType(DataType.I16, 2));
-        DataType i32 = prog.addType(DataType.newNumberType(DataType.I32, 4));
+        DataType i8 = prog.addType(DataType.I8_TYPE);
+        DataType i16 = prog.addType(DataType.I16_TYPE);
+        DataType i32 = prog.addType(DataType.I32_TYPE);
         DataType i64 = prog.addType(DataType.INT_TYPE);
-        DataType f32 = prog.addType(DataType.newNumberType(DataType.F32, 4));
-        DataType f64 = prog.addType(DataType.newNumberType(DataType.FLOAT, 8));
-        prog.addType(DataType.newNumberType(DataType.TYPE, 8));
+        DataType f32 = prog.addType(DataType.F32_TYPE);
+        DataType f64 = prog.addType(DataType.FLOAT_TYPE);
+        prog.addType(DataType.TYPE_TYPE);
 
-        FunctionDefinition f = new FunctionDefinition(0);
-        f.name = DataType.INT;
+        FunctionDefinition f = new FunctionDefinition(new FullName("", DataType.INT), 0);
         Variable var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i64;
@@ -33,8 +33,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = DataType.I32;
+        f = new FunctionDefinition(new FullName("", DataType.I32), 0);
         var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i32;
@@ -42,8 +41,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = DataType.I16;
+        f = new FunctionDefinition(new FullName("", DataType.I16), 0);
         var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i16;
@@ -51,8 +49,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = DataType.I8;
+        f = new FunctionDefinition(new FullName("", DataType.I8), 0);
         var = new Variable("x", DataType.INT_TYPE);
         f.parameters.add(var);
         f.returnType = i8;
@@ -60,8 +57,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = DataType.FLOAT;
+        f = new FunctionDefinition(new FullName("", DataType.FLOAT), 0);
         var = new Variable("x", f64);
         f.parameters.add(var);
         f.returnType = f64;
@@ -69,8 +65,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = DataType.F32;
+        f = new FunctionDefinition(new FullName("", DataType.F32), 0);
         var = new Variable("x", f64);
         f.parameters.add(var);
         f.returnType = f32;
@@ -78,8 +73,7 @@ public class Std {
         f.list.add(new Return(var));
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "idiv";
+        f = new FunctionDefinition(new FullName("", "idiv"), 0);
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -90,8 +84,7 @@ public class Std {
                 + "return a > 0 ? LLONG_MAX : LLONG_MIN;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "imod";
+        f = new FunctionDefinition(new FullName("", "imod"), 0);
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -101,8 +94,7 @@ public class Std {
                 + "return 0;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "shiftLeft";
+        f = new FunctionDefinition(new FullName("", "shiftLeft"), 0);
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -110,8 +102,7 @@ public class Std {
         f.cCode = "return a << b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "shiftRight_int";
+        f = new FunctionDefinition(new FullName("", "shiftRight_int"), 0);
         f.parameters.add(new Variable("a", i64));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -119,8 +110,7 @@ public class Std {
         f.cCode = "return ((uint64_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "shiftRight_i32";
+        f = new FunctionDefinition(new FullName("", "shiftRight_i32"), 0);
         f.parameters.add(new Variable("a", i32));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -128,8 +118,7 @@ public class Std {
         f.cCode = "return ((uint32_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "shiftRight_i16";
+        f = new FunctionDefinition(new FullName("", "shiftRight_i16"), 0);
         f.parameters.add(new Variable("a", i16));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -137,8 +126,7 @@ public class Std {
         f.cCode = "return ((uint16_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "shiftRight_i8";
+        f = new FunctionDefinition(new FullName("", "shiftRight_i8"), 0);
         f.parameters.add(new Variable("a", i8));
         f.parameters.add(new Variable("b", i64));
         f.includes = new ArrayList<>();
@@ -146,8 +134,7 @@ public class Std {
         f.cCode = "return ((uint8_t) a) >> b;\n";
         prog.addFunction(f);
 
-        f = new FunctionDefinition(0);
-        f.name = "idx";
+        f = new FunctionDefinition(new FullName("", "idx"), 0);
         f.parameters.add(new Variable("x", i64));
         f.parameters.add(new Variable("len", i64));
         f.includes = new ArrayList<>();
@@ -163,7 +150,7 @@ public class Std {
     }
 
     public static void registerRange(Program program) {
-        if (program.getFunctionIfExists(null, null, "range", 2) != null) {
+        if (program.getFunctionIfExists(null, "", "range", 2) != null) {
             return;
         }
         String type = "fun range(start int, lessThan int) int\n"
@@ -173,11 +160,11 @@ public class Std {
                 + "    _ += 1";
         Parser parser = new Parser(type);
         Program p = parser.parse();
-        program.addFunction(p.getFunction(null, null, "range", 2));
+        program.addFunction(p.getFunction(null, "", "range", 2));
     }
 
     public static void registerUntil(Program program) {
-        if (program.getFunctionIfExists(null, null, "until", 1) != null) {
+        if (program.getFunctionIfExists(null, "", "until", 1) != null) {
             return;
         }
         String type = "fun until(lessThan int) 0 .. lessThan\n"
@@ -190,17 +177,17 @@ public class Std {
                 + "      _ = _next";
         Parser parser = new Parser(type);
         Program p = parser.parse();
-        program.addFunction(p.getFunction(null, null, "until", 1));
+        program.addFunction(p.getFunction(null, "", "until", 1));
     }
 
-    public static void registerStd(Program program) {
-        if (program.getImport("Std") != null) {
+    public static void registerStd(String module, Program program) {
+        String stdModule = "org.bau.Std";
+        if (program.getSourceFile(stdModule) != null) {
             return;
         }
         ArrayList<String> list = new ArrayList<>();
-        String stdModule = "org.bau.Std";
         // prevent recursion
-        program.addImport(stdModule, "Std", list);
+        program.addImport("", stdModule, "Std", list);
         String moduleSource = program.readModule(stdModule);
         Parser p = new Parser(program, stdModule, moduleSource, 0);
         // disable the scan phase -- otherwise we would register recursively
@@ -210,7 +197,8 @@ public class Std {
         list.add("ord");
         list.add("convertIntToI8Array");
         list.add("appendValue");
-        program.addImport(stdModule, "Std", list);
+        program.addSourceFile(stdModule, "");
+        program.addImport(module, stdModule, "Std", list);
     }
 
     public static Value eval(String name, Memory m) {

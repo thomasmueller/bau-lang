@@ -417,26 +417,26 @@ int64_t idx_2(int64_t x, int64_t len) {
     return arrayOutOfBounds(x, len);
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_List_org_bau_String_string_0() {
-    org_bau_List_List_org_bau_String_string* _t2 = org_bau_List_List_org_bau_String_string_new();
-    _t2->array = org_bau_String_string_array_new(0);
-    _t2->size = 0;
-    return _t2;
+    org_bau_List_List_org_bau_String_string* _t0 = org_bau_List_List_org_bau_String_string_new();
+    _t0->array = org_bau_String_string_array_new(0);
+    _t0->size = 0;
+    return _t0;
 }
 org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_string_1(int64_t _T) {
     org_bau_List_List_org_bau_String_string* result = org_bau_List_List_org_bau_String_string_0();
-    org_bau_String_string_array* _t14 = org_bau_String_string_array_new(4);
-    _incUseStack(_t14);
+    org_bau_String_string_array* _t0 = org_bau_String_string_array_new(4);
+    _incUseStack(_t0);
     _decUse(result->array, org_bau_String_string_array);
-    result->array = _t14;
-    _decUseStack(_t14, org_bau_String_string_array);
+    result->array = _t0;
+    _decUseStack(_t0, org_bau_String_string_array);
     return result;
 }
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     org_bau_String_string_copy(&x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_String_string_array* _t3 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t3);
-        org_bau_String_string_array* n = _t3;
+        org_bau_String_string_array* _t1 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t1);
+        org_bau_String_string_array* n = _t1;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -456,7 +456,7 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         _decUse(this->array, org_bau_String_string_array);
         this->array = n;
         _decUseStack(n, org_bau_String_string_array);
-        _decUseStack(_t3, org_bau_String_string_array);
+        _decUseStack(_t1, org_bau_String_string_array);
     }
     org_bau_String_string_copy(&x);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;

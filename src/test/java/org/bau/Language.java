@@ -18,8 +18,6 @@ instead of null = empty array, use static struct i8_array EMPTY = { .len = 0, ._
 
 debug macro like in rust
 https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro
-line number, file name
-power assert
 
 use the conversion functions in println
 
@@ -27,9 +25,6 @@ document operator-at-end or ( for multi-line statements:
 https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
 
 Support "until" inside macro functions ("For loops in macros are currently not supported")
-
-Functional vs Imperative
-Expression based vs Statement based
 
 Higher-order functions via templating + compile time evaluation
 
@@ -64,7 +59,7 @@ MayRetain, MayRelease, MayEscape
 currently we only trace "MayRelease"; also need "MayEscape" (may be stored somewhere)
 https://en.wikipedia.org/wiki/Effect_system
 
-support "nullable" / boxed value types. specially "string?", but then also "int?"
+support "nullable" / boxed value types? specially "string?", but then also "int?"
 
 value equality and comparison operator overloading, specially for strings
 reference equality via
@@ -76,10 +71,6 @@ reference equality via
 
 code coverage tool
 assertions on the right?
-
-language server LSP
-https://github.com/tower-lsp-community/tower-lsp-server/tree/main
-
 
 improved stdlib and add to readme
 
@@ -102,8 +93,6 @@ https://news.ycombinator.com/item?id=46925741
 * verify whitespace count (eg warn if whitespace doesn't match the expectation)
 
 * test setjmp / longjmp
-
-'==' for comparison, due to 'x = y = 10'
 
 make 'ord' function go away
 
@@ -140,6 +129,9 @@ array-backed Treap
 
 hash function with seed parameter
 
+- https://martin.ankerl.com/2022/08/27/hashmap-bench-01/
+  Comprehensive C++ Hashmap Benchmarks 2022
+  https://news.ycombinator.com/item?id=47518264
 - hash table benchmark
   https://bluuewhale.github.io/posts/building-a-fast-and-memory-efficient-hash-table-in-java-by-borrowing-the-best-ideas/
   https://github.com/bluuewhale/hash-smith
@@ -393,10 +385,7 @@ what to do, depending on problem.
 There are some limitations on what the callback can do,
 these would need to be defined.
 
-
 ----------------
-
-
 
 ## Division by Zero
 
@@ -415,7 +404,6 @@ If I implement the panic callback (above), then this can be used.
 An option might be to support a new data type "safe integer" that does not allow
 overflow, division by zero, and remainder by zero. This data type is then slower.
 
-
 --------------
 
 https://news.ycombinator.com/item?id=44672003   Go Segvault: There is no memory safety without thread safety
@@ -429,7 +417,6 @@ Rust: panic unwinding... consider making a "non-panic" mode? what about endless 
 JSON Test Suite
 https://github.com/nst/JSONTestSuite
 
-
 Mini-Bau
 x: [0] # array length 1, one integer 0? or empty array?
 x[100]: 0 # array size 100 with value 0?
@@ -438,7 +425,6 @@ fun factorial(x: 0)
     if x <= 1
         return 1
     return x * factorial(x - 1)
-
 
 int value = 0
 b = a.get("x")

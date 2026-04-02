@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.bau.parser.NumberValue;
+import org.bau.parser.expr.NumberValue;
 import org.junit.Test;
 
 public class TestParseHex {

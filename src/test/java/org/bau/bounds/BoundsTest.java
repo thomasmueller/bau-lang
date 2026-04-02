@@ -59,7 +59,7 @@ public class BoundsTest {
                                 break next >= x.len
                                 i = next
                         test()
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test

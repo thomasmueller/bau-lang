@@ -6,9 +6,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Statement;
+
 // basic block, with one entry, and one exit
 // (but possibly multiple predecessors and successors)
 public class BasicBlock {
+
     int id;
     boolean processed;
     ArrayList<BasicBlock> predecessors = new ArrayList<>();

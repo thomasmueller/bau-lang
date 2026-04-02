@@ -1,5 +1,6 @@
 import org.bau.Math
 import org.bau.DateTime
+import org.bau.Utils
 
 a := DateTime.getNanoTime()
 println(a)

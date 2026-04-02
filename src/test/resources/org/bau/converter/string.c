@@ -253,8 +253,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 typedef struct string string;
 struct string;
 typedef struct string_array string_array;
@@ -271,22 +269,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
     memset(result->data, 0, sizeof(int8_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -323,7 +305,6 @@ char **__argv;
 string str_1(i8_array* s);
 string string_0();
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void string_free(string* x);
 void string_copy(string* x);
 void string_array_free(string_array* x);
@@ -333,13 +314,6 @@ void i8_array_free_0(i8_array* x) {
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 void string_free_0(string* x) {
     _decUse(x->data, i8_array);
@@ -395,23 +369,23 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    string_array* _t1 = string_array_new(3);
-    _incUseStack(_t1);
-    string_array* x = _t1;
-    string _t2 = str_1(string_1000);
+    string_array* _t0 = string_array_new(3);
+    _incUseStack(_t0);
+    string_array* x = _t0;
+    string _t1 = str_1(string_1000);
+    string_copy(&_t1);
+    x->data[0] = _t1;
+    string _t2 = str_1(string_1001);
     string_copy(&_t2);
-    x->data[0] = _t2;
-    string _t3 = str_1(string_1001);
+    x->data[1] = _t2;
+    string _t3 = str_1(string_1002);
     string_copy(&_t3);
-    x->data[1] = _t3;
-    string _t4 = str_1(string_1002);
-    string_copy(&_t4);
-    x->data[2] = _t4;
+    x->data[2] = _t3;
     printf("%.*s %.*s %.*s\n", _arrayLen(x->data[0].data), x->data[0].data->data, _arrayLen(x->data[1].data), x->data[1].data->data, _arrayLen(x->data[2].data), x->data[2].data->data);
-    string_free(&_t4);
     string_free(&_t3);
     string_free(&_t2);
+    string_free(&_t1);
     _decUseStack(x, string_array);
-    _decUseStack(_t1, string_array);
+    _decUseStack(_t0, string_array);
     _end();
 }

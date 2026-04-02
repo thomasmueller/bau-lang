@@ -11,7 +11,7 @@ public class StringFormat {
         boolean escape = false;
         for (String a : args) {
             if (escape) {
-                a = a.replaceAll("\'", "\'\'");
+                a = a.replace("\'", "\'\'");
                 escape = false;
             } else {
                 for (char c : a.toCharArray()) {

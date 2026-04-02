@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Free;
+import org.bau.parser.stmt.Loop;
+import org.bau.parser.stmt.PhiBlock;
+import org.bau.parser.stmt.Statement;
+
 public class FunctionContext {
 
     private final Program program;
@@ -18,16 +24,13 @@ public class FunctionContext {
     private final HashMap<String, Variable> variables = new HashMap<>();
     private final LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
     private int nextTempVariableId;
-    private String currentFunctionName;
-
-    HashMap<Integer, Integer> statementIdMap = new HashMap<>();
+    private FullName currentFunctionName;
+    private ArrayList<BasicBlock> catchPredecessors = new ArrayList<>();
+    private HashMap<String, Integer> variableVersions = new HashMap<>();
 
     ArrayList<BasicBlock> blockList = new ArrayList<>();
-    ArrayList<BasicBlock> catchPredecessors = new ArrayList<>();
 
-    HashMap<String, Integer> variableVersions = new HashMap<>();
-
-    public FunctionContext(Program program, String functionName) {
+    public FunctionContext(Program program, FullName functionName) {
         this.program = program;
         this.currentFunctionName = functionName;
     }
@@ -39,7 +42,7 @@ public class FunctionContext {
         return nextTempVariableId++;
     }
 
-    public void reset(String functionName) {
+    public void reset(FullName functionName) {
         currentFunctionName = functionName;
         blockList.clear();
         nextTempVariableId = 0;
@@ -128,22 +131,22 @@ public class FunctionContext {
 
     public void addTemporaryType(DataType type) {
         addType(type);
-        addIdentifier(type.fullName(), type);
+        addIdentifier(type.getFullName().getFullName(), type);
         if (!type.isRange()) {
             // no need for range types
-            addIdentifier(type.arrayType().fullName(), type.arrayType());
+            addIdentifier(type.arrayType().getFullName().getFullName(), type.arrayType());
         }
     }
 
     public FunctionDefinition getFunctionIfExists(String module, String name) {
+        Utils.assertTrue(module != null);
         Variable var = variables.get(name);
         if (var == null) {
             var = program.getGlobalVariable(module, name);
         }
         if (var != null && "fun".equals(var.type().name())) {
-            FunctionDefinition def = new FunctionDefinition(0);
+            FunctionDefinition def = new FunctionDefinition(new FullName("", name), 0);
             def.isFunctionPointer = true;
-            def.name = name;
             def.returnType = var.type().functionPointerReturnType;
             int paramId = 0;
             for (DataType pt : var.type().functionPointerArgs) {
@@ -162,12 +165,11 @@ public class FunctionContext {
     }
 
     public FunctionDefinition getFunctionIfExists(DataType type, FunctionDefinition calledFrom, String module, String name, int parameterCount) {
-        if (type == null && module == null) {
+        if (type == null && (module == null || module.isEmpty())) {
             Variable var = variables.get(name);
             if (var != null && "fun".equals(var.type().name())) {
-                FunctionDefinition def = new FunctionDefinition(0);
+                FunctionDefinition def = new FunctionDefinition(new FullName("", name), 0);
                 def.isFunctionPointer = true;
-                def.name = name;
                 def.returnType = var.type().functionPointerReturnType;
                 int paramId = 0;
                 for (DataType pt : var.type().functionPointerArgs) {
@@ -193,20 +195,26 @@ public class FunctionContext {
     }
 
     private DataType addType(DataType type) {
-        if (dataTypeMap.containsKey(type.fullName())) {
-            throw new IllegalStateException("Type already exists: " + type.fullName());
+        if (dataTypeMap.containsKey(type.getFullName().getFullName())) {
+            throw new IllegalStateException("Type already exists: " + type.getFullName().getFullName());
         }
-        dataTypeMap.put(type.fullName(), type);
+        dataTypeMap.put(type.getFullName().getFullName(), type);
         if (!type.isArray()) {
-            dataTypeMap.put(type.arrayType().fullName(), type.arrayType());
+            dataTypeMap.put(type.arrayType().getFullName().getFullName(), type.arrayType());
         }
         return type;
     }
 
     public DataType getType(String module, String name) {
-        String fullName = new FullName(module, name).toString();
-        DataType t = dataTypeMap.get(fullName);
-        if (t == null && module != null) {
+        Utils.assertTrue(module != null);
+        // check built-in types first (int, float,...)
+        DataType t = program.getType("", name);
+        if (t != null && t.isNumber()) {
+            return t;
+        }
+        String fullName = new FullName(module, name).getFullName();
+        t = dataTypeMap.get(fullName);
+        if (t == null && (module != null && !module.isEmpty())) {
             t = dataTypeMap.get(name);
         }
         if (t == null) {

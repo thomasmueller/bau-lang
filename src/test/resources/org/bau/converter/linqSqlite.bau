@@ -1,6 +1,8 @@
 import org.bau.db.Sqlite3
     Record
     text
+import org.bau.List
+    List
 
 type Customer
     id int

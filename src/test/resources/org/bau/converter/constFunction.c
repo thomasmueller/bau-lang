@@ -251,37 +251,11 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
             free(n);
         } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
 /* types */
-typedef struct int_array int_array;
-struct int_array;
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
 char **__argv;
 /* functions */
-void int_array_free(int_array* x);
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
-}
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();

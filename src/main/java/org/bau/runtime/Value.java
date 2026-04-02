@@ -2,7 +2,7 @@ package org.bau.runtime;
 
 import java.util.HashMap;
 
-import org.bau.parser.NumberValue;
+import org.bau.parser.expr.NumberValue;
 
 public class Value {
 

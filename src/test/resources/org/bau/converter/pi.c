@@ -258,8 +258,6 @@ typedef struct i8_array i8_array;
 struct i8_array;
 typedef struct i32_array i32_array;
 struct i32_array;
-typedef struct int_array int_array;
-struct int_array;
 typedef struct org_bau_BigInt_bigInt org_bau_BigInt_bigInt;
 struct org_bau_BigInt_bigInt;
 struct i8_array {
@@ -290,22 +288,6 @@ i32_array* i32_array_new(uint64_t len) {
     result->len = len;
     result->data = _malloc(sizeof(int32_t) * len);
     memset(result->data, 0, sizeof(int32_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -367,7 +349,6 @@ int32_t shiftRight_i32_2(int32_t a, int64_t b);
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void i8_array_free(i8_array* x);
 void i32_array_free(i32_array* x);
-void int_array_free(int_array* x);
 void org_bau_BigInt_bigInt_free(org_bau_BigInt_bigInt* x);
 void org_bau_BigInt_bigInt_copy(org_bau_BigInt_bigInt* x);
 void i8_array_free_0(i8_array* x) {
@@ -383,13 +364,6 @@ void i32_array_free_0(i32_array* x) {
 }
 void i32_array_free(i32_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i32_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 void org_bau_BigInt_bigInt_free_0(org_bau_BigInt_bigInt* x) {
     _decUse(x->data, i32_array);
@@ -554,10 +528,10 @@ org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b) {
     return res;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_0() {
-    org_bau_BigInt_bigInt _t10 = org_bau_BigInt_bigInt_new();
-    _t10.negative = 0;
-    _t10.data = i32_array_new(0);
-    return _t10;
+    org_bau_BigInt_bigInt _t0 = org_bau_BigInt_bigInt_new();
+    _t0.negative = 0;
+    _t0.data = i32_array_new(0);
+    return _t0;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_convertIntToBigInt_1(int64_t value) {
     org_bau_BigInt_bigInt _t0 = org_bau_BigInt_newBigInt_1(value);
@@ -604,23 +578,23 @@ i32_array* org_bau_BigInt_copyOf_2(i32_array* a, int64_t newLen) {
 i32_array* org_bau_BigInt_copyOfRange_i32_array_i32_3(i32_array* a, int64_t from, int64_t to) {
     _incUseStack(a);
     int64_t len = to - from;
-    i32_array* _t12 = i32_array_new(len);
-    _incUseStack(_t12);
-    i32_array* x = _t12;
+    i32_array* _t0 = i32_array_new(len);
+    _incUseStack(_t0);
+    i32_array* x = _t0;
     int64_t i = 0;
     while (1 == 1) {
-        int64_t _t13 = ( i + from ) < to;
-        if (_t13) {
-            int64_t _t14 = i < _arrayLen(a);
-            _t13 = _t14;
+        int64_t _t1 = ( i + from ) < to;
+        if (_t1) {
+            int64_t _t2 = i < _arrayLen(a);
+            _t1 = _t2;
         }
-        if (!(_t13)) {
+        if (!(_t1)) {
             break;
         }
         x->data[idx_2(i, _arrayLen(x))] = a->data[idx_2(i + from, _arrayLen(a))];
         i = i + 1;
     }
-    _decUseStack(_t12, i32_array);
+    _decUseStack(_t0, i32_array);
     _decUseStack(a, i32_array);
     return x;
 }
@@ -1454,28 +1428,28 @@ void _main() {
     den = org_bau_BigInt_convertIntToBigInt_1(1);
     num = org_bau_BigInt_convertIntToBigInt_1(1);
     int64_t n = 50;
-    int64_t _t18 = org_bau_Env_argCount_0();
-    if (_t18 > 1) {
-        i8_array* _t19 = org_bau_Env_arg_1(1);
-        int64_t _t20 = org_bau_Int_parseInt_1(_t19);
-        n = _t20;
-        _decUseStack(_t19, i8_array);
+    int64_t _t0 = org_bau_Env_argCount_0();
+    if (_t0 > 1) {
+        i8_array* _t1 = org_bau_Env_arg_1(1);
+        int64_t _t2 = org_bau_Int_parseInt_1(_t1);
+        n = _t2;
+        _decUseStack(_t1, i8_array);
     }
     int64_t k = 0;
     int64_t i = 0;
-    i8_array* _t21 = i8_array_new(10);
-    _incUseStack(_t21);
-    i8_array* buff = _t21;
+    i8_array* _t3 = i8_array_new(10);
+    _incUseStack(_t3);
+    i8_array* buff = _t3;
     while (i < n) {
         k = k + 1;
         nextTerm_1(k);
-        int64_t _t22 = org_bau_BigInt_bigInt_compare_2(num, acc);
-        if (_t22 > 0) {
+        int64_t _t4 = org_bau_BigInt_bigInt_compare_2(num, acc);
+        if (_t4 > 0) {
             continue;
         }
         int64_t d = extractDigit_1(3);
-        int64_t _t23 = extractDigit_1(4);
-        if (d != _t23) {
+        int64_t _t5 = extractDigit_1(4);
+        if (d != _t5) {
             continue;
         }
         eliminateDigit_1(d);
@@ -1486,7 +1460,7 @@ void _main() {
         }
     }
     _decUseStack(buff, i8_array);
-    _decUseStack(_t21, i8_array);
+    _decUseStack(_t3, i8_array);
     org_bau_BigInt_bigInt_free(&acc);
     org_bau_BigInt_bigInt_free(&den);
     org_bau_BigInt_bigInt_free(&num);

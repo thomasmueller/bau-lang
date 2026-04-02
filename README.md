@@ -25,9 +25,9 @@ For older changes see <a href="docsrc/changes.md">Change Log</a>
 
 ## Why
 
-Our <a href="docsrc/why.md">vision</a> is:
-We want to have a language as easy and concise as Python,
-with the speed and ability to run really everywhere like C
+The <a href="docsrc/why.md">Vision</a> is:
+A language that is as easy and concise as Python,
+with the speed and ability to run really everywhere like C,
 and the safety of Rust and Java.
 
 ## Tools and Documentation

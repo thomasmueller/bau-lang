@@ -1,0 +1,89 @@
+package org.bau.parser.expr;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bau.parser.BasicBlock;
+import org.bau.parser.DataType;
+import org.bau.parser.FunctionContext;
+import org.bau.parser.Parser;
+import org.bau.parser.Program;
+import org.bau.parser.Solver;
+import org.bau.parser.Solver.Rule;
+import org.bau.parser.stmt.Statement;
+import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
+
+public interface Expression {
+
+    Value eval(Memory memory);
+
+    DataType type();
+
+    DataType canThrowException();
+
+    Expression replace(Variable old, Expression with);
+
+    Expression simplify();
+
+    String format();
+
+    String toC();
+
+    boolean isEasyToRead();
+
+    default boolean isComparison() {
+        return false;
+    }
+
+    /**
+     * After "using" owned variables and fields, they are null
+     * (calling a method, assigning to another variable)
+     */
+    void setOwnedBoundsToNull(Solver solver, int depth, boolean loop);
+
+    /**
+     * Whether the expression is a constant or a variable. Operations
+     * (specially if they involve multiple variables) are not simple.
+     */
+    boolean isSimple();
+
+    /**
+     * Write (assignment) functions for sub-expressions and return the variable.
+     *
+     * @param target the list of statements
+     * @param assignment if the result is assigned to a variable
+     * @return the variable
+     */
+    Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target);
+
+    /**
+     * Get the list of owned fields or variables that are "used",
+     * for example when calling a function.
+     * Those need to be set to NULL afterwards.
+     */
+    default List<Expression> getUsedOwned() {
+        return List.of();
+    }
+
+    void used(Program program);
+
+    default List<Rule> getRules() {
+        return List.of();
+    }
+
+    boolean containsModifiableVariables();
+
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock);
+
+    public void setVariableVersions(String name, int oldVersion, int newVersion);
+
+    default List<Variable> getVariables() {
+        return List.of();
+    }
+
+    public String toAST();
+
+    void resolveTypes(Program program);
+
+}

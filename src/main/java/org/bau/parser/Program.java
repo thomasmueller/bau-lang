@@ -14,13 +14,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.bau.parser.Statement.StatementResult;
+import org.bau.parser.expr.Call;
+import org.bau.parser.expr.Cast;
+import org.bau.parser.expr.Expression;
+import org.bau.parser.expr.LeftValue;
+import org.bau.parser.expr.NullValue;
+import org.bau.parser.expr.NumberValue;
+import org.bau.parser.expr.StringLiteral;
+import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Assignment;
+import org.bau.parser.stmt.Catch;
+import org.bau.parser.stmt.Free;
+import org.bau.parser.stmt.If;
+import org.bau.parser.stmt.Loop;
+import org.bau.parser.stmt.Return;
+import org.bau.parser.stmt.Statement;
+import org.bau.parser.stmt.Throw;
+import org.bau.parser.stmt.Statement.StatementResult;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueRef;
@@ -30,45 +45,21 @@ public class Program {
 
     private boolean useTmMalloc = false;
     private boolean traceRefCounts = false;
-
-    ArrayList<Statement> initList = new ArrayList<>();
-    ArrayList<Statement> mainList = new ArrayList<>();
-
-    LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
+    private LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
 
     // string -> reference
-    HashMap<String, Long> stringConstants = new HashMap<>();
+    private HashMap<String, Long> stringConstants = new HashMap<>();
 
     // reference -> string
-    TreeMap<Long, StringLiteral> stringConstantsMap = new TreeMap<>();
-
-    TreeMap<Long, Variable> arrayConstantsMap = new TreeMap<>();
-
-    HashMap<String, Variable> variables = new HashMap<>();
+    private TreeMap<Long, StringLiteral> stringConstantsMap = new TreeMap<>();
+    private TreeMap<Long, Variable> arrayConstantsMap = new TreeMap<>();
 
     // global variables (or constants) in modules
-    LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
-
-    TreeMap<String, Trait> traits = new TreeMap<>();
-    int[] traitFunctionOffsets = new int[0];
-
-    TreeSet<String> includes = new TreeSet<>();
-
-    TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
-
-    HashMap<String, FunctionDefinition> functionTemplates = new HashMap<>();
-
-    ArrayList<String> comments = new ArrayList<>();
-
-    // map from module identifier to full module name
-    HashMap<String, String> imports = new HashMap<>();
-
-    // map from type / method / constant identifier to module identifier
-    HashMap<String, String> importEntries = new HashMap<>();
-
-    List<Statement> autoClose;
-
-    HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
+    private LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
+    private int[] traitFunctionOffsets = new int[0];
+    private TreeSet<String> includes = new TreeSet<>();
+    private HashMap<String, FunctionDefinition> functionTemplates = new HashMap<>();
+    private ArrayList<String> comments = new ArrayList<>();
 
     private File moduleRootPath;
 
@@ -76,22 +67,35 @@ public class Program {
 
     private Solver solver = new Solver();
 
+    // key: module (empty string for unnamed); value: source file
+    private HashMap<String, SourceFile> modules = new HashMap<>();
+
+    private long ticksExecuted;
+
+    ArrayList<Statement> initList = new ArrayList<>();
+    ArrayList<Statement> mainList = new ArrayList<>();
+
+    HashSet<DataType> usedTypes = new HashSet<>();
+
+    TreeMap<String, FunctionDefinition> functions = new TreeMap<String, FunctionDefinition>();
+
+    List<Statement> autoClose;
+
+    HashMap<String, FunctionDefinition> uncompiledFunctions = new HashMap<>();
+
     {
-        FunctionDefinition f = new FunctionDefinition(0);
         // TODO move println to std
-        f.name = "println";
+        FunctionDefinition f = new FunctionDefinition(new FullName("", "println"), 0);
         f.builtIn = true;
         f.varArgs = true;
         addFunction(f);
         Std.register(this);
     }
 
-    private Map<String, String> modules = new HashMap<>();
-
-    private long ticksExecuted;
-
     public Program(Map<String, String> modules) {
-        this.modules = modules;
+        for (Entry<String, String> m : modules.entrySet()) {
+            this.addSourceFile(m.getKey(), m.getValue());
+        }
     }
 
     public Program(String moduleRootPath) {
@@ -99,22 +103,22 @@ public class Program {
     }
 
     public FunctionDefinition getFunctionTemplate(DataType type, String module, String name) {
-        String id = FunctionDefinition.getFunctionId(type, module, name, 0);
+        String id = FunctionDefinition.getFunctionId(type, new FullName(module, name), 0);
         FunctionDefinition def = functionTemplates.get(id);
         if (def != null || type == null) {
             return def;
         }
         // generic T function
-        DataType t2 = DataType.newEmptyType(module, "T");
+        DataType t2 = DataType.newUndefined(new FullName(module, "T"));
         if (type.isArray()) {
             t2 = t2.arrayType();
         }
-        id = FunctionDefinition.getFunctionId(t2, module, name, 0);
+        id = FunctionDefinition.getFunctionId(t2, new FullName(module, name), 0);
         return functionTemplates.get(id);
     }
 
     public void addFunctionTemplate(DataType type, String module, String name, FunctionDefinition def) {
-        String id = FunctionDefinition.getFunctionId(type, module, name, 0);
+        String id = FunctionDefinition.getFunctionId(type, new FullName(module, name), 0);
         functionTemplates.put(id, def);
     }
 
@@ -174,14 +178,14 @@ public class Program {
         if (def.macro) {
             // TODO now we add both a function and a template -
             // this is not needed
-            addFunctionTemplate(def.callType, def.module, def.name, def);
+            addFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name, def);
         }
         String id = def.getFunctionId();
         if (functions.containsKey(id)) {
             throw new IllegalStateException("Function already exists: " + id);
         }
         functions.put(id, def);
-        if (def.name.equals("close") && def.callType != null && def.callType.isPointer()) {
+        if (def.getFullName().name.equals("close") && def.callType != null && def.callType.isPointer()) {
             def.callType.autoClose = def;
         }
     }
@@ -248,13 +252,13 @@ public class Program {
         String module = source.module();
         if (source.isNumber()) {
             // for numbers (int, float, etc) use org.bau.Std,
-            Std.registerStd(this);
+            Std.registerStd(module, this);
             module = "org.bau.Std";
             // for non-array number types assume int or float
             if (!source.isArray()) {
                 if (source.isFloatingPoint()) {
                     if (source.sizeOf() != 8) {
-                        source = getType(null, DataType.FLOAT);
+                        source = DataType.FLOAT_TYPE;
                     }
                 } else {
                     if (source.sizeOf() != 8) {
@@ -316,7 +320,7 @@ public class Program {
                 }
             }
             return null;
-        } else if (source.toString().equals(target.toString())) {
+        } else if (source.format().equals(target.format())) {
             // memory type is different
             return expr;
         } else if (source.isNullable() && target.orNull() == source) {
@@ -344,16 +348,16 @@ public class Program {
             if (parameterCount < 0) {
                 continue;
             }
-            String id = FunctionDefinition.getFunctionId(type, module, name, parameterCount);
+            String id = FunctionDefinition.getFunctionId(type, new FullName(module, name), parameterCount);
             FunctionDefinition fd = functions.get(id);
             if (fd != null) {
                 return fd;
             }
-            id = FunctionDefinition.getFunctionId(type, module, name, Integer.MAX_VALUE);
+            id = FunctionDefinition.getFunctionId(type, new FullName(module, name), Integer.MAX_VALUE);
             FunctionDefinition result = functions.get(id);
-            if (result == null && module != null) {
+            if (result == null && module != null && !module.isEmpty()) {
                 // no method in this module - but the might be a global function
-                result = getFunctionIfExists(type, null, name, parameterCount);
+                result = getFunctionIfExists(type, "", name, parameterCount);
             }
             if (result != null) {
                 return result;
@@ -381,7 +385,7 @@ public class Program {
             // TODO support varargs
             parameterCount = 0;
         }
-        String id = FunctionDefinition.getFunctionId(type, module, name, parameterCount);
+        String id = FunctionDefinition.getFunctionId(type, new FullName(module, name), parameterCount);
         if (id == null) {
             return null;
         }
@@ -389,47 +393,48 @@ public class Program {
         if (fd != null) {
             return fd;
         }
-        id = FunctionDefinition.getFunctionId(type, module, name, Integer.MAX_VALUE);
+        id = FunctionDefinition.getFunctionId(type, new FullName(module, name), Integer.MAX_VALUE);
         FunctionDefinition result = functions.get(id);
-        if (result == null && module != null) {
+        if (result == null && (module != null && !module.isEmpty())) {
             // no method in this module - but the might be a global function
-            result = getFunctionIfExists(type, null, name, parameterCount);
+            result = getFunctionIfExists(type, "", name, parameterCount);
         }
         return result;
     }
 
     public DataType addType(DataType type) {
-        if (dataTypeMap.containsKey(type.fullName())) {
-            throw new IllegalStateException("Type already exists: " + type.fullName());
+        if (dataTypeMap.containsKey(type.getFullName().getFullName())) {
+            throw new IllegalStateException("Type already exists: " + type.getFullName().getFullName());
         }
-        dataTypeMap.put(type.fullName(), type);
+        dataTypeMap.put(type.getFullName().getFullName(), type);
         if (!type.isArray()) {
-        	dataTypeMap.put(type.arrayType().fullName(), type.arrayType());
+        	dataTypeMap.put(type.arrayType().getFullName().getFullName(), type.arrayType());
         }
         return type;
     }
 
     public DataType getType(String module, String name) {
-        String fullName = new FullName(module, name).toString();
+        Utils.assertTrue(module != null);
+        String fullName = new FullName(module, name).getFullName();
         DataType t = dataTypeMap.get(fullName);
-        if (t == null && module != null) {
+        if (t == null && module != null && !module.isEmpty()) {
             t = dataTypeMap.get(name);
         }
         return t;
     }
 
-    public String toString() {
-        StringBuilder buff = new StringBuilder();
-        for (Statement s : initList) {
-            buff.append(s);
+    private void resolveTypes() {
+        ArrayList<DataType> list = new ArrayList<>(dataTypeMap.values());
+        for (DataType t : list) {
+            t.resolveTypes(this);
         }
-        for (Statement s : mainList) {
-            buff.append(s);
+        for (FunctionDefinition def : functions.values()) {
+            def.resolveTypes(this);
         }
-        return buff.toString();
     }
 
     public String toC() {
+        resolveTypes();
         for (Statement s : initList) {
             s.used(this);
         }
@@ -526,7 +531,7 @@ public class Program {
                 + "        } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }\n");
         boolean hasTraits = false;
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed() && (!t.traitNames.isEmpty() || t.isTrait())) {
+            if (isTypeUsed(t) && (!t.traitNames.isEmpty() || t.isTrait())) {
                 hasTraits = true;
             }
         }
@@ -541,7 +546,7 @@ public class Program {
             buff.append(Statement.indent("void (*vtable[])();\n"));
             buff.append("};\n");
             for (DataType t : dataTypeMap.values()) {
-                if (t.isUsed() && !t.traitNames.isEmpty()) {
+                if (isTypeUsed(t) && !t.traitNames.isEmpty()) {
                     buff.append("static _typeMetaData *_typeMeta" + t.nameC() + ";\n");
                 }
             }
@@ -553,7 +558,7 @@ public class Program {
             if (t.enumValues != null) {
                 continue;
             }
-            if (t.isUsed() && !t.isNumber()) {
+            if (isTypeUsed(t) && !t.isNumber()) {
                 buff.append("typedef struct " + t.nameC() + " " + t.nameC() + ";\n");
                 buff.append("struct ").append(t.nameC()).append(";\n");
             }
@@ -562,7 +567,7 @@ public class Program {
             if (t.enumValues != null) {
                 continue;
             }
-            if (!t.isNumber() && t.isUsed()) {
+            if (!t.isNumber() && isTypeUsed(t)) {
                 buff.append("struct ").append(t.nameC()).append(" {\n");
                 if (t.isArray()) {
                     buff.append(Statement.indent("int32_t len;\n"));
@@ -673,7 +678,7 @@ public class Program {
         }
         // _free needs be after close
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed()) {
+            if (isTypeUsed(t)) {
                 if (t.isArray() || t.needFree()) {
                     buff.append("void " + t.nameC() + "_free(" + t.nameC() + "* x);\n");
                     if (t.isCopyType() && !t.isArray()) {
@@ -683,7 +688,7 @@ public class Program {
             }
         }
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed()) {
+            if (isTypeUsed(t)) {
                 if (t.isArray() || t.needFree()) {
                     buff.append("void " + t.nameC() + "_free_0(" + t.nameC() + "* x) {\n");
                     if (t.isArray()) {
@@ -716,7 +721,7 @@ public class Program {
                             }
                         }
                         if (t.autoClose != null) {
-                            buff.append(Statement.indent(t.nameC() + "_" + esc("close") + "_1(x);\n"));
+                            buff.append(Statement.indent(t.nameC() + "_" + FullName.esc("close") + "_1(x);\n"));
                             buff.append(Statement.indent("if (x->_refCount) { fprintf(stdout, \"Object re-referenced in the close method\"); exit(1); }\n"));
                         }
                         if (t.needIncDec()) {
@@ -757,8 +762,8 @@ public class Program {
             }
         }
         if (hasStringConstants) {
-            buff.append(esc("i8") + "_array* str_const(char* data, uint32_t len) {\n");
-            buff.append(Statement.indent(esc("i8") + "_array* result = _malloc(sizeof(" + esc("i8") + "_array));\n"));
+            buff.append(FullName.esc("i8") + "_array* str_const(char* data, uint32_t len) {\n");
+            buff.append(Statement.indent(FullName.esc("i8") + "_array* result = _malloc(sizeof(" + FullName.esc("i8") + "_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -770,13 +775,13 @@ public class Program {
             buff.append("}\n");
             for (long id: stringConstantsMap.keySet()) {
                 if (stringConstantsMap.get(id).isUsed()) {
-                    buff.append(esc("i8") + "_array* string_" + id + ";\n");
+                    buff.append(FullName.esc("i8") + "_array* string_" + id + ";\n");
                 }
             }
         }
         if (!arrayConstantsMap.isEmpty()) {
-            buff.append(esc("int") + "_array* int_array_const(int64_t* data, uint32_t len) {\n");
-            buff.append(Statement.indent(esc("int") + "_array* result = _malloc(sizeof(" + esc("int") + "_array));\n"));
+            buff.append(FullName.esc("int") + "_array* int_array_const(int64_t* data, uint32_t len) {\n");
+            buff.append(Statement.indent(FullName.esc("int") + "_array* result = _malloc(sizeof(" + FullName.esc("int") + "_array));\n"));
             buff.append(Statement.indent("result->len = len;\n"));
             // 0 means do not free the memory (it looks like it's already free)
             buff.append(Statement.indent("result->_refCount = INT32_MAX;\n"));
@@ -784,7 +789,7 @@ public class Program {
             buff.append(Statement.indent("return result;\n"));
             buff.append("}\n");
             for (long id: arrayConstantsMap.keySet()) {
-                buff.append(esc("int") + "_array* array_" + id + ";\n");
+                buff.append(FullName.esc("int") + "_array* array_" + id + ";\n");
             }
         }
         for (Variable var : globalVariables.values()) {
@@ -843,9 +848,8 @@ public class Program {
         buff.append("}\n");
         buff.append("void _main() {\n");
         context.nextFunction();
-        FunctionDefinition main = new FunctionDefinition(0);
+        FunctionDefinition main = new FunctionDefinition(new FullName("", "main"), 0);
         main.list = mainList;
-        main.name = "main";
         main.borrowCheck();
         StringBuilder buff2 = new StringBuilder();
         for (Statement s : initList) {
@@ -924,7 +928,7 @@ public class Program {
             buff.append(Statement.indent("_traitFunctionOffsets[" + i + "] = " + traitFunctionOffsets[i] + ";\n"));
         }
         for (DataType t : dataTypeMap.values()) {
-            if (t.isUsed() && !t.traitNames.isEmpty()) {
+            if (isTypeUsed(t) && !t.traitNames.isEmpty()) {
                 ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
                 for (FullName tr : t.traitNames) {
                     int todoSupportModule;
@@ -934,13 +938,13 @@ public class Program {
                     }
                 }
                 for (FunctionDefinition tf : traitFunctions) {
-                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.name, tf.parameters.size());
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.getFullName().name, tf.parameters.size());
                     if (f2 != null) {
                         f2.traitFunctionId = tf.traitFunctionId;
                     } else {
-                        f2 = getFunctionIfExists(tf.callType, t.module(), tf.name, tf.parameters.size());
+                        f2 = getFunctionIfExists(tf.callType, t.module(), tf.getFullName().name, tf.parameters.size());
                         if (f2 == null) {
-                            throw new IllegalStateException("Missing function: " + t.name() + "." + tf.name +
+                            throw new IllegalStateException("Missing function: " + t.name() + "." + tf.getFullName().name +
                                     " or alternatively " + tf.callType.name() + "." + t.name());
                         }
                     }
@@ -981,12 +985,12 @@ public class Program {
                 buff.append(Statement.indent(name + "->typeName = \"" + t.name() + "\";\n"));
                 int i = 0;
                 for (FunctionDefinition tf : traitFunctions) {
-                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.name, tf.parameters.size());
+                    FunctionDefinition f2 = getFunctionIfExists(t, t.module(), tf.getFullName().name, tf.parameters.size());
                     String n;
                     if (f2 == null) {
-                        f2 = getFunctionIfExists(tf.callType, t.module(), tf.name, tf.parameters.size());
+                        f2 = getFunctionIfExists(tf.callType, t.module(), tf.getFullName().name, tf.parameters.size());
                         if (f2 == null || (f2.list.isEmpty() && f2.returnType != null)) {
-                            throw new IllegalStateException("Function not found: " + t.name() + " or " + tf.callType + " " + tf.name);
+                            throw new IllegalStateException("Function not found: " + t.name() + " or " + tf.callType + " " + tf.getFullName().name);
                         }
                         n = "(void (*)())" + f2.functionNameC() + "_default";
                         // n = "NULL";
@@ -1007,6 +1011,10 @@ public class Program {
         buff.append("}\n");
     }
 
+    private boolean isTypeUsed(DataType type) {
+        return usedTypes.contains(type);
+    }
+
     private void assignTraitSlots() {
         HashSet<DataType> traitsWithFunctions = new HashSet<>();
         HashSet<DataType> typesWithTraitFunctions = new HashSet<>();
@@ -1014,9 +1022,9 @@ public class Program {
             if (t.isTrait()) {
                 t.used(this);
             }
-            if (t.isUsed() && !t.traitNames.isEmpty()) {
+            if (isTypeUsed(t) && !t.traitNames.isEmpty()) {
                 for (DataType trait : t.traitTypes) {
-                    if (trait.isUsed() && !trait.getTraitDefinition().functions.isEmpty()) {
+                    if (isTypeUsed(trait) && !trait.getTraitDefinition().functions.isEmpty()) {
                         typesWithTraitFunctions.add(t);
                         traitsWithFunctions.add(trait);
                     }
@@ -1033,7 +1041,7 @@ public class Program {
                 if (result != 0) {
                     return result;
                 }
-                return o1.toString().compareTo(o2.toString());
+                return o1.format().compareTo(o2.format());
             }
         });
         // this takes O(n^3) time,
@@ -1153,19 +1161,16 @@ public class Program {
         return ticksExecuted;
     }
 
-    public void addImport(String name, String as, ArrayList<String> entries) {
-        imports.put(as, name);
-        for(String e : entries) {
-            importEntries.put(e, name);
-        }
+    public void addImport(String module, String name, String as, ArrayList<String> entries) {
+        getSourceFile(module).addImport(name, as, entries);
     }
 
-    public String getImportEntry(String identifier) {
-        return importEntries.get(identifier);
+    public String getImportModule(String module, String identifier) {
+        return getSourceFile(module).getImportModule(identifier);
     }
 
-    public String getImport(String as) {
-        return imports.get(as);
+    public String getImport(String module, String as) {
+        return getSourceFile(module).getImport(as);
     }
 
     public void addIncludeC(String file) {
@@ -1180,9 +1185,9 @@ public class Program {
     }
 
     public String readModule(String name) {
-        String m = modules.get(name);
+        SourceFile m = modules.get(name);
         if (m != null) {
-            return m;
+            return m.getSourceCode();
         }
         String fileName = name.replace('.', '/') + ".bau";
         InputStream in = getClass().getResourceAsStream("/" + fileName);
@@ -1359,70 +1364,41 @@ public class Program {
         return functions.get(functionId);
     }
 
-    public static String esc(String identifier) {
-        if (identifier.length() == 1) {
-            return identifier;
+    public void addSourceFile(String module, String sourceCode) {
+        SourceFile f = modules.get(module);
+        if (f == null) {
+            int id = modules.size();
+            f = new SourceFile(id, module, sourceCode);
+            modules.put(module, f);
         }
-        if (identifier.startsWith("0")) {
-            return "_" + identifier.substring(1);
-        }
-        int underscoreIndex = identifier.indexOf('_', 1);
-        if (underscoreIndex > 0) {
-            if (identifier.toUpperCase(Locale.ENGLISH).equals(identifier)) {
-                // constants
-                return identifier;
+    }
+
+    public String formatModule(String module) {
+        SourceFile f = modules.get(module);
+        return f.format();
+    }
+
+    public SourceFile getSourceFile(String module) {
+        return modules.get(module);
+    }
+
+    public void resolveTypes(List<Statement> list) {
+        if (list != null) {
+            for (Statement s : list) {
+                s.resolveTypes(this);
             }
-            identifier = identifier.replaceAll("_", "__");
         }
-        if (identifier.startsWith("_")) {
-            if (identifier.charAt(1) <= 'Z') {
-                // uppercase
-                return identifier;
-            }
-            if (identifier.equals("_next")) {
-                return identifier;
-            }
-            // user defined
-            return "_u" + identifier;
+    }
+
+    public String format() {
+        StringBuilder buff = new StringBuilder();
+        for (Statement s : initList) {
+            buff.append(s.format());
         }
-        if (identifier.indexOf('_') > 0) {
-            return identifier;
+        for (Statement s : mainList) {
+            buff.append(s.format());
         }
-        return identifier;
-        // TODO this needs some more work
-        /*
-        switch (identifier) {
-        case "code":
-        case "copyLen":
-        case "data":
-        case "dateTime":
-        case "day":
-        case "exceptionType":
-        case "File":
-        case "filePointer":
-        case "hour":
-        case "idx":
-        case "index":
-        case "i32":
-        case "i32_array":
-        case "len":
-        case "mode":
-        case "month":
-        case "minute":
-        case "millis":
-        case "newLen":
-        case "name":
-        case "pos":
-        case "result":
-        case "second":
-        case "shiftLeft":
-        case "shiftRight":
-        case "this":
-        case "year":
-            return identifier;
-        }
-        return "b_" + identifier;
-        */
+        return buff.toString();
     }
 
 }

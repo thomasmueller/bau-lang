@@ -1117,10 +1117,10 @@ int64_t org_bau_Int_numberOfTrailingZeros_1(int64_t x) {
     return _r0;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t13 = org_bau_String_StringBuilder_new();
-    _t13->data = i8_array_new(0);
-    _t13->len = 0;
-    return _t13;
+    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
+    _t1->data = i8_array_new(0);
+    _t1->len = 0;
+    return _t1;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
     org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));
@@ -1319,9 +1319,9 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0() {
-    org_bau_os_Terminal_termIos _t10 = org_bau_os_Terminal_termIos_new();
-    _t10.data = i8_array_new(0);
-    return _t10;
+    org_bau_os_Terminal_termIos _t0 = org_bau_os_Terminal_termIos_new();
+    _t0.data = i8_array_new(0);
+    return _t0;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -1594,14 +1594,14 @@ void _main() {
     KNIGHT = 5;
     PAWN = 6;
     BLACK = 6;
-    int_array* _t18 = int_array_new(64);
-    _incUseStack(_t18);
-    board = _t18;
+    int_array* _t0 = int_array_new(64);
+    _incUseStack(_t0);
+    board = _t0;
     castlingFlags = 0;
     pawnMoved2 = 0;
     turn = 0;
-    int64_t _t19 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t19)) {
+    int64_t _t0 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t0)) {
         printf("Not a terminal\n");
         return;
     }
@@ -1616,19 +1616,19 @@ void _main() {
         if (key == 0) {
             continue;
         }
-        int64_t _t20 = key;
-        if (_t20 == 113) {
+        int64_t _t1 = key;
+        if (_t1 == 113) {
             break;
         } else {
-            if (_t20 == 32) {
+            if (_t1 == 32) {
                 if (state == 0) {
                     int64_t p = xx + ( 8 * yy );
-                    int64_t _t21 = board->data[idx_2(p, _arrayLen(board))] == 0;
-                    if (!(_t21)) {
-                        int64_t _t22 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
-                        _t21 = _t22;
+                    int64_t _t2 = board->data[idx_2(p, _arrayLen(board))] == 0;
+                    if (!(_t2)) {
+                        int64_t _t3 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
+                        _t2 = _t3;
                     }
-                    if (_t21) {
+                    if (_t2) {
                         continue;
                     }
                     from = p;
@@ -1659,14 +1659,14 @@ void _main() {
                             }
                         }
                         if (allowed) {
-                            int64_t _t23 = move_2(from, p);
-                            lastWhite = _t23;
+                            int64_t _t4 = move_2(from, p);
+                            lastWhite = _t4;
                             showCursor = 0;
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
                                 lastBlack = move;
-                                int64_t _t24 = move_1(move);
+                                int64_t _t5 = move_1(move);
                                 ;
                             }
                         }
@@ -1676,25 +1676,25 @@ void _main() {
                     }
                 }
             } else {
-                if (_t20 == 99) {
+                if (_t1 == 99) {
                     int64_t p = xx + ( 8 * yy );
                     if (state == 0) {
                         from = p;
                         state = 1;
                     } else {
-                        int64_t _t25 = move_2(from, p);
-                        lastWhite = _t25;
+                        int64_t _t6 = move_2(from, p);
+                        lastWhite = _t6;
                         refreshScreen_0();
                         state = 0;
                     }
                 } else {
-                    if (_t20 == 117) {
-                        int64_t _t26 = lastBlack != 0;
-                        if (_t26) {
-                            int64_t _t27 = lastWhite != 0;
-                            _t26 = _t27;
+                    if (_t1 == 117) {
+                        int64_t _t7 = lastBlack != 0;
+                        if (_t7) {
+                            int64_t _t8 = lastWhite != 0;
+                            _t7 = _t8;
                         }
-                        if (_t26) {
+                        if (_t7) {
                             undo_1(lastBlack);
                             undo_1(lastWhite);
                             refreshScreen_0();
@@ -1702,34 +1702,34 @@ void _main() {
                         lastBlack = 0;
                         lastWhite = 0;
                     } else {
-                        if (_t20 == 115) {
+                        if (_t1 == 115) {
                             blackTurn = !(blackTurn);
                             showCursor = 0;
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
-                                int64_t _t28 = move_1(move);
+                                int64_t _t9 = move_1(move);
                                 ;
                             }
                             showCursor = 1;
                             refreshScreen_0();
                             state = 0;
                         } else {
-                            if (_t20 == 1001) {
-                                int64_t _t29 = org_bau_Int_min_2(7, xx + 1);
-                                xx = _t29;
+                            if (_t1 == 1001) {
+                                int64_t _t10 = org_bau_Int_min_2(7, xx + 1);
+                                xx = _t10;
                             } else {
-                                if (_t20 == 1000) {
-                                    int64_t _t30 = org_bau_Int_max_2(0, xx - 1);
-                                    xx = _t30;
+                                if (_t1 == 1000) {
+                                    int64_t _t11 = org_bau_Int_max_2(0, xx - 1);
+                                    xx = _t11;
                                 } else {
-                                    if (_t20 == 1002) {
-                                        int64_t _t31 = org_bau_Int_max_2(0, yy - 1);
-                                        yy = _t31;
+                                    if (_t1 == 1002) {
+                                        int64_t _t12 = org_bau_Int_max_2(0, yy - 1);
+                                        yy = _t12;
                                     } else {
-                                        if (_t20 == 1003) {
-                                            int64_t _t32 = org_bau_Int_min_2(7, yy + 1);
-                                            yy = _t32;
+                                        if (_t1 == 1003) {
+                                            int64_t _t13 = org_bau_Int_min_2(7, yy + 1);
+                                            yy = _t13;
                                         }
                                     }
                                 }
@@ -1741,7 +1741,7 @@ void _main() {
         }
     }
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t18, int_array);
+    _decUseStack(_t0, int_array);
     _decUseStack(board, int_array);
     _end();
 }

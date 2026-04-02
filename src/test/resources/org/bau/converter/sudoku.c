@@ -255,8 +255,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -273,22 +271,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->_refCount = 1;
     return result;
 }
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
@@ -301,20 +283,12 @@ i8_array* org_bau_Env_arg_1(int64_t index);
 int64_t org_bau_Env_argCount_0();
 int64_t solve_1(i8_array* c);
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -416,20 +390,20 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    int64_t _t9 = org_bau_Env_argCount_0();
-    int64_t _t10 = _t9 != 2;
-    if (!(_t10)) {
-        int64_t _t11 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
-        _t10 = _t11;
+    int64_t _t0 = org_bau_Env_argCount_0();
+    int64_t _t1 = _t0 != 2;
+    if (!(_t1)) {
+        int64_t _t2 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
+        _t1 = _t2;
     }
-    if (_t10) {
+    if (_t1) {
         printf("Expected one argument: \"<line1> <line2> ... <line9>\"\n");
         printf("where each line is 9 characters: 0-9, or . for unknown.\n");
         return;
     }
     i8_array* c = org_bau_Env_arg_1(1);
-    int64_t _t12 = solve_1(c);
-    if (_t12) {
+    int64_t _t3 = solve_1(c);
+    if (_t3) {
         if (8 > 0) {
             while (1 == 1) {
                 int64_t i = 0;

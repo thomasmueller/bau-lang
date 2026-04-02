@@ -39,7 +39,7 @@ public class BorrowTest {
 
                         fun Entry print()
                             println('key: ' key ' value: ' value)
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test

@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
+import org.bau.parser.expr.Expression;
+import org.bau.parser.expr.New;
+import org.bau.parser.expr.NullValue;
+import org.bau.parser.expr.NumberValue;
+import org.bau.parser.expr.Variable;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueNull;
 
@@ -19,54 +23,61 @@ public class DataType {
     public static final String FLOAT = "float";
     public static final String TYPE = "type";
 
-    // we only define INT_TYPE because the types have a "used" flag -
-    // and we don't want to set it if not needed
-    // TODO this means for int array, this is always set
+    public static final DataType F32_TYPE = newNumberType(DataType.F32, 4);
+    public static final DataType FLOAT_TYPE = newNumberType(DataType.FLOAT, 8);
+    public static final DataType I8_TYPE = newNumberType(DataType.I8, 1);
+    public static final DataType I16_TYPE = newNumberType(DataType.I16, 2);
+    public static final DataType I32_TYPE = newNumberType(DataType.I32, 4);
     public static final DataType INT_TYPE = newNumberType(DataType.INT, 8);
+    public static final DataType TYPE_TYPE = newNumberType(DataType.TYPE, 8);
 
-    private final String module;
-    private final String name;
-    private final MemoryType memoryType;
     private final FullName fullName;
+    private final MemoryType memoryType;
 
+    // number of bytes
     private final int sizeOf;
 
     // int, float, type, enum
     private final boolean isNumber;
     private final boolean isFloatingPoint;
 
+    // for non-array: the array type
+    private final DataType arrayType;
+    private final DataType arrayBaseType;
 
     private final DataType nullableType;
     private DataType notNullType;
-    private final boolean isNullable;
-
-    // for non-array: the array type
-    private final DataType arrayType;
-
     // for array: the base type
-    private final DataType arrayBaseType;
-
-    // for owner and borrow: base type
-
-    public List<Variable> fields = new ArrayList<>();
-
     private DataType borrowType;
     private DataType ownerType;
 
-    public LinkedHashMap<String, Long> enumValues;
-    FunctionDefinition autoClose;
-    private boolean used;
-    Expression maxValue;
-    public ArrayList<String> parameters;
-    public String template;
+    private final boolean isNullable;
+
+    private Trait traitDefinition;
+
     public int lineOffset;
 
+    public int fileId, location;
+
+    public List<Variable> fields = new ArrayList<>();
+
+    public LinkedHashMap<String, Long> enumValues;
+
+    public FunctionDefinition autoClose;
+    Expression maxValue;
+
+    // templates
+    public ArrayList<String> parameters;
+    public String template;
+
+    // function pointers
     public boolean isFunctionPointer;
     public ArrayList<DataType> functionPointerArgs;
     public DataType functionPointerReturnType;
+
+    // trait specific
     public ArrayList<FullName> traitNames = new ArrayList<>();
     public ArrayList<DataType> traitTypes = new ArrayList<>();
-    private Trait traitDefinition;
     public HashSet<DataType> implementingTypes = new HashSet<>();
 
     public static boolean isGenericTypeName(String token) {
@@ -79,50 +90,56 @@ public class DataType {
                 token.toUpperCase().equals(token);
     }
 
-    public static DataType newTraitType(String module, String name, MemoryType memoryType) {
-        return new DataType(module, name, 0, false, null, false, memoryType);
+    public static DataType newUndefined(FullName fullName) {
+        DataType result = newNonArray(fullName, 0, MemoryType.UNDEFINED);
+        return result;
+    }
+
+    public static DataType newTraitType(FullName fullName, MemoryType memoryType) {
+        return new DataType(fullName, 0, false, null, false, memoryType);
     }
 
     public static DataType newNumberType(String name, int sizeOf) {
-        return new DataType(null, name, sizeOf, true, null, false, MemoryType.COPY);
+        return new DataType(new FullName("", name), sizeOf, true, null, false, MemoryType.COPY);
     }
 
     public static DataType newBuiltIn(String name, int sizeOf) {
-        return newNonArray(null, name, sizeOf, MemoryType.COPY);
+        return newNonArray(new FullName("", name), sizeOf, MemoryType.COPY);
     }
 
-    public static DataType newEnumType(String module, String name) {
-        return new DataType(module, name, 8, true, null, false, MemoryType.COPY);
+    public static DataType newEnumType(FullName fullName) {
+        return new DataType(fullName, 8, true, null, false, MemoryType.COPY);
     }
 
-    public static DataType newEmptyType(String module, String name) {
-        return newNonArray(module, name, 0, MemoryType.REF_COUNT);
-    }
-
-    public static DataType newRegularType(String module, String name, int sizeOf, MemoryType memoryType) {
+    public static DataType newRegularType(FullName fullName, int sizeOf, MemoryType memoryType) {
         if (memoryType == MemoryType.BORROW) {
             throw new IllegalArgumentException();
         }
-        return newNonArray(module, name, sizeOf, memoryType);
+        return newNonArray(fullName, sizeOf, memoryType);
     }
 
-    private static DataType newNonArray(String module, String name, int sizeOf, MemoryType memoryType) {
+    private static DataType newNonArray(FullName fullName, int sizeOf, MemoryType memoryType) {
         if (memoryType == MemoryType.BORROW) {
             throw new IllegalArgumentException();
         }
-        return new DataType(module, name, sizeOf, false, null, false, memoryType);
+        return new DataType(fullName, sizeOf, false, null, false, memoryType);
     }
 
     public static DataType newFunctionPointer(String module, ArrayList<DataType> params, DataType returnType) {
-        DataType r = newNonArray(module, "fun", 0, MemoryType.COPY);
+        DataType r = newNonArray(new FullName(module, "fun"), 0, MemoryType.COPY);
         r.isFunctionPointer = true;
         r.functionPointerArgs = params;
         r.functionPointerReturnType = returnType;
         return r;
     }
 
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
+    }
+
     public int hashCode() {
-        return toString().hashCode();
+        return format().hashCode();
     }
 
     public boolean equals(DataType other) {
@@ -133,7 +150,7 @@ public class DataType {
             return false;
         }
         // function pointer types are not equal
-        return this.toString().equals(other.toString());
+        return this.format().equals(other.format());
     }
 
     public Expression nullExpression() {
@@ -148,29 +165,27 @@ public class DataType {
         }
     }
 
-    private DataType(String module, String name, int sizeOf, boolean isNumber, DataType arrayBaseType, boolean isNullable, MemoryType memoryType) {
+    private DataType(FullName fullName, int sizeOf, boolean isNumber, DataType arrayBaseType, boolean isNullable, MemoryType memoryType) {
         this.isNullable = isNullable;
-        this.module = module;
-        this.name = name;
         this.memoryType = memoryType;
-        this.fullName = new FullName(module, id());
+        this.fullName = fullName;
         this.sizeOf = sizeOf;
         this.isNumber = isNumber;
         this.arrayBaseType = arrayBaseType;
         if (isNumber) {
-            isFloatingPoint = name.charAt(0) == 'f';
+            isFloatingPoint = fullName.name.charAt(0) == 'f';
         } else {
             isFloatingPoint = false;
         }
         if (!isArray() && memoryType != MemoryType.COPY && !isNullable) {
-            nullableType = new DataType(module, name, sizeOf, false, null, true, memoryType);
+            nullableType = new DataType(fullName, sizeOf, false, null, true, memoryType);
             nullableType.fields = fields;
             nullableType.notNullType = this;
         } else {
             nullableType = null;
         }
         if (!isArray()) {
-            arrayType = new DataType(module, name + "[]", sizeOf, false, this, isNullable, MemoryType.REF_COUNT);
+            arrayType = new DataType(new FullName(fullName.module, fullName.name + "[]"), sizeOf, false, this, isNullable, MemoryType.REF_COUNT);
         } else {
             arrayType = this;
         }
@@ -180,11 +195,11 @@ public class DataType {
         this.fields.addAll(fields);
     }
 
-    void used(Program program) {
-        if (DataType.isGenericTypeName(name)) {
+    public void used(Program program) {
+        if (DataType.isGenericTypeName(fullName.name)) {
             throw new IllegalStateException();
         }
-        this.used = true;
+        program.usedTypes.add(this);
         if (!traitNames.isEmpty()) {
             if (traitTypes.isEmpty()) {
                 for (FullName n : traitNames) {
@@ -214,20 +229,12 @@ public class DataType {
         return memoryType == MemoryType.COPY;
     }
 
-    public String fullName() {
-        return fullName.toString();
-    }
-
     public FullName getFullName() {
-        return new FullName(module, name);
-    }
-
-    public String id() {
-        return name;
+        return fullName;
     }
 
     public String idC() {
-        String n = name;
+        String n = fullName.name;
         if (isArray()) {
             n = arrayBaseType.idC() + "_array";
         }
@@ -238,8 +245,8 @@ public class DataType {
     }
 
     public String getCamelCaseName() {
-        String result = name;
-        char firstChar = name.charAt(0);
+        String result = fullName.name;
+        char firstChar = fullName.name.charAt(0);
         if (firstChar >= 'a' && firstChar <= 'z') {
             result = (char)(firstChar - 'a' + 'A') + result.substring(1);
         }
@@ -250,11 +257,11 @@ public class DataType {
     }
 
     public String module() {
-        return module;
+        return fullName.module;
     }
 
     public String name() {
-        return name;
+        return fullName.name;
     }
 
     public int sizeOf() {
@@ -275,10 +282,10 @@ public class DataType {
         return arrayType;
     }
 
-    public String toString() {
+    public String format() {
         StringBuilder buff = new StringBuilder();
         if (traitDefinition != null) {
-            buff.append(name);
+            buff.append(fullName.getFullName());
             return buff.toString();
         }
         if (isFunctionPointer) {
@@ -287,15 +294,15 @@ public class DataType {
                 if (i > 0) {
                     buff.append(", ");
                 }
-                buff.append(functionPointerArgs.get(i).toString());
+                buff.append(functionPointerArgs.get(i).format());
             }
             buff.append(")");
             if (functionPointerReturnType != null) {
-                buff.append(' ').append(functionPointerReturnType);
+                buff.append(' ').append(functionPointerReturnType.format());
             }
             return buff.toString();
         }
-        buff.append(name);
+        buff.append(fullName.name);
         if (parameters != null) {
             buff.append('(');
             int i = 0;
@@ -316,33 +323,32 @@ public class DataType {
 
     public String nameC() {
         String s;
-        if ("i8".equals(name)) {
+        if ("i8".equals(fullName.name)) {
             s = "int8_t";
-        } else if ("i16".equals(name)) {
+        } else if ("i16".equals(fullName.name)) {
             s = "int16_t";
-        } else if ("i32".equals(name)) {
+        } else if ("i32".equals(fullName.name)) {
             s = "int32_t";
-        } else if ("int".equals(name)) {
+        } else if ("int".equals(fullName.name)) {
             s = "int64_t";
-        } else if ("f32".equals(name)) {
+        } else if ("f32".equals(fullName.name)) {
             s = "float";
-        } else if ("float".equals(name)) {
+        } else if ("float".equals(fullName.name)) {
             s = "double";
-        } else if (name.startsWith("0..")) {
+        } else if (fullName.name.startsWith("0..")) {
             s = "int64_t";
         } else if (enumValues != null) {
             s = "int64_t";
         } else {
-            String n = name;
-            if (module != null) {
-                s = Program.esc(module).replace(".", "_") + "_" + n;
+            String n = fullName.name;
+            if (!fullName.module.isEmpty()) {
+                s = fullName.getEscapedModuleId() + "_" + n;
             } else {
                 s = n;
             }
         }
         if (isArray()) {
-            // replace "[]" with "_array"
-            s = s.replaceAll(Pattern.quote("[]"), "_array");
+            s = s.replace("[]", "_array");
         }
         if (memoryType == MemoryType.OWNER || memoryType == MemoryType.BORROW) {
             s += "_owned";
@@ -351,6 +357,7 @@ public class DataType {
     }
 
     public String toC() {
+        Utils.assertTrue(memoryType != MemoryType.UNDEFINED);
         if (isFunctionPointer) {
             throw new IllegalStateException();
         }
@@ -385,10 +392,6 @@ public class DataType {
 
     public boolean isArray() {
         return arrayBaseType != null;
-    }
-
-    public boolean isUsed() {
-        return used;
     }
 
     public DataType orNull() {
@@ -431,7 +434,7 @@ public class DataType {
             return this;
         } else if (memoryType == MemoryType.OWNER) {
             if (borrowType == null) {
-                borrowType = new DataType(module, name, sizeOf, false, null, false, MemoryType.BORROW);
+                borrowType = new DataType(fullName, sizeOf, false, null, false, MemoryType.BORROW);
                 borrowType.ownerType = this;
                 borrowType.fields = fields;
             }
@@ -444,10 +447,6 @@ public class DataType {
 
     public boolean isNullable() {
         return isNullable;
-    }
-
-    public String getModule() {
-        return module;
     }
 
     public void setTraitDefinition(Trait trait) {
@@ -472,8 +471,7 @@ public class DataType {
         buff.append(name);
         for (DataType t : params) {
             buff.append('_');
-            String fullName = t.fullName();
-            buff.append(fullName.replace('.', '_').replace("[]", "_array"));
+            buff.append(t.getFullName().getFullTypeId());
         }
         return buff.toString();
     }
@@ -486,7 +484,7 @@ public class DataType {
     }
 
     public Value getZeroValue() {
-        switch(name) {
+        switch(fullName.name) {
         case I8:
             return new Value.ValueI8((byte) 0);
         case I16:
@@ -548,9 +546,29 @@ public class DataType {
     public String[] getFieldTypes() {
         String[] result = new String[fields.size()];
         for (int i = 0; i < result.length; i++) {
-            result[i] = fields.get(i).type().fullName();
+            result[i] = fields.get(i).type().getFullName().getFullName();
         }
         return result;
+    }
+
+    public void resolveTypes(Program program) {
+        for (int i = 0; i < fields.size(); i++) {
+            Variable v = fields.get(i);
+            v.resolveTypes(program);
+        }
+    }
+
+    public DataType resolve(Program program) {
+        if (memoryType == MemoryType.UNDEFINED) {
+            DataType t2 = program.getType(module(), name());
+            if (isNullable) {
+                return t2.orNull();
+            } else if (isArray()) {
+                return t2.arrayType();
+            }
+            return t2;
+        }
+        return this;
     }
 
 }

@@ -137,10 +137,11 @@ for a := until(weekday.saturday + 1)
         label: 'Exceptions',
         code: `import org.bau.Exception
     exception
+    newException
 
 fun square(x int) int throws exception
     if x > 3_000_000_000
-        throw exception('Too big')
+        throw newException('Too big')
     return x * x
     
 for i := range(2_999_999_999, 3_000_000_002)

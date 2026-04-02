@@ -395,11 +395,11 @@ int64_t imod_2(int64_t a, int64_t b) {
 }
 List_int* newList_int_1(int64_t _T) {
     List_int* result = List_int_0();
-    int_array* _t11 = int_array_new(4);
-    _incUseStack(_t11);
+    int_array* _t0 = int_array_new(4);
+    _incUseStack(_t0);
     _decUse(result->array, int_array);
-    result->array = _t11;
-    _decUseStack(_t11, int_array);
+    result->array = _t0;
+    _decUseStack(_t0, int_array);
     return result;
 }
 int_array* range_2(int64_t start, int64_t end) {
@@ -451,9 +451,9 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    List_int* _t13 = NULL;
+    List_int* _t1 = NULL;
     if (1) {
-        List_int* _t12 = NULL;
+        List_int* _t0 = NULL;
         if (1) {
             List_int* this = rangeList_2(0, 10);
             List_int* _u_result = newList_int_1(0);
@@ -466,12 +466,12 @@ void _main() {
                 _u_i = _u_i + 1;
             }
             _incUseStack(_u_result);
-            _decUseStack(_t12, List_int);
-            _t12 = _u_result;
+            _decUseStack(_t0, List_int);
+            _t0 = _u_result;
         } else {
         }
-        _incUseStack(_t12);
-        List_int* this = _t12;
+        _incUseStack(_t0);
+        List_int* this = _t0;
         List_int* _u_result = newList_int_1(0);
         int64_t _u_i = 0;
         while (_u_i < this->size) {
@@ -480,18 +480,18 @@ void _main() {
             _u_i = _u_i + 1;
         }
         _incUseStack(_u_result);
-        _decUseStack(_t13, List_int);
-        _t13 = _u_result;
+        _decUseStack(_t1, List_int);
+        _t1 = _u_result;
     } else {
     }
-    _incUseStack(_t13);
-    List_int* list = _t13;
+    _incUseStack(_t1);
+    List_int* list = _t1;
     if (list->size > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t14 = List_int_get_2(list, i);
-                printf("%lld: %lld\n", (long long)i, (long long)_t14);
+                int64_t _t2 = List_int_get_2(list, i);
+                printf("%lld: %lld\n", (long long)i, (long long)_t2);
                 int64_t _next = i + 1;
                 if (_next >= list->size) {
                     break;
@@ -501,9 +501,9 @@ void _main() {
             break;
         }
     }
-    int_array* _t16 = NULL;
+    int_array* _t4 = NULL;
     if (1) {
-        int_array* _t15 = NULL;
+        int_array* _t3 = NULL;
         if (1) {
             int_array* this = range_2(0, 10);
             int_array* _0t0 = int_array_new(_arrayLen(this));
@@ -528,12 +528,12 @@ void _main() {
                 _u_i = _u_i + 1;
             }
             _incUseStack(_u_result);
-            _decUseStack(_t15, int_array);
-            _t15 = _u_result;
+            _decUseStack(_t3, int_array);
+            _t3 = _u_result;
         } else {
         }
-        _incUseStack(_t15);
-        int_array* this = _t15;
+        _incUseStack(_t3);
+        int_array* this = _t3;
         int_array* _0t0 = int_array_new(_arrayLen(this));
         _incUseStack(_0t0);
         int_array* _u_result = _0t0;
@@ -544,12 +544,12 @@ void _main() {
             _u_i = _u_i + 1;
         }
         _incUseStack(_u_result);
-        _decUseStack(_t16, int_array);
-        _t16 = _u_result;
+        _decUseStack(_t4, int_array);
+        _t4 = _u_result;
     } else {
     }
-    _incUseStack(_t16);
-    int_array* array = _t16;
+    _incUseStack(_t4);
+    int_array* array = _t4;
     if (_arrayLen(array) > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -565,9 +565,9 @@ void _main() {
         }
     }
     _decUseStack(array, int_array);
-    _decUseStack(_t16, int_array);
+    _decUseStack(_t4, int_array);
     _decUseStack(list, List_int);
-    _decUseStack(_t13, List_int);
+    _decUseStack(_t1, List_int);
     _end();
 }
 /*

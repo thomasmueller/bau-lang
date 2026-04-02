@@ -253,24 +253,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
             free(n);
         } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
 /* types */
-typedef struct int_array int_array;
-struct int_array;
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
@@ -278,14 +260,6 @@ char **__argv;
 /* functions */
 int64_t org_bau_Utils_random_0();
 int64_t shiftRight_int_2(int64_t a, int64_t b);
-void int_array_free(int_array* x);
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
-}
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -330,11 +304,11 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    int64_t _t42 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t42);
+    int64_t _t0 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t0);
     printf("%.9f\n", 3.141592653589793);
-    int64_t _t43 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t43);
+    int64_t _t1 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t1);
     printf("%.9f\n", 3.141592653589793);
     _end();
 }

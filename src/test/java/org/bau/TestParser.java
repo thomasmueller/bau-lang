@@ -29,7 +29,7 @@ public class TestParser {
                             1
                         println('Hello ',
                               'world')
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test
@@ -42,7 +42,7 @@ loop 1
     println('hello ', a)
 println('end')
                 """,
-                new Parser("a:=1; loop 1 { break a>10; println('hello ', a); } println('end');").parse().toString());
+                new Parser("a:=1; loop 1 { break a>10; println('hello ', a); } println('end');").parse().format());
         assertEquals("""
 a := 1
 loop 1
@@ -58,7 +58,7 @@ println('end')
                         "  continue a<10\n" +
                         "  println(a)\n" +
                         "  a+=1\n" +
-                        "println('end')\n").parse().toString());
+                        "println('end')\n").parse().format());
         assertEquals("""
 a := 1
 if a == 0
@@ -77,9 +77,9 @@ println('done')
                         "    println('one')\n" +
                         "else\n" +
                         "    println('other')\n" +
-                        "println('done')").parse().toString());
+                        "println('done')").parse().format());
         assertEquals("A : 5\n",
-                new Parser("A : 1 + 2 * 3 & 5").parse().toString());
+                new Parser("A : 1 + 2 * 3 & 5").parse().format());
     }
 
     @Test
@@ -97,6 +97,6 @@ println('end')
                         "    break a>10\n" +
                         "    println(a)\n" +
                         "    a+=1\n" +
-                        "println('end')\n").parse().toString());
+                        "println('end')\n").parse().format());
     }
 }

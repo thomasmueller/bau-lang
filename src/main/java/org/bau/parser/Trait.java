@@ -3,9 +3,8 @@ package org.bau.parser;
 import java.util.ArrayList;
 
 public class Trait {
+
     private final FullName fullName;
-    final ArrayList<FunctionDefinition> functions = new ArrayList<>();
-    public final ArrayList<FullName> requiredTraitNames = new ArrayList<>();
 
     // same as DataType.traitSlot (one is redundant)
     // slot of the trait. most commonly used traits have slot 0, then 1 etc
@@ -20,16 +19,15 @@ public class Trait {
     // slot 1 has offset the maximum of all traits with slot 0
     private int functionOffset = -1;
 
+    final ArrayList<FunctionDefinition> functions = new ArrayList<>();
+    public final ArrayList<FullName> requiredTraitNames = new ArrayList<>();
+
     public Trait(FullName fullName) {
         this.fullName = fullName;
     }
 
-    public String getName() {
-        return fullName.name;
-    }
-
-    public String getModule() {
-        return fullName.module;
+    public FullName getFullName() {
+        return fullName;
     }
 
     public void setSlot(int slot) {

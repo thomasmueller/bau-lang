@@ -253,8 +253,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 typedef struct Tree Tree;
 struct Tree;
 struct i8_array {
@@ -269,22 +267,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
     memset(result->data, 0, sizeof(int8_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -312,7 +294,6 @@ int64_t shiftLeft_2(int64_t a, int64_t b);
 void stretch_1(int64_t depth);
 Tree* with_1(int64_t depth);
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void Tree_free(Tree* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
@@ -320,13 +301,6 @@ void i8_array_free_0(i8_array* x) {
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 void Tree_free_0(Tree* x) {
     _decUse(x->left, Tree);
@@ -424,8 +398,8 @@ void _main() {
         int64_t sum = 0;
         int64_t i = 1;
         while (i <= iterations) {
-            int64_t _t1 = count_1(depth);
-            sum = sum + _t1;
+            int64_t _t0 = count_1(depth);
+            sum = sum + _t0;
             i = i + 1;
         }
         printf("%lld trees of depth %lld; check: %lld\n", (long long)iterations, (long long)depth, (long long)sum);

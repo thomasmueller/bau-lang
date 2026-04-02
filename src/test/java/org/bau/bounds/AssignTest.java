@@ -19,7 +19,7 @@ public class AssignTest {
                                 x int
                             fun Value test(other Value)
                                 this = other
-                            """).parse().toString());
+                            """).parse().format());
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage(), e.getMessage().startsWith("Can not modify constant 'this'"));
         }

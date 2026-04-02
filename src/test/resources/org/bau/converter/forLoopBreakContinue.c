@@ -253,8 +253,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -271,22 +269,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->_refCount = 1;
     return result;
 }
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
@@ -296,20 +278,12 @@ int64_t idx_2(int64_t x, int64_t len);
 int64_t test_2(int64_t p, i8_array* data);
 void write_1(i8_array* d);
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;

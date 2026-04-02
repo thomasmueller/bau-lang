@@ -544,11 +544,12 @@ public class Solver {
     }
 
     public static class Rule {
-        Expr left, right;
-        String type;
-        boolean always;
-        boolean global;
-        int depth;
+        public Expr left;
+        public Expr right;
+        public String type;
+        public boolean always;
+        public boolean global;
+        public int depth;
 
         public String toString() {
             return left + " " + type + " " + right;

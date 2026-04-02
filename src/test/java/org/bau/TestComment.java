@@ -6,7 +6,7 @@ import org.bau.parser.Parser;
 import org.junit.Test;
 
 public class TestComment {
-    
+
     @Test
     public void comments() {
         assertEquals("a := 1\n"
@@ -30,7 +30,7 @@ public class TestComment {
                         ###
                         a = 4
                         ## short block comment ## a = 5
-                        """).parse().toString());
+                        """).parse().format());
     }
 
 }

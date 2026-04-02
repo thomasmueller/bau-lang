@@ -3,6 +3,8 @@ package org.bau.parser;
 import java.util.Collections;
 import java.util.List;
 
+import org.bau.parser.expr.StringLiteral;
+
 public class Templates {
 
     public static void checkMacroFunction(FunctionDefinition def) {
@@ -76,7 +78,7 @@ public class Templates {
     }
 
     private static String[] getFields(String typeName, boolean types, Program program) {
-        String module = null;
+        String module = "";
         int lastDot = typeName.lastIndexOf('.');
         if (lastDot >= 0) {
             module = typeName.substring(0, lastDot);

@@ -43,7 +43,7 @@ fun range(from int, to int) int
     _ += 1
 for a := range(0, 10)
   println(a)
-                        """).parse().toString());
+                        """).parse().format());
     }
 
 }

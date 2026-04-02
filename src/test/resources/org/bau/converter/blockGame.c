@@ -264,8 +264,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 typedef struct org_bau_String_StringBuilder org_bau_String_StringBuilder;
 struct org_bau_String_StringBuilder;
 typedef struct org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos;
@@ -282,22 +280,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->len = len;
     result->data = _malloc(sizeof(int8_t) * len);
     memset(result->data, 0, sizeof(int8_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
     _traceMalloc(result->data);
     result->_refCount = 1;
     return result;
@@ -358,7 +340,6 @@ void refreshScreen_0();
 int64_t shiftRight_int_2(int64_t a, int64_t b);
 void updateBlock_1(int64_t draw);
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void org_bau_String_StringBuilder_free(org_bau_String_StringBuilder* x);
 void org_bau_os_Terminal_termIos_free(org_bau_os_Terminal_termIos* x);
 void org_bau_os_Terminal_termIos_copy(org_bau_os_Terminal_termIos* x);
@@ -368,13 +349,6 @@ void i8_array_free_0(i8_array* x) {
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 void org_bau_String_StringBuilder_free_0(org_bau_String_StringBuilder* x) {
     _decUse(x->data, i8_array);
@@ -594,10 +568,10 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     return result;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t44 = org_bau_String_StringBuilder_new();
-    _t44->data = i8_array_new(0);
-    _t44->len = 0;
-    return _t44;
+    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
+    _t1->data = i8_array_new(0);
+    _t1->len = 0;
+    return _t1;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
     org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));
@@ -848,9 +822,9 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0() {
-    org_bau_os_Terminal_termIos _t49 = org_bau_os_Terminal_termIos_new();
-    _t49.data = i8_array_new(0);
-    return _t49;
+    org_bau_os_Terminal_termIos _t0 = org_bau_os_Terminal_termIos_new();
+    _t0.data = i8_array_new(0);
+    return _t0;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -1005,20 +979,20 @@ void _main() {
     rotation = 0;
     running = 0;
     blockType = 0;
-    i8_array* _t51 = i8_array_new(336);
-    _incUseStack(_t51);
-    FIELD = _t51;
+    i8_array* _t0 = i8_array_new(336);
+    _incUseStack(_t0);
+    FIELD = _t0;
     _incUseStack(string_1031);
     shapes = string_1031;
     _incUseStack(string_1032);
     rotated = string_1032;
-    int64_t _t52 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t52)) {
+    int64_t _t0 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t0)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t53 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t53);
+    int64_t _t1 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t1);
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -1075,45 +1049,45 @@ void _main() {
             updateBlock_1(0);
             int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t54 = tick > 0;
-                if (_t54) {
-                    int64_t _t55 = running;
-                    _t54 = _t55;
+                int64_t _t2 = tick > 0;
+                if (_t2) {
+                    int64_t _t3 = running;
+                    _t2 = _t3;
                 }
-                if (!(_t54)) {
+                if (!(_t2)) {
                     break;
                 }
                 tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t56 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t56)) {
+                int64_t _t4 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t4)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t57 = key;
-                if (_t57 == 1000) {
+                int64_t _t5 = key;
+                if (_t5 == 1000) {
                     tempPos = tempPos - 1;
                 } else {
-                    if (_t57 == 1001) {
+                    if (_t5 == 1001) {
                         tempPos = tempPos + 1;
                     } else {
-                        if ((_t57 == 32) || (_t57 == 1002)) {
+                        if ((_t5 == 32) || (_t5 == 1002)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                         } else {
-                            if (_t57 == 27) {
+                            if (_t5 == 27) {
                                 org_bau_Env_exit_1(0);
                             } else {
-                                if (_t57 == 1003) {
+                                if (_t5 == 1003) {
                                     running = 0;
                                 }
                             }
                         }
                     }
                 }
-                int64_t _t58 = canPlace_2(tempPos, tempRot);
-                if (_t58) {
+                int64_t _t6 = canPlace_2(tempPos, tempRot);
+                if (_t6) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1121,8 +1095,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t59 = canPlace_2(position + 14, rotation);
-            if (_t59) {
+            int64_t _t7 = canPlace_2(position + 14, rotation);
+            if (_t7) {
                 position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1164,8 +1138,8 @@ void _main() {
                 i = i - 1;
             }
             refreshScreen_0();
-            int64_t _t60 = org_bau_Utils_random_1(7);
-            rotation = _t60;
+            int64_t _t8 = org_bau_Utils_random_1(7);
+            rotation = _t8;
             blockType = rotation + 1;
             if (position < 28) {
                 break;
@@ -1175,7 +1149,7 @@ void _main() {
         }
     }
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t51, i8_array);
+    _decUseStack(_t0, i8_array);
     _decUseStack(FIELD, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);

@@ -337,8 +337,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t2 = isMunchausen_1(i);
-                if (_t2) {
+                int64_t _t0 = isMunchausen_1(i);
+                if (_t0) {
                     printf("%lld\n", (long long)i);
                 }
                 int64_t _next = i + 1;

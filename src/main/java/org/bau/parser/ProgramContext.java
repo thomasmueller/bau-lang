@@ -3,11 +3,11 @@ package org.bau.parser;
 import java.util.LinkedHashSet;
 
 public class ProgramContext {
-    FunctionDefinition function;
-    int nextExceptionVariableId;
-    int nextSkipLabel;
-    int nextCatchLabel;
-    DataType needToCatch;
+    public FunctionDefinition function;
+    public int nextExceptionVariableId;
+    public int nextSkipLabel;
+    public int nextCatchLabel;
+    public DataType needToCatch;
     public LinkedHashSet<String> delareList = new LinkedHashSet<>();
 
     void nextFunction() {

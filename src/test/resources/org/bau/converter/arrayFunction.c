@@ -513,8 +513,8 @@ void _main() {
             break;
         }
     }
-    int64_t _t10 = i8_array_len_1(string_1011);
-    printf("len of hello is %lld\n", (long long)_t10);
+    int64_t _t1 = i8_array_len_1(string_1011);
+    printf("len of hello is %lld\n", (long long)_t1);
     _decUseStack(z, i8_array);
     _decUseStack(y, float_array);
     _decUseStack(x, int_array);

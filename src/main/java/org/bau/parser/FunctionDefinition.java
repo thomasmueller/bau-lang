@@ -4,19 +4,31 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Free;
+import org.bau.parser.stmt.Statement;
+
 public class FunctionDefinition {
+
+    private boolean used;
+    private String catchLabel;
+    private HashSet<DataType> freedOwnedTypes = null;
+    private HashSet<DataType> borrowedTypes = null;
+    private FullName fullName;
+
     public ArrayList<Statement> list = new ArrayList<>();
-    List<Statement> autoClose;
+    public List<Statement> autoClose;
     public ArrayList<Variable> parameters = new ArrayList<>();
     boolean builtIn;
 
     // functions with a type have a "this" parameter
     public DataType callType;
-    public String module;
-    public String name;
     public DataType returnType;
     public DataType exceptionType;
-    private boolean used;
+
+    // the type of the "it" variable
+    public DataType itType;
+
     public ArrayList<String> includes;
     public String cCode;
     public boolean varArgs;
@@ -26,45 +38,40 @@ public class FunctionDefinition {
     public String header;
     public String code;
     public String comment;
-    private String catchLabel;
-    private HashSet<DataType> freedOwnedTypes = null;
-    private HashSet<DataType> borrowedTypes = null;
     final int lineOffset;
     public boolean isConstructor;
     public boolean isFunctionPointer;
     int traitFunctionId;
 
-    // the type of the "it" variable
-    public DataType itType;
-
-    public FunctionDefinition(int lineOffset) {
+    public FunctionDefinition(FullName fullName, int lineOffset) {
+        this.fullName = fullName;
         this.lineOffset = lineOffset;
     }
 
     public String getFunctionId() {
         int parameterCount = varArgs ? Integer.MAX_VALUE : parameters.size();
-        return getFunctionId(callType, module, name, parameterCount);
+        return getFunctionId(callType, fullName, parameterCount);
     }
 
-    public static String getFunctionId(DataType type, String module, String name, int parameterCount) {
-        if (module != null && type != null && type.getModule() != null && !type.getModule().equals(module)) {
-            // throw new IllegalStateException("Module does not match the module of the type");
+    public static String getFunctionId(DataType type, FullName fullName, int parameterCount) {
+        Utils.assertTrue(fullName.module != null);
+        if (!fullName.module.isEmpty() && type != null && !type.module().isEmpty() && !type.module().equals(fullName.module)) {
             return null;
         }
         StringBuilder buff = new StringBuilder();
         if (type != null) {
-            buff.append(type.fullName()).append(' ');
-        } else if (module != null) {
-            buff.append(module).append(' ');
+            buff.append(type.getFullName().getFullName()).append(' ');
+        } else if (!fullName.module.isEmpty()) {
+            buff.append(fullName.module).append(' ');
         }
-        buff.append(name).append(' ').append(parameterCount);
+        buff.append(fullName.name).append(' ').append(parameterCount);
         return buff.toString();
     }
 
     public String functionNameC() {
         StringBuilder buff = new StringBuilder();
-        if (module != null) {
-            buff.append(Program.esc(module).replace(".", "_") + "_");
+        if (!fullName.module.isEmpty()) {
+            buff.append(fullName.getEscapedModuleId() + "_");
         }
         if (callType != null) {
             buff.append(callType.idC()).append('_');
@@ -170,6 +177,7 @@ public class FunctionDefinition {
     }
 
     public String toC(ProgramContext context) {
+        Utils.assertTrue(fullName.module != null);
         if (builtIn) {
             return "";
         }
@@ -287,7 +295,7 @@ public class FunctionDefinition {
             buff.append("_" + returnType.nameC());
         }
         buff.append("_or_");
-        buff.append(exceptionType);
+        buff.append(exceptionType.format());
         return buff.toString();
     }
 
@@ -307,9 +315,9 @@ public class FunctionDefinition {
         }
         buff.append("fun ");
         if (callType != null) {
-            buff.append(callType).append(' ');
+            buff.append(callType.format()).append(' ');
         }
-        buff.append(name);
+        buff.append(fullName.name);
         buff.append('(');
         int first = callType == null ? 0 : 1;
         for (int i = first; i < parameters.size(); i++) {
@@ -325,10 +333,10 @@ public class FunctionDefinition {
             }
             buff.append(' ');
             if (varArgs && i == parameters.size() - 1) {
-                buff.append(v.type().baseType());
+                buff.append(v.type().baseType().format());
                 buff.append("..");
             } else {
-                buff.append(v.type());
+                buff.append(v.type().format());
             }
         }
         buff.append(")");
@@ -340,16 +348,16 @@ public class FunctionDefinition {
         }
         if (returnType != null) {
             buff.append(' ');
-            buff.append(returnType);
+            buff.append(returnType.format());
         }
         if (exceptionType != null) {
             buff.append(" throws ");
-            buff.append(exceptionType);
+            buff.append(exceptionType.format());
         }
         return buff.toString();
     }
 
-    public String toString() {
+    public String format() {
         StringBuilder buff = new StringBuilder();
         buff.append(toHeaderString().trim());
         if (code != null) {
@@ -391,7 +399,7 @@ public class FunctionDefinition {
             DataType ownerType = type.ownerType();
             if (freedOwnedTypes.contains(ownerType)) {
                 throw new IllegalStateException(
-                        "Function " + getFunctionId() + ": borrowing " + type + " which is freed");
+                        "Function " + getFunctionId() + ": borrowing " + type.format() + " which is freed");
             }
         }
     }
@@ -400,14 +408,14 @@ public class FunctionDefinition {
         return used;
     }
 
-    void used(Program program) {
+    public void used(Program program) {
         if (used) {
             return;
         }
         used = true;
         if (callType != null) {
             for (DataType t : callType.implementingTypes) {
-                FunctionDefinition fd = program.getFunctionIfExists(t, t.module(), name, parameters.size());
+                FunctionDefinition fd = program.getFunctionIfExists(t, t.module(), fullName.name, parameters.size());
                 if (fd != null) {
                     fd.used(program);
                 }
@@ -445,7 +453,7 @@ public class FunctionDefinition {
     }
 
     public String nameC() {
-        return name;
+        return fullName.name;
     }
 
     public String getCode() {
@@ -460,10 +468,34 @@ public class FunctionDefinition {
 
     public List<Variable> getDeclaredVariables() {
         ArrayList<Variable> result = new ArrayList<>();
-        for(Statement s : list) {
+        for (Statement s : list) {
             result.addAll(s.getDeclaredVariables());
         }
         return result;
+    }
+
+    public FullName getFullName() {
+        return fullName;
+    }
+
+    public void resolveTypes(Program program) {
+        if (callType != null) {
+            callType = callType.resolve(program);
+        }
+        if (returnType != null) {
+            returnType = returnType.resolve(program);
+        }
+        if (exceptionType != null) {
+            exceptionType = exceptionType.resolve(program);
+        }
+        if (itType != null) {
+            itType = itType.resolve(program);
+        }
+        program.resolveTypes(list);
+        program.resolveTypes(autoClose);
+        for (Variable p : parameters) {
+            p.resolveTypes(program);
+        }
     }
 
 }

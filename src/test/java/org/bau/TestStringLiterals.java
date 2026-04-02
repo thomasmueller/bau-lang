@@ -3,7 +3,7 @@ package org.bau;
 import static org.junit.Assert.assertEquals;
 
 import org.bau.parser.Parser;
-import org.bau.parser.StringLiteral;
+import org.bau.parser.expr.StringLiteral;
 import org.junit.Test;
 
 public class TestStringLiterals {
@@ -14,7 +14,7 @@ public class TestStringLiterals {
                 + "",
                 new Parser("""
                         println('\\n\\t\\'\\\\\\xC3\\xb6')
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test
@@ -28,7 +28,7 @@ public class TestStringLiterals {
                         println(``Backtick: ` ``)
                         println(```Two Backticks: `` ```)
 
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class TestStringLiterals {
                             println(i)
                           println(``backtick ` ``)
                           ```)
-                        """).parse().toString());
+                        """).parse().format());
     }
 
     @Test

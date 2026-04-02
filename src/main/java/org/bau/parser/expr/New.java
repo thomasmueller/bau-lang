@@ -1,0 +1,189 @@
+package org.bau.parser.expr;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bau.parser.BasicBlock;
+import org.bau.parser.DataType;
+import org.bau.parser.FunctionContext;
+import org.bau.parser.Parser;
+import org.bau.parser.Program;
+import org.bau.parser.Solver;
+import org.bau.parser.stmt.Statement;
+import org.bau.runtime.Memory;
+import org.bau.runtime.Value;
+import org.bau.runtime.Value.ValueInt;
+import org.bau.runtime.Value.ValueRef;
+import org.bau.runtime.Value.ValueStruct;
+
+public class New implements Expression {
+
+	private DataType type;
+	public Expression arrayLength;
+
+    public New(DataType type, Expression arrayLength) {
+    	this.type = type;
+    	this.arrayLength = arrayLength;
+    }
+
+    @Override
+    public Value eval(Memory memory) {
+        Value result;
+        if (type.isArray()) {
+            Value len = arrayLength.eval(memory);
+            if (len == null) {
+                return null;
+            }
+            long l1 = len.longValue();
+            int l = l1 < 0 || l1 > Integer.MAX_VALUE ? 0 : (int) l1;
+            if (type.baseType().isCopyType()) {
+                switch (type.baseType().name()) {
+                case DataType.I32:
+                    result = new Value.ValueI32Array(l);
+                    break;
+                case DataType.I8:
+                    result = new Value.ValueI8Array(new byte[l]);
+                    break;
+                default:
+                    result = new Value.ValueArray(l, ValueInt.ZERO);
+                    break;
+                }
+            } else if (type.baseType().isArray() || type.baseType().isPointer()) {
+                result = new Value.ValueArray(l, new Value.ValueRef(0));
+            } else {
+                result = new Value.ValueArray(l, new Value.ValueStruct());
+            }
+            long heapId = memory.putHeap(result);
+            return new ValueRef(heapId);
+        } else {
+            ValueStruct struct = new Value.ValueStruct();
+            for (Variable f : type.fields) {
+                struct.set(f.name(), f.type().getZeroValue());
+            }
+            result = struct;
+        }
+        if (type.isArray() || type.isPointer()) {
+            long heapId = memory.putHeap(result);
+            return new ValueRef(heapId);
+        } else {
+            return result;
+        }
+    }
+
+    @Override
+    public DataType type() {
+        return type;
+    }
+
+    public Expression replace(Variable old, Expression with) {
+        New c = new New(type, arrayLength.replace(old, with));
+        return c;
+    }
+
+    public DataType canThrowException() {
+        return null;
+    }
+
+    @Override
+    public String toC() {
+        if (type.isArray()) {
+            StringBuilder buff = new StringBuilder();
+            buff.append(type.nameC() + "_new(" + arrayLength.toC() + ")");
+            return buff.toString();
+        }
+        if (type.isPointer()) {
+            if (arrayLength == null) {
+            	return type.nameC() + "_new()";
+            }
+        }
+        String t = type.toC();
+        if (t.endsWith("*")) {
+            // TODO hack to get rid of pointers
+            t = t.substring(0, t.length() - 1);
+        }
+        return type.nameC() + "_new()";
+    }
+
+    @Override
+    public void setOwnedBoundsToNull(Solver solver, int level, boolean loop) {
+    }
+
+    public String format() {
+        if (arrayLength != null) {
+            return "new " + type.baseType().name() + "[" + arrayLength.format() + "]";
+        }
+        return "new " + type.name();
+    }
+
+    @Override
+    public boolean isEasyToRead() {
+        return false;
+    }
+
+    @Override
+    public Expression simplify() {
+        return this;
+    }
+
+    @Override
+    public boolean isSimple() {
+        return false;
+    }
+
+    @Override
+    public Expression writeStatements(Parser parser, boolean assignment, ArrayList<Statement> target) {
+        if (arrayLength != null) {
+            arrayLength = arrayLength.writeStatements(parser, false, target);
+        }
+        // we need to have a temp variable so that we will free the memory
+        // (for example, if the new expression is an argument of a function call)
+        Variable var = parser.assignTempVariable(target, this);
+        return var;
+    }
+
+    @Override
+    public void used(Program program) {
+        type.used(program);
+        if (arrayLength != null) {
+            arrayLength.used(program);
+        }
+    }
+
+    @Override
+    public boolean containsModifiableVariables() {
+        return arrayLength.containsModifiableVariables();
+    }
+
+    @Override
+    public void setVariableVersions(FunctionContext functionContext, BasicBlock basicBlock) {
+        if (arrayLength != null) {
+            arrayLength.setVariableVersions(functionContext, basicBlock);
+        }
+    }
+
+    @Override
+    public void setVariableVersions(String name, int oldVersion, int newVersion) {
+        if (arrayLength != null) {
+            arrayLength.setVariableVersions(name, oldVersion, newVersion);
+        }
+    }
+
+    @Override
+    public List<Variable> getVariables() {
+        return arrayLength.getVariables();
+    }
+
+    @Override
+    public String toAST() {
+        return "\"new\",\"" + type.getFullName().getFullName() + "\"";
+    }
+
+    @Override
+    public void resolveTypes(Program program) {
+        if (arrayLength != null) {
+            arrayLength.resolveTypes(program);
+        }
+        type = type.resolve(program);
+    }
+
+}

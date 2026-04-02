@@ -254,8 +254,6 @@ void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
 /* types */
 typedef struct i8_array i8_array;
 struct i8_array;
-typedef struct int_array int_array;
-struct int_array;
 struct i8_array {
     int32_t len;
     int32_t _refCount;
@@ -272,22 +270,6 @@ i8_array* i8_array_new(uint64_t len) {
     result->_refCount = 1;
     return result;
 }
-struct int_array {
-    int32_t len;
-    int32_t _refCount;
-    int64_t* data;
-};
-int_array* int_array_new(uint64_t len) {
-    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
-    int_array* result = _malloc(sizeof(int_array));
-    _traceMalloc(result);
-    result->len = len;
-    result->data = _malloc(sizeof(int64_t) * len);
-    memset(result->data, 0, sizeof(int64_t) * len);
-    _traceMalloc(result->data);
-    result->_refCount = 1;
-    return result;
-}
 /* exception types */
 /* global */
 int __argc;
@@ -296,20 +278,12 @@ char **__argv;
 void exit_1(int64_t code);
 i8_array* expensiveCalc_1(i8_array* a);
 void i8_array_free(i8_array* x);
-void int_array_free(int_array* x);
 void i8_array_free_0(i8_array* x) {
     _free(x->data); _traceFree(x->data);
     _free(x); _traceFree(x);
 }
 void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
-}
-void int_array_free_0(int_array* x) {
-    _free(x->data); _traceFree(x->data);
-    _free(x); _traceFree(x);
-}
-void int_array_free(int_array* x) {
-    _registerAndMaybeDrain(x, (void(*)(void*))int_array_free_0);
 }
 i8_array* str_const(char* data, uint32_t len) {
     i8_array* result = _malloc(sizeof(i8_array));
@@ -355,16 +329,16 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                i8_array* _t9 = NULL;
+                i8_array* _t0 = NULL;
                 if (i) {
-                    _decUseStack(_t9, i8_array);
-                    _t9 = expensiveCalc_1(string_1001);
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1001);
                 } else {
-                    _decUseStack(_t9, i8_array);
-                    _t9 = expensiveCalc_1(string_1002);
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1002);
                 }
-                _incUseStack(_t9);
-                i8_array* x = _t9;
+                _incUseStack(_t0);
+                i8_array* x = _t0;
                 printf("%lld: %.*s\n", (long long)i, _arrayLen(x), x->data);
                 if (!(( i < 1 ))) {
                     printf("assertion failed\n");
@@ -375,12 +349,12 @@ void _main() {
                 int64_t _next = i + 1;
                 if (_next >= 2) {
                     _decUseStack(x, i8_array);
-                    _decUseStack(_t9, i8_array);
+                    _decUseStack(_t0, i8_array);
                     break;
                 }
                 i = _next;
                 _decUseStack(x, i8_array);
-                _decUseStack(_t9, i8_array);
+                _decUseStack(_t0, i8_array);
             }
             break;
         }

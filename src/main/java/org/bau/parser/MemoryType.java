@@ -4,5 +4,6 @@ public enum MemoryType {
     COPY,
     REF_COUNT,
     OWNER,
-    BORROW
+    BORROW,
+    UNDEFINED
 }

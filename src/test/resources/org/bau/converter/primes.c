@@ -385,8 +385,8 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     randomSeed = 0;
-    int64_t _t1 = primeSum_1(100);
-    printf("%lld\n", (long long)_t1);
+    int64_t _t0 = primeSum_1(100);
+    printf("%lld\n", (long long)_t0);
     _end();
 }
 /*

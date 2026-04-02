@@ -51,6 +51,31 @@ public class JsonTest {
 //    }
 
     @Test
+    public void skipNested() {
+        String json = "{\"a\": 1, \"b\": { \"b-nested\": 2, \"b-nested2\": 3 }, \"c\": 4 }";
+        JsonReader obj = new JsonReader(json);
+        assertEquals("a", obj.nextKey());
+        JsonReader val1 = obj.value();
+        assertEquals(TokenType.NUMBER, val1.getTokenType());
+        assertEquals("1", val1.getNumber());
+        assertEquals("b", obj.nextKey());
+        JsonReader nested = obj.value();
+        assertEquals(TokenType.OBJECT, nested.getTokenType());
+        assertEquals("c", obj.nextKey());
+        JsonReader val4 = obj.value();
+        assertEquals(TokenType.NUMBER, val4.getTokenType());
+        assertEquals("4", val4.getNumber());
+    }
+
+    @Test
+    public void readInWrongOrder() {
+        String json = "{\"a\": 1, \"b\": { \"b-nested\": 2, \"b-nested2\": 3 }, \"c\": 4 }";
+        JsonReader obj = new JsonReader(json);
+        assertEquals("4", obj.get("c").getNumber());
+        assertEquals("1", obj.get("a").getNumber());
+    }
+
+    @Test
     public void formatting() {
         StringBuilder buff = new StringBuilder();
         for (int i = 0; i < 1000; i++) {
