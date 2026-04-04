@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-04-04: Improved `for` loops to allow iterating over entries, or entries + index.
 * 2026-03-28: First complete LINQ (Language Integrated Query) example using SQLite.
 * 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 
