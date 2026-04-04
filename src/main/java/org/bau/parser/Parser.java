@@ -1826,10 +1826,10 @@ public class Parser {
 
     private void verifyBounds(Assignment s) {
         if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
-            throw syntaxError("Not an array: " + s.leftValue);
+            throw syntaxError("Not an array: " + s.leftValue.format());
         }
         if (!areTypesCompatible(s.value, s.leftValue.type())) {
-            throw syntaxError("Incompatible types: " + s.value.type() + "; required: " + s.leftValue.type());
+            throw syntaxError("Incompatible types: " + s.value.type().format() + "; required: " + s.leftValue.type().format());
         }
         if (s.leftValue.type().isTrait() && s.value.type().implementsTrait(s.leftValue.type())) {
             s.value = new Cast(s.value, s.leftValue.type());
@@ -2292,7 +2292,7 @@ public class Parser {
                 }
                 Expression cast = program.cast(expr, isNotNull, targetType);
                 if (cast == null) {
-                    throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
+                    throw syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
                 }
                 call.args.set(i, cast);
             }
@@ -2409,7 +2409,7 @@ public class Parser {
         Return b = new Return(null);
         if (matchOp("\n") || matchOp(";")) {
             if (currentFunctionDefinition.returnType != null) {
-                throw syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType);
+                throw syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType.format());
             }
             target.add(b);
             negateLastBlockCondition();
@@ -2891,13 +2891,45 @@ public class Parser {
             setRangeBounds(var);
         }
         functionContext.addVariable(var);
+        ArrayList<Statement> loopFunctionList = new ArrayList<>();
+        loopFunctionList.addAll(functionDef.list);
+
+        List<Variable> localVars = functionDef.getDeclaredVariables();
+        Variable itVar = null;
+        for (Variable v : localVars) {
+            String name = v.name();
+            if (name.equals("_")) {
+                itVar = v;
+            }
+        }
+        if(itVar != null) {
+            localVars.remove(itVar);
+        }
+        if (localVars.size() != 0) {
+            ArrayList<Statement> list = loopFunctionList;
+            ArrayList<Variable> v2 = new ArrayList<>();
+            for (Variable old : localVars) {
+                Variable v = Variable.newInternal("0t" + functionContext.nextTempVariableId(), old.type());
+                functionContext.addVariable(v);
+                v2.add(v);
+            }
+            for (int j = 0; j < localVars.size(); j++) {
+                for (int i = 0; i < list.size(); i++) {
+                    Statement s = list.get(i);
+                    s = s.replace(localVars.get(j), v2.get(j));
+                    list.set(i, s);
+                }
+            }
+        }
+
+
+
+
         Loop loop = new Loop();
         int i = 0;
         Variable old = new Variable("_", call.def.returnType);
         ArrayList<Statement> whileLoop = null;
         If wrappingIf = null;
-        List<Statement> loopFunctionList = new ArrayList<>();
-        loopFunctionList.addAll(functionDef.list);
         if (!loopFunctionList.isEmpty()) {
             while (loopFunctionList.get(0) instanceof PhiBlock) {
                 loopFunctionList.remove(0);
@@ -2915,14 +2947,15 @@ public class Parser {
                 for(int k = 0; k < oldArgs.size(); k++) {
                     condition = condition.replace(oldArgs.get(k), newArgs.get(k));
                 }
-                loopFunctionList = wrappingIf.thenList;
+                loopFunctionList = new ArrayList<>(wrappingIf.thenList);
                 // clone
                 wrappingIf = new If();
                 wrappingIf.condition = condition;
             }
             if (stat instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
-                ((Assignment) stat).cloneVariable(this);
+                Assignment a = ((Assignment) stat);
+                a.cloneVariable(this);
             }
         }
         startBlock(true, comp);
@@ -2935,7 +2968,8 @@ public class Parser {
             }
             if (s instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
-                ((Assignment) s).cloneVariable(this);
+                Assignment a = ((Assignment) s);
+                a.cloneVariable(this);
             }
             if (s instanceof Loop) {
                 Loop w = (Loop) s;
@@ -2992,7 +3026,7 @@ public class Parser {
         for (; j < whileLoop.size(); j++) {
             Statement s = whileLoop.get(j);
             s = s.replace(old, var);
-            for(int k = 0; k < oldArgs.size(); k++) {
+            for (int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
             }
             if (s instanceof Break) {
@@ -3480,10 +3514,10 @@ public class Parser {
                             } else if ("line".equals(f)) {
                                 type = DataType.INT_TYPE;
                             } else {
-                                throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");
+                                throw syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
                             }
                         } else {
-                            throw syntaxError("Field '" + f + "' not found with type '" + vt + "'");
+                            throw syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
                         }
                     }
                     v = new FieldAccess(v, f, type);

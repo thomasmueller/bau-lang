@@ -457,4 +457,8 @@ public class Variable implements Expression, LeftValue {
         type = type.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

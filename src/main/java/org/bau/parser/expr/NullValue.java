@@ -107,4 +107,8 @@ public class NullValue implements Expression {
         }
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

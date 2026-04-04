@@ -329,16 +329,16 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                i8_array* _t0 = NULL;
+                i8_array* _t1 = NULL;
                 if (i) {
-                    _decUseStack(_t0, i8_array);
-                    _t0 = expensiveCalc_1(string_1001);
+                    _decUseStack(_t1, i8_array);
+                    _t1 = expensiveCalc_1(string_1001);
                 } else {
-                    _decUseStack(_t0, i8_array);
-                    _t0 = expensiveCalc_1(string_1002);
+                    _decUseStack(_t1, i8_array);
+                    _t1 = expensiveCalc_1(string_1002);
                 }
-                _incUseStack(_t0);
-                i8_array* x = _t0;
+                _incUseStack(_t1);
+                i8_array* x = _t1;
                 printf("%lld: %.*s\n", (long long)i, _arrayLen(x), x->data);
                 if (!(( i < 1 ))) {
                     printf("assertion failed\n");
@@ -346,15 +346,15 @@ void _main() {
                 } else {
                 }
                 printf("next\n");
-                int64_t _next = i + 1;
-                if (_next >= 2) {
+                int64_t _t0 = i + 1;
+                if (_t0 >= 2) {
                     _decUseStack(x, i8_array);
-                    _decUseStack(_t0, i8_array);
+                    _decUseStack(_t1, i8_array);
                     break;
                 }
-                i = _next;
+                i = _t0;
                 _decUseStack(x, i8_array);
-                _decUseStack(_t0, i8_array);
+                _decUseStack(_t1, i8_array);
             }
             break;
         }

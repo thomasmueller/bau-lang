@@ -120,4 +120,8 @@ public class Cast implements Expression {
         targetType = targetType.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

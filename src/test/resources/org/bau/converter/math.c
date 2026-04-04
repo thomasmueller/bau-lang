@@ -1089,11 +1089,11 @@ i8_array* org_bau_Std_convertFloatToI8Array_1(double n) {
             int64_t i = 0;
             while (1) {
                 buff->data[idx_2(pos + i, _arrayLen(buff))] = aa->data[i];
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(aa)) {
+                int64_t _t8 = i + 1;
+                if (_t8 >= _arrayLen(aa)) {
                     break;
                 }
-                i = _next;
+                i = _t8;
             }
             break;
         }
@@ -1103,11 +1103,11 @@ i8_array* org_bau_Std_convertFloatToI8Array_1(double n) {
             int64_t i = 0;
             while (1) {
                 buff->data[idx_2(( pos + _arrayLen(aa) ) + i, _arrayLen(buff))] = bb->data[i];
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(bb)) {
+                int64_t _t9 = i + 1;
+                if (_t9 >= _arrayLen(bb)) {
                     break;
                 }
-                i = _next;
+                i = _t9;
             }
             break;
         }
@@ -1120,11 +1120,11 @@ i8_array* org_bau_Std_convertFloatToI8Array_1(double n) {
                 int64_t i = 0;
                 while (1) {
                     buff->data[idx_2(( pos + _arrayLen(aa) ) + _arrayLen(bb) + 1 + i, _arrayLen(buff))] = ee->data[i];
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(ee)) {
+                    int64_t _t10 = i + 1;
+                    if (_t10 >= _arrayLen(ee)) {
                         break;
                     }
-                    i = _next;
+                    i = _t10;
                 }
                 break;
             }
@@ -1241,19 +1241,19 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                i8_array* _t4 = org_bau_Std_convertFloatToI8Array_1(x);
-                i8_array* _t5 = org_bau_Std_convertFloatToI8Array_1(- x);
-                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t4), _t4->data, _arrayLen(_t5), _t5->data);
+                i8_array* _t5 = org_bau_Std_convertFloatToI8Array_1(x);
+                i8_array* _t6 = org_bau_Std_convertFloatToI8Array_1(- x);
+                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t5), _t5->data, _arrayLen(_t6), _t6->data);
                 x = x * 12345678901234;
-                int64_t _next = i + 1;
-                if (_next >= 25) {
+                int64_t _t4 = i + 1;
+                if (_t4 >= 25) {
+                    _decUseStack(_t6, i8_array);
                     _decUseStack(_t5, i8_array);
-                    _decUseStack(_t4, i8_array);
                     break;
                 }
-                i = _next;
+                i = _t4;
+                _decUseStack(_t6, i8_array);
                 _decUseStack(_t5, i8_array);
-                _decUseStack(_t4, i8_array);
             }
             break;
         }
@@ -1263,19 +1263,19 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                i8_array* _t6 = org_bau_Std_convertFloatToI8Array_1(x);
-                i8_array* _t7 = org_bau_Std_convertFloatToI8Array_1(- x);
-                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t6), _t6->data, _arrayLen(_t7), _t7->data);
+                i8_array* _t8 = org_bau_Std_convertFloatToI8Array_1(x);
+                i8_array* _t9 = org_bau_Std_convertFloatToI8Array_1(- x);
+                printf("%lld %.*s, %.*s\n", (long long)i, _arrayLen(_t8), _t8->data, _arrayLen(_t9), _t9->data);
                 x = x * 12;
-                int64_t _next = i + 1;
-                if (_next >= 25) {
-                    _decUseStack(_t7, i8_array);
-                    _decUseStack(_t6, i8_array);
+                int64_t _t7 = i + 1;
+                if (_t7 >= 25) {
+                    _decUseStack(_t9, i8_array);
+                    _decUseStack(_t8, i8_array);
                     break;
                 }
-                i = _next;
-                _decUseStack(_t7, i8_array);
-                _decUseStack(_t6, i8_array);
+                i = _t7;
+                _decUseStack(_t9, i8_array);
+                _decUseStack(_t8, i8_array);
             }
             break;
         }
@@ -1287,60 +1287,60 @@ void _main() {
     x = -1.0;
     x = -1;
     while (x <= 1) {
-        double _t8 = org_bau_Math_signum_1(x);
-        printf("signum %.9f = %.9f\n", x, _t8);
-        double _t9 = org_bau_Math_abs_1(x);
-        printf("abs    %.9f = %.9f\n", x, _t9);
-        double _t10 = org_bau_Math_floor_1(x);
-        printf("floor  %.9f = %.9f\n", x, _t10);
-        double _t11 = org_bau_Math_ceil_1(x);
-        printf("ceil   %.9f = %.9f\n", x, _t11);
-        double _t12 = org_bau_Math_round_1(x);
-        printf("round  %.9f = %.9f\n", x, _t12);
-        double _t13 = org_bau_Math_exp_1(x);
-        printf("exp    %.9f = %.9f\n", x, _t13);
-        double _t14 = org_bau_Math_log_1(x);
-        printf("log    %.9f = %.9f\n", x, _t14);
-        double _t15 = org_bau_Math_log10_1(x);
-        printf("log10  %.9f = %.9f\n", x, _t15);
-        double _t16 = org_bau_Math_sqrt_1(x);
-        printf("sqrt   %.9f = %.9f\n", x, _t16);
-        double _t17 = org_bau_Math_sin_1(x);
-        printf("sin    %.9f = %.9f\n", x, _t17);
-        double _t18 = org_bau_Math_cos_1(x);
-        printf("cos    %.9f = %.9f\n", x, _t18);
-        double _t19 = org_bau_Math_tan_1(x);
-        printf("tan    %.9f = %.9f\n", x, _t19);
-        double _t20 = org_bau_Math_atan_1(x);
-        printf("atan   %.9f = %.9f\n", x, _t20);
-        double _t21 = org_bau_Math_asin_1(x);
-        printf("asin   %.9f = %.9f\n", x, _t21);
-        double _t22 = org_bau_Math_acos_1(x);
-        printf("acos   %.9f = %.9f\n", x, _t22);
+        double _t10 = org_bau_Math_signum_1(x);
+        printf("signum %.9f = %.9f\n", x, _t10);
+        double _t11 = org_bau_Math_abs_1(x);
+        printf("abs    %.9f = %.9f\n", x, _t11);
+        double _t12 = org_bau_Math_floor_1(x);
+        printf("floor  %.9f = %.9f\n", x, _t12);
+        double _t13 = org_bau_Math_ceil_1(x);
+        printf("ceil   %.9f = %.9f\n", x, _t13);
+        double _t14 = org_bau_Math_round_1(x);
+        printf("round  %.9f = %.9f\n", x, _t14);
+        double _t15 = org_bau_Math_exp_1(x);
+        printf("exp    %.9f = %.9f\n", x, _t15);
+        double _t16 = org_bau_Math_log_1(x);
+        printf("log    %.9f = %.9f\n", x, _t16);
+        double _t17 = org_bau_Math_log10_1(x);
+        printf("log10  %.9f = %.9f\n", x, _t17);
+        double _t18 = org_bau_Math_sqrt_1(x);
+        printf("sqrt   %.9f = %.9f\n", x, _t18);
+        double _t19 = org_bau_Math_sin_1(x);
+        printf("sin    %.9f = %.9f\n", x, _t19);
+        double _t20 = org_bau_Math_cos_1(x);
+        printf("cos    %.9f = %.9f\n", x, _t20);
+        double _t21 = org_bau_Math_tan_1(x);
+        printf("tan    %.9f = %.9f\n", x, _t21);
+        double _t22 = org_bau_Math_atan_1(x);
+        printf("atan   %.9f = %.9f\n", x, _t22);
+        double _t23 = org_bau_Math_asin_1(x);
+        printf("asin   %.9f = %.9f\n", x, _t23);
+        double _t24 = org_bau_Math_acos_1(x);
+        printf("acos   %.9f = %.9f\n", x, _t24);
         x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
-        int64_t _t23 = org_bau_Math_isNotANumber_1(x);
-        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t23);
-        int64_t _t24 = org_bau_Math_isNegativeZero_1(x);
-        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t24);
-        int64_t _t25 = org_bau_Math_convertDoubleToLongBits_1(x);
-        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t25);
-        double _t26 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
-        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t26);
+        int64_t _t25 = org_bau_Math_isNotANumber_1(x);
+        printf("isNotANumber   %.9f = %lld\n", x, (long long)_t25);
+        int64_t _t26 = org_bau_Math_isNegativeZero_1(x);
+        printf("isNegativeZero %.9f = %lld\n", x, (long long)_t26);
+        int64_t _t27 = org_bau_Math_convertDoubleToLongBits_1(x);
+        printf("convertDoubleToLongBits %.9f = %lld\n", x, (long long)_t27);
+        double _t28 = org_bau_Math_convertLongBitsToDouble_1(4602678819172646912);
+        printf("convertLongBitsToDouble %.9f = %.9f\n", x, _t28);
         x = x + 0.5;
     }
     x = -1;
     while (x <= 1) {
         double y = -1.0;
         while (y <= 1) {
-            double _t27 = org_bau_Math_pow_2(x, y);
-            printf("pow %.9f\n", _t27);
-            double _t28 = org_bau_Math_minFloat_2(x, y);
-            printf("min %.9f\n", _t28);
-            double _t29 = org_bau_Math_maxFloat_2(x, y);
-            printf("max %.9f\n", _t29);
+            double _t29 = org_bau_Math_pow_2(x, y);
+            printf("pow %.9f\n", _t29);
+            double _t30 = org_bau_Math_minFloat_2(x, y);
+            printf("min %.9f\n", _t30);
+            double _t31 = org_bau_Math_maxFloat_2(x, y);
+            printf("max %.9f\n", _t31);
             y = y + 0.5;
         }
         x = x + 0.5;

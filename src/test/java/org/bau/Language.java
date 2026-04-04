@@ -5,6 +5,9 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+add examples like here: https://xslang.org/examples
+
+
 make 'ord' optional
 
 move array copy methods:

@@ -127,4 +127,8 @@ public class Borrow implements Expression {
         base.resolveTypes(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

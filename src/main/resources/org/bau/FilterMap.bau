@@ -5,9 +5,12 @@ import org.bau.List
 type FilterMap(T)
     list List(T)
 
-fun from(T type, list List(T)) FilterMap(T)
-    result : FilterMap(T)(list)
-    return result
+fun from(T type) FilterMap(T)
+    return FilterMap(T)(List(T)())
+
+fun in(list List(T)) FilterMap(T)
+    this.list = list
+    return this
 
 fun FilterMap(T) where(condition(T) int) macro FilterMap(T)
     result : List(T)()

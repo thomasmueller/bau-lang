@@ -292,11 +292,11 @@ void test_0() {
             int64_t i = 0;
             while (1) {
                 data->data[i] = i;
-                int64_t _next = i + 1;
-                if (_next >= 10) {
+                int64_t _t1 = i + 1;
+                if (_t1 >= 10) {
                     break;
                 }
-                i = _next;
+                i = _t1;
             }
             break;
         }

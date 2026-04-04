@@ -283,4 +283,8 @@ public class ArrayAccess implements Expression, LeftValue {
         arrayIndex.resolveTypes(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

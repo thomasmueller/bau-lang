@@ -441,11 +441,11 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)data->data[i]);
-                int64_t _next = i + 1;
-                if (_next >= 16) {
+                int64_t _t1 = i + 1;
+                if (_t1 >= 16) {
                     break;
                 }
-                i = _next;
+                i = _t1;
             }
             break;
         }
@@ -456,11 +456,11 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 printf("%d\n", a->data[i]);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(a)) {
+                int64_t _t2 = i + 1;
+                if (_t2 >= _arrayLen(a)) {
                     break;
                 }
-                i = _next;
+                i = _t2;
             }
             break;
         }
@@ -471,11 +471,11 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)b->data[i]);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(b)) {
+                int64_t _t3 = i + 1;
+                if (_t3 >= _arrayLen(b)) {
                     break;
                 }
-                i = _next;
+                i = _t3;
             }
             break;
         }
@@ -486,11 +486,11 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 printf("%.9f\n", c->data[i]);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(c)) {
+                int64_t _t4 = i + 1;
+                if (_t4 >= _arrayLen(c)) {
                     break;
                 }
-                i = _next;
+                i = _t4;
             }
             break;
         }
@@ -504,17 +504,17 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 printf("%d\n", z->data[i]);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(z)) {
+                int64_t _t5 = i + 1;
+                if (_t5 >= _arrayLen(z)) {
                     break;
                 }
-                i = _next;
+                i = _t5;
             }
             break;
         }
     }
-    int64_t _t1 = i8_array_len_1(string_1011);
-    printf("len of hello is %lld\n", (long long)_t1);
+    int64_t _t6 = i8_array_len_1(string_1011);
+    printf("len of hello is %lld\n", (long long)_t6);
     _decUseStack(z, i8_array);
     _decUseStack(y, float_array);
     _decUseStack(x, int_array);

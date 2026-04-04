@@ -519,13 +519,13 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t7 = org_bau_Utils_random_0();
-                test->data[i] = _t7;
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(test)) {
+                int64_t _t8 = org_bau_Utils_random_0();
+                test->data[i] = _t8;
+                int64_t _t7 = i + 1;
+                if (_t7 >= _arrayLen(test)) {
                     break;
                 }
-                i = _next;
+                i = _t7;
             }
             break;
         }
@@ -541,11 +541,11 @@ void _main() {
                 reverse_int_array_int_3(test, 0, _arrayLen(test) - 1);
                 shellSort_int_array_int_1(test);
                 sum = sum + test->data[0];
-                int64_t _next = loop + 1;
-                if (_next >= repeat) {
+                int64_t _t9 = loop + 1;
+                if (_t9 >= repeat) {
                     break;
                 }
-                loop = _next;
+                loop = _t9;
             }
             break;
         }

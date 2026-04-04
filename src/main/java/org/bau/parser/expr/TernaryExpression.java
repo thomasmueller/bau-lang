@@ -216,4 +216,8 @@ public class TernaryExpression implements Expression {
         ifFalse.resolveTypes(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

@@ -117,4 +117,8 @@ public class ArrayConstant implements Expression {
         type = type.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

@@ -112,4 +112,8 @@ public class Parentheses implements Expression {
         base.resolveTypes(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

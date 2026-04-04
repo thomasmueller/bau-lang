@@ -150,4 +150,8 @@ public class NumberValue implements Expression {
         type = type.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

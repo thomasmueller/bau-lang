@@ -683,26 +683,26 @@ _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_
             while (1) {
                 _x0 = Token_matchChar_3(t, text, tp);
                 if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
-                int64_t _t0 = _x0.result;
-                if (!(_t0)) {
+                int64_t _t1 = _x0.result;
+                if (!(_t1)) {
                     _decUseStack(t, Token);
                     return ok_int64_t_or_exception(-1);
                 }
                 tp = tp + 1;
-                int64_t _next = i + 1;
-                if (_next >= t->min) {
+                int64_t _t0 = i + 1;
+                if (_t0 >= t->min) {
                     break;
                 }
-                i = _next;
+                i = _t0;
             }
             break;
         }
     }
     _x1 = matchStar_6(t, list, rp + 1, text, tp, t->max - t->min);
     if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch0; }
-    int64_t _t1 = _x1.result;
+    int64_t _t2 = _x1.result;
     _decUseStack(t, Token);
-    return ok_int64_t_or_exception(_t1);
+    return ok_int64_t_or_exception(_t2);
     } while(0);
     catch0:
     return exception_int64_t_or_exception(_lastException);
@@ -811,11 +811,11 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
                     _incUseStack(this->array->data[i]);
                     _decUse(n->data[idx_2(i, _arrayLen(n))], Token);
                     n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(this->array)) {
+                    int64_t _t2 = i + 1;
+                    if (_t2 >= _arrayLen(this->array)) {
                         break;
                     }
-                    i = _next;
+                    i = _t2;
                 }
                 break;
             }
@@ -842,11 +842,11 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(this->array)) {
+                    int64_t _t2 = i + 1;
+                    if (_t2 >= _arrayLen(this->array)) {
                         break;
                     }
-                    i = _next;
+                    i = _t2;
                 }
                 break;
             }

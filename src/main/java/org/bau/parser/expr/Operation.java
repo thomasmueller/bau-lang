@@ -157,11 +157,11 @@ public class Operation implements Expression {
         }
         DataType l = left.type().resolveEnumType();
         if (!l.isNumber()) {
-            throw new IllegalStateException("Not a number type: " + l + " for operation " + operator);
+            throw new IllegalStateException("Not a number type: " + l.format() + " for operation " + operator);
         }
         DataType r = right.type().resolveEnumType();
         if (!r.isNumber()) {
-            throw new IllegalStateException("Not a number type: " + r + " for operation " + operator);
+            throw new IllegalStateException("Not a number type: " + r.format() + " for operation " + operator);
         }
         if (l.equals(r)) {
             return l;
@@ -188,7 +188,7 @@ public class Operation implements Expression {
                 return higher;
             }
         }
-        throw new IllegalStateException("Operands needs to be of the same type: " + l + " <-> " + r);
+        throw new IllegalStateException("Operands needs to be of the same type: " + l.format() + " <-> " + r.format());
     }
 
     public static Value eval(DataType type, Value l, String operator, Value r) {
@@ -601,7 +601,7 @@ public class Operation implements Expression {
         if (targetType.isFunctionPointer && val instanceof Value.ValueFunctionPointer) {
             return val;
         }
-        throw new IllegalStateException("Unsupported target type " + targetType + " for " + val);
+        throw new IllegalStateException("Unsupported target type " + targetType.format() + " for " + val);
     }
 
     @Override
@@ -758,6 +758,10 @@ public class Operation implements Expression {
             left.resolveTypes(program);
         }
         right.resolveTypes(program);
+    }
+
+    public String toString() {
+        return format();
     }
 
 }

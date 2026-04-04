@@ -363,11 +363,11 @@ int64_t sum_var(int64_t a, int _vaCount,...) {
             int64_t i = 0;
             while (1) {
                 sum = sum + b->data[i];
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(b)) {
+                int64_t _t0 = i + 1;
+                if (_t0 >= _arrayLen(b)) {
                     break;
                 }
-                i = _next;
+                i = _t0;
             }
             break;
         }

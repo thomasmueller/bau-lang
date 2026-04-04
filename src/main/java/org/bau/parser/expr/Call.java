@@ -506,4 +506,8 @@ public class Call implements Statement, Expression, LeftValue {
         }
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

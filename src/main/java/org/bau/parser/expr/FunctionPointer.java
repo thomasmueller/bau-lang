@@ -118,4 +118,8 @@ public class FunctionPointer implements Expression {
         functionPointerType = functionPointerType.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

@@ -489,22 +489,22 @@ org_bau_BigInt_bigInt org_bau_BigInt_add_2(i32_array* a, i32_array* b) {
             int64_t i = 0;
             while (1) {
                 int64_t x = result->data[idx_2(i, _arrayLen(result))] & 4294967295;
-                int64_t _t1 = 0;
+                int64_t _t2 = 0;
                 if (i >= _arrayLen(b)) {
-                    _t1 = 0;
+                    _t2 = 0;
                 } else {
-                    _t1 = b->data[idx_2(i, _arrayLen(b))] & 4294967295;
+                    _t2 = b->data[idx_2(i, _arrayLen(b))] & 4294967295;
                 }
-                int64_t y = _t1;
+                int64_t y = _t2;
                 int64_t z = ( x + y ) + carry;
-                int32_t _t2 = i32_1(z);
-                result->data[idx_2(i, _arrayLen(result))] = _t2;
+                int32_t _t3 = i32_1(z);
+                result->data[idx_2(i, _arrayLen(result))] = _t3;
                 carry = shiftRight_int_2(z, 32);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(a)) {
+                int64_t _t1 = i + 1;
+                if (_t1 >= _arrayLen(a)) {
                     break;
                 }
-                i = _next;
+                i = _t1;
             }
             break;
         }
@@ -632,39 +632,39 @@ org_bau_BigInt_bigInt org_bau_BigInt_mulBig_2(i32_array* a, i32_array* b) {
                         while (1) {
                             int64_t bx = b->data[bi] & 4294967295;
                             int64_t z = ( ax * bx ) + (result->data[idx_2(i, _arrayLen(result))] & 4294967295) + carry;
-                            int32_t _t3 = i32_1(z);
-                            result->data[idx_2(i, _arrayLen(result))] = _t3;
+                            int32_t _t5 = i32_1(z);
+                            result->data[idx_2(i, _arrayLen(result))] = _t5;
                             carry = shiftRight_int_2(z, 32);
                             i = i + 1;
-                            int64_t _next = bi + 1;
-                            if (_next >= _arrayLen(b)) {
+                            int64_t _t4 = bi + 1;
+                            if (_t4 >= _arrayLen(b)) {
                                 break;
                             }
-                            bi = _next;
+                            bi = _t4;
                         }
                         break;
                     }
                 }
                 while (carry > 0) {
                     int64_t z = result->data[idx_2(i, _arrayLen(result))] + carry;
-                    int32_t _t4 = i32_1(z);
-                    result->data[idx_2(i, _arrayLen(result))] = _t4;
+                    int32_t _t6 = i32_1(z);
+                    result->data[idx_2(i, _arrayLen(result))] = _t6;
                     carry = shiftRight_int_2(z, 32);
                     i = i + 1;
                 }
-                int64_t _next = ai + 1;
-                if (_next >= _arrayLen(a)) {
+                int64_t _t3 = ai + 1;
+                if (_t3 >= _arrayLen(a)) {
                     break;
                 }
-                ai = _next;
+                ai = _t3;
             }
             break;
         }
     }
-    org_bau_BigInt_bigInt _t5 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    org_bau_BigInt_bigInt _t7 = org_bau_BigInt_newBigIntShorten_2(result, 0);
     _decUseStack(result, i32_array);
     _decUseStack(_t2, i32_array);
-    return _t5;
+    return _t7;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b) {
     if (a == 1) {
@@ -687,14 +687,14 @@ org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b) {
             while (1) {
                 int64_t bx = result->data[i] & 4294967295;
                 int64_t z = ( ax * bx ) + carry;
-                int32_t _t0 = i32_1(z);
-                result->data[i] = _t0;
+                int32_t _t1 = i32_1(z);
+                result->data[i] = _t1;
                 carry = shiftRight_int_2(z, 32);
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(result)) {
+                int64_t _t0 = i + 1;
+                if (_t0 >= _arrayLen(result)) {
                     break;
                 }
-                i = _next;
+                i = _t0;
             }
             break;
         }
@@ -702,9 +702,9 @@ org_bau_BigInt_bigInt org_bau_BigInt_mulSmall_2(int32_t a, i32_array* b) {
     if (carry) {
         result->data[idx_2(_arrayLen(result) - 1, _arrayLen(result))] = carry;
     }
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_newBigIntShorten_2(result, 0);
     _decUseStack(result, i32_array);
-    return _t1;
+    return _t2;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_newBigInt_1(int64_t value) {
     if (value == 0) {
@@ -821,20 +821,20 @@ org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b) {
                 }
                 int64_t z = ( x - y ) - carry;
                 carry = (shiftRight_int_2(z, 63)) & 1;
-                int32_t _t0 = i32_1(z);
-                result->data[idx_2(i, _arrayLen(result))] = _t0;
-                int64_t _next = i + 1;
-                if (_next >= _arrayLen(a)) {
+                int32_t _t1 = i32_1(z);
+                result->data[idx_2(i, _arrayLen(result))] = _t1;
+                int64_t _t0 = i + 1;
+                if (_t0 >= _arrayLen(a)) {
                     break;
                 }
-                i = _next;
+                i = _t0;
             }
             break;
         }
     }
-    org_bau_BigInt_bigInt _t1 = org_bau_BigInt_newBigIntShorten_2(result, 0);
+    org_bau_BigInt_bigInt _t2 = org_bau_BigInt_newBigIntShorten_2(result, 0);
     _decUseStack(result, i32_array);
-    return _t1;
+    return _t2;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_bigInt_add_2(org_bau_BigInt_bigInt this, org_bau_BigInt_bigInt other) {
     org_bau_BigInt_bigInt_copy(&this);
@@ -1055,24 +1055,24 @@ org_bau_BigInt_bigInt org_bau_BigInt_bigInt_div_2(org_bau_BigInt_bigInt this, or
                 while (1) {
                     int64_t p = qhat * (vn->data[i] & 4294967295);
                     int64_t t = (un->data[idx_2(i + j, _arrayLen(un))] & 4294967295) - carry - (p & 4294967295);
-                    int64_t _t22 = int_1(t);
-                    un->data[idx_2(i + j, _arrayLen(un))] = _t22;
-                    int64_t _t23 = org_bau_Int_arithmeticRightShift_2(t, 32);
-                    carry = (shiftRight_int_2(p, 32)) - _t23;
-                    int64_t _next = i + 1;
-                    if (_next >= ( n - 1 )) {
+                    int64_t _t23 = int_1(t);
+                    un->data[idx_2(i + j, _arrayLen(un))] = _t23;
+                    int64_t _t24 = org_bau_Int_arithmeticRightShift_2(t, 32);
+                    carry = (shiftRight_int_2(p, 32)) - _t24;
+                    int64_t _t22 = i + 1;
+                    if (_t22 >= ( n - 1 )) {
                         break;
                     }
-                    i = _next;
+                    i = _t22;
                 }
                 break;
             }
         }
         int64_t t = (un->data[idx_2(( j + n ) - 1, _arrayLen(un))] & 4294967295) - carry;
-        int64_t _t24 = int_1(t);
-        un->data[idx_2(( j + n ) - 1, _arrayLen(un))] = _t24;
-        int64_t _t25 = int_1(qhat);
-        q->data[idx_2(j, _arrayLen(q))] = _t25;
+        int64_t _t25 = int_1(t);
+        un->data[idx_2(( j + n ) - 1, _arrayLen(un))] = _t25;
+        int64_t _t26 = int_1(qhat);
+        q->data[idx_2(j, _arrayLen(q))] = _t26;
         j = j - 1;
     }
     org_bau_BigInt_bigInt res = org_bau_BigInt_bigInt_0();

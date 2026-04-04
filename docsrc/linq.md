@@ -69,7 +69,7 @@ The collection backend has similar features:
         p.y = y
         return p
 
-## Advanced Features
+## Advanced Features: Sorting
 
 Here is an example implementation that shows how to capture values
 printing the AST of the parameter expression, and sort entries:
@@ -133,4 +133,49 @@ printing the AST of the parameter expression, and sort entries:
                     j -= g
                 a[j + g] = old
                 i += 1
+
+## Advanced Features: Folding
+
+The following syntax might be useful for folding / aggregation:
+
+    fun main()
+        sum : for(rangeArray(1, 20)).
+            init(0).aggregate(it.agg + it.value)
+        println('sum: ' sum)
+        prod : for(rangeArray(1, 20)).
+            init(1).aggregate(it.agg * it.value)
+        println('product: ' prod)
     
+    fun rangeArray(from T, to T) T[]
+        data : T[to - from]
+        for i := range(from, to)
+            data[i - from] = i
+        return data
+    
+    type intPair
+        agg int
+        value int
+        
+    type intAggregator
+        data int[]
+        init int
+    
+    fun for(data int[]) intAggregator
+        x : intAggregator()
+        x.data = data
+        return x
+    
+    fun intAggregator init(value int) intAggregator
+        init = value
+        return this
+    
+    fun intAggregator aggregate(operation(intPair) int) macro int
+        i := 0
+        agg := init
+        loop i < data.len
+            it : intPair()
+            it.agg = agg
+            it.value = data[i]
+            agg = operation
+            i += 1
+        return agg

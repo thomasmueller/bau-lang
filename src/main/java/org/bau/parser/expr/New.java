@@ -186,4 +186,8 @@ public class New implements Expression {
         type = type.resolve(program);
     }
 
+    public String toString() {
+        return format();
+    }
+
 }

@@ -456,12 +456,12 @@ int64_t HashMap_int_int_get_2(HashMap_int_int* this, int64_t key) {
             int64_t _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
             return _r0;
         } else {
-            int64_t _t6 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t6) {
-                int64_t _t7 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t6 = _t7;
+            int64_t _t7 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t7) {
+                int64_t _t8 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t7 = _t8;
             }
-            if (_t6) {
+            if (_t7) {
                 int64_t _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 return _r1;
             }
@@ -502,11 +502,11 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
                     if (oh->data[idx_2(i, _arrayLen(oh))] != 0) {
                         HashMap_int_int_put_3(this, ok->data[i], ov->data[idx_2(i, _arrayLen(ov))]);
                     }
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(ok)) {
+                    int64_t _t4 = i + 1;
+                    if (_t4 >= _arrayLen(ok)) {
                         break;
                     }
-                    i = _next;
+                    i = _t4;
                 }
                 break;
             }
@@ -524,12 +524,12 @@ void HashMap_int_int_put_3(HashMap_int_int* this, int64_t key, int64_t value) {
     int64_t hash = int_hashCode_1(key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t4 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t4) {
-            int64_t _t5 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t4 = _t5;
+        int64_t _t5 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t5) {
+            int64_t _t6 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t5 = _t6;
         }
-        if (_t4) {
+        if (_t5) {
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
         } else {
@@ -551,12 +551,12 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
         if (this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == 0) {
             return 0;
         } else {
-            int64_t _t8 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t8) {
-                int64_t _t9 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t8 = _t9;
+            int64_t _t9 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t9) {
+                int64_t _t10 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t9 = _t10;
             }
-            if (_t8) {
+            if (_t9) {
                 this->keys->data[idx_2(p, _arrayLen(this->keys))] = 0;
                 this->hashes->data[idx_2(p, _arrayLen(this->hashes))] = 0;
                 this->values->data[idx_2(p, _arrayLen(this->values))] = 0;
@@ -575,19 +575,19 @@ int64_t HashMap_int_int_remove_2(HashMap_int_int* this, int64_t key) {
         int64_t pb = h2 & (_arrayLen(this->keys) - 1);
         int64_t canMove = 0;
         if (pb <= p2) {
-            int64_t _t10 = (pb <= p);
-            if (_t10) {
-                int64_t _t11 = (p2 >= p);
-                _t10 = _t11;
+            int64_t _t11 = (pb <= p);
+            if (_t11) {
+                int64_t _t12 = (p2 >= p);
+                _t11 = _t12;
             }
-            canMove = _t10;
+            canMove = _t11;
         } else {
-            int64_t _t12 = pb <= p;
-            if (!(_t12)) {
-                int64_t _t13 = p2 > p;
-                _t12 = _t13;
+            int64_t _t13 = pb <= p;
+            if (!(_t13)) {
+                int64_t _t14 = p2 > p;
+                _t13 = _t14;
             }
-            canMove = _t12;
+            canMove = _t13;
         }
         if (canMove) {
             this->keys->data[idx_2(p, _arrayLen(this->keys))] = this->keys->data[idx_2(p2, _arrayLen(this->keys))];
@@ -621,12 +621,12 @@ str HashMap_str_str_get_2(HashMap_str_str* this, str key) {
             str_free(&key);
             return _r0;
         } else {
-            int64_t _t6 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t6) {
-                int64_t _t7 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t6 = _t7;
+            int64_t _t7 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t7) {
+                int64_t _t8 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t7 = _t8;
             }
-            if (_t6) {
+            if (_t7) {
                 str_copy(&this->values->data[idx_2(p, _arrayLen(this->values))]);
                 str _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 str_free(&key);
@@ -670,11 +670,11 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
                     if (oh->data[idx_2(i, _arrayLen(oh))] != 0) {
                         HashMap_str_str_put_3(this, ok->data[i], ov->data[idx_2(i, _arrayLen(ov))]);
                     }
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(ok)) {
+                    int64_t _t4 = i + 1;
+                    if (_t4 >= _arrayLen(ok)) {
                         break;
                     }
-                    i = _next;
+                    i = _t4;
                 }
                 break;
             }
@@ -692,12 +692,12 @@ void HashMap_str_str_put_3(HashMap_str_str* this, str key, str value) {
     int64_t hash = str_hashCode_1(key);
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t4 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t4) {
-            int64_t _t5 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t4 = _t5;
+        int64_t _t5 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t5) {
+            int64_t _t6 = str_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t5 = _t6;
         }
-        if (_t4) {
+        if (_t5) {
             str_copy(&value);
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
@@ -841,16 +841,16 @@ void test_0() {
             while (1) {
                 HashMap_int_int_put_3(map, i, 10 * i);
                 if (i > 10) {
-                    int64_t _t1 = HashMap_int_int_remove_2(map, i - 10);
+                    int64_t _t2 = HashMap_int_int_remove_2(map, i - 10);
                     ;
                 }
-                int64_t _t2 = HashMap_int_int_get_2(map, i);
-                printf("int map[%lld]=%lld\n", (long long)i, (long long)_t2);
-                int64_t _next = i + 1;
-                if (_next >= 20) {
+                int64_t _t3 = HashMap_int_int_get_2(map, i);
+                printf("int map[%lld]=%lld\n", (long long)i, (long long)_t3);
+                int64_t _t1 = i + 1;
+                if (_t1 >= 20) {
                     break;
                 }
-                i = _next;
+                i = _t1;
             }
             break;
         }

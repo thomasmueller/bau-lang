@@ -423,31 +423,31 @@ int64_t canPlace_2(int64_t pos, int64_t rot) {
                         while (1) {
                             int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rot * 6 ) + x, _arrayLen(shapes))];
                             if (c != 88) {
-                                int64_t _next = x + 1;
-                                if (_next >= 4) {
+                                int64_t _t1 = x + 1;
+                                if (_t1 >= 4) {
                                     break;
                                 }
-                                x = _next;
+                                x = _t1;
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
                             if (FIELD->data[idx_2(pos + offset, _arrayLen(FIELD))]) {
                                 return 0;
                             }
-                            int64_t _next = x + 1;
-                            if (_next >= 4) {
+                            int64_t _t1 = x + 1;
+                            if (_t1 >= 4) {
                                 break;
                             }
-                            x = _next;
+                            x = _t1;
                         }
                         break;
                     }
                 }
-                int64_t _next = y + 1;
-                if (_next >= 4) {
+                int64_t _t0 = y + 1;
+                if (_t0 >= 4) {
                     break;
                 }
-                y = _next;
+                y = _t0;
             }
             break;
         }
@@ -553,11 +553,11 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
             int64_t j = 0;
             while (1) {
                 result->data[j] = buff->data[idx_2(j, _arrayLen(buff))];
-                int64_t _next = j + 1;
-                if (_next >= pos) {
+                int64_t _t2 = j + 1;
+                if (_t2 >= pos) {
                     break;
                 }
-                j = _next;
+                j = _t2;
             }
             break;
         }
@@ -600,11 +600,11 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->data->data[i];
-                    int64_t _next = i + 1;
-                    if (_next >= _arrayLen(this->data)) {
+                    int64_t _t5 = i + 1;
+                    if (_t5 >= _arrayLen(this->data)) {
                         break;
                     }
-                    i = _next;
+                    i = _t5;
                 }
                 break;
             }
@@ -620,11 +620,11 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
             int64_t i = 0;
             while (1) {
                 this->data->data[idx_2(this->len + i, _arrayLen(this->data))] = b->data[idx_2(start + i, _arrayLen(b))];
-                int64_t _next = i + 1;
-                if (_next >= add) {
+                int64_t _t6 = i + 1;
+                if (_t6 >= add) {
                     break;
                 }
-                i = _next;
+                i = _t6;
             }
             break;
         }
@@ -857,32 +857,32 @@ void refreshScreen_0() {
                         while (1) {
                             int8_t c = FIELD->data[idx_2(x + ( 14 * y ), _arrayLen(FIELD))];
                             if (c) {
-                                i8_array* _t3 = i8_array_new(1);
-                                _incUseStack(_t3);
-                                i8_array* c2 = _t3;
+                                i8_array* _t5 = i8_array_new(1);
+                                _incUseStack(_t5);
+                                i8_array* c2 = _t5;
                                 c2->data[0] = ( 48 + c ) - 1;
                                 org_bau_String_StringBuilder_append_2(buff, string_1039);
                                 org_bau_String_StringBuilder_append_2(buff, c2);
                                 org_bau_String_StringBuilder_append_2(buff, string_1040);
                                 _decUseStack(c2, i8_array);
-                                _decUseStack(_t3, i8_array);
+                                _decUseStack(_t5, i8_array);
                             }
                             org_bau_String_StringBuilder_append_2(buff, string_1041);
-                            int64_t _next = x + 1;
-                            if (_next >= 14) {
+                            int64_t _t4 = x + 1;
+                            if (_t4 >= 14) {
                                 break;
                             }
-                            x = _next;
+                            x = _t4;
                         }
                         break;
                     }
                 }
                 org_bau_String_StringBuilder_append_2(buff, string_1042);
-                int64_t _next = y + 1;
-                if (_next >= 24) {
+                int64_t _t3 = y + 1;
+                if (_t3 >= 24) {
                     break;
                 }
-                y = _next;
+                y = _t3;
             }
             break;
         }
@@ -907,29 +907,29 @@ void updateBlock_1(int64_t draw) {
                         while (1) {
                             int8_t c = shapes->data[idx_2(( y * 21 ) * 6 + ( rotation * 6 ) + x, _arrayLen(shapes))];
                             if (c != 88) {
-                                int64_t _next = x + 1;
-                                if (_next >= 4) {
+                                int64_t _t1 = x + 1;
+                                if (_t1 >= 4) {
                                     break;
                                 }
-                                x = _next;
+                                x = _t1;
                                 continue;
                             }
                             int64_t offset = ( y * 14 ) + x;
                             FIELD->data[idx_2(position + offset, _arrayLen(FIELD))] = (1 + blockType) * draw;
-                            int64_t _next = x + 1;
-                            if (_next >= 4) {
+                            int64_t _t1 = x + 1;
+                            if (_t1 >= 4) {
                                 break;
                             }
-                            x = _next;
+                            x = _t1;
                         }
                         break;
                     }
                 }
-                int64_t _next = y + 1;
-                if (_next >= 4) {
+                int64_t _t0 = y + 1;
+                if (_t0 >= 4) {
                     break;
                 }
-                y = _next;
+                y = _t0;
             }
             break;
         }
@@ -1006,11 +1006,11 @@ void _main() {
                 int64_t i = 0;
                 while (1) {
                     FIELD->data[idx_2(i, _arrayLen(FIELD))] = 0;
-                    int64_t _next = i + 1;
-                    if (_next >= 336) {
+                    int64_t _t2 = i + 1;
+                    if (_t2 >= 336) {
                         break;
                     }
-                    i = _next;
+                    i = _t2;
                 }
                 break;
             }
@@ -1021,11 +1021,11 @@ void _main() {
                 while (1) {
                     FIELD->data[idx_2(14 * y, _arrayLen(FIELD))] = 1;
                     FIELD->data[idx_2(13 + ( 14 * y ), _arrayLen(FIELD))] = 1;
-                    int64_t _next = y + 1;
-                    if (_next >= 24) {
+                    int64_t _t3 = y + 1;
+                    if (_t3 >= 24) {
                         break;
                     }
-                    y = _next;
+                    y = _t3;
                 }
                 break;
             }
@@ -1035,11 +1035,11 @@ void _main() {
                 int64_t x = 0;
                 while (1) {
                     FIELD->data[idx_2(x + 322, _arrayLen(FIELD))] = 1;
-                    int64_t _next = x + 1;
-                    if (_next >= 14) {
+                    int64_t _t4 = x + 1;
+                    if (_t4 >= 14) {
                         break;
                     }
-                    x = _next;
+                    x = _t4;
                 }
                 break;
             }
@@ -1049,45 +1049,45 @@ void _main() {
             updateBlock_1(0);
             int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t2 = tick > 0;
-                if (_t2) {
-                    int64_t _t3 = running;
-                    _t2 = _t3;
+                int64_t _t5 = tick > 0;
+                if (_t5) {
+                    int64_t _t6 = running;
+                    _t5 = _t6;
                 }
-                if (!(_t2)) {
+                if (!(_t5)) {
                     break;
                 }
                 tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t4 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t4)) {
+                int64_t _t7 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t7)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t5 = key;
-                if (_t5 == 1000) {
+                int64_t _t8 = key;
+                if (_t8 == 1000) {
                     tempPos = tempPos - 1;
                 } else {
-                    if (_t5 == 1001) {
+                    if (_t8 == 1001) {
                         tempPos = tempPos + 1;
                     } else {
-                        if ((_t5 == 32) || (_t5 == 1002)) {
+                        if ((_t8 == 32) || (_t8 == 1002)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                         } else {
-                            if (_t5 == 27) {
+                            if (_t8 == 27) {
                                 org_bau_Env_exit_1(0);
                             } else {
-                                if (_t5 == 1003) {
+                                if (_t8 == 1003) {
                                     running = 0;
                                 }
                             }
                         }
                     }
                 }
-                int64_t _t6 = canPlace_2(tempPos, tempRot);
-                if (_t6) {
+                int64_t _t9 = canPlace_2(tempPos, tempRot);
+                if (_t9) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1095,8 +1095,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t7 = canPlace_2(position + 14, rotation);
-            if (_t7) {
+            int64_t _t10 = canPlace_2(position + 14, rotation);
+            if (_t10) {
                 position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1114,11 +1114,11 @@ void _main() {
                                 found = 0;
                                 break;
                             }
-                            int64_t _next = j + 1;
-                            if (_next >= 14) {
+                            int64_t _t11 = j + 1;
+                            if (_t11 >= 14) {
                                 break;
                             }
-                            j = _next;
+                            j = _t11;
                         }
                         break;
                     }
@@ -1138,8 +1138,8 @@ void _main() {
                 i = i - 1;
             }
             refreshScreen_0();
-            int64_t _t8 = org_bau_Utils_random_1(7);
-            rotation = _t8;
+            int64_t _t12 = org_bau_Utils_random_1(7);
+            rotation = _t12;
             blockType = rotation + 1;
             if (position < 28) {
                 break;

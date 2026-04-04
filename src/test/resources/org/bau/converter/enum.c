@@ -318,25 +318,25 @@ void _main() {
         while (1 == 1) {
             int64_t a = 0;
             while (1) {
-                int64_t _t0 = get_1(a);
-                if (_t0 == 0) {
+                int64_t _t1 = get_1(a);
+                if (_t1 == 0) {
                     printf("...is sunday\n");
                 } else {
-                    if (_t0 == 1) {
+                    if (_t1 == 1) {
                         printf("...is monday\n");
                     } else {
-                        if ((_t0 == 2) || (_t0 == 3)) {
+                        if ((_t1 == 2) || (_t1 == 3)) {
                             printf("...is tuesday or wednesday\n");
                         } else {
                             printf("...is some other day\n");
                         }
                     }
                 }
-                int64_t _next = a + 1;
-                if (_next >= 7) {
+                int64_t _t0 = a + 1;
+                if (_t0 >= 7) {
                     break;
                 }
-                a = _next;
+                a = _t0;
             }
             break;
         }
