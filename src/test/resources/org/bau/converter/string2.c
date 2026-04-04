@@ -443,11 +443,10 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
                 while (1) {
                     org_bau_String_string_copy(&this->array->data[i]);
                     n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
-                    int64_t _t2 = i + 1;
-                    if (_t2 >= _arrayLen(this->array)) {
+                    if (( i + 1 ) >= _arrayLen(this->array)) {
                         break;
                     }
-                    i = _t2;
+                    i = i + 1;
                 }
                 break;
             }
@@ -662,11 +661,10 @@ i8_array* org_bau_String_substring_3(i8_array* s, int64_t start, int64_t end) {
                     break;
                 }
                 i = next;
-                int64_t _t5 = j + 1;
-                if (_t5 >= len) {
+                if (( j + 1 ) >= len) {
                     break;
                 }
-                j = _t5;
+                j = j + 1;
             }
             break;
         }
@@ -702,11 +700,10 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->data->data[i];
-                    int64_t _t5 = i + 1;
-                    if (_t5 >= _arrayLen(this->data)) {
+                    if (( i + 1 ) >= _arrayLen(this->data)) {
                         break;
                     }
-                    i = _t5;
+                    i = i + 1;
                 }
                 break;
             }
@@ -722,11 +719,10 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
             int64_t i = 0;
             while (1) {
                 this->data->data[idx_2(this->len + i, _arrayLen(this->data))] = b->data[idx_2(start + i, _arrayLen(b))];
-                int64_t _t6 = i + 1;
-                if (_t6 >= add) {
+                if (( i + 1 ) >= add) {
                     break;
                 }
-                i = _t6;
+                i = i + 1;
             }
             break;
         }
@@ -751,12 +747,11 @@ void test_0() {
             while (1) {
                 org_bau_String_string s = org_bau_List_List_org_bau_String_string_get_2(list, i);
                 printf("#%lld: %.*s\n", (long long)i, _arrayLen(s.data), s.data->data);
-                int64_t _t4 = i + 1;
-                if (_t4 >= list->size) {
+                if (( i + 1 ) >= list->size) {
                     org_bau_String_string_free(&s);
                     break;
                 }
-                i = _t4;
+                i = i + 1;
                 org_bau_String_string_free(&s);
             }
             break;

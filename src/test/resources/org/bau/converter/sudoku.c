@@ -409,11 +409,10 @@ void _main() {
                 int64_t i = 0;
                 while (1) {
                     c->data[idx_2(9 + ( 10 * i ), _arrayLen(c))] = 10;
-                    int64_t _t4 = i + 1;
-                    if (_t4 >= 8) {
+                    if (( i + 1 ) >= 8) {
                         break;
                     }
-                    i = _t4;
+                    i = i + 1;
                 }
                 break;
             }

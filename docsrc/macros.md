@@ -4,7 +4,7 @@ Macros can reduce repetitive code,
 and can help improve the readability.
 Some use cases are:
 
-* `for` loops,
+* `for` loops to iterate over entries and / or indexes,
 * `when` (ternary expressions),
 * `assert`,
 * (debug) logging,
@@ -24,11 +24,13 @@ Macros have access to the source code of the arguments.
 
 ### For Loops
 
-There are built-in macros `range` and `until`:
+There are built-in macros `range` and `until` to iterate
+from `0` or from some other value up to, but excluding, an upper bound.
+The following will print `0`, `1`, `2`, `3`, and `4`:
 
-    for i := range(0, 5)
-        println('i: ' i)
     for i := until(5)
+        println('i: ' i)
+    for i := range(0, 5)
         println('i: ' i)
 
 ### When (Ternary Expression)
@@ -112,6 +114,54 @@ and access databases in a type-safe way.
     fun convertRecordToUser(r Record) User
         return User(text())
 
+## Implementing For Loop Functions
+
+Custom `for` loop functions can be implemented.
+The variable `_` marks the result, and `return _` is replaced with the loop body. 
+A `continue` statement jumps to the statement just after the `return`.
+
+As an example, the following allows to iterate over the elements of an array:
+
+    fun elements(array T[]) T
+        if array.len
+            i := 0..array.len
+            loop
+                _ : array[i]
+                return _
+                break i + 1 >= array.len
+                i += 1
+
+Sometimes it is useful to have the index and the value,
+or (for a hash table) the key and the value.
+For this purpose, a `pair` type can be used:
+
+    type pair(T)
+        i int
+        value T
+    
+    fun newPair(value T, index int) pair(T)
+        result : pair(T)()
+        result.value = value
+        result.i = index
+        return result
+    
+    fun pairs(array T[]) pair(T)
+        if array.len
+            i := 0..array.len
+            loop
+                _ : newPair(array[i], i)
+                return _
+                break i + 1 >= array.len
+                i += 1
+    
+    fun main()
+        array : int[5]
+        for i := until2(array.len)
+            array[i] = i * 10        
+        for e := elements(array)
+            println('element ' e)        
+        for p := pairs(array)
+            println('index-value-pairs #' p.i ' = ' p.value)
 
 ## Implementing Macros
 

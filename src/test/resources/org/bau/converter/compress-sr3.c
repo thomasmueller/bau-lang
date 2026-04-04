@@ -535,11 +535,10 @@ void initRead_0() {
             while (1) {
                 x = ((shiftLeft_2(x, 8)) + (global->input->data[idx_2(inPos, _arrayLen(global->input))] & 255)) & 4294967295;
                 inPos = inPos + 1;
-                int64_t _t0 = i + 1;
-                if (_t0 >= 4) {
+                if (( i + 1 ) >= 4) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }
@@ -775,31 +774,30 @@ void _main() {
             int64_t i = 0;
             while (1) {
                 state->data[idx_2(i, _arrayLen(state))] = 2147483648;
-                int64_t _t5 = i + 1;
-                if (_t5 >= 528384) {
+                if (( i + 1 ) >= 528384) {
                     break;
                 }
-                i = _t5;
+                i = i + 1;
             }
             break;
         }
     }
     org_bau_File_File_close_1(in);
-    i8_array* _t6 = i8_array_new(_arrayLen(input) * 10);
+    i8_array* _t5 = i8_array_new(_arrayLen(input) * 10);
+    _incUseStack(_t5);
+    i8_array* output = _t5;
+    Sr3* _t6 = Sr3_0();
     _incUseStack(_t6);
-    i8_array* output = _t6;
-    Sr3* _t7 = Sr3_0();
-    _incUseStack(_t7);
     _decUseStack(global, Sr3);
-    global = _t7;
+    global = _t6;
     _incUseStack(input);
     _decUse(global->input, i8_array);
     global->input = input;
     _incUseStack(output);
     _decUse(global->output, i8_array);
     global->output = output;
-    i8_array* _t8 = org_bau_Env_arg_1(1);
-    if (_t8->data[idx_2(0, _arrayLen(_t8))] == 99) {
+    i8_array* _t7 = org_bau_Env_arg_1(1);
+    if (_t7->data[idx_2(0, _arrayLen(_t7))] == 99) {
         output->data[idx_2(0, _arrayLen(output))] = 115;
         output->data[idx_2(1, _arrayLen(output))] = 82;
         output->data[idx_2(2, _arrayLen(output))] = 2;
@@ -807,17 +805,17 @@ void _main() {
         outPos = 4;
         compress_0();
     } else {
-        int64_t _t9 = input->data[idx_2(0, _arrayLen(input))] != 115;
-        if (!(_t9)) {
-            int64_t _t10 = input->data[idx_2(1, _arrayLen(input))] != 82;
-            _t9 = _t10;
+        int64_t _t8 = input->data[idx_2(0, _arrayLen(input))] != 115;
+        if (!(_t8)) {
+            int64_t _t9 = input->data[idx_2(1, _arrayLen(input))] != 82;
+            _t8 = _t9;
         }
-        int64_t _t11 = _t9;
-        if (!(_t11)) {
-            int64_t _t12 = input->data[idx_2(2, _arrayLen(input))] != 2;
-            _t11 = _t12;
+        int64_t _t10 = _t8;
+        if (!(_t10)) {
+            int64_t _t11 = input->data[idx_2(2, _arrayLen(input))] != 2;
+            _t10 = _t11;
         }
-        if (_t11) {
+        if (_t10) {
             printf("Not an SR3 file\n");
             return;
         }
@@ -825,21 +823,21 @@ void _main() {
         inPos = 4;
         decompress_0();
     }
-    i8_array* _t13 = org_bau_Env_arg_1(3);
-    org_bau_File_File* out = org_bau_File_openFile_2(_t13, string_1017);
+    i8_array* _t12 = org_bau_Env_arg_1(3);
+    org_bau_File_File* out = org_bau_File_openFile_2(_t12, string_1017);
     if (!(out)) {
         printf("Could not open output\n");
         return;
     }
-    int64_t _t14 = org_bau_File_File_write_4(out, output, 0, outPos);
+    int64_t _t13 = org_bau_File_File_write_4(out, output, 0, outPos);
     ;
     org_bau_File_File_close_1(out);
     _decUseStack(out, org_bau_File_File);
-    _decUseStack(_t13, i8_array);
-    _decUseStack(_t8, i8_array);
-    _decUseStack(_t7, Sr3);
+    _decUseStack(_t12, i8_array);
+    _decUseStack(_t7, i8_array);
+    _decUseStack(_t6, Sr3);
     _decUseStack(output, i8_array);
-    _decUseStack(_t6, i8_array);
+    _decUseStack(_t5, i8_array);
     _decUseStack(input, i8_array);
     _decUseStack(_t3, i8_array);
     _decUseStack(in, org_bau_File_File);

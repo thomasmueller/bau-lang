@@ -167,14 +167,13 @@ public class Std {
         if (program.getFunctionIfExists(null, "", "until", 1) != null) {
             return;
         }
-        String type = "fun until(lessThan int) 0 .. lessThan\n"
+        String type = "fun until(lessThan int) 0..lessThan\n"
                 + "  if lessThan > 0\n"
-                + "    _ := 0 .. lessThan\n"
+                + "    _ := 0..lessThan\n"
                 + "    loop\n"
                 + "      return _\n"
-                + "      _next : _ + 1\n"
-                + "      break _next >= lessThan\n"
-                + "      _ = _next";
+                + "      break _ + 1 >= lessThan\n"
+                + "      _ += 1";
         Parser parser = new Parser(type);
         Program p = parser.parse();
         program.addFunction(p.getFunction(null, "", "until", 1));

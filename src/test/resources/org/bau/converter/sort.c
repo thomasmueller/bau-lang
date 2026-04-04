@@ -375,13 +375,12 @@ void test_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t2 = org_bau_Utils_random_0();
-                x->data[i] = _t2;
-                int64_t _t1 = i + 1;
-                if (_t1 >= 5) {
+                int64_t _t1 = org_bau_Utils_random_0();
+                x->data[i] = _t1;
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t1;
+                i = i + 1;
             }
             break;
         }
@@ -392,11 +391,10 @@ void test_0() {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)x->data[i]);
-                int64_t _t3 = i + 1;
-                if (_t3 >= 5) {
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t3;
+                i = i + 1;
             }
             break;
         }
@@ -405,13 +403,12 @@ void test_0() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t5 = org_bau_Utils_random_0();
-                x->data[i] = _t5;
-                int64_t _t4 = i + 1;
-                if (_t4 >= 5) {
+                int64_t _t2 = org_bau_Utils_random_0();
+                x->data[i] = _t2;
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t4;
+                i = i + 1;
             }
             break;
         }
@@ -422,11 +419,10 @@ void test_0() {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)x->data[i]);
-                int64_t _t6 = i + 1;
-                if (_t6 >= 5) {
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t6;
+                i = i + 1;
             }
             break;
         }

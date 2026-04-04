@@ -363,12 +363,12 @@ int64_t org_bau_HashMap_HashMap_int_int_get_3(org_bau_HashMap_HashMap_int_int* t
             int64_t _r0 = this->values->data[idx_2(p, _arrayLen(this->values))];
             return _r0;
         } else {
-            int64_t _t7 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-            if (_t7) {
-                int64_t _t8 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-                _t7 = _t8;
+            int64_t _t6 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+            if (_t6) {
+                int64_t _t7 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+                _t6 = _t7;
             }
-            if (_t7) {
+            if (_t6) {
                 int64_t _r1 = this->values->data[idx_2(p, _arrayLen(this->values))];
                 return _r1;
             }
@@ -409,11 +409,10 @@ void org_bau_HashMap_HashMap_int_int_put_4(org_bau_HashMap_HashMap_int_int* this
                     if (oh->data[idx_2(i, _arrayLen(oh))] != 0) {
                         org_bau_HashMap_HashMap_int_int_put_4(this, oh->data[idx_2(i, _arrayLen(oh))], ok->data[i], ov->data[idx_2(i, _arrayLen(ov))]);
                     }
-                    int64_t _t4 = i + 1;
-                    if (_t4 >= _arrayLen(ok)) {
+                    if (( i + 1 ) >= _arrayLen(ok)) {
                         break;
                     }
-                    i = _t4;
+                    i = i + 1;
                 }
                 break;
             }
@@ -430,12 +429,12 @@ void org_bau_HashMap_HashMap_int_int_put_4(org_bau_HashMap_HashMap_int_int* this
     }
     int64_t p = hash & (_arrayLen(this->keys) - 1);
     while (1) {
-        int64_t _t5 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
-        if (_t5) {
-            int64_t _t6 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
-            _t5 = _t6;
+        int64_t _t4 = this->hashes->data[idx_2(p, _arrayLen(this->hashes))] == hash;
+        if (_t4) {
+            int64_t _t5 = int_equals_2(key, this->keys->data[idx_2(p, _arrayLen(this->keys))]);
+            _t4 = _t5;
         }
-        if (_t5) {
+        if (_t4) {
             this->values->data[idx_2(p, _arrayLen(this->values))] = value;
             return;
         } else {
@@ -467,13 +466,12 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t1 = org_bau_HashMap_mix_1(i);
-                org_bau_HashMap_HashMap_int_int_put_4(map, _t1, i, i * 10);
-                int64_t _t0 = i + 1;
-                if (_t0 >= 5) {
+                int64_t _t0 = org_bau_HashMap_mix_1(i);
+                org_bau_HashMap_HashMap_int_int_put_4(map, _t0, i, i * 10);
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }
@@ -482,14 +480,13 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t3 = org_bau_HashMap_mix_1(i);
-                int64_t _t4 = org_bau_HashMap_HashMap_int_int_get_3(map, _t3, i);
-                printf("%lld\n", (long long)_t4);
-                int64_t _t2 = i + 1;
-                if (_t2 >= 5) {
+                int64_t _t1 = org_bau_HashMap_mix_1(i);
+                int64_t _t2 = org_bau_HashMap_HashMap_int_int_get_3(map, _t1, i);
+                printf("%lld\n", (long long)_t2);
+                if (( i + 1 ) >= 5) {
                     break;
                 }
-                i = _t2;
+                i = i + 1;
             }
             break;
         }

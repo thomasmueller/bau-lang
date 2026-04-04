@@ -461,39 +461,39 @@ int64_t evaluateBoard_1(int64_t black) {
             while (1) {
                 int64_t b = board->data[idx_2(i, _arrayLen(board))];
                 int64_t sc = 0;
-                int64_t _t1 = getPiece_1(b);
-                if (_t1 == 1) {
+                int64_t _t0 = getPiece_1(b);
+                if (_t0 == 1) {
                     sc = 10000000;
                 } else {
-                    if (_t1 == 2) {
+                    if (_t0 == 2) {
                         sc = 1000;
                     } else {
-                        if (_t1 == 3) {
+                        if (_t0 == 3) {
                             sc = 500;
                         } else {
-                            if (_t1 == 5) {
-                                int64_t _t2 = getPossibleMoves_2(i, 0);
-                                int64_t _t3 = org_bau_Int_bitCount_1(_t2);
-                                sc = _t3;
+                            if (_t0 == 5) {
+                                int64_t _t1 = getPossibleMoves_2(i, 0);
+                                int64_t _t2 = org_bau_Int_bitCount_1(_t1);
+                                sc = _t2;
                                 sc = sc + 320;
                             } else {
-                                if (_t1 == 4) {
-                                    int64_t _t4 = getPossibleMoves_2(i, 0);
-                                    int64_t _t5 = org_bau_Int_bitCount_1(_t4);
-                                    sc = _t5;
+                                if (_t0 == 4) {
+                                    int64_t _t3 = getPossibleMoves_2(i, 0);
+                                    int64_t _t4 = org_bau_Int_bitCount_1(_t3);
+                                    sc = _t4;
                                     sc = sc + 330;
                                 } else {
-                                    if (_t1 == 6) {
+                                    if (_t0 == 6) {
                                         sc = 100;
                                         if (turn > 40) {
-                                            int64_t _t6 = 0;
-                                            int64_t _t7 = isBlack_1(b);
-                                            if (_t7) {
-                                                _t6 = (idiv_2(i, 8)) - 1;
+                                            int64_t _t5 = 0;
+                                            int64_t _t6 = isBlack_1(b);
+                                            if (_t6) {
+                                                _t5 = (idiv_2(i, 8)) - 1;
                                             } else {
-                                                _t6 = 6 - (idiv_2(i, 8));
+                                                _t5 = 6 - (idiv_2(i, 8));
                                             }
-                                            sc = sc + ( shiftLeft_2(1, _t6) );
+                                            sc = sc + ( shiftLeft_2(1, _t5) );
                                         }
                                     }
                                 }
@@ -501,16 +501,15 @@ int64_t evaluateBoard_1(int64_t black) {
                         }
                     }
                 }
-                int64_t _t8 = isBlack_1(b);
-                if (_t8 != black) {
+                int64_t _t7 = isBlack_1(b);
+                if (_t7 != black) {
                     sc = - sc;
                 }
                 sum = sum + sc;
-                int64_t _t0 = i + 1;
-                if (_t0 >= 64) {
+                if (( i + 1 ) >= 64) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }
@@ -760,11 +759,10 @@ void init_0() {
                 board->data[idx_2(i, _arrayLen(board))] += 6;
                 board->data[idx_2(i + 8, _arrayLen(board))] = 12;
                 board->data[idx_2(i + 48, _arrayLen(board))] = 6;
-                int64_t _t0 = i + 1;
-                if (_t0 >= 8) {
+                if (( i + 1 ) >= 8) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }
@@ -780,28 +778,26 @@ int64_t isFieldAttacked_2(int64_t black, int64_t pos) {
             int64_t i = 0;
             while (1) {
                 int64_t b = board->data[idx_2(i, _arrayLen(board))];
-                int64_t _t1 = b == 0;
-                if (!(_t1)) {
-                    int64_t _t2 = isBlack_1(b) == black;
-                    _t1 = _t2;
+                int64_t _t0 = b == 0;
+                if (!(_t0)) {
+                    int64_t _t1 = isBlack_1(b) == black;
+                    _t0 = _t1;
                 }
-                if (_t1) {
-                    int64_t _t0 = i + 1;
-                    if (_t0 >= 64) {
+                if (_t0) {
+                    if (( i + 1 ) >= 64) {
                         break;
                     }
-                    i = _t0;
+                    i = i + 1;
                     continue;
                 }
                 int64_t moves = getPossibleMoves_2(i, 1);
                 if (((shiftRight_int_2(moves, pos)) & 1) == 1) {
                     return 1;
                 }
-                int64_t _t0 = i + 1;
-                if (_t0 >= 64) {
+                if (( i + 1 ) >= 64) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }
@@ -897,29 +893,28 @@ int64_t negamax_5(int64_t top, int64_t depth, int64_t black, int64_t alpha, int6
         while (1 == 1) {
             int64_t phase = 0;
             while (1) {
-                int64_t _t4 = depth <= 0;
-                if (_t4) {
-                    int64_t _t5 = phase == 1;
-                    _t4 = _t5;
+                int64_t _t3 = depth <= 0;
+                if (_t3) {
+                    int64_t _t4 = phase == 1;
+                    _t3 = _t4;
                 }
-                if (_t4) {
+                if (_t3) {
                     return best;
                 }
                 if (64 > 0) {
                     while (1 == 1) {
                         int64_t i = 0;
                         while (1) {
-                            int64_t _t7 = board->data[idx_2(i, _arrayLen(board))] == 0;
-                            if (!(_t7)) {
-                                int64_t _t8 = isBlack_1(board->data[idx_2(i, _arrayLen(board))]) != black;
-                                _t7 = _t8;
+                            int64_t _t5 = board->data[idx_2(i, _arrayLen(board))] == 0;
+                            if (!(_t5)) {
+                                int64_t _t6 = isBlack_1(board->data[idx_2(i, _arrayLen(board))]) != black;
+                                _t5 = _t6;
                             }
-                            if (_t7) {
-                                int64_t _t6 = i + 1;
-                                if (_t6 >= 64) {
+                            if (_t5) {
+                                if (( i + 1 ) >= 64) {
                                     break;
                                 }
-                                i = _t6;
+                                i = i + 1;
                                 continue;
                             }
                             int64_t attackOnly = 0;
@@ -938,38 +933,36 @@ int64_t negamax_5(int64_t top, int64_t depth, int64_t black, int64_t alpha, int6
                                     continue;
                                 }
                                 int64_t move = move_2(i, target);
-                                int64_t _t9 = negamax_5(0, depth - 1, 1 - black, - beta, - alpha);
-                                int64_t score = - _t9;
+                                int64_t _t7 = negamax_5(0, depth - 1, 1 - black, - beta, - alpha);
+                                int64_t score = - _t7;
                                 if (score > best) {
                                     bestMove = move;
                                     best = score;
-                                    int64_t _t10 = org_bau_Int_max_2(alpha, score);
-                                    alpha = _t10;
+                                    int64_t _t8 = org_bau_Int_max_2(alpha, score);
+                                    alpha = _t8;
                                 }
                                 undo_1(move);
-                                int64_t _t11 = !(top);
-                                if (_t11) {
-                                    int64_t _t12 = best >= beta;
-                                    _t11 = _t12;
+                                int64_t _t9 = !(top);
+                                if (_t9) {
+                                    int64_t _t10 = best >= beta;
+                                    _t9 = _t10;
                                 }
-                                if (_t11) {
+                                if (_t9) {
                                     break;
                                 }
                             }
-                            int64_t _t6 = i + 1;
-                            if (_t6 >= 64) {
+                            if (( i + 1 ) >= 64) {
                                 break;
                             }
-                            i = _t6;
+                            i = i + 1;
                         }
                         break;
                     }
                 }
-                int64_t _t3 = phase + 1;
-                if (_t3 >= 2) {
+                if (( phase + 1 ) >= 2) {
                     break;
                 }
-                phase = _t3;
+                phase = phase + 1;
             }
             break;
         }
@@ -1081,11 +1074,10 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
             int64_t j = 0;
             while (1) {
                 result->data[j] = buff->data[idx_2(j, _arrayLen(buff))];
-                int64_t _t2 = j + 1;
-                if (_t2 >= pos) {
+                if (( j + 1 ) >= pos) {
                     break;
                 }
-                j = _t2;
+                j = j + 1;
             }
             break;
         }
@@ -1149,11 +1141,10 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->data->data[i];
-                    int64_t _t5 = i + 1;
-                    if (_t5 >= _arrayLen(this->data)) {
+                    if (( i + 1 ) >= _arrayLen(this->data)) {
                         break;
                     }
-                    i = _t5;
+                    i = i + 1;
                 }
                 break;
             }
@@ -1169,11 +1160,10 @@ void org_bau_String_StringBuilder_append_4(org_bau_String_StringBuilder* this, i
             int64_t i = 0;
             while (1) {
                 this->data->data[idx_2(this->len + i, _arrayLen(this->data))] = b->data[idx_2(start + i, _arrayLen(b))];
-                int64_t _t6 = i + 1;
-                if (_t6 >= add) {
+                if (( i + 1 ) >= add) {
                     break;
                 }
-                i = _t6;
+                i = i + 1;
             }
             break;
         }
@@ -1341,8 +1331,8 @@ void refreshScreen_0() {
         while (1 == 1) {
             int64_t y = 0;
             while (1) {
-                i8_array* _t2 = org_bau_Int_intToString_1(8 - y);
-                org_bau_String_StringBuilder_append_2(buff, _t2);
+                i8_array* _t1 = org_bau_Int_intToString_1(8 - y);
+                org_bau_String_StringBuilder_append_2(buff, _t1);
                 org_bau_String_StringBuilder_append_2(buff, string_1057);
                 if (8 > 0) {
                     while (1 == 1) {
@@ -1358,8 +1348,8 @@ void refreshScreen_0() {
                                     org_bau_String_StringBuilder_append_2(buff, string_1059);
                                 }
                             }
-                            int64_t _t4 = isBlack_1(b);
-                            if (_t4) {
+                            int64_t _t2 = isBlack_1(b);
+                            if (_t2) {
                                 org_bau_String_StringBuilder_append_2(buff, string_1060);
                             } else {
                                 org_bau_String_StringBuilder_append_2(buff, string_1061);
@@ -1368,35 +1358,33 @@ void refreshScreen_0() {
                             if (b == 0) {
                                 org_bau_String_StringBuilder_append_2(buff, string_1057);
                             } else {
-                                i8_array* _t5 = i8_array_new(3);
-                                _incUseStack(_t5);
-                                i8_array* b2 = _t5;
+                                i8_array* _t3 = i8_array_new(3);
+                                _incUseStack(_t3);
+                                i8_array* b2 = _t3;
                                 b2->data[0] = 0xe2;
                                 b2->data[1] = 0x99;
                                 b2->data[2] = 148 + (b - 1);
                                 org_bau_String_StringBuilder_append_2(buff, b2);
                                 _decUseStack(b2, i8_array);
-                                _decUseStack(_t5, i8_array);
+                                _decUseStack(_t3, i8_array);
                             }
                             org_bau_String_StringBuilder_append_2(buff, string_1057);
                             org_bau_String_StringBuilder_append_2(buff, string_1062);
-                            int64_t _t3 = x + 1;
-                            if (_t3 >= 8) {
+                            if (( x + 1 ) >= 8) {
                                 break;
                             }
-                            x = _t3;
+                            x = x + 1;
                         }
                         break;
                     }
                 }
                 org_bau_String_StringBuilder_append_2(buff, string_1063);
-                int64_t _t1 = y + 1;
-                if (_t1 >= 8) {
-                    _decUseStack(_t2, i8_array);
+                if (( y + 1 ) >= 8) {
+                    _decUseStack(_t1, i8_array);
                     break;
                 }
-                y = _t1;
-                _decUseStack(_t2, i8_array);
+                y = y + 1;
+                _decUseStack(_t1, i8_array);
             }
             break;
         }
@@ -1404,18 +1392,18 @@ void refreshScreen_0() {
     org_bau_String_StringBuilder_append_2(buff, string_1064);
     org_bau_String_StringBuilder_append_2(buff, string_1065);
     org_bau_String_StringBuilder_append_2(buff, string_1066);
-    i8_array* _t6 = org_bau_Int_intToString_1(yy + 2);
-    org_bau_String_StringBuilder_append_2(buff, _t6);
+    i8_array* _t4 = org_bau_Int_intToString_1(yy + 2);
+    org_bau_String_StringBuilder_append_2(buff, _t4);
     org_bau_String_StringBuilder_append_2(buff, string_1067);
-    i8_array* _t7 = org_bau_Int_intToString_1(( 1 + ( 3 * xx ) ) + 3);
-    org_bau_String_StringBuilder_append_2(buff, _t7);
+    i8_array* _t5 = org_bau_Int_intToString_1(( 1 + ( 3 * xx ) ) + 3);
+    org_bau_String_StringBuilder_append_2(buff, _t5);
     org_bau_String_StringBuilder_append_2(buff, string_1019);
     if (showCursor) {
         org_bau_String_StringBuilder_append_2(buff, string_1068);
     }
     org_bau_os_Terminal_writeToTerminal_2(buff->data, buff->len);
-    _decUseStack(_t7, i8_array);
-    _decUseStack(_t6, i8_array);
+    _decUseStack(_t5, i8_array);
+    _decUseStack(_t4, i8_array);
     _decUseStack(_t0, i8_array);
     _decUseStack(buff, org_bau_String_StringBuilder);
 }
@@ -1649,24 +1637,23 @@ void _main() {
                                 int64_t i = 0;
                                 while (1) {
                                     board->data[idx_2(i, _arrayLen(board))] &= -17;
-                                    int64_t _t4 = i + 1;
-                                    if (_t4 >= 64) {
+                                    if (( i + 1 ) >= 64) {
                                         break;
                                     }
-                                    i = _t4;
+                                    i = i + 1;
                                 }
                                 break;
                             }
                         }
                         if (allowed) {
-                            int64_t _t5 = move_2(from, p);
-                            lastWhite = _t5;
+                            int64_t _t4 = move_2(from, p);
+                            lastWhite = _t4;
                             showCursor = 0;
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
                                 lastBlack = move;
-                                int64_t _t6 = move_1(move);
+                                int64_t _t5 = move_1(move);
                                 ;
                             }
                         }
@@ -1682,19 +1669,19 @@ void _main() {
                         from = p;
                         state = 1;
                     } else {
-                        int64_t _t7 = move_2(from, p);
-                        lastWhite = _t7;
+                        int64_t _t6 = move_2(from, p);
+                        lastWhite = _t6;
                         refreshScreen_0();
                         state = 0;
                     }
                 } else {
                     if (_t1 == 117) {
-                        int64_t _t8 = lastBlack != 0;
-                        if (_t8) {
-                            int64_t _t9 = lastWhite != 0;
-                            _t8 = _t9;
+                        int64_t _t7 = lastBlack != 0;
+                        if (_t7) {
+                            int64_t _t8 = lastWhite != 0;
+                            _t7 = _t8;
                         }
-                        if (_t8) {
+                        if (_t7) {
                             undo_1(lastBlack);
                             undo_1(lastWhite);
                             refreshScreen_0();
@@ -1708,7 +1695,7 @@ void _main() {
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
-                                int64_t _t10 = move_1(move);
+                                int64_t _t9 = move_1(move);
                                 ;
                             }
                             showCursor = 1;
@@ -1716,20 +1703,20 @@ void _main() {
                             state = 0;
                         } else {
                             if (_t1 == 1001) {
-                                int64_t _t11 = org_bau_Int_min_2(7, xx + 1);
-                                xx = _t11;
+                                int64_t _t10 = org_bau_Int_min_2(7, xx + 1);
+                                xx = _t10;
                             } else {
                                 if (_t1 == 1000) {
-                                    int64_t _t12 = org_bau_Int_max_2(0, xx - 1);
-                                    xx = _t12;
+                                    int64_t _t11 = org_bau_Int_max_2(0, xx - 1);
+                                    xx = _t11;
                                 } else {
                                     if (_t1 == 1002) {
-                                        int64_t _t13 = org_bau_Int_max_2(0, yy - 1);
-                                        yy = _t13;
+                                        int64_t _t12 = org_bau_Int_max_2(0, yy - 1);
+                                        yy = _t12;
                                     } else {
                                         if (_t1 == 1003) {
-                                            int64_t _t14 = org_bau_Int_min_2(7, yy + 1);
-                                            yy = _t14;
+                                            int64_t _t13 = org_bau_Int_min_2(7, yy + 1);
+                                            yy = _t13;
                                         }
                                     }
                                 }

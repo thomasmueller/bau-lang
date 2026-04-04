@@ -337,15 +337,14 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t1 = isMunchausen_1(i);
-                if (_t1) {
+                int64_t _t0 = isMunchausen_1(i);
+                if (_t0) {
                     printf("%lld\n", (long long)i);
                 }
-                int64_t _t0 = i + 1;
-                if (_t0 >= 4400) {
+                if (( i + 1 ) >= 4400) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }

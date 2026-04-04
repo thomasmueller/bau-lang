@@ -323,11 +323,10 @@ void List_int_add_2(List_int* this, int64_t x) {
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->array->data[idx_2(i, _arrayLen(this->array))];
-                    int64_t _t2 = i + 1;
-                    if (_t2 >= this->size) {
+                    if (( i + 1 ) >= this->size) {
                         break;
                     }
-                    i = _t2;
+                    i = i + 1;
                 }
                 break;
             }
@@ -364,11 +363,10 @@ void test_0() {
             int64_t i = 0;
             while (1) {
                 printf("%lld\n", (long long)list->array->data[idx_2(i, _arrayLen(list->array))]);
-                int64_t _t1 = i + 1;
-                if (_t1 >= list->size) {
+                if (( i + 1 ) >= list->size) {
                     break;
                 }
-                i = _t1;
+                i = i + 1;
             }
             break;
         }

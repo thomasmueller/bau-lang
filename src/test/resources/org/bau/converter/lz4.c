@@ -1113,26 +1113,25 @@ int64_t org_bau_compress_Lz4Tool_compressFile_3(i8_array* inputFileName, i8_arra
                     int64_t i = 0;
                     while (1) {
                         outBlock->data[idx_2(i + 4, _arrayLen(outBlock))] = block->data[idx_2(i, _arrayLen(block))];
-                        int64_t _t6 = i + 1;
-                        if (_t6 >= read) {
+                        if (( i + 1 ) >= read) {
                             break;
                         }
-                        i = _t6;
+                        i = i + 1;
                     }
                     break;
                 }
             }
             org_bau_compress_Lz4_write4_3(outBlock, 0, writeBlockSize);
-            int64_t _t7 = org_bau_File_File_write_4(out, outBlock, 0, read + 4);
+            int64_t _t6 = org_bau_File_File_write_4(out, outBlock, 0, read + 4);
             ;
         } else {
             org_bau_compress_Lz4_write4_3(outBlock, 0, end - 4);
-            int64_t _t8 = org_bau_File_File_write_4(out, outBlock, 0, end);
+            int64_t _t7 = org_bau_File_File_write_4(out, outBlock, 0, end);
             ;
         }
     }
     org_bau_compress_Lz4_write4_3(outBlock, 0, 0);
-    int64_t _t9 = org_bau_File_File_write_4(out, outBlock, 0, 4);
+    int64_t _t8 = org_bau_File_File_write_4(out, outBlock, 0, 4);
     ;
     _decUseStack(lz4, org_bau_compress_Lz4_LZ4Compress);
     _decUseStack(outBlock, i8_array);
@@ -1336,11 +1335,10 @@ int64_t org_bau_compress_Lz4Tool_is_2(i8_array* a, i8_array* b) {
                 if (a->data[i] != b->data[i]) {
                     return 0;
                 }
-                int64_t _t0 = i + 1;
-                if (_t0 >= _arrayLen(a)) {
+                if (( i + 1 ) >= _arrayLen(a)) {
                     break;
                 }
-                i = _t0;
+                i = i + 1;
             }
             break;
         }

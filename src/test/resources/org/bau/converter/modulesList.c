@@ -336,11 +336,10 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
                 int64_t i = 0;
                 while (1) {
                     n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
-                    int64_t _t2 = i + 1;
-                    if (_t2 >= _arrayLen(this->array)) {
+                    if (( i + 1 ) >= _arrayLen(this->array)) {
                         break;
                     }
-                    i = _t2;
+                    i = i + 1;
                 }
                 break;
             }
