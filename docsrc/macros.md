@@ -120,7 +120,19 @@ Custom `for` loop functions can be implemented.
 The variable `_` marks the result, and `return _` is replaced with the loop body. 
 A `continue` statement jumps to the statement just after the `return`.
 
-As an example, the following allows to iterate over the elements of an array:
+One might one to iterate over the elements of an array or list.
+Sometimes it is useful to have the index and the value,
+or (for a hash table) the key and the value.
+For this purpose, a `pair` type can be used:
+
+    fun main()
+        array : int[5]
+        for i := until(array.len)
+            array[i] = i * 10        
+        for e := elements(array)
+            println('element ' e)        
+        for p := pairs(array)
+            println('index-value-pairs #' p.i ' = ' p.value)
 
     fun elements(array T[]) T
         if array.len
@@ -130,10 +142,6 @@ As an example, the following allows to iterate over the elements of an array:
                 return _
                 break i + 1 >= array.len
                 i += 1
-
-Sometimes it is useful to have the index and the value,
-or (for a hash table) the key and the value.
-For this purpose, a `pair` type can be used:
 
     type pair(T)
         i int
@@ -154,15 +162,6 @@ For this purpose, a `pair` type can be used:
                 break i + 1 >= array.len
                 i += 1
     
-    fun main()
-        array : int[5]
-        for i := until2(array.len)
-            array[i] = i * 10        
-        for e := elements(array)
-            println('element ' e)        
-        for p := pairs(array)
-            println('index-value-pairs #' p.i ' = ' p.value)
-
 ## Implementing Macros
 
 Macros are implemented like regular functions, by adding `macro`.
