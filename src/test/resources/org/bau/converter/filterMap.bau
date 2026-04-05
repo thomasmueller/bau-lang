@@ -1,0 +1,29 @@
+import org.bau.List
+    newList
+import org.bau.FilterMap
+    from
+
+type Point
+    x int
+    y int
+
+fun main()
+    list : newList(Point)
+    list.add(newPoint(1, 10))
+    list.add(newPoint(3, 300))
+    # for each entry that has y > 100
+    # calculate x * y, and store
+    # the result in a list of integers
+    l2 : from(Point).in(list).where(it.y > 100).
+        map(it.x * it.y).select()
+    for i := until(l2.len())
+        println(l2.get(i))
+
+fun newPoint(x int, y int) Point
+    p : Point()
+    p.x = x
+    p.y = y
+    return p
+
+## Expected
+900

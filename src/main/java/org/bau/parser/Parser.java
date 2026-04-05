@@ -420,7 +420,11 @@ public class Parser {
             while (true) {
                 String t = readIdentifier();
                 parameters.add(t);
-                DataType type = DataType.newUndefined(new FullName(targetModule, t));
+                String m = targetModule;
+                if (DataType.isGenericTypeName(t)) {
+                    m = "";
+                }
+                DataType type = DataType.newUndefined(new FullName(m, t));
                 functionContext.addTemporaryType(type);
                 template = true;
                 if (matchOp(")")) {
@@ -822,7 +826,7 @@ public class Parser {
                 if (DataType.isGenericTypeName(token) && !templateTypes.contains(token)) {
                     templateTypes.add(token);
                     template = true;
-                    type = DataType.newUndefined(new FullName(targetModule, token));
+                    type = DataType.newUndefined(new FullName("", token));
                     functionContext.addTemporaryType(type);
                     type = readType(template);
                     if (matchOp("..")) {
@@ -836,7 +840,11 @@ public class Parser {
                     template = true;
                     type = DataType.TYPE_TYPE;
                     templateTypes.add(name);
-                    DataType t = DataType.newUndefined(new FullName(targetModule, name));
+                    String m = targetModule;
+                    if (DataType.isGenericTypeName(name)) {
+                        m = "";
+                    }
+                    DataType t = DataType.newUndefined(new FullName(m, name));
                     functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
@@ -1032,7 +1040,7 @@ public class Parser {
         }
         String m;
         m = program.getImportModule(module, name);
-        if (m.isEmpty()) {
+        if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
             m = module;
         }
         DataType t = functionContext.getType(m, name);
@@ -2182,7 +2190,7 @@ public class Parser {
             FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
             String notFound = "Function '" + identifier + "' not found";
             if (type != null) {
-                notFound += " on type " + type;
+                notFound += " on type " + type.format();
             }
             if (didYouMean != null) {
                 notFound += "; did you mean " + didYouMean.toString() + " ?";

@@ -1,0 +1,74 @@
+fun until(lessThan int) 0 .. lessThan
+    if lessThan > 0
+        _ := 0..lessThan
+        loop
+            return _
+            break _ + 1 >= lessThan
+            _ += 1
+
+fun elements(array T[]) T
+    if array.len
+        i := 0..array.len
+        loop
+            _ : array[i]
+            return _
+            break i + 1 >= array.len
+            i += 1
+
+type pair(T)
+    i int
+    value T
+
+fun newPair(value T, index int) pair(T)
+    result : pair(T)()
+    result.value = value
+    result.i = index
+    return result
+
+fun pairs(array T[]) pair(T)
+    if array.len
+        i := 0..array.len
+        loop
+            _ : newPair(array[i], i)
+            return _
+            break i + 1 >= array.len
+            i += 1
+
+fun main()
+    array : int[5]
+    for i := until(array.len)
+        array[i] = i * 10        
+    for e := elements(array)
+        println('element ' e)        
+    for p := pairs(array)
+        println('index-value-pairs #' p.i ' = ' p.value)
+        
+    floats : float[5]
+    for i := until(floats.len)
+        floats[i] = i * 10 + 0.1
+    for e := elements(floats)
+        println('element ' e)        
+    for p := pairs(floats)
+        println('index-value-pairs #' p.i ' = ' p.value)
+
+## Expected
+element 0
+element 10
+element 20
+element 30
+element 40
+index-value-pairs #0 = 0
+index-value-pairs #1 = 10
+index-value-pairs #2 = 20
+index-value-pairs #3 = 30
+index-value-pairs #4 = 40
+element 0.1
+element 10.1
+element 20.1
+element 30.1
+element 40.1
+index-value-pairs #0 = 0.1
+index-value-pairs #1 = 10.1
+index-value-pairs #2 = 20.1
+index-value-pairs #3 = 30.1
+index-value-pairs #4 = 40.1

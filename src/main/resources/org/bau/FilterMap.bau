@@ -8,7 +8,7 @@ type FilterMap(T)
 fun from(T type) FilterMap(T)
     return FilterMap(T)(List(T)())
 
-fun in(list List(T)) FilterMap(T)
+fun FilterMap(T) in(list List(T)) FilterMap(T)
     this.list = list
     return this
 
@@ -33,7 +33,7 @@ fun FilterMap(T) map(expression(T) U) macro FilterMap(U)
         x : expression
         result.add(x)
         i += 1
-    return from(U, result)
+    return from(U).in(result)
 
 fun FilterMap(T) select() List(T)
     return this.list

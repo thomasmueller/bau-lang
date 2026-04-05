@@ -113,27 +113,28 @@ public class Assignment implements Statement {
             incRefCount = false;
         }
         Value val = value.eval(m);
-        if (val != null) {
-            if (val instanceof ValuePanic) {
-                return StatementResult.PANIC;
-            } else if (val instanceof ValueException) {
-                return StatementResult.THROW;
+        if (val == null) {
+            return StatementResult.TIMEOUT;
+        }
+        if (val instanceof ValuePanic) {
+            return StatementResult.PANIC;
+        } else if (val instanceof ValueException) {
+            return StatementResult.THROW;
+        }
+        Value panic;
+        if (modify != null) {
+            Value old = leftValue.eval(m);
+            if (old == null) {
+                throw new IllegalStateException();
             }
-            Value panic;
-            if (modify != null) {
-                Value old = leftValue.eval(m);
-                if (old == null) {
-                    throw new IllegalStateException();
-                }
-                Value v2 = Operation.eval(leftValue.type(), old, modify, val);
-                panic = leftValue.setValue(m, v2, incRefCount, initial);
-            } else {
-                panic = leftValue.setValue(m, val, incRefCount, initial);
-            }
-            if (panic != null) {
-                m.setGlobal(Memory.PANIC, val);
-                return StatementResult.PANIC;
-            }
+            Value v2 = Operation.eval(leftValue.type(), old, modify, val);
+            panic = leftValue.setValue(m, v2, incRefCount, initial);
+        } else {
+            panic = leftValue.setValue(m, val, incRefCount, initial);
+        }
+        if (panic != null) {
+            m.setGlobal(Memory.PANIC, val);
+            return StatementResult.PANIC;
         }
         return StatementResult.OK;
     }

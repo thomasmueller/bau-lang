@@ -109,7 +109,7 @@ public class Program {
             return def;
         }
         // generic T function
-        DataType t2 = DataType.newUndefined(new FullName(module, "T"));
+        DataType t2 = DataType.newUndefined(new FullName("", "T"));
         if (type.isArray()) {
             t2 = t2.arrayType();
         }
@@ -1297,6 +1297,8 @@ public class Program {
             }
             if (n == StatementResult.OK) {
                 // ok
+            } else if (n == StatementResult.TIMEOUT) {
+                return n;
             } else if (n == StatementResult.BREAK) {
                 return n;
             } else if (n == StatementResult.CONTINUE) {

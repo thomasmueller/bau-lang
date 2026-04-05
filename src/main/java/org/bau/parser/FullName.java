@@ -10,6 +10,9 @@ public class FullName {
 
     public FullName(String module, String name) {
         Utils.assertTrue(module != null);
+        if (DataType.isGenericTypeName(name)) {
+            Utils.assertTrue(module.isEmpty());
+        }
         this.module = module;
         this.name = name;
     }

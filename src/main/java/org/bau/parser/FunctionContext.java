@@ -207,6 +207,9 @@ public class FunctionContext {
 
     public DataType getType(String module, String name) {
         Utils.assertTrue(module != null);
+        if (DataType.isGenericTypeName(name)) {
+            return null;
+        }
         // check built-in types first (int, float,...)
         DataType t = program.getType("", name);
         if (t != null && t.isNumber()) {
@@ -214,7 +217,7 @@ public class FunctionContext {
         }
         String fullName = new FullName(module, name).getFullName();
         t = dataTypeMap.get(fullName);
-        if (t == null && (module != null && !module.isEmpty())) {
+        if (t == null && !module.isEmpty()) {
             t = dataTypeMap.get(name);
         }
         if (t == null) {

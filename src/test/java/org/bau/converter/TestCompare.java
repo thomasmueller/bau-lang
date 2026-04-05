@@ -146,8 +146,18 @@ public class TestCompare {
     }
 
     @Test
+    public void filterMap() throws IOException {
+        test("filterMap");
+    }
+
+    @Test
     public void forLoopBreakContinue() throws IOException {
         test("forLoopBreakContinue");
+    }
+
+    @Test
+    public void forLoops() throws IOException {
+        test("forLoops");
     }
 
     @Test

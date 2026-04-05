@@ -10,19 +10,19 @@ randomSeed := 0
 
 # Set the random seed.
 fun setRandomSeed(seed int)
-  randomSeed = seed
+    randomSeed = seed
 
 # Get the random seed.
 fun getRandomSeed() int
-  return randomSeed
+    return randomSeed
 
 # Pseudo-random number generated using the Splitmix64 algorithm.
 fun random() int
-  randomSeed += 0x9e3779b97f4a7c15
-  z := randomSeed
-  z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
-  z = (z ^ (z >> 27)) * 0x94d049bb133111eb
-  return z ^ (z >> 31)
+    randomSeed += 0x9e3779b97f4a7c15
+    z := randomSeed
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9
+    z = (z ^ (z >> 27)) * 0x94d049bb133111eb
+    return z ^ (z >> 31)
 
 # Pseudo-random number between 0 and smallerThan (excluding).
 fun random(smallerThan int) int
@@ -35,5 +35,5 @@ fun random(smallerThan int) int
     loop
         x : random() >> 1
         result : x % limit
-        #if result >= x + max
+        # if result >= x + max
         return result
