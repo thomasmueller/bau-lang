@@ -311,8 +311,8 @@ void List_int_add_2(List_int* this, int64_t x);
 int64_t List_int_get_2(List_int* this, int64_t x);
 int64_t idx_2(int64_t x, int64_t len);
 int64_t imod_2(int64_t a, int64_t b);
+int_array* intRange_2(int64_t start, int64_t end);
 List_int* newList_int_1(int64_t _T);
-int_array* range_2(int64_t start, int64_t end);
 List_int* rangeList_2(int64_t start, int64_t end);
 void i8_array_free(i8_array* x);
 void int_array_free(int_array* x);
@@ -355,9 +355,9 @@ List_int* List_int_0() {
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {
-        int_array* _t1 = int_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        int_array* n = _t1;
+        int_array* _t2 = int_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        int_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -375,7 +375,7 @@ void List_int_add_2(List_int* this, int64_t x) {
         _decUse(this->array, int_array);
         this->array = n;
         _decUseStack(n, int_array);
-        _decUseStack(_t1, int_array);
+        _decUseStack(_t2, int_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
@@ -392,16 +392,7 @@ int64_t imod_2(int64_t a, int64_t b) {
     if (b != 0) return a % b;
     return 0;
 }
-List_int* newList_int_1(int64_t _T) {
-    List_int* result = List_int_0();
-    int_array* _t0 = int_array_new(4);
-    _incUseStack(_t0);
-    _decUse(result->array, int_array);
-    result->array = _t0;
-    _decUseStack(_t0, int_array);
-    return result;
-}
-int_array* range_2(int64_t start, int64_t end) {
+int_array* intRange_2(int64_t start, int64_t end) {
     int_array* _t0 = int_array_new(end - start);
     _incUseStack(_t0);
     int_array* list = _t0;
@@ -420,6 +411,15 @@ int_array* range_2(int64_t start, int64_t end) {
     }
     _decUseStack(_t0, int_array);
     return list;
+}
+List_int* newList_int_1(int64_t _T) {
+    List_int* result = List_int_0();
+    int_array* _t0 = int_array_new(4);
+    _incUseStack(_t0);
+    _decUse(result->array, int_array);
+    result->array = _t0;
+    _decUseStack(_t0, int_array);
+    return result;
 }
 List_int* rangeList_2(int64_t start, int64_t end) {
     List_int* list = newList_int_1(0);
@@ -501,7 +501,7 @@ void _main() {
     if (1) {
         int_array* _t3 = NULL;
         if (1) {
-            int_array* this = range_2(0, 10);
+            int_array* this = intRange_2(0, 10);
             int_array* _0t0 = int_array_new(_arrayLen(this));
             _incUseStack(_0t0);
             int_array* _u_temp = _0t0;

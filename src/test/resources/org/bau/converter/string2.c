@@ -434,9 +434,9 @@ org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_str
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     org_bau_String_string_copy(&x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_String_string_array* _t1 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        org_bau_String_string_array* n = _t1;
+        org_bau_String_string_array* _t2 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        org_bau_String_string_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -455,7 +455,7 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         _decUse(this->array, org_bau_String_string_array);
         this->array = n;
         _decUseStack(n, org_bau_String_string_array);
-        _decUseStack(_t1, org_bau_String_string_array);
+        _decUseStack(_t2, org_bau_String_string_array);
     }
     org_bau_String_string_copy(&x);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
@@ -468,10 +468,10 @@ org_bau_String_string org_bau_List_List_org_bau_String_string_get_2(org_bau_List
     return _r1;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
-    _t1->data = i8_array_new(0);
-    _t1->len = 0;
-    return _t1;
+    org_bau_String_StringBuilder* _t2 = org_bau_String_StringBuilder_new();
+    _t2->data = i8_array_new(0);
+    _t2->len = 0;
+    return _t2;
 }
 int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find) {
     int64_t _t0 = org_bau_String_indexOf_3(s, find, 0);

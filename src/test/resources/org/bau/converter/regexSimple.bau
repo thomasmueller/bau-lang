@@ -53,12 +53,6 @@ type match
     start int
     end int
 
-fun match(start int, end int) match
-    m := match()
-    m.start = start
-    m.end = end
-    return m
-
 fun parse(regex i8[]) List(Token) throws exception
     result := newList(Token)
     i := 0

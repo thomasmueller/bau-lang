@@ -487,12 +487,13 @@ public class Parser {
         }
         functionContext.rewindStack(stackPos);
         type.traitNames.addAll(traitNames);
-        defineConstructor(type);
+        defineConstructors(type);
         return true;
     }
 
-    private void defineConstructor(DataType type) {
+    private void defineConstructors(DataType type) {
         int stackPos = functionContext.getStackPos();
+        // required fields constructor
         FunctionDefinition def = new FunctionDefinition(type.getFullName(), 0);
         def.isConstructor = true;
         def.returnType = type;
@@ -507,6 +508,8 @@ public class Parser {
                 assign.value = var.type().nullExpression();
             } else if (var.type().isArray()) {
                 assign.value = var.type().nullExpression();
+            } else if (var.type().isNullable()) {
+                assign.value = var.type().nullExpression();
             } else {
                 Variable arg = new Variable(var.name(), var.type());
                 def.parameters.add(arg);
@@ -517,6 +520,31 @@ public class Parser {
         Return ret = new Return(result);
         def.list.add(ret);
         program.addFunction(def);
+        functionContext.rewindStack(stackPos);
+
+        if (def.parameters.size() == type.fields.size()) {
+            return;
+        }
+
+        // all fields constructor
+        FunctionDefinition def2 = new FunctionDefinition(type.getFullName(), 0);
+        def2.isConstructor = true;
+        def2.returnType = type;
+        New n2 = new New(type, null);
+        Variable result2 = assignTempVariable(def2.list, n2);
+        for (Variable var : type.fields) {
+            Assignment assign = new Assignment();
+            assign.type = var.type();
+            assign.initial = true;
+            assign.leftValue = new FieldAccess(result2, var.name(), var.type());
+            Variable arg = new Variable(var.name(), var.type());
+            def2.parameters.add(arg);
+            assign.value = arg;
+            def2.list.add(assign);
+        }
+        Return ret2 = new Return(result2);
+        def2.list.add(ret2);
+        program.addFunction(def2);
         functionContext.rewindStack(stackPos);
     }
 
@@ -615,6 +643,7 @@ public class Parser {
         currentLoop = null;
         int defIndent = indent;
         isGlobalScope = false;
+        int stackPos = functionContext.getStackPos();
         DataType callType;
         String id = null;
         boolean template = DataType.isGenericTypeName(token);
@@ -655,7 +684,6 @@ public class Parser {
             parseTypeFunctionTemplate(defIndent, callType);
             return true;
         }
-        int stackPos = functionContext.getStackPos();
         if (currentFunctionDefinition != null) {
             throw new IllegalStateException();
         }
@@ -2849,6 +2877,22 @@ public class Parser {
         if (!matchOp(":=")) {
             throw syntaxError("Expected ':=', got '" + token + "' in 'for' statement");
         }
+        Call call = new Call();
+        Expression expr;
+        if ("range".equals(token) || "until".equals(token)) {
+            Std.registerUntil(program);
+            Std.registerRange(program);
+            String method = readIdentifier();
+            if (!matchOp("(")) {
+                throw syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
+            }
+            expr = parseCall(null, "", method, call, false);
+        } else {
+            expr = parseExpressionPrimary();
+        }
+
+
+        /*
         String method = readIdentifier();
         if (!matchOp("(")) {
             throw syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
@@ -2861,6 +2905,9 @@ public class Parser {
         }
         Call call = new Call();
         Expression expr = parseCall(null, "", method, call, false);
+        */
+
+
         if (!(expr instanceof Call)) {
             throw syntaxError("Only range functions are supported");
         }

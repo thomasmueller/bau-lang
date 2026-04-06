@@ -527,9 +527,9 @@ int64_t org_bau_File_File_write_4(org_bau_File_File* this, i8_array* data, int64
     return 0;
 }
 org_bau_compress_Lz4_LZ4Compress* org_bau_compress_Lz4_LZ4Compress_0() {
-    org_bau_compress_Lz4_LZ4Compress* _t1 = org_bau_compress_Lz4_LZ4Compress_new();
-    _t1->hashTable = int_array_new(0);
-    return _t1;
+    org_bau_compress_Lz4_LZ4Compress* _t2 = org_bau_compress_Lz4_LZ4Compress_new();
+    _t2->hashTable = int_array_new(0);
+    return _t2;
 }
 org_bau_compress_Lz4_XXHash* org_bau_compress_Lz4_XXHash_0() {
     org_bau_compress_Lz4_XXHash* _t0 = org_bau_compress_Lz4_XXHash_new();

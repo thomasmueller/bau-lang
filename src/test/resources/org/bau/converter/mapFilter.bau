@@ -44,7 +44,7 @@ fun rangeList(start int, end int) List(int)
         list.add(i + start)
     return list
 
-fun range(start int, end int) int[]
+fun intRange(start int, end int) int[]
     list : int[end - start]
     for i := until(end - start)
         list[i] = i + start
@@ -80,7 +80,7 @@ fun main()
     list : rangeList(0, 10).filter(it % 2 == 0).map(it * it)
     for i := until(list.size)
         println(i ': ' list.get(i))
-    array : range(0, 10).filterInt(it % 2 == 0).mapInt(it * it)
+    array : intRange(0, 10).filterInt(it % 2 == 0).mapInt(it * it)
     for i := until(array.len)
         println(i ': ' array[i])
 

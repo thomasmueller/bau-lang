@@ -511,9 +511,9 @@ org_bau_List_List_Point* org_bau_List_newList_Point_1(int64_t _T) {
 void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
     _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Point_array* _t1 = Point_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        Point_array* n = _t1;
+        Point_array* _t2 = Point_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        Point_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -533,7 +533,7 @@ void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
         _decUse(this->array, Point_array);
         this->array = n;
         _decUseStack(n, Point_array);
-        _decUseStack(_t1, Point_array);
+        _decUseStack(_t2, Point_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Point);
@@ -543,9 +543,9 @@ void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {
-        int_array* _t1 = int_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        int_array* n = _t1;
+        int_array* _t2 = int_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        int_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -563,7 +563,7 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
         _decUse(this->array, int_array);
         this->array = n;
         _decUseStack(n, int_array);
-        _decUseStack(_t1, int_array);
+        _decUseStack(_t2, int_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;

@@ -1,18 +1,10 @@
-fun until(lessThan int) 0 .. lessThan
-    if lessThan > 0
-        _ := 0..lessThan
+fun T[] elements() T
+    if this.len
+        i := 0..this.len
         loop
+            _ : this[i]
             return _
-            break _ + 1 >= lessThan
-            _ += 1
-
-fun elements(array T[]) T
-    if array.len
-        i := 0..array.len
-        loop
-            _ : array[i]
-            return _
-            break i + 1 >= array.len
+            break i + 1 >= this.len
             i += 1
 
 type pair(T)
@@ -38,7 +30,7 @@ fun main()
     array : int[5]
     for i := until(array.len)
         array[i] = i * 10        
-    for e := elements(array)
+    for e := array.elements()
         println('element ' e)        
     for p := pairs(array)
         println('index-value-pairs #' p.i ' = ' p.value)
@@ -46,7 +38,7 @@ fun main()
     floats : float[5]
     for i := until(floats.len)
         floats[i] = i * 10 + 0.1
-    for e := elements(floats)
+    for e := floats.elements()
         println('element ' e)        
     for p := pairs(floats)
         println('index-value-pairs #' p.i ' = ' p.value)

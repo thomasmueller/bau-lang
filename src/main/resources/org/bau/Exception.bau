@@ -6,6 +6,4 @@ type exception
   message i8[]
 
 fun newException(message i8[]) exception
-    result : exception()
-    result.message = message
-    return result
+    return exception(0, message)

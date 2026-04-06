@@ -137,13 +137,14 @@ and not `null` is considered true.
     for i := range(0, 10)
         println(i)
 
-`for` is internally converted to `loop`:
+`for` is internally converted to `loop`.
 
     i := 0
     loop i < 10
         println(i)
         i += 1
 
+<a href="docsrc/macros.md#implementing-for-loop-functions">Custom `for` loops</a>, are supported.
 `break` exits a loop. `continue` restarts.
 They may have a condition:
 
@@ -375,8 +376,8 @@ types that start with uppercase are referenced
 If a type has a `close` function, then it is called
 before the memory is freed.
 
-For each type, a constructor is automatically added,
-which has the non-nullable fields as arguments.
+For each type, a constructor is automatically added
+with the non-nullable fields, and one with all fields.
 
 Functions on built-in types, and arrays, are allowed.
 Functions on foreign types are only visible within

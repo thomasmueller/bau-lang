@@ -323,12 +323,12 @@ i8_array* string_1003;
 i8_array* string_1004;
 int64_t randomSeed;
 Tree* Tree_2(Tree* left, Tree* right) {
-    Tree* _t0 = Tree_new();
+    Tree* _t1 = Tree_new();
     _incUseStack(left);
-    _t0->left = left;
+    _t1->left = left;
     _incUseStack(right);
-    _t0->right = right;
-    return _t0;
+    _t1->right = right;
+    return _t1;
 }
 int64_t Tree_nodeCount_1(Tree* this) {
     int64_t result = 1;

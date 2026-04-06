@@ -717,9 +717,9 @@ org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_str
 void org_bau_List_List_Customer_add_2(org_bau_List_List_Customer* this, Customer* x) {
     _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Customer_array* _t1 = Customer_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        Customer_array* n = _t1;
+        Customer_array* _t2 = Customer_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        Customer_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -739,7 +739,7 @@ void org_bau_List_List_Customer_add_2(org_bau_List_List_Customer* this, Customer
         _decUse(this->array, Customer_array);
         this->array = n;
         _decUseStack(n, Customer_array);
-        _decUseStack(_t1, Customer_array);
+        _decUseStack(_t2, Customer_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Customer);
@@ -755,9 +755,9 @@ Customer* org_bau_List_List_Customer_get_2(org_bau_List_List_Customer* this, int
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     org_bau_String_string_copy(&x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_String_string_array* _t1 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        org_bau_String_string_array* n = _t1;
+        org_bau_String_string_array* _t2 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        org_bau_String_string_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -776,7 +776,7 @@ void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_Str
         _decUse(this->array, org_bau_String_string_array);
         this->array = n;
         _decUseStack(n, org_bau_String_string_array);
-        _decUseStack(_t1, org_bau_String_string_array);
+        _decUseStack(_t2, org_bau_String_string_array);
     }
     org_bau_String_string_copy(&x);
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
@@ -822,10 +822,10 @@ i8_array* org_bau_Std_convertIntToI8Array_1(int64_t x) {
     return buff;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
-    _t1->data = i8_array_new(0);
-    _t1->len = 0;
-    return _t1;
+    org_bau_String_StringBuilder* _t2 = org_bau_String_StringBuilder_new();
+    _t2->data = i8_array_new(0);
+    _t2->len = 0;
+    return _t2;
 }
 int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find) {
     int64_t _t0 = org_bau_String_indexOf_3(s, find, 0);
@@ -1066,9 +1066,9 @@ org_bau_db_Sqlite3_Query_Customer* org_bau_db_Sqlite3_Query_Customer_4(org_bau_d
     return _t0;
 }
 org_bau_db_Sqlite3_Record* org_bau_db_Sqlite3_Record_0() {
-    org_bau_db_Sqlite3_Record* _t2 = org_bau_db_Sqlite3_Record_new();
-    _t2->data = i8_array_new(0);
-    return _t2;
+    org_bau_db_Sqlite3_Record* _t4 = org_bau_db_Sqlite3_Record_new();
+    _t4->data = i8_array_new(0);
+    return _t4;
 }
 org_bau_db_Sqlite3_Sqlite* org_bau_db_Sqlite3_Sqlite_0() {
     org_bau_db_Sqlite3_Sqlite* _t0 = org_bau_db_Sqlite3_Sqlite_new();
@@ -1209,9 +1209,9 @@ void org_bau_db_Sqlite3_setField_Customer_3(Customer* row, int64_t c, org_bau_db
     }
 }
 org_bau_db_Sqlite3_text org_bau_db_Sqlite3_text_0() {
-    org_bau_db_Sqlite3_text _t1 = org_bau_db_Sqlite3_text_new();
-    _t1.data = i8_array_new(0);
-    return _t1;
+    org_bau_db_Sqlite3_text _t2 = org_bau_db_Sqlite3_text_new();
+    _t2.data = i8_array_new(0);
+    return _t2;
 }
 org_bau_List_List_Customer* org_bau_db_Sqlite3_Query_Customer_select_1(org_bau_db_Sqlite3_Query_Customer* this) {
     org_bau_String_StringBuilder* buff = org_bau_String_newStringBuilder_1(16);

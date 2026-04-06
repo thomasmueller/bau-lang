@@ -322,12 +322,12 @@ i8_array* string_1003;
 i8_array* string_1004;
 int64_t randomSeed;
 Tree_owned* Tree_2(Tree_owned* left, Tree_owned* right) {
-    Tree_owned* _t0 = Tree_owned_new();
-    _t0->left = left;
+    Tree_owned* _t1 = Tree_owned_new();
+    _t1->left = left;
     left = NULL;
-    _t0->right = right;
+    _t1->right = right;
     right = NULL;
-    return _t0;
+    return _t1;
 }
 int64_t Tree_owned_nodeCount_1(Tree_owned* this) {
     int64_t result = 1;

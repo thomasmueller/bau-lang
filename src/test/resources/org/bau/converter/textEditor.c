@@ -1052,37 +1052,6 @@ org_bau_List_List_org_bau_String_string* org_bau_List_newList_org_bau_String_str
 void org_bau_List_List_org_bau_String_string_add_2(org_bau_List_List_org_bau_String_string* this, org_bau_String_string x) {
     org_bau_String_string_copy(&x);
     if (this->size >= _arrayLen(this->array)) {
-        org_bau_String_string_array* _t1 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        org_bau_String_string_array* n = _t1;
-        if (_arrayLen(this->array) > 0) {
-            while (1 == 1) {
-                int64_t i = 0;
-                while (1) {
-                    org_bau_String_string_copy(&this->array->data[i]);
-                    n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
-                    if (( i + 1 ) >= _arrayLen(this->array)) {
-                        break;
-                    }
-                    i = i + 1;
-                }
-                break;
-            }
-        }
-        _incUseStack(n);
-        _decUse(this->array, org_bau_String_string_array);
-        this->array = n;
-        _decUseStack(n, org_bau_String_string_array);
-        _decUseStack(_t1, org_bau_String_string_array);
-    }
-    org_bau_String_string_copy(&x);
-    this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
-    this->size += 1;
-    org_bau_String_string_free(&x);
-}
-void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_String_string* this, int64_t index, org_bau_String_string x) {
-    org_bau_String_string_copy(&x);
-    if (this->size >= _arrayLen(this->array)) {
         org_bau_String_string_array* _t2 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
         _incUseStack(_t2);
         org_bau_String_string_array* n = _t2;
@@ -1106,6 +1075,37 @@ void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_Str
         _decUseStack(n, org_bau_String_string_array);
         _decUseStack(_t2, org_bau_String_string_array);
     }
+    org_bau_String_string_copy(&x);
+    this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
+    this->size += 1;
+    org_bau_String_string_free(&x);
+}
+void org_bau_List_List_org_bau_String_string_add_3(org_bau_List_List_org_bau_String_string* this, int64_t index, org_bau_String_string x) {
+    org_bau_String_string_copy(&x);
+    if (this->size >= _arrayLen(this->array)) {
+        org_bau_String_string_array* _t3 = org_bau_String_string_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t3);
+        org_bau_String_string_array* n = _t3;
+        if (_arrayLen(this->array) > 0) {
+            while (1 == 1) {
+                int64_t i = 0;
+                while (1) {
+                    org_bau_String_string_copy(&this->array->data[i]);
+                    n->data[idx_2(i, _arrayLen(n))] = this->array->data[i];
+                    if (( i + 1 ) >= _arrayLen(this->array)) {
+                        break;
+                    }
+                    i = i + 1;
+                }
+                break;
+            }
+        }
+        _incUseStack(n);
+        _decUse(this->array, org_bau_String_string_array);
+        this->array = n;
+        _decUseStack(n, org_bau_String_string_array);
+        _decUseStack(_t3, org_bau_String_string_array);
+    }
     int64_t p = this->size;
     while (p > index) {
         org_bau_String_string_copy(&this->array->data[idx_2(p - 1, _arrayLen(this->array))]);
@@ -1127,10 +1127,10 @@ void org_bau_List_List_org_bau_String_string_remove_2(org_bau_List_List_org_bau_
     this->array->data[idx_2(pos, _arrayLen(this->array))] = org_bau_String_string_new();
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
-    _t1->data = i8_array_new(0);
-    _t1->len = 0;
-    return _t1;
+    org_bau_String_StringBuilder* _t2 = org_bau_String_StringBuilder_new();
+    _t2->data = i8_array_new(0);
+    _t2->len = 0;
+    return _t2;
 }
 int64_t org_bau_String_indexOf_2(i8_array* s, i8_array* find) {
     int64_t _t0 = org_bau_String_indexOf_3(s, find, 0);
@@ -1495,10 +1495,10 @@ org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0() {
     return _t0;
 }
 org_bau_os_Terminal_windowSize org_bau_os_Terminal_windowSize_0() {
-    org_bau_os_Terminal_windowSize _t1 = org_bau_os_Terminal_windowSize_new();
-    _t1.rows = 0;
-    _t1.columns = 0;
-    return _t1;
+    org_bau_os_Terminal_windowSize _t2 = org_bau_os_Terminal_windowSize_new();
+    _t2.rows = 0;
+    _t2.columns = 0;
+    return _t2;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -1869,8 +1869,8 @@ void _main() {
     findText = org_bau_String_string_0();
     mode = 0;
     currentWindowSize = org_bau_os_Terminal_getWindowSize_0();
-    org_bau_List_List_org_bau_String_string* _t1 = org_bau_List_newList_org_bau_String_string_1(0);
-    currentFile = fileContent_1(_t1);
+    org_bau_List_List_org_bau_String_string* _t2 = org_bau_List_newList_org_bau_String_string_1(0);
+    currentFile = fileContent_1(_t2);
     int64_t _t0 = org_bau_os_Terminal_isTerminal_0();
     if (!(_t0)) {
         printf("Not a terminal\n");
@@ -2073,7 +2073,7 @@ void _main() {
     org_bau_os_Terminal_termIos_free(&oldTermIos);
     org_bau_String_string_free(&findText);
     org_bau_os_Terminal_windowSize_free(&currentWindowSize);
-    _decUseStack(_t1, org_bau_List_List_org_bau_String_string);
+    _decUseStack(_t2, org_bau_List_List_org_bau_String_string);
     fileContent_free(&currentFile);
     _end();
 }

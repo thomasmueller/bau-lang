@@ -793,9 +793,9 @@ org_bau_BigInt_bigInt org_bau_BigInt_newBigIntShorten_2(i32_array* data, int64_t
     return result;
 }
 org_bau_BigInt_str org_bau_BigInt_str_0() {
-    org_bau_BigInt_str _t1 = org_bau_BigInt_str_new();
-    _t1.data = i8_array_new(0);
-    return _t1;
+    org_bau_BigInt_str _t2 = org_bau_BigInt_str_new();
+    _t2.data = i8_array_new(0);
+    return _t2;
 }
 org_bau_BigInt_bigInt org_bau_BigInt_sub_2(i32_array* a, i32_array* b) {
     i32_array* result = org_bau_BigInt_copyOf_2(a, _arrayLen(a));

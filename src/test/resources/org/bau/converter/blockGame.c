@@ -564,10 +564,10 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     return result;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t1 = org_bau_String_StringBuilder_new();
-    _t1->data = i8_array_new(0);
-    _t1->len = 0;
-    return _t1;
+    org_bau_String_StringBuilder* _t2 = org_bau_String_StringBuilder_new();
+    _t2->data = i8_array_new(0);
+    _t2->len = 0;
+    return _t2;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
     org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));

@@ -315,14 +315,14 @@ List_int* List_int_0() {
 }
 void List_int_add_2(List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {
-        int_array* _t1 = int_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        int_array* n = _t1;
+        int_array* _t2 = int_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        int_array* n = _t2;
         _incUseStack(n);
         _decUse(this->array, int_array);
         this->array = n;
         _decUseStack(n, int_array);
-        _decUseStack(_t1, int_array);
+        _decUseStack(_t2, int_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;

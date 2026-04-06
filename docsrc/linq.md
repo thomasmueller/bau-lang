@@ -58,7 +58,7 @@ The collection backend has similar features:
         # for each entry that has y > 100
         # calculate x * y, and store
         # the result in a list of integers
-        l2 : from(Point, list).where(it.y > 100).
+        l2 : from(Point).in(list).where(it.y > 100).
             map(it.x * it.y).select()
         for i := until(l2.len())
             println(l2.get(i))

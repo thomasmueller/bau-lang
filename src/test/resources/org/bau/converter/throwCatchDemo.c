@@ -302,7 +302,7 @@ _int64_t_or_exception exception_int64_t_or_exception(org_bau_Exception_exception
 int __argc;
 char **__argv;
 /* functions */
-org_bau_Exception_exception org_bau_Exception_exception_0();
+org_bau_Exception_exception org_bau_Exception_exception_2(int64_t exceptionType, i8_array* message);
 org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message);
 _int64_t_or_exception square_1(int64_t x);
 void i8_array_free(i8_array* x);
@@ -333,18 +333,16 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1000;
-org_bau_Exception_exception org_bau_Exception_exception_0() {
-    org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
-    _t0.exceptionType = 0;
-    _t0.message = i8_array_new(0);
-    return _t0;
+org_bau_Exception_exception org_bau_Exception_exception_2(int64_t exceptionType, i8_array* message) {
+    org_bau_Exception_exception _t1 = org_bau_Exception_exception_new();
+    _t1.exceptionType = exceptionType;
+    _incUseStack(message);
+    _t1.message = message;
+    return _t1;
 }
 org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message) {
-    org_bau_Exception_exception result = org_bau_Exception_exception_0();
-    _incUseStack(message);
-    _decUse(result.message, i8_array);
-    result.message = message;
-    return result;
+    org_bau_Exception_exception _t0 = org_bau_Exception_exception_2(0, message);
+    return _t0;
 }
 _int64_t_or_exception square_1(int64_t x) {
     org_bau_Exception_exception _lastException;

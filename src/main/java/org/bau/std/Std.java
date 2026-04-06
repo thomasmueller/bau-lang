@@ -154,10 +154,10 @@ public class Std {
             return;
         }
         String type = "fun range(start int, lessThan int) int\n"
-                + "  _ := start\n"
-                + "  loop _ < lessThan\n"
-                + "    return _\n"
-                + "    _ += 1";
+                + "    _ := start\n"
+                + "    loop _ < lessThan\n"
+                + "        return _\n"
+                + "        _ += 1";
         Parser parser = new Parser(type);
         Program p = parser.parse();
         program.addFunction(p.getFunction(null, "", "range", 2));
@@ -168,12 +168,12 @@ public class Std {
             return;
         }
         String type = "fun until(lessThan int) 0..lessThan\n"
-                + "  if lessThan > 0\n"
-                + "    _ := 0..lessThan\n"
-                + "    loop\n"
-                + "      return _\n"
-                + "      break _ + 1 >= lessThan\n"
-                + "      _ += 1";
+                + "    if lessThan > 0\n"
+                + "        _ := 0..lessThan\n"
+                + "        loop\n"
+                + "            return _\n"
+                + "            break _ + 1 >= lessThan\n"
+                + "            _ += 1";
         Parser parser = new Parser(type);
         Program p = parser.parse();
         program.addFunction(p.getFunction(null, "", "until", 1));

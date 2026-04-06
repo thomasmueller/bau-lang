@@ -409,12 +409,11 @@ Token* Token_1(org_bau_List_List_i8* data);
 _int64_t_or_exception Token_matchChar_3(Token* this, i8_array* text, int64_t pos);
 _match_or_exception find_2(i8_array* text, i8_array* regex);
 int64_t idx_2(int64_t x, int64_t len);
-match match_0();
 match match_2(int64_t start, int64_t end);
 _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp);
 _int64_t_or_exception matchStar_6(Token* t, org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp, int64_t max);
 _int64_t_or_exception matches_2(i8_array* text, i8_array* regex);
-org_bau_Exception_exception org_bau_Exception_exception_0();
+org_bau_Exception_exception org_bau_Exception_exception_2(int64_t exceptionType, i8_array* message);
 org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message);
 org_bau_List_List_Token* org_bau_List_List_Token_0();
 org_bau_List_List_i8* org_bau_List_List_i8_0();
@@ -643,17 +642,11 @@ int64_t idx_2(int64_t x, int64_t len) {
     if (x >= 0 && x < len) return x;
     return arrayOutOfBounds(x, len);
 }
-match match_0() {
-    match _t1 = match_new();
-    _t1.start = 0;
-    _t1.end = 0;
-    return _t1;
-}
 match match_2(int64_t start, int64_t end) {
-    match m = match_0();
-    m.start = start;
-    m.end = end;
-    return m;
+    match _t3 = match_new();
+    _t3.start = start;
+    _t3.end = end;
+    return _t3;
 }
 _int64_t_or_exception matchHere_4(org_bau_List_List_Token* list, int64_t rp, i8_array* text, int64_t tp) {
     org_bau_Exception_exception _lastException;
@@ -754,18 +747,16 @@ _int64_t_or_exception matches_2(i8_array* text, i8_array* regex) {
     catch0:
     return exception_int64_t_or_exception(_lastException);
 }
-org_bau_Exception_exception org_bau_Exception_exception_0() {
-    org_bau_Exception_exception _t0 = org_bau_Exception_exception_new();
-    _t0.exceptionType = 0;
-    _t0.message = i8_array_new(0);
-    return _t0;
+org_bau_Exception_exception org_bau_Exception_exception_2(int64_t exceptionType, i8_array* message) {
+    org_bau_Exception_exception _t1 = org_bau_Exception_exception_new();
+    _t1.exceptionType = exceptionType;
+    _incUseStack(message);
+    _t1.message = message;
+    return _t1;
 }
 org_bau_Exception_exception org_bau_Exception_newException_1(i8_array* message) {
-    org_bau_Exception_exception result = org_bau_Exception_exception_0();
-    _incUseStack(message);
-    _decUse(result.message, i8_array);
-    result.message = message;
-    return result;
+    org_bau_Exception_exception _t0 = org_bau_Exception_exception_2(0, message);
+    return _t0;
 }
 org_bau_List_List_Token* org_bau_List_List_Token_0() {
     org_bau_List_List_Token* _t0 = org_bau_List_List_Token_new();
@@ -800,9 +791,9 @@ org_bau_List_List_i8* org_bau_List_newList_i8_1(int64_t _T) {
 void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
     _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Token_array* _t1 = Token_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        Token_array* n = _t1;
+        Token_array* _t2 = Token_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        Token_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -822,7 +813,7 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
         _decUse(this->array, Token_array);
         this->array = n;
         _decUseStack(n, Token_array);
-        _decUseStack(_t1, Token_array);
+        _decUseStack(_t2, Token_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Token);
@@ -832,9 +823,9 @@ void org_bau_List_List_Token_add_2(org_bau_List_List_Token* this, Token* x) {
 }
 void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
     if (this->size >= _arrayLen(this->array)) {
-        i8_array* _t1 = i8_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t1);
-        i8_array* n = _t1;
+        i8_array* _t2 = i8_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t2);
+        i8_array* n = _t2;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -852,7 +843,7 @@ void org_bau_List_List_i8_add_2(org_bau_List_List_i8* this, int8_t x) {
         _decUse(this->array, i8_array);
         this->array = n;
         _decUseStack(n, i8_array);
-        _decUseStack(_t1, i8_array);
+        _decUseStack(_t2, i8_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;

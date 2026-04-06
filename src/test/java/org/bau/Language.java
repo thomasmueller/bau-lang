@@ -7,8 +7,23 @@ https://github.com/NicoNex/tau
 
 add examples like here: https://xslang.org/examples
 
+for e := list.elements()
 
 make 'ord' optional
+
+two constructors: one minimal, and one with all parameters
+
+simple form of destructuring for:
+* for k, v := map.entries()  # key-value pairs
+* a, b = b, a # swap
+* u1 : newUser(userName, age) # correct parameter list
+* u2 : newUser(.name: userName, .age: age)
+* u3 : newUser(.age: age, .name: userName)
+* func(.debug = true, .x = x, .y = y)
+* [a, b] = [b, a]
+* for [k, v] in map
+* Point p = [.x = 10, .y = 20]
+* func(debug: true, x: 10)
 
 move array copy methods:
     BigInt.copyOf, copyOfRange

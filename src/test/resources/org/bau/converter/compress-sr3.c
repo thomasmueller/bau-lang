@@ -743,9 +743,9 @@ void _main() {
     DT = array_1000;
     di1 = 5;
     h = 0;
-    int_array* _t1 = int_array_new(528384);
-    _incUseStack(_t1);
-    state = _t1;
+    int_array* _t2 = int_array_new(528384);
+    _incUseStack(_t2);
+    state = _t2;
     x1 = 0;
     x2 = 0xffffffff;
     x = 0;
@@ -843,7 +843,7 @@ void _main() {
     _decUseStack(in, org_bau_File_File);
     _decUseStack(_t1, i8_array);
     _decUseStack(DT, int_array);
-    _decUseStack(_t1, int_array);
+    _decUseStack(_t2, int_array);
     _decUseStack(state, int_array);
     _decUseStack(global, Sr3);
     _end();
