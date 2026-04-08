@@ -1,7 +1,7 @@
 {
   "comments": {
     "lineComment": "#",
-    "blockComment": ["##\n", "##"]
+    "blockComment": ["##", "##"]
   },
   "brackets": [
     ["[", "]"],
@@ -13,22 +13,19 @@
     { "open": "'", "close": "'", "notIn": ["string", "comment"] },
     { "open": "`", "close": "`", "notIn": ["string", "comment"] }
   ],
-  "autoCloseBefore": ".,<>!=]) \n",
+  "autoCloseBefore": ".,<>=]) \n",
   "surroundingPairs": [
     ["[", "]"],
     ["(", ")"],
     ["'", "'"]
   ],
   "folding": {
-    "markers": {
-      "start": "^\\s*//\\s*#?region\\b",
-      "end": "^\\s*//\\s*#?endregion\\b"
-    }
+    "offSide": true
   },
   "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\#\\%\\^\\&\\*\\(\\)\\-\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\?\\s]+)",
   "onEnterRules": [
 		{
-			"beforeText": "^\\s*(?:if|elif|else|for|while|case|catch|fun|type|enum|import|and|or|not|\\.|\\(|\\,).*?\\s*$",
+			"beforeText": "^\\s*(?:if|elif|else|for|loop|switch|case|catch|fun|type|enum|trait|macro|import|and|or|not|\\.|\\(|\\,).*?\\s*$",
 			"action": { "indent": "indent" }
 		},
 		{

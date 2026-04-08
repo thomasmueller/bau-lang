@@ -27,15 +27,15 @@
 			"include": "#string"
 		},
 		{
-			"match": "\\b(if|elif|else|for|while|switch|case|break|return|throw|catch)\\b",
+			"match": "\\b(if|elif|else|for|loop|switch|case|break|continue|return|throw|catch)\\b",
 			"name": "keyword.control.flow.bau"
-		},		
+		},
 		{
-			"match": "\\b(type|enum|fun|import|module|const|throws)\\b",
+			"match": "\\b(type|enum|fun|import|module|const|macro|throws|trait)\\b",
 			"name": "keyword.other.bau"
 		},
 		{
-			"match": "\\b(int|i32|i16|i8|f64|f32)\\b",
+			"match": "\\b(int|i32|i16|i8|float|f32)\\b",
 			"name": "support.type.bau"
 		},
 		{
@@ -167,12 +167,20 @@
 					"name": "keyword.operator.bitwise.shift.bau"
 				},
 				{
-					"match": "!=|<=|>=|==|<|>",
+					"match": "<>|<=|>=|==|<|>",
 					"name": "keyword.operator.comparison.bau"
 				},
 				{
 					"match": "&|\\||\\^|~",
 					"name": "keyword.operator.bau"
+				},
+				{
+					"match": "\\.\\.",
+					"name": "keyword.operator.range.bau"
+				},
+				{
+					"match": ":=",
+					"name": "keyword.operator.assignment.bau"
 				},
 				{
 					"match": "=",
