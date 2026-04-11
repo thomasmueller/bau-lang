@@ -138,10 +138,10 @@ public class Break implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public void resolveTypesForStatement(Program program) {
         program.resolveTypes(autoClose);
         if (condition != null) {
-            condition.resolveTypes(program);
+            condition = condition.resolveTypes(program);
         }
     }
 

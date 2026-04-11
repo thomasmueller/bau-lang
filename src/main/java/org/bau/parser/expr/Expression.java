@@ -84,6 +84,6 @@ public interface Expression {
 
     public String toAST();
 
-    void resolveTypes(Program program);
+    Expression resolveTypes(Program program);
 
 }

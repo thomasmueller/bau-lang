@@ -397,13 +397,13 @@ public class Assignment implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        leftValue.resolveTypes(program);
+    public void resolveTypesForStatement(Program program) {
+        leftValue = leftValue.resolveTypes(program);
         if (type != null) {
             type = type.resolve(program);
         }
         if (value != null) {
-            value.resolveTypes(program);
+            value = value.resolveTypes(program);
         }
     }
 

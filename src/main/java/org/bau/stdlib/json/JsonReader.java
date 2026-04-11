@@ -53,6 +53,30 @@ public class JsonReader {
         return null;
     }
 
+    public String getString(String key) {
+        JsonReader v = get(key);
+        if (v == null) {
+            return null;
+        }
+        return v.getString();
+    }
+
+    public long getLong(String key) {
+        JsonReader v = get(key);
+        if (v == null) {
+            return -1;
+        }
+        String s = v.getNumber();
+        if (s == null) {
+            return -1;
+        }
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
+    }
+
     public String nextKey() {
         if (matches(TokenType.COLON)) {
             skipValue();

@@ -498,7 +498,7 @@ int64_t Reader_read_1_default(Reader* this) {
     return 0;
 }
 void Writer_write_2(Writer* this, int64_t x) {
-    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[3];
+    void (*_)(Writer*, int64_t) = (void (*)(Writer*, int64_t)) this->_type->vtable[2];
     _(this, x);
 }
 void Writer_write_2_default(Writer* this, int64_t x) {
@@ -523,8 +523,8 @@ void _traitInit() {
     _typeMetaMemory = malloc(sizeof(_typeMetaData) + 4 * sizeof(void(*)(void)));
     _typeMetaMemory->typeName = "Memory";
     _typeMetaMemory->vtable[0] = (void (*)())Memory_read_1;
-    _typeMetaMemory->vtable[2] = (void (*)())Memory_read_1;
-    _typeMetaMemory->vtable[3] = (void (*)())Memory_write_2;
+    _typeMetaMemory->vtable[2] = (void (*)())Memory_write_2;
+    _typeMetaMemory->vtable[3] = (void (*)())Memory_read_1;
 }
 void _main();
 int main(int _argc, char *_argv[]) {

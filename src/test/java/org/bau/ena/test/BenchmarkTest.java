@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.bau.ena.Interpreter;
-import org.bau.ena.Parser;
+import org.bau.ena.EnaInterpreter;
+import org.bau.ena.EnaParser;
 import org.bau.ena.ast.Stmt;
 import org.bau.ena.vm.reg.RegBytecode;
 import org.bau.ena.vm.reg.RegCompiler;
@@ -20,12 +20,12 @@ import org.junit.Test;
 public class BenchmarkTest {
     private static final long MAX_OPS = 100_000_000L;
     private String runInterpreter(String src) {
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream old = System.out;
         System.setOut(new PrintStream(baos));
         long start = System.currentTimeMillis();
-        try { new Interpreter().setMaxOps(MAX_OPS).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
+        try { new EnaInterpreter().setMaxOps(MAX_OPS).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
         long time = System.currentTimeMillis() - start;
         assertTrue(time >= 0);
         // System.out.println("runInterpreter: " + time + " ms");
@@ -33,7 +33,7 @@ public class BenchmarkTest {
     }
 
     private String runStackVM(String src) {
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         StackCompiler comp = new StackCompiler();
         StackBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -48,7 +48,7 @@ public class BenchmarkTest {
     }
 
     private String runRegVM(String src) {
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         RegCompiler comp = new RegCompiler();
         RegBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

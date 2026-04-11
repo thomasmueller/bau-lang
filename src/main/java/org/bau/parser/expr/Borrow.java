@@ -123,8 +123,9 @@ public class Borrow implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        base.resolveTypes(program);
+    public Expression resolveTypes(Program program) {
+        base = base.resolveTypes(program);
+        return this;
     }
 
     public String toString() {

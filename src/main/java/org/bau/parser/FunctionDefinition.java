@@ -38,14 +38,19 @@ public class FunctionDefinition {
     public String header;
     public String code;
     public String comment;
-    final int lineOffset;
+    final int posOffset;
+
     public boolean isConstructor;
     public boolean isFunctionPointer;
     int traitFunctionId;
 
-    public FunctionDefinition(FullName fullName, int lineOffset) {
+    public FunctionDefinition(FullName fullName, int posOffset) {
         this.fullName = fullName;
-        this.lineOffset = lineOffset;
+        this.posOffset = posOffset;
+    }
+
+    public void setLocation(Program program, String module, int fileId, int location) {
+        program.setLocation(module, location, this);
     }
 
     public String getFunctionId() {
@@ -493,8 +498,8 @@ public class FunctionDefinition {
         }
         program.resolveTypes(list);
         program.resolveTypes(autoClose);
-        for (Variable p : parameters) {
-            p.resolveTypes(program);
+        for(int i = 0; i < parameters.size(); i++) {
+            parameters.set(i, parameters.get(i).resolveTypes(program));
         }
     }
 

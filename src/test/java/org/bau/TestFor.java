@@ -21,7 +21,7 @@ public class TestFor {
         } catch (IllegalStateException e) {
             assertEquals("'break' statement outside of a loop at line 3:\n"
                     + "  break\n"
-                    + "       ^", e.getMessage());
+                    + "       ^\n", e.getMessage());
         }
     }
 

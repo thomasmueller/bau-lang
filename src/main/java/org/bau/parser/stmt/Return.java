@@ -130,10 +130,10 @@ public class Return implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public void resolveTypesForStatement(Program program) {
         program.resolveTypes(autoClose);
         if (expr != null) {
-            expr.resolveTypes(program);
+            expr = expr.resolveTypes(program);
         }
     }
 

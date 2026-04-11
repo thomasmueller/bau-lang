@@ -15,7 +15,7 @@ import org.bau.runtime.Value;
 
 public class Cast implements Expression {
 
-    private final Expression base;
+    private Expression base;
     private DataType targetType;
 
     public Cast(Expression base, DataType targetType) {
@@ -115,9 +115,10 @@ public class Cast implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        base.resolveTypes(program);
+    public Expression resolveTypes(Program program) {
+        base = base.resolveTypes(program);
         targetType = targetType.resolve(program);
+        return this;
     }
 
     public String toString() {

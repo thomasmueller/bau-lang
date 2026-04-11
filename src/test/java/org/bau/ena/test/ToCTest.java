@@ -1,6 +1,6 @@
 package org.bau.ena.test;
 
-import org.bau.ena.Parser;
+import org.bau.ena.EnaParser;
 import org.bau.ena.ast.Stmt;
 import org.bau.ena.tools.CGenerator;
 import org.junit.Test;
@@ -18,7 +18,7 @@ public class ToCTest {
             "",
             "fun main()",
             "    println(fib(10))");
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         CGenerator gen = new CGenerator();
         String c = gen.generate(prog);
         // System.out.println("Generated C:\n" + c);

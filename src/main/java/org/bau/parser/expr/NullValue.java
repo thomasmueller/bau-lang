@@ -101,10 +101,11 @@ public class NullValue implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public Expression resolveTypes(Program program) {
         if (type != null) {
             type = type.resolve(program);
         }
+        return this;
     }
 
     public String toString() {

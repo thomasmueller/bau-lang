@@ -45,18 +45,24 @@ public class Program {
 
     private boolean useTmMalloc = false;
     private boolean traceRefCounts = false;
+
+    // full name -> data type
     private LinkedHashMap<String, DataType> dataTypeMap = new LinkedHashMap<String, DataType>();
 
-    // string -> reference
+    // string value -> reference
     private HashMap<String, Long> stringConstants = new HashMap<>();
 
-    // reference -> string
+    // reference -> string literal with the value
     private TreeMap<Long, StringLiteral> stringConstantsMap = new TreeMap<>();
+
+    // reference -> variable (that contains the value)
     private TreeMap<Long, Variable> arrayConstantsMap = new TreeMap<>();
 
     // global variables (or constants) in modules
     private LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
+
     private int[] traitFunctionOffsets = new int[0];
+
     private TreeSet<String> includes = new TreeSet<>();
     private HashMap<String, FunctionDefinition> functionTemplates = new HashMap<>();
     private ArrayList<String> comments = new ArrayList<>();
@@ -931,8 +937,7 @@ public class Program {
             if (isTypeUsed(t) && !t.traitNames.isEmpty()) {
                 ArrayList<FunctionDefinition> traitFunctions = new ArrayList<>();
                 for (FullName tr : t.traitNames) {
-                    int todoSupportModule;
-                    Trait trait = dataTypeMap.get(tr.name).getTraitDefinition();
+                    Trait trait = dataTypeMap.get(tr.getFullName()).getTraitDefinition();
                     for (FunctionDefinition def : trait.functions) {
                         traitFunctions.add(def);
                     }
@@ -970,8 +975,8 @@ public class Program {
                             return 0;
                         }
                         throw new IllegalStateException("Same function id for different functions:\n" +
-                                o1.toString() + "\n" +
-                                o2.toString());
+                                o1.format() + "\n" +
+                                o2.format());
                     }
 
                 });
@@ -1384,10 +1389,19 @@ public class Program {
         return modules.get(module);
     }
 
+    public SourceFile getSourceFile(int fileId) {
+        for (SourceFile f : modules.values()) {
+            if (f.getFileId() == fileId) {
+                return f;
+            }
+        }
+        return null;
+    }
+
     public void resolveTypes(List<Statement> list) {
         if (list != null) {
             for (Statement s : list) {
-                s.resolveTypes(this);
+                s.resolveTypesForStatement(this);
             }
         }
     }
@@ -1401,6 +1415,50 @@ public class Program {
             buff.append(s.format());
         }
         return buff.toString();
+    }
+
+    public String getHover(String module, int line, int character, boolean html) {
+        String result;
+        // module = "module: " + module + " line: " + line + " character: " + character + "\n";
+        SourceFile f = getSourceFile(module);
+        if (f == null) {
+            return "(module " + module + " not found)";
+        }
+        int location = f.getLocation(line, character);
+        Object obj = f.getLocation(location);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof DataType) {
+            DataType type = (DataType) obj;
+            result = "Type **" + type.format() + "**\n";
+            // result = "<div style=\"font-family:Sans-Serif\"> Type is **" + type.format() + "** </div>\n";
+        } else if (obj instanceof FunctionDefinition) {
+            FunctionDefinition def = (FunctionDefinition) obj;
+            result = "Function **" + def.toHeaderString().trim() + "**\n";
+        } else {
+            result = null;
+        }
+        // result += " location " + location + " line " + line + " char " + character + " locations " + f.getLocations();
+        return result;
+    }
+
+    public void setLocation(String module, int location, Object obj) {
+        getSourceFile(module).setLocation(location, obj);
+    }
+
+    public void syntaxError(int fileId, int location, String message) {
+        getSourceFile(fileId).syntaxError(location, message);
+    }
+
+    public Program checkErrors() {
+        for (SourceFile f : modules.values()) {
+            String errors = f.getErrors();
+            if (errors != null) {
+                throw new IllegalStateException(errors);
+            }
+        }
+        return this;
     }
 
 }

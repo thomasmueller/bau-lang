@@ -179,11 +179,12 @@ public class New implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public Expression resolveTypes(Program program) {
         if (arrayLength != null) {
             arrayLength.resolveTypes(program);
         }
         type = type.resolve(program);
+        return this;
     }
 
     public String toString() {

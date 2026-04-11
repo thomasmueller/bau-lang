@@ -753,11 +753,12 @@ public class Operation implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public Expression resolveTypes(Program program) {
         if (left != null) {
-            left.resolveTypes(program);
+            left = left.resolveTypes(program);
         }
-        right.resolveTypes(program);
+        right = right.resolveTypes(program);
+        return this;
     }
 
     public String toString() {

@@ -453,8 +453,10 @@ public class Variable implements Expression, LeftValue {
         return Objects.equals(name, other.name) && version == other.version;
     }
 
-    public void resolveTypes(Program program) {
+    @Override
+    public Variable resolveTypes(Program program) {
         type = type.resolve(program);
+        return this;
     }
 
     public String toString() {

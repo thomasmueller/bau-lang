@@ -24,6 +24,6 @@ public interface LeftValue extends Expression {
         // ignore
     }
 
-    void resolveTypes(Program program);
+    LeftValue resolveTypes(Program program);
 
 }

@@ -7,11 +7,25 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
+import org.bau.parser.Parser;
+import org.bau.parser.Program;
 import org.bau.stdlib.json.JsonBuilder;
 import org.bau.stdlib.json.JsonReader;
 
 public class BauLanguageServer {
+
+    // TODO:
+    // - format (pretty print)
+    // - compile time errors
+    // - recompile if changed
+    // - autocomplete after a dot
+    // - goto definition
+    // - find references
+    // - hover info
+    // - rename a variable / function
+    // - formatting
 
     // https://code.visualstudio.com/api/language-extensions/language-configuration-guide
     // https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
@@ -26,7 +40,16 @@ public class BauLanguageServer {
 
     final static String logFile = "langServ.log.txt";
 
+    private HashMap<String, String> uriToModule = new HashMap<>();
+    private HashMap<String, String> moduleSource = new HashMap<>();
+    private HashMap<String, Program> moduleProgram = new HashMap<>();
+    private boolean html;
+
     public static void main(String[] args) throws IOException {
+        new BauLanguageServer().run(args);
+    }
+
+    private void run(String[] args) throws IOException {
         OutputStream logOut;
         for (int i = 0;; i++) {
             String f = i == 0 ? logFile : logFile + i + ".txt";
@@ -42,7 +65,7 @@ public class BauLanguageServer {
         }
     }
 
-    private static void run(OutputStream logOut) throws IOException {
+    private void run(OutputStream logOut) throws IOException {
         BufferedInputStream in = new BufferedInputStream(System.in);
         int nextContentLength = 0;
         while (true) {
@@ -84,7 +107,7 @@ public class BauLanguageServer {
         }
     }
 
-    private static boolean process(OutputStream logOut, String content) throws IOException {
+    private boolean process(OutputStream logOut, String content) throws IOException {
         JsonReader obj = new JsonReader(content);
         String method = obj.get("method").getString();
         JsonReader idReader = obj.get("id");
@@ -92,6 +115,18 @@ public class BauLanguageServer {
         if (method.equals("exit")) {
             return true;
         } else if (method.equals("initialize")) {
+
+            JsonReader params = obj.get("params");
+            if (params != null) {
+                JsonReader clientInfo = params.get("clientInfo");
+                if (clientInfo != null) {
+                    String clientName = clientInfo.getString("name");
+                    // String clientVersion = clientInfo.getString("version");
+                    if ("Eclipse IDE".equals(clientName)) {
+                        html = true;
+                    }
+                }
+            }
             JsonBuilder b = new JsonBuilder();
             b.object()
                 .key("id").encodedValue(id)
@@ -280,6 +315,29 @@ public class BauLanguageServer {
             // no response needed
         } else if (method.equals("textDocument/didOpen")) {
             // no response needed
+            // {
+            //     "jsonrpc": "2.0",
+            //     "method": "textDocument/didOpen",
+            //     "params": {
+            //         "textDocument": {
+            //             "languageId": "bau",
+            //             "text": "module ..."
+            //             "uri": "file:///Users/mueller/data/bau/demo.bau",
+            //             "version": 1
+            //         }
+            //     }
+            // }
+            JsonReader params = obj.get("params");
+            if (params != null) {
+                JsonReader textDocument = params.get("textDocument");
+                if (textDocument != null) {
+                    String text = textDocument.getString("text");
+                    String uri = textDocument.getString("uri");
+                    if (uri != null && uri.endsWith(".bau") && text != null) {
+                        compile(uri, text);
+                    }
+                }
+            }
         } else if (method.equals("textDocument/didSave")) {
             // no response needed
         } else if (method.equals("textDocument/formatting")) {
@@ -321,9 +379,6 @@ public class BauLanguageServer {
             byte[] result = BauLanguageServer.convert(b);
             System.out.write(result);
             logOut.write(result);
-            // {
-            //     "id": 1,
-            //     "jsonrpc": "2.0",
             //     "result": [
             //       {
             //         "range": {
@@ -334,24 +389,52 @@ public class BauLanguageServer {
             //       }
             //     ]
             //   }
-            //   A list of text edits to apply. Typically one edit covering the whole file. Or "result": null if no changes needed.
+            //   A list of text edits to apply.
+            //   Typically one edit covering the whole file.
+            //   Or "result": null if no changes needed.
         } else if (method.equals("textDocument/hover")) {
-            // {
-            //     "id": 5,
-            //     "jsonrpc": "2.0",
-            //     "result": {
-            //       "contents": {
-            //         "kind": "markdown",
-            //         "value": "**fun add(item int)**\n\nAdds an item to the list"
-            //       }
-            //     }
-            //   }
+            JsonReader params = obj.get("params");
+            String hover = null;
+            if (params != null) {
+                JsonReader textDocument = params.get("textDocument");
+                JsonReader position = params.get("position");
+                if (textDocument != null && position != null) {
+                    String uri = textDocument.getString("uri");
+                    long character = position.getLong("character");
+                    long line = position.getLong("line");
+                    if (uri != null && uri.endsWith(".bau")) {
+                        hover = hover(uri, line, character);
+                    }
+                }
+            }
+            //     "method": "textDocument/hover",
+            //     "params": {
+            //         "textDocument": {
+            //             "uri": "file:///Users/mueller/data/bau/demo.bau"
+            //         },
+            //         "position": {
+            //             "character": 25,
+            //             "line": 16
+            //         }
             JsonBuilder b = new JsonBuilder();
-            b.object().
-                key("id").encodedValue(id).
-                key("jsonrpc").value("2.0").
-                key("result").value(null).
-            endObject();
+            if (hover == null) {
+                b.object().
+                    key("id").encodedValue(id).
+                    key("jsonrpc").value("2.0").
+                    key("result").value(null).
+                    endObject();
+            } else {
+                b.object().
+                    key("id").encodedValue(id).
+                    key("jsonrpc").value("2.0").
+                    key("result").object().
+                        key("contents").object().
+                            key("kind").value("markdown").
+                            key("value").value(hover).
+                        endObject().
+                    endObject().
+                endObject();
+            }
             byte[] result = BauLanguageServer.convert(b);
             System.out.write(result);
             logOut.write(result);
@@ -359,6 +442,46 @@ public class BauLanguageServer {
             logOut.write(("\nUnknown method: <" + method + ">\n").getBytes(StandardCharsets.UTF_8));
         }
         return false;
+    }
+
+    private String hover(String uri, long line, long character) {
+        Program program = getProgram(uri);
+        if (program == null) {
+            return null;
+        }
+        String module = uriToModule.get(uri);
+        return program.getHover(module, (int) line, (int) character, html);
+    }
+
+    private void compile(String uri, String text) {
+        int moduleStart = text.indexOf("module ");
+        String module = "";
+        if (moduleStart >= 0) {
+            int moduleEnd = text.indexOf("\n", moduleStart);
+            if (moduleEnd < 0) {
+                moduleEnd = text.length();
+            }
+            module = text.substring(moduleStart, moduleEnd).trim();
+        }
+        uriToModule.put(uri, module);
+        moduleSource.put(module, text);
+        if (module.equals("")) {
+            Parser p = new Parser(moduleSource, text);
+            try {
+                Program prog = p.parse();
+                moduleProgram.put(module, prog);
+            } catch (Exception e) {
+                moduleProgram.remove(module);
+            }
+        }
+    }
+
+    private Program getProgram(String uri) {
+        String module = uriToModule.get(uri);
+        if (module == null) {
+            return null;
+        }
+        return moduleProgram.get(module);
     }
 
     public static byte[] convert(JsonBuilder b) {

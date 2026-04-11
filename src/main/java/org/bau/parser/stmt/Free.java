@@ -23,7 +23,7 @@ public class Free implements Statement {
     public static final String INC_USE_STACK = "_incUseStack";
     public static final String DEC_USE_STACK = "_decUseStack";
 
-    public final Variable var;
+    public Variable var;
 
     public Free(Variable var) {
         this.var = var;
@@ -196,8 +196,8 @@ public class Free implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        var.resolveTypes(program);
+    public void resolveTypesForStatement(Program program) {
+        var = var.resolveTypes(program);
     }
 
 }

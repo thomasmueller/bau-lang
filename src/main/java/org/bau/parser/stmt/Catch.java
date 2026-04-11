@@ -143,10 +143,10 @@ public class Catch implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public void resolveTypesForStatement(Program program) {
         program.resolveTypes(list);
         program.resolveTypes(autoClose);
-        var.resolveTypes(program);
+        var = var.resolveTypes(program);
     }
 
 }

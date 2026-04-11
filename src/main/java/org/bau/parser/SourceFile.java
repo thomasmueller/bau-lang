@@ -2,10 +2,13 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 //context for formatting and for line numbers
 public class SourceFile {
 
+    private static final int MAX_ERRORS = 50;
     private final int fileId;
     private final String module;
     private String sourceCode;
@@ -14,7 +17,10 @@ public class SourceFile {
     private HashMap<String, String> imports = new HashMap<>();
     // map from type / method / constant identifier to module identifier
     private HashMap<String, String> importEntries = new HashMap<>();
+    private TreeMap<Integer, Object> elements = new TreeMap<>();
+    private TreeMap<Integer, String> errors = new TreeMap<>();
     private boolean imported;
+    private int errorCount;
 
     SourceFile(int fileId, String module, String sourceCode) {
         Utils.assertTrue(module != null);
@@ -78,6 +84,83 @@ public class SourceFile {
 
     public String toString() {
         return module;
+    }
+
+    public void setLocation(int location, Object obj) {
+        elements.put(location, obj);
+    }
+
+    public Object getLocation(int location) {
+        Entry<Integer, Object> e = elements.floorEntry(location);
+        return e == null ? null : e.getValue();
+    }
+
+    public int getLocation(int line, int character) {
+        int pos = 0;
+        int l = 0;
+        int c = 0;
+        while (l < line || (l == line && c < character)) {
+            if (pos >= sourceCode.length()) {
+                return -1;
+            }
+            int ch = sourceCode.charAt(pos);
+            if (ch == '\n') {
+                l++;
+                c = 0;
+            } else {
+                c++;
+            }
+            pos++;
+        }
+        return pos;
+    }
+
+    public String getLocations() {
+        return elements.toString();
+    }
+
+    public static int getLine(String source, int pos) {
+        int line = 1;
+        for (int i = 0; i < pos; i++) {
+            if (source.charAt(i) == '\n') {
+                line++;
+            }
+        }
+        return line;
+    }
+
+    public void syntaxError(int location, String message) {
+        int lineStart = location;
+        while (lineStart > 0 && sourceCode.charAt(lineStart - 1) != '\n') {
+            lineStart--;
+        }
+        int line = getLine(sourceCode, location);
+        message += " at line " + line + ":\n";
+        int lineEnd = sourceCode.indexOf('\n', location);
+        if (lineEnd < 0) {
+            lineEnd = sourceCode.length();
+        }
+        message += sourceCode.substring(lineStart, lineEnd) + "\n";
+        message += " ".repeat(location - lineStart);
+        message += "^";
+        errors.put(location, message);
+        errorCount++;
+        if (errorCount > MAX_ERRORS) {
+            // too many errors: throw the first
+            throw new IllegalStateException(getErrors());
+        }
+    }
+
+    public String getErrors() {
+        if (errors.isEmpty()) {
+            return null;
+        }
+        StringBuilder buff = new StringBuilder();
+        for (String s : errors.values()) {
+            buff.append(s);
+            buff.append("\n");
+        }
+        return buff.toString();
     }
 
 }

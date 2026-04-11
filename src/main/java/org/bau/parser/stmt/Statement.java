@@ -86,5 +86,5 @@ public interface Statement {
         return List.of();
     }
 
-    void resolveTypes(Program program);
+    void resolveTypesForStatement(Program program);
 }

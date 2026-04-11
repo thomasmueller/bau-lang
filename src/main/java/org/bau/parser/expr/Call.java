@@ -500,10 +500,16 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        for (Expression a : args) {
-            a.resolveTypes(program);
+    public LeftValue resolveTypes(Program program) {
+        for (int i = 0; i < args.size(); i++) {
+            args.set(i, args.get(i).resolveTypes(program));
         }
+        return this;
+    }
+
+    @Override
+    public void resolveTypesForStatement(Program program) {
+        resolveTypes(program);
     }
 
     public String toString() {

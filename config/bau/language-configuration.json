@@ -17,7 +17,8 @@
   "surroundingPairs": [
     ["[", "]"],
     ["(", ")"],
-    ["'", "'"]
+    ["'", "'"],
+    ["`", "`"]
   ],
   "folding": {
     "offSide": true

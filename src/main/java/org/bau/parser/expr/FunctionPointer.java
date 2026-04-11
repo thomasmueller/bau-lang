@@ -113,9 +113,10 @@ public class FunctionPointer implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public Expression resolveTypes(Program program) {
         function.resolveTypes(program);
         functionPointerType = functionPointerType.resolve(program);
+        return this;
     }
 
     public String toString() {

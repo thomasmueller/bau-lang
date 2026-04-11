@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import org.bau.ena.Preprocessor;
+import org.bau.ena.EnaPreprocessor;
 
 public class PreprocessorTest {
 
@@ -15,7 +15,7 @@ public class PreprocessorTest {
                 "    @{left}: (@{left}) + (@{rest})",
                 "",
                 "x +: 10");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = String.join("\n",
                 "x: (x) + (10)");
         assertEquals(exp, got.trim());
@@ -29,7 +29,7 @@ public class PreprocessorTest {
                 "",
                 "x: 10",
                 "debugPrint 2 * x");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = String.join("\n",
                 "x: 10",
                 "println('2 * x', ' = ', (2 * x))");
@@ -51,7 +51,7 @@ public class PreprocessorTest {
                 + "\n"
                 + "for i, 0, 10\n"
                 + "    x +: 1\n";
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = "if 1\n"
                 + "    i: 0\n"
                 + "    loop i < (10)\n"
@@ -71,7 +71,7 @@ public class PreprocessorTest {
                 + "    break i > 10\n"
                 + "    i +: 1\n"
                 + "";
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = "i: 0\n"
                 + "loop 1\n"
                 + "    if i > 10\n"
@@ -88,7 +88,7 @@ public class PreprocessorTest {
                 "        println('Log: ', @{rest})",
                 "",
                 "log 'Hello ', name");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = String.join("\n",
                 "if logEnabled",
                 "    println('Log: ', 'Hello ', name)");
@@ -108,7 +108,7 @@ public class PreprocessorTest {
                 "for i, 0, 10",
                 "    println('hello ', i)",
                 "println('done')");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         String exp = String.join("\n",
                 "if 1",
                 "    i: 0",
@@ -131,7 +131,7 @@ public class PreprocessorTest {
                 "i: -1",
                 "assert i < 0",
                 "println('done')");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals("\n"
                 + "i: -1\n"
                 + "if 0 = (i < 0)\n"
@@ -153,7 +153,7 @@ public class PreprocessorTest {
                 "i: -1",
                 "assert map.contains('id')",
                 "println('done')");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals("\n"
                 + "i: -1\n"
                 + "if 0 = (map.contains('id'))\n"
@@ -174,7 +174,7 @@ public class PreprocessorTest {
                 "",
                 "array: int[10]",
                 "x: when array.len < 0, 0, array[0]");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals(""
                 + "array: int[10]\n"
                 + "if array.len < 0\n"
@@ -197,7 +197,7 @@ public class PreprocessorTest {
                 "a: 10",
                 "b: 20",
                 "c: max a, b");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals("\n"
                 + "a: 10\n"
                 + "b: 20\n"
@@ -211,7 +211,7 @@ public class PreprocessorTest {
 
     @Test
     public void testNoSubstitutionInsideText() {
-        String got = Preprocessor.convert("def PI\n"
+        String got = EnaPreprocessor.convert("def PI\n"
                 + "    @{left} 3.1415\n"
                 + "\n"
                 + "x: 'Hello PI'\n"
@@ -225,7 +225,7 @@ public class PreprocessorTest {
 
     @Test
     public void testNoSubstitutionInsideComment() {
-        String got = Preprocessor.convert("def PI\n"
+        String got = EnaPreprocessor.convert("def PI\n"
                 + "    @{left} 3.1415\n"
                 + "\n"
                 + "x: PI # PI is 3.1415\n"
@@ -242,7 +242,7 @@ public class PreprocessorTest {
                 "    println(@{x.text})",
                 "",
                 "show hello");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals("println('hello')", got.trim());
     }
 
@@ -253,7 +253,7 @@ public class PreprocessorTest {
                 "    println('@') @@ x",
                 "",
                 "test 42");
-        String got = Preprocessor.convert(src);
+        String got = EnaPreprocessor.convert(src);
         assertEquals("println('@') @ 42", got.trim());
     }
 }

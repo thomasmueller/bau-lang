@@ -146,8 +146,9 @@ public class NumberValue implements Expression {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public Expression resolveTypes(Program program) {
         type = type.resolve(program);
+        return this;
     }
 
     public String toString() {

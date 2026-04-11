@@ -5,32 +5,46 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-add examples like here: https://xslang.org/examples
+example code / prime numbers:
+https://news.ycombinator.com/item?id=47690609
+https://www.jeremykun.com/2026/04/07/deterministic-miller-rabin/
+Deterministic Primality Testing for Limited Bit Width
 
-for e := list.elements()
+1d chess
+https://news.ycombinator.com/item?id=47719740
+
+
+fast way to parse what is the module name
+(currently require that the module name is at the top)
+
+require "import" also for fully qualified modules?
+maybe it is not needed
+
+language server: collect line and column numbers for
+    - done: type definitions
+    - function definitions
+    - function calls
+    - variable definitions
+    - variable usage
+    public int fileId, location;
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
+    }
+
+continue compilation on error (collect errors and continue on next line)
+
+add examples like here: https://xslang.org/examples
+and https://lisette.run/
 
 make 'ord' optional
-
-two constructors: one minimal, and one with all parameters
-
-simple form of destructuring for:
-* for k, v := map.entries()  # key-value pairs
-* a, b = b, a # swap
-* u1 : newUser(userName, age) # correct parameter list
-* u2 : newUser(.name: userName, .age: age)
-* u3 : newUser(.age: age, .name: userName)
-* func(.debug = true, .x = x, .y = y)
-* [a, b] = [b, a]
-* for [k, v] in map
-* Point p = [.x = 10, .y = 20]
-* func(debug: true, x: 10)
 
 move array copy methods:
     BigInt.copyOf, copyOfRange
 move string types:
     BigInt str
 
-String
+String data type
 
 instead of null = empty array, use static struct i8_array EMPTY = { .len = 0, ._refCount = INF, .data = NULL };
 
@@ -39,7 +53,7 @@ https://stackoverflow.com/questions/38141056/does-rust-have-a-debug-macro
 
 use the conversion functions in println
 
-document operator-at-end or ( for multi-line statements:
+document operator-at-end or '(' for multi-line statements:
 https://www.reddit.com/r/ProgrammingLanguages/comments/1rx9tcx/no_semicolons_needed_how_languages_get_away_with/
 
 Support "until" inside macro functions ("For loops in macros are currently not supported")
@@ -125,6 +139,19 @@ div by zero: change implementation (simplify)
 shorten stdlib method, eg.
 numberOfLeadingZeros -> leadingZeros
 isNotANumber -> isNaN
+
+simple form of destructuring for:
+* for k, v := map.entries()  # key-value pairs
+* a, b = b, a # swap
+* u1 : newUser(userName, age) # correct parameter list
+* u2 : newUser(.name: userName, .age: age)
+* u3 : newUser(.age: age, .name: userName)
+* func(.debug = true, .x = x, .y = y)
+* [a, b] = [b, a]
+* for [k, v] in map
+* Point p = [.x = 10, .y = 20]
+* func(debug: true, x: 10)
+
 
 Javascript backend, like Nim:
 nim js -d:nodejs fannkuch.nim

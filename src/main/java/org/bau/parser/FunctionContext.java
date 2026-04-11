@@ -206,6 +206,7 @@ public class FunctionContext {
     }
 
     public DataType getType(String module, String name) {
+        int todoMoveUsagesToResolvePhase;
         Utils.assertTrue(module != null);
         if (DataType.isGenericTypeName(name)) {
             return null;

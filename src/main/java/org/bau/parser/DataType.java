@@ -55,8 +55,7 @@ public class DataType {
 
     private Trait traitDefinition;
 
-    public int lineOffset;
-
+    public int posOffset;
     public int fileId, location;
 
     public List<Variable> fields = new ArrayList<>();
@@ -133,9 +132,10 @@ public class DataType {
         return r;
     }
 
-    public void setLocation(int fileId, int location) {
+    public void setLocation(Program program, String module, int fileId, int location) {
         this.fileId = fileId;
         this.location = location;
+        program.setLocation(module, location, this);
     }
 
     public int hashCode() {
@@ -553,8 +553,39 @@ public class DataType {
 
     public void resolveTypes(Program program) {
         for (int i = 0; i < fields.size(); i++) {
-            Variable v = fields.get(i);
-            v.resolveTypes(program);
+            fields.set(i, fields.get(i).resolveTypes(program));
+        }
+        // traits: set trait function ids, and add functions
+        if (traitDefinition != null && !traitDefinition.requiredTraitNames.isEmpty()) {
+            int functionId = 0;
+            for (FullName n : traitDefinition.requiredTraitNames) {
+                DataType required = program.getType(n.module, n.name);
+                if (required != null) {
+                    Trait tr = required.getTraitDefinition();
+                    if (tr == null) {
+                        program.syntaxError(fileId, location, "Type '" + name() + "' is not a trait");
+                    }
+                    for (FunctionDefinition def : tr.functions) {
+                        FunctionDefinition d2 = new FunctionDefinition(def.getFullName(), def.posOffset);
+                        d2.callType = this;
+                        d2.varArgs = def.varArgs;
+                        for (Variable v : def.parameters) {
+                            // can we share the variables?
+                            d2.parameters.add(v);
+                        }
+                        d2.traitFunctionId = def.traitFunctionId;
+                        if (functionId <= d2.traitFunctionId) {
+                            functionId = d2.traitFunctionId + 1;
+                        }
+                        d2.returnType = def.returnType;
+                        getTraitDefinition().functions.add(d2);
+                        program.addFunction(d2);
+                    }
+                }
+            }
+            for (FunctionDefinition def : getTraitDefinition().functions) {
+                def.traitFunctionId = functionId++;
+            }
         }
     }
 

@@ -15,7 +15,7 @@ public final class RegCompileTool {
             System.exit(1);
         }
         String src = Files.readString(Path.of(args[0]));
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         RegCompiler comp = new RegCompiler();
         RegBytecode bc = comp.compile(prog);
         comp.writeToFile(bc, Path.of(args[1]));

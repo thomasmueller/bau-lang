@@ -6,8 +6,8 @@ import static org.junit.Assert.fail;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.bau.ena.Interpreter;
-import org.bau.ena.Parser;
+import org.bau.ena.EnaInterpreter;
+import org.bau.ena.EnaParser;
 import org.bau.ena.ast.Stmt;
 import org.bau.ena.vm.reg.RegBytecode;
 import org.bau.ena.vm.reg.RegCompiler;
@@ -19,15 +19,15 @@ import org.junit.Test;
 
 public class InterpreterTest {
     private Stmt.Program parse(String src) {
-        return Parser.parse(src);
+        return EnaParser.parse(src);
     }
 
     private String runInterpreter(String src) {
-        Stmt.Program prog = Parser.parse(src);
+        Stmt.Program prog = EnaParser.parse(src);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream old = System.out;
         System.setOut(new PrintStream(baos));
-        try { new Interpreter().setMaxOps(10_000_000L).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
+        try { new EnaInterpreter().setMaxOps(10_000_000L).setCheckEvery(65536).execute(prog); } finally { System.setOut(old); }
         return baos.toString().replace("\r\n", "\n");
     }
 

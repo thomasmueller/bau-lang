@@ -301,9 +301,10 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        base.resolveTypes(program);
+    public LeftValue resolveTypes(Program program) {
+        base = base.resolveTypes(program);
         type = type.resolve(program);
+        return this;
     }
 
     public String toString() {

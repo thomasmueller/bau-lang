@@ -63,7 +63,7 @@ public class NativeCode implements Statement {
     }
 
     @Override
-    public void resolveTypes(Program program) {
+    public void resolveTypesForStatement(Program program) {
     }
 
 }

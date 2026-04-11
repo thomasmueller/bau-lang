@@ -84,7 +84,7 @@ public class Parser {
     private FunctionDefinition currentFunctionDefinition;
     private Loop currentLoop;
     private boolean scanPhase = true;
-    private final int lineOffset;
+    private final int posOffset;
     private int fileId;
 
     String text;
@@ -102,7 +102,7 @@ public class Parser {
         this(new Program(Map.of()), "", text, 0);
     }
 
-    public Parser(Program program, String module, String text, int lineOffset) {
+    public Parser(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
         program.addSourceFile(module, text);
         this.fileId = program.getSourceFile(module).getFileId();
@@ -111,7 +111,7 @@ public class Parser {
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
-        this.lineOffset = lineOffset;
+        this.posOffset = posOffset;
         this.solver = new Solver(program.getSolver());
     }
 
@@ -134,7 +134,7 @@ public class Parser {
                     functions.remove(main);
                     functions.add(main);
                     if (main.returnType != null) {
-                        throw syntaxError("The 'main' method may not return a value; use org.bau.Env.exit instead");
+                        syntaxError("The 'main' method may not return a value; use org.bau.Env.exit instead");
                     }
                 }
             }
@@ -143,7 +143,7 @@ public class Parser {
                 def = program.getFunctionById(def.getFunctionId());
                 if (def.code != null) {
                     String f = def.format();
-                    Parser p = new Parser(program, def.getFullName().module, f, def.lineOffset);
+                    Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
                     functionContext.reset(def.getFullName());
                     p.functionContext = functionContext;
                     p.scanPhase = false;
@@ -156,7 +156,7 @@ public class Parser {
             for (FunctionDefinition def : functions) {
                 if (def.code != null) {
                     String f = def.format();
-                    Parser p = new Parser(program, def.getFullName().module, f, def.lineOffset);
+                    Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
                     functionContext.reset(def.getFullName());
                     p.functionContext = functionContext;
                     p.scanPhase = false;
@@ -172,78 +172,73 @@ public class Parser {
                 }
             }
         }
-        return program;
+        return program.checkErrors();
     }
 
-    private int getLine(int pos) {
-        int line = 1;
-        for(int i=0; i<pos; i++) {
-            if (text.charAt(i) == '\n') {
-                line++;
-            }
-        }
-        return (lineOffset == 0 ? 0 : (lineOffset - 1)) + line;
+    private void syntaxError(String message, Exception e) {
+        program.syntaxError(fileId, lastPos + posOffset, message);
     }
 
-    private IllegalStateException syntaxError(String message) {
-        return syntaxError(message, null);
+    private void syntaxError(String message) {
+        syntaxError(message, lastPos);
     }
 
-    private IllegalStateException syntaxError(String message, Exception e) {
-        int lineStart = lastPos;
-        while (lineStart > 0 && text.charAt(lineStart - 1) != '\n') {
-            lineStart--;
+    private void syntaxError(String message, int at) {
+        program.syntaxError(fileId, at + posOffset, message);
+        pos = lastPos;
+        while (pos < text.length() && text.charAt(pos) != '\n') {
+            pos++;
         }
-        message += " at line " + getLine(lineStart) + ":\n";
-        int lineEnd = text.indexOf('\n', lineStart);
-        if (lineEnd < 0) {
-            lineEnd = text.length();
-        }
-        message += text.substring(lineStart, lineEnd) + "\n";
-        message += " ".repeat(lastPos - lineStart);
-        message += "^".repeat(pos - lastPos);
-        IllegalStateException ex = new IllegalStateException(message, e);
-        return ex;
+        read();
+        throw new IllegalStateException();
     }
 
     private Program parseProgram() {
         boolean mainStatements = false;
         while (true) {
-            while (matchOp(";") || matchOp("\n")) {
-                // ok
-            }
-            if (type == TokenType.END) {
-                break;
-            }
-            if (parseFunctionDefinition(module)) {
-                mainStatements = true;
-                // ok
-            } else if (parseTypeDefinition(module)) {
-                mainStatements = true;
-                // ok
-            } else if (parseTraitDefinition(module)) {
-                mainStatements = true;
-                // ok
-            } else if (parseImport()) {
-                mainStatements = true;
-                // ok
-            } else if (parseModule()) {
-                mainStatements = true;
-                // ok
-            } else if (parseEnumDefinition()) {
-                mainStatements = true;
-                // ok
-            } else {
-                if (mainStatements && (module == null || module.isEmpty()) && program.getFunctionIfExists(null, "", "main", 0) == null) {
-                    // there is no main yet: we thread the statements as a main function
-                    pos = lastPos;
-                    String mainCode = parseBlock(-1);
-                    FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), getLine(pos));
-                    def.code = Statement.indent(mainCode);
-                    program.addFunction(def);
+            try {
+                while (matchOp(";") || matchOp("\n")) {
+                    // ok
+                }
+                if (type == TokenType.END) {
+                    break;
+                }
+                if (parseFunctionDefinition(module)) {
+                    mainStatements = true;
+                    // ok
+                } else if (parseTypeDefinition(module)) {
+                    mainStatements = true;
+                    // ok
+                } else if (parseTraitDefinition(module)) {
+                    mainStatements = true;
+                    // ok
+                } else if (parseImport()) {
+                    mainStatements = true;
+                    // ok
+                } else if (parseModule()) {
+                    mainStatements = true;
+                    // ok
+                } else if (parseEnumDefinition()) {
+                    mainStatements = true;
+                    // ok
                 } else {
-                    isGlobalScope = true;
-                    parseStatements(program.initList);
+                    if (mainStatements && (module == null || module.isEmpty()) && program.getFunctionIfExists(null, "", "main", 0) == null) {
+                        // there is no main yet: we thread the statements as a main function
+                        pos = lastPos;
+                        String mainCode = parseBlock(-1);
+                        FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
+                        def.code = Statement.indent(mainCode);
+                        program.addFunction(def);
+                    } else {
+                        isGlobalScope = true;
+                        parseStatement(program.initList);
+                    }
+                }
+            } catch (IllegalStateException e) {
+                if (e.getMessage() == null) {
+                    // exception already processed - ignore and continue
+                } else {
+                    throw e;
                 }
             }
         }
@@ -262,7 +257,7 @@ public class Parser {
             name += "." + id;
         }
         if (!name.equals(module)) {
-            throw syntaxError("The module name '" + name + "' doesn't match the expected '" + module + "'");
+            syntaxError("The module name '" + name + "' doesn't match the expected '" + module + "'");
         }
         return true;
     }
@@ -296,7 +291,7 @@ public class Parser {
         if (!alreadyImported) {
             String moduleSource = program.readModule(name);
             if (moduleSource == null) {
-                throw syntaxError("Resource not found: '" + name + ".bau'");
+                syntaxError("Resource not found: '" + name + ".bau'");
             }
             program.addSourceFile(name, moduleSource);
             SourceFile sf = program.getSourceFile(name);
@@ -306,13 +301,13 @@ public class Parser {
                 parser.isImport = true;
                 parser.parse();
             } catch (IllegalStateException e) {
-                throw syntaxError("Error parsing module " + name + ": " + e.getMessage(), e);
+                syntaxError("Error parsing module " + name + ": " + e.getMessage(), e);
             }
         }
         for (String e : entries) {
             Variable v = program.getGlobalVariable(name, e);
             if (v != null && !v.isConstant()) {
-                throw syntaxError("May not import global constants; use " + name + "." + e + " instead");
+                syntaxError("May not import global constants; use " + name + "." + e + " instead");
             }
         }
         return true;
@@ -328,42 +323,18 @@ public class Parser {
         String name = readIdentifier();
         int location = lastPos - name.length();
         if (functionContext.getType(targetModule, name) != null) {
-            throw syntaxError("Type '" + name + "' was already defined");
+            syntaxError("Type '" + name + "' was already defined");
         }
         boolean owned = match("owned");
         MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
         DataType type = DataType.newTraitType(new FullName(targetModule, name), memoryType);
-        type.setLocation(fileId, location);
+        type.setLocation(program, module, fileId, location);
         FullName traitName = new FullName(targetModule, name);
         type.setTraitDefinition(new Trait(traitName));
-        int functionId = 0;
         if (matchOp(":")) {
             while (true) {
                 FullName n = readIdentifierWithPossibleModule();
                 type.getTraitDefinition().requiredTraitNames.add(n);
-                DataType required = program.getType(n.module, n.name);
-                if (required != null) {
-                    Trait tr = required.getTraitDefinition();
-                    if (tr == null) {
-                        throw syntaxError("Type '" + name + "' is not a trait");
-                    }
-                    for (FunctionDefinition def : tr.functions) {
-                        FunctionDefinition d2 = new FunctionDefinition(def.getFullName(), def.lineOffset);
-                        d2.callType = type;
-                        d2.varArgs = def.varArgs;
-                        for (Variable v : def.parameters) {
-                            // can we share the variables?
-                            d2.parameters.add(v);
-                        }
-                        d2.traitFunctionId = def.traitFunctionId;
-                        if (functionId <= d2.traitFunctionId) {
-                            functionId = d2.traitFunctionId + 1;
-                        }
-                        d2.returnType = def.returnType;
-                        type.getTraitDefinition().functions.add(d2);
-                        program.addFunction(d2);
-                    }
-                }
                 if (!matchOp(",")) {
                     break;
                 }
@@ -376,7 +347,7 @@ public class Parser {
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 FullName fn = new FullName(module, readIdentifier());
-                FunctionDefinition def = new FunctionDefinition(fn, getLine(lastPos));
+                FunctionDefinition def = new FunctionDefinition(fn, lastPos);
                 def.callType = type;
                 matchOp("(");
                 Variable var = new Variable("this", type);
@@ -384,9 +355,8 @@ public class Parser {
                 def.parameters.add(var);
                 boolean template = parseFunctionDeclaration(false, targetModule, def);
                 if (template) {
-                    throw syntaxError("Template are not supported in traits");
+                    syntaxError("Template are not supported in traits");
                 }
-                def.traitFunctionId = functionId++;
                 type.getTraitDefinition().functions.add(def);
                 program.addFunction(def);
             }
@@ -411,7 +381,7 @@ public class Parser {
         String name = readIdentifier();
         int location = lastPos - name.length();
         if (functionContext.getType(targetModule, name) != null) {
-            throw syntaxError("Type '" + name + "' was already defined");
+            syntaxError("Type '" + name + "' was already defined");
         }
         boolean template = false;
         ArrayList<String> parameters = new ArrayList<>();
@@ -456,12 +426,12 @@ public class Parser {
         MemoryType memoryType = name.charAt(0) > 'Z' ? MemoryType.COPY : MemoryType.REF_COUNT;
         if (owned) {
             if (memoryType == MemoryType.COPY) {
-                throw syntaxError("Value types can not be owned");
+                syntaxError("Value types can not be owned");
             }
             memoryType = MemoryType.OWNER;
         }
         DataType type = DataType.newRegularType(new FullName(targetModule, name), sizeOf, memoryType);
-        type.setLocation(fileId, location);
+        type.setLocation(program, module, fileId, location);
         // need to add it first, because one of the fields could be of this type
         program.addType(type);
         String title = "type " + type.format();
@@ -552,9 +522,9 @@ public class Parser {
         int lastPos = pos;
         String code = parseBlock(defIndent);
         DataType type = DataType.newUndefined(new FullName(module, name));
-        type.setLocation(fileId, location);
+        type.setLocation(program, module, fileId, location);
         type.parameters = parameters;
-        type.lineOffset = getLine(lastPos);
+        type.posOffset = lastPos;
         type.template = code;
         lastComment = null;
         program.addComment("type " + type.format(), comment);
@@ -590,6 +560,7 @@ public class Parser {
         String comment = lastComment;
         int defIndent = indent;
         String id = readIdentifier();
+        int location = lastPos - id.length();
         readEndOfStatement();
         LinkedHashMap<String, Long> entries = new LinkedHashMap<>();
         HashMap<Long, String> map = new HashMap<>();
@@ -600,15 +571,15 @@ public class Parser {
                 if (matchOp(":")) {
                     Expression expr = parseExpression();
                     if (expr.type().isFloatingPoint() || expr.type().isNullable() || !expr.type().isNumber()) {
-                        throw syntaxError("Only integer types are supported");
+                        syntaxError("Only integer types are supported");
                     }
                     Value v = eval(expr, false);
                     long x = v.longValue();
                     if (map.containsKey(x)) {
-                        throw syntaxError("This value is already used by '" + map.get(x) + "'");
+                        syntaxError("This value is already used by '" + map.get(x) + "'");
                     }
                     if (entries.containsKey(name)) {
-                        throw syntaxError("Duplicate name '" + name + "'");
+                        syntaxError("Duplicate name '" + name + "'");
                     }
                     nextValue = x;
                 } else {
@@ -623,6 +594,7 @@ public class Parser {
             }
         }
         DataType type = DataType.newEnumType(new FullName(module, id));
+        type.setLocation(program, module, fileId, location);
         type.enumValues = entries;
         program.addType(type);
         program.addComment("enum " + type.format(), comment);
@@ -646,6 +618,7 @@ public class Parser {
         int stackPos = functionContext.getStackPos();
         DataType callType;
         String id = null;
+        int location = -1;
         boolean template = DataType.isGenericTypeName(token);
         if (template) {
             DataType type = DataType.newUndefined(new FullName(targetModule, token));
@@ -653,33 +626,34 @@ public class Parser {
             callType = readType(true);
         } else {
             id = readIdentifier();
+            location = lastPos - id.length();
             callType = functionContext.getType(targetModule, id);
         }
         String typeName = id;
         if (callType != null) {
             if (matchOp("[")) {
                 if (!matchOp("]")) {
-                    throw syntaxError("Expected ']', got '" + token + "' when reading type");
+                    syntaxError("Expected ']', got '" + token + "' when reading type");
                 }
                 callType = callType.arrayType();
             }
         }
         if (callType != null && callType.template != null) {
             if (!matchOp("(")) {
-                throw syntaxError("Expected '(', got '" + token + "' when reading a function definition template");
+                syntaxError("Expected '(', got '" + token + "' when reading a function definition template");
             }
             matchOp("\n");
             for (int i = 0; i < callType.parameters.size(); i++) {
                 String p = readIdentifier();
                 String expected = callType.parameters.get(i);
                 if (!p.equals(expected)) {
-                    throw syntaxError("Expected '" + expected + "' , got '" + p
+                    syntaxError("Expected '" + expected + "' , got '" + p
                             + "' when reading a function definition template");
                 }
                 matchOp(",");
             }
             if (!matchOp(")")) {
-                throw syntaxError("Expected ')', got '" + token + "' when reading a function definition template");
+                syntaxError("Expected ')', got '" + token + "' when reading a function definition template");
             }
             parseTypeFunctionTemplate(defIndent, callType);
             return true;
@@ -699,16 +673,17 @@ public class Parser {
             name = id;
         } else {
             if (callType == null && !template) {
-                throw syntaxError("Type not found: " + typeName);
+                syntaxError("Type not found: " + typeName);
             }
             ct = callType;
             name = readIdentifier();
+            location = lastPos - name.length();
             if (!matchOp("(")) {
-                throw syntaxError("Expected '(', got '" + token + "' when reading a function definition");
+                syntaxError("Expected '(', got '" + token + "' when reading a function definition");
             }
             matchOp("\n");
             if (type == null) {
-                throw syntaxError("Type '" + id + "' not found when reading a function definition");
+                syntaxError("Type '" + id + "' not found when reading a function definition");
             }
             thisVar = new Variable("this", callType);
             // "this" can not be re-assigned
@@ -716,7 +691,8 @@ public class Parser {
 
             functionContext.addVariable(thisVar);
         }
-        FunctionDefinition def = new FunctionDefinition(new FullName(module, name), getLine(lastPos));
+        FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
+        def.setLocation(program, module, fileId, location);
         def.callType = ct;
         if (thisVar != null ) {
             def.parameters.add(thisVar);
@@ -730,7 +706,7 @@ public class Parser {
                 // this ensures it is not called
                 old.list = null;
             } else {
-                throw syntaxError("Function '" + def.getFullName().name + "' already has an implementation");
+                syntaxError("Function '" + def.getFullName().name + "' already has an implementation");
             }
         }
         if (scanPhase && template) {
@@ -768,10 +744,10 @@ public class Parser {
         program.addFunction(def);
         startBlock(false, null);
         while (true) {
-            if (indent <= defIndent) {
+            if (indent <= defIndent || type == TokenType.END) {
                 break;
             }
-            parseStatements(def.list);
+            parseStatement(def.list);
         }
         if (def.exceptionType != null && def.returnType == null) {
             def.list.add(new Return(null));
@@ -812,7 +788,7 @@ public class Parser {
         solver.clear();
         if (currentFunctionDefinition.returnType != null) {
             if (!Program.doesReturn(currentFunctionDefinition.list)) {
-                throw syntaxError("Function does not return or throw");
+                syntaxError("Function does not return or throw");
             }
         }
         if (Variable.SSA_FORM && functionContext.blockList.isEmpty()) {
@@ -847,7 +823,7 @@ public class Parser {
                     itType = readType(true);
                     def.itType = itType;
                     if (!matchOp(")")) {
-                        throw syntaxError("Expected ')'");
+                        syntaxError("Expected ')'");
                     }
                 }
                 DataType type;
@@ -890,7 +866,7 @@ public class Parser {
                     }
                     if (type.memoryType() == MemoryType.OWNER) {
                         if (varArgs) {
-                            throw syntaxError("Owned var-args are not supported");
+                            syntaxError("Owned var-args are not supported");
                         }
                     }
                     def.parameters.add(var);
@@ -898,7 +874,7 @@ public class Parser {
                 }
                 if (varArgs) {
                     if (!matchOp(")")) {
-                        throw syntaxError("Expected ')', got " + token);
+                        syntaxError("Expected ')', got " + token);
                     }
                     break;
                 } else {
@@ -921,7 +897,7 @@ public class Parser {
             def.macro = true;
         }
         if (itType != null && !def.macro) {
-            throw syntaxError("Types on 'it' parameters are only allowed in macros");
+            syntaxError("Types on 'it' parameters are only allowed in macros");
         }
         if (matchOp("\n")) {
             // void
@@ -936,19 +912,19 @@ public class Parser {
             }
             if (def.exceptionType != null) {
                 if (def.exceptionType.needIncDec()) {
-                    throw syntaxError("May only throw value types");
+                    syntaxError("May only throw value types");
                 }
                 boolean found = false;
                 for (Variable f : def.exceptionType.fields) {
                     if (f.name().equals("exceptionType")) {
                         if (f.type() != DataType.INT_TYPE) {
-                            throw syntaxError("The field 'exceptionType' must be of type 'int'");
+                            syntaxError("The field 'exceptionType' must be of type 'int'");
                         }
                         found = true;
                     }
                 }
                 if (!found) {
-                    throw syntaxError("The exception type needs to have an integer field 'exceptionType'");
+                    syntaxError("The exception type needs to have an integer field 'exceptionType'");
                 }
             }
             readEndOfStatement();
@@ -983,7 +959,7 @@ public class Parser {
         }
         buff.append(" " + functionName + "\n");
         buff.append(code);
-        t.lineOffset = getLine(lastPos);
+        t.posOffset = lastPos;
         t.template += "\n" + buff.toString();
         if (comment != null) {
             program.addComment("fun " + t.format() + " " + functionName.trim(), comment);
@@ -993,7 +969,7 @@ public class Parser {
     private void parseFunctionTemplate(int defIndent, FunctionDefinition def) {
         String s = parseBlock(defIndent);
         if (program.getFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name) != null) {
-            throw syntaxError("Function template '" + def.getFullName().name + "' was already defined");
+            syntaxError("Function template '" + def.getFullName().name + "' was already defined");
         }
         def.template = s;
         program.addFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name, def);
@@ -1012,12 +988,12 @@ public class Parser {
 
     private DataType readType(boolean templatesOk, boolean arraysOk) {
         if (DataType.TYPE.equals(token)) {
-            throw syntaxError("Type '" + token + "' may not be used here");
+            syntaxError("Type '" + token + "' may not be used here");
         }
         if ("fun".equals(token)) {
             read();
             if (!matchOp("(")) {
-                throw syntaxError("Expected '('");
+                syntaxError("Expected '('");
             }
             ArrayList<DataType> params = new ArrayList<>();
             if (!matchOp(")")) {
@@ -1029,7 +1005,7 @@ public class Parser {
                     } else if (matchOp(")")) {
                         break;
                     } else {
-                        throw syntaxError("Expected ')'");
+                        syntaxError("Expected ')'");
                     }
                 }
             }
@@ -1045,7 +1021,7 @@ public class Parser {
             if (matchOp("..")) {
                 Expression upperBound = parseExpression();
                 if (upperBound.canThrowException() != null) {
-                    throw syntaxError("May not throw an exception here");
+                    syntaxError("May not throw an exception here");
                 }
                 String rangeTypeName = "0.." + upperBound.format();
                 DataType t = functionContext.getType("", rangeTypeName);
@@ -1085,22 +1061,22 @@ public class Parser {
         }
         if (arraysOk && matchOp("[")) {
             if (!matchOp("]")) {
-                throw syntaxError("Expected ']', got '" + token + "' when reading a type");
+                syntaxError("Expected ']', got '" + token + "' when reading a type");
             }
             t = t.arrayType();
         }
         if (borrow) {
             if (t.memoryType() != MemoryType.REF_COUNT) {
-                throw syntaxError("Not a pointer type");
+                syntaxError("Not a pointer type");
             }
             t = t.borrowType();
         }
         if (matchOp("?")) {
             if (t.isArray()) {
-                throw syntaxError("Arrays can't be null (but they can be empty)");
+                syntaxError("Arrays can't be null (but they can be empty)");
             } else if (t.isCopyType()) {
                 // ignore, to support templates
-                // throw syntaxError("Numbers and value types can't be be null (but the value can be zero)");
+                // syntaxError("Numbers and value types can't be be null (but the value can be zero)");
             } else {
                 t = t.orNull();
             }
@@ -1111,7 +1087,7 @@ public class Parser {
     private ArrayList<DataType> parseTypeParameters(DataType t, boolean templatesOk) {
         String name = t.name();
         if (!matchOp("(")) {
-            throw syntaxError("Type '" + name + "' is a template; need to specify the parameters");
+            syntaxError("Type '" + name + "' is a template; need to specify the parameters");
         }
         matchOp("\n");
         ArrayList<DataType> params = new ArrayList<>();
@@ -1121,7 +1097,7 @@ public class Parser {
             matchOp(",");
         }
         if (!matchOp(")")) {
-            throw syntaxError("Type '" + name + "' is a template; need to specify " + t.parameters.size() + " parameters");
+            syntaxError("Type '" + name + "' is a template; need to specify " + t.parameters.size() + " parameters");
         }
         return params;
     }
@@ -1141,7 +1117,7 @@ public class Parser {
             code = Templates.convertTemplate(code, t.parameters, with, program);
             code = "type " + typeId + "\n" + code;
             try {
-                Parser p = new Parser(program, module, code, t.lineOffset);
+                Parser p = new Parser(program, module, code, t.posOffset);
                 p.scanPhase = false;
                 p.read();
                 p.parseTypeDefinition(t.module());
@@ -1150,13 +1126,26 @@ public class Parser {
                 }
                 t = functionContext.getType(t.module(), typeId);
             } catch (IllegalStateException e) {
-                throw syntaxError("Error parsing template: " + e.getMessage(), e);
+                syntaxError("Error parsing template: " + e.getMessage(), e);
             }
         }
         return t;
     }
 
-    private void parseStatements(ArrayList<Statement> target) {
+    private void parseStatement(ArrayList<Statement> target) {
+        try {
+            tryParseStatement(target);
+        } catch (IllegalStateException e) {
+            if (e.getMessage() == null) {
+                // syntax error - already added to source file
+                // ignore
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private void tryParseStatement(ArrayList<Statement> target) {
         if (matchOp("\n")) {
             return;
         }
@@ -1207,9 +1196,9 @@ public class Parser {
                 String identifier1 = readIdentifier();
                 if (identifier1.equals("fun")) {
                     if ("main".equals(currentFunctionDefinition.getFullName().name)) {
-                        throw syntaxError("Trying to define a function inside the main function. Note that any statement starts the main function implicitly.");
+                        syntaxError("Trying to define a function inside the main function. Note that any statement starts the main function implicitly.");
                     }
-                    throw syntaxError("Trying to define a function inside a function");
+                    syntaxError("Trying to define a function inside a function");
                 }
                 // TODO this is duplicate source code
                 // if there is no variable with this name, and
@@ -1240,31 +1229,31 @@ public class Parser {
             }
             if (matchOp(":=")) {
                 if (m != module && !m.equals(module)) {
-                    throw syntaxError("Can not create a new variable in a different module");
+                    syntaxError("Can not create a new variable in a different module");
                 }
                 Expression expr = parseExpression();
                 expr = expr.writeStatements(this, true, target);
                 if (expr instanceof NullValue) {
                     if (targetType == null) {
-                        throw syntaxError("Can only assign null if the type is known");
+                        syntaxError("Can only assign null if the type is known");
                     }
                     expr = new NullValue(targetType);
                 }
                 DataType type = expr.type();
                 if (type.isArray()) {
-                    throw syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
+                    syntaxError("Arrays need to be declared as constants to simplify array-bound verification");
                 }
                 boolean global = isGlobalScope;
                 if (matchOp("..")) {
                     if (global) {
-                        throw syntaxError("Global ranges are not allowed; they need to be in a function");
+                        syntaxError("Global ranges are not allowed; they need to be in a function");
                     }
                     if (!"0".equals(expr.format())) {
-                        throw syntaxError("Range needs to start from 0: '" + expr.format() + "'");
+                        syntaxError("Range needs to start from 0: '" + expr.format() + "'");
                     }
                     Expression upperBound = parseExpression();
                     if (upperBound.canThrowException() != null) {
-                        throw syntaxError("May not throw an exception here");
+                        syntaxError("May not throw an exception here");
                     }
                     String rangeTypeName = "0.." + upperBound.format();
                     DataType rangeType = functionContext.getType("", rangeTypeName);
@@ -1278,7 +1267,7 @@ public class Parser {
                 if (targetType != null) {
                     Expression cast = program.cast(expr, false, targetType);
                     if (cast == null) {
-                        throw syntaxError("Need explicit cast for " + expr.type() + " to " + targetType);
+                        syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
                     }
                     expr = cast;
                     type = cast.type();
@@ -1287,7 +1276,7 @@ public class Parser {
                     if (targetType.isNullable() && targetType.equals(type.orNull())) {
                         type = targetType;
                     } else {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression");
                     }
                 }
                 for (String identifier : identifierList) {
@@ -1303,7 +1292,7 @@ public class Parser {
                         program.addGlobalVariable(v);
                     } else {
                         if (functionContext.getVariable(module, v.name()) != null) {
-                            throw syntaxError("Variable '" + v.name() + "' already exists");
+                            syntaxError("Variable '" + v.name() + "' already exists");
                         }
                         functionContext.addVariable(v);
                     }
@@ -1319,18 +1308,18 @@ public class Parser {
             }
             if (matchOp(":")) {
                 if (m != module && !m.equals(module)) {
-                    throw syntaxError("Can not define a constant in a different module");
+                    syntaxError("Can not define a constant in a different module");
                 }
                 Expression expr = parseExpression();
                 if (expr instanceof NullValue) {
                     if (targetType == null) {
-                        throw syntaxError("Can only assign null if the type is known");
+                        syntaxError("Can only assign null if the type is known");
                     }
                     expr = new NullValue(targetType);
                 }
                 expr = expr.writeStatements(this, true, target);
                 if (expr == null) {
-                    throw syntaxError("Expression required");
+                    syntaxError("Expression required");
                 }
                 Value constValue = eval(expr, true);
                 if (constValue != null) {
@@ -1341,7 +1330,7 @@ public class Parser {
                     }
                 }
                 if (identifierList.size() != 1) {
-                    throw syntaxError("Constant lists are not supported");
+                    syntaxError("Constant lists are not supported");
                 }
                 String identifier = identifierList.get(0);
                 Assignment s = new Assignment();
@@ -1351,7 +1340,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(expr.type())) {
                     Expression e = program.cast(expr, false, targetType);
                     if (e == null) {
-                        throw syntaxError("The type of the variable is different than the type of the expression, and there is no matching convert method");
+                        syntaxError("The type of the variable is different than the type of the expression, and there is no matching convert method");
                     }
                     expr = e;
                 }
@@ -1364,11 +1353,11 @@ public class Parser {
                 s.type = s.value.type();
                 if (global && !identifier.toUpperCase(Locale.ROOT).equals(identifier)) {
                     if (!s.type.isArray()) {
-                        throw syntaxError("Global constants need to be all caps: " + identifier);
+                        syntaxError("Global constants need to be all caps: " + identifier);
                     }
                 }
                 if (functionContext.getVariable(null, v.name()) != null) {
-                    throw syntaxError("Variable already defined: " + v.name());
+                    syntaxError("Variable already defined: " + v.name());
                 }
                 functionContext.addVariable(v);
                 if (global) {
@@ -1382,14 +1371,14 @@ public class Parser {
             } else if (matchOp("(")) {
                 matchOp("\n");
                 if (identifierList.size() != 1) {
-                    throw syntaxError("Function lists are not supported");
+                    syntaxError("Function lists are not supported");
                 }
                 String identifier = identifierList.get(0);
                 if ("native".equals(identifier)) {
                     String s = token.trim();
                     read();
                     if (!matchOp(")")) {
-                        throw syntaxError("Expected ')'");
+                        syntaxError("Expected ')'");
                     }
                     while (s.startsWith("#include ")) {
                         int index = s.indexOf('\n');
@@ -1430,7 +1419,7 @@ public class Parser {
                     matchOp("\n");
                     identifier = readIdentifier();
                     if (!matchOp("(")) {
-                        throw syntaxError("Only method calls are supported here");
+                        syntaxError("Only method calls are supported here");
                     }
                 }
                 readEndOfStatement();
@@ -1440,7 +1429,7 @@ public class Parser {
                 return;
             } else if (matchOp("\n") && targetType != null) {
                 if (identifierList.size() != 1) {
-                    throw syntaxError("Declaration lists are not supported");
+                    syntaxError("Declaration lists are not supported");
                 }
                 String identifier = identifierList.get(0);
                 Assignment s = new Assignment();
@@ -1455,7 +1444,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(expr.type())) {
                     expr = program.cast(expr, false, targetType);
                     if (expr == null) {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression");
                     }
                 }
                 s.value = expr;
@@ -1464,7 +1453,7 @@ public class Parser {
                 s.leftValue = v;
                 s.type = targetType;
                 if (functionContext.getVariable(module, v.name()) != null) {
-                    throw syntaxError("Variable '" + v.name() + "' already exists");
+                    syntaxError("Variable '" + v.name() + "' already exists");
                 }
                 functionContext.addVariable(v);
                 if (global) {
@@ -1477,14 +1466,14 @@ public class Parser {
                 return;
             }
             if (identifierList.size() != 1) {
-                throw syntaxError("Lists are currently not supported");
+                syntaxError("Lists are currently not supported");
             }
             String identifier = identifierList.get(0);
             LeftValue left = functionContext.getVariable(module, identifier);
             if (left == null) {
                 left = functionContext.getVariable(null, "this");
                 if (left == null) {
-                    throw syntaxError("Variable not found: '" + identifier
+                    syntaxError("Variable not found: '" + identifier
                             + "' \n"
                             + "(constants are declared with ':', "
                             + "new variable are declared with ':=')");
@@ -1493,7 +1482,7 @@ public class Parser {
                 DataType vt = left.type();
                 DataType type = vt.getFieldDataType(identifier);
                 if (type == null) {
-                    throw syntaxError("Variable not found: '" + identifier
+                    syntaxError("Variable not found: '" + identifier
                             + "' \n"
                             + "(constants are declared with ':', "
                             + "new variable are declared with ':=')");
@@ -1513,7 +1502,8 @@ public class Parser {
                         DataType vt = left.type();
                         String[] fieldNames = vt.getFieldNames();
                         if (fieldNames.length == 0) {
-                            throw syntaxError("Field '" + index + "' not found in type '" + left.type() + "'");
+                            syntaxError("Field '" + index + "' not found in type '" + left.type() + "'");
+                            f = "x";
                         } else if (index >= 0 && index < fieldNames.length) {
                             f = fieldNames[index];
                         } else {
@@ -1556,7 +1546,7 @@ public class Parser {
                             type = left.type().getFieldDataType(f);
                         }
                         if (type == null) {
-                            throw syntaxError("Field '" + f + "' not found in type '" + left.type() + "'");
+                            syntaxError("Field '" + f + "' not found in type '" + left.type().format() + "'");
                         }
                         left = new FieldAccess(left, f, type);
                     }
@@ -1565,10 +1555,10 @@ public class Parser {
                     boolean checkBounds = needBoundsCheck(left, arrayIndex);
                     if (matchOp("]!")) {
                         if (checkBounds) {
-                            throw syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
+                            syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
                         }
                     } else if (!matchOp("]")) {
-                        throw syntaxError("Expected ']', got '" + token + "' in array access");
+                        syntaxError("Expected ']', got '" + token + "' in array access");
                     }
                     left = new ArrayAccess(left, arrayIndex, checkBounds);
                 } else {
@@ -1578,7 +1568,7 @@ public class Parser {
             Assignment s = new Assignment();
             s.leftValue = left;
             if (left.isConstant()) {
-                throw syntaxError("Can not modify constant '" + left.format() + "'");
+                syntaxError("Can not modify constant '" + left.format() + "'");
             }
             if (matchOp("=")) {
                 Expression expr = parseExpression();
@@ -1586,7 +1576,7 @@ public class Parser {
                 if (targetType != null && !targetType.equals(expr.type())) {
                     expr = program.cast(expr, false, targetType);
                     if (expr == null) {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression");
                     }
                 }
                 s.value = expr;
@@ -1594,7 +1584,7 @@ public class Parser {
                 // and so it's important we have a temp variable
                 s.type = s.value.type();
                 if (s.leftValue instanceof Variable && s.type != null && s.type.isArray()) {
-                    throw syntaxError("Arrays can not be re-assigned to simplify array-bound verification");
+                    syntaxError("Arrays can not be re-assigned to simplify array-bound verification");
                 }
                 if (s.value instanceof NullValue) {
                     // for templates, we want to support assignment to null
@@ -1620,7 +1610,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1637,7 +1627,7 @@ public class Parser {
                 s.type = s.value.type();
                 if (targetType != null) {
                     if (!targetType.equals(s.value.type())) {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression");
                     }
                     if (!targetType.isFloatingPoint()) {
                         verifyNotZero(expr);
@@ -1658,7 +1648,7 @@ public class Parser {
                 s.type = s.value.type();
                 if (targetType != null) {
                     if (!targetType.equals(s.value.type())) {
-                        throw syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression");
                     }
                     if (!targetType.isFloatingPoint()) {
                         verifyNotZero(expr);
@@ -1678,7 +1668,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1694,7 +1684,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1710,7 +1700,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1726,7 +1716,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1742,7 +1732,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1758,7 +1748,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1774,7 +1764,7 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    throw syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1785,7 +1775,7 @@ public class Parser {
                 return;
             }
         }
-        throw syntaxError("Expected a statement, got '" + token + "'");
+        syntaxError("Expected a statement, got '" + token + "'");
     }
 
     private void convertToExpandedForm(Assignment s) {
@@ -1802,7 +1792,7 @@ public class Parser {
         Value v = expr.eval(null);
         if (v != null) {
             if (v.longValue() == 0) {
-                throw syntaxError("Division by zero is not allowed");
+                syntaxError("Division by zero is not allowed");
             }
             return;
         }
@@ -1830,7 +1820,7 @@ public class Parser {
             maybeZero = true;
         }
         if (maybeZero) {
-            throw syntaxError("Can not verify if value might be zero; division by zero is not allowed: " + expr);
+            syntaxError("Can not verify if value might be zero; division by zero is not allowed: " + expr.format());
         }
     }
 
@@ -1862,10 +1852,10 @@ public class Parser {
 
     private void verifyBounds(Assignment s) {
         if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
-            throw syntaxError("Not an array: " + s.leftValue.format());
+            syntaxError("Not an array: " + s.leftValue.format());
         }
         if (!areTypesCompatible(s.value, s.leftValue.type())) {
-            throw syntaxError("Incompatible types: " + s.value.type().format() + "; required: " + s.leftValue.type().format());
+            syntaxError("Incompatible types: " + s.value.type().format() + "; required: " + s.leftValue.type().format());
         }
         if (s.leftValue.type().isTrait() && s.value.type().implementsTrait(s.leftValue.type())) {
             s.value = new Cast(s.value, s.leftValue.type());
@@ -1881,11 +1871,11 @@ public class Parser {
     private void verifyBounds(DataType targetType, Expression expr) {
         if (expr instanceof NullValue) {
             if (!targetType.isNullable()) {
-                throw syntaxError("The expression may not be 'null' here.");
+                syntaxError("The expression may not be 'null' here.");
             }
         } else if (expr.type().isNullable() && !targetType.isNullable()) {
             verifyNullAccess(expr);
-            // throw syntaxError("The expression may be 'null', but this is not allowed here.");
+            // syntaxError("The expression may be 'null', but this is not allowed here.");
         }
         if (!targetType.isRange()) {
             return;
@@ -1915,17 +1905,17 @@ public class Parser {
             smallerLen = solver.isTrue(r);
         }
         if (!largerEqualZero) {
-            throw syntaxError("Can not verify if value is at least 0");
+            syntaxError("Can not verify if value is at least 0");
         }
         if (!smallerLen) {
-            throw syntaxError("Can not verify if value is smaller than '" + max.format() + "'");
+            syntaxError("Can not verify if value is smaller than '" + max.format() + "'");
         }
     }
 
     private void readEndOfStatement() {
         lastComment = null;
         if (token != null && !matchOp(";") && !matchOp("\n")) {
-            throw syntaxError("Expected end of statement, got '" + token + "'");
+            syntaxError("Expected end of statement, got '" + token + "'");
         }
     }
 
@@ -2047,7 +2037,8 @@ public class Parser {
     }
 
     private Expression parseCall(DataType type, String module, String identifier, Call call, boolean nonMacroCall) {
-        int lineNumber = getLine(lastPos);
+        int callStart = lastPos - identifier.length();
+        int posOffset = lastPos;
         if (type != null && (type.module() != null && !type.module().isEmpty())) {
             module = type.module();
         }
@@ -2078,13 +2069,13 @@ public class Parser {
                 header = Templates.convertTemplate(header, templateNames, templateParams, program);
                 code = header.trim() + "\n" + code;
                 try {
-                    Parser p = new Parser(program, module, code, template.lineOffset);
+                    Parser p = new Parser(program, module, code, template.posOffset);
                     p.scanPhase = false;
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, template.getFullName().name, template.parameters.size());
                 } catch (IllegalStateException e) {
-                    throw syntaxError("Error parsing template: " + e.getMessage(), e);
+                    syntaxError("Error parsing template: " + e.getMessage(), e);
                 }
                 String templateCode = template.template;
                 template = call.def;
@@ -2112,12 +2103,12 @@ public class Parser {
             if (checkComma) {
                 Expression last = call.args.get(call.args.size() - 1);
                 if (!last.isEasyToRead()) {
-                    throw syntaxError("Expected ',' after '" + last.format() + "' or parentheses around the expression, to make it easier to read");
+                    syntaxError("Expected ',' after '" + last.format() + "' or parentheses around the expression, to make it easier to read");
                 }
             }
             if (template != null && pi < template.parameters.size() && DataType.TYPE.equals(template.parameters.get(pi).type().name())) {
                 if (DataType.TYPE.equals(token)) {
-                    throw syntaxError("Type '" + token + "' may not be used here");
+                    syntaxError("Type '" + token + "' may not be used here");
                 }
                 DataType t = readType(false, true);
                 String pName = template.parameters.get(pi).name();
@@ -2159,7 +2150,7 @@ public class Parser {
                                 templateNames.add(typeName);
                                 pt = p.type();
                                 if (!pt.isArray()) {
-                                    throw syntaxError("Expected array, got " + pt);
+                                    syntaxError("Expected array, got " + pt.format());
                                 }
                                 pt = pt.baseType();
                                 templateParams.add(pt.getFullName().getFullName());
@@ -2169,7 +2160,7 @@ public class Parser {
                 }
                 if (checkComma) {
                     if (!p.isEasyToRead()) {
-                        throw syntaxError("Expected ',' before '" + p.format() + "' or parentheses around the expression, to make it easier to read");
+                        syntaxError("Expected ',' before '" + p.format() + "' or parentheses around the expression, to make it easier to read");
                     }
                 }
                 call.args.add(p);
@@ -2196,13 +2187,13 @@ public class Parser {
                 header = Templates.convertTemplate(header, templateNames, templateParams, program);
                 code = header.trim() + "\n" + code;
                 try {
-                    Parser p = new Parser(program, module, code, template.lineOffset);
+                    Parser p = new Parser(program, module, code, template.posOffset);
                     p.scanPhase = false;
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
                 } catch (IllegalStateException e) {
-                    throw syntaxError("Error parsing template: " + e.getMessage(), e);
+                    syntaxError("Error parsing template: " + e.getMessage(), e);
                 }
             }
         } else {
@@ -2223,7 +2214,7 @@ public class Parser {
             if (didYouMean != null) {
                 notFound += "; did you mean " + didYouMean.toString() + " ?";
             }
-            throw syntaxError(notFound);
+            syntaxError(notFound, callStart);
         }
         if (type == null && currentFunctionDefinition != null && call.def.callType != null && call.def.callType == currentFunctionDefinition.callType) {
             // add the "this." parameter at the beginning
@@ -2242,7 +2233,7 @@ public class Parser {
                 buff.append(call.def.parameters.get(i).name());
             }
             buff.append(")");
-            throw syntaxError(buff.toString());
+            syntaxError(buff.toString());
         }
 
         // verify parameters with range restrictions
@@ -2250,7 +2241,7 @@ public class Parser {
         if (nonMacroCall && currentFunctionDefinition != null &&
                 currentFunctionDefinition.constExpr &&
                 !call.def.constExpr) {
-            throw syntaxError("A method marked as const can only call methods marked as const, but " + call.def.getFullName().name + " is not");
+            syntaxError("A method marked as const can only call methods marked as const, but " + call.def.getFullName().name + " is not");
         }
 
         for (Variable var : call.def.parameters) {
@@ -2287,7 +2278,7 @@ public class Parser {
             // special case for now
         } else {
             if (call.def.parameters.size() > call.args.size()) {
-                throw syntaxError("Function '" + identifier + "' not found");
+                syntaxError("Function '" + identifier + "' not found");
             }
             for (int i = 0; i < call.args.size(); i++) {
                 DataType targetType;
@@ -2296,7 +2287,8 @@ public class Parser {
                     Variable var = call.def.parameters.get(call.def.parameters.size() - 1);
                     targetType = var.type().baseType();
                 } else if (i >= call.def.parameters.size()) {
-                    throw syntaxError("Function '" + identifier + "' not found");
+                    syntaxError("Function '" + identifier + "' not found");
+                    targetType = DataType.INT_TYPE;
                 } else {
                     Variable var = call.def.parameters.get(i);
                     targetType = var.type();
@@ -2328,7 +2320,7 @@ public class Parser {
                 }
                 Expression cast = program.cast(expr, isNotNull, targetType);
                 if (cast == null) {
-                    throw syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
+                    syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
                 }
                 call.args.set(i, cast);
             }
@@ -2354,7 +2346,7 @@ public class Parser {
                 Variable var = call.def.parameters.get(i);
                 Variable lineVar = new Variable(var.name() + ".line", DataType.INT_TYPE);
                 params.add(lineVar);
-                args.add(NumberValue.valueOf(lineNumber));
+                args.add(NumberValue.valueOf(SourceFile.getLine(text, posOffset)));
                 DataType strType = DataType.I8_TYPE.arrayType();
                 Variable moduleVar = new Variable(var.name() + ".module", strType);
                 String m = this.module;
@@ -2440,12 +2432,12 @@ public class Parser {
 
     private void parseReturn(ArrayList<Statement> target) {
         if (currentFunctionDefinition == null) {
-            throw syntaxError("Return needs to be inside of a function");
+            syntaxError("Return needs to be inside of a function");
         }
         Return b = new Return(null);
         if (matchOp("\n") || matchOp(";")) {
             if (currentFunctionDefinition.returnType != null) {
-                throw syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType.format());
+                syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType.format());
             }
             target.add(b);
             negateLastBlockCondition();
@@ -2455,7 +2447,7 @@ public class Parser {
         // assign it first to a variable so that the components can be freed up
         b.expr = parseExpression(target);
         if (currentFunctionDefinition.returnType == null) {
-            throw syntaxError("The function declared to not return a value");
+            syntaxError("The function declared to not return a value");
         }
         if (!b.expr.isSimple()) {
             // this is converted to "_r", but we can not use "_r" internally
@@ -2468,7 +2460,7 @@ public class Parser {
             ret.isConstant = true;
             DataType type = b.expr.type();
             if (type == null) {
-                throw syntaxError("No type");
+                syntaxError("No type");
             }
             Variable var = Variable.newInternal(constId, type);
             ret.leftValue = var;
@@ -2483,7 +2475,7 @@ public class Parser {
             if (e2 != null) {
                 b.expr = e2;
             } else {
-                throw syntaxError("Incompatible types: " + b.expr.type() + "; required: " + currentFunctionDefinition.returnType);
+                syntaxError("Incompatible types: " + b.expr.type().format() + "; required: " + currentFunctionDefinition.returnType.format());
             }
         }
         if (type.isTrait() && b.expr.type().implementsTrait(type)) {
@@ -2496,7 +2488,7 @@ public class Parser {
             target.add(b);
             return;
         }
-        throw syntaxError("Expected end of statement, got '" + token + "' in 'return' statement");
+        syntaxError("Expected end of statement, got '" + token + "' in 'return' statement");
     }
 
     private boolean areTypesCompatible(Expression expr, DataType assignToType) {
@@ -2529,7 +2521,7 @@ public class Parser {
                 return false;
             }
             if (exprType.isFloatingPoint() && !assignToType.isFloatingPoint()) {
-                // throw syntaxError("The expression is floating point, but the variable is not.");
+                // syntaxError("The expression is floating point, but the variable is not.");
                 // TODO there are many more cases that are not allowed
                 return false;
             }
@@ -2571,7 +2563,7 @@ public class Parser {
         String id = readIdentifier();
         Variable var = new Variable(id, exceptionType);
         if (exceptionType == null) {
-            throw syntaxError("Exception type is not known");
+            syntaxError("Exception type is not known");
         }
         functionContext.addVariable(var);
         catchStat.var = var;
@@ -2581,7 +2573,8 @@ public class Parser {
         } else if (matchOp("{")) {
             sameLine = true;
         } else {
-            throw syntaxError("Expected end of statement, got '" + token + "' in 'catch' statement");
+            syntaxError("Expected end of statement, got '" + token + "' in 'catch' statement");
+            sameLine = false;
         }
         while (true) {
             if (sameLine) {
@@ -2593,7 +2586,7 @@ public class Parser {
                     break;
                 }
             }
-            parseStatements(catchStat.list);
+            parseStatement(catchStat.list);
         }
         catchStat.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
@@ -2602,7 +2595,7 @@ public class Parser {
 
     private void parseThrow(ArrayList<Statement> target) {
         if (currentFunctionDefinition.exceptionType == null) {
-            throw syntaxError("This method does not throw an exception (local exceptions are not supported)");
+            syntaxError("This method does not throw an exception (local exceptions are not supported)");
         }
         Throw t = new Throw();
         if (matchOp("\n") || matchOp(";")) {
@@ -2620,12 +2613,12 @@ public class Parser {
             negateLastBlockCondition();
             return;
         }
-        throw syntaxError("Expected end of statement, got '" + token + "' in 'throw' statement");
+        syntaxError("Expected end of statement, got '" + token + "' in 'throw' statement");
     }
 
     private void parseBreak(ArrayList<Statement> target) {
         if (currentLoop == null) {
-            throw syntaxError("'break' statement outside of a loop");
+            syntaxError("'break' statement outside of a loop");
         }
         Break b = new Break();
         if (matchOp("\n") || matchOp(";")) {
@@ -2640,12 +2633,12 @@ public class Parser {
             target.add(b);
             return;
         }
-        throw syntaxError("Expected end of statement, got '" + token + "' in 'break' statement");
+        syntaxError("Expected end of statement, got '" + token + "' in 'break' statement");
     }
 
     private void parseContinue(ArrayList<Statement> target) {
         if (currentLoop == null) {
-            throw syntaxError("'continue' statement outside of a loop");
+            syntaxError("'continue' statement outside of a loop");
         }
         Continue c = new Continue();
         if (matchOp("\n") || matchOp(";")) {
@@ -2662,7 +2655,7 @@ public class Parser {
             target.add(c);
             return;
         }
-        throw syntaxError("Expected end of statement, got '" + token + "' in 'continue' statement");
+        syntaxError("Expected end of statement, got '" + token + "' in 'continue' statement");
     }
 
     private boolean match(String s) {
@@ -2703,7 +2696,7 @@ public class Parser {
         int stackPos = functionContext.getStackPos();
         boolean first = true;
         if (!matchOp("\n")) {
-            throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+            syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
         }
         while (true) {
             if (match("case")) {
@@ -2723,7 +2716,7 @@ public class Parser {
                     matchOp("\n");
                 }
                 if (!matchOp("\n")) {
-                    throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+                    syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
                 }
                 if (!first) {
                     endBlock();
@@ -2742,7 +2735,7 @@ public class Parser {
                 ifStatement.condition = condition;
             } else if (match("else")) {
                 if (!matchOp("\n")) {
-                    throw syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
+                    syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
                 }
                 endBlock();
                 startBlock(false, null);
@@ -2756,7 +2749,7 @@ public class Parser {
                 if (indent <= switchIndent) {
                     break;
                 }
-                parseStatements(list);
+                parseStatement(list);
             }
             if (!elsePart) {
                 ifStatement.thenList = list;
@@ -2792,7 +2785,8 @@ public class Parser {
             } else if (matchOp("{")) {
                 sameLine = true;
             } else {
-                throw syntaxError("Expected end of statement, got '" + token + "' in 'if' statement");
+                syntaxError("Expected end of statement, got '" + token + "' in 'if' statement");
+                sameLine = false;
             }
             ArrayList<Statement> list = new ArrayList<>();
             if (ifStatement.thenList == null) {
@@ -2810,7 +2804,7 @@ public class Parser {
                         break;
                     }
                 }
-                parseStatements(list);
+                parseStatement(list);
             }
             if (ifStatement.thenAutoClose == null) {
                 ifStatement.thenAutoClose = autoClose(stackPos, null);
@@ -2870,12 +2864,12 @@ public class Parser {
 
     private void parseFor(ArrayList<Statement> target) {
         if (currentFunctionDefinition != null && currentFunctionDefinition.macro) {
-            throw syntaxError("For loops in macros are currently not supported");
+            syntaxError("For loops in macros are currently not supported");
         }
         int loopIndent = indent;
         String variableName = readIdentifier();
         if (!matchOp(":=")) {
-            throw syntaxError("Expected ':=', got '" + token + "' in 'for' statement");
+            syntaxError("Expected ':=', got '" + token + "' in 'for' statement");
         }
         Call call = new Call();
         Expression expr;
@@ -2884,37 +2878,19 @@ public class Parser {
             Std.registerRange(program);
             String method = readIdentifier();
             if (!matchOp("(")) {
-                throw syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
+                syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
             }
             expr = parseCall(null, "", method, call, false);
         } else {
             expr = parseExpressionPrimary();
         }
-
-
-        /*
-        String method = readIdentifier();
-        if (!matchOp("(")) {
-            throw syntaxError("Expected a function call, got '" + token + "' in 'for' statement");
-        }
-        matchOp("\n");
-        if ("range".equals(method)) {
-            Std.registerRange(program);
-        } else if ("until".equals(method)) {
-            Std.registerUntil(program);
-        }
-        Call call = new Call();
-        Expression expr = parseCall(null, "", method, call, false);
-        */
-
-
         if (!(expr instanceof Call)) {
-            throw syntaxError("Only range functions are supported");
+            syntaxError("Only range functions are supported");
         }
         call = (Call) expr;
         FunctionDefinition functionDef = call.def;
         if (functionDef.exceptionType != null) {
-            throw syntaxError("The function in the 'for' statement may not throw an exception sorry");
+            syntaxError("The function in the 'for' statement may not throw an exception sorry");
         }
         int stackPos = functionContext.getStackPos();
         int oldStackPosLoop = stackPosLoop;
@@ -3064,7 +3040,8 @@ public class Parser {
         } else if (matchOp("{")) {
             sameLine = true;
         } else {
-            throw syntaxError("Expected end of statement, got '"+token+"' in 'for' statement");
+            syntaxError("Expected end of statement, got '"+token+"' in 'for' statement");
+            sameLine = false;
         }
         while (true) {
             if (sameLine) {
@@ -3076,7 +3053,7 @@ public class Parser {
                     break;
                 }
             }
-            parseStatements(loop.list);
+            parseStatement(loop.list);
         }
         for (; j < whileLoop.size(); j++) {
             Statement s = whileLoop.get(j);
@@ -3198,7 +3175,8 @@ public class Parser {
         } else if (matchOp("{")) {
             sameLine = true;
         } else {
-            throw syntaxError("Expected end of statement, got '"+token+"' in 'while' statement");
+            syntaxError("Expected end of statement, got '"+token+"' in 'while' statement");
+            sameLine = false;
         }
         int stackPos = functionContext.getStackPos();
         int oldStackPosLoop = stackPosLoop;
@@ -3213,7 +3191,7 @@ public class Parser {
                     break;
                 }
             }
-            parseStatements(loop.list);
+            parseStatement(loop.list);
         }
         loop.autoClose(autoClose(stackPos, null));
         functionContext.rewindStack(stackPos);
@@ -3241,7 +3219,7 @@ public class Parser {
             }
             Variable var = functionContext.getVariable(null, name);
             if (var == null) {
-                throw syntaxError("Variable not found: '" + name + "'");
+                syntaxError("Variable not found: '" + name + "'");
             }
             if (var.type().needFree()) {
                 Free free = new Free(var);
@@ -3256,7 +3234,8 @@ public class Parser {
         try {
             return parseExpression().writeStatements(this, false, target);
         } catch (IllegalStateException e) {
-            throw syntaxError(e.getMessage());
+            syntaxError(e.getMessage());
+            return NumberValue.ZERO;
         }
     }
 
@@ -3383,15 +3362,16 @@ public class Parser {
             }
             DataType dataType = functionContext.getType(m, n);
             if (dataType != null && dataType.enumValues != null) {
+                int todoEnumValuesAreInitiallyFields;
                 DataType enumType = functionContext.getType(m, n);
                 read();
                 if (matchOp(".")) {
-                    throw syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
+                    syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
                 }
                 String val = readIdentifier();
                 Long value = enumType.enumValues.get(val);
                 if (value == null) {
-                    throw syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
+                    syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
                 }
                 Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
                 return expr;
@@ -3407,10 +3387,10 @@ public class Parser {
                 if (matchOp("[")) {
                     Expression arrayLength = parseExpression();
                     if (arrayLength.canThrowException() != null) {
-                        throw syntaxError("May not throw an exception here");
+                        syntaxError("May not throw an exception here");
                     }
                     if (!matchOp("]")) {
-                        throw syntaxError("Expected ')', got '" + token + "' in constructor");
+                        syntaxError("Expected ')', got '" + token + "' in constructor");
                     }
                     New newExpr = new New(dataType.arrayType(), arrayLength);
                     return newExpr;
@@ -3421,7 +3401,7 @@ public class Parser {
                     Expression expr = parseCall(null, m, n, call, true);
                     return expr;
                 } else {
-                    throw syntaxError("Expected '(' to call the constructor");
+                    syntaxError("Expected '(' to call the constructor");
                 }
             }
             if (matchOp("(")) {
@@ -3441,12 +3421,12 @@ public class Parser {
                         }
                         if (def.code != null) {
                             try {
-                                Parser p = new Parser(program, def.getFullName().module, def.format(), def.lineOffset);
+                                Parser p = new Parser(program, def.getFullName().module, def.format(), def.posOffset);
                                 p.scanPhase = false;
                                 p.read();
                                 p.parseFunctionDefinition(def.getFullName().module);
                             } catch (IllegalStateException e) {
-                                throw syntaxError("Error parsing function: " + e.getMessage(), e);
+                                syntaxError("Error parsing function: " + e.getMessage(), e);
                             }
                         }
                     }
@@ -3493,16 +3473,16 @@ public class Parser {
                 }
                 if (def != null) {
                     if (def.exceptionType != null) {
-                        throw syntaxError("Function throws an exception; this is not supported");
+                        syntaxError("Function throws an exception; this is not supported");
                     }
                     if (def.varArgs) {
-                        throw syntaxError("Function has a variable number of arguments; this is not supported");
+                        syntaxError("Function has a variable number of arguments; this is not supported");
                     }
                     FunctionPointer fp = new FunctionPointer(def);
                     return fp;
                 }
                 if (var == null) {
-                    throw syntaxError("Variable or constant not found: '" + n + "'");
+                    syntaxError("Variable or constant not found: '" + n + "'");
                 }
             }
             return parsePossibleDot(var);
@@ -3510,11 +3490,12 @@ public class Parser {
             matchOp("\n");
             Expression expr = parseExpression();
             if (!matchOp(")")) {
-                throw syntaxError("Expected ')', got '" + token + "' in nested expression");
+                syntaxError("Expected ')', got '" + token + "' in nested expression");
             }
             return parsePossibleDot(new Parentheses(expr));
         } else {
-            throw syntaxError("Expected an expression, got '"+token+"'");
+            syntaxError("Expected an expression, got '" + token + "'");
+            return NumberValue.ZERO;
         }
     }
 
@@ -3569,10 +3550,10 @@ public class Parser {
                             } else if ("line".equals(f)) {
                                 type = DataType.INT_TYPE;
                             } else {
-                                throw syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
+                                syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
                             }
                         } else {
-                            throw syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
+                            syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
                         }
                     }
                     v = new FieldAccess(v, f, type);
@@ -3583,13 +3564,13 @@ public class Parser {
                 boolean checkBounds = needBoundsCheck(v, arrayIndex);
                 if (matchOp("]!")) {
                     if (checkBounds) {
-                        throw syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
+                        syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
                     }
                 } else if (!matchOp("]")) {
-                    throw syntaxError("Expected ']', got '" + token + "' in array access");
+                    syntaxError("Expected ']', got '" + token + "' in array access");
                 }
                 if (!v.type().isArray()) {
-                    throw syntaxError("Not an array type: " + v.type());
+                    syntaxError("Not an array type: " + v.type().format());
                 }
                 v = new ArrayAccess(v, arrayIndex, checkBounds);
                 vt = v.type();
@@ -3611,7 +3592,7 @@ public class Parser {
                 needTest = false;
             }
             if (needTest) {
-                throw syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format() + "' before accessing it.");
+                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format() + "' before accessing it.");
             }
         } else if (expr.type().memoryType() == MemoryType.OWNER) {
             // owners are known to _not_ be null, until they are cleared
@@ -3624,7 +3605,7 @@ public class Parser {
                 needTest = true;
             }
             if (!needTest) {
-                throw syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format()
+                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format()
                         + "' before accessing it.");
             }
         }
@@ -3663,7 +3644,7 @@ public class Parser {
                 right = parseExpression(right, prec + (p2 > prec ? 1 : 0));
             }
             if (Operation.isComparison(op) && (expr.isComparison() || right.isComparison())) {
-                throw syntaxError("Comparing a result of a comparison requires parenthesis");
+                syntaxError("Comparing a result of a comparison requires parenthesis");
             }
             Operation operation = new Operation(expr, op, right);
             if ("/".equals(op) || "%".equals(op)) {
@@ -3680,19 +3661,24 @@ public class Parser {
         String name = readIdentifier();
         String module = "";
         while (matchOp(".")) {
-            if (module == null || module.isEmpty()) {
+            if (module.isEmpty()) {
                 module = name;
             } else {
                 module = module + "." + name;
             }
             name = readIdentifier();
         }
-        return new FullName(module, name);
+        String m = module;
+        String m2 = program.getImport(module, name);
+        if (m2 != null && !m2.isEmpty()) {
+            m = m2;
+        }
+        return new FullName(m, name);
     }
 
     private String readIdentifier() {
         if (type != TokenType.IDENTIFIER) {
-            throw syntaxError("Expected an identifier, got '" + token + "'");
+            syntaxError("Expected an identifier, got '" + token + "'");
         }
         String name = token;
         read();
@@ -3878,7 +3864,7 @@ public class Parser {
                     case 'x': {
                         pos++;
                         if (pos + 2 >= text.length()) {
-                            throw syntaxError("Expected '\\x00'");
+                            syntaxError("Expected '\\x00'");
                         }
                         String u = text.substring(pos, pos + 2);
                         pos += 1;
@@ -3890,7 +3876,7 @@ public class Parser {
                         break;
                     }
                     default:
-                        throw syntaxError("Expected '\\n', '\\r', '\\t', '\\'', '\\\\', or '\\x'; got '" + c + "'");
+                        syntaxError("Expected '\\n', '\\r', '\\t', '\\'', '\\\\', or '\\x'; got '" + c + "'");
                     }
                 } else {
                     if (c > 127) {
@@ -3900,7 +3886,7 @@ public class Parser {
                 }
                 pos++;
                 if (pos >= text.length()) {
-                    throw syntaxError("Unclosed string");
+                    syntaxError("Unclosed string");
                 }
                 c = text.charAt(pos);
             }
@@ -3915,13 +3901,13 @@ public class Parser {
                 token = new String(utf8, StandardCharsets.UTF_8);
                 byte[] u8b = token.getBytes(StandardCharsets.UTF_8);
                 if (u8b.length != utf8.length) {
-                    throw syntaxError("String literal is not normalized UTF-8");
+                    syntaxError("String literal is not normalized UTF-8");
                 }
                 for (int i = 0; i < buff.length(); i++) {
                     if (u8b[i] != utf8[i]) {
                         // the language doesn't need string literals to be valid UTF-8 sequences -
                         // this is a limitation of the current parser
-                        throw syntaxError("String literal is not normalized UTF-8");
+                        syntaxError("String literal is not normalized UTF-8");
                     }
                 }
             }
@@ -3950,7 +3936,7 @@ public class Parser {
             type = TokenType.STRING;
             token = StringLiteral.unindentRawMultiLineString(token);
         } else if (c == '\t') {
-            throw syntaxError("Tab characters are not supported sorry");
+            syntaxError("Tab characters are not supported sorry");
         } else if (c > ' ') {
             char first = c;
             pos++;
@@ -4027,13 +4013,13 @@ public class Parser {
             if (mayFail) {
                 return null;
             }
-            throw syntaxError("Can not evaluate the value");
+            syntaxError("Can not evaluate the value");
         } else if (v instanceof ValueException) {
             ValueException ex = (ValueException) v;
-            throw syntaxError("Evaluating the value threw an exception: " + ex.message);
+            syntaxError("Evaluating the value threw an exception: " + ex.message);
         } else if (v instanceof ValuePanic) {
             ValuePanic ex = (ValuePanic) v;
-            throw syntaxError("Evaluating the value failed: " + ex.message);
+            syntaxError("Evaluating the value failed: " + ex.message);
         }
         return v;
     }

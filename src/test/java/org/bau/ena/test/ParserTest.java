@@ -2,14 +2,14 @@ package org.bau.ena.test;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.bau.ena.Interpreter;
-import org.bau.ena.Parser;
+import org.bau.ena.EnaInterpreter;
+import org.bau.ena.EnaParser;
 import org.bau.ena.ast.Stmt;
 import org.junit.Test;
 
 public class ParserTest {
     private Stmt.Program parse(String src) {
-        return Parser.parse(src);
+        return EnaParser.parse(src);
     }
 
     @Test
@@ -28,7 +28,7 @@ public class ParserTest {
             """;
         Stmt.Program prog = parse(src);
         assertNotNull(prog);
-        Interpreter it = new Interpreter();
+        EnaInterpreter it = new EnaInterpreter();
         it.setPrintToSystemOut(false);
         it.execute(prog);
     }
@@ -51,7 +51,7 @@ public class ParserTest {
             """;
         Stmt.Program prog = parse(src);
         assertNotNull(prog);
-        Interpreter it = new Interpreter();
+        EnaInterpreter it = new EnaInterpreter();
         it.setPrintToSystemOut(false);
         it.execute(prog);
     }

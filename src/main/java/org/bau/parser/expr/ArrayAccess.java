@@ -278,9 +278,10 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void resolveTypes(Program program) {
-        base.resolveTypes(program);
-        arrayIndex.resolveTypes(program);
+    public LeftValue resolveTypes(Program program) {
+        base = base.resolveTypes(program);
+        arrayIndex = arrayIndex.resolveTypes(program);
+        return this;
     }
 
     public String toString() {
