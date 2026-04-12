@@ -113,9 +113,9 @@ public class FunctionPointer implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
-        function.resolveTypes(program);
-        functionPointerType = functionPointerType.resolve(program);
+    public Expression resolveTypes(FunctionContext context) {
+        function.resolveTypes(context.getProgram());
+        functionPointerType = functionPointerType.resolve(context.getProgram());
         return this;
     }
 

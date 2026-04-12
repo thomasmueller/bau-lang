@@ -18,7 +18,7 @@ public class ToCTest {
             "",
             "fun main()",
             "    println(fib(10))");
-        Stmt.Program prog = EnaParser.parse(src);
+        Stmt.EnaProgram prog = EnaParser.parse(src);
         CGenerator gen = new CGenerator();
         String c = gen.generate(prog);
         // System.out.println("Generated C:\n" + c);

@@ -1,7 +1,7 @@
 package org.bau.ena.ast;
 
 public sealed interface Stmt extends Node permits Stmt.Assign, Stmt.ExprStmt, Stmt.If, Stmt.Loop,
-        Stmt.Exit, Stmt.Return, Stmt.Block, Stmt.Function, Stmt.TypeDef, Stmt.Program {
+        Stmt.Exit, Stmt.Return, Stmt.Block, Stmt.Function, Stmt.EnaTypeDef, Stmt.EnaProgram {
     public record Assign(Expr target, Expr value, int line, int column) implements Stmt {
     }
 
@@ -30,10 +30,10 @@ public sealed interface Stmt extends Node permits Stmt.Assign, Stmt.ExprStmt, St
     public record Param(String name, String type) {
     }
 
-    public record TypeDef(String name, Param[] fields, int line, int column) implements Stmt {
+    public record EnaTypeDef(String name, Param[] fields, int line, int column) implements Stmt {
     }
 
-    public record Program(Stmt[] items) implements Stmt {
+    public record EnaProgram(Stmt[] items) implements Stmt {
         @Override
         public int line() {
             return 1;

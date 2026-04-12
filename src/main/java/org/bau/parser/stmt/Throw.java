@@ -86,8 +86,8 @@ public class Throw implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        expr = expr.resolveTypes(program);
+    public void resolveTypesForStatement(FunctionContext context) {
+        expr = expr.resolveTypes(context);
     }
 
 }

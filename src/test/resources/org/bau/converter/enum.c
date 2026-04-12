@@ -314,7 +314,7 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    if (7 > 0) {
+    if (( 6 + 1 ) > 0) {
         while (1 == 1) {
             int64_t a = 0;
             while (1) {
@@ -332,7 +332,7 @@ void _main() {
                         }
                     }
                 }
-                if (( a + 1 ) >= 7) {
+                if (( a + 1 ) >= ( 6 + 1 )) {
                     break;
                 }
                 a = a + 1;

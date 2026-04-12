@@ -20,7 +20,7 @@ import org.junit.Test;
 public class BenchmarkTest {
     private static final long MAX_OPS = 100_000_000L;
     private String runInterpreter(String src) {
-        Stmt.Program prog = EnaParser.parse(src);
+        Stmt.EnaProgram prog = EnaParser.parse(src);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream old = System.out;
         System.setOut(new PrintStream(baos));
@@ -33,7 +33,7 @@ public class BenchmarkTest {
     }
 
     private String runStackVM(String src) {
-        Stmt.Program prog = EnaParser.parse(src);
+        Stmt.EnaProgram prog = EnaParser.parse(src);
         StackCompiler comp = new StackCompiler();
         StackBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -48,7 +48,7 @@ public class BenchmarkTest {
     }
 
     private String runRegVM(String src) {
-        Stmt.Program prog = EnaParser.parse(src);
+        Stmt.EnaProgram prog = EnaParser.parse(src);
         RegCompiler comp = new RegCompiler();
         RegBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

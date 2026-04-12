@@ -54,7 +54,7 @@ public final class EnaInterpreter {
     }
 
     private final Map<String, EnaFunction> functions = new HashMap<>();
-    private final Map<String, Stmt.TypeDef> types = new HashMap<>();
+    private final Map<String, Stmt.EnaTypeDef> types = new HashMap<>();
 
     private static final class FunPtr {
         final String name;
@@ -96,12 +96,12 @@ public final class EnaInterpreter {
         }
     }
 
-    public Object execute(Stmt.Program program) {
+    public Object execute(Stmt.EnaProgram program) {
         // First pass: collect functions and types
         for (Stmt item : program.items()) {
             if (item instanceof Stmt.Function fn)
                 functions.put(fn.name(), new EnaFunction(fn.name(), fn));
-            else if (item instanceof Stmt.TypeDef td)
+            else if (item instanceof Stmt.EnaTypeDef td)
                 types.put(td.name(), td);
         }
 
@@ -120,7 +120,7 @@ public final class EnaInterpreter {
         }
 
         for (Stmt item : program.items()) {
-            if (item instanceof Stmt.Function || item instanceof Stmt.TypeDef)
+            if (item instanceof Stmt.Function || item instanceof Stmt.EnaTypeDef)
                 continue;
             execStmt(item, globals);
         }
@@ -156,7 +156,7 @@ public final class EnaInterpreter {
         EnaFunction mf = functions.get(name);
         if (mf == null) {
             // Constructor call for a type
-            Stmt.TypeDef td = types.get(name);
+            Stmt.EnaTypeDef td = types.get(name);
             if (td != null) {
                 if (args.size() != td.fields().length)
                     throw new RuntimeException("arity mismatch for constructor " + name);

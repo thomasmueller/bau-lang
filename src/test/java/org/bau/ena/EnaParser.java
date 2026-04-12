@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.bau.ena.ast.Expr;
 import org.bau.ena.ast.Stmt;
-import org.bau.ena.ast.Stmt.Program;
+import org.bau.ena.ast.Stmt.EnaProgram;
 
 public final class EnaParser {
     private final List<EnaToken> tokens;
@@ -15,7 +15,7 @@ public final class EnaParser {
         this.tokens = tokens;
     }
 
-    private Stmt.Program parseProgram() {
+    private Stmt.EnaProgram parseProgram() {
         List<Stmt> items = new ArrayList<>();
         while (!check(EnaTokenType.EOF)) {
             if (check(EnaTokenType.NEWLINE)) {
@@ -34,7 +34,7 @@ public final class EnaParser {
                 items.add(parseStatement());
         }
         consume(EnaTokenType.EOF, "expected EOF");
-        Stmt.Program p = new Stmt.Program(items.toArray(new Stmt[0]));
+        Stmt.EnaProgram p = new Stmt.EnaProgram(items.toArray(new Stmt[0]));
         validateNoVoidCallInExpression(p);
         return p;
     }
@@ -53,7 +53,7 @@ public final class EnaParser {
         }
         consume(EnaTokenType.RPAREN, "expected ')'");
         skipOptionalNewlines();
-        return new Stmt.TypeDef(name.lexeme, fields.toArray(new Stmt.Param[0]), kw.line, kw.column);
+        return new Stmt.EnaTypeDef(name.lexeme, fields.toArray(new Stmt.Param[0]), kw.line, kw.column);
     }
 
     private String parseTypeName() {
@@ -406,7 +406,7 @@ public final class EnaParser {
     }
 
     // Semantic validation: void functions cannot be used as expressions
-    private void validateNoVoidCallInExpression(Stmt.Program program) {
+    private void validateNoVoidCallInExpression(Stmt.EnaProgram program) {
         java.util.Map<String, Boolean> returnsValue = new java.util.HashMap<>();
         for (Stmt s : program.items())
             if (s instanceof Stmt.Function fn)
@@ -496,7 +496,7 @@ public final class EnaParser {
         // literals and variables are fine
     }
 
-    public static Program parse(String src) {
+    public static EnaProgram parse(String src) {
         src = """
 def +:
     @{left}: (@{left}) + (@{rest})

@@ -34,7 +34,7 @@ public class Operation implements Expression {
     public String operator;
     public Expression right;
 
-    public Operation(Expression left, String operator, Expression right) {
+    public static Operation buildAndOptimize(Expression left, String operator, Expression right) {
         if (left != null) {
             Value l = left.eval(null);
             if (l != null) {
@@ -53,6 +53,10 @@ public class Operation implements Expression {
                 right = new NumberValue(r, right.type(), false);
             }
         }
+        return new Operation(left, operator, right);
+    }
+
+    public Operation(Expression left, String operator, Expression right) {
         this.left = left;
         this.operator = operator;
         this.right = right;
@@ -753,11 +757,11 @@ public class Operation implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
+    public Expression resolveTypes(FunctionContext context) {
         if (left != null) {
-            left = left.resolveTypes(program);
+            left = left.resolveTypes(context);
         }
-        right = right.resolveTypes(program);
+        right = right.resolveTypes(context);
         return this;
     }
 

@@ -8,7 +8,7 @@ import org.bau.ena.ast.Stmt;
 import org.junit.Test;
 
 public class ParserTest {
-    private Stmt.Program parse(String src) {
+    private Stmt.EnaProgram parse(String src) {
         return EnaParser.parse(src);
     }
 
@@ -26,7 +26,7 @@ public class ParserTest {
                     println(fact(i))
                     i +: 1
             """;
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         assertNotNull(prog);
         EnaInterpreter it = new EnaInterpreter();
         it.setPrintToSystemOut(false);
@@ -49,7 +49,7 @@ public class ParserTest {
                 a[2]: 3
                 println(sum(a))
             """;
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         assertNotNull(prog);
         EnaInterpreter it = new EnaInterpreter();
         it.setPrintToSystemOut(false);
@@ -71,7 +71,7 @@ public class ParserTest {
                 _: (1 + 2) * 3
                 _: 1 or 0 and 1
             """;
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         assertNotNull(prog);
     }
 }

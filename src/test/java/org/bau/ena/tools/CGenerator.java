@@ -4,7 +4,7 @@ import org.bau.ena.ast.Expr;
 import org.bau.ena.ast.Stmt;
 
 public final class CGenerator {
-    public String generate(Stmt.Program program) {
+    public String generate(Stmt.EnaProgram program) {
         StringBuilder c = new StringBuilder();
         // Preamble: include Boehm GC and std headers
         c.append("#include <gc.h>\n");

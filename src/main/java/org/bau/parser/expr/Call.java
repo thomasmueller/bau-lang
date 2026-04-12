@@ -32,6 +32,13 @@ public class Call implements Statement, Expression, LeftValue {
     public boolean statement;
     public ArrayList<Expression> args = new ArrayList<>();
     public FunctionDefinition def;
+    public int fileId, location;
+
+    @Override
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
+    }
 
     @Override
     public Value eval(Memory m) {
@@ -500,16 +507,16 @@ public class Call implements Statement, Expression, LeftValue {
     }
 
     @Override
-    public LeftValue resolveTypes(Program program) {
+    public LeftValue resolveTypes(FunctionContext context) {
         for (int i = 0; i < args.size(); i++) {
-            args.set(i, args.get(i).resolveTypes(program));
+            args.set(i, args.get(i).resolveTypes(context));
         }
         return this;
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        resolveTypes(program);
+    public void resolveTypesForStatement(FunctionContext context) {
+        resolveTypes(context);
     }
 
     public String toString() {

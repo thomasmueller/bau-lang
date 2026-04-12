@@ -41,6 +41,7 @@ public class Assignment implements Statement {
     public String modify;
     public Expression value;
     public boolean isGlobalScope;
+    public int fileId, location;
 
     @Override
     public Assignment replace(Variable old, Expression with) {
@@ -57,6 +58,11 @@ public class Assignment implements Statement {
         c.modify = modify;
         c.value = v2;
         return c;
+    }
+
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
     }
 
     @Override
@@ -204,7 +210,7 @@ public class Assignment implements Statement {
             // first, use "%" or "/" by "0", and then
             // replace the last '0' with the right expression
             // TODO this is a hack
-            Operation op = new Operation(leftValue, modify, new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false));
+            Operation op = Operation.buildAndOptimize(leftValue, modify, new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false));
             String ops = op.toC();
             int index = ops.lastIndexOf('0');
             ops = ops.substring(0, index) + result + ops.substring(index + 1);
@@ -250,7 +256,7 @@ public class Assignment implements Statement {
     @Override
     public void used(Program program) {
         if ("%".equals(modify) || "/".equals(modify)) {
-            Operation op = new Operation(leftValue, modify, value);
+            Operation op = Operation.buildAndOptimize(leftValue, modify, value);
             op.used(program);
         }
         leftValue.used(program);
@@ -269,7 +275,7 @@ public class Assignment implements Statement {
             if (value instanceof New) {
                 New n = (New) value;
                 v.setConstantLength(n.arrayLength);
-                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                FieldAccess f = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f, "==", n.arrayLength);
                 if (r != null) {
                     r.always = true;
@@ -280,7 +286,7 @@ public class Assignment implements Statement {
                 StringLiteral n = (StringLiteral) value;
                 NumberValue len = new NumberValue(n.array.len(), DataType.INT_TYPE, false);
                 v.setConstantLength(len);
-                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                FieldAccess f = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f, "==", len);
                 if (r != null) {
                     r.always = true;
@@ -291,7 +297,7 @@ public class Assignment implements Statement {
                 ArrayConstant n = (ArrayConstant) value;
                 NumberValue len = new NumberValue(n.len(), DataType.INT_TYPE, false);
                 v.setConstantLength(len);
-                FieldAccess f = new FieldAccess(v, "len", DataType.INT_TYPE);
+                FieldAccess f = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f, "==", len);
                 if (r != null) {
                     r.always = true;
@@ -301,8 +307,8 @@ public class Assignment implements Statement {
             } else if (value instanceof Variable) {
                 Variable v2 = (Variable) value;
                 v.copyConstant(v2);
-                FieldAccess f1 = new FieldAccess(v2, "len", DataType.INT_TYPE);
-                FieldAccess f2 = new FieldAccess(v, "len", DataType.INT_TYPE);
+                FieldAccess f1 = new FieldAccess(v2, "len", false, DataType.INT_TYPE);
+                FieldAccess f2 = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f1, "==", f2);
                 if (r != null) {
                     r.always = true;
@@ -355,7 +361,7 @@ public class Assignment implements Statement {
     public void convertToExpandedForm() {
         if (modify != null && (leftValue instanceof Variable)) {
             Variable v = (Variable) leftValue;
-            value = new Operation(v.cloneVariable(), modify, value);
+            value = Operation.buildAndOptimize(v.cloneVariable(), modify, value);
             modify = null;
 
 
@@ -397,13 +403,18 @@ public class Assignment implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        leftValue = leftValue.resolveTypes(program);
+    public void resolveTypesForStatement(FunctionContext context) {
+        Expression expr = leftValue.resolveTypes(context);
+        if (!(expr instanceof LeftValue)) {
+            context.getProgram().syntaxError(fileId, location, "Expected a left value (for an assignment), got " + expr);
+        } else {
+            leftValue = (LeftValue) expr;
+        }
         if (type != null) {
-            type = type.resolve(program);
+            type = type.resolve(context.getProgram());
         }
         if (value != null) {
-            value = value.resolveTypes(program);
+            value = value.resolveTypes(context);
         }
     }
 

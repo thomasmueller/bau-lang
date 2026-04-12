@@ -138,10 +138,10 @@ public class Continue implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        program.resolveTypes(autoClose);
+    public void resolveTypesForStatement(FunctionContext context) {
+        context.resolveTypes(autoClose);
         if (condition != null) {
-            condition = condition.resolveTypes(program);
+            condition = condition.resolveTypes(context);
         }
     }
 

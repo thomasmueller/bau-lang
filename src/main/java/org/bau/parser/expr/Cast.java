@@ -115,9 +115,9 @@ public class Cast implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
-        base = base.resolveTypes(program);
-        targetType = targetType.resolve(program);
+    public Expression resolveTypes(FunctionContext context) {
+        base = base.resolveTypes(context);
+        targetType = targetType.resolve(context.getProgram());
         return this;
     }
 

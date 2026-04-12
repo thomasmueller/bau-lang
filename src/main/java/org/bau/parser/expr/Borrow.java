@@ -123,8 +123,8 @@ public class Borrow implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
-        base = base.resolveTypes(program);
+    public Expression resolveTypes(FunctionContext context) {
+        base = base.resolveTypes(context);
         return this;
     }
 

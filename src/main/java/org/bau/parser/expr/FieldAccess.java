@@ -26,11 +26,20 @@ public class FieldAccess implements Expression, LeftValue {
     Expression base;
     final String fieldName;
     private DataType type;
+    private boolean leftValue;
+    public int fileId, location;
 
-    public FieldAccess(Expression base, String fieldName, DataType type) {
+    public FieldAccess(Expression base, String fieldName, boolean leftValue, DataType type) {
         this.base = base;
         this.fieldName = fieldName;
+        this.leftValue = leftValue;
         this.type = type;
+    }
+
+    @Override
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
     }
 
     @Override
@@ -116,7 +125,7 @@ public class FieldAccess implements Expression, LeftValue {
         if (b2 == base) {
             return this;
         }
-        return new FieldAccess(b2, fieldName, type);
+        return new FieldAccess(b2, fieldName, leftValue, type);
     }
 
     @Override
@@ -301,9 +310,42 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public LeftValue resolveTypes(Program program) {
-        base = base.resolveTypes(program);
-        type = type.resolve(program);
+    public Expression resolveTypes(FunctionContext context) {
+        if (type == DataType.UNKNOWN) {
+            if (base instanceof Variable) {
+                Variable v = (Variable) base;
+                String m = context.getModule();
+                DataType enumType = context.getType(m, v.name());
+                if (enumType != null && enumType.enumValues != null) {
+                    Long value = enumType.enumValues.get(fieldName);
+                    if (value == null) {
+                        context.getProgram().syntaxError(fileId, location, "Value '" + fieldName + "' not found for enum type '" + enumType.name() + "'");
+                    }
+                    Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
+                    return expr;
+                }
+            }
+        }
+
+//          DataType enumType = functionContext.getType(m, n);
+//          read();
+//          if (matchOp(".")) {
+//              syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
+//          }
+//          String val = readIdentifier();
+//          Long value = enumType.enumValues.get(val);
+//          if (value == null) {
+//              syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
+//          }
+//          Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
+//          return expr;
+//
+//
+//            int test;
+//            System.out.println("??");
+//        }
+        base = base.resolveTypes(context);
+        type = type.resolve(context.getProgram());
         return this;
     }
 

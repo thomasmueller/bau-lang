@@ -3,6 +3,7 @@ package org.bau.parser.stmt;
 import java.util.HashSet;
 
 import org.bau.parser.DataType;
+import org.bau.parser.FunctionContext;
 import org.bau.parser.MemoryType;
 import org.bau.parser.Program;
 import org.bau.parser.ProgramContext;
@@ -63,7 +64,7 @@ public class NativeCode implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
+    public void resolveTypesForStatement(FunctionContext context) {
     }
 
 }

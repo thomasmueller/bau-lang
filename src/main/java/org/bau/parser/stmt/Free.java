@@ -196,8 +196,13 @@ public class Free implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        var = var.resolveTypes(program);
+    public void resolveTypesForStatement(FunctionContext context) {
+        Expression e = var.resolveTypes(context);
+        if (!(e instanceof Variable)) {
+            context.getProgram().syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+        } else {
+            var = (Variable) e;
+        }
     }
 
 }

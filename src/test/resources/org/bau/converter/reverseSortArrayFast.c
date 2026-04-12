@@ -494,24 +494,24 @@ void _main() {
     MAX_I32 = 4294967295;
     int64_t repeat = 10;
     int64_t count = 10;
-    int64_t _t0 = org_bau_Env_argCount_0();
-    if (_t0 > 1) {
-        i8_array* _t1 = org_bau_Env_arg_1(1);
-        int64_t _t2 = org_bau_Int_parseInt_1(_t1);
-        repeat = _t2;
-        _decUseStack(_t1, i8_array);
+    int64_t _t11 = org_bau_Env_argCount_0();
+    if (_t11 > 1) {
+        i8_array* _t12 = org_bau_Env_arg_1(1);
+        int64_t _t13 = org_bau_Int_parseInt_1(_t12);
+        repeat = _t13;
+        _decUseStack(_t12, i8_array);
     }
-    int64_t _t3 = org_bau_Env_argCount_0();
-    if (_t3 > 2) {
-        i8_array* _t4 = org_bau_Env_arg_1(2);
-        int64_t _t5 = org_bau_Int_parseInt_1(_t4);
-        count = _t5;
-        _decUseStack(_t4, i8_array);
+    int64_t _t14 = org_bau_Env_argCount_0();
+    if (_t14 > 2) {
+        i8_array* _t15 = org_bau_Env_arg_1(2);
+        int64_t _t16 = org_bau_Int_parseInt_1(_t15);
+        count = _t16;
+        _decUseStack(_t15, i8_array);
     }
     printf("repeat %lld count %lld\n", (long long)repeat, (long long)count);
-    int_array* _t6 = int_array_new(count);
-    _incUseStack(_t6);
-    int_array* test = _t6;
+    int_array* _t17 = int_array_new(count);
+    _incUseStack(_t17);
+    int_array* test = _t17;
     if (_arrayLen(test) <= 1) {
         return;
     }
@@ -519,8 +519,8 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t7 = org_bau_Utils_random_0();
-                test->data[i] = _t7;
+                int64_t _t18 = org_bau_Utils_random_0();
+                test->data[i] = _t18;
                 if (( i + 1 ) >= _arrayLen(test)) {
                     break;
                 }
@@ -550,7 +550,7 @@ void _main() {
     }
     printf("sum %lld\n", (long long)sum);
     _decUseStack(test, int_array);
-    _decUseStack(_t6, int_array);
+    _decUseStack(_t17, int_array);
     _end();
 }
 /*

@@ -101,9 +101,9 @@ public class NullValue implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
+    public Expression resolveTypes(FunctionContext context) {
         if (type != null) {
-            type = type.resolve(program);
+            type = type.resolve(context.getProgram());
         }
         return this;
     }

@@ -432,11 +432,15 @@ public class Program {
     private void resolveTypes() {
         ArrayList<DataType> list = new ArrayList<>(dataTypeMap.values());
         for (DataType t : list) {
-            t.resolveTypes(this);
+            FunctionContext fc = new FunctionContext(this, new FullName(t.module(), ""));
+            t.resolveTypes(fc);
         }
         for (FunctionDefinition def : functions.values()) {
             def.resolveTypes(this);
         }
+        FunctionContext fc = new FunctionContext(this, new FullName("", "main"));
+        fc.resolveTypes(initList);
+        fc.resolveTypes(mainList);
     }
 
     public String toC() {
@@ -1396,14 +1400,6 @@ public class Program {
             }
         }
         return null;
-    }
-
-    public void resolveTypes(List<Statement> list) {
-        if (list != null) {
-            for (Statement s : list) {
-                s.resolveTypesForStatement(this);
-            }
-        }
     }
 
     public String format() {

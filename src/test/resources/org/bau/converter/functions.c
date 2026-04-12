@@ -387,22 +387,22 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     randomSeed = 0;
-    int64_t _t0 = square_1(2);
-    int64_t _t1 = square_2(2, 3);
-    printf("%lld %lld\n", (long long)_t0, (long long)_t1);
-    int64_t _t2 = sum_var(1, /* argCount */ 1, 2);
-    printf("%lld\n", (long long)_t2);
-    int64_t _t3 = sum_var(1, /* argCount */ 2, 2, 3);
-    printf("%lld\n", (long long)_t3);
-    int64_t _t4 = sum_var(1, /* argCount */ 3, 2, 3, 4);
-    printf("%lld\n", (long long)_t4);
+    int64_t _t9 = square_1(2);
+    int64_t _t10 = square_2(2, 3);
+    printf("%lld %lld\n", (long long)_t9, (long long)_t10);
+    int64_t _t11 = sum_var(1, /* argCount */ 1, 2);
+    printf("%lld\n", (long long)_t11);
+    int64_t _t12 = sum_var(1, /* argCount */ 2, 2, 3);
+    printf("%lld\n", (long long)_t12);
+    int64_t _t13 = sum_var(1, /* argCount */ 3, 2, 3, 4);
+    printf("%lld\n", (long long)_t13);
     printf("ascii of \"0\" is %lld\n", (long long)48);
-    int64_t _t5 = int_rotateRight_2(1, 1);
-    int64_t _t6 = int_rotateRight_2(0x1, 1);
-    printf("%lld = %lld\n", (long long)_t5, (long long)_t6);
-    double _t7 = float_twice_1(1.0);
-    double _t8 = float_twice_1(1.0);
-    printf("%.9f = %.9f\n", _t7, _t8);
+    int64_t _t14 = int_rotateRight_2(1, 1);
+    int64_t _t15 = int_rotateRight_2(0x1, 1);
+    printf("%lld = %lld\n", (long long)_t14, (long long)_t15);
+    double _t16 = float_twice_1(1.0);
+    double _t17 = float_twice_1(1.0);
+    printf("%.9f = %.9f\n", _t16, _t17);
     _end();
 }
 /*

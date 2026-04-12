@@ -207,13 +207,13 @@ public class TernaryExpression implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
-        type = type.resolve(program);
-        condition = condition.resolveTypes(program);
-        program.resolveTypes(ifTrueStatements);
-        program.resolveTypes(ifFalseStatements);
-        ifTrue = ifTrue.resolveTypes(program);
-        ifFalse = ifFalse.resolveTypes(program);
+    public Expression resolveTypes(FunctionContext context) {
+        type = type.resolve(context.getProgram());
+        condition = condition.resolveTypes(context);
+        context.resolveTypes(ifTrueStatements);
+        context.resolveTypes(ifFalseStatements);
+        ifTrue = ifTrue.resolveTypes(context);
+        ifFalse = ifFalse.resolveTypes(context);
         return this;
     }
 

@@ -179,11 +179,11 @@ public class New implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
+    public Expression resolveTypes(FunctionContext context) {
         if (arrayLength != null) {
-            arrayLength.resolveTypes(program);
+            arrayLength.resolveTypes(context);
         }
-        type = type.resolve(program);
+        type = type.resolve(context.getProgram());
         return this;
     }
 

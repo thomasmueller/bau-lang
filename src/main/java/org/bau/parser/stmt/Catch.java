@@ -143,10 +143,15 @@ public class Catch implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        program.resolveTypes(list);
-        program.resolveTypes(autoClose);
-        var = var.resolveTypes(program);
+    public void resolveTypesForStatement(FunctionContext context) {
+        context.resolveTypes(list);
+        context.resolveTypes(autoClose);
+        Expression e = var.resolveTypes(context);
+        if (!(e instanceof Variable)) {
+            context.getProgram().syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+        } else {
+            var = (Variable) e;
+        }
     }
 
 }

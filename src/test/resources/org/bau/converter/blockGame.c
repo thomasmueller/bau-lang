@@ -564,10 +564,10 @@ i8_array* org_bau_Int_intToString_1(int64_t n) {
     return result;
 }
 org_bau_String_StringBuilder* org_bau_String_StringBuilder_0() {
-    org_bau_String_StringBuilder* _t2 = org_bau_String_StringBuilder_new();
-    _t2->data = i8_array_new(0);
-    _t2->len = 0;
-    return _t2;
+    org_bau_String_StringBuilder* _t47 = org_bau_String_StringBuilder_new();
+    _t47->data = i8_array_new(0);
+    _t47->len = 0;
+    return _t47;
 }
 void org_bau_String_StringBuilder_append_2(org_bau_String_StringBuilder* this, i8_array* b) {
     org_bau_String_StringBuilder_append_4(this, b, 0, _arrayLen(b));
@@ -701,7 +701,7 @@ void org_bau_os_Terminal_enableRawMode_1(void  (*refreshScreen_0)()) {
             raw.c_cc[VMIN] = 0;
             raw.c_cc[VTIME] = 1;
             if (tcsetattr(0, TCSAFLUSH, &raw) < 0) return;
-    org_bau_os_Signal_signal_2(28, org_bau_os_Terminal_windowSizeChanged_1);
+    org_bau_os_Signal_signal_2(signalId.SIGWINCH, org_bau_os_Terminal_windowSizeChanged_1);
     org_bau_os_Terminal_windowSizeChanged_1(0);
     _decUseStack(_t0, i8_array);
     org_bau_os_Terminal_termIos_free(&n);
@@ -753,10 +753,12 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         }
         if (e0 == 79) {
             if (e1 == 72) {
-                return 1005;
+                unknown _r0 = 1005;
+                return _r0;
             } else {
                 if (e1 == 70) {
-                    return 1006;
+                    unknown _r1 = 1006;
+                    return _r1;
                 }
             }
             return key;
@@ -776,13 +778,16 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
             }
             int64_t _t2 = e1;
             if (_t2 == 51) {
-                return 1004;
+                unknown _r2 = 1004;
+                return _r2;
             } else {
                 if (_t2 == 53) {
-                    return 1007;
+                    unknown _r3 = 1007;
+                    return _r3;
                 } else {
                     if (_t2 == 54) {
-                        return 1008;
+                        unknown _r4 = 1008;
+                        return _r4;
                     }
                 }
             }
@@ -790,22 +795,28 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         }
         int64_t _t3 = e1;
         if (_t3 == 65) {
-            return 1002;
+            unknown _r5 = 1002;
+            return _r5;
         } else {
             if (_t3 == 66) {
-                return 1003;
+                unknown _r6 = 1003;
+                return _r6;
             } else {
                 if (_t3 == 67) {
-                    return 1001;
+                    unknown _r7 = 1001;
+                    return _r7;
                 } else {
                     if (_t3 == 68) {
-                        return 1000;
+                        unknown _r8 = 1000;
+                        return _r8;
                     } else {
                         if (_t3 == 70) {
-                            return 1006;
+                            unknown _r9 = 1006;
+                            return _r9;
                         } else {
                             if (_t3 == 72) {
-                                return 1005;
+                                unknown _r10 = 1005;
+                                return _r10;
                             }
                         }
                     }
@@ -816,9 +827,9 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
     }
 }
 org_bau_os_Terminal_termIos org_bau_os_Terminal_termIos_0() {
-    org_bau_os_Terminal_termIos _t0 = org_bau_os_Terminal_termIos_new();
-    _t0.data = i8_array_new(0);
-    return _t0;
+    org_bau_os_Terminal_termIos _t54 = org_bau_os_Terminal_termIos_new();
+    _t54.data = i8_array_new(0);
+    return _t54;
 }
 void org_bau_os_Terminal_windowSizeChanged_1(int32_t x) {
     refreshScreenCallback_0();
@@ -968,20 +979,20 @@ void _main() {
     rotation = 0;
     running = 0;
     blockType = 0;
-    i8_array* _t0 = i8_array_new(336);
-    _incUseStack(_t0);
-    FIELD = _t0;
+    i8_array* _t58 = i8_array_new(336);
+    _incUseStack(_t58);
+    FIELD = _t58;
     _incUseStack(string_1031);
     shapes = string_1031;
     _incUseStack(string_1032);
     rotated = string_1032;
-    int64_t _t0 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t0)) {
+    int64_t _t59 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t59)) {
         printf("Not a terminal\n");
         return;
     }
-    int64_t _t1 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t1);
+    int64_t _t60 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t60);
     org_bau_os_Terminal_enableRawMode_1(refreshScreen_0);
     while (1) {
         refreshScreen_0();
@@ -1035,45 +1046,45 @@ void _main() {
             updateBlock_1(0);
             int64_t tick = 16;
             while (1 == 1) {
-                int64_t _t2 = tick > 0;
-                if (_t2) {
-                    int64_t _t3 = running;
-                    _t2 = _t3;
+                int64_t _t61 = tick > 0;
+                if (_t61) {
+                    int64_t _t62 = running;
+                    _t61 = _t62;
                 }
-                if (!(_t2)) {
+                if (!(_t61)) {
                     break;
                 }
                 tick = tick - 1;
                 org_bau_os_Sleep_sleep_1(14);
-                int64_t _t4 = org_bau_os_Terminal_keyboardHit_0();
-                if (!(_t4)) {
+                int64_t _t63 = org_bau_os_Terminal_keyboardHit_0();
+                if (!(_t63)) {
                     continue;
                 }
                 int64_t tempRot = rotation;
                 int64_t tempPos = position;
                 int64_t key = org_bau_os_Terminal_readEditorKey_0();
-                int64_t _t5 = key;
-                if (_t5 == 1000) {
+                int64_t _t64 = key;
+                if (_t64 == keyCode.ARROW_LEFT) {
                     tempPos = tempPos - 1;
                 } else {
-                    if (_t5 == 1001) {
+                    if (_t64 == keyCode.ARROW_RIGHT) {
                         tempPos = tempPos + 1;
                     } else {
-                        if ((_t5 == 32) || (_t5 == 1002)) {
+                        if ((_t64 == 32) || (_t64 == keyCode.ARROW_UP)) {
                             tempRot = rotated->data[idx_2(rotation, _arrayLen(rotated))] - 65;
                         } else {
-                            if (_t5 == 27) {
+                            if (_t64 == keyCode.ESC) {
                                 org_bau_Env_exit_1(0);
                             } else {
-                                if (_t5 == 1003) {
+                                if (_t64 == keyCode.ARROW_DOWN) {
                                     running = 0;
                                 }
                             }
                         }
                     }
                 }
-                int64_t _t6 = canPlace_2(tempPos, tempRot);
-                if (_t6) {
+                int64_t _t65 = canPlace_2(tempPos, tempRot);
+                if (_t65) {
                     position = tempPos;
                     rotation = tempRot;
                     updateBlock_1(1);
@@ -1081,8 +1092,8 @@ void _main() {
                     updateBlock_1(0);
                 }
             }
-            int64_t _t7 = canPlace_2(position + 14, rotation);
-            if (_t7) {
+            int64_t _t66 = canPlace_2(position + 14, rotation);
+            if (_t66) {
                 position = position + 14;
                 updateBlock_1(1);
                 refreshScreen_0();
@@ -1123,8 +1134,8 @@ void _main() {
                 i = i - 1;
             }
             refreshScreen_0();
-            int64_t _t8 = org_bau_Utils_random_1(7);
-            rotation = _t8;
+            int64_t _t67 = org_bau_Utils_random_1(7);
+            rotation = _t67;
             blockType = rotation + 1;
             if (position < 28) {
                 break;
@@ -1134,7 +1145,7 @@ void _main() {
         }
     }
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t0, i8_array);
+    _decUseStack(_t58, i8_array);
     _decUseStack(FIELD, i8_array);
     _decUseStack(shapes, i8_array);
     _decUseStack(rotated, i8_array);

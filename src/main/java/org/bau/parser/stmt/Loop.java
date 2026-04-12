@@ -219,12 +219,12 @@ public class Loop implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        program.resolveTypes(autoClose);
-        program.resolveTypes(list);
-        program.resolveTypes(listContinue);
+    public void resolveTypesForStatement(FunctionContext context) {
+        context.resolveTypes(autoClose);
+        context.resolveTypes(list);
+        context.resolveTypes(listContinue);
         if (condition != null) {
-            condition = condition.resolveTypes(program);
+            condition = condition.resolveTypes(context);
         }
     }
 

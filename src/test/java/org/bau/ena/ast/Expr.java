@@ -4,17 +4,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.bau.ena.types.Type;
+import org.bau.ena.types.EnaType;
 
 public sealed interface Expr extends Node permits Expr.Literal, Expr.Variable, Expr.Binary, Expr.Unary, Expr.Call,
         Expr.Member, Expr.Index, Expr.NewArray, Expr.Paren {
-    Map<Expr, Type> __TYPES = Collections.synchronizedMap(new WeakHashMap<>());
+    Map<Expr, EnaType> __TYPES = Collections.synchronizedMap(new WeakHashMap<>());
 
-    default Type type() {
+    default EnaType type() {
         return __TYPES.get(this);
     }
 
-    default void setType(Type t) {
+    default void setType(EnaType t) {
         __TYPES.put(this, t);
     }
 

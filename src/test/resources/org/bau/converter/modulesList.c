@@ -319,11 +319,11 @@ org_bau_List_List_int* org_bau_List_List_int_0() {
 }
 org_bau_List_List_int* org_bau_List_newList_int_1(int64_t _T) {
     org_bau_List_List_int* result = org_bau_List_List_int_0();
-    int_array* _t0 = int_array_new(4);
-    _incUseStack(_t0);
+    int_array* _t13 = int_array_new(4);
+    _incUseStack(_t13);
     _decUse(result->array, int_array);
-    result->array = _t0;
-    _decUseStack(_t0, int_array);
+    result->array = _t13;
+    _decUseStack(_t13, int_array);
     return result;
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {

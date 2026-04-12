@@ -466,7 +466,7 @@ void _main() {
     _x0 = divisionByZeroThrow_2(10, 0);
     ;
     if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
-    int64_t _t0 = _x0.result;
+    int64_t _t2 = _x0.result;
     goto skip0;
     } while(0);
     catch0:;
@@ -478,7 +478,7 @@ void _main() {
     _x1 = divisionByZeroThrow_2(10, 1);
     ;
     if (_x1.exception.exceptionType != -1) { _lastException = _x1.exception; goto catch1; }
-    int64_t _t1 = _x1.result;
+    int64_t _t3 = _x1.result;
     goto skip1;
     } while(0);
     catch1:;

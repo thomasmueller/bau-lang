@@ -199,8 +199,8 @@ public class StringLiteral implements Expression {
     }
 
     @Override
-    public Expression resolveTypes(Program program) {
-        type = type.resolve(program);
+    public Expression resolveTypes(FunctionContext context) {
+        type = type.resolve(context.getProgram());
         return this;
     }
 

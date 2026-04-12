@@ -369,23 +369,23 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    string_array* _t0 = string_array_new(3);
-    _incUseStack(_t0);
-    string_array* x = _t0;
-    string _t1 = str_1(string_1000);
-    string_copy(&_t1);
-    x->data[0] = _t1;
-    string _t2 = str_1(string_1001);
-    string_copy(&_t2);
-    x->data[1] = _t2;
-    string _t3 = str_1(string_1002);
+    string_array* _t2 = string_array_new(3);
+    _incUseStack(_t2);
+    string_array* x = _t2;
+    string _t3 = str_1(string_1000);
     string_copy(&_t3);
-    x->data[2] = _t3;
+    x->data[0] = _t3;
+    string _t4 = str_1(string_1001);
+    string_copy(&_t4);
+    x->data[1] = _t4;
+    string _t5 = str_1(string_1002);
+    string_copy(&_t5);
+    x->data[2] = _t5;
     printf("%.*s %.*s %.*s\n", _arrayLen(x->data[0].data), x->data[0].data->data, _arrayLen(x->data[1].data), x->data[1].data->data, _arrayLen(x->data[2].data), x->data[2].data->data);
+    string_free(&_t5);
+    string_free(&_t4);
     string_free(&_t3);
-    string_free(&_t2);
-    string_free(&_t1);
     _decUseStack(x, string_array);
-    _decUseStack(_t0, string_array);
+    _decUseStack(_t2, string_array);
     _end();
 }

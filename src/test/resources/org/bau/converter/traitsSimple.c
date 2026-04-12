@@ -545,10 +545,10 @@ int main(int _argc, char *_argv[]) {
 void _main() {
     printf("start\n");
     Memory* mem = Memory_0();
-    int_array* _t0 = int_array_new(10);
-    _incUseStack(_t0);
+    int_array* _t2 = int_array_new(10);
+    _incUseStack(_t2);
     _decUse(mem->array, int_array);
-    mem->array = _t0;
+    mem->array = _t2;
     _incUseStack(((Reader*) mem));
     Reader* r = ((Reader*) mem);
     printf("write 10\n");
@@ -560,7 +560,7 @@ void _main() {
     printf("read %lld\n", (long long)x);
     _decUseStack(w, Writer);
     _decUseStack(r, Reader);
-    _decUseStack(_t0, int_array);
+    _decUseStack(_t2, int_array);
     _decUseStack(mem, Memory);
     _end();
 }

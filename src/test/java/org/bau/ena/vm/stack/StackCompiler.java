@@ -2,7 +2,7 @@ package org.bau.ena.vm.stack;
 
 import org.bau.ena.ast.Expr;
 import org.bau.ena.ast.Stmt;
-import org.bau.ena.types.Type;
+import org.bau.ena.types.EnaType;
 import org.bau.ena.types.TypeChecker;
 
 import java.util.ArrayList;
@@ -20,14 +20,14 @@ public final class StackCompiler {
     private int currentNextLocal = 0;
     private final Deque<List<Integer>> breakStack = new ArrayDeque<>();
     private final java.util.Set<String> typeNames = new java.util.HashSet<>();
-    private Map<Stmt, Type> stmtTypes = java.util.Collections.emptyMap();
+    private Map<Stmt, EnaType> stmtTypes = java.util.Collections.emptyMap();
     private int loopDepth = 0; // track loop nesting for 'exit'
-    private Map<String, java.util.List<Type>> funcParamTypes = new java.util.HashMap<>();
+    private Map<String, java.util.List<EnaType>> funcParamTypes = new java.util.HashMap<>();
 
-    public StackBytecode compile(Stmt.Program program) {
+    public StackBytecode compile(Stmt.EnaProgram program) {
         // Pass 1: collect type names, functions, and globals (no stubs yet)
         for (Stmt item : program.items()) {
-            if (item instanceof Stmt.TypeDef td) {
+            if (item instanceof Stmt.EnaTypeDef td) {
                 typeNames.add(td.name());
             }
         }
@@ -36,7 +36,7 @@ public final class StackCompiler {
                 funcIndex.put(fn.name(), bc.functions.size());
                 int locals = fn.params().length + 16;
                 bc.functions.add(new StackBytecode.Func(fn.name(), locals));
-            } else if (item instanceof Stmt.TypeDef td) {
+            } else if (item instanceof Stmt.EnaTypeDef td) {
                 // record type and constructor stub
                 typeNames.add(td.name());
                 String[] fields = new String[td.fields().length];
@@ -77,32 +77,32 @@ public final class StackCompiler {
     }
 
     private void validateFunctionReturns(Stmt.Function fn) {
-        Type expected = (fn.returnType() == null) ? Type.VOID : resolveType(fn.returnType());
+        EnaType expected = (fn.returnType() == null) ? EnaType.VOID : resolveType(fn.returnType());
         validateReturnsInBlock(fn.body(), expected, fn.name());
     }
 
-    private void buildFuncParamTypes(Stmt.Program program) {
+    private void buildFuncParamTypes(Stmt.EnaProgram program) {
         for (Stmt it : program.items())
             if (it instanceof Stmt.Function fn) {
-                java.util.ArrayList<Type> ps = new java.util.ArrayList<>();
+                java.util.ArrayList<EnaType> ps = new java.util.ArrayList<>();
                 for (Stmt.Param p : fn.params())
                     ps.add(resolveType(p.type()));
                 funcParamTypes.put(fn.name(), ps);
             }
         for (Stmt it : program.items())
-            if (it instanceof Stmt.TypeDef td) {
-                java.util.ArrayList<Type> ps = new java.util.ArrayList<>();
+            if (it instanceof Stmt.EnaTypeDef td) {
+                java.util.ArrayList<EnaType> ps = new java.util.ArrayList<>();
                 for (Stmt.Param p : td.fields())
                     ps.add(resolveType(p.type()));
                 funcParamTypes.put(td.name(), ps);
             }
         // println(args text[])
-        funcParamTypes.put("println", java.util.List.of(new Type.Array(Type.TEXT)));
+        funcParamTypes.put("println", java.util.List.of(new EnaType.Array(EnaType.TEXT)));
         // puts(out text)
-        funcParamTypes.put("puts", java.util.List.of(Type.TEXT));
+        funcParamTypes.put("puts", java.util.List.of(EnaType.TEXT));
         // format is a builtin that accepts any number of arguments (treated in
         // compileExpr)
-        funcParamTypes.put("format", java.util.List.of(new Type.Array(Type.TEXT)));
+        funcParamTypes.put("format", java.util.List.of(new EnaType.Array(EnaType.TEXT)));
     }
 
     private void validateCalls(Stmt.Block body) {
@@ -141,7 +141,7 @@ public final class StackCompiler {
                         validateCallsInExpr(a);
                     return;
                 }
-                java.util.List<Type> params = funcParamTypes.get(fv.name());
+                java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                 if ("println".equals(fv.name())) {
                     for (Expr a : c.args())
                         validateCallsInExpr(a);
@@ -150,7 +150,7 @@ public final class StackCompiler {
                 if (params == null)
                     throw new RuntimeException("unknown function: " + fv.name());
                 int provided = c.args().length;
-                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof Type.Array);
+                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof EnaType.Array);
                 int fixed = varargs ? params.size() - 1 : params.size();
                 if (!varargs) {
                     if (provided != params.size())
@@ -226,8 +226,8 @@ public final class StackCompiler {
                 validateFieldsInExpr(m.target());
                 return;
             }
-            Type tt = m.target().type();
-            if (!(tt instanceof Type.Struct st))
+            EnaType tt = m.target().type();
+            if (!(tt instanceof EnaType.Struct st))
                 throw new RuntimeException("field access on non-struct type");
             int tid = bc.types.indexOf(st.name());
             if (tid < 0)
@@ -307,23 +307,23 @@ public final class StackCompiler {
 
     private void validateTypesAndVarsInExpr(Expr e) {
         if (e instanceof Expr.Variable v) {
-            if (v.type() instanceof Type.Unknown)
+            if (v.type() instanceof EnaType.Unknown)
                 throw new RuntimeException("undefined variable: " + v.name());
             return;
         }
         if (e instanceof Expr.Unary u) {
-            if (!(u.expr().type() instanceof Type.Int || u.expr().type() instanceof Type.Real))
+            if (!(u.expr().type() instanceof EnaType.Int || u.expr().type() instanceof EnaType.Real))
                 throw new RuntimeException("type error: unary '-' on non-number");
             validateTypesAndVarsInExpr(u.expr());
             return;
         }
         if (e instanceof Expr.Binary b) {
-            Type lt = b.left().type();
-            Type rt = b.right().type();
+            EnaType lt = b.left().type();
+            EnaType rt = b.right().type();
             String op = b.op();
-            boolean lNum = lt instanceof Type.Int || lt instanceof Type.Real;
-            boolean rNum = rt instanceof Type.Int || rt instanceof Type.Real;
-            boolean anyText = lt instanceof Type.Text || rt instanceof Type.Text;
+            boolean lNum = lt instanceof EnaType.Int || lt instanceof EnaType.Real;
+            boolean rNum = rt instanceof EnaType.Int || rt instanceof EnaType.Real;
+            boolean anyText = lt instanceof EnaType.Text || rt instanceof EnaType.Text;
             switch (op) {
             case "+":
                 if (lNum && rNum) {
@@ -344,7 +344,7 @@ public final class StackCompiler {
             case "&":
             case "|":
             case "^":
-                if (!(lt instanceof Type.Int && rt instanceof Type.Int))
+                if (!(lt instanceof EnaType.Int && rt instanceof EnaType.Int))
                     throw new RuntimeException("type error: bitwise/shift require int operands");
                 break;
             case "=":
@@ -360,8 +360,8 @@ public final class StackCompiler {
                     boolean leftZero = (b.left() instanceof Expr.Literal ll
                             && ((ll.value() instanceof Long && ((Long) ll.value()) == 0L)
                                     || (ll.value() instanceof Double && ((Double) ll.value()) == 0.0)));
-                    boolean structVsZero = ((lt instanceof Type.Struct) && rightZero)
-                            || ((rt instanceof Type.Struct) && leftZero)
+                    boolean structVsZero = ((lt instanceof EnaType.Struct) && rightZero)
+                            || ((rt instanceof EnaType.Struct) && leftZero)
                             || ((b.left() instanceof Expr.Member) && rightZero)
                             || ((b.right() instanceof Expr.Member) && leftZero);
                     if (structVsZero) {
@@ -369,7 +369,7 @@ public final class StackCompiler {
                         break;
                     }
                 }
-                if (!(lNum && rNum) && !(lt instanceof Type.Text && rt instanceof Type.Text))
+                if (!(lNum && rNum) && !(lt instanceof EnaType.Text && rt instanceof EnaType.Text))
                     throw new RuntimeException(
                             "type error: comparison requires numbers or text (or struct compared to 0 with '=' or '<>')");
                 break;
@@ -386,10 +386,10 @@ public final class StackCompiler {
         }
         if (e instanceof Expr.Index ix) {
             boolean isTypeArrayCtor = (ix.target() instanceof Expr.Variable v) && typeNames.contains(v.name());
-            if (!isTypeArrayCtor && !(ix.target().type() instanceof Type.Array)) {
+            if (!isTypeArrayCtor && !(ix.target().type() instanceof EnaType.Array)) {
                 // be permissive to support TypeName[len]
             }
-            if (!isTypeArrayCtor && !(ix.index().type() instanceof Type.Int))
+            if (!isTypeArrayCtor && !(ix.index().type() instanceof EnaType.Int))
                 throw new RuntimeException("type error: array index must be int");
             validateTypesAndVarsInExpr(ix.target());
             validateTypesAndVarsInExpr(ix.index());
@@ -397,8 +397,8 @@ public final class StackCompiler {
         }
         if (e instanceof Expr.Member m) {
             if ("len".equals(m.name())) {
-                Type tt = m.target().type();
-                if (!(tt instanceof Type.Array || tt instanceof Type.Text))
+                EnaType tt = m.target().type();
+                if (!(tt instanceof EnaType.Array || tt instanceof EnaType.Text))
                     throw new RuntimeException("type error: len on non-array/text");
                 validateTypesAndVarsInExpr(m.target());
                 return;
@@ -424,26 +424,26 @@ public final class StackCompiler {
             return;
         }
         if (e instanceof Expr.NewArray na) {
-            if (!(na.length().type() instanceof Type.Int || na.length().type() instanceof Type.Real))
+            if (!(na.length().type() instanceof EnaType.Int || na.length().type() instanceof EnaType.Real))
                 throw new RuntimeException("type error: array length must be number");
             validateTypesAndVarsInExpr(na.length());
             return;
         }
     }
 
-    private void validateReturnsInBlock(Stmt.Block b, Type expected, String fname) {
+    private void validateReturnsInBlock(Stmt.Block b, EnaType expected, String fname) {
         for (Stmt s : b.statements())
             validateReturnsInStmt(s, expected, fname);
     }
 
-    private void validateReturnsInStmt(Stmt s, Type expected, String fname) {
+    private void validateReturnsInStmt(Stmt s, EnaType expected, String fname) {
         if (s instanceof Stmt.Return r) {
-            Type actual = stmtTypes.getOrDefault(r, Type.UNKNOWN);
-            if (expected instanceof Type.Void) {
-                if (!(actual instanceof Type.Void))
+            EnaType actual = stmtTypes.getOrDefault(r, EnaType.UNKNOWN);
+            if (expected instanceof EnaType.Void) {
+                if (!(actual instanceof EnaType.Void))
                     throw new RuntimeException("type error: function " + fname + " should not return a value");
             } else {
-                if (actual instanceof Type.Void)
+                if (actual instanceof EnaType.Void)
                     throw new RuntimeException(
                             "type error: function " + fname + " must return a value of type " + typeName(expected));
                 if (!typesCompatible(actual, expected))
@@ -459,20 +459,20 @@ public final class StackCompiler {
                 validateReturnsInBlock(iff.elseBlock(), expected, fname);
         } else if (s instanceof Stmt.Loop lp) {
             validateReturnsInBlock(lp.body(), expected, fname);
-        } else if (s instanceof Stmt.Function || s instanceof Stmt.TypeDef || s instanceof Stmt.Program) {
+        } else if (s instanceof Stmt.Function || s instanceof Stmt.EnaTypeDef || s instanceof Stmt.EnaProgram) {
             // ignore nested defs (not present) / program wrapper
         }
     }
 
-    private boolean typesCompatible(Type a, Type b) {
-        if (a instanceof Type.Unknown || b instanceof Type.Unknown)
+    private boolean typesCompatible(EnaType a, EnaType b) {
+        if (a instanceof EnaType.Unknown || b instanceof EnaType.Unknown)
             return true;
         if (a.getClass() == b.getClass()) {
-            if (a instanceof Type.Struct sa && b instanceof Type.Struct sb)
+            if (a instanceof EnaType.Struct sa && b instanceof EnaType.Struct sb)
                 return sa.name().equals(sb.name());
-            if (a instanceof Type.Array aa && b instanceof Type.Array ab)
+            if (a instanceof EnaType.Array aa && b instanceof EnaType.Array ab)
                 return typesCompatible(aa.elem(), ab.elem());
-            if (a instanceof Type.Fun fa && b instanceof Type.Fun fb) {
+            if (a instanceof EnaType.Fun fa && b instanceof EnaType.Fun fb) {
                 if (fa.params().size() != fb.params().size())
                     return false;
                 for (int i = 0; i < fa.params().size(); i++)
@@ -487,40 +487,40 @@ public final class StackCompiler {
         return false;
     }
 
-    private String typeName(Type t) {
-        if (t instanceof Type.Int)
+    private String typeName(EnaType t) {
+        if (t instanceof EnaType.Int)
             return "int";
-        if (t instanceof Type.Real)
+        if (t instanceof EnaType.Real)
             return "real";
-        if (t instanceof Type.Text)
+        if (t instanceof EnaType.Text)
             return "text";
-        if (t instanceof Type.Void)
+        if (t instanceof EnaType.Void)
             return "void";
-        if (t instanceof Type.Unknown)
+        if (t instanceof EnaType.Unknown)
             return "UNKNOWN";
-        if (t instanceof Type.Struct st)
+        if (t instanceof EnaType.Struct st)
             return st.name();
-        if (t instanceof Type.Array ar)
+        if (t instanceof EnaType.Array ar)
             return typeName(ar.elem()) + "[]";
-        if (t instanceof Type.Fun)
+        if (t instanceof EnaType.Fun)
             return "fun";
         return t.toString();
     }
 
-    private Type resolveType(String name) {
+    private EnaType resolveType(String name) {
         if (name == null)
-            return Type.VOID;
+            return EnaType.VOID;
         if ("int".equals(name))
-            return Type.INT;
+            return EnaType.INT;
         if ("real".equals(name))
-            return Type.REAL;
+            return EnaType.REAL;
         if ("text".equals(name))
-            return Type.TEXT;
+            return EnaType.TEXT;
         if (name.endsWith("[]")) {
             String base = name.substring(0, name.length() - 2);
-            return new Type.Array(resolveType(base));
+            return new EnaType.Array(resolveType(base));
         }
-        return new Type.Struct(name, java.util.Map.of());
+        return new EnaType.Struct(name, java.util.Map.of());
     }
 
     private void ensureGlobal(Stmt item) {
@@ -716,13 +716,13 @@ public final class StackCompiler {
             }
             // Handle varargs packing for trailing array parameter
             if (c.target() instanceof Expr.Variable fv) {
-                java.util.List<Type> params = funcParamTypes.get(fv.name());
+                java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                 boolean varargs = params != null && !params.isEmpty()
-                        && (params.get(params.size() - 1) instanceof Type.Array) && !typeNames.contains(fv.name());
+                        && (params.get(params.size() - 1) instanceof EnaType.Array) && !typeNames.contains(fv.name());
                 if (varargs) {
                     int fixed = params.size() - 1;
                     // If caller provided exactly one array for the vararg slot, just push it
-                    if (c.args().length == params.size() && (c.args()[fixed].type() instanceof Type.Array)) {
+                    if (c.args().length == params.size() && (c.args()[fixed].type() instanceof EnaType.Array)) {
                         for (int i = 0; i < fixed; i++)
                             compileExpr(code, c.args()[i]);
                         compileExpr(code, c.args()[fixed]);
@@ -733,9 +733,9 @@ public final class StackCompiler {
                         // pack extras into an array
                         int extras = Math.max(0, c.args().length - fixed);
                         code.add(new StackBytecode.Insn(StackBytecode.Op.PUSHI, extras));
-                        Type.Array arrT = (Type.Array) params.get(params.size() - 1);
-                        int tcode = (arrT.elem() instanceof Type.Int) ? 1
-                                : (arrT.elem() instanceof Type.Real ? 2 : (arrT.elem() instanceof Type.Text ? 3 : 0));
+                        EnaType.Array arrT = (EnaType.Array) params.get(params.size() - 1);
+                        int tcode = (arrT.elem() instanceof EnaType.Int) ? 1
+                                : (arrT.elem() instanceof EnaType.Real ? 2 : (arrT.elem() instanceof EnaType.Text ? 3 : 0));
                         code.add(new StackBytecode.Insn(StackBytecode.Op.NEWARR, tcode));
                         for (int i = 0; i < extras; i++) {
                             // push array first, then index, then value for ASTORE order: arr, idx, val
@@ -774,9 +774,9 @@ public final class StackCompiler {
                 } else {
                     // If varargs, actual argc is fixed+1 (packed array). Passthrough if exactly one
                     // array passed.
-                    java.util.List<Type> params = funcParamTypes.get(fv.name());
+                    java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                     boolean varargs = params != null && !params.isEmpty()
-                            && (params.get(params.size() - 1) instanceof Type.Array);
+                            && (params.get(params.size() - 1) instanceof EnaType.Array);
                     int argc = varargs ? (params.size()) : c.args().length;
                     code.add(new StackBytecode.Insn(StackBytecode.Op.CALL, fi, argc));
                 }
@@ -793,7 +793,7 @@ public final class StackCompiler {
         if (e instanceof Expr.Binary b) {
             // Disallow array concatenation with +
             if ("+".equals(b.op())
-                    && (b.left().type() instanceof Type.Array || b.right().type() instanceof Type.Array)) {
+                    && (b.left().type() instanceof EnaType.Array || b.right().type() instanceof EnaType.Array)) {
                 throw new RuntimeException("array concatenation is not supported");
             }
             compileExpr(code, b.left());
@@ -837,14 +837,14 @@ public final class StackCompiler {
                 break;
             case "=": {
                 // Allow struct = 0 only; otherwise regular equals
-                if (b.left().type() instanceof Type.Struct && b.right() instanceof Expr.Literal lit
+                if (b.left().type() instanceof EnaType.Struct && b.right() instanceof Expr.Literal lit
                         && (lit.value() instanceof Long) && ((Long) lit.value()) == 0L) {
                     // Compare to zero: emit equality by converting struct truthiness to int then
                     // compare to 0
                     // Reuse existing CMPEQ as both sides are already on stack; semantic is handled
                     // in VM equals
                     code.add(new StackBytecode.Insn(StackBytecode.Op.CMPEQ));
-                } else if (b.right().type() instanceof Type.Struct && b.left() instanceof Expr.Literal lit2
+                } else if (b.right().type() instanceof EnaType.Struct && b.left() instanceof Expr.Literal lit2
                         && (lit2.value() instanceof Long) && ((Long) lit2.value()) == 0L) {
                     code.add(new StackBytecode.Insn(StackBytecode.Op.CMPEQ));
                 } else {
@@ -853,10 +853,10 @@ public final class StackCompiler {
                 break;
             }
             case "<>": {
-                if (b.left().type() instanceof Type.Struct && b.right() instanceof Expr.Literal lit
+                if (b.left().type() instanceof EnaType.Struct && b.right() instanceof Expr.Literal lit
                         && (lit.value() instanceof Long) && ((Long) lit.value()) == 0L) {
                     code.add(new StackBytecode.Insn(StackBytecode.Op.CMPNE));
-                } else if (b.right().type() instanceof Type.Struct && b.left() instanceof Expr.Literal lit2
+                } else if (b.right().type() instanceof EnaType.Struct && b.left() instanceof Expr.Literal lit2
                         && (lit2.value() instanceof Long) && ((Long) lit2.value()) == 0L) {
                     code.add(new StackBytecode.Insn(StackBytecode.Op.CMPNE));
                 } else {

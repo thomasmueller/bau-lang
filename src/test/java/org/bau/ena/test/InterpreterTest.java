@@ -18,12 +18,12 @@ import org.bau.ena.vm.stack.StackVM;
 import org.junit.Test;
 
 public class InterpreterTest {
-    private Stmt.Program parse(String src) {
+    private Stmt.EnaProgram parse(String src) {
         return EnaParser.parse(src);
     }
 
     private String runInterpreter(String src) {
-        Stmt.Program prog = EnaParser.parse(src);
+        Stmt.EnaProgram prog = EnaParser.parse(src);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream old = System.out;
         System.setOut(new PrintStream(baos));
@@ -32,7 +32,7 @@ public class InterpreterTest {
     }
 
     private String runStackVM(String src) {
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         StackCompiler comp = new StackCompiler();
         StackBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -43,7 +43,7 @@ public class InterpreterTest {
     }
 
     private String runRegVM(String src) {
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         RegCompiler comp = new RegCompiler();
         RegBytecode bc = comp.compile(prog);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -655,7 +655,7 @@ public class InterpreterTest {
             fun main()
                 exit
             """;
-        Stmt.Program prog = parse(src);
+        Stmt.EnaProgram prog = parse(src);
         // Stack VM compile should fail
         try {
             new StackCompiler().compile(prog);
@@ -679,7 +679,7 @@ public class InterpreterTest {
             fun f()
                 ret 1
             """;
-        Stmt.Program p1 = parse(src1);
+        Stmt.EnaProgram p1 = parse(src1);
         try { new StackCompiler().compile(p1); fail("Expected compile error: void function returns value (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p1); fail("Expected compile error: void function returns value (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -688,7 +688,7 @@ public class InterpreterTest {
             fun g() int
                 ret
             """;
-        Stmt.Program p2 = parse(src2);
+        Stmt.EnaProgram p2 = parse(src2);
         try { new StackCompiler().compile(p2); fail("Expected compile error: missing return value (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p2); fail("Expected compile error: missing return value (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -697,7 +697,7 @@ public class InterpreterTest {
             fun h() real
                 ret 1
             """;
-        Stmt.Program p3 = parse(src3);
+        Stmt.EnaProgram p3 = parse(src3);
         try { new StackCompiler().compile(p3); fail("Expected compile error: wrong return type (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p3); fail("Expected compile error: wrong return type (RegVM)"); } catch (RuntimeException ex) {}
     }
@@ -709,7 +709,7 @@ public class InterpreterTest {
             fun main()
                 foo(1)
             """;
-        Stmt.Program p1 = parse(s1);
+        Stmt.EnaProgram p1 = parse(s1);
         try { new StackCompiler().compile(p1); fail("Expected compile error: unknown function (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p1); fail("Expected compile error: unknown function (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -719,7 +719,7 @@ public class InterpreterTest {
                 a: 1
                 a(2)
             """;
-        Stmt.Program p2 = parse(s2);
+        Stmt.EnaProgram p2 = parse(s2);
         try { new StackCompiler().compile(p2); fail("Expected compile error: non-callable target (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p2); fail("Expected compile error: non-callable target (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -730,7 +730,7 @@ public class InterpreterTest {
             fun main()
                 println(f())
             """;
-        Stmt.Program p3 = parse(s3);
+        Stmt.EnaProgram p3 = parse(s3);
         try { new StackCompiler().compile(p3); fail("Expected compile error: arity mismatch (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p3); fail("Expected compile error: arity mismatch (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -740,7 +740,7 @@ public class InterpreterTest {
             fun main()
                 p(1)
             """;
-        Stmt.Program p4 = parse(s4);
+        Stmt.EnaProgram p4 = parse(s4);
         try { new StackCompiler().compile(p4); fail("Expected compile error: ctor arity mismatch (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p4); fail("Expected compile error: ctor arity mismatch (RegVM)"); } catch (RuntimeException ex) {}
     }
@@ -753,7 +753,7 @@ public class InterpreterTest {
                 a: 1
                 println(a.x)
             """;
-        Stmt.Program p1 = parse(s1);
+        Stmt.EnaProgram p1 = parse(s1);
         try { new StackCompiler().compile(p1); fail("Expected compile error: field on non-struct (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p1); fail("Expected compile error: field on non-struct (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -764,7 +764,7 @@ public class InterpreterTest {
                 q: p(1,2)
                 println(q.z)
             """;
-        Stmt.Program p2 = parse(s2);
+        Stmt.EnaProgram p2 = parse(s2);
         try { new StackCompiler().compile(p2); fail("Expected compile error: unknown field (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(p2); fail("Expected compile error: unknown field (RegVM)"); } catch (RuntimeException ex) {}
     }
@@ -776,7 +776,7 @@ public class InterpreterTest {
             fun main()
                 println('x' + 1)
             """;
-        Stmt.Program pa1 = parse(a1);
+        Stmt.EnaProgram pa1 = parse(a1);
         try { new StackCompiler().compile(pa1); fail("Expected compile error: '+' types (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(pa1); fail("Expected compile error: '+' types (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -786,7 +786,7 @@ public class InterpreterTest {
             fun main()
                 println(1 << 'x')
             """;
-        Stmt.Program pa3 = parse(a3);
+        Stmt.EnaProgram pa3 = parse(a3);
         try { new StackCompiler().compile(pa3); fail("Expected compile error: shift types (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(pa3); fail("Expected compile error: shift types (RegVM)"); } catch (RuntimeException ex) {}
 
@@ -795,7 +795,7 @@ public class InterpreterTest {
             fun main()
                 println(x)
             """;
-        Stmt.Program pu1 = parse(u1);
+        Stmt.EnaProgram pu1 = parse(u1);
         try { new StackCompiler().compile(pu1); fail("Expected compile error: undefined var (StackVM)"); } catch (RuntimeException ex) {}
         try { new org.bau.ena.vm.reg.RegCompiler().compile(pu1); fail("Expected compile error: undefined var (RegVM)"); } catch (RuntimeException ex) {}
     }

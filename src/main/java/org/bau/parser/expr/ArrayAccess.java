@@ -24,11 +24,18 @@ public class ArrayAccess implements Expression, LeftValue {
     private Expression base;
     private Expression arrayIndex;
     private final boolean checkBounds;
+    public int fileId, location;
 
     public ArrayAccess(Expression base, Expression arrayIndex, boolean checkBounds) {
         this.base = base;
         this.arrayIndex = arrayIndex;
         this.checkBounds = checkBounds;
+    }
+
+    @Override
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
     }
 
     @Override
@@ -278,9 +285,28 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public LeftValue resolveTypes(Program program) {
-        base = base.resolveTypes(program);
-        arrayIndex = arrayIndex.resolveTypes(program);
+    public Expression resolveTypes(FunctionContext context) {
+        if (base instanceof Variable && base.type() == DataType.UNKNOWN) {
+            // possibly new array of a type
+            Variable v = (Variable) base;
+            String name = v.name();
+            String m = context.getModule();
+            DataType dataType = context.getType(m, name);
+            if (dataType != null) {
+                New newExpr = new New(dataType.arrayType(), arrayIndex);
+                return newExpr;
+            }
+            // number type
+            m = "";
+            dataType = context.getType(m, name);
+            if (dataType != null) {
+                New newExpr = new New(dataType.arrayType(), arrayIndex);
+                return newExpr;
+            }
+        }
+
+        base = base.resolveTypes(context);
+        arrayIndex = arrayIndex.resolveTypes(context);
         return this;
     }
 

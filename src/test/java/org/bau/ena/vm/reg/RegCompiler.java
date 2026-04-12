@@ -1,12 +1,5 @@
 package org.bau.ena.vm.reg;
 
-import org.bau.ena.ast.Expr;
-import org.bau.ena.ast.Stmt;
-import org.bau.ena.types.Type;
-import org.bau.ena.types.TypeChecker;
-
-import static org.bau.ena.vm.reg.RegBytecode.*;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -14,24 +7,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bau.ena.ast.Expr;
+import org.bau.ena.ast.Stmt;
+import org.bau.ena.types.EnaType;
+import org.bau.ena.types.TypeChecker;
+import org.bau.ena.vm.reg.RegBytecode.Func;
+import org.bau.ena.vm.reg.RegBytecode.Insn;
+import org.bau.ena.vm.reg.RegBytecode.Op;
+
 public final class RegCompiler {
     private static final int LOCAL_BASE = 32;
     private final RegBytecode bc = new RegBytecode();
     private final Map<String, Integer> funcIndex = new HashMap<>();
     private final Map<String, Integer> globalIndex = new HashMap<>();
-    private final Map<String, Type> globalTypes = new HashMap<>();
+    private final Map<String, EnaType> globalTypes = new HashMap<>();
     private Map<String, Integer> currentLocals = null;
     private final Deque<List<Integer>> breakStack = new ArrayDeque<>();
     private int loopDepth = 0;
     private final java.util.Set<String> typeNames = new java.util.HashSet<>();
-    private Map<Expr, Type> exprTypes = java.util.Collections.emptyMap();
-    private Map<Stmt, Type> stmtTypes = java.util.Collections.emptyMap();
-    private Map<String, java.util.List<Type>> funcParamTypes = new java.util.HashMap<>();
+    private Map<Expr, EnaType> exprTypes = java.util.Collections.emptyMap();
+    private Map<Stmt, EnaType> stmtTypes = java.util.Collections.emptyMap();
+    private Map<String, java.util.List<EnaType>> funcParamTypes = new java.util.HashMap<>();
 
-    public RegBytecode compile(Stmt.Program program) {
+    public RegBytecode compile(Stmt.EnaProgram program) {
         // Pass 1: collect types and functions
         for (Stmt item : program.items())
-            if (item instanceof Stmt.TypeDef td) {
+            if (item instanceof Stmt.EnaTypeDef td) {
                 typeNames.add(td.name());
                 String[] fields = new String[td.fields().length];
                 String[] fieldTypes = new String[td.fields().length];
@@ -110,25 +111,25 @@ public final class RegCompiler {
         }
     }
 
-    private void buildFuncParamTypes(Stmt.Program program) {
+    private void buildFuncParamTypes(Stmt.EnaProgram program) {
         for (Stmt it : program.items())
             if (it instanceof Stmt.Function fn) {
-                java.util.ArrayList<Type> ps = new java.util.ArrayList<>();
+                java.util.ArrayList<EnaType> ps = new java.util.ArrayList<>();
                 for (Stmt.Param p : fn.params())
                     ps.add(resolveType(p.type()));
                 funcParamTypes.put(fn.name(), ps);
             }
         for (Stmt it : program.items())
-            if (it instanceof Stmt.TypeDef td) {
-                java.util.ArrayList<Type> ps = new java.util.ArrayList<>();
+            if (it instanceof Stmt.EnaTypeDef td) {
+                java.util.ArrayList<EnaType> ps = new java.util.ArrayList<>();
                 for (Stmt.Param p : td.fields())
                     ps.add(resolveType(p.type()));
                 funcParamTypes.put(td.name(), ps);
             }
         // println accepts any number of args; we'll lower by concat before print
-        funcParamTypes.put("println", java.util.List.of(new Type.Array(Type.TEXT)));
-        funcParamTypes.put("puts", java.util.List.of(Type.TEXT));
-        funcParamTypes.put("format", java.util.List.of(new Type.Array(Type.TEXT)));
+        funcParamTypes.put("println", java.util.List.of(new EnaType.Array(EnaType.TEXT)));
+        funcParamTypes.put("puts", java.util.List.of(EnaType.TEXT));
+        funcParamTypes.put("format", java.util.List.of(new EnaType.Array(EnaType.TEXT)));
     }
 
     private void validateCalls(Stmt.Block body) {
@@ -157,11 +158,11 @@ public final class RegCompiler {
                         validateCallsInExpr(a);
                     return;
                 }
-                java.util.List<Type> params = funcParamTypes.get(fv.name());
+                java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                 if (params == null)
                     throw new RuntimeException("unknown function: " + fv.name());
                 int provided = c.args().length;
-                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof Type.Array);
+                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof EnaType.Array);
                 int fixed = varargs ? params.size() - 1 : params.size();
                 if (!varargs) {
                     if (provided != params.size())
@@ -201,7 +202,7 @@ public final class RegCompiler {
                         validateCallsInExpr(a);
                     return;
                 }
-                java.util.List<Type> params = funcParamTypes.get(fv.name());
+                java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                 if ("println".equals(fv.name())) {
                     for (Expr a : c.args())
                         validateCallsInExpr(a);
@@ -210,11 +211,11 @@ public final class RegCompiler {
                 if (params == null)
                     throw new RuntimeException("unknown function: " + fv.name());
                 // Disallow use of void-returning function in expression position
-                Type callType = exprTypes.getOrDefault(c, Type.UNKNOWN);
-                if (callType instanceof Type.Void)
+                EnaType callType = exprTypes.getOrDefault(c, EnaType.UNKNOWN);
+                if (callType instanceof EnaType.Void)
                     throw new RuntimeException("type error: void function used as expression");
                 int provided = c.args().length;
-                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof Type.Array);
+                boolean varargs = !params.isEmpty() && (params.get(params.size() - 1) instanceof EnaType.Array);
                 int fixed = varargs ? params.size() - 1 : params.size();
                 if (!varargs) {
                     if (provided != params.size())
@@ -289,8 +290,8 @@ public final class RegCompiler {
                 validateFieldsInExpr(m.target());
                 return;
             }
-            Type tt = m.target().type();
-            if (!(tt instanceof Type.Struct st))
+            EnaType tt = m.target().type();
+            if (!(tt instanceof EnaType.Struct st))
                 throw new RuntimeException("field access on non-struct type");
             int tid = bc.types.indexOf(st.name());
             if (tid < 0)
@@ -344,18 +345,18 @@ public final class RegCompiler {
             // Record global variable types early so later expressions have correct types
             if (currentLocals == null && a.target() instanceof Expr.Variable gv) {
                 if (a.value() instanceof Expr.NewArray na) {
-                    Type elem;
+                    EnaType elem;
                     switch (na.baseType()) {
-                    case "int" -> elem = Type.INT;
-                    case "real" -> elem = Type.REAL;
-                    case "text" -> elem = Type.TEXT;
-                    default -> elem = new Type.Struct(na.baseType(), java.util.Map.of());
+                    case "int" -> elem = EnaType.INT;
+                    case "real" -> elem = EnaType.REAL;
+                    case "text" -> elem = EnaType.TEXT;
+                    default -> elem = new EnaType.Struct(na.baseType(), java.util.Map.of());
                     }
-                    globalTypes.put(gv.name(), new Type.Array(elem));
+                    globalTypes.put(gv.name(), new EnaType.Array(elem));
                 } else {
                     // Use inferred type of RHS for scalars/text/structs
-                    Type rhsType = a.value().type();
-                    if (!(rhsType instanceof Type.Unknown)) {
+                    EnaType rhsType = a.value().type();
+                    if (!(rhsType instanceof EnaType.Unknown)) {
                         globalTypes.put(gv.name(), rhsType);
                     }
                 }
@@ -386,23 +387,23 @@ public final class RegCompiler {
 
     private void validateTypesAndVarsInExpr(Expr e) {
         if (e instanceof Expr.Variable v) {
-            if (v.type() instanceof Type.Unknown)
+            if (v.type() instanceof EnaType.Unknown)
                 throw new RuntimeException("undefined variable: " + v.name());
             return;
         }
         if (e instanceof Expr.Unary u) {
-            if (!(u.expr().type() instanceof Type.Int || u.expr().type() instanceof Type.Real))
+            if (!(u.expr().type() instanceof EnaType.Int || u.expr().type() instanceof EnaType.Real))
                 throw new RuntimeException("type error: unary '-' on non-number");
             validateTypesAndVarsInExpr(u.expr());
             return;
         }
         if (e instanceof Expr.Binary b) {
-            Type lt = b.left().type();
-            Type rt = b.right().type();
+            EnaType lt = b.left().type();
+            EnaType rt = b.right().type();
             String op = b.op();
-            boolean lNum = lt instanceof Type.Int || lt instanceof Type.Real;
-            boolean rNum = rt instanceof Type.Int || rt instanceof Type.Real;
-            boolean anyText = lt instanceof Type.Text || rt instanceof Type.Text;
+            boolean lNum = lt instanceof EnaType.Int || lt instanceof EnaType.Real;
+            boolean rNum = rt instanceof EnaType.Int || rt instanceof EnaType.Real;
+            boolean anyText = lt instanceof EnaType.Text || rt instanceof EnaType.Text;
             switch (op) {
             case "+":
                 if (lNum && rNum) {
@@ -423,7 +424,7 @@ public final class RegCompiler {
             case "&":
             case "|":
             case "^":
-                if (!(lt instanceof Type.Int && rt instanceof Type.Int))
+                if (!(lt instanceof EnaType.Int && rt instanceof EnaType.Int))
                     throw new RuntimeException("type error: bitwise/shift require int operands");
                 break;
             case "=":
@@ -439,15 +440,15 @@ public final class RegCompiler {
                     boolean leftZero = (b.left() instanceof Expr.Literal ll
                             && ((ll.value() instanceof Long && ((Long) ll.value()) == 0L)
                                     || (ll.value() instanceof Double && ((Double) ll.value()) == 0.0)));
-                    boolean structVsZero = ((lt instanceof Type.Struct) && rightZero)
-                            || ((rt instanceof Type.Struct) && leftZero)
+                    boolean structVsZero = ((lt instanceof EnaType.Struct) && rightZero)
+                            || ((rt instanceof EnaType.Struct) && leftZero)
                             || ((b.left() instanceof Expr.Member) && rightZero)
                             || ((b.right() instanceof Expr.Member) && leftZero);
                     if (structVsZero) {
                         break;
                     }
                 }
-                if (!(lNum && rNum) && !(lt instanceof Type.Text && rt instanceof Type.Text))
+                if (!(lNum && rNum) && !(lt instanceof EnaType.Text && rt instanceof EnaType.Text))
                     throw new RuntimeException("type error: comparison requires numbers or text");
                 break;
             case "and":
@@ -463,11 +464,11 @@ public final class RegCompiler {
         }
         if (e instanceof Expr.Index ix) {
             boolean isTypeArrayCtor = (ix.target() instanceof Expr.Variable v) && typeNames.contains(v.name());
-            if (!isTypeArrayCtor && !(ix.target().type() instanceof Type.Array)) {
+            if (!isTypeArrayCtor && !(ix.target().type() instanceof EnaType.Array)) {
                 // be permissive; special constructor array
             }
             if (!isTypeArrayCtor) {
-                boolean okIndex = ix.index().type() instanceof Type.Int;
+                boolean okIndex = ix.index().type() instanceof EnaType.Int;
                 if (!okIndex && ix.index() instanceof Expr.Literal lit && lit.value() instanceof Long)
                     okIndex = true;
                 if (!okIndex)
@@ -479,17 +480,17 @@ public final class RegCompiler {
         }
         if (e instanceof Expr.Member m) {
             if ("len".equals(m.name())) {
-                Type tt = m.target().type();
+                EnaType tt = m.target().type();
                 if (m.target() instanceof Expr.Variable gv) {
-                    Type gt = globalTypes.get(gv.name());
+                    EnaType gt = globalTypes.get(gv.name());
                     if (gt != null)
                         tt = gt;
                 }
-                if (tt instanceof Type.Unknown) {
+                if (tt instanceof EnaType.Unknown) {
                     validateTypesAndVarsInExpr(m.target());
                     return;
                 }
-                if (!(tt instanceof Type.Array || tt instanceof Type.Text)) {
+                if (!(tt instanceof EnaType.Array || tt instanceof EnaType.Text)) {
                     // At top-level, allow len on globals even if type not yet fully propagated
                     if (m.target() instanceof Expr.Variable && currentLocals == null) {
                         validateTypesAndVarsInExpr(m.target());
@@ -520,7 +521,7 @@ public final class RegCompiler {
             return;
         }
         if (e instanceof Expr.NewArray na) {
-            if (!(na.length().type() instanceof Type.Int || na.length().type() instanceof Type.Real))
+            if (!(na.length().type() instanceof EnaType.Int || na.length().type() instanceof EnaType.Real))
                 throw new RuntimeException("type error: array length must be number");
             validateTypesAndVarsInExpr(na.length());
             return;
@@ -729,23 +730,23 @@ public final class RegCompiler {
     }
 
     private void validateFunctionReturns(Stmt.Function fn) {
-        Type expected = (fn.returnType() == null) ? Type.VOID : resolveType(fn.returnType());
+        EnaType expected = (fn.returnType() == null) ? EnaType.VOID : resolveType(fn.returnType());
         validateReturnsInBlock(fn.body(), expected, fn.name());
     }
 
-    private void validateReturnsInBlock(Stmt.Block b, Type expected, String fname) {
+    private void validateReturnsInBlock(Stmt.Block b, EnaType expected, String fname) {
         for (Stmt s : b.statements())
             validateReturnsInStmt(s, expected, fname);
     }
 
-    private void validateReturnsInStmt(Stmt s, Type expected, String fname) {
+    private void validateReturnsInStmt(Stmt s, EnaType expected, String fname) {
         if (s instanceof Stmt.Return r) {
-            Type actual = stmtTypes.getOrDefault(r, Type.UNKNOWN);
-            if (expected instanceof Type.Void) {
-                if (!(actual instanceof Type.Void))
+            EnaType actual = stmtTypes.getOrDefault(r, EnaType.UNKNOWN);
+            if (expected instanceof EnaType.Void) {
+                if (!(actual instanceof EnaType.Void))
                     throw new RuntimeException("type error: function " + fname + " should not return a value");
             } else {
-                if (actual instanceof Type.Void)
+                if (actual instanceof EnaType.Void)
                     throw new RuntimeException(
                             "type error: function " + fname + " must return a value of type " + typeName(expected));
                 if (!typesCompatible(actual, expected))
@@ -764,15 +765,15 @@ public final class RegCompiler {
         }
     }
 
-    private boolean typesCompatible(Type a, Type b) {
-        if (a instanceof Type.Unknown || b instanceof Type.Unknown)
+    private boolean typesCompatible(EnaType a, EnaType b) {
+        if (a instanceof EnaType.Unknown || b instanceof EnaType.Unknown)
             return true;
         if (a.getClass() == b.getClass()) {
-            if (a instanceof Type.Struct sa && b instanceof Type.Struct sb)
+            if (a instanceof EnaType.Struct sa && b instanceof EnaType.Struct sb)
                 return sa.name().equals(sb.name());
-            if (a instanceof Type.Array aa && b instanceof Type.Array ab)
+            if (a instanceof EnaType.Array aa && b instanceof EnaType.Array ab)
                 return typesCompatible(aa.elem(), ab.elem());
-            if (a instanceof Type.Fun fa && b instanceof Type.Fun fb) {
+            if (a instanceof EnaType.Fun fa && b instanceof EnaType.Fun fb) {
                 if (fa.params().size() != fb.params().size())
                     return false;
                 for (int i = 0; i < fa.params().size(); i++)
@@ -785,40 +786,40 @@ public final class RegCompiler {
         return false;
     }
 
-    private String typeName(Type t) {
-        if (t instanceof Type.Int)
+    private String typeName(EnaType t) {
+        if (t instanceof EnaType.Int)
             return "int";
-        if (t instanceof Type.Real)
+        if (t instanceof EnaType.Real)
             return "real";
-        if (t instanceof Type.Text)
+        if (t instanceof EnaType.Text)
             return "text";
-        if (t instanceof Type.Void)
+        if (t instanceof EnaType.Void)
             return "void";
-        if (t instanceof Type.Unknown)
+        if (t instanceof EnaType.Unknown)
             return "UNKNOWN";
-        if (t instanceof Type.Struct st)
+        if (t instanceof EnaType.Struct st)
             return st.name();
-        if (t instanceof Type.Array ar)
+        if (t instanceof EnaType.Array ar)
             return typeName(ar.elem()) + "[]";
-        if (t instanceof Type.Fun)
+        if (t instanceof EnaType.Fun)
             return "fun";
         return t.toString();
     }
 
-    private Type resolveType(String name) {
+    private EnaType resolveType(String name) {
         if (name == null)
-            return Type.VOID;
+            return EnaType.VOID;
         if ("int".equals(name))
-            return Type.INT;
+            return EnaType.INT;
         if ("real".equals(name))
-            return Type.REAL;
+            return EnaType.REAL;
         if ("text".equals(name))
-            return Type.TEXT;
+            return EnaType.TEXT;
         if (name.endsWith("[]")) {
             String base = name.substring(0, name.length() - 2);
-            return new Type.Array(resolveType(base));
+            return new EnaType.Array(resolveType(base));
         }
-        return new Type.Struct(name, java.util.Map.of());
+        return new EnaType.Struct(name, java.util.Map.of());
     }
 
     private void compileBlock(RegBuilder b, Stmt.Block block) {
@@ -832,14 +833,14 @@ public final class RegCompiler {
             // Track global variable types at top-level for later array operations
             if (currentLocals == null && a.target() instanceof Expr.Variable gv) {
                 if (a.value() instanceof Expr.NewArray na) {
-                    Type elem;
+                    EnaType elem;
                     switch (na.baseType()) {
-                    case "int" -> elem = Type.INT;
-                    case "real" -> elem = Type.REAL;
-                    case "text" -> elem = Type.TEXT;
-                    default -> elem = new Type.Struct(na.baseType(), java.util.Map.of());
+                    case "int" -> elem = EnaType.INT;
+                    case "real" -> elem = EnaType.REAL;
+                    case "text" -> elem = EnaType.TEXT;
+                    default -> elem = new EnaType.Struct(na.baseType(), java.util.Map.of());
                     }
-                    globalTypes.put(gv.name(), new Type.Array(elem));
+                    globalTypes.put(gv.name(), new EnaType.Array(elem));
                 }
             }
             assignTarget(b, a.target(), rv);
@@ -857,7 +858,7 @@ public final class RegCompiler {
             List<Integer> endJumps = new java.util.ArrayList<>();
             for (int i = 0; i < iff.conds().length; i++) {
                 int cr = compileExpr(b, iff.conds()[i]);
-                if (!(iff.conds()[i].type() instanceof Type.Int))
+                if (!(iff.conds()[i].type() instanceof EnaType.Int))
                     throw new RuntimeException("type error: if condition must be int");
                 int jmpToBlock = b.f.code.size();
                 b.emit(Insn.jmpif(cr, 0)); // target fix later
@@ -884,7 +885,7 @@ public final class RegCompiler {
             loopDepth++;
             int start = b.f.code.size();
             int cr = compileExpr(b, loop.cond());
-            if (!(loop.cond().type() instanceof Type.Int))
+            if (!(loop.cond().type() instanceof EnaType.Int))
                 throw new RuntimeException("type error: loop condition must be int");
             int jmpToBody = b.f.code.size();
             b.emit(Insn.jmpif(cr, 0));
@@ -930,22 +931,22 @@ public final class RegCompiler {
         if (target instanceof Expr.Index ix) {
             int a = compileExpr(b, ix.target());
             int i = compileExpr(b, ix.index());
-            Type t = ix.target().type();
-            if (t instanceof Type.Unknown && ix.target() instanceof Expr.Variable gv) {
-                Type gt = globalTypes.get(gv.name());
+            EnaType t = ix.target().type();
+            if (t instanceof EnaType.Unknown && ix.target() instanceof Expr.Variable gv) {
+                EnaType gt = globalTypes.get(gv.name());
                 if (gt != null)
                     t = gt;
             }
-            if (!(t instanceof Type.Array arr)) {
+            if (!(t instanceof EnaType.Array arr)) {
                 b.free(a);
                 b.free(i);
                 throw new RuntimeException("compile error: index assignment on non-array or unknown element type");
             }
-            if (arr.elem() instanceof Type.Int)
+            if (arr.elem() instanceof EnaType.Int)
                 b.emit(Insn.astorei(a, i, rv));
-            else if (arr.elem() instanceof Type.Real)
+            else if (arr.elem() instanceof EnaType.Real)
                 b.emit(Insn.astorer(a, i, rv));
-            else if (arr.elem() instanceof Type.Text)
+            else if (arr.elem() instanceof EnaType.Text)
                 b.emit(Insn.astoret(a, i, rv));
             else
                 b.emit(Insn.asstores(a, i, rv));
@@ -956,13 +957,13 @@ public final class RegCompiler {
         if (target instanceof Expr.Member m) {
             // resolve field index using struct type; support array element member via index
             // fallback
-            Type tt = m.target().type();
-            if (!(tt instanceof Type.Struct) && m.target() instanceof Expr.Index ix) {
-                Type at = ix.target().type();
-                if (at instanceof Type.Array arr && arr.elem() instanceof Type.Struct)
+            EnaType tt = m.target().type();
+            if (!(tt instanceof EnaType.Struct) && m.target() instanceof Expr.Index ix) {
+                EnaType at = ix.target().type();
+                if (at instanceof EnaType.Array arr && arr.elem() instanceof EnaType.Struct)
                     tt = arr.elem();
             }
-            if (!(tt instanceof Type.Struct st))
+            if (!(tt instanceof EnaType.Struct st))
                 throw new RuntimeException("field access on non-struct type");
             int tid = bc.types.indexOf(st.name());
             if (tid < 0)
@@ -1008,7 +1009,7 @@ public final class RegCompiler {
                 int gi = globalIndex.computeIfAbsent(v.name(), k -> globalIndex.size());
                 b.emit(Insn.load(rd, gi));
                 // If this variable is a known global type, attach it for downstream type checks
-                Type gt = globalTypes.get(v.name());
+                EnaType gt = globalTypes.get(v.name());
                 if (gt != null) {
                     v.setType(gt);
                 }
@@ -1044,23 +1045,23 @@ public final class RegCompiler {
             int rd = b.alloc();
             int a = compileExpr(b, ix.target());
             int i = compileExpr(b, ix.index());
-            Type t = resolvedExprType(ix.target());
-            if (t instanceof Type.Unknown && ix.target() instanceof Expr.Variable gv) {
-                Type gt = globalTypes.get(gv.name());
+            EnaType t = resolvedExprType(ix.target());
+            if (t instanceof EnaType.Unknown && ix.target() instanceof Expr.Variable gv) {
+                EnaType gt = globalTypes.get(gv.name());
                 if (gt != null)
                     t = gt;
             }
-            if (!(t instanceof Type.Array arr)) {
+            if (!(t instanceof EnaType.Array arr)) {
                 b.free(a);
                 b.free(i);
                 b.free(rd);
                 throw new RuntimeException("compile error: indexing non-array or unknown element type");
             }
-            if (arr.elem() instanceof Type.Int)
+            if (arr.elem() instanceof EnaType.Int)
                 b.emit(Insn.aloadi(rd, a, i));
-            else if (arr.elem() instanceof Type.Real)
+            else if (arr.elem() instanceof EnaType.Real)
                 b.emit(Insn.aloadr(rd, a, i));
-            else if (arr.elem() instanceof Type.Text)
+            else if (arr.elem() instanceof EnaType.Text)
                 b.emit(Insn.aloadt(rd, a, i));
             else
                 b.emit(Insn.aloads(rd, a, i));
@@ -1072,22 +1073,22 @@ public final class RegCompiler {
             if ("len".equals(m.name())) {
                 int rd = b.alloc();
                 int a = compileExpr(b, m.target());
-                Type tt = resolvedExprType(m.target());
-                if (tt instanceof Type.Unknown) {
+                EnaType tt = resolvedExprType(m.target());
+                if (tt instanceof EnaType.Unknown) {
                     // try resolve from globalTypes if it's a global variable
-                    if (m.target() instanceof Expr.Variable gv && globalTypes.get(gv.name()) instanceof Type.Array arr2)
+                    if (m.target() instanceof Expr.Variable gv && globalTypes.get(gv.name()) instanceof EnaType.Array arr2)
                         tt = arr2;
                 }
-                if (tt instanceof Type.Array arr) {
-                    if (arr.elem() instanceof Type.Int)
+                if (tt instanceof EnaType.Array arr) {
+                    if (arr.elem() instanceof EnaType.Int)
                         b.emit(Insn.leni(rd, a));
-                    else if (arr.elem() instanceof Type.Real)
+                    else if (arr.elem() instanceof EnaType.Real)
                         b.emit(Insn.lenf(rd, a));
-                    else if (arr.elem() instanceof Type.Text)
+                    else if (arr.elem() instanceof EnaType.Text)
                         b.emit(Insn.lent(rd, a));
                     else
                         b.emit(Insn.lens(rd, a));
-                } else if (tt instanceof Type.Text) {
+                } else if (tt instanceof EnaType.Text) {
                     b.emit(Insn.lent(rd, a));
                 } else {
                     // default to LENS for unsupported kinds
@@ -1097,14 +1098,14 @@ public final class RegCompiler {
                 return rd;
             }
             // Resolve field index from the struct type
-            Type tt = resolvedExprType(m.target());
-            if (!(tt instanceof Type.Struct) && m.target() instanceof Expr.Index ix) {
-                Type at = ix.target().type();
-                if (at instanceof Type.Array arr && arr.elem() instanceof Type.Struct)
+            EnaType tt = resolvedExprType(m.target());
+            if (!(tt instanceof EnaType.Struct) && m.target() instanceof Expr.Index ix) {
+                EnaType at = ix.target().type();
+                if (at instanceof EnaType.Array arr && arr.elem() instanceof EnaType.Struct)
                     tt = arr.elem();
             }
             int fieldIndex = 0;
-            if (tt instanceof Type.Struct st) {
+            if (tt instanceof EnaType.Struct st) {
                 int tid = bc.types.indexOf(st.name());
                 if (tid < 0)
                     throw new RuntimeException("unknown struct type: " + st.name());
@@ -1140,9 +1141,9 @@ public final class RegCompiler {
                         return out;
                     }
                     int acc = args.get(0);
-                    if (!(c.args()[0].type() instanceof Type.Text)) {
+                    if (!(c.args()[0].type() instanceof EnaType.Text)) {
                         int t0 = b.alloc();
-                        if (c.args()[0].type() instanceof Type.Real)
+                        if (c.args()[0].type() instanceof EnaType.Real)
                             b.emit(Insn.r2s(t0, acc));
                         else
                             b.emit(Insn.i2s(t0, acc));
@@ -1150,9 +1151,9 @@ public final class RegCompiler {
                     }
                     for (int i = 1; i < args.size(); i++) {
                         int cur = args.get(i);
-                        if (!(c.args()[i].type() instanceof Type.Text)) {
+                        if (!(c.args()[i].type() instanceof EnaType.Text)) {
                             int ti = b.alloc();
-                            if (c.args()[i].type() instanceof Type.Real)
+                            if (c.args()[i].type() instanceof EnaType.Real)
                                 b.emit(Insn.r2s(ti, cur));
                             else
                                 b.emit(Insn.i2s(ti, cur));
@@ -1179,9 +1180,9 @@ public final class RegCompiler {
                         return 0;
                     }
                     int acc = args.get(0);
-                    if (!(c.args()[0].type() instanceof Type.Text)) {
+                    if (!(c.args()[0].type() instanceof EnaType.Text)) {
                         int t0 = b.alloc();
-                        if (c.args()[0].type() instanceof Type.Real)
+                        if (c.args()[0].type() instanceof EnaType.Real)
                             b.emit(Insn.r2s(t0, acc));
                         else
                             b.emit(Insn.i2s(t0, acc));
@@ -1189,9 +1190,9 @@ public final class RegCompiler {
                     }
                     for (int i = 1; i < args.size(); i++) {
                         int cur = args.get(i);
-                        if (!(c.args()[i].type() instanceof Type.Text)) {
+                        if (!(c.args()[i].type() instanceof EnaType.Text)) {
                             int ti = b.alloc();
-                            if (c.args()[i].type() instanceof Type.Real)
+                            if (c.args()[i].type() instanceof EnaType.Real)
                                 b.emit(Insn.r2s(ti, cur));
                             else
                                 b.emit(Insn.i2s(ti, cur));
@@ -1214,9 +1215,9 @@ public final class RegCompiler {
                     if (args.size() != 1)
                         throw new RuntimeException("arity mismatch for puts: expected 1, got " + args.size());
                     int v = args.get(0);
-                    if (!(c.args()[0].type() instanceof Type.Text)) {
+                    if (!(c.args()[0].type() instanceof EnaType.Text)) {
                         int t = b.alloc();
-                        if (c.args()[0].type() instanceof Type.Real)
+                        if (c.args()[0].type() instanceof EnaType.Real)
                             b.emit(Insn.r2s(t, v));
                         else
                             b.emit(Insn.i2s(t, v));
@@ -1227,9 +1228,9 @@ public final class RegCompiler {
                     return 0;
                 }
                 // Handle varargs: last param is array -> pack extra args into array
-                java.util.List<Type> params = funcParamTypes.get(fv.name());
+                java.util.List<EnaType> params = funcParamTypes.get(fv.name());
                 boolean varargs = params != null && !params.isEmpty()
-                        && (params.get(params.size() - 1) instanceof Type.Array);
+                        && (params.get(params.size() - 1) instanceof EnaType.Array);
                 int rd;
                 if (varargs && !typeNames.contains(fv.name())) {
                     // Special-cases: implement format/println via direct concatenation of provided
@@ -1277,7 +1278,7 @@ public final class RegCompiler {
                     int fixed = params.size() - 1;
                     // Passthrough if caller provided exactly one array for the vararg slot
                     if (args.size() == params.size()) {
-                        if (c.args()[fixed].type() instanceof Type.Array) {
+                        if (c.args()[fixed].type() instanceof EnaType.Array) {
                             for (int i = 0; i < args.size(); i++)
                                 b.emit(Insn.mov(i + 1, args.get(i)));
                             rd = b.alloc();
@@ -1287,19 +1288,19 @@ public final class RegCompiler {
                             return rd;
                         }
                     }
-                    Type.Array arrT = (Type.Array) params.get(params.size() - 1);
+                    EnaType.Array arrT = (EnaType.Array) params.get(params.size() - 1);
                     int arrReg = b.alloc();
                     int lenReg = b.alloc();
                     b.emit(Insn.loadi(lenReg, Math.max(0, args.size() - fixed)));
                     int elemTypeCode;
-                    Type elemT = arrT.elem();
-                    if (elemT instanceof Type.Int)
+                    EnaType elemT = arrT.elem();
+                    if (elemT instanceof EnaType.Int)
                         elemTypeCode = 1;
-                    else if (elemT instanceof Type.Real)
+                    else if (elemT instanceof EnaType.Real)
                         elemTypeCode = 2;
-                    else if (elemT instanceof Type.Text)
+                    else if (elemT instanceof EnaType.Text)
                         elemTypeCode = 3;
-                    else if (elemT instanceof Type.Struct st)
+                    else if (elemT instanceof EnaType.Struct st)
                         elemTypeCode = -(bc.types.indexOf(st.name()) + 1);
                     else
                         elemTypeCode = 0;
@@ -1309,12 +1310,12 @@ public final class RegCompiler {
                     for (int i = fixed; i < args.size(); i++) {
                         int idx = b.alloc();
                         b.emit(Insn.loadi(idx, i - fixed));
-                        Type elemT2 = arrT.elem();
-                        if (elemT2 instanceof Type.Int)
+                        EnaType elemT2 = arrT.elem();
+                        if (elemT2 instanceof EnaType.Int)
                             b.emit(Insn.astorei(arrReg, idx, args.get(i)));
-                        else if (elemT2 instanceof Type.Real)
+                        else if (elemT2 instanceof EnaType.Real)
                             b.emit(Insn.astorer(arrReg, idx, args.get(i)));
-                        else if (elemT2 instanceof Type.Text)
+                        else if (elemT2 instanceof EnaType.Text)
                             b.emit(Insn.astoret(arrReg, idx, args.get(i)));
                         else
                             b.emit(Insn.asstores(arrReg, idx, args.get(i)));
@@ -1353,7 +1354,7 @@ public final class RegCompiler {
         if (e instanceof Expr.Unary u) {
             int x = compileExpr(b, u.expr());
             int rd = b.alloc();
-            if (u.expr().type() instanceof Type.Real)
+            if (u.expr().type() instanceof EnaType.Real)
                 b.emit(Insn.op3(Op.FNEG, rd, x, 0));
             else
                 b.emit(Insn.op3(Op.NEG, rd, x, 0));
@@ -1364,16 +1365,16 @@ public final class RegCompiler {
             int a = compileExpr(b, br.left());
             int c = compileExpr(b, br.right());
             int rd = b.alloc();
-            boolean forceReal = (br.left().type() instanceof Type.Real) || (br.right().type() instanceof Type.Real);
+            boolean forceReal = (br.left().type() instanceof EnaType.Real) || (br.right().type() instanceof EnaType.Real);
             if ("+".equals(br.op())) {
-                Type lt = br.left().type();
-                Type rt = br.right().type();
-                boolean isText = (lt instanceof Type.Text) || (rt instanceof Type.Text);
-                boolean isArray = (lt instanceof Type.Array) || (rt instanceof Type.Array);
-                boolean isInt = (lt instanceof Type.Int) && (rt instanceof Type.Int);
-                boolean isReal = (lt instanceof Type.Real) && (rt instanceof Type.Real);
-                boolean mixedIntReal = ((lt instanceof Type.Real) && (rt instanceof Type.Int))
-                        || ((lt instanceof Type.Int) && (rt instanceof Type.Real));
+                EnaType lt = br.left().type();
+                EnaType rt = br.right().type();
+                boolean isText = (lt instanceof EnaType.Text) || (rt instanceof EnaType.Text);
+                boolean isArray = (lt instanceof EnaType.Array) || (rt instanceof EnaType.Array);
+                boolean isInt = (lt instanceof EnaType.Int) && (rt instanceof EnaType.Int);
+                boolean isReal = (lt instanceof EnaType.Real) && (rt instanceof EnaType.Real);
+                boolean mixedIntReal = ((lt instanceof EnaType.Real) && (rt instanceof EnaType.Int))
+                        || ((lt instanceof EnaType.Int) && (rt instanceof EnaType.Real));
                 if (isText) {
                     throw new RuntimeException("type error: '+' on text is not supported; use format(...)");
                 } else if (isArray) {
@@ -1384,7 +1385,7 @@ public final class RegCompiler {
                     b.emit(Insn.op3(Op.FADD, rd, a, c));
                 } else if (mixedIntReal) {
                     // convert int operand to real then ALUR ADD
-                    if (lt instanceof Type.Int && rt instanceof Type.Real) {
+                    if (lt instanceof EnaType.Int && rt instanceof EnaType.Real) {
                         int ar = b.alloc();
                         b.emit(Insn.i2r(ar, a));
                         b.emit(Insn.op3(Op.FADD, rd, ar, c));
@@ -1401,17 +1402,17 @@ public final class RegCompiler {
                 boolean isCmp = op.equals("=") || op.equals("<>") || op.equals("<") || op.equals("<=") || op.equals(">")
                         || op.equals(">=");
                 if (isCmp) {
-                    Type lt = br.left().type();
-                    Type rt = br.right().type();
-                    boolean bothInt = (lt instanceof Type.Int) && (rt instanceof Type.Int);
-                    boolean bothText = (lt instanceof Type.Text) && (rt instanceof Type.Text);
+                    EnaType lt = br.left().type();
+                    EnaType rt = br.right().type();
+                    boolean bothInt = (lt instanceof EnaType.Int) && (rt instanceof EnaType.Int);
+                    boolean bothText = (lt instanceof EnaType.Text) && (rt instanceof EnaType.Text);
                     // Allow struct = 0 and struct <> 0 only; forbid other numeric comparisons with
                     // struct
-                    boolean leftStructRightZero = (lt instanceof Type.Struct) && (br.right() instanceof Expr.Literal lit
+                    boolean leftStructRightZero = (lt instanceof EnaType.Struct) && (br.right() instanceof Expr.Literal lit
                             && lit.value() instanceof Long && ((Long) lit.value()) == 0L);
-                    boolean rightStructLeftZero = (rt instanceof Type.Struct) && (br.left() instanceof Expr.Literal lit2
+                    boolean rightStructLeftZero = (rt instanceof EnaType.Struct) && (br.left() instanceof Expr.Literal lit2
                             && lit2.value() instanceof Long && ((Long) lit2.value()) == 0L);
-                    if ((lt instanceof Type.Struct || rt instanceof Type.Struct)
+                    if ((lt instanceof EnaType.Struct || rt instanceof EnaType.Struct)
                             && !(leftStructRightZero || rightStructLeftZero) && (op.equals("=") || op.equals("<>")
                                     || op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">="))) {
                         throw new RuntimeException(
@@ -1528,14 +1529,14 @@ public final class RegCompiler {
                         case "/" -> Op.FDIV;
                         default -> throw new RuntimeException("real op:" + op);
                         };
-                        Type lt2 = br.left().type();
-                        Type rt2 = br.right().type();
-                        if (lt2 instanceof Type.Int && rt2 instanceof Type.Real) {
+                        EnaType lt2 = br.left().type();
+                        EnaType rt2 = br.right().type();
+                        if (lt2 instanceof EnaType.Int && rt2 instanceof EnaType.Real) {
                             int ar = b.alloc();
                             b.emit(Insn.i2r(ar, a));
                             b.emit(Insn.op3(opReal, rd, ar, c));
                             b.free(ar);
-                        } else if (lt2 instanceof Type.Real && rt2 instanceof Type.Int) {
+                        } else if (lt2 instanceof EnaType.Real && rt2 instanceof EnaType.Int) {
                             int cr = b.alloc();
                             b.emit(Insn.i2r(cr, c));
                             b.emit(Insn.op3(opReal, rd, a, cr));
@@ -1547,7 +1548,7 @@ public final class RegCompiler {
                     } else {
                         // Integer path; ensure logical ops have int operands by enforcing type check
                         if ("and".equals(op) || "or".equals(op)) {
-                            if (!(br.left().type() instanceof Type.Int) || !(br.right().type() instanceof Type.Int))
+                            if (!(br.left().type() instanceof EnaType.Int) || !(br.right().type() instanceof EnaType.Int))
                                 throw new RuntimeException("type error: logical and/or require int operands");
                             b.emit(Insn.op3(opInt, rd, a, c));
                         } else {
@@ -1563,16 +1564,16 @@ public final class RegCompiler {
         throw new RuntimeException("Unsupported expression");
     }
 
-    private Type resolvedExprType(Expr e) {
-        Type t = e.type();
-        if (!(t instanceof Type.Unknown))
+    private EnaType resolvedExprType(Expr e) {
+        EnaType t = e.type();
+        if (!(t instanceof EnaType.Unknown))
             return t;
         if (e instanceof Expr.Variable v) {
             // If it's a global (no current local with that name), prefer recorded
             // globalTypes
             boolean isLocal = currentLocals != null && currentLocals.containsKey(v.name());
             if (!isLocal) {
-                Type gt = globalTypes.get(v.name());
+                EnaType gt = globalTypes.get(v.name());
                 if (gt != null)
                     return gt;
             }

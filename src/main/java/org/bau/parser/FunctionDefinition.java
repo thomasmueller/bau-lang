@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import org.bau.parser.expr.Expression;
 import org.bau.parser.expr.Variable;
 import org.bau.parser.stmt.Free;
 import org.bau.parser.stmt.Statement;
@@ -496,10 +497,18 @@ public class FunctionDefinition {
         if (itType != null) {
             itType = itType.resolve(program);
         }
-        program.resolveTypes(list);
-        program.resolveTypes(autoClose);
-        for(int i = 0; i < parameters.size(); i++) {
-            parameters.set(i, parameters.get(i).resolveTypes(program));
+        FunctionContext fc = new FunctionContext(program, fullName);
+        fc.resolveTypes(list);
+        fc.resolveTypes(autoClose);
+        for (int i = 0; i < parameters.size(); i++) {
+            Variable var = parameters.get(i);
+            Expression e = var.resolveTypes(fc);
+            if (e instanceof Variable) {
+                Variable v = (Variable) e;
+                parameters.set(i, v);
+            } else {
+                program.syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+            }
         }
     }
 

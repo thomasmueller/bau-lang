@@ -48,7 +48,7 @@ import org.bau.runtime.Value.ValuePanic;
 import org.bau.runtime.Value.ValueRef;
 import org.bau.std.Std;
 
-public class Parser {
+public class Parser2 {
 
     enum TokenType {
         END,
@@ -72,7 +72,7 @@ public class Parser {
 
     // the block id is is incremented for each if / elif / else block
     private Program program;
-    private FunctionContext functionContext;
+//    private FunctionContext functionContext;
     private boolean isGlobalScope;
     private int nextConstantId;
     private String module;
@@ -82,8 +82,6 @@ public class Parser {
     // (after the parameters)
     private int stackPosFunction;
     private FunctionDefinition currentFunctionDefinition;
-    private Loop currentLoop;
-    private boolean scanPhase = true;
     private final int posOffset;
     private int fileId;
 
@@ -94,20 +92,20 @@ public class Parser {
 
     public boolean isImport;
 
-    public Parser(Map<String, String> modules, String text) {
+    public Parser2(Map<String, String> modules, String text) {
         this(new Program(modules), "", text, 0);
     }
 
-    public Parser(String text) {
+    public Parser2(String text) {
         this(new Program(Map.of()), "", text, 0);
     }
 
-    public Parser(Program program, String module, String text, int posOffset) {
+    public Parser2(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
         program.addSourceFile(module, text);
         this.fileId = program.getSourceFile(module).getFileId();
         this.program = program;
-        this.functionContext = new FunctionContext(program, new FullName(module, "main"));
+//        this.functionContext = new FunctionContext(program, new FullName(module, "main"));
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
@@ -115,67 +113,9 @@ public class Parser {
         this.solver = new Solver(program.getSolver());
     }
 
-    public void setScanPhase(boolean scanPhase) {
-        this.scanPhase = scanPhase;
-    }
-
     public Program parse() {
-//        Parser2 p2 = new Parser2(text);
-//        Program prog2 = p2.parse();
-
-
         readSpaces();
         Program program = parseProgram();
-        if (scanPhase) {
-            functionContext.rewindStack(0);
-            ArrayList<FunctionDefinition> functions = new ArrayList<>();
-            functions.addAll(program.getFunctions());
-            if (module == null || module.isEmpty()) {
-                FunctionDefinition main = program.getFunctionIfExists(null, "", "main", 0);
-                if (main != null) {
-                    // move "main" to the end, so a range function is parsed first
-                    // (this is only needed if we support custom range functions)
-                    functions.remove(main);
-                    functions.add(main);
-                    if (main.returnType != null) {
-                        syntaxError("The 'main' method may not return a value; use org.bau.Env.exit instead");
-                    }
-                }
-            }
-            for (FunctionDefinition def : functions) {
-                // the function could be compiled in the meantime (constants)
-                def = program.getFunctionById(def.getFunctionId());
-                if (def.code != null) {
-                    String f = def.format();
-                    Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
-                    functionContext.reset(def.getFullName());
-                    p.functionContext = functionContext;
-                    p.scanPhase = false;
-                    p.parse();
-                }
-            }
-            // there might be more functions now: templates might be expanded
-            functions.clear();
-            functions.addAll(program.getFunctions());
-            for (FunctionDefinition def : functions) {
-                if (def.code != null) {
-                    String f = def.format();
-                    Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
-                    functionContext.reset(def.getFullName());
-                    p.functionContext = functionContext;
-                    p.scanPhase = false;
-                    p.parse();
-                }
-            }
-            if (module == null || module.isEmpty()) {
-                FunctionDefinition main = program.getFunctionIfExists(null, "", "main", 0);
-                if (main != null) {
-                    program.removeFunction(main);
-                    program.mainList.addAll(main.list);
-                    program.autoClose = main.autoClose;
-                }
-            }
-        }
         return program.checkErrors();
     }
 
@@ -246,7 +186,7 @@ public class Parser {
                 }
             }
         }
-        program.autoClose = autoClose(0, null);
+//        program.autoClose = autoClose(0, null);
         return program;
     }
 
@@ -301,7 +241,7 @@ public class Parser {
             SourceFile sf = program.getSourceFile(name);
             sf.setImported(true);
             try {
-                Parser parser = new Parser(program, name, moduleSource, 0);
+                Parser2 parser = new Parser2(program, name, moduleSource, 0);
                 parser.isImport = true;
                 parser.parse();
             } catch (IllegalStateException e) {
@@ -321,14 +261,14 @@ public class Parser {
         if (!match("trait")) {
             return false;
         }
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         int defIndent = indent;
         String comment = lastComment;
         String name = readIdentifier();
         int location = lastPos - name.length();
-        if (functionContext.getType(targetModule, name) != null) {
-            syntaxError("Type '" + name + "' was already defined");
-        }
+//        if (functionContext.getType(targetModule, name) != null) {
+//            syntaxError("Type '" + name + "' was already defined");
+//        }
         boolean owned = match("owned");
         MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
         DataType type = DataType.newTraitType(new FullName(targetModule, name), memoryType);
@@ -345,7 +285,7 @@ public class Parser {
             }
         }
         readEndOfStatement();
-        functionContext.rewindStack(stackPos);
+//        functionContext.rewindStack(stackPos);
         program.addComment("trait " + type.format(), comment);
         lastComment = null;
         while (indent > defIndent) {
@@ -366,7 +306,7 @@ public class Parser {
             }
         }
         program.addType(type);
-        functionContext.rewindStack(stackPos);
+//        functionContext.rewindStack(stackPos);
         return true;
     }
 
@@ -379,7 +319,7 @@ public class Parser {
         if (!match("type")) {
             return false;
         }
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         int defIndent = indent;
         String comment = lastComment;
         String name = readIdentifier();
@@ -387,9 +327,9 @@ public class Parser {
             syntaxError("Type name '" + name + "' is too short, needs to be at least 2 characters");
         }
         int location = lastPos - name.length();
-        if (functionContext.getType(targetModule, name) != null) {
-            syntaxError("Type '" + name + "' was already defined");
-        }
+//        if (functionContext.getType(targetModule, name) != null) {
+//            syntaxError("Type '" + name + "' was already defined");
+//        }
         boolean template = false;
         ArrayList<String> parameters = new ArrayList<>();
         if (matchOp("(")) {
@@ -402,7 +342,7 @@ public class Parser {
                     m = "";
                 }
                 DataType type = DataType.newUndefined(new FullName(m, t));
-                functionContext.addTemporaryType(type);
+//                functionContext.addTemporaryType(type);
                 template = true;
                 if (matchOp(")")) {
                     break;
@@ -425,7 +365,7 @@ public class Parser {
             }
         }
         readEndOfStatement();
-        functionContext.rewindStack(stackPos);
+//        functionContext.rewindStack(stackPos);
         if (template) {
             parseTypeTemplate(defIndent, name, parameters, comment, location);
             return true;
@@ -462,68 +402,68 @@ public class Parser {
         if (!parameters.isEmpty()) {
             type.parameters = parameters;
         }
-        functionContext.rewindStack(stackPos);
+//        functionContext.rewindStack(stackPos);
         type.traitNames.addAll(traitNames);
-        defineConstructors(type);
+//        defineConstructors(type);
         return true;
     }
 
-    private void defineConstructors(DataType type) {
-        int stackPos = functionContext.getStackPos();
-        // required fields constructor
-        FunctionDefinition def = new FunctionDefinition(type.getFullName(), 0);
-        def.isConstructor = true;
-        def.returnType = type;
-        New n = new New(type, null);
-        Variable result = assignTempVariable(def.list, n);
-        for (Variable var : type.fields) {
-            Assignment assign = new Assignment();
-            assign.type = var.type();
-            assign.initial = true;
-            assign.leftValue = new FieldAccess(result, var.name(), true, var.type());
-            if (var.type().isCopyType() && var.type().isNumber()) {
-                assign.value = var.type().nullExpression();
-            } else if (var.type().isArray()) {
-                assign.value = var.type().nullExpression();
-            } else if (var.type().isNullable()) {
-                assign.value = var.type().nullExpression();
-            } else {
-                Variable arg = new Variable(var.name(), var.type());
-                def.parameters.add(arg);
-                assign.value = arg;
-            }
-            def.list.add(assign);
-        }
-        Return ret = new Return(result);
-        def.list.add(ret);
-        program.addFunction(def);
-        functionContext.rewindStack(stackPos);
-
-        if (def.parameters.size() == type.fields.size()) {
-            return;
-        }
-
-        // all fields constructor
-        FunctionDefinition def2 = new FunctionDefinition(type.getFullName(), 0);
-        def2.isConstructor = true;
-        def2.returnType = type;
-        New n2 = new New(type, null);
-        Variable result2 = assignTempVariable(def2.list, n2);
-        for (Variable var : type.fields) {
-            Assignment assign = new Assignment();
-            assign.type = var.type();
-            assign.initial = true;
-            assign.leftValue = new FieldAccess(result2, var.name(), true, var.type());
-            Variable arg = new Variable(var.name(), var.type());
-            def2.parameters.add(arg);
-            assign.value = arg;
-            def2.list.add(assign);
-        }
-        Return ret2 = new Return(result2);
-        def2.list.add(ret2);
-        program.addFunction(def2);
-        functionContext.rewindStack(stackPos);
-    }
+//    private void defineConstructors(DataType type) {
+////        int stackPos = functionContext.getStackPos();
+//        // required fields constructor
+//        FunctionDefinition def = new FunctionDefinition(type.getFullName(), 0);
+//        def.isConstructor = true;
+//        def.returnType = type;
+//        New n = new New(type, null);
+////        Variable result = assignTempVariable(def.list, n);
+//        for (Variable var : type.fields) {
+//            Assignment assign = new Assignment();
+//            assign.type = var.type();
+//            assign.initial = true;
+//            assign.leftValue = new FieldAccess(result, var.name(), true, var.type());
+//            if (var.type().isCopyType() && var.type().isNumber()) {
+//                assign.value = var.type().nullExpression();
+//            } else if (var.type().isArray()) {
+//                assign.value = var.type().nullExpression();
+//            } else if (var.type().isNullable()) {
+//                assign.value = var.type().nullExpression();
+//            } else {
+//                Variable arg = new Variable(var.name(), var.type());
+//                def.parameters.add(arg);
+//                assign.value = arg;
+//            }
+//            def.list.add(assign);
+//        }
+//        Return ret = new Return(result);
+//        def.list.add(ret);
+//        program.addFunction(def);
+////        functionContext.rewindStack(stackPos);
+//
+//        if (def.parameters.size() == type.fields.size()) {
+//            return;
+//        }
+//
+//        // all fields constructor
+//        FunctionDefinition def2 = new FunctionDefinition(type.getFullName(), 0);
+//        def2.isConstructor = true;
+//        def2.returnType = type;
+//        New n2 = new New(type, null);
+//        Variable result2 = assignTempVariable(def2.list, n2);
+//        for (Variable var : type.fields) {
+//            Assignment assign = new Assignment();
+//            assign.type = var.type();
+//            assign.initial = true;
+//            assign.leftValue = new FieldAccess(result2, var.name(), true, var.type());
+//            Variable arg = new Variable(var.name(), var.type());
+//            def2.parameters.add(arg);
+//            assign.value = arg;
+//            def2.list.add(assign);
+//        }
+//        Return ret2 = new Return(result2);
+//        def2.list.add(ret2);
+//        program.addFunction(def2);
+////        functionContext.rewindStack(stackPos);
+//    }
 
     private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment, int location) {
         int lastPos = pos;
@@ -572,40 +512,41 @@ public class Parser {
         }
         int location = lastPos - id.length();
         readEndOfStatement();
-        LinkedHashMap<String, Long> entries = new LinkedHashMap<>();
+        LinkedHashMap<String, Expression> entries = new LinkedHashMap<>();
         HashMap<Long, String> map = new HashMap<>();
         long nextValue = 0;
         while (indent > defIndent) {
             if (!matchOp("\n")) {
                 String name = readIdentifier();
+                Expression expr = null;
                 if (matchOp(":")) {
-                    Expression expr = parseExpression();
-                    if (expr.type().isFloatingPoint() || expr.type().isNullable() || !expr.type().isNumber()) {
-                        syntaxError("Only integer types are supported");
-                    }
-                    Value v = eval(expr, false);
-                    long x = v.longValue();
-                    if (map.containsKey(x)) {
-                        syntaxError("This value is already used by '" + map.get(x) + "'");
-                    }
-                    if (entries.containsKey(name)) {
-                        syntaxError("Duplicate name '" + name + "'");
-                    }
-                    nextValue = x;
+                    expr = parseExpression();
+//                    if (expr.type().isFloatingPoint() || expr.type().isNullable() || !expr.type().isNumber()) {
+//                        syntaxError("Only integer types are supported");
+//                    }
+//                    Value v = eval(expr, false);
+//                    long x = v.longValue();
+//                    if (map.containsKey(x)) {
+//                        syntaxError("This value is already used by '" + map.get(x) + "'");
+//                    }
+//                    if (entries.containsKey(name)) {
+//                        syntaxError("Duplicate name '" + name + "'");
+//                    }
+//                    nextValue = x;
                 } else {
-                    while (map.containsKey(nextValue)) {
-                        nextValue++;
-                    }
+//                    while (map.containsKey(nextValue)) {
+//                        nextValue++;
+//                    }
                 }
                 map.put(nextValue, name);
-                entries.put(name, nextValue);
+                entries.put(name, expr);
                 nextValue++;
                 readEndOfStatement();
             }
         }
         DataType type = DataType.newEnumType(new FullName(module, id));
         type.setLocation(program, module, fileId, location);
-        type.enumValues = entries;
+        type.enumExpressions = entries;
         program.addType(type);
         program.addComment("enum " + type.format(), comment);
         lastComment = null;
@@ -617,27 +558,28 @@ public class Parser {
         if (!match("fun")) {
             return false;
         }
-        if (functionContext.getStackPos() != 0) {
-            // TODO currently we do parse functions while parsing functions...
-            // throw new IllegalStateException();
-        }
+//        if (functionContext.getStackPos() != 0) {
+//            // TODO currently we do parse functions while parsing functions...
+//            // throw new IllegalStateException();
+//        }
         String comment = lastComment;
-        currentLoop = null;
+//        currentLoop = null;
         int defIndent = indent;
         isGlobalScope = false;
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         DataType callType;
         String id = null;
         int location = -1;
         boolean template = DataType.isGenericTypeName(token);
         if (template) {
             DataType type = DataType.newUndefined(new FullName(targetModule, token));
-            functionContext.addTemporaryType(type);
+//            functionContext.addTemporaryType(type);
             callType = readType(true);
         } else {
             id = readIdentifier();
             location = lastPos - id.length();
-            callType = functionContext.getType(targetModule, id);
+//            callType = functionContext.getType(targetModule, id);
+            callType = DataType.newUndefined(new FullName(targetModule, id));
         }
         String typeName = id;
         if (callType != null) {
@@ -665,7 +607,7 @@ public class Parser {
             if (!matchOp(")")) {
                 syntaxError("Expected ')', got '" + token + "' when reading a function definition template");
             }
-            parseTypeFunctionTemplate(defIndent, callType);
+//            parseTypeFunctionTemplate(defIndent, callType);
             return true;
         }
         if (currentFunctionDefinition != null) {
@@ -676,7 +618,7 @@ public class Parser {
         DataType ct = null;
         // stack position is before the "this" parameter
         // (which also may need to be incremented, if the function returns "this")
-        stackPosFunction = functionContext.getStackPos();
+//        stackPosFunction = functionContext.getStackPos();
         Variable thisVar = null;
         if (matchOp("(")) {
             matchOp("\n");
@@ -699,7 +641,7 @@ public class Parser {
             // "this" can not be re-assigned
             thisVar.setConstantValue(null);
 
-            functionContext.addVariable(thisVar);
+//            functionContext.addVariable(thisVar);
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
         def.setLocation(program, module, fileId, location);
@@ -719,27 +661,27 @@ public class Parser {
                 syntaxError("Function '" + def.getFullName().name + "' already has an implementation");
             }
         }
-        if (scanPhase && template) {
-            parseFunctionTemplate(defIndent, def);
-            functionContext.rewindStack(stackPos);
-            currentFunctionDefinition = null;
-            return true;
-        }
-        if (scanPhase || template) {
-            int startCode = lastPos;
-            String s = parseBlock(defIndent);
-            String header = text.substring(startParse, startCode).trim() + "\n";
-            if (comment != null) {
-                header = "##\n" + comment + "\n##\n" + header;
-            }
-            def.header = header;
-            def.code = s;
-            def.comment = comment;
-            program.addFunction(def);
-            functionContext.rewindStack(stackPos);
-            currentFunctionDefinition = null;
-            return true;
-        }
+//        if (scanPhase && template) {
+//            parseFunctionTemplate(defIndent, def);
+//            functionContext.rewindStack(stackPos);
+//            currentFunctionDefinition = null;
+//            return true;
+//        }
+//        if (scanPhase || template) {
+//            int startCode = lastPos;
+//            String s = parseBlock(defIndent);
+//            String header = text.substring(startParse, startCode).trim() + "\n";
+//            if (comment != null) {
+//                header = "##\n" + comment + "\n##\n" + header;
+//            }
+//            def.header = header;
+//            def.code = s;
+//            def.comment = comment;
+//            program.addFunction(def);
+//            functionContext.rewindStack(stackPos);
+//            currentFunctionDefinition = null;
+//            return true;
+//        }
         for (Variable var : def.parameters) {
             if (var.name().equals("this") && var.isConstant()) {
                 // "this" is not null (if it is constant, which allows "this" to be a parameter for other functions)
@@ -762,57 +704,57 @@ public class Parser {
         if (def.exceptionType != null && def.returnType == null) {
             def.list.add(new Return(null));
         }
-        List<Statement> autoClose = autoClose(stackPosFunction, null);
-        List<Statement> ownedParameters = new ArrayList<>();
-        autoClose.addAll(ownedParameters);
-        // we don't need to increment + decrement the function arguments,
-        // if the function doesn't return this type
-        for (int i = 0; i < autoClose.size(); i++) {
-            Statement s = autoClose.get(i);
-            if (s instanceof Free) {
-                Free free = (Free) s;
-                if (free.var.type() == def.returnType) {
-                    continue;
-                }
-                for (int j = 0; j < def.parameters.size(); j++) {
-                    if (def.varArgs && j == def.parameters.size() - 1) {
-                        // var arg array needs to be freed
-                        continue;
-                    }
-                    if (def.parameters.get(j) == free.var) {
-                        if (free.var.reassignCount == 0) {
-                            free.var.skipIncrementDecrementRefCount = true;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        def.autoClose(autoClose);
-        functionContext.rewindStack(stackPos);
-        currentLoop = null;
+//        List<Statement> autoClose = autoClose(stackPosFunction, null);
+//        List<Statement> ownedParameters = new ArrayList<>();
+//        autoClose.addAll(ownedParameters);
+//        // we don't need to increment + decrement the function arguments,
+//        // if the function doesn't return this type
+//        for (int i = 0; i < autoClose.size(); i++) {
+//            Statement s = autoClose.get(i);
+//            if (s instanceof Free) {
+//                Free free = (Free) s;
+//                if (free.var.type() == def.returnType) {
+//                    continue;
+//                }
+//                for (int j = 0; j < def.parameters.size(); j++) {
+//                    if (def.varArgs && j == def.parameters.size() - 1) {
+//                        // var arg array needs to be freed
+//                        continue;
+//                    }
+//                    if (def.parameters.get(j) == free.var) {
+//                        if (free.var.reassignCount == 0) {
+//                            free.var.skipIncrementDecrementRefCount = true;
+//                        }
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//        def.autoClose(autoClose);
+//        functionContext.rewindStack(stackPos);
+//        currentLoop = null;
         endBlock();
         if (depth != 0) {
             throw new IllegalStateException();
         }
         solver.clear();
-        if (currentFunctionDefinition.returnType != null) {
-            if (!Program.doesReturn(currentFunctionDefinition.list)) {
-                syntaxError("Function does not return or throw");
-            }
-        }
-        if (Variable.SSA_FORM && functionContext.blockList.isEmpty()) {
-            BasicBlock header = functionContext.newBasicBlock();
-            for (Variable v : currentFunctionDefinition.parameters) {
-                header.setVariableVersion(v.name(), 0);
-            }
-            functionContext.linkBasicBlocks(currentFunctionDefinition.list, header, null, null);
-            functionContext.setBasicBlocksVariableVersions();
-            functionContext.optimizeSkipIncrementDecrementRefCounts(currentFunctionDefinition);
-            if (Variable.DEBUG_VERSIONS) {
-                functionContext.printBasicBlocks();
-            }
-        }
+//        if (currentFunctionDefinition.returnType != null) {
+//            if (!Program.doesReturn(currentFunctionDefinition.list)) {
+//                syntaxError("Function does not return or throw");
+//            }
+//        }
+//        if (Variable.SSA_FORM && functionContext.blockList.isEmpty()) {
+//            BasicBlock header = functionContext.newBasicBlock();
+//            for (Variable v : currentFunctionDefinition.parameters) {
+//                header.setVariableVersion(v.name(), 0);
+//            }
+//            functionContext.linkBasicBlocks(currentFunctionDefinition.list, header, null, null);
+//            functionContext.setBasicBlocksVariableVersions();
+//            functionContext.optimizeSkipIncrementDecrementRefCounts(currentFunctionDefinition);
+//            if (Variable.DEBUG_VERSIONS) {
+//                functionContext.printBasicBlocks();
+//            }
+//        }
 
         currentFunctionDefinition = null;
         if (def.macro) {
@@ -841,7 +783,7 @@ public class Parser {
                     templateTypes.add(token);
                     template = true;
                     type = DataType.newUndefined(new FullName("", token));
-                    functionContext.addTemporaryType(type);
+//                    functionContext.addTemporaryType(type);
                     type = readType(template);
                     if (matchOp("..")) {
                         varArgs = true;
@@ -849,7 +791,7 @@ public class Parser {
                     }
                     Variable var = new Variable(name, type);
                     def.parameters.add(var);
-                    functionContext.addVariable(var);
+//                    functionContext.addVariable(var);
                 } else if (match("type")) {
                     template = true;
                     type = DataType.TYPE_TYPE;
@@ -859,11 +801,11 @@ public class Parser {
                         m = "";
                     }
                     DataType t = DataType.newUndefined(new FullName(m, name));
-                    functionContext.addTemporaryType(t);
+//                    functionContext.addTemporaryType(t);
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
                     def.parameters.add(var);
-                    functionContext.addVariable(var);
+//                    functionContext.addVariable(var);
                 } else {
                     type = readType(template);
                     if (matchOp("..")) {
@@ -880,7 +822,7 @@ public class Parser {
                         }
                     }
                     def.parameters.add(var);
-                    functionContext.addVariable(var);
+//                    functionContext.addVariable(var);
                 }
                 if (varArgs) {
                     if (!matchOp(")")) {
@@ -942,48 +884,48 @@ public class Parser {
         return template;
     }
 
-    private void parseTypeFunctionTemplate(int defIndent, DataType t) {
-        String comment = lastComment;
-        int start = lastPos;
-        // read to end of the line
-        while (true) {
-            if (type == TokenType.OPERATOR && "\n".equals(token)) {
-                readSpaces();
-                break;
-            }
-            read();
-        }
-        String functionName = text.substring(start, lastPos).trim();
-        String code = parseBlock(defIndent);
-        StringBuilder buff = new StringBuilder();
-        buff.append("fun ").append(t.name());
-        for (String p : t.parameters) {
-            buff.append("_@@").append(p + "_").append("@@");
-        }
-        for (String p : t.parameters) {
-            String find = t.name() + "(" + p + ")";
-            String replace = t.name() + "_@@" + p + "_@@";
-            if (functionName.indexOf(find) >= 0) {
-                functionName = functionName.replace(find, replace);
-            }
-        }
-        buff.append(" " + functionName + "\n");
-        buff.append(code);
-        t.posOffset = lastPos;
-        t.template += "\n" + buff.toString();
-        if (comment != null) {
-            program.addComment("fun " + t.format() + " " + functionName.trim(), comment);
-        }
-    }
-
-    private void parseFunctionTemplate(int defIndent, FunctionDefinition def) {
-        String s = parseBlock(defIndent);
-        if (program.getFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name) != null) {
-            syntaxError("Function template '" + def.getFullName().name + "' was already defined");
-        }
-        def.template = s;
-        program.addFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name, def);
-    }
+//    private void parseTypeFunctionTemplate(int defIndent, DataType t) {
+//        String comment = lastComment;
+//        int start = lastPos;
+//        // read to end of the line
+//        while (true) {
+//            if (type == TokenType.OPERATOR && "\n".equals(token)) {
+//                readSpaces();
+//                break;
+//            }
+//            read();
+//        }
+//        String functionName = text.substring(start, lastPos).trim();
+//        String code = parseBlock(defIndent);
+//        StringBuilder buff = new StringBuilder();
+//        buff.append("fun ").append(t.name());
+//        for (String p : t.parameters) {
+//            buff.append("_@@").append(p + "_").append("@@");
+//        }
+//        for (String p : t.parameters) {
+//            String find = t.name() + "(" + p + ")";
+//            String replace = t.name() + "_@@" + p + "_@@";
+//            if (functionName.indexOf(find) >= 0) {
+//                functionName = functionName.replace(find, replace);
+//            }
+//        }
+//        buff.append(" " + functionName + "\n");
+//        buff.append(code);
+//        t.posOffset = lastPos;
+//        t.template += "\n" + buff.toString();
+//        if (comment != null) {
+//            program.addComment("fun " + t.format() + " " + functionName.trim(), comment);
+//        }
+//    }
+//
+//    private void parseFunctionTemplate(int defIndent, FunctionDefinition def) {
+//        String s = parseBlock(defIndent);
+//        if (program.getFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name) != null) {
+//            syntaxError("Function template '" + def.getFullName().name + "' was already defined");
+//        }
+//        def.template = s;
+//        program.addFunctionTemplate(def.callType, def.getFullName().module, def.getFullName().name, def);
+//    }
 
     /**
      * Read a type definition. Either a template type can be returned (eg. List(T)),
@@ -1030,17 +972,17 @@ public class Parser {
             read();
             if (matchOp("..")) {
                 Expression upperBound = parseExpression();
-                if (upperBound.canThrowException() != null) {
-                    syntaxError("May not throw an exception here");
-                }
+//                if (upperBound.canThrowException() != null) {
+//                    syntaxError("May not throw an exception here");
+//                }
                 String rangeTypeName = "0.." + upperBound.format();
-                DataType t = functionContext.getType("", rangeTypeName);
-                if (t != null) {
-                    return t;
-                }
+//                DataType t = functionContext.getType("", rangeTypeName);
+//                if (t != null) {
+//                    return t;
+//                }
                 DataType newType = DataType.newNumberType(rangeTypeName, 8);
                 newType.maxValue = upperBound;
-                functionContext.addTemporaryType(newType);
+//                functionContext.addTemporaryType(newType);
                 return newType;
             }
         }
@@ -1057,18 +999,19 @@ public class Parser {
         if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
             m = module;
         }
-        DataType t = functionContext.getType(m, name);
-        if (t == null) {
-            t = DataType.newUndefined(new FullName(m, name));
-        }
-        if (t.template != null) {
-            ArrayList<DataType> params = parseTypeParameters(t, templatesOk);
-            // if templates can be returned, then
-            // we must not replace the types
-            if (!templatesOk) {
-                t = parseTemplatedType(t, params);
-            }
-        }
+        DataType t = DataType.newUndefined(new FullName(m, name));
+//        DataType t = functionContext.getType(m, name);
+//        if (t == null) {
+//            t = DataType.newUndefined(new FullName(m, name));
+//        }
+//        if (t.template != null) {
+//            ArrayList<DataType> params = parseTypeParameters(t, templatesOk);
+//            // if templates can be returned, then
+//            // we must not replace the types
+//            if (!templatesOk) {
+//                t = parseTemplatedType(t, params);
+//            }
+//        }
         if (arraysOk && matchOp("[")) {
             if (!matchOp("]")) {
                 syntaxError("Expected ']', got '" + token + "' when reading a type");
@@ -1076,9 +1019,9 @@ public class Parser {
             t = t.arrayType();
         }
         if (borrow) {
-            if (t.memoryType() != MemoryType.REF_COUNT) {
-                syntaxError("Not a pointer type");
-            }
+//            if (t.memoryType() != MemoryType.REF_COUNT) {
+//                syntaxError("Not a pointer type");
+//            }
             t = t.borrowType();
         }
         if (matchOp("?")) {
@@ -1112,35 +1055,35 @@ public class Parser {
         return params;
     }
 
-    private DataType parseTemplatedType(DataType t, ArrayList<DataType> params) {
-        String name = t.name();
-        String typeId = DataType.getId(name, params);
-        DataType t2 = functionContext.getType(t.module(), typeId);
-        if (t2 != null) {
-            t = t2;
-        } else {
-            String code = t.template;
-            ArrayList<String> with = new ArrayList<>();
-            for (int i = 0; i < t.parameters.size(); i++) {
-                with.add(params.get(i).getFullName().getFullName());
-            }
-            code = Templates.convertTemplate(code, t.parameters, with, program);
-            code = "type " + typeId + "\n" + code;
-            try {
-                Parser p = new Parser(program, module, code, t.posOffset);
-                p.scanPhase = false;
-                p.read();
-                p.parseTypeDefinition(t.module());
-                while (p.type != TokenType.END) {
-                    p.parseFunctionDefinition(t.module());
-                }
-                t = functionContext.getType(t.module(), typeId);
-            } catch (IllegalStateException e) {
-                syntaxError("Error parsing template: " + e.getMessage(), e);
-            }
-        }
-        return t;
-    }
+//    private DataType parseTemplatedType(DataType t, ArrayList<DataType> params) {
+//        String name = t.name();
+//        String typeId = DataType.getId(name, params);
+//        DataType t2 = functionContext.getType(t.module(), typeId);
+//        if (t2 != null) {
+//            t = t2;
+//        } else {
+//            String code = t.template;
+//            ArrayList<String> with = new ArrayList<>();
+//            for (int i = 0; i < t.parameters.size(); i++) {
+//                with.add(params.get(i).getFullName().getFullName());
+//            }
+//            code = Templates.convertTemplate(code, t.parameters, with, program);
+//            code = "type " + typeId + "\n" + code;
+//            try {
+//                Parser2 p = new Parser2(program, module, code, t.posOffset);
+//                p.scanPhase = false;
+//                p.read();
+//                p.parseTypeDefinition(t.module());
+//                while (p.type != TokenType.END) {
+//                    p.parseFunctionDefinition(t.module());
+//                }
+//                t = functionContext.getType(t.module(), typeId);
+//            } catch (IllegalStateException e) {
+//                syntaxError("Error parsing template: " + e.getMessage(), e);
+//            }
+//        }
+//        return t;
+//    }
 
     private void parseStatement(ArrayList<Statement> target) {
         try {
@@ -1215,19 +1158,19 @@ public class Parser {
                 // no function with this name, and
                 // no this.field with this name,
                 // then it could be a fully qualified module name
-                Variable thisVar = functionContext.getVariable(null, "this");
-                if (functionContext.getVariable(null, identifier1) == null &&
-                        functionContext.getType(m, identifier1) == null &&
-                        (thisVar == null || thisVar.type().getFieldDataType(identifier1) == null)) {
-                    while (matchOp(".")) {
-                        m = (m == module || m.equals(module)) ? identifier1 : m + "." + identifier1;
-                        identifier1 = readIdentifier();
-                    }
-                    String m2 = program.getImport(module, m);
-                    if (m2 != null && !m2.isEmpty()) {
-                        m = m2;
-                    }
-                }
+//                Variable thisVar = functionContext.getVariable(null, "this");
+//                if (functionContext.getVariable(null, identifier1) == null &&
+//                        functionContext.getType(m, identifier1) == null &&
+//                        (thisVar == null || thisVar.type().getFieldDataType(identifier1) == null)) {
+//                    while (matchOp(".")) {
+//                        m = (m == module || m.equals(module)) ? identifier1 : m + "." + identifier1;
+//                        identifier1 = readIdentifier();
+//                    }
+//                    String m2 = program.getImport(module, m);
+//                    if (m2 != null && !m2.isEmpty()) {
+//                        m = m2;
+//                    }
+//                }
                 identifierList.add(identifier1);
                 if (!matchOp(",")) {
                     break;
@@ -1242,7 +1185,7 @@ public class Parser {
                     syntaxError("Can not create a new variable in a different module");
                 }
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, true, target);
+//                expr = expr.writeStatements(this, true, target);
                 if (expr instanceof NullValue) {
                     if (targetType == null) {
                         syntaxError("Can only assign null if the type is known");
@@ -1266,29 +1209,29 @@ public class Parser {
                         syntaxError("May not throw an exception here");
                     }
                     String rangeTypeName = "0.." + upperBound.format();
-                    DataType rangeType = functionContext.getType("", rangeTypeName);
-                    if (rangeType == null) {
-                        rangeType = DataType.newNumberType(rangeTypeName, 8);
-                        rangeType.maxValue = upperBound;
-                        functionContext.addTemporaryType(rangeType);
-                    }
-                    type = rangeType;
+//                    DataType rangeType = functionContext.getType("", rangeTypeName);
+//                    if (rangeType == null) {
+//                        rangeType = DataType.newNumberType(rangeTypeName, 8);
+//                        rangeType.maxValue = upperBound;
+//                        functionContext.addTemporaryType(rangeType);
+//                    }
+//                    type = rangeType;
                 }
-                if (targetType != null) {
-                    Expression cast = program.cast(expr, false, targetType);
-                    if (cast == null) {
-                        syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
-                    }
-                    expr = cast;
-                    type = cast.type();
-                }
-                if (targetType != null && !targetType.equals(expr.type())) {
-                    if (targetType.isNullable() && targetType.equals(type.orNull())) {
-                        type = targetType;
-                    } else {
-                        syntaxError("The type of the variable is different than the type of the expression");
-                    }
-                }
+//                if (targetType != null) {
+//                    Expression cast = program.cast(expr, false, targetType);
+//                    if (cast == null) {
+//                        syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
+//                    }
+//                    expr = cast;
+//                    type = cast.type();
+//                }
+//                if (targetType != null && !targetType.equals(expr.type())) {
+//                    if (targetType.isNullable() && targetType.equals(type.orNull())) {
+//                        type = targetType;
+//                    } else {
+//                        syntaxError("The type of the variable is different than the type of the expression");
+//                    }
+//                }
                 for (String identifier : identifierList) {
                     Assignment s = new Assignment();
                     s.initial = true;
@@ -1298,19 +1241,19 @@ public class Parser {
                     s.type = type;
                     Variable v = new Variable(module, identifier, global, s.type);
                     s.leftValue = v;
-                    if (global) {
-                        program.addGlobalVariable(v);
-                    } else {
-                        if (functionContext.getVariable(module, v.name()) != null) {
-                            syntaxError("Variable '" + v.name() + "' already exists");
-                        }
-                        functionContext.addVariable(v);
-                    }
-                    if (type.isRange()) {
-                        setRangeBounds(v);
-                    }
-                    verifyBounds(s);
-                    s.setBounds(solver, depth, false);
+//                    if (global) {
+//                        program.addGlobalVariable(v);
+//                    } else {
+//                        if (functionContext.getVariable(module, v.name()) != null) {
+//                            syntaxError("Variable '" + v.name() + "' already exists");
+//                        }
+//                        functionContext.addVariable(v);
+//                    }
+//                    if (type.isRange()) {
+//                        setRangeBounds(v);
+//                    }
+//                    verifyBounds(s);
+//                    s.setBounds(solver, depth, false);
                     target.add(s);
                 }
                 readEndOfStatement();
@@ -1327,18 +1270,18 @@ public class Parser {
                     }
                     expr = new NullValue(targetType);
                 }
-                expr = expr.writeStatements(this, true, target);
-                if (expr == null) {
-                    syntaxError("Expression required");
-                }
-                Value constValue = eval(expr, true);
-                if (constValue != null) {
-                    if (constValue.isArray() || constValue instanceof Value.ValueRef) {
-                        // the value would be in the heap, but we don't retain the heap
-                        // here, so the data would be lost
-                        constValue = null;
-                    }
-                }
+//                expr = expr.writeStatements(this, true, target);
+//                if (expr == null) {
+//                    syntaxError("Expression required");
+//                }
+//                Value constValue = eval(expr, true);
+//                if (constValue != null) {
+//                    if (constValue.isArray() || constValue instanceof Value.ValueRef) {
+//                        // the value would be in the heap, but we don't retain the heap
+//                        // here, so the data would be lost
+//                        constValue = null;
+//                    }
+//                }
                 if (identifierList.size() != 1) {
                     syntaxError("Constant lists are not supported");
                 }
@@ -1356,24 +1299,25 @@ public class Parser {
                 }
                 s.value = expr;
                 boolean global = isGlobalScope;
-                Variable v = new Variable(module, identifier, global, s.value.type());
-                v.setConstantValue(constValue);
+                Variable v = new Variable(module, identifier, global, DataType.UNKNOWN);
+//                Variable v = new Variable(module, identifier, global, s.value.type());
+//                v.setConstantValue(constValue);
                 s.leftValue = v;
-                s.setConstantBounds(solver, v, expr);
-                s.type = s.value.type();
+//                s.setConstantBounds(solver, v, expr);
+                s.type = DataType.UNKNOWN; // s.value.type();
                 if (global && !identifier.toUpperCase(Locale.ROOT).equals(identifier)) {
                     if (!s.type.isArray()) {
                         syntaxError("Global constants need to be all caps: " + identifier);
                     }
                 }
-                if (functionContext.getVariable(null, v.name()) != null) {
-                    syntaxError("Variable already defined: " + v.name());
-                }
-                functionContext.addVariable(v);
+//                if (functionContext.getVariable(null, v.name()) != null) {
+//                    syntaxError("Variable already defined: " + v.name());
+//                }
+//                functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
                 }
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
@@ -1413,12 +1357,12 @@ public class Parser {
                 DataType t = null;
                 while (true) {
                     expr = parseCall(t, m, identifier, call, true);
-                    expr = expr.writeStatements(this, false, target);
+//                    expr = expr.writeStatements(this, false, target);
                     if (expr == null) {
                         // eg. ternary expression
                         break;
                     }
-                    t = expr.type();
+                    t = DataType.UNKNOWN; //  expr.type();
                     if (t == null || !matchOp(".")) {
                         break;
                     }
@@ -1462,14 +1406,14 @@ public class Parser {
                 Variable v = new Variable(module, identifier, global, targetType);
                 s.leftValue = v;
                 s.type = targetType;
-                if (functionContext.getVariable(module, v.name()) != null) {
-                    syntaxError("Variable '" + v.name() + "' already exists");
-                }
-                functionContext.addVariable(v);
+//                if (functionContext.getVariable(module, v.name()) != null) {
+//                    syntaxError("Variable '" + v.name() + "' already exists");
+//                }
+//                functionContext.addVariable(v);
                 if (global) {
                     program.addGlobalVariable(v);
                 }
-                verifyBounds(s);
+//                verifyBounds(s);
                 // already read
                 // readEndOfStatement();
                 target.add(s);
@@ -1479,32 +1423,38 @@ public class Parser {
                 syntaxError("Lists are currently not supported");
             }
             String identifier = identifierList.get(0);
-            LeftValue left = functionContext.getVariable(module, identifier);
-            if (left == null) {
-                left = functionContext.getVariable(null, "this");
-                if (left == null) {
-                    syntaxError("Variable not found: '" + identifier
-                            + "' \n"
-                            + "(constants are declared with ':', "
-                            + "new variable are declared with ':=')");
-                }
-                verifyNullAccess(left);
-                DataType vt = left.type();
-                DataType type = vt.getFieldDataType(identifier);
-                if (type == null) {
-                    syntaxError("Variable not found: '" + identifier
-                            + "' \n"
-                            + "(constants are declared with ':', "
-                            + "new variable are declared with ':=')");
-                }
-                left = new FieldAccess(left, identifier, true, type);
-            }
+
+
+            int test3;
+//            LeftValue left = functionContext.getVariable(module, identifier);
+//            if (left == null) {
+//                left = functionContext.getVariable(null, "this");
+//                if (left == null) {
+//                    syntaxError("Variable not found: '" + identifier
+//                            + "' \n"
+//                            + "(constants are declared with ':', "
+//                            + "new variable are declared with ':=')");
+//                }
+//                verifyNullAccess(left);
+//                DataType vt = left.type();
+//                DataType type = vt.getFieldDataType(identifier);
+//                if (type == null) {
+//                    syntaxError("Variable not found: '" + identifier
+//                            + "' \n"
+//                            + "(constants are declared with ':', "
+//                            + "new variable are declared with ':=')");
+//                }
+//                left = new FieldAccess(left, identifier, true, type);
+//            }
+            LeftValue left = new Variable(identifier, DataType.UNKNOWN);
+
+
             while (true) {
                 if (matchOp(".")) {
                     // TODO duplicate code, in parsePossibleDot
-                    if (left.type().isPointer()) {
-                        verifyNullAccess(left);
-                    }
+//                    if (left.type().isPointer()) {
+//                        verifyNullAccess(left);
+//                    }
                     String f;
                     if (left instanceof Variable && type == TokenType.INTEGER) {
                         int index = Integer.parseInt(token);
@@ -1535,16 +1485,16 @@ public class Parser {
                             } else {
                                 readEndOfStatement();
                                 call.statement = true;
-                                expr = call.writeStatements(this, false, target);
-                                if (expr instanceof Call) {
-                                    // could return a variable
-                                    target.add((Call) call);
-                                }
+//                                expr = call.writeStatements(this, false, target);
+//                                if (expr instanceof Call) {
+//                                    // could return a variable
+//                                    target.add((Call) call);
+//                                }
                                 return;
                             }
                         } else {
                             // eg calling a macro that doesn't return anything
-                            expr.writeStatements(this, false, target);
+//                            expr.writeStatements(this, false, target);
                             readEndOfStatement();
                             return;
                         }
@@ -1582,7 +1532,7 @@ public class Parser {
             }
             if (matchOp("=")) {
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 if (targetType != null && !targetType.equals(expr.type())) {
                     expr = program.cast(expr, false, targetType);
                     if (expr == null) {
@@ -1600,39 +1550,39 @@ public class Parser {
                     // for templates, we want to support assignment to null
                     s.value = left.type().nullExpression();
                 }
-                if (!areTypesCompatible(s.value, s.leftValue.type())) {
-                    Expression e2 = program.cast(s.value, false, s.leftValue.type());
-                    if (e2 != null) {
-                        s.value = e2;
-                    }
-                }
-                verifyBounds(s);
+//                if (!areTypesCompatible(s.value, s.leftValue.type())) {
+//                    Expression e2 = program.cast(s.value, false, s.leftValue.type());
+//                    if (e2 != null) {
+//                        s.value = e2;
+//                    }
+//                }
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             }
             if (matchOp("*=")) {
                 s.modify = "*";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("/=")) {
                 s.modify = "/";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null) {
@@ -1644,16 +1594,16 @@ public class Parser {
                     }
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("%=")) {
                 s.modify = "%";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null) {
@@ -1665,123 +1615,123 @@ public class Parser {
                     }
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("+=")) {
                 s.modify = "+";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("-=")) {
                 s.modify = "-";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("&=")) {
                 s.modify = "&";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("|=")) {
                 s.modify = "|";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("^=")) {
                 s.modify = "^";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp(">>=")) {
                 s.modify = ">>";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             } else if (matchOp("<<=")) {
                 s.modify = "<<";
                 Expression expr = parseExpression();
-                expr = expr.writeStatements(this, false, target);
+//                expr = expr.writeStatements(this, false, target);
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
                     syntaxError("The type of the variable is different than the type of the expression");
                 }
                 convertToExpandedForm(s);
-                verifyBounds(s);
+//                verifyBounds(s);
                 s.setBounds(solver, depth, false);
                 readEndOfStatement();
                 target.add(s);
-                s.cloneVariable(this);
+//                s.cloneVariable(this);
                 return;
             }
         }
@@ -1794,9 +1744,9 @@ public class Parser {
         }
     }
 
-    public void updateVariable(String name, Variable newVersion) {
-        functionContext.updateVariable(name, newVersion);
-    }
+//    public void updateVariable(String name, Variable newVersion) {
+//        functionContext.updateVariable(name, newVersion);
+//    }
 
     private void verifyNotZero(Expression expr) {
         Value v = expr.eval(null);
@@ -1860,67 +1810,67 @@ public class Parser {
         return newResult;
     }
 
-    private void verifyBounds(Assignment s) {
-        if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
-            syntaxError("Not an array: " + s.leftValue.format());
-        }
-        if (!areTypesCompatible(s.value, s.leftValue.type())) {
-            syntaxError("Incompatible types: " + s.value.type().format() + "; required: " + s.leftValue.type().format());
-        }
-        if (s.leftValue.type().isTrait() && s.value.type().implementsTrait(s.leftValue.type())) {
-            s.value = new Cast(s.value, s.leftValue.type());
-        }
-        if (s.modify == null) {
-            verifyBounds(s.leftValue.type(), s.value);
-        } else {
-            Expression newValue = Operation.buildAndOptimize(s.leftValue, s.modify, s.value);
-            verifyBounds(s.leftValue.type(), newValue);
-        }
-    }
+//    private void verifyBounds(Assignment s) {
+//        if (s.leftValue instanceof ArrayAccess && !((ArrayAccess) s.leftValue).isBaseTypeArray()) {
+//            syntaxError("Not an array: " + s.leftValue.format());
+//        }
+//        if (!areTypesCompatible(s.value, s.leftValue.type())) {
+//            syntaxError("Incompatible types: " + s.value.type().format() + "; required: " + s.leftValue.type().format());
+//        }
+//        if (s.leftValue.type().isTrait() && s.value.type().implementsTrait(s.leftValue.type())) {
+//            s.value = new Cast(s.value, s.leftValue.type());
+//        }
+//        if (s.modify == null) {
+////            verifyBounds(s.leftValue.type(), s.value);
+//        } else {
+//            Expression newValue = new Operation(s.leftValue, s.modify, s.value);
+////            verifyBounds(s.leftValue.type(), newValue);
+//        }
+//    }
 
-    private void verifyBounds(DataType targetType, Expression expr) {
-        if (expr instanceof NullValue) {
-            if (!targetType.isNullable()) {
-                syntaxError("The expression may not be 'null' here.");
-            }
-        } else if (expr.type().isNullable() && !targetType.isNullable()) {
-            verifyNullAccess(expr);
-            // syntaxError("The expression may be 'null', but this is not allowed here.");
-        }
-        if (!targetType.isRange()) {
-            return;
-        }
-        verifyBounds(targetType, expr, targetType.maxValue);
-    }
+//    private void verifyBounds(DataType targetType, Expression expr) {
+//        if (expr instanceof NullValue) {
+//            if (!targetType.isNullable()) {
+//                syntaxError("The expression may not be 'null' here.");
+//            }
+//        } else if (expr.type().isNullable() && !targetType.isNullable()) {
+////            verifyNullAccess(expr);
+//            // syntaxError("The expression may be 'null', but this is not allowed here.");
+//        }
+//        if (!targetType.isRange()) {
+//            return;
+//        }
+//        verifyBounds(targetType, expr, targetType.maxValue);
+//    }
 
-    private void verifyBounds(DataType targetType, Expression expr, Expression max) {
-        Solver.Rule r0 = new Solver.Rule();
-        r0.left = Operation.toSolverExpr(expr);
-        r0.type = ">=";
-        r0.right = Solver.number(0);
-        boolean largerEqualZero;
-        if (!r0.isComplete()) {
-            largerEqualZero = false;
-        } else {
-            largerEqualZero = solver.isTrue(r0);
-        }
-        Solver.Rule r = new Solver.Rule();
-        r.left = Operation.toSolverExpr(expr);
-        r.type = "<";
-        r.right = Operation.toSolverExpr(max);
-        boolean smallerLen;
-        if (!r.isComplete()) {
-            smallerLen = false;
-        } else {
-            smallerLen = solver.isTrue(r);
-        }
-        if (!largerEqualZero) {
-            syntaxError("Can not verify if value is at least 0");
-        }
-        if (!smallerLen) {
-            syntaxError("Can not verify if value is smaller than '" + max.format() + "'");
-        }
-    }
+//    private void verifyBounds(DataType targetType, Expression expr, Expression max) {
+//        Solver.Rule r0 = new Solver.Rule();
+//        r0.left = Operation.toSolverExpr(expr);
+//        r0.type = ">=";
+//        r0.right = Solver.number(0);
+//        boolean largerEqualZero;
+//        if (!r0.isComplete()) {
+//            largerEqualZero = false;
+//        } else {
+//            largerEqualZero = solver.isTrue(r0);
+//        }
+//        Solver.Rule r = new Solver.Rule();
+//        r.left = Operation.toSolverExpr(expr);
+//        r.type = "<";
+//        r.right = Operation.toSolverExpr(max);
+//        boolean smallerLen;
+//        if (!r.isComplete()) {
+//            smallerLen = false;
+//        } else {
+//            smallerLen = solver.isTrue(r);
+//        }
+//        if (!largerEqualZero) {
+//            syntaxError("Can not verify if value is at least 0");
+//        }
+//        if (!smallerLen) {
+//            syntaxError("Can not verify if value is smaller than '" + max.format() + "'");
+//        }
+//    }
 
     private void readEndOfStatement() {
         lastComment = null;
@@ -1986,7 +1936,7 @@ public class Parser {
             setThis.initial = true;
             setThis.isConstant = true;
             setThis.value = call.args.get(0);
-            setThis.value = setThis.value.writeStatements(this, true, ternary.ifTrueStatements);
+//            setThis.value = setThis.value.writeStatements(this, true, ternary.ifTrueStatements);
             ternary.ifTrueStatements.add(setThis);
         }
         List<Statement> ifTrue = ifStatement.thenList;
@@ -2070,39 +2020,39 @@ public class Parser {
                 }
             }
         }
-        if (template != null && template.macro) {
-            if (!templateNames.isEmpty()) {
-                String code = template.getCode();
-                code = Templates.convertTemplate(code, templateNames, templateParams, program);
-                String header = template.toHeaderString();
-                header = Templates.convertTemplate(header, "type", "int", program);
-                header = Templates.convertTemplate(header, templateNames, templateParams, program);
-                code = header.trim() + "\n" + code;
-                try {
-                    Parser p = new Parser(program, module, code, template.posOffset);
-                    p.scanPhase = false;
-                    p.read();
-                    p.parseFunctionDefinition(module);
-                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, template.getFullName().name, template.parameters.size());
-                } catch (IllegalStateException e) {
-                    syntaxError("Error parsing template: " + e.getMessage(), e);
-                }
-                String templateCode = template.template;
-                template = call.def;
-                template.template = templateCode;
-            }
-        }
+//        if (template != null && template.macro) {
+//            if (!templateNames.isEmpty()) {
+//                String code = template.getCode();
+//                code = Templates.convertTemplate(code, templateNames, templateParams, program);
+//                String header = template.toHeaderString();
+//                header = Templates.convertTemplate(header, "type", "int", program);
+//                header = Templates.convertTemplate(header, templateNames, templateParams, program);
+//                code = header.trim() + "\n" + code;
+//                try {
+//                    Parser2 p = new Parser2(program, module, code, template.posOffset);
+//                    p.scanPhase = false;
+//                    p.read();
+//                    p.parseFunctionDefinition(module);
+//                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, template.getFullName().name, template.parameters.size());
+//                } catch (IllegalStateException e) {
+//                    syntaxError("Error parsing template: " + e.getMessage(), e);
+//                }
+//                String templateCode = template.template;
+//                template = call.def;
+//                template.template = templateCode;
+//            }
+//        }
         boolean lastWasComma = false;
         int pi = call.args.size(); // including 'this'
         int paramIndex = 0; // excluding 'this'
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         if (template != null && template.macro) {
             DataType itType = DataType.INT_TYPE;
             if (template.itType != null) {
                 itType = template.itType;
             }
             Variable it = new Variable("it", itType);
-            functionContext.addVariable(it);
+//            functionContext.addVariable(it);
         }
         HashSet<String> templateTypes = new HashSet<>();
         while (true) {
@@ -2187,255 +2137,255 @@ public class Parser {
             for (String t : templateParams) {
                 fullName += "_" + t.replace('.', '_').replace("[]", "_array");
             }
-            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
-            if (call.def == null) {
-                String code = template.getCode();
-                code = Templates.convertTemplate(code, templateNames, templateParams, program);
-                String header = template.toHeaderString();
-                header = Templates.convertTemplate(header, template.getFullName().name, fullName, program);
-                header = Templates.convertTemplate(header, "type", "int", program);
-                header = Templates.convertTemplate(header, templateNames, templateParams, program);
-                code = header.trim() + "\n" + code;
-                try {
-                    Parser p = new Parser(program, module, code, template.posOffset);
-                    p.scanPhase = false;
-                    p.read();
-                    p.parseFunctionDefinition(module);
-                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
-                } catch (IllegalStateException e) {
-                    syntaxError("Error parsing template: " + e.getMessage(), e);
-                }
-            }
+//            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
+//            if (call.def == null) {
+//                String code = template.getCode();
+//                code = Templates.convertTemplate(code, templateNames, templateParams, program);
+//                String header = template.toHeaderString();
+//                header = Templates.convertTemplate(header, template.getFullName().name, fullName, program);
+//                header = Templates.convertTemplate(header, "type", "int", program);
+//                header = Templates.convertTemplate(header, templateNames, templateParams, program);
+//                code = header.trim() + "\n" + code;
+//                try {
+//                    Parser2 p = new Parser2(program, module, code, template.posOffset);
+//                    p.scanPhase = false;
+//                    p.read();
+//                    p.parseFunctionDefinition(module);
+//                    call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
+//                } catch (IllegalStateException e) {
+//                    syntaxError("Error parsing template: " + e.getMessage(), e);
+//                }
+//            }
         } else {
-            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
-            if (call.def == null) {
-                call.def = functionContext.getFunctionIfExists(module, identifier);
-            }
-            if (call.def == null) {
-                call.def = functionContext.getFunctionIfExists("", identifier);
-            }
+//            call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, identifier, call.args.size());
+//            if (call.def == null) {
+//                call.def = functionContext.getFunctionIfExists(module, identifier);
+//            }
+//            if (call.def == null) {
+//                call.def = functionContext.getFunctionIfExists("", identifier);
+//            }
         }
-        if (call.def == null) {
-            FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
-            String notFound = "Function '" + identifier + "' not found";
-            if (type != null) {
-                notFound += " on type " + type.format();
-            }
-            if (didYouMean != null) {
-                notFound += "; did you mean " + didYouMean.toString() + " ?";
-            }
-            syntaxError(notFound, callStart);
-        }
-        if (type == null && currentFunctionDefinition != null && call.def.callType != null && call.def.callType == currentFunctionDefinition.callType) {
-            // add the "this." parameter at the beginning
-            Variable thisVar = functionContext.getVariable(null, "this");
-            call.args.add(0, thisVar);
-        }
-        if (call.def.parameters.size() > call.args.size()) {
-            int thisParam = call.def.callType == null ? 0 : 1;
-            StringBuilder buff = new StringBuilder();
-            buff.append("Expected " + (call.def.parameters.size() - thisParam) + " parameters, got "
-                    + (call.args.size() - thisParam) + " in call to " + call.def.getFullName().name + "(");
-            for (int i = thisParam; i < call.def.parameters.size(); i++) {
-                if (i > thisParam) {
-                    buff.append(", ");
-                }
-                buff.append(call.def.parameters.get(i).name());
-            }
-            buff.append(")");
-            syntaxError(buff.toString());
-        }
+//        if (call.def == null) {
+//            FunctionDefinition didYouMean = program.getFunctionFuzzyMatch(type, module, identifier, call.args.size());
+//            String notFound = "Function '" + identifier + "' not found";
+//            if (type != null) {
+//                notFound += " on type " + type.format();
+//            }
+//            if (didYouMean != null) {
+//                notFound += "; did you mean " + didYouMean.toString() + " ?";
+//            }
+//            syntaxError(notFound, callStart);
+//        }
+//        if (type == null && currentFunctionDefinition != null && call.def.callType != null && call.def.callType == currentFunctionDefinition.callType) {
+//            // add the "this." parameter at the beginning
+////            Variable thisVar = functionContext.getVariable(null, "this");
+////            call.args.add(0, thisVar);
+//        }
+//        if (call.def.parameters.size() > call.args.size()) {
+//            int thisParam = call.def.callType == null ? 0 : 1;
+//            StringBuilder buff = new StringBuilder();
+//            buff.append("Expected " + (call.def.parameters.size() - thisParam) + " parameters, got "
+//                    + (call.args.size() - thisParam) + " in call to " + call.def.getFullName().name + "(");
+//            for (int i = thisParam; i < call.def.parameters.size(); i++) {
+//                if (i > thisParam) {
+//                    buff.append(", ");
+//                }
+//                buff.append(call.def.parameters.get(i).name());
+//            }
+//            buff.append(")");
+//            syntaxError(buff.toString());
+//        }
 
         // verify parameters with range restrictions
-        boolean hasRangeParameter = false;
-        if (nonMacroCall && currentFunctionDefinition != null &&
-                currentFunctionDefinition.constExpr &&
-                !call.def.constExpr) {
-            syntaxError("A method marked as const can only call methods marked as const, but " + call.def.getFullName().name + " is not");
-        }
+//        boolean hasRangeParameter = false;
+//        if (nonMacroCall && currentFunctionDefinition != null &&
+//                currentFunctionDefinition.constExpr &&
+//                !call.def.constExpr) {
+//            syntaxError("A method marked as const can only call methods marked as const, but " + call.def.getFullName().name + " is not");
+//        }
 
-        for (Variable var : call.def.parameters) {
-            if (var.type().isRange()) {
-                hasRangeParameter = true;
-            }
-        }
-        if (hasRangeParameter) {
-            // build a list of original -> replacement pairs
-            ArrayList<Variable> original = new ArrayList<>();
-            ArrayList<Expression> replacement = new ArrayList<>();
-            for (int i = 0; i < call.def.parameters.size(); i++) {
-                Variable var = call.def.parameters.get(i);
-                Expression expr = call.args.get(i);
-                DataType varType = var.type();
-                if (varType.isRange()) {
-                    Expression max = varType.maxValue;
-                    // replace all
-                    for(int j = 0; j < original.size(); j++) {
-                        max = max.replace(original.get(j), replacement.get(j));
-                    }
-                    verifyBounds(varType, expr, max);
-                } else {
-                    if (!expr.isSimple()) {
-                        continue;
-                    }
-                    original.add(var);
-                    replacement.add(expr);
-                }
-            }
-        }
+//        for (Variable var : call.def.parameters) {
+//            if (var.type().isRange()) {
+//                hasRangeParameter = true;
+//            }
+//        }
+//        if (hasRangeParameter) {
+//            // build a list of original -> replacement pairs
+//            ArrayList<Variable> original = new ArrayList<>();
+//            ArrayList<Expression> replacement = new ArrayList<>();
+//            for (int i = 0; i < call.def.parameters.size(); i++) {
+//                Variable var = call.def.parameters.get(i);
+//                Expression expr = call.args.get(i);
+//                DataType varType = var.type();
+//                if (varType.isRange()) {
+//                    Expression max = varType.maxValue;
+//                    // replace all
+//                    for(int j = 0; j < original.size(); j++) {
+//                        max = max.replace(original.get(j), replacement.get(j));
+//                    }
+////                    verifyBounds(varType, expr, max);
+//                } else {
+//                    if (!expr.isSimple()) {
+//                        continue;
+//                    }
+//                    original.add(var);
+//                    replacement.add(expr);
+//                }
+//            }
+//        }
         // cast
-        if (call.def.getFullName().name.equals("println")) {
-            // special case for now
-        } else {
-            if (call.def.parameters.size() > call.args.size()) {
-                syntaxError("Function '" + identifier + "' not found");
-            }
-            for (int i = 0; i < call.args.size(); i++) {
-                DataType targetType;
-                if (i >= call.def.parameters.size() - 1  && call.def.varArgs) {
-                    // last
-                    Variable var = call.def.parameters.get(call.def.parameters.size() - 1);
-                    targetType = var.type().baseType();
-                } else if (i >= call.def.parameters.size()) {
-                    syntaxError("Function '" + identifier + "' not found");
-                    targetType = DataType.INT_TYPE;
-                } else {
-                    Variable var = call.def.parameters.get(i);
-                    targetType = var.type();
-                }
-                Expression expr = call.args.get(i);
-                if (expr.type() == targetType) {
-                    continue;
-                }
-                if (expr.type() != null
-                        && (expr.type().isNumber() || expr.type().isFloatingPoint())
-                        && call.def.getFullName().name.equals(targetType.format())) {
-                    // explicit cast
-                    continue;
-                }
-                if (expr.type() != null && expr.type().equals(targetType)) {
-                    continue;
-                }
-                boolean isNotNull = false;
-                if (expr.type() != null && expr.type().isNullable()) {
-                    Solver.Rule r = new Solver.Rule();
-                    r.left = Operation.toSolverExpr(expr);
-                    if (r.left != null) {
-                        r.type = "<>";
-                        r.right = Solver.number(0);
-                        if (r != null && solver.isTrue(r)) {
-                            isNotNull = true;
-                        }
-                    }
-                }
-                Expression cast = program.cast(expr, isNotNull, targetType);
-                if (cast == null) {
-                    syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
-                }
-                call.args.set(i, cast);
-            }
-        }
-        if (call.exceptionType() != null) {
-            exceptionType = call.exceptionType();
-        }
+//        if (call.def.getFullName().name.equals("println")) {
+//            // special case for now
+//        } else {
+//            if (call.def.parameters.size() > call.args.size()) {
+//                syntaxError("Function '" + identifier + "' not found");
+//            }
+//            for (int i = 0; i < call.args.size(); i++) {
+//                DataType targetType;
+//                if (i >= call.def.parameters.size() - 1  && call.def.varArgs) {
+//                    // last
+//                    Variable var = call.def.parameters.get(call.def.parameters.size() - 1);
+//                    targetType = var.type().baseType();
+//                } else if (i >= call.def.parameters.size()) {
+//                    syntaxError("Function '" + identifier + "' not found");
+//                    targetType = DataType.INT_TYPE;
+//                } else {
+//                    Variable var = call.def.parameters.get(i);
+//                    targetType = var.type();
+//                }
+//                Expression expr = call.args.get(i);
+//                if (expr.type() == targetType) {
+//                    continue;
+//                }
+//                if (expr.type() != null
+//                        && (expr.type().isNumber() || expr.type().isFloatingPoint())
+//                        && call.def.getFullName().name.equals(targetType.format())) {
+//                    // explicit cast
+//                    continue;
+//                }
+//                if (expr.type() != null && expr.type().equals(targetType)) {
+//                    continue;
+//                }
+//                boolean isNotNull = false;
+//                if (expr.type() != null && expr.type().isNullable()) {
+//                    Solver.Rule r = new Solver.Rule();
+//                    r.left = Operation.toSolverExpr(expr);
+//                    if (r.left != null) {
+//                        r.type = "<>";
+//                        r.right = Solver.number(0);
+//                        if (r != null && solver.isTrue(r)) {
+//                            isNotNull = true;
+//                        }
+//                    }
+//                }
+//                Expression cast = program.cast(expr, isNotNull, targetType);
+//                if (cast == null) {
+//                    syntaxError("Need explicit cast for " + expr.type().format() + " to " + targetType.format());
+//                }
+//                call.args.set(i, cast);
+//            }
+//        }
+//        if (call.exceptionType() != null) {
+//            exceptionType = call.exceptionType();
+//        }
         // owned variables are now null
-        call.setBounds(solver, depth, false);
+//        call.setBounds(solver, depth, false);
 
-        if (call.def.macro) {
+//        if (call.def.macro) {
+//
+//            ArrayList<Variable> params = new ArrayList<>();
+//            ArrayList<Expression> args = new ArrayList<>();
+//
+//            int argCount = call.args.size();
+//            for (int i = 0; i < argCount; i++) {
+//                if (i == 0 && call.def.callType != null) {
+//                    // don't expand "this"
+//                    continue;
+//                }
+//                Expression p = call.args.get(i);
+//                Variable var = call.def.parameters.get(i);
+//                Variable lineVar = new Variable(var.name() + ".line", DataType.INT_TYPE);
+//                params.add(lineVar);
+//                args.add(NumberValue.valueOf(SourceFile.getLine(text, posOffset)));
+//                DataType strType = DataType.I8_TYPE.arrayType();
+//                Variable moduleVar = new Variable(var.name() + ".module", strType);
+//                String m = this.module;
+//                if (m == null) {
+//                    m = "";
+//                }
+//                StringLiteral moduleValue = StringLiteral.buildStringLiteral(m, strType, program);
+//                params.add(moduleVar);
+//                args.add(moduleValue);
+//                Variable sourceVar = new Variable(var.name() + ".source", strType);
+//                StringLiteral sourceValue = StringLiteral.buildStringLiteral(p.format(), strType, program);
+//                params.add(sourceVar);
+//                args.add(sourceValue);
+//                Variable astVar = new Variable(var.name() + ".ast", strType);
+//                StringLiteral astValue = StringLiteral.buildStringLiteral(p.toAST(), strType, program);
+//                params.add(astVar);
+//                args.add(astValue);
+//                List<Variable> vars = p.getVariables();
+//                // deduplicate
+//                vars = new ArrayList<>(new HashSet<Variable>(vars));
+//                vars.sort(new Comparator<Variable>() {
+//                    @Override
+//                    public int compare(Variable o1, Variable o2) {
+//                        return o1.name().compareTo(o2.name());
+//                    }
+//                });
+//                ArrayList<Expression> valueList = new ArrayList<>();
+//                for (Variable v : vars) {
+//                    if (v.name().equals("it")) {
+//                        continue;
+//                    }
+//                    Expression e = program.cast(v, false, strType);
+//                    valueList.add(StringLiteral.buildStringLiteral(v.name(), strType, program));
+//                    if (e == null) {
+//                        valueList.add(StringLiteral.buildStringLiteral("?", strType, program));
+//                    } else {
+//                        valueList.add(e);
+//                    }
+//                }
+//                Variable varsVar = new Variable(var.name() + ".values", strType);
+//                Expression varExpr;
+//                if (valueList.isEmpty()) {
+//                    varExpr = StringLiteral.buildStringLiteral("", strType, program);
+//                } else {
+//                    String join = "appendValue";
+//                    FunctionDefinition append = program.getFunctionIfExists(null, "org.bau.Std", join, 2);
+//                    // append(append(append(append(null, a), b), c))
+//                    // that way, the append function could double the array size when needed,
+//                    // store the length at the end, and in the last call truncate;
+//                    // and in this way, use O(n) instead of O(n^2) time
+//                    if (append != null) {
+//                        Expression last = StringLiteral.buildStringLiteral("", strType, program);
+//                        valueList.add(last);
+//                        while (valueList.size() > 0) {
+//                            Expression a = valueList.remove(0);
+//                            Call appendCall = new Call();
+//                            appendCall.def = append;
+//                            appendCall.args.add(last);
+//                            appendCall.args.add(a);
+//                            last = appendCall;
+//                        }
+//                        valueList.add(last);
+//                    }
+//                    varExpr = valueList.get(0);
+//                }
+//                params.add(varsVar);
+//                args.add(varExpr);
+//                // needs to be done at the very end at the end,
+//                // otherwise fields are not expanded
+//                params.add(var);
+//                args.add(p);
+//            }
+//            type = call.def.returnType;
+//            TernaryExpression result = expandMacro(call, call.def, type, params, args);
+////            functionContext.rewindStack(stackPos);
+//            return result;
+//        }
 
-            ArrayList<Variable> params = new ArrayList<>();
-            ArrayList<Expression> args = new ArrayList<>();
-
-            int argCount = call.args.size();
-            for (int i = 0; i < argCount; i++) {
-                if (i == 0 && call.def.callType != null) {
-                    // don't expand "this"
-                    continue;
-                }
-                Expression p = call.args.get(i);
-                Variable var = call.def.parameters.get(i);
-                Variable lineVar = new Variable(var.name() + ".line", DataType.INT_TYPE);
-                params.add(lineVar);
-                args.add(NumberValue.valueOf(SourceFile.getLine(text, posOffset)));
-                DataType strType = DataType.I8_TYPE.arrayType();
-                Variable moduleVar = new Variable(var.name() + ".module", strType);
-                String m = this.module;
-                if (m == null) {
-                    m = "";
-                }
-                StringLiteral moduleValue = StringLiteral.buildStringLiteral(m, strType, program);
-                params.add(moduleVar);
-                args.add(moduleValue);
-                Variable sourceVar = new Variable(var.name() + ".source", strType);
-                StringLiteral sourceValue = StringLiteral.buildStringLiteral(p.format(), strType, program);
-                params.add(sourceVar);
-                args.add(sourceValue);
-                Variable astVar = new Variable(var.name() + ".ast", strType);
-                StringLiteral astValue = StringLiteral.buildStringLiteral(p.toAST(), strType, program);
-                params.add(astVar);
-                args.add(astValue);
-                List<Variable> vars = p.getVariables();
-                // deduplicate
-                vars = new ArrayList<>(new HashSet<Variable>(vars));
-                vars.sort(new Comparator<Variable>() {
-                    @Override
-                    public int compare(Variable o1, Variable o2) {
-                        return o1.name().compareTo(o2.name());
-                    }
-                });
-                ArrayList<Expression> valueList = new ArrayList<>();
-                for (Variable v : vars) {
-                    if (v.name().equals("it")) {
-                        continue;
-                    }
-                    Expression e = program.cast(v, false, strType);
-                    valueList.add(StringLiteral.buildStringLiteral(v.name(), strType, program));
-                    if (e == null) {
-                        valueList.add(StringLiteral.buildStringLiteral("?", strType, program));
-                    } else {
-                        valueList.add(e);
-                    }
-                }
-                Variable varsVar = new Variable(var.name() + ".values", strType);
-                Expression varExpr;
-                if (valueList.isEmpty()) {
-                    varExpr = StringLiteral.buildStringLiteral("", strType, program);
-                } else {
-                    String join = "appendValue";
-                    FunctionDefinition append = program.getFunctionIfExists(null, "org.bau.Std", join, 2);
-                    // append(append(append(append(null, a), b), c))
-                    // that way, the append function could double the array size when needed,
-                    // store the length at the end, and in the last call truncate;
-                    // and in this way, use O(n) instead of O(n^2) time
-                    if (append != null) {
-                        Expression last = StringLiteral.buildStringLiteral("", strType, program);
-                        valueList.add(last);
-                        while (valueList.size() > 0) {
-                            Expression a = valueList.remove(0);
-                            Call appendCall = new Call();
-                            appendCall.def = append;
-                            appendCall.args.add(last);
-                            appendCall.args.add(a);
-                            last = appendCall;
-                        }
-                        valueList.add(last);
-                    }
-                    varExpr = valueList.get(0);
-                }
-                params.add(varsVar);
-                args.add(varExpr);
-                // needs to be done at the very end at the end,
-                // otherwise fields are not expanded
-                params.add(var);
-                args.add(p);
-            }
-            type = call.def.returnType;
-            TernaryExpression result = expandMacro(call, call.def, type, params, args);
-            functionContext.rewindStack(stackPos);
-            return result;
-        }
-
-        functionContext.rewindStack(stackPos);
+//        functionContext.rewindStack(stackPos);
 
         return call;
     }
@@ -2459,40 +2409,40 @@ public class Parser {
         if (currentFunctionDefinition.returnType == null) {
             syntaxError("The function declared to not return a value");
         }
-        if (!b.expr.isSimple()) {
-            // this is converted to "_r", but we can not use "_r" internally
-            // because this can conflict with user-defined variable names.
-            // user defined names can not start with a number
-            // (same as "0t")
-            String constId = "0r" + nextConstantId++;
-            Assignment ret = new Assignment();
-            ret.initial = true;
-            ret.isConstant = true;
-            DataType type = b.expr.type();
-            if (type == null) {
-                syntaxError("No type");
-            }
-            Variable var = Variable.newInternal(constId, type);
-            ret.leftValue = var;
-            ret.type = b.expr.type();
-            ret.value = b.expr;
-            b.expr = ret.leftValue;
-            target.add(ret);
-        }
-        DataType type = currentFunctionDefinition.returnType;
-        if (!areTypesCompatible(b.expr, type)) {
-            Expression e2 = program.cast(b.expr, false, type);
-            if (e2 != null) {
-                b.expr = e2;
-            } else {
-                syntaxError("Incompatible types: " + b.expr.type().format() + "; required: " + currentFunctionDefinition.returnType.format());
-            }
-        }
-        if (type.isTrait() && b.expr.type().implementsTrait(type)) {
-            b.expr = new Cast(b.expr, type);
-        }
-        verifyBounds(currentFunctionDefinition.returnType, b.expr);
-        b.autoClose = autoClose(stackPosFunction, b.expr);
+//        if (!b.expr.isSimple()) {
+//            // this is converted to "_r", but we can not use "_r" internally
+//            // because this can conflict with user-defined variable names.
+//            // user defined names can not start with a number
+//            // (same as "0t")
+//            String constId = "0r" + nextConstantId++;
+//            Assignment ret = new Assignment();
+//            ret.initial = true;
+//            ret.isConstant = true;
+//            DataType type = DataType.UNKNOWN; // b.expr.type();
+////            if (type == null) {
+////                syntaxError("No type");
+////            }
+//            Variable var = Variable.newInternal(constId, type);
+//            ret.leftValue = var;
+//            ret.type = b.expr.type();
+//            ret.value = b.expr;
+//            b.expr = ret.leftValue;
+//            target.add(ret);
+//        }
+//        DataType type = currentFunctionDefinition.returnType;
+//        if (!areTypesCompatible(b.expr, type)) {
+//            Expression e2 = program.cast(b.expr, false, type);
+//            if (e2 != null) {
+//                b.expr = e2;
+//            } else {
+//                syntaxError("Incompatible types: " + b.expr.type().format() + "; required: " + currentFunctionDefinition.returnType.format());
+//            }
+//        }
+//        if (type.isTrait() && b.expr.type().implementsTrait(type)) {
+//            b.expr = new Cast(b.expr, type);
+//        }
+//        verifyBounds(currentFunctionDefinition.returnType, b.expr);
+//        b.autoClose = autoClose(stackPosFunction, b.expr);
         negateLastBlockCondition();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
@@ -2501,81 +2451,81 @@ public class Parser {
         syntaxError("Expected end of statement, got '" + token + "' in 'return' statement");
     }
 
-    private boolean areTypesCompatible(Expression expr, DataType assignToType) {
-        DataType exprType = expr.type();
-        if (exprType == null) {
-            // unknown (eg. "null")
-            expr = assignToType.nullExpression();
-            exprType = assignToType.orNull();
-        }
-        // TODO use this function everywhere where it makes sense
-        if (exprType.equals(assignToType)) {
-            return true;
-        }
-        if (exprType.isNumber() || assignToType.isNumber()) {
-            if (expr.format().equals("0") && (assignToType.isCopyType() || assignToType.isNullable())) {
-                // setting 0 to a nullable variable or value type is ok
-                return true;
-            }
-            if (!exprType.isNumber() || !assignToType.isNumber()) {
-                return false;
-            }
-            if (!exprType.isRange() && assignToType.isRange()) {
-                // verified via bounds check
-                return true;
-            }
-            if (exprType.isRange() && !assignToType.isRange()) {
-                return true;
-            }
-            if (!exprType.isRange() && assignToType.isRange()) {
-                return false;
-            }
-            if (exprType.isFloatingPoint() && !assignToType.isFloatingPoint()) {
-                // syntaxError("The expression is floating point, but the variable is not.");
-                // TODO there are many more cases that are not allowed
-                return false;
-            }
-            return true;
-        }
-        if (exprType == null || assignToType == null) {
-            return exprType == assignToType;
-        }
-        if (exprType == assignToType || exprType.equals(assignToType)) {
-            return true;
-        }
-        if (exprType.isArray() != assignToType.isArray()) {
-            return false;
-        }
-        if (exprType.isArray()) {
-            return exprType.equals(assignToType);
-        }
-        if (exprType.isNullable() == assignToType.isNullable()) {
-            return exprType.equals(assignToType);
-        } else if (exprType.isNullable() && !assignToType.isNullable()) {
-            verifyNullAccess(expr);
-            return exprType.equals(assignToType.orNull());
-        } else if (!exprType.isNullable() && assignToType.isNullable()) {
-            assignToType = assignToType.notNullType();
-        }
-        if (exprType.equals(assignToType)) {
-            return true;
-        }
-        if (exprType.implementsTrait(assignToType)) {
-            return true;
-        }
-        return false;
-    }
+//    private boolean areTypesCompatible(Expression expr, DataType assignToType) {
+//        DataType exprType = expr.type();
+//        if (exprType == null) {
+//            // unknown (eg. "null")
+//            expr = assignToType.nullExpression();
+//            exprType = assignToType.orNull();
+//        }
+//        // TODO use this function everywhere where it makes sense
+//        if (exprType.equals(assignToType)) {
+//            return true;
+//        }
+//        if (exprType.isNumber() || assignToType.isNumber()) {
+//            if (expr.format().equals("0") && (assignToType.isCopyType() || assignToType.isNullable())) {
+//                // setting 0 to a nullable variable or value type is ok
+//                return true;
+//            }
+//            if (!exprType.isNumber() || !assignToType.isNumber()) {
+//                return false;
+//            }
+//            if (!exprType.isRange() && assignToType.isRange()) {
+//                // verified via bounds check
+//                return true;
+//            }
+//            if (exprType.isRange() && !assignToType.isRange()) {
+//                return true;
+//            }
+//            if (!exprType.isRange() && assignToType.isRange()) {
+//                return false;
+//            }
+//            if (exprType.isFloatingPoint() && !assignToType.isFloatingPoint()) {
+//                // syntaxError("The expression is floating point, but the variable is not.");
+//                // TODO there are many more cases that are not allowed
+//                return false;
+//            }
+//            return true;
+//        }
+//        if (exprType == null || assignToType == null) {
+//            return exprType == assignToType;
+//        }
+//        if (exprType == assignToType || exprType.equals(assignToType)) {
+//            return true;
+//        }
+//        if (exprType.isArray() != assignToType.isArray()) {
+//            return false;
+//        }
+//        if (exprType.isArray()) {
+//            return exprType.equals(assignToType);
+//        }
+//        if (exprType.isNullable() == assignToType.isNullable()) {
+//            return exprType.equals(assignToType);
+//        } else if (exprType.isNullable() && !assignToType.isNullable()) {
+////            verifyNullAccess(expr);
+//            return exprType.equals(assignToType.orNull());
+//        } else if (!exprType.isNullable() && assignToType.isNullable()) {
+//            assignToType = assignToType.notNullType();
+//        }
+//        if (exprType.equals(assignToType)) {
+//            return true;
+//        }
+//        if (exprType.implementsTrait(assignToType)) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     private void parseCatch(ArrayList<Statement> target) {
         int catchIndent = indent;
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         Catch catchStat = new Catch();
         String id = readIdentifier();
         Variable var = new Variable(id, exceptionType);
         if (exceptionType == null) {
             syntaxError("Exception type is not known");
         }
-        functionContext.addVariable(var);
+//        functionContext.addVariable(var);
         catchStat.var = var;
         boolean sameLine;
         if (matchOp("\n")) {
@@ -2598,8 +2548,8 @@ public class Parser {
             }
             parseStatement(catchStat.list);
         }
-        catchStat.autoClose(autoClose(stackPos, null));
-        functionContext.rewindStack(stackPos);
+//        catchStat.autoClose(autoClose(stackPos, null));
+//        functionContext.rewindStack(stackPos);
         target.add(catchStat);
     }
 
@@ -2627,9 +2577,9 @@ public class Parser {
     }
 
     private void parseBreak(ArrayList<Statement> target) {
-        if (currentLoop == null) {
-            syntaxError("'break' statement outside of a loop");
-        }
+//        if (currentLoop == null) {
+//            syntaxError("'break' statement outside of a loop");
+//        }
         Break b = new Break();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
@@ -2638,7 +2588,7 @@ public class Parser {
         }
         b.condition = parseCondition(target);
         setBlockCondition(b.condition, false, true);
-        b.autoClose = autoClose(stackPosLoop, null);
+//        b.autoClose = autoClose(stackPosLoop, null);
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
             return;
@@ -2647,9 +2597,9 @@ public class Parser {
     }
 
     private void parseContinue(ArrayList<Statement> target) {
-        if (currentLoop == null) {
-            syntaxError("'continue' statement outside of a loop");
-        }
+//        if (currentLoop == null) {
+//            syntaxError("'continue' statement outside of a loop");
+//        }
         Continue c = new Continue();
         if (matchOp("\n") || matchOp(";")) {
             target.add(c);
@@ -2657,10 +2607,10 @@ public class Parser {
             return;
         }
         c.condition = parseCondition(target);
-        c.loop = currentLoop;
+//        c.loop = currentLoop;
         setBlockCondition(c.condition, false, true);
 
-        c.autoClose = autoClose(stackPosLoop, null);
+//        c.autoClose = autoClose(stackPosLoop, null);
         if (matchOp("\n") || matchOp(";")) {
             target.add(c);
             return;
@@ -2691,7 +2641,7 @@ public class Parser {
     private Expression parseCondition(ArrayList<Statement> target) {
         Expression expr = parseExpression(target);
         if (expr.type().isNullable()) {
-            return Operation.buildAndOptimize(expr, "<>", new NullValue(expr.type()));
+            return new Operation(expr, "<>", new NullValue(expr.type()));
         }
         return expr;
     }
@@ -2700,10 +2650,11 @@ public class Parser {
         int switchIndent = indent;
         If ifStatement = new If();
         If topIfStatement = ifStatement;
-        Expression switchExpr = assignTempVariable(target, parseExpression());
+        Expression switchExpr = parseExpression();
+//        Expression switchExpr = assignTempVariable(target, parseExpression());
 
         boolean elsePart = false;
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         boolean first = true;
         if (!matchOp("\n")) {
             syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
@@ -2713,11 +2664,11 @@ public class Parser {
                 Expression condition = null;
                 while (true) {
                     Expression caseExpr = parseExpression();
-                    Expression cond = Operation.buildAndOptimize(switchExpr, "==", caseExpr);
+                    Expression cond = new Operation(switchExpr, "==", caseExpr);
                     if (condition == null) {
                         condition = cond;
                     } else {
-                        condition = Operation.buildAndOptimize(condition, "or", cond);
+                        condition = new Operation(condition, "or", cond);
                     }
                     if (!matchOp(",")) {
                         break;
@@ -2761,14 +2712,14 @@ public class Parser {
                 }
                 parseStatement(list);
             }
-            if (!elsePart) {
-                ifStatement.thenList = list;
-                ifStatement.thenAutoClose = autoClose(stackPos, null);
-            } else {
-                ifStatement.elseList = list;
-                ifStatement.elseAutoClose = autoClose(stackPos, null);
-            }
-            functionContext.rewindStack(stackPos);
+//            if (!elsePart) {
+//                ifStatement.thenList = list;
+//                ifStatement.thenAutoClose = autoClose(stackPos, null);
+//            } else {
+//                ifStatement.elseList = list;
+//                ifStatement.elseAutoClose = autoClose(stackPos, null);
+//            }
+//            functionContext.rewindStack(stackPos);
             if (elsePart) {
                 break;
             }
@@ -2788,7 +2739,7 @@ public class Parser {
         startBlock(false, condition);
         ifStatement.condition = condition;
         boolean elsePart = false;
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         while (true) {
             if (matchOp("\n")) {
                 sameLine = false;
@@ -2816,12 +2767,12 @@ public class Parser {
                 }
                 parseStatement(list);
             }
-            if (ifStatement.thenAutoClose == null) {
-                ifStatement.thenAutoClose = autoClose(stackPos, null);
-            } else {
-                ifStatement.elseAutoClose = autoClose(stackPos, null);
-            }
-            functionContext.rewindStack(stackPos);
+//            if (ifStatement.thenAutoClose == null) {
+//                ifStatement.thenAutoClose = autoClose(stackPos, null);
+//            } else {
+//                ifStatement.elseAutoClose = autoClose(stackPos, null);
+//            }
+//            functionContext.rewindStack(stackPos);
             if (elsePart) {
                 break;
             }
@@ -2902,9 +2853,9 @@ public class Parser {
         if (functionDef.exceptionType != null) {
             syntaxError("The function in the 'for' statement may not throw an exception sorry");
         }
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         int oldStackPosLoop = stackPosLoop;
-        stackPosLoop = stackPos;
+//        stackPosLoop = stackPos;
         Loop outerLoop = new Loop();
 
         ArrayList<Variable> oldArgs = new ArrayList<>();
@@ -2921,7 +2872,7 @@ public class Parser {
             // TODO hack: replace maxValue for loops over arrays
             type.maxValue = call.args.get(0);
         }
-        Operation comp = Operation.buildAndOptimize(
+        Operation comp = new Operation(
                 NumberValue.valueOf(1),
                 "==",
                 NumberValue.valueOf(1)
@@ -2931,7 +2882,7 @@ public class Parser {
         if (var.type().isRange()) {
             setRangeBounds(var);
         }
-        functionContext.addVariable(var);
+//        functionContext.addVariable(var);
         ArrayList<Statement> loopFunctionList = new ArrayList<>();
         loopFunctionList.addAll(functionDef.list);
 
@@ -2949,11 +2900,11 @@ public class Parser {
         if (localVars.size() != 0) {
             ArrayList<Statement> list = loopFunctionList;
             ArrayList<Variable> v2 = new ArrayList<>();
-            for (Variable old : localVars) {
-                Variable v = Variable.newInternal("0t" + functionContext.nextTempVariableId(), old.type());
-                functionContext.addVariable(v);
-                v2.add(v);
-            }
+//            for (Variable old : localVars) {
+//                Variable v = Variable.newInternal("0t" + functionContext.nextTempVariableId(), old.type());
+//                functionContext.addVariable(v);
+//                v2.add(v);
+//            }
             for (int j = 0; j < localVars.size(); j++) {
                 for (int i = 0; i < list.size(); i++) {
                     Statement s = list.get(i);
@@ -2996,7 +2947,7 @@ public class Parser {
             if (stat instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
                 Assignment a = ((Assignment) stat);
-                a.cloneVariable(this);
+//                a.cloneVariable(this);
             }
         }
         startBlock(true, comp);
@@ -3010,7 +2961,7 @@ public class Parser {
             if (s instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
                 Assignment a = ((Assignment) s);
-                a.cloneVariable(this);
+//                a.cloneVariable(this);
             }
             if (s instanceof Loop) {
                 Loop w = (Loop) s;
@@ -3023,8 +2974,8 @@ public class Parser {
             s.setBounds(solver, depth, true);
             outerLoop.list.add(s);
         }
-        Loop oldLoop = currentLoop;
-        currentLoop = loop;
+//        Loop oldLoop = currentLoop;
+//        currentLoop = loop;
         startBlock(true, loop.condition);
         int j = 0;
         for (; j < whileLoop.size(); j++) {
@@ -3039,7 +2990,7 @@ public class Parser {
             }
             if (s instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
-                ((Assignment) s).cloneVariable(this);
+//                ((Assignment) s).cloneVariable(this);
             }
             s.setBounds(solver, depth, true);
             loop.list.add(s);
@@ -3071,18 +3022,18 @@ public class Parser {
             for (int k = 0; k < oldArgs.size(); k++) {
                 s = s.replace(oldArgs.get(k), newArgs.get(k));
             }
-            if (s instanceof Break) {
-                ((Break) s).autoClose = autoClose(stackPosLoop, null);
-            } else if (s instanceof Continue) {
-                ((Continue) s).autoClose = autoClose(stackPosLoop, null);
-            }
+//            if (s instanceof Break) {
+//                ((Break) s).autoClose = autoClose(stackPosLoop, null);
+//            } else if (s instanceof Continue) {
+//                ((Continue) s).autoClose = autoClose(stackPosLoop, null);
+//            }
             s.setBounds(solver, depth, true);
             if (loop.listContinue.isEmpty()) {
                 loop.listContinue.add(new PhiBlock());
             }
             if (s instanceof Assignment) {
                 // need to make sure we have our own copy of all variables,
-                ((Assignment) s).cloneVariable(this);
+//                ((Assignment) s).cloneVariable(this);
             }
             loop.listContinue.add(s);
         }
@@ -3095,11 +3046,11 @@ public class Parser {
             outerLoop.list.add(s);
         }
         outerLoop.list.add(new Break());
-        loop.autoClose(autoClose(stackPos, null));
-        functionContext.rewindStack(stackPos);
+//        loop.autoClose(autoClose(stackPos, null));
+//        functionContext.rewindStack(stackPos);
         endBlock();
         stackPosLoop = oldStackPosLoop;
-        currentLoop = oldLoop;
+//        currentLoop = oldLoop;
         if (wrappingIf == null) {
             target.add(new PhiBlock());
             target.add(outerLoop);
@@ -3159,9 +3110,9 @@ public class Parser {
 
     private void parseLoop(ArrayList<Statement> target) {
         int loopIndent = indent;
-        Loop oldLoop = currentLoop;
+//        Loop oldLoop = currentLoop;
         Loop loop = new Loop();
-        currentLoop = loop;
+//        currentLoop = loop;
         if (type == TokenType.OPERATOR && ("\n".equals(token) || "{".equals(token))) {
             loop.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
         } else {
@@ -3171,9 +3122,9 @@ public class Parser {
         if (!loop.list.isEmpty()) {
             // we need to make it an endless loop with a break condition
             Break b = new Break();
-            b.condition = Operation.buildAndOptimize(null, "not", loop.condition);
+            b.condition = new Operation(null, "not", loop.condition);
             loop.list.add(b);
-            loop.condition = Operation.buildAndOptimize(
+            loop.condition = new Operation(
                     NumberValue.valueOf(1),
                     "==",
                     NumberValue.valueOf(1)
@@ -3188,9 +3139,9 @@ public class Parser {
             syntaxError("Expected end of statement, got '"+token+"' in 'while' statement");
             sameLine = false;
         }
-        int stackPos = functionContext.getStackPos();
+//        int stackPos = functionContext.getStackPos();
         int oldStackPosLoop = stackPosLoop;
-        stackPosLoop = stackPos;
+//        stackPosLoop = stackPos;
         while (true) {
             if (sameLine) {
                 if (matchOp("}")) {
@@ -3203,11 +3154,11 @@ public class Parser {
             }
             parseStatement(loop.list);
         }
-        loop.autoClose(autoClose(stackPos, null));
-        functionContext.rewindStack(stackPos);
+//        loop.autoClose(autoClose(stackPos, null));
+//        functionContext.rewindStack(stackPos);
         stackPosLoop = oldStackPosLoop;
         endBlock();
-        currentLoop = oldLoop;
+//        currentLoop = oldLoop;
         // before the loop (we jump here from the end of the loop)
         target.add(new PhiBlock());
         target.add(loop);
@@ -3215,34 +3166,34 @@ public class Parser {
         target.add(new PhiBlock());
     }
 
-    private List<Statement> autoClose(int stackPos, Expression except) {
-        ArrayList<Statement> autoClose = new ArrayList<Statement>();
-        if (functionContext.getStackCloseDifference(stackPos) == 0) {
-            return autoClose;
-        }
-        ArrayList<String> list = functionContext.newVariablesList(stackPos);
-        String exceptString = except == null ? "" : except.format();
-        for (String name : list) {
-            // do not close if we return it
-            if (name.equals(exceptString)) {
-                continue;
-            }
-            Variable var = functionContext.getVariable(null, name);
-            if (var == null) {
-                syntaxError("Variable not found: '" + name + "'");
-            }
-            if (var.type().needFree()) {
-                Free free = new Free(var);
-                autoClose.add(free);
-            }
-        }
-        Collections.reverse(autoClose);
-        return autoClose;
-    }
+//    private List<Statement> autoClose(int stackPos, Expression except) {
+//        ArrayList<Statement> autoClose = new ArrayList<Statement>();
+//        if (functionContext.getStackCloseDifference(stackPos) == 0) {
+//            return autoClose;
+//        }
+//        ArrayList<String> list = functionContext.newVariablesList(stackPos);
+//        String exceptString = except == null ? "" : except.format();
+//        for (String name : list) {
+//            // do not close if we return it
+//            if (name.equals(exceptString)) {
+//                continue;
+//            }
+//            Variable var = functionContext.getVariable(null, name);
+//            if (var == null) {
+//                syntaxError("Variable not found: '" + name + "'");
+//            }
+//            if (var.type().needFree()) {
+//                Free free = new Free(var);
+//                autoClose.add(free);
+//            }
+//        }
+//        Collections.reverse(autoClose);
+//        return autoClose;
+//    }
 
     private Expression parseExpression(ArrayList<Statement> target) {
         try {
-            return parseExpression().writeStatements(this, false, target);
+            return parseExpression(); // .writeStatements(this, false, target);
         } catch (IllegalStateException e) {
             syntaxError(e.getMessage());
             return NumberValue.ZERO;
@@ -3251,16 +3202,16 @@ public class Parser {
 
     private Expression parseExpression() {
         Expression expr = parseExpression(parseExpressionPrimary(), 1);
-        if (expr.type() == null) {
+//        if (expr.type() == null) {
             // null
-            return expr;
-        }
-        if (expr.type().isNumber() && !(expr instanceof NumberValue)) {
-            Value v = eval(expr, true);
-            if (v != null) {
-                return new NumberValue(v, expr.type(), false);
-            }
-        }
+//            return expr;
+//        }
+//        if (expr.type().isNumber() && !(expr instanceof NumberValue)) {
+//            Value v = eval(expr, true);
+//            if (v != null) {
+//                return new NumberValue(v, expr.type(), false);
+//            }
+//        }
         return expr;
     }
 
@@ -3279,15 +3230,15 @@ public class Parser {
 
     private Expression parseExpressionPrimary() {
         if (matchOp("-")) {
-            Operation op = Operation.buildAndOptimize(null, "-", parseExpressionPrimary());
+            Operation op = new Operation(null, "-", parseExpressionPrimary());
             return op;
         } else if (matchOp("+")) {
             return parseExpressionPrimary();
         } else if (matchOp("~")) {
-            Operation op = Operation.buildAndOptimize(null, "~", parseExpressionPrimary());
+            Operation op = new Operation(null, "~", parseExpressionPrimary());
             return op;
         } else if (match("not")) {
-            Operation op = Operation.buildAndOptimize(null, "not", parseExpressionPrimary());
+            Operation op = new Operation(null, "not", parseExpressionPrimary());
             return op;
         } else if (type == TokenType.INTEGER) {
             String n = token;
@@ -3338,7 +3289,7 @@ public class Parser {
                 read();
                 return new NullValue(null);
             }
-            Variable thisVar = functionContext.getVariable(null, "this");
+//            Variable thisVar = functionContext.getVariable(null, "this");
             String m = null;
             if ("ord".equals(n)
                     || "appendValue".equals(n)
@@ -3356,57 +3307,71 @@ public class Parser {
                     // no function with this name, and
                     // no this.field with this name,
                     // then it could be a fully qualified module name
-                    if (functionContext.getVariable(null, n) == null &&
-                            functionContext.getType(m, n) == null &&
-                            (thisVar == null || thisVar.type().getFieldDataType(n) == null)) {
-                        while (matchOp(".")) {
-                            m = m == module ? n : m + "." + n;
-                            n = readIdentifier();
-                        }
-                        String m2 = program.getImport(module, m);
-                        if (m2 != null) {
-                            m = m2;
-                        }
-                    }
+//                    if (functionContext.getVariable(null, n) == null &&
+//                            functionContext.getType(m, n) == null &&
+//                            (thisVar == null || thisVar.type().getFieldDataType(n) == null)) {
+//                        while (matchOp(".")) {
+//                            m = m == module ? n : m + "." + n;
+//                            n = readIdentifier();
+//                        }
+//                        String m2 = program.getImport(module, m);
+//                        if (m2 != null) {
+//                            m = m2;
+//                        }
+//                    }
                 }
             }
-            DataType dataType = functionContext.getType(m, n);
-            if (dataType != null && dataType.enumValues != null) {
-                // enums are processed when when evaluating types
-            } else if (dataType != null) {
-                if (dataType.template != null) {
-                    ArrayList<DataType> params = parseTypeParameters(dataType, false);
-                    // if templates can be returned, then
-                    // we must not replace the types
-                    dataType = parseTemplatedType(dataType, params);
-                    // the name of the constructor includes the type names
-                    n = dataType.name();
-                }
-                if (matchOp("[")) {
-                    Expression arrayLength = parseExpression();
-                    if (arrayLength.canThrowException() != null) {
-                        syntaxError("May not throw an exception here");
-                    }
-                    if (!matchOp("]")) {
-                        syntaxError("Expected ')', got '" + token + "' in constructor");
-                    }
-                    New newExpr = new New(dataType.arrayType(), arrayLength);
-                    return newExpr;
-                }
-                if (matchOp("(")) {
-                    matchOp("\n");
-                    Call call = new Call();
-                    Expression expr = parseCall(null, m, n, call, true);
-                    return expr;
-                } else {
-                    syntaxError("Expected '(' to call the constructor");
-                }
-            }
+            int test;
+//            DataType dataType = functionContext.getType(m, n);
+//            if (dataType != null && dataType.enumValues != null) {
+////                int todoEnumValuesAreInitiallyFields;
+////                DataType enumType = functionContext.getType(m, n);
+////                read();
+////                if (matchOp(".")) {
+////                    syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
+////                }
+////                String val = readIdentifier();
+////                Long value = enumType.enumValues.get(val);
+////                if (value == null) {
+////                    syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
+////                }
+////                Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
+////                return expr;
+//            } else if (dataType != null) {
+//                if (dataType.template != null) {
+//                    int test2;
+//                    ArrayList<DataType> params = parseTypeParameters(dataType, false);
+//                    // if templates can be returned, then
+//                    // we must not replace the types
+//                    dataType = parseTemplatedType(dataType, params);
+//                    // the name of the constructor includes the type names
+//                    n = dataType.name();
+//                }
+//                if (matchOp("[")) {
+//                    Expression arrayLength = parseExpression();
+//                    if (arrayLength.canThrowException() != null) {
+//                        syntaxError("May not throw an exception here");
+//                    }
+//                    if (!matchOp("]")) {
+//                        syntaxError("Expected ')', got '" + token + "' in constructor");
+//                    }
+//                    New newExpr = new New(dataType.arrayType(), arrayLength);
+//                    return newExpr;
+//                }
+//                if (matchOp("(")) {
+//                    matchOp("\n");
+//                    Call call = new Call();
+//                    Expression expr = parseCall(null, m, n, call, true);
+//                    return expr;
+//                } else {
+//                    syntaxError("Expected '(' to call the constructor");
+//                }
+//            }
             if (matchOp("(")) {
                 matchOp("\n");
                 Call call = new Call();
                 Expression expr = parseCall(null, m, n, call, true);
-                Value val = eval(expr, true);
+//                Value val = eval(expr, true);
                 ArrayList<FunctionDefinition> toCompileFirst = new ArrayList<>(program.uncompiledFunctions.values());
                 if (!toCompileFirst.isEmpty()) {
                     // could not yet evaluate, because a function was not yet compiled
@@ -3417,72 +3382,74 @@ public class Parser {
                         if (def != latest) {
                             continue;
                         }
-                        if (def.code != null) {
-                            try {
-                                Parser p = new Parser(program, def.getFullName().module, def.format(), def.posOffset);
-                                p.scanPhase = false;
-                                p.read();
-                                p.parseFunctionDefinition(def.getFullName().module);
-                            } catch (IllegalStateException e) {
-                                syntaxError("Error parsing function: " + e.getMessage(), e);
-                            }
-                        }
+//                        if (def.code != null) {
+//                            try {
+//                                Parser2 p = new Parser2(program, def.getFullName().module, def.format(), def.posOffset);
+//                                p.scanPhase = false;
+//                                p.read();
+//                                p.parseFunctionDefinition(def.getFullName().module);
+//                            } catch (IllegalStateException e) {
+//                                syntaxError("Error parsing function: " + e.getMessage(), e);
+//                            }
+//                        }
                     }
                     // replace the definition
                     call.def = program.functions.get(call.def.getFunctionId());
                     // try again (but only once)
-                    val = eval(call, true);
+//                    val = eval(call, true);
                 }
-                if (val != null) {
-                    if (val instanceof ValueI8Array) {
-                        ValueI8Array str = (ValueI8Array) val;
-                        String s = str.toString();
-                        DataType type = DataType.I8_TYPE.arrayType();
-                        expr = StringLiteral.buildStringLiteral(s, type, program);
-                        return expr;
-                    } else if (val instanceof ValueArray) {
-                        if (call.type().baseType().isNumber()) {
-                            Variable var = new Variable("x", call.type());
-                            var.setConstantValue(val);
-                            long reference = program.addArrayConstant(var);
-                            return new ArrayConstant((ValueArray) val, expr.type(), reference);
-                        }
-                    } else if (val instanceof ValueRef) {
-                        // the memory is no longer available
-                    } else {
-                        return new NumberValue(val, expr.type(), false);
-                    }
-                }
+//                if (val != null) {
+//                    if (val instanceof ValueI8Array) {
+//                        ValueI8Array str = (ValueI8Array) val;
+//                        String s = str.toString();
+//                        DataType type = DataType.I8_TYPE.arrayType();
+//                        expr = StringLiteral.buildStringLiteral(s, type, program);
+//                        return expr;
+//                    } else if (val instanceof ValueArray) {
+//                        if (call.type().baseType().isNumber()) {
+//                            Variable var = new Variable("x", call.type());
+//                            var.setConstantValue(val);
+//                            long reference = program.addArrayConstant(var);
+//                            return new ArrayConstant((ValueArray) val, expr.type(), reference);
+//                        }
+//                    } else if (val instanceof ValueRef) {
+//                        // the memory is no longer available
+//                    } else {
+//                        return new NumberValue(val, expr.type(), false);
+//                    }
+//                }
                 return parsePossibleDot(expr);
             }
-            Expression var = functionContext.getVariable(m, n);
-            if (var == null) {
-                if (thisVar != null) {
-                    verifyNullAccess(thisVar);
-                    DataType thisType = thisVar.type();
-                    DataType type = thisType.getFieldDataType(n);
-                    if (type != null) {
-                        var = new FieldAccess(thisVar, n, false, type);
-                    }
-                }
-                FunctionDefinition def = functionContext.getFunctionIfExists("", n);
-                if (def == null) {
-                    def = functionContext.getFunctionIfExists(m, n);
-                }
-                if (def != null) {
-                    if (def.exceptionType != null) {
-                        syntaxError("Function throws an exception; this is not supported");
-                    }
-                    if (def.varArgs) {
-                        syntaxError("Function has a variable number of arguments; this is not supported");
-                    }
-                    FunctionPointer fp = new FunctionPointer(def);
-                    return fp;
-                }
-                if (var == null) {
-                    var = new Variable(n, DataType.UNKNOWN);
-                }
-            }
+//            Expression var = functionContext.getVariable(m, n);
+//            if (var == null) {
+//                if (thisVar != null) {
+//                    verifyNullAccess(thisVar);
+//                    DataType thisType = thisVar.type();
+//                    DataType type = thisType.getFieldDataType(n);
+//                    if (type != null) {
+//                        var = new FieldAccess(thisVar, n, false, type);
+//                    }
+//                }
+//
+//                int test3;
+//                FunctionDefinition def = functionContext.getFunctionIfExists("", n);
+//                if (def == null) {
+//                    def = functionContext.getFunctionIfExists(m, n);
+//                }
+//                if (def != null) {
+//                    if (def.exceptionType != null) {
+//                        syntaxError("Function throws an exception; this is not supported");
+//                    }
+//                    if (def.varArgs) {
+//                        syntaxError("Function has a variable number of arguments; this is not supported");
+//                    }
+//                    FunctionPointer fp = new FunctionPointer(def);
+//                    return fp;
+//                }
+//                if (var == null) {
+                    Variable var = new Variable(n, DataType.UNKNOWN);
+//                }
+//            }
             return parsePossibleDot(var);
         } else if (matchOp("(")) {
             matchOp("\n");
@@ -3498,26 +3465,27 @@ public class Parser {
     }
 
     private Expression parsePossibleDot(Expression v) {
-        DataType vt = v.type();
+        DataType vt = null; // v.type();
         while (true) {
             if (matchOp(".")) {
-                if (vt.isPointer()) {
-                    verifyNullAccess(v);
-                }
+//                if (vt.isPointer()) {
+//                    verifyNullAccess(v);
+//                }
                 matchOp("\n");
                 String f;
                 if (v instanceof Variable && type == TokenType.INTEGER) {
                     int index = Integer.parseInt(token);
                     read();
-                    String[] fieldNames = vt.getFieldNames();
-                    if (fieldNames.length == 0) {
-                        // no fields
-                        return v;
-                    } else if (index >= 0 && index < fieldNames.length) {
-                        f = fieldNames[index];
-                    } else {
-                        f = fieldNames[0];
-                    }
+                    f = "" + index;
+//                    String[] fieldNames = vt.getFieldNames();
+//                    if (fieldNames.length == 0) {
+//                        // no fields
+//                        return v;
+//                    } else if (index >= 0 && index < fieldNames.length) {
+//                        f = fieldNames[index];
+//                    } else {
+//                        f = fieldNames[0];
+//                    }
                 } else {
                     f = readIdentifier();
                 }
@@ -3526,52 +3494,61 @@ public class Parser {
                     Call call = new Call();
                     call.args.add(v);
                     v = parseCall(vt, module, f, call, true);
-                    vt = v.type();
+//                    vt = v.type();
                 } else {
-                    DataType type;
-                    if ("len".equals(f) && vt.isArray()) {
-                        type = DataType.I32_TYPE;
-                    } else {
-                        type = vt.getFieldDataType(f);
-                    }
-                    if (type == null) {
-                        if (currentFunctionDefinition != null
-                                && currentFunctionDefinition.macro) {
-                            if ("source".equals(f)) {
-                                type = DataType.I8_TYPE.arrayType();
-                            } else if ("ast".equals(f)) {
-                                type = DataType.I8_TYPE.arrayType();
-                            } else if ("values".equals(f)) {
-                                type = DataType.I8_TYPE.arrayType();
-                            } else if ("module".equals(f)) {
-                                type = DataType.I8_TYPE.arrayType();
-                            } else if ("line".equals(f)) {
-                                type = DataType.INT_TYPE;
-                            } else {
-                                syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
-                            }
-                        } else {
-                            type = DataType.UNKNOWN;
-                        }
-                    }
+                    DataType type = DataType.UNKNOWN;
+//                    if ("len".equals(f) && vt.isArray()) {
+//                        type = DataType.I32_TYPE;
+//                    } else {
+//                        type = vt.getFieldDataType(f);
+//                    }
+//                    if (type == null) {
+//                        if (currentFunctionDefinition != null
+//                                && currentFunctionDefinition.macro) {
+//                            if ("source".equals(f)) {
+//                                type = DataType.I8_TYPE.arrayType();
+//                            } else if ("ast".equals(f)) {
+//                                type = DataType.I8_TYPE.arrayType();
+//                            } else if ("values".equals(f)) {
+//                                type = DataType.I8_TYPE.arrayType();
+//                            } else if ("module".equals(f)) {
+//                                type = DataType.I8_TYPE.arrayType();
+//                            } else if ("line".equals(f)) {
+//                                type = DataType.INT_TYPE;
+//                            } else {
+//                                syntaxError("Field '" + f + "' not found with type '" + vt.format() + "'");
+//                            }
+//                        } else {
+//                            type = DataType.UNKNOWN;
+//                        }
+//                    }
                     v = new FieldAccess(v, f, false, type);
                     vt = v.type();
                 }
             } else if (matchOp("[")) {
                 Expression arrayIndex = parseExpression();
-                boolean checkBounds = needBoundsCheck(v, arrayIndex);
-                if (matchOp("]!")) {
-                    if (checkBounds) {
-                        syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
-                    }
-                } else if (!matchOp("]")) {
+                int test3;
+//                boolean checkBounds = needBoundsCheck(v, arrayIndex);
+//                if (matchOp("]!")) {
+//                    if (checkBounds) {
+//                        syntaxError("Expected ']', got '" + token + "' when reading from an array that needs a bounds check (use '[index]' instead of '[index]!').");
+//                    }
+//                } else if (!matchOp("]")) {
+//                    syntaxError("Expected ']', got '" + token + "' in array access");
+//                }
+//                if (!v.type().isArray()) {
+//                    syntaxError("Not an array type: " + v.type().format());
+//                }
+//                v = new ArrayAccess(v, arrayIndex, checkBounds);
+                if (matchOp("]")) {
+                    v = new ArrayAccess(v, arrayIndex, true);
+//                    vt = v.type();
+                } else if (matchOp("]!")) {
+                    v = new ArrayAccess(v, arrayIndex, false);
+//                    vt = v.type();
+                } else {
                     syntaxError("Expected ']', got '" + token + "' in array access");
                 }
-                if (!v.type().isArray()) {
-                    syntaxError("Not an array type: " + v.type().format());
-                }
-                v = new ArrayAccess(v, arrayIndex, checkBounds);
-                vt = v.type();
             } else {
                 break;
             }
@@ -3579,35 +3556,35 @@ public class Parser {
         return v;
     }
 
-    private void verifyNullAccess(Expression expr) {
-        boolean needTest = true;
-        if (expr.type().isNullable()) {
-            Solver.Rule r = new Solver.Rule();
-            r.left = Operation.toSolverExpr(expr);
-            r.type = "<>";
-            r.right = Solver.number(0);
-            if (!r.isComplete() || solver.isTrue(r)) {
-                needTest = false;
-            }
-            if (needTest) {
-                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format() + "' before accessing it.");
-            }
-        } else if (expr.type().memoryType() == MemoryType.OWNER) {
-            // owners are known to _not_ be null, until they are cleared
-            needTest = false;
-            Solver.Rule r = new Solver.Rule();
-            r.left = Operation.toSolverExpr(expr);
-            r.type = "<>";
-            r.right = Solver.number(0);
-            if (!r.isComplete() || solver.isTrue(r)) {
-                needTest = true;
-            }
-            if (!needTest) {
-                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format()
-                        + "' before accessing it.");
-            }
-        }
-    }
+//    private void verifyNullAccess(Expression expr) {
+//        boolean needTest = true;
+//        if (expr.type().isNullable()) {
+//            Solver.Rule r = new Solver.Rule();
+//            r.left = Operation.toSolverExpr(expr);
+//            r.type = "<>";
+//            r.right = Solver.number(0);
+//            if (!r.isComplete() || solver.isTrue(r)) {
+//                needTest = false;
+//            }
+//            if (needTest) {
+//                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format() + "' before accessing it.");
+//            }
+//        } else if (expr.type().memoryType() == MemoryType.OWNER) {
+//            // owners are known to _not_ be null, until they are cleared
+//            needTest = false;
+//            Solver.Rule r = new Solver.Rule();
+//            r.left = Operation.toSolverExpr(expr);
+//            r.type = "<>";
+//            r.right = Solver.number(0);
+//            if (!r.isComplete() || solver.isTrue(r)) {
+//                needTest = true;
+//            }
+//            if (!needTest) {
+//                syntaxError("The expression '" + expr.format() + "' could be null here. You need to verify using 'if " + expr.format()
+//                        + "' before accessing it.");
+//            }
+//        }
+//    }
 
     private String operatorToken() {
         if (type == TokenType.OPERATOR) {
@@ -3644,7 +3621,7 @@ public class Parser {
             if (Operation.isComparison(op) && (expr.isComparison() || right.isComparison())) {
                 syntaxError("Comparing a result of a comparison requires parenthesis");
             }
-            Operation operation = Operation.buildAndOptimize(expr, op, right);
+            Operation operation = new Operation(expr, op, right);
             if ("/".equals(op) || "%".equals(op)) {
                 if (!operation.type().isFloatingPoint()) {
                     verifyNotZero(right);
@@ -3977,49 +3954,49 @@ public class Parser {
         return text.substring(0, pos) + "[*]" + text.substring(pos);
     }
 
-    public Variable assignTempVariable(ArrayList<Statement> target, Expression expr) {
-        return assignTempVariable(target, expr, expr.type());
-    }
+//    public Variable assignTempVariable(ArrayList<Statement> target, Expression expr) {
+//        return assignTempVariable(target, expr, expr.type());
+//    }
 
-    public Variable assignTempVariable(ArrayList<Statement> target, Expression expr, DataType type) {
-        Assignment assign = new Assignment();
-        assign.initial = true;
-        assign.isConstant = true;
-        // this is converted to "_t", but we can not use "_t" internally
-        // because this can conflict with user-defined variable names.
-        // user defined names can not start with a number
-        // (same as "0r")
-        Variable var = Variable.newInternal("0t" + functionContext.nextTempVariableId(), type);
-        assign.type = type;
-        assign.leftValue = var;
-        assign.value = expr;
-        Solver.Rule r = Operation.toRule(var, "==", expr);
-        if (r != null) {
-            r.depth = depth;
-            r.always = true;
-            solver.addRule(r);
-        }
-        assign.setConstantBounds(solver, var, expr);
-        target.add(assign);
-        functionContext.addVariable(var);
-        return var;
-    }
+//    public Variable assignTempVariable(ArrayList<Statement> target, Expression expr, DataType type) {
+//        Assignment assign = new Assignment();
+//        assign.initial = true;
+//        assign.isConstant = true;
+//        // this is converted to "_t", but we can not use "_t" internally
+//        // because this can conflict with user-defined variable names.
+//        // user defined names can not start with a number
+//        // (same as "0r")
+////        Variable var = Variable.newInternal("0t" + functionContext.nextTempVariableId(), type);
+//        assign.type = type;
+//        assign.leftValue = var;
+//        assign.value = expr;
+//        Solver.Rule r = Operation.toRule(var, "==", expr);
+//        if (r != null) {
+//            r.depth = depth;
+//            r.always = true;
+//            solver.addRule(r);
+//        }
+//        assign.setConstantBounds(solver, var, expr);
+//        target.add(assign);
+////        functionContext.addVariable(var);
+//        return var;
+//    }
 
-    private Value eval(Expression expr, boolean mayFail) {
-        Value v = program.evalConstants(expr);
-        if (v == null) {
-            if (mayFail) {
-                return null;
-            }
-            syntaxError("Can not evaluate the value");
-        } else if (v instanceof ValueException) {
-            ValueException ex = (ValueException) v;
-            syntaxError("Evaluating the value threw an exception: " + ex.message);
-        } else if (v instanceof ValuePanic) {
-            ValuePanic ex = (ValuePanic) v;
-            syntaxError("Evaluating the value failed: " + ex.message);
-        }
-        return v;
-    }
+//    private Value eval(Expression expr, boolean mayFail) {
+//        Value v = program.evalConstants(expr);
+//        if (v == null) {
+//            if (mayFail) {
+//                return null;
+//            }
+//            syntaxError("Can not evaluate the value");
+//        } else if (v instanceof ValueException) {
+//            ValueException ex = (ValueException) v;
+//            syntaxError("Evaluating the value threw an exception: " + ex.message);
+//        } else if (v instanceof ValuePanic) {
+//            ValuePanic ex = (ValuePanic) v;
+//            syntaxError("Evaluating the value failed: " + ex.message);
+//        }
+//        return v;
+//    }
 
 }

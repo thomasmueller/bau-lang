@@ -31,6 +31,9 @@ public class DataType {
     public static final DataType INT_TYPE = newNumberType(DataType.INT, 8);
     public static final DataType TYPE_TYPE = newNumberType(DataType.TYPE, 8);
 
+    // used during parsing
+    public static final DataType UNKNOWN = newNumberType("unknown", 8);
+
     private final FullName fullName;
     private final MemoryType memoryType;
 
@@ -60,6 +63,7 @@ public class DataType {
 
     public List<Variable> fields = new ArrayList<>();
 
+    public LinkedHashMap<String, Expression> enumExpressions;
     public LinkedHashMap<String, Long> enumValues;
 
     public FunctionDefinition autoClose;
@@ -270,14 +274,14 @@ public class DataType {
 
     public DataType baseType() {
         if (!isArray()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Not an array");
         }
         return arrayBaseType;
     }
 
     public DataType arrayType() {
         if (isArray()) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Is already an array");
         }
         return arrayType;
     }
@@ -551,15 +555,23 @@ public class DataType {
         return result;
     }
 
-    public void resolveTypes(Program program) {
+    public void resolveTypes(FunctionContext context) {
         for (int i = 0; i < fields.size(); i++) {
-            fields.set(i, fields.get(i).resolveTypes(program));
+            Variable var = fields.get(i);
+            Expression e = var.resolveTypes(context);
+            if (e instanceof Variable) {
+                Variable v = (Variable) e;
+                fields.set(i, v);
+            } else {
+                context.getProgram().syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+            }
         }
+        Program program = context.getProgram();
         // traits: set trait function ids, and add functions
         if (traitDefinition != null && !traitDefinition.requiredTraitNames.isEmpty()) {
             int functionId = 0;
             for (FullName n : traitDefinition.requiredTraitNames) {
-                DataType required = program.getType(n.module, n.name);
+                DataType required = context.getType(n.module, n.name);
                 if (required != null) {
                     Trait tr = required.getTraitDefinition();
                     if (tr == null) {

@@ -304,11 +304,11 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    int64_t _t0 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t0);
+    int64_t _t43 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t43);
     printf("%.9f\n", 3.141592653589793);
-    int64_t _t1 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t1);
+    int64_t _t44 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t44);
     printf("%.9f\n", 3.141592653589793);
     _end();
 }

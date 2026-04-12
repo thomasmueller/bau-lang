@@ -445,28 +445,28 @@ Point* newPoint_2(int64_t x, int64_t y) {
     return p;
 }
 org_bau_FilterMap_FilterMap_Point* org_bau_FilterMap_FilterMap_Point_1(org_bau_List_List_Point* list) {
-    org_bau_FilterMap_FilterMap_Point* _t0 = org_bau_FilterMap_FilterMap_Point_new();
+    org_bau_FilterMap_FilterMap_Point* _t18 = org_bau_FilterMap_FilterMap_Point_new();
     _incUseStack(list);
-    _t0->list = list;
-    return _t0;
+    _t18->list = list;
+    return _t18;
 }
 org_bau_FilterMap_FilterMap_int* org_bau_FilterMap_FilterMap_int_1(org_bau_List_List_int* list) {
-    org_bau_FilterMap_FilterMap_int* _t0 = org_bau_FilterMap_FilterMap_int_new();
+    org_bau_FilterMap_FilterMap_int* _t27 = org_bau_FilterMap_FilterMap_int_new();
     _incUseStack(list);
-    _t0->list = list;
-    return _t0;
+    _t27->list = list;
+    return _t27;
 }
 org_bau_FilterMap_FilterMap_Point* org_bau_FilterMap_from_Point_1(int64_t _T) {
-    org_bau_List_List_Point* _t0 = org_bau_List_List_Point_0();
-    org_bau_FilterMap_FilterMap_Point* _t1 = org_bau_FilterMap_FilterMap_Point_1(_t0);
-    _decUseStack(_t0, org_bau_List_List_Point);
-    return _t1;
+    org_bau_List_List_Point* _t20 = org_bau_List_List_Point_0();
+    org_bau_FilterMap_FilterMap_Point* _t21 = org_bau_FilterMap_FilterMap_Point_1(_t20);
+    _decUseStack(_t20, org_bau_List_List_Point);
+    return _t21;
 }
 org_bau_FilterMap_FilterMap_int* org_bau_FilterMap_from_int_1(int64_t _T) {
-    org_bau_List_List_int* _t0 = org_bau_List_List_int_0();
-    org_bau_FilterMap_FilterMap_int* _t1 = org_bau_FilterMap_FilterMap_int_1(_t0);
-    _decUseStack(_t0, org_bau_List_List_int);
-    return _t1;
+    org_bau_List_List_int* _t30 = org_bau_List_List_int_0();
+    org_bau_FilterMap_FilterMap_int* _t31 = org_bau_FilterMap_FilterMap_int_1(_t30);
+    _decUseStack(_t30, org_bau_List_List_int);
+    return _t31;
 }
 org_bau_FilterMap_FilterMap_Point* org_bau_FilterMap_FilterMap_Point_in_2(org_bau_FilterMap_FilterMap_Point* this, org_bau_List_List_Point* list) {
     _incUseStack(this);
@@ -488,32 +488,32 @@ org_bau_List_List_int* org_bau_FilterMap_FilterMap_int_select_1(org_bau_FilterMa
     return _r0;
 }
 org_bau_List_List_Point* org_bau_List_List_Point_0() {
-    org_bau_List_List_Point* _t0 = org_bau_List_List_Point_new();
-    _t0->array = Point_array_new(0);
-    _t0->size = 0;
-    return _t0;
+    org_bau_List_List_Point* _t2 = org_bau_List_List_Point_new();
+    _t2->array = Point_array_new(0);
+    _t2->size = 0;
+    return _t2;
 }
 org_bau_List_List_int* org_bau_List_List_int_0() {
-    org_bau_List_List_int* _t0 = org_bau_List_List_int_new();
-    _t0->array = int_array_new(0);
-    _t0->size = 0;
-    return _t0;
+    org_bau_List_List_int* _t23 = org_bau_List_List_int_new();
+    _t23->array = int_array_new(0);
+    _t23->size = 0;
+    return _t23;
 }
 org_bau_List_List_Point* org_bau_List_newList_Point_1(int64_t _T) {
     org_bau_List_List_Point* result = org_bau_List_List_Point_0();
-    Point_array* _t0 = Point_array_new(4);
-    _incUseStack(_t0);
+    Point_array* _t15 = Point_array_new(4);
+    _incUseStack(_t15);
     _decUse(result->array, Point_array);
-    result->array = _t0;
-    _decUseStack(_t0, Point_array);
+    result->array = _t15;
+    _decUseStack(_t15, Point_array);
     return result;
 }
 void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
     _incUseStack(x);
     if (this->size >= _arrayLen(this->array)) {
-        Point_array* _t2 = Point_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t2);
-        Point_array* n = _t2;
+        Point_array* _t4 = Point_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t4);
+        Point_array* n = _t4;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -533,7 +533,7 @@ void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
         _decUse(this->array, Point_array);
         this->array = n;
         _decUseStack(n, Point_array);
-        _decUseStack(_t2, Point_array);
+        _decUseStack(_t4, Point_array);
     }
     _incUseStack(x);
     _decUse(this->array->data[idx_2(this->size, _arrayLen(this->array))], Point);
@@ -543,9 +543,9 @@ void org_bau_List_List_Point_add_2(org_bau_List_List_Point* this, Point* x) {
 }
 void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
     if (this->size >= _arrayLen(this->array)) {
-        int_array* _t2 = int_array_new(_arrayLen(this->array) * 2);
-        _incUseStack(_t2);
-        int_array* n = _t2;
+        int_array* _t25 = int_array_new(_arrayLen(this->array) * 2);
+        _incUseStack(_t25);
+        int_array* n = _t25;
         if (_arrayLen(this->array) > 0) {
             while (1 == 1) {
                 int64_t i = 0;
@@ -563,7 +563,7 @@ void org_bau_List_List_int_add_2(org_bau_List_List_int* this, int64_t x) {
         _decUse(this->array, int_array);
         this->array = n;
         _decUseStack(n, int_array);
-        _decUseStack(_t2, int_array);
+        _decUseStack(_t25, int_array);
     }
     this->array->data[idx_2(this->size, _arrayLen(this->array))] = x;
     this->size += 1;
@@ -586,21 +586,21 @@ int main(int _argc, char *_argv[]) {
 }
 void _main() {
     org_bau_List_List_Point* list = org_bau_List_newList_Point_1(0);
-    Point* _t0 = newPoint_2(1, 10);
-    org_bau_List_List_Point_add_2(list, _t0);
-    Point* _t1 = newPoint_2(3, 300);
-    org_bau_List_List_Point_add_2(list, _t1);
-    org_bau_FilterMap_FilterMap_int* _t4 = NULL;
+    Point* _t16 = newPoint_2(1, 10);
+    org_bau_List_List_Point_add_2(list, _t16);
+    Point* _t17 = newPoint_2(3, 300);
+    org_bau_List_List_Point_add_2(list, _t17);
+    org_bau_FilterMap_FilterMap_int* _t35 = NULL;
     if (1) {
-        org_bau_FilterMap_FilterMap_Point* _t3 = NULL;
+        org_bau_FilterMap_FilterMap_Point* _t34 = NULL;
         if (1) {
-            org_bau_FilterMap_FilterMap_Point* _t2 = org_bau_FilterMap_from_Point_1(0);
-            org_bau_FilterMap_FilterMap_Point* this = org_bau_FilterMap_FilterMap_Point_in_2(_t2, list);
+            org_bau_FilterMap_FilterMap_Point* _t22 = org_bau_FilterMap_from_Point_1(0);
+            org_bau_FilterMap_FilterMap_Point* this = org_bau_FilterMap_FilterMap_Point_in_2(_t22, list);
             org_bau_List_List_Point* _u_result = org_bau_List_List_Point_0();
-            Point_array* _0t1 = Point_array_new(this->list->size);
-            _incUseStack(_0t1);
+            Point_array* _0t19 = Point_array_new(this->list->size);
+            _incUseStack(_0t19);
             _decUse(_u_result->array, Point_array);
-            _u_result->array = _0t1;
+            _u_result->array = _0t19;
             int64_t _u_i = 0;
             while (_u_i < this->list->size) {
                 _incUseStack(this->list->array->data[idx_2(_u_i, _arrayLen(this->list->array))]);
@@ -614,17 +614,17 @@ void _main() {
             _decUse(this->list, org_bau_List_List_Point);
             this->list = _u_result;
             _incUseStack(this);
-            _decUseStack(_t3, org_bau_FilterMap_FilterMap_Point);
-            _t3 = this;
+            _decUseStack(_t34, org_bau_FilterMap_FilterMap_Point);
+            _t34 = this;
         } else {
         }
-        _incUseStack(_t3);
-        org_bau_FilterMap_FilterMap_Point* this = _t3;
+        _incUseStack(_t34);
+        org_bau_FilterMap_FilterMap_Point* this = _t34;
         org_bau_List_List_int* _u_result = org_bau_List_List_int_0();
-        int_array* _0t0 = int_array_new(this->list->size);
-        _incUseStack(_0t0);
+        int_array* _0t29 = int_array_new(this->list->size);
+        _incUseStack(_0t29);
         _decUse(_u_result->array, int_array);
-        _u_result->array = _0t0;
+        _u_result->array = _0t29;
         int64_t _u_i = 0;
         while (_u_i < this->list->size) {
             _incUseStack(this->list->array->data[idx_2(_u_i, _arrayLen(this->list->array))]);
@@ -633,20 +633,20 @@ void _main() {
             org_bau_List_List_int_add_2(_u_result, _u_x);
             _u_i = _u_i + 1;
         }
-        org_bau_FilterMap_FilterMap_int* _0t1 = org_bau_FilterMap_from_int_1(0);
-        org_bau_FilterMap_FilterMap_int* _0t2 = org_bau_FilterMap_FilterMap_int_in_2(_0t1, _u_result);
-        _incUseStack(_0t2);
-        _decUseStack(_t4, org_bau_FilterMap_FilterMap_int);
-        _t4 = _0t2;
+        org_bau_FilterMap_FilterMap_int* _0t32 = org_bau_FilterMap_from_int_1(0);
+        org_bau_FilterMap_FilterMap_int* _0t33 = org_bau_FilterMap_FilterMap_int_in_2(_0t32, _u_result);
+        _incUseStack(_0t33);
+        _decUseStack(_t35, org_bau_FilterMap_FilterMap_int);
+        _t35 = _0t33;
     } else {
     }
-    org_bau_List_List_int* l2 = org_bau_FilterMap_FilterMap_int_select_1(_t4);
+    org_bau_List_List_int* l2 = org_bau_FilterMap_FilterMap_int_select_1(_t35);
     if (org_bau_List_List_int_len_1(l2) > 0) {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                int64_t _t5 = org_bau_List_List_int_get_2(l2, i);
-                printf("%lld\n", (long long)_t5);
+                int64_t _t36 = org_bau_List_List_int_get_2(l2, i);
+                printf("%lld\n", (long long)_t36);
                 if (( i + 1 ) >= org_bau_List_List_int_len_1(l2)) {
                     break;
                 }
@@ -656,9 +656,9 @@ void _main() {
         }
     }
     _decUseStack(l2, org_bau_List_List_int);
-    _decUseStack(_t4, org_bau_FilterMap_FilterMap_int);
-    _decUseStack(_t1, Point);
-    _decUseStack(_t0, Point);
+    _decUseStack(_t35, org_bau_FilterMap_FilterMap_int);
+    _decUseStack(_t17, Point);
+    _decUseStack(_t16, Point);
     _decUseStack(list, org_bau_List_List_Point);
     _end();
 }

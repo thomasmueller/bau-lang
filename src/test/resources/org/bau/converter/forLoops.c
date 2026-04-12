@@ -404,16 +404,16 @@ pair_int newPair_int_2(int64_t value, int64_t index) {
     return result;
 }
 pair_float pair_float_0() {
-    pair_float _t0 = pair_float_new();
-    _t0.i = 0;
-    _t0.value = 0;
-    return _t0;
+    pair_float _t16 = pair_float_new();
+    _t16.i = 0;
+    _t16.value = 0;
+    return _t16;
 }
 pair_int pair_int_0() {
-    pair_int _t0 = pair_int_new();
-    _t0.i = 0;
-    _t0.value = 0;
-    return _t0;
+    pair_int _t11 = pair_int_new();
+    _t11.i = 0;
+    _t11.value = 0;
+    return _t11;
 }
 void _main();
 int main(int _argc, char *_argv[]) {
@@ -445,37 +445,37 @@ void _main() {
     }
     if (_arrayLen(array)) {
         while (1 == 1) {
-            int64_t _t1 = 0;
+            int64_t _t10 = 0;
             while (1) {
-                int64_t e = array->data[_t1];
+                int64_t e = array->data[_t10];
                 printf("element %lld\n", (long long)e);
-                if (( _t1 + 1 ) >= 5) {
+                if (( _t10 + 1 ) >= _arrayLen(array)) {
                     break;
                 }
-                _t1 = _t1 + 1;
+                _t10 = _t10 + 1;
             }
             break;
         }
     }
     if (_arrayLen(array)) {
         while (1 == 1) {
-            int64_t _t2 = 0;
+            int64_t _t13 = 0;
             while (1) {
-                pair_int p = newPair_int_2(array->data[_t2], _t2);
+                pair_int p = newPair_int_2(array->data[_t13], _t13);
                 printf("index-value-pairs #%lld = %lld\n", (long long)p.i, (long long)p.value);
-                if (( _t2 + 1 ) >= 5) {
+                if (( _t13 + 1 ) >= _arrayLen(array)) {
                     pair_int_free(&p);
                     break;
                 }
-                _t2 = _t2 + 1;
+                _t13 = _t13 + 1;
                 pair_int_free(&p);
             }
             break;
         }
     }
-    float_array* _t3 = float_array_new(5);
-    _incUseStack(_t3);
-    float_array* floats = _t3;
+    float_array* _t14 = float_array_new(5);
+    _incUseStack(_t14);
+    float_array* floats = _t14;
     if (5 > 0) {
         while (1 == 1) {
             int64_t i = 0;
@@ -491,36 +491,36 @@ void _main() {
     }
     if (_arrayLen(floats)) {
         while (1 == 1) {
-            int64_t _t4 = 0;
+            int64_t _t15 = 0;
             while (1) {
-                double e = floats->data[_t4];
+                double e = floats->data[_t15];
                 printf("element %.9f\n", e);
-                if (( _t4 + 1 ) >= 5) {
+                if (( _t15 + 1 ) >= _arrayLen(floats)) {
                     break;
                 }
-                _t4 = _t4 + 1;
+                _t15 = _t15 + 1;
             }
             break;
         }
     }
     if (_arrayLen(floats)) {
         while (1 == 1) {
-            int64_t _t5 = 0;
+            int64_t _t18 = 0;
             while (1) {
-                pair_float p = newPair_float_2(floats->data[_t5], _t5);
+                pair_float p = newPair_float_2(floats->data[_t18], _t18);
                 printf("index-value-pairs #%lld = %.9f\n", (long long)p.i, p.value);
-                if (( _t5 + 1 ) >= 5) {
+                if (( _t18 + 1 ) >= _arrayLen(floats)) {
                     pair_float_free(&p);
                     break;
                 }
-                _t5 = _t5 + 1;
+                _t18 = _t18 + 1;
                 pair_float_free(&p);
             }
             break;
         }
     }
     _decUseStack(floats, float_array);
-    _decUseStack(_t3, float_array);
+    _decUseStack(_t14, float_array);
     _decUseStack(array, int_array);
     _decUseStack(_t0, int_array);
     _end();

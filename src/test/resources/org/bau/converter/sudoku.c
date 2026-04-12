@@ -390,20 +390,20 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    int64_t _t0 = org_bau_Env_argCount_0();
-    int64_t _t1 = _t0 != 2;
-    if (!(_t1)) {
-        int64_t _t2 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
-        _t1 = _t2;
+    int64_t _t9 = org_bau_Env_argCount_0();
+    int64_t _t10 = _t9 != 2;
+    if (!(_t10)) {
+        int64_t _t11 = _arrayLen(org_bau_Env_arg_1(1)) != 89;
+        _t10 = _t11;
     }
-    if (_t1) {
+    if (_t10) {
         printf("Expected one argument: \"<line1> <line2> ... <line9>\"\n");
         printf("where each line is 9 characters: 0-9, or . for unknown.\n");
         return;
     }
     i8_array* c = org_bau_Env_arg_1(1);
-    int64_t _t3 = solve_1(c);
-    if (_t3) {
+    int64_t _t12 = solve_1(c);
+    if (_t12) {
         if (8 > 0) {
             while (1 == 1) {
                 int64_t i = 0;

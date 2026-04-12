@@ -230,13 +230,13 @@ public class If implements Statement {
     }
 
     @Override
-    public void resolveTypesForStatement(Program program) {
-        program.resolveTypes(thenList);
-        program.resolveTypes(thenAutoClose);
-        program.resolveTypes(elseList);
-        program.resolveTypes(elseAutoClose);
+    public void resolveTypesForStatement(FunctionContext context) {
+        context.resolveTypes(thenList);
+        context.resolveTypes(thenAutoClose);
+        context.resolveTypes(elseList);
+        context.resolveTypes(elseAutoClose);
         if (condition != null) {
-            condition = condition.resolveTypes(program);
+            condition = condition.resolveTypes(context);
         }
     }
 

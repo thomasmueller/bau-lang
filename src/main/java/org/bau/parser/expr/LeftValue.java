@@ -1,6 +1,6 @@
 package org.bau.parser.expr;
 
-import org.bau.parser.Program;
+import org.bau.parser.FunctionContext;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 
@@ -24,6 +24,8 @@ public interface LeftValue extends Expression {
         // ignore
     }
 
-    LeftValue resolveTypes(Program program);
+    Expression resolveTypes(FunctionContext context);
+
+    void setLocation(int fileId, int location);
 
 }

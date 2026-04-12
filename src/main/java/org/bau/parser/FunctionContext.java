@@ -36,7 +36,7 @@ public class FunctionContext {
     }
 
     public int nextTempVariableId() {
-        if ("main".equals(currentFunctionName)) {
+        if ("main".equals(currentFunctionName.name)) {
             return program.nextTempVariableIdGlobalScope();
         }
         return nextTempVariableId++;
@@ -206,7 +206,6 @@ public class FunctionContext {
     }
 
     public DataType getType(String module, String name) {
-        int todoMoveUsagesToResolvePhase;
         Utils.assertTrue(module != null);
         if (DataType.isGenericTypeName(name)) {
             return null;
@@ -411,6 +410,23 @@ public class FunctionContext {
             }
         }
         return versions.size();
+    }
+
+    public Program getProgram() {
+        return program;
+    }
+
+
+    public void resolveTypes(List<Statement> list) {
+        if (list != null) {
+            for (Statement s : list) {
+                s.resolveTypesForStatement(this);
+            }
+        }
+    }
+
+    public String getModule() {
+        return currentFunctionName.module;
     }
 
 }

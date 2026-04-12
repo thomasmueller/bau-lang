@@ -8,6 +8,7 @@ import org.bau.parser.BasicBlock;
 import org.bau.parser.DataType;
 import org.bau.parser.FullName;
 import org.bau.parser.FunctionContext;
+import org.bau.parser.FunctionDefinition;
 import org.bau.parser.MemoryType;
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
@@ -38,12 +39,19 @@ public class Variable implements Expression, LeftValue {
     private Value constantValue;
     private boolean isInternal;
     private boolean used;
+    public int fileId, location;
 
     public int reassignCount;
     public boolean skipIncrementDecrementRefCount;
 
     public Variable(String name, DataType type) {
         this("", name, false, type);
+    }
+
+    @Override
+    public void setLocation(int fileId, int location) {
+        this.fileId = fileId;
+        this.location = location;
     }
 
     public static Variable newInternal(String constId, DataType type) {
@@ -454,8 +462,23 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
-    public Variable resolveTypes(Program program) {
-        type = type.resolve(program);
+    public Expression resolveTypes(FunctionContext context) {
+        if (type == DataType.UNKNOWN) {
+            String m = context.getModule();
+            FunctionDefinition def = context.getFunctionIfExists(m, name);
+            if (def != null) {
+                // function pointer
+                if (def.exceptionType != null) {
+                    context.getProgram().syntaxError(fileId, location, "Function throws an exception; this is not supported");
+                }
+                if (def.varArgs) {
+                    context.getProgram().syntaxError(fileId, location, "Function has a variable number of arguments; this is not supported");
+                }
+                FunctionPointer fp = new FunctionPointer(def);
+                return fp;
+            }
+        }
+        type = type.resolve(context.getProgram());
         return this;
     }
 
