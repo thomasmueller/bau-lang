@@ -200,8 +200,15 @@ for i := until(y.len)
     {
         value: 'sudoku',
         label: 'Sudoku Solver',
-        code: `# Enter the known digits below. Use '.' for unknown.
-p: '8........ ..36..... .7..9.2.. .5...7... ....457.. ...1...3. ..1....68 ..85...1. .9....4..'
+        code: `import org.bau.Std
+
+fun main()
+    # Enter the known digits below. Use '.' for unknown.
+    p: '8........ ..36..... .7..9.2.. .5...7... ....457.. ...1...3. ..1....68 ..85...1. .9....4..'
+    solve(p)
+    for i := until(8)
+        p[i * 10 + 9] = ord('\\n')
+    println(p)
 
 fun solve(c i8[]) int
     for i := until(c.len)
@@ -222,11 +229,6 @@ fun solve(c i8[]) int
                 break c[(n3 / 9 * 10) + (n3 % 9)] == k + ord('1')
         return 0
     return 1
-
-solve(p)
-for i := until(8)
-    p[i * 10 + 9] = ord('\\n')
-println(p)
 `
     }
 ];

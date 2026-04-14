@@ -120,12 +120,12 @@ public class Parser {
     }
 
     public Program parse() {
-//        try {
-//            Parser2 p2 = new Parser2(text);
-//            Program prog2 = p2.parse();
-//        } catch (Throwable e) {
-//            e.printStackTrace(System.out);
-//        }
+        try {
+            Parser2 p2 = new Parser2(text);
+            Program prog2 = p2.parse();
+        } catch (Throwable e) {
+            // e.printStackTrace(System.out);
+        }
 
         readSpaces();
         Program program = parseProgram();
