@@ -5,6 +5,8 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-04-14: Syntax changed for constructors on generic types: now the type is just a regular parameter (simplifying the grammar).
+* 2026-04-13: Syntax changed for member functions: now there is a dot after the type. Example: `fun Node.count() int` instead of `fun Node count() int`.
 * 2026-04-04: <a href="docsrc/macros.md#implementing-for-loop-functions">Improved `for` loops</a> to allow iterating over entries, or entries + index.
 * 2026-03-28: First complete <a href="docsrc/linq.md">LINQ (Language Integrated Query)</a> example using SQLite.
 * 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
@@ -319,7 +321,7 @@ It is replaced at compile time:
             list[i] = i + start
         return list
     
-    fun int[] map(value int) macro int[]
+    fun int[].map(value int) macro int[]
         result : int[this.len]
         i := 0
         while i < this.len
@@ -363,17 +365,18 @@ Types can have fields and functions:
     type Square
         length int
 
-    fun Square area() int
+    fun Square.area() int
         return length * length
 
     s : Square()
+    a : s.area()
 
 `int` and other types that start with lowercase are copied when assigned
 (sometimes called `structs` in other languages);
 types that start with uppercase are referenced 
 (sometimes called `classes` in other languages).
 
-If a type has a `close` function, then it is called
+If a type has a `close()` function, then it is called
 before the memory is freed.
 
 For each type, a constructor is automatically added
@@ -383,7 +386,7 @@ Functions on built-in types, and arrays, are allowed.
 Functions on foreign types are only visible within
 the module where they are defined.
 
-    fun int square() int
+    fun int.square() int
         return this * this
 
     println(12.square())
@@ -428,11 +431,11 @@ Types can have parameters. Such types are called templates:
         array T[]
         size int
 
-The following `List(T)(T[0])` is the constructor
+The following `List(T, T[0])` is the constructor
 of `List(T)`, with an empty array of `T` as parameter. 
 
     fun newList(T type) List(T)
-        return List(T)(T[0])
+        return List(T, T[0])
 
     intList := newList(int)
     squareList := newList(Square)
@@ -477,7 +480,7 @@ To avoid cycles, explicitly set fields to `null`
         left Tree?
         right Tree?
 
-    fun Tree nodeCount() int
+    fun Tree.nodeCount() int
         result := 1
         l : left
         if l
@@ -495,7 +498,7 @@ and borrow with `&`.
         left Tree?
         right Tree?
 
-    fun Tree nodeCount() int
+    fun Tree.nodeCount() int
         result := 1
         l : &left
         if l
@@ -605,14 +608,14 @@ contain a list of functions.
 Types that implement a trait needs to declares all trait functions
 if the trait does not have a default implementation.
 
-    fun Reader size() int
+    fun Reader.size() int
         return -1
 
     type Memory : Reader
         array int[]
         pos int
     
-    fun Memory read() int
+    fun Memory.read() int
         x : array[pos]
         pos += 1
         return x

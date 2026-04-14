@@ -5,6 +5,10 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+"list : List(int, 4)" instead of "list : List(int)(4)"
+
+change import system: not use fully qualified names; use aliases instead
+
 example code / prime numbers:
 https://news.ycombinator.com/item?id=47690609
 https://www.jeremykun.com/2026/04/07/deterministic-miller-rabin/
@@ -13,6 +17,12 @@ Deterministic Primality Testing for Limited Bit Width
 1d chess
 https://news.ycombinator.com/item?id=47719740
 
+floyds sampling algorithm
+https://news.ycombinator.com/item?id=47672710
+https://buttondown.com/jaffray/archive/floyds-sampling-algorithm/
+
+selection algorithm:
+quickselect / https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm
 
 fast way to parse what is the module name
 (currently require that the module name is at the top)

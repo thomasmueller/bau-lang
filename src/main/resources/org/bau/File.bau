@@ -29,13 +29,13 @@ fun openFile(name i8[], mode i8[]) File?
         ```)
     return File()
 
-fun File seek(pos int)
+fun File.seek(pos int)
     native(```
         FILE* fp = (FILE*) (this->filePointer);
         fseek(fp, pos, SEEK_SET);
         ```)
 
-fun File len() int
+fun File.len() int
     native(```
         #include <sys/stat.h>
         FILE* fp = (FILE*) (this->filePointer);
@@ -47,7 +47,7 @@ fun File len() int
         ```)
     return -1
 
-fun File read(data i8[], pos int, len int) int
+fun File.read(data i8[], pos int, len int) int
     native(```
         FILE* fp = (FILE*) (this->filePointer);
         if (pos < 0 || len < 0 || pos + len > data->len) {
@@ -58,7 +58,7 @@ fun File read(data i8[], pos int, len int) int
         ```)
     return 0
 
-fun File readFully(buffer i8[], pos int, len int) int
+fun File.readFully(buffer i8[], pos int, len int) int
     count := 0
     loop
         l := this.read(buffer, count + pos, len - count)
@@ -67,7 +67,7 @@ fun File readFully(buffer i8[], pos int, len int) int
         else
             count += l
 
-fun File write(data i8[], pos int, len int) int
+fun File.write(data i8[], pos int, len int) int
     native(```
         FILE* fp = (FILE*) (this->filePointer);
         if (pos < 0 || len < 0 || pos + len > data->len) {
@@ -78,7 +78,7 @@ fun File write(data i8[], pos int, len int) int
         ```)
     return 0
 
-fun File close()
+fun File.close()
     native(```
         FILE* fp = (FILE*) (this->filePointer);
         fclose(fp);

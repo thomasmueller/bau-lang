@@ -1486,43 +1486,43 @@ throws an exception if the string does not match [0-9]+
 fun newBigInt(value int) bigInt
 create a new bigInt
 
-fun bigInt add(other bigInt) bigInt
+fun bigInt.add(other bigInt) bigInt
 addition
 
-fun bigInt compare(o bigInt) int
+fun bigInt.compare(o bigInt) int
 compare to another value
 
-fun bigInt div(other bigInt) bigInt
+fun bigInt.div(other bigInt) bigInt
 division
 
-fun bigInt len() int
+fun bigInt.len() int
 length in bits
 
-fun bigInt mul(other bigInt) bigInt
+fun bigInt.mul(other bigInt) bigInt
 multiplication
 
-fun bigInt mulInt(value int) bigInt
+fun bigInt.mulInt(value int) bigInt
 mul by an integer
 
-fun bigInt neg() bigInt
+fun bigInt.neg() bigInt
 negate
 
-fun bigInt shiftLeft(n int) bigInt
+fun bigInt.shiftLeft(n int) bigInt
 left shift
 
-fun bigInt shiftRight(n int) bigInt
+fun bigInt.shiftRight(n int) bigInt
 right shift
 
-fun bigInt signum() int
+fun bigInt.signum() int
 get the signum
 
-fun bigInt sub(other bigInt) bigInt
+fun bigInt.sub(other bigInt) bigInt
 subion
 
-fun bigInt toInt() int
+fun bigInt.toInt() int
 get the int value (at most 32 bits)
 
-fun bigInt toStr() i8[]
+fun bigInt.toStr() i8[]
 convert to string
 
 */

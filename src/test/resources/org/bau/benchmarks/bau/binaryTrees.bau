@@ -41,7 +41,7 @@ fun buildTree(depth int) Tree
         return Tree(null, null)
     return Tree(buildTree(depth - 1), buildTree(depth - 1))
 
-fun Tree nodeCount() int
+fun Tree.nodeCount() int
     result := 1
     l : &left
     if l

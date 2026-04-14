@@ -2,7 +2,7 @@ import org.bau.HashMap
     newHashMap
     mix
 
-fun int equals(o int) int
+fun int.equals(o int) int
     return this == o
 
 fun main()

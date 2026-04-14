@@ -108,7 +108,7 @@ fun newBigInt(value int) bigInt
             return x
 
 # negate
-fun bigInt neg() bigInt
+fun bigInt.neg() bigInt
     if data.len == 0
         return this
     x : bigInt()
@@ -117,7 +117,7 @@ fun bigInt neg() bigInt
     return x
 
 # left shift
-fun bigInt shiftLeft(n int) bigInt
+fun bigInt.shiftLeft(n int) bigInt
     if n < 0
         return shiftRight(-n)
     if data.len == 0
@@ -136,7 +136,7 @@ fun bigInt shiftLeft(n int) bigInt
     return newBigIntShorten(data2, negative)
 
 # right shift
-fun bigInt shiftRight(n int) bigInt
+fun bigInt.shiftRight(n int) bigInt
     if n < 0
         return shiftLeft(-n)
     len2 : len() - n
@@ -153,14 +153,14 @@ fun bigInt shiftRight(n int) bigInt
     return newBigIntShorten(data2, negative)
 
 # length in bits
-fun bigInt len() int
+fun bigInt.len() int
     if data.len == 0
         return 0
     lastLen := 64 - numberOfLeadingZeros(data[data.len - 1] & 0xffffffff)
     return (data.len - 1) * 32 + lastLen
 
 # compare to another value
-fun bigInt compare(o bigInt) int
+fun bigInt.compare(o bigInt) int
     if negative <> o.negative
         return when(negative, -1, 1)
     if negative
@@ -179,7 +179,7 @@ fun bigInt compare(o bigInt) int
     return 0
 
 # addition
-fun bigInt add(other bigInt) bigInt
+fun bigInt.add(other bigInt) bigInt
     if data.len == 0
         return other
     elif other.data.len == 0
@@ -214,7 +214,7 @@ fun add(a i32[], b i32[]) bigInt
     return res
 
 # subion
-fun bigInt sub(other bigInt) bigInt
+fun bigInt.sub(other bigInt) bigInt
     if data.len == 0
         return other.neg()
     elif other.data.len == 0
@@ -243,11 +243,11 @@ fun sub(a i32[], b i32[]) bigInt
     return newBigIntShorten(result, 0)
 
 # get the int value (at most 32 bits)
-fun bigInt toInt() int
+fun bigInt.toInt() int
     return signum() * when(data.len == 0, 0, data[0] & 0xffffffff)
 
 # multiplication
-fun bigInt mul(other bigInt) bigInt
+fun bigInt.mul(other bigInt) bigInt
     thisLen : len()
     otherLen : other.len()
     if thisLen == 0
@@ -266,7 +266,7 @@ fun bigInt mul(other bigInt) bigInt
     return mul(data, other.data)
 
 # mul by an integer
-fun bigInt mulInt(value int) bigInt
+fun bigInt.mulInt(value int) bigInt
     if (value >= 1 << 31 or value <= -(1 << 31))
         return mul(newBigInt(value))
     other := i32(value)
@@ -337,7 +337,7 @@ fun mulBig(a i32[], b i32[]) bigInt
     return newBigIntShorten(result, 0)
 
 # division
-fun bigInt div(other bigInt) bigInt
+fun bigInt.div(other bigInt) bigInt
     if other.data.len == 0
         # TODO division by zero: currently we return 0
         # throw exception instead?
@@ -404,7 +404,7 @@ fun bigInt div(other bigInt) bigInt
     return res
 
 # convert to string
-fun bigInt toStr() i8[]
+fun bigInt.toStr() i8[]
     n := this
     buff := str()
     buff.data = i8[50]
@@ -438,7 +438,7 @@ fun bigInt toStr() i8[]
     return copyOfRange(buff.data, 0, end)
 
 # get the signum
-fun bigInt signum() int
+fun bigInt.signum() int
     if data.len == 0
         return 0
     elif negative

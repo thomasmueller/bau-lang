@@ -7,13 +7,13 @@ type HashMap(K, V)
     hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-    result : HashMap(K, V)()
+    result : HashMap(K, V)
     result.keys = K[4]
     result.values = V[4]
     result.hashes = int[4]
     return result
 
-fun HashMap(K, V) put(key K, value V)
+fun HashMap(K, V).put(key K, value V)
     if size * 2 >= keys.len
         kn : K[keys.len * 2]
         vn : V[keys.len * 2]
@@ -41,7 +41,7 @@ fun HashMap(K, V) put(key K, value V)
             return
         p = (p + 1) & (keys.len - 1)
 
-fun HashMap(K, V) get(key K) V
+fun HashMap(K, V).get(key K) V
     hash : key.hashCode()
     p := hash & (keys.len - 1)
     loop 1
@@ -51,7 +51,7 @@ fun HashMap(K, V) get(key K) V
             return values[p]
         p = (p + 1) & (keys.len - 1)
 
-fun HashMap(K, V) remove(key K) int
+fun HashMap(K, V).remove(key K) int
     hash : key.hashCode()
     p := hash & (keys.len - 1)
     loop 1
@@ -126,22 +126,22 @@ fun mix(z int) int
     z = (z ^ (z >> 27)) * 0x94d049bb133111eb
     return z ^ (z >> 31)
 
-fun int hashCode() int
+fun int.hashCode() int
     return mix(this)
 
-fun i8[] hashCode() int
+fun i8[].hashCode() int
     return hashCode(this)
 
 type str 
     value i8[]
   
-fun int equals(other int) int
+fun int.equals(other int) int
     return this == other
 
-fun str equals(other str) int
+fun str.equals(other str) int
     return this.value.len == other.value.len
 
-fun str hashCode() int
+fun str.hashCode() int
     return hashCode(this.value)
 
 fun test()

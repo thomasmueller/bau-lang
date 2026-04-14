@@ -8,10 +8,10 @@ fun newBitField(len int) BitField
     result.data = int[(len + 63) / 64]
     return result
 
-fun BitField set(index int)
+fun BitField.set(index int)
     data[index >> 6] |= 1 << (index & 0x3f)
 
-fun BitField get(index int) int
+fun BitField.get(index int) int
     return data[index >> 6] >> (index & 0x3f) & 1
 
 fun primeSum(limit int) int

@@ -7,10 +7,10 @@ fun openFile(fp int) File
     println('opening ' f.fp)
     return f
 
-fun File close()
+fun File.close()
     println('closing ' fp)
 
-fun File use()
+fun File.use()
     println('use ' fp)
 
 i := 0

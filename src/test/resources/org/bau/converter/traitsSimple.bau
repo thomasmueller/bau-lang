@@ -8,14 +8,14 @@ type Memory : Reader, Writer
     array int[]
     pos int
 
-fun Memory read() int
+fun Memory.read() int
     p : pos
     if p < 0 or p >= array.len
         return -1
     pos += 1
     return array[p]
 
-fun Memory write(x int)
+fun Memory.write(x int)
     p : pos
     if p < 0 or p >= array.len
         println('not writing to pos=' p)

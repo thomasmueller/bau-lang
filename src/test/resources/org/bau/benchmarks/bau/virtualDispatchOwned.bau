@@ -101,146 +101,145 @@ fun random(x i32, max i32) int
 type Variable owned: Expression
     value int
 
-fun Variable hash() int
+fun Variable.hash() int
     return value + 11
 
-fun Variable eval() int
+fun Variable.eval() int
     return value
 
-fun Variable store(v int)
+fun Variable.store(v int)
     value = v
 
 type NumberLiteral owned: Expression
 
-fun NumberLiteral hash() int
+fun NumberLiteral.hash() int
     return 12
 
-fun NumberLiteral eval() int
+fun NumberLiteral.eval() int
     return 2
 
 type StringLiteral owned: Expression
 
-fun StringLiteral hash() int
+fun StringLiteral.hash() int
     return 13
 
-fun StringLiteral eval() int
+fun StringLiteral.eval() int
     return 3
 
 type NewExpr owned: Expression
 
-fun NewExpr hash() int
+fun NewExpr.hash() int
     return 14
 
-fun NewExpr eval() int
+fun NewExpr.eval() int
     return 4
 
 type NullValue owned: Expression
 
-fun NullValue hash() int
+fun NullValue.hash() int
     return 15
 
-fun NullValue eval() int
+fun NullValue.eval() int
     return 5
 
 type ArrayAccess owned: Expression
 
-fun ArrayAccess hash() int
+fun ArrayAccess.hash() int
     return 16
 
-fun ArrayAccess eval() int
+fun ArrayAccess.eval() int
     return 6
 
 type Call owned: Expression
 
-fun Call hash() int
+fun Call.hash() int
     return 17
 
-fun Call eval() int
+fun Call.eval() int
     return 7
 
 type Operation owned: Expression
 
-fun Operation hash() int
+fun Operation.hash() int
     return 18
 
-fun Operation eval() int
+fun Operation.eval() int
     return 8
 
 type Comparison owned: Expression
 
-fun Comparison hash() int
+fun Comparison.hash() int
     return 19
 
-fun Comparison eval() int
+fun Comparison.eval() int
     return 9
 
 # ===== Statement Implementations =====
 
 type IfStmt owned: Statement
 
-fun IfStmt hash() int
+fun IfStmt.hash() int
     return 31
 
-fun IfStmt execute() int
+fun IfStmt.execute() int
     return 21
 
 type WhileStmt owned: Statement
 
-fun WhileStmt hash() int
+fun WhileStmt.hash() int
     return 32
 
-fun WhileStmt execute() int
+fun WhileStmt.execute() int
     return 22
 
 type DoWhileStmt owned: Statement
 
-fun DoWhileStmt hash() int
+fun DoWhileStmt.hash() int
     return 33
 
-fun DoWhileStmt execute() int
+fun DoWhileStmt.execute() int
     return 23
 
 type Assignment owned: Statement, Expression
     value int
 
-fun Assignment hash() int
+fun Assignment.hash() int
     return value + 34
 
-fun Assignment execute() int
+fun Assignment.execute() int
     return value + 24
     
-fun Assignment eval() int
+fun Assignment.eval() int
     return value + 25
     
 type SwitchStmt owned: Statement
 
-fun SwitchStmt hash() int
+fun SwitchStmt.hash() int
     return 36
 
-fun SwitchStmt execute() int
+fun SwitchStmt.execute() int
     return 26
 
 type ReturnStmt owned: Statement
 
-fun ReturnStmt hash() int
+fun ReturnStmt.hash() int
     return 37
 
-fun ReturnStmt execute() int
+fun ReturnStmt.execute() int
     return 27
 
 type BreakStmt owned: Statement
 
-fun BreakStmt hash() int
+fun BreakStmt.hash() int
     return 38
 
-fun BreakStmt execute() int
+fun BreakStmt.execute() int
     return 28
 
 type ContinueStmt owned: Statement
 
-fun ContinueStmt hash() int
+fun ContinueStmt.hash() int
     return 39
 
-fun ContinueStmt execute() int
+fun ContinueStmt.execute() int
     return 29
-

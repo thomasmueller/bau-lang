@@ -50,7 +50,7 @@ fun open(name i8[]) Sqlite?
     `)
     return result
 
-fun Sqlite execute(sql i8[])
+fun Sqlite.execute(sql i8[])
     if db == 0
         return
     native(`
@@ -67,7 +67,7 @@ fun Sqlite execute(sql i8[])
         sqlite3_exec(db, n, NULL, NULL, &errmsg);
     `)
 
-fun Sqlite prepare(sql i8[]) int
+fun Sqlite.prepare(sql i8[]) int
     if db == 0
         return 0
     result := 0
@@ -90,7 +90,7 @@ fun Sqlite prepare(sql i8[]) int
     `)
     return result
 
-fun Sqlite nextRow() int
+fun Sqlite.nextRow() int
     if db == 0 or stmt == 0
         return 0
     result := 0
@@ -102,7 +102,7 @@ fun Sqlite nextRow() int
     `)
     return result
 
-fun Sqlite getInt(column int) int
+fun Sqlite.getInt(column int) int
     if db == 0 or stmt == 0
         return 0
     result := 0
@@ -112,7 +112,7 @@ fun Sqlite getInt(column int) int
     `)
     return result
 
-fun Sqlite getString(column int) i8[]
+fun Sqlite.getString(column int) i8[]
     if db == 0 or stmt == 0
         return i8[0]
     result : i8[256]
@@ -135,7 +135,7 @@ fun Sqlite getString(column int) i8[]
         result2[i] = result[i]
     return result2
 
-fun Sqlite close()
+fun Sqlite.close()
     if db == 0
         return
     native(`
@@ -183,19 +183,19 @@ type Query(T)
     condition text
     orderBy text
 
-fun Sqlite from(T type) Query(T)
-    result : Query(T)(this, text(), text(), text())
+fun Sqlite.from(T type) Query(T)
+    result : Query(T, this, text(), text(), text())
     result.tableName = T.name
     return result
 
-fun Sqlite dropTable(T type)
+fun Sqlite.dropTable(T type)
     buff : newStringBuilder(16)
     buff.append('drop table if exists ')
     buff.append(T.name)
     sql : buff.toString().data
     this.execute(sql)
 
-fun Sqlite createTable(T type)
+fun Sqlite.createTable(T type)
     buff : newStringBuilder(16)
     buff.append('create table if not exists ')
     buff.append(T.name)
@@ -243,7 +243,7 @@ fun quote(s i8[]) i8[]
         copy[i] = result[i]
     return copy
 
-fun Sqlite insert(x T)
+fun Sqlite.insert(x T)
     buff : newStringBuilder(16)
     buff.append('insert into ')
     buff.append(T.name)
@@ -264,12 +264,12 @@ fun Sqlite insert(x T)
     sql : buff.toString().data
     this.execute(sql)
 
-fun Query(T) where(condition(T) int) macro Query(T)
+fun Query(T).where(condition(T) int) macro Query(T)
     this.condition = text()
     this.condition.data = condition.source
     return this
 
-fun Query(T) orderBy(column(T) U) macro Query(T)
+fun Query(T).orderBy(column(T) U) macro Query(T)
     this.orderBy = text()
     this.orderBy.data = column.source
     return this
@@ -290,7 +290,7 @@ fun cleanIt(expr i8[])
         expr[p + 1] = ord(' ')
         expr[p + 2] = ord(' ')
 
-fun Query(T) select() List(T)
+fun Query(T).select() List(T)
     buff : newStringBuilder(16)
     buff.append('select * from ')
     buff.append(tableName)

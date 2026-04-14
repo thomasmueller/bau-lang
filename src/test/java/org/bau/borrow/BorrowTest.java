@@ -37,7 +37,7 @@ public class BorrowTest {
                         fun clear(n Entry)
                             println('clear ' n.key)
 
-                        fun Entry print()
+                        fun Entry.print()
                             println('key: ' key ' value: ' value)
                         """).parse().format());
     }
@@ -62,7 +62,7 @@ public class BorrowTest {
                     fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry print()
+                    fun Entry.print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();
@@ -91,7 +91,7 @@ public class BorrowTest {
                     fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry print()
+                    fun Entry.print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();
@@ -122,7 +122,7 @@ public class BorrowTest {
                     fun clear(n Entry)
                         println('clear ' n.key)
 
-                    fun Entry print()
+                    fun Entry.print()
                         println('key: ' key ' value: ' value)
                     """).parse().toC();
             Assert.fail();

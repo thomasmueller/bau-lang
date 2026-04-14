@@ -19,7 +19,7 @@ type Token
     min int
     max int
 
-fun Token matchChar(text i8[], pos int) int throws exception
+fun Token.matchChar(text i8[], pos int) int throws exception
     if pos >= text.len
         return 0
     c := text[pos]

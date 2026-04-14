@@ -59,7 +59,7 @@ fun write8(d i8[], pos 0..d.len - 7, x int)
     d[pos + 6]! = x >> 48
     d[pos + 7]! = x >> 56
 
-fun XXHash update(buf i8[], start 0..buf.len, len int) i32
+fun XXHash.update(buf i8[], start 0..buf.len, len int) i32
     end : start + len
     pos := start
     if len >= 16
@@ -261,7 +261,7 @@ fun runLenCountSlow(data i8[], aLen 0..data.len - 7, ai int, bi int) int
         runLen += 1
     return runLen
 
-fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) int
+fun LZ4Compress.compressBlock(inData i8[], len int, outData i8[], outPos int) int
     if inData.len <= 16
         return -1
     if len >= inData.len - 7
@@ -422,7 +422,7 @@ fun LZ4Compress compressBlock(inData i8[], len int, outData i8[], outPos int) in
     return outPos
 
 ##
-fun LZ4Compress compressBlockSlow(inData i8[], len int, outData i8[], outPos int) int
+fun LZ4Compress.compressBlockSlow(inData i8[], len int, outData i8[], outPos int) int
     if inData.len <= 0
         return -1
     if len >= inData.len

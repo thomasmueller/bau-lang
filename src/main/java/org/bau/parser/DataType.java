@@ -82,6 +82,7 @@ public class DataType {
     public ArrayList<FullName> traitNames = new ArrayList<>();
     public ArrayList<DataType> traitTypes = new ArrayList<>();
     public HashSet<DataType> implementingTypes = new HashSet<>();
+    private boolean resolveTypes;
 
     public static boolean isGenericTypeName(String token) {
         while (token.endsWith("[]")) {
@@ -556,6 +557,10 @@ public class DataType {
     }
 
     public void resolveTypes(FunctionContext context) {
+        if (resolveTypes) {
+            return;
+        }
+        resolveTypes = true;
         for (int i = 0; i < fields.size(); i++) {
             Variable var = fields.get(i);
             Expression e = var.resolveTypes(context);

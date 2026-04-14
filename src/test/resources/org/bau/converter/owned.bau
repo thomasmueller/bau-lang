@@ -14,7 +14,7 @@ type Entry owned
 fun clear(n Entry)
     println('clear ' n.key)
 
-fun Entry print()
+fun Entry.print()
     println('key: ' key ' value: ' value)
 
 ## Expected

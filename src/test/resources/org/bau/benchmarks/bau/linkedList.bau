@@ -10,12 +10,10 @@ type Node owned
 
 fun createLinkedList(len int) Node
     i := len - 1
-    head := Node(null)
-    head.value = i
+    head := Node(i, null)
     loop i > 0
         i -= 1
-        n : Node(head)
-        n.value = i
+        n : Node(i, head)
         head = n
     return head
 

@@ -1,4 +1,4 @@
-fun T[] elements() T
+fun T[].elements() T
     if this.len
         i := 0..this.len
         loop
@@ -12,7 +12,7 @@ type pair(T)
     value T
 
 fun newPair(value T, index int) pair(T)
-    result : pair(T)()
+    result : pair(T)
     result.value = value
     result.i = index
     return result

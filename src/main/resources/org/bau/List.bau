@@ -7,15 +7,15 @@ type List(T)
 
 # Create a new list
 fun newList(T type) List(T)
-    result : List(T)()
+    result : List(T)
     result.array = T[4]
     return result
 
-fun List(T) len() int
+fun List(T).len() int
     return size
 
 # Append an entry to the list
-fun List(T) add(x T)
+fun List(T).add(x T)
     if size >= array.len
         n : T[array.len * 2]
         for i := until(array.len)
@@ -25,7 +25,7 @@ fun List(T) add(x T)
     size += 1
 
 # Insert an entry to the list at the given index
-fun List(T) add(index int, x T)
+fun List(T).add(index int, x T)
     if size >= array.len
         n : T[array.len * 2]
         for i := until(array.len)
@@ -38,12 +38,12 @@ fun List(T) add(index int, x T)
     array[index] = x
     size += 1
 
-fun List(T) remove(pos int)
+fun List(T).remove(pos int)
     loop pos < size - 1
         array[pos] = array[pos + 1]
         pos += 1
     size -= 1
     array[pos] = null
 
-fun List(T) get(x int) T?
+fun List(T).get(x int) T?
     return array[x]

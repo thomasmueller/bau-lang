@@ -3,7 +3,7 @@ fun when(condition int, a T, b T) T
         return a
     return b
 
-fun int then(a T, b T) const T
+fun int.then(a T, b T) const T
     if this
         return a
     return b

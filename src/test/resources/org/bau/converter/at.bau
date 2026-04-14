@@ -130,16 +130,16 @@ LIST: 10
 type Value
     list List(float)
 
-fun Value get(i int) float
+fun Value.get(i int) float
     return list.array[i]
 
-fun Value set(i int, x float)
+fun Value.set(i int, x float)
     list.array[i] = x
 
-fun Value add(x float)
+fun Value.add(x float)
     list.add(x)
 
-fun Value len() int
+fun Value.len() int
     return list.len()
 
 type Expr
@@ -181,26 +181,26 @@ fun newAt() At
     return At(global, local, functions, stack, out, code, token, value, returnValue)
 
 ##
- fun At set(name string, value Value)
+fun At.set(name string, value Value)
     global.put(hashCode(name.data), name, value)
 ##
 
-fun At get(map HashMap(string, Value), name string) Value?
+fun At.get(map HashMap(string, Value), name string) Value?
     return map.get(hashCode(name.data), name)
 
-fun At put(map HashMap(string, Value), name string, value Value)
+fun At.put(map HashMap(string, Value), name string, value Value)
     map.put(hashCode(name.data), name, value)
 
-fun At setFunction(name string, expr Expr)
+fun At.setFunction(name string, expr Expr)
     functions.put(hashCode(name.data), name, expr)
 
-fun At getFunction(name string) List(Expr)?
+fun At.getFunction(name string) List(Expr)?
     return functions.get(hashCode(name.data), name).list
 
-fun At hasFunction(name string) int
+fun At.hasFunction(name string) int
     return functions.get(hashCode(name.data), name) <> null
 
-fun At run(programCode i8[]) string
+fun At.run(programCode i8[]) string
     code = str(programCode)
     pos = 0
     counter = 100000
@@ -229,7 +229,7 @@ fun At run(programCode i8[]) string
         out.append(convertToString(result).data)
     return str(out.data)
 
-fun At parseExpr(min int) Expr
+fun At.parseExpr(min int) Expr
     prim := parsePrimary()
     loop
         power := -1
@@ -254,7 +254,7 @@ fun At parseExpr(min int) Expr
         prim = op
     return prim
 
-fun At parsePrimary() Expr
+fun At.parsePrimary() Expr
     v : value
     if token.data.len == 0
         return newExpr(LITERAL, '', valueOf(0))
@@ -311,13 +311,13 @@ fun At parsePrimary() Expr
         return e
     return newExpr(VARIABLE, id.data, valueOf(0))
 
-fun At match(a i8[], b i8[]) int
+fun At.match(a i8[], b i8[]) int
     if equals(token.data, a) or equals(token.data, b)
         read()
         return 1
     return 0
 
-fun At read()
+fun At.read()
     token = str('')
     loop pos < code.data.len
         c : code.charAt(pos)
@@ -379,7 +379,7 @@ fun At read()
         token = code.substring(start, pos)
 
 fun valueOf(v float) Value
-    list : List(float)()
+    list : List(float)
     list.array = float[1]
     list.size = 1
     list.array[0] = v
@@ -401,7 +401,7 @@ fun convertToString(array Value) string
             buff.append(c)
     return buff.toString()
 
-fun At runExpr(expr Expr) Value
+fun At.runExpr(expr Expr) Value
     result := valueOf(0)
     if expr == null
         return result
@@ -508,7 +508,7 @@ fun At runExpr(expr Expr) Value
         result = valueOf(operator(expr.name, 0, lo.get(0), r))
     return result
 
-fun At call(name string, argList Expr[]) Value
+fun At.call(name string, argList Expr[]) Value
     m : getFunction(name)
     if m == null
         return valueOf(0)
@@ -529,7 +529,7 @@ fun At call(name string, argList Expr[]) Value
         stack.remove(stack.size - 1)
     return result
 
-fun At operator(op string, precedence int, l float, r float) float
+fun At.operator(op string, precedence int, l float, r float) float
     if hasFunction(op) and not inOperator
         if precedence
             return 40

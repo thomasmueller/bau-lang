@@ -1,13 +1,11 @@
 import org.bau.File
 
-fun test()
-  file := File.openFile('hello.txt', 'r')
-  if not file
-      println('file not found')
-      return
-  data : i8[16]
-  file.read(data, 0, 15)
-  data[5] = 0
-  println(data)
-
-test()
+fun main()
+    file := File.openFile('hello.txt', 'r')
+    if not file
+        println('file not found')
+        return
+    data : i8[16]
+    file.read(data, 0, 15)
+    data[5] = 0
+    println(data)

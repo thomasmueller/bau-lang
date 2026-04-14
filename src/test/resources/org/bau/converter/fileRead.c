@@ -291,7 +291,6 @@ org_bau_File_File* org_bau_File_File_0();
 org_bau_File_File* org_bau_File_openFile_2(i8_array* name, i8_array* mode);
 void org_bau_File_File_close_1(org_bau_File_File* this);
 int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_t pos, int64_t len);
-void test_0();
 void i8_array_free(i8_array* x);
 void org_bau_File_File_free(org_bau_File_File* x);
 void i8_array_free_0(i8_array* x) {
@@ -363,23 +362,6 @@ int64_t org_bau_File_File_read_4(org_bau_File_File* this, i8_array* data, int64_
     }
     return 0;
 }
-void test_0() {
-    org_bau_File_File* file = org_bau_File_openFile_2(string_1010, string_1011);
-    if (!(file)) {
-        printf("file not found\n");
-        return;
-    }
-    i8_array* _t0 = i8_array_new(16);
-    _incUseStack(_t0);
-    i8_array* data = _t0;
-    int64_t _t1 = org_bau_File_File_read_4(file, data, 0, 15);
-    ;
-    data->data[5] = 0;
-    printf("%.*s\n", _arrayLen(data), data->data);
-    _decUseStack(data, i8_array);
-    _decUseStack(_t0, i8_array);
-    _decUseStack(file, org_bau_File_File);
-}
 void _main();
 int main(int _argc, char *_argv[]) {
     tmmalloc_init();
@@ -392,7 +374,21 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    test_0();
+    org_bau_File_File* file = org_bau_File_openFile_2(string_1010, string_1011);
+    if (!(file)) {
+        printf("file not found\n");
+        return;
+    }
+    i8_array* _t11 = i8_array_new(16);
+    _incUseStack(_t11);
+    i8_array* data = _t11;
+    int64_t _t12 = org_bau_File_File_read_4(file, data, 0, 15);
+    ;
+    data->data[5] = 0;
+    printf("%.*s\n", _arrayLen(data), data->data);
+    _decUseStack(data, i8_array);
+    _decUseStack(_t11, i8_array);
+    _decUseStack(file, org_bau_File_File);
     _end();
 }
 /*

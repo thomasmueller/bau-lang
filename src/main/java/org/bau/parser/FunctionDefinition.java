@@ -321,7 +321,7 @@ public class FunctionDefinition {
         }
         buff.append("fun ");
         if (callType != null) {
-            buff.append(callType.format()).append(' ');
+            buff.append(callType.format()).append('.');
         }
         buff.append(fullName.name);
         buff.append('(');

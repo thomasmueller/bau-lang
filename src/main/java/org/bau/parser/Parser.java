@@ -120,9 +120,12 @@ public class Parser {
     }
 
     public Program parse() {
-//        Parser2 p2 = new Parser2(text);
-//        Program prog2 = p2.parse();
-
+//        try {
+//            Parser2 p2 = new Parser2(text);
+//            Program prog2 = p2.parse();
+//        } catch (Throwable e) {
+//            e.printStackTrace(System.out);
+//        }
 
         readSpaces();
         Program program = parseProgram();
@@ -344,6 +347,8 @@ public class Parser {
                 }
             }
         }
+        // resolve early because we need to have the functions in the original types
+        type.resolveTypes(functionContext);
         readEndOfStatement();
         functionContext.rewindStack(stackPos);
         program.addComment("trait " + type.format(), comment);
@@ -665,8 +670,16 @@ public class Parser {
             if (!matchOp(")")) {
                 syntaxError("Expected ')', got '" + token + "' when reading a function definition template");
             }
+            if (!matchOp(".")) {
+                syntaxError("Expected '.' after the type, got '" + token + "'");
+            }
             parseTypeFunctionTemplate(defIndent, callType);
             return true;
+        }
+        if (callType != null) {
+            if (!matchOp(".")) {
+                syntaxError("Expected '.' after the type, got '" + token + "'");
+            }
         }
         if (currentFunctionDefinition != null) {
             throw new IllegalStateException();
@@ -967,7 +980,7 @@ public class Parser {
                 functionName = functionName.replace(find, replace);
             }
         }
-        buff.append(" " + functionName + "\n");
+        buff.append("." + functionName + "\n");
         buff.append(code);
         t.posOffset = lastPos;
         t.template += "\n" + buff.toString();
@@ -3375,14 +3388,59 @@ public class Parser {
                 // enums are processed when when evaluating types
             } else if (dataType != null) {
                 if (dataType.template != null) {
-                    ArrayList<DataType> params = parseTypeParameters(dataType, false);
-                    // if templates can be returned, then
-                    // we must not replace the types
+                    if (!matchOp("(")) {
+                        syntaxError("Type '" + dataType.name() + "' is a template; need to specify the parameters");
+                    }
+                    matchOp("\n");
+                    ArrayList<DataType> params = new ArrayList<>();
+                    for (int i = 0; i < dataType.parameters.size(); i++) {
+                        if (i > 0) {
+                            matchOp(",");
+                        }
+                        DataType t2 = readType(false);
+                        params.add(t2);
+                    }
                     dataType = parseTemplatedType(dataType, params);
                     // the name of the constructor includes the type names
                     n = dataType.name();
+                    if (matchOp(",")) {
+                        // constructor method call
+                        matchOp("\n");
+                        Call call = new Call();
+                        Expression expr = parseCall(null, m, n, call, true);
+                        return expr;
+                    } else if (")".equals(token)) {
+                        int rewind = lastPos;
+                        matchOp(")");
+                        if (matchOp("[")) {
+                            // arrayOfLists: List(int)[10]
+                            Expression arrayLength = parseExpression();
+                            if (arrayLength.canThrowException() != null) {
+                                syntaxError("May not throw an exception here");
+                            }
+                            if (!matchOp("]")) {
+                                syntaxError("Expected ')', got '" + token + "' in constructor");
+                            }
+                            New newExpr = new New(dataType.arrayType(), arrayLength);
+                            return newExpr;
+                        } else {
+                            // constructor method call: rewind
+                            pos = rewind;
+                            read();
+                            matchOp("\n");
+                            Call call = new Call();
+                            Expression expr = parseCall(null, m, n, call, true);
+                            return expr;
+                        }
+                    } else if (matchOp(",")) {
+                        // List(int, 10)
+                        Call call = new Call();
+                        Expression expr = parseCall(null, m, n, call, true);
+                        return expr;
+                    }
                 }
                 if (matchOp("[")) {
+                    // arrayOfLists: List(int)[10]
                     Expression arrayLength = parseExpression();
                     if (arrayLength.canThrowException() != null) {
                         syntaxError("May not throw an exception here");
@@ -3725,7 +3783,7 @@ public class Parser {
                     // block comment
                     pos++;
                     int len = 2;
-                    while (text.charAt(pos) == '#') {
+                    while (pos < text.length() && text.charAt(pos) == '#') {
                         pos++;
                         len++;
                     }
@@ -3912,7 +3970,7 @@ public class Parser {
         } else if (c == '`') {
             pos++;
             int len = 1;
-            while (text.charAt(pos) == '`') {
+            while (pos < text.length() && text.charAt(pos) == '`') {
                 pos++;
                 len++;
             }
@@ -3922,7 +3980,7 @@ public class Parser {
                     pos++;
                 }
                 int l2 = 0;
-                while (text.charAt(pos) == '`') {
+                while (pos < text.length() && text.charAt(pos) == '`') {
                     pos++;
                     l2++;
                 }

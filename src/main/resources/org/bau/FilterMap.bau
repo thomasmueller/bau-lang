@@ -6,14 +6,14 @@ type FilterMap(T)
     list List(T)
 
 fun from(T type) FilterMap(T)
-    return FilterMap(T)(List(T)())
+    return FilterMap(T, List(T))
 
-fun FilterMap(T) in(list List(T)) FilterMap(T)
+fun FilterMap(T).in(list List(T)) FilterMap(T)
     this.list = list
     return this
 
-fun FilterMap(T) where(condition(T) int) macro FilterMap(T)
-    result : List(T)()
+fun FilterMap(T).where(condition(T) int) macro FilterMap(T)
+    result : List(T)
     result.array = T[list.size]
     i := 0
     loop i < list.size
@@ -24,8 +24,8 @@ fun FilterMap(T) where(condition(T) int) macro FilterMap(T)
     this.list = result        
     return this
 
-fun FilterMap(T) map(expression(T) U) macro FilterMap(U)
-    result : List(U)()
+fun FilterMap(T).map(expression(T) U) macro FilterMap(U)
+    result : List(U)
     result.array = U[list.size]
     i := 0
     loop i < list.size
@@ -35,5 +35,5 @@ fun FilterMap(T) map(expression(T) U) macro FilterMap(U)
         i += 1
     return from(U).in(result)
 
-fun FilterMap(T) select() List(T)
+fun FilterMap(T).select() List(T)
     return this.list

@@ -33,7 +33,7 @@ fun fill(data int[])
 fun arrayOf(T type, entries T..) T[]
     return entries
 
-fun i8[] len() int
+fun i8[].len() int
   return this.len
 
 fun sum(a int, b int) int

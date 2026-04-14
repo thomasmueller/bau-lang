@@ -12,10 +12,10 @@ fun sum(a int, b int..) int
     sum += b[i]
   return sum
 
-fun int rotateRight(n int) int
+fun int.rotateRight(n int) int
     return (this >> n) | (this << (64 - n))
 
-fun float twice() float
+fun float.twice() float
     return this + this
 
 println(square(2) ' ' square(2 3))

@@ -62,7 +62,7 @@ fun main()
     {
         value: 'functionsOnTypes',
         label: 'Functions on Types',
-        code: `fun int square() int
+        code: `fun int.square() int
     return this * this
 
 println(12.square())
@@ -92,8 +92,8 @@ if data.len
         next : i + 1
         break next >= data.len
         i = next
- for j := until(data.len)
-    println('#' j ' = ' data[j])
+    for j := until(data.len)
+        println('#' j ' = ' data[j])
 `
     },
     {
@@ -154,7 +154,7 @@ for i := range(2_999_999_999, 3_000_000_002)
     {
         value: 'macros',
         label: 'Macros',
-        code: `fun if(cond int, a T, b T) macro T
+        code: `fun when(cond int, a T, b T) macro T
     if cond
         return a
     else
@@ -165,7 +165,7 @@ fun processMessage(a i8[]) i8[]
     return a
 
 for i := until(2)
-    x : if(i, processMessage('not zero'), processMessage('zero'))
+    x : when(i, processMessage('not zero'), processMessage('zero'))
     println(i ': ' x)
 `
     },

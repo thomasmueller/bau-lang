@@ -9,10 +9,10 @@ import org.bau.Arrays
 type string
     data i8[]
 
-fun string equals(other string) int
+fun string.equals(other string) int
     return equals(data, other.data)
 
-fun string len() int
+fun string.len() int
     return data.len
 
 fun indexOf(s i8[], find i8[], start int) int
@@ -67,13 +67,13 @@ fun newStringBuilder(len int) StringBuilder
     result.data = i8[len]
     return result
 
-fun StringBuilder len() int
+fun StringBuilder.len() int
     return len
 
-fun StringBuilder append(b i8[])
+fun StringBuilder.append(b i8[])
     append(b, 0, b.len)
 
-fun StringBuilder append(b i8[], start int, end int)
+fun StringBuilder.append(b i8[], start int, end int)
     add : end - start
     if start >= b.len or end < start or end > b.len
         return
@@ -86,7 +86,7 @@ fun StringBuilder append(b i8[], start int, end int)
         data[len + i] = b[start + i]
     len += add
 
-fun StringBuilder toString() string
+fun StringBuilder.toString() string
     return str(substring(data, 0, len))
 
 fun substring(s i8[], start int, end int) i8[]
@@ -109,10 +109,10 @@ fun substring(s i8[], start int, end int) i8[]
         i = next
     return result
 
-fun string substring(start int, end int) string
+fun string.substring(start int, end int) string
     return str(substring(this.data, start, end))
 
-fun string charAt(i int) int
+fun string.charAt(i int) int
     if i < 0 or i >= data.len
         return 0
     return data[i]
@@ -120,7 +120,7 @@ fun string charAt(i int) int
 fun substring(s i8[], start int) i8[]
     return substring(s, start, s.len)
 
-fun string substring(start int) string
+fun string.substring(start int) string
     return str(substring(this.data, start, this.data.len))
 
 fun replaceAll(s i8[], before i8[], after i8[]) i8[]

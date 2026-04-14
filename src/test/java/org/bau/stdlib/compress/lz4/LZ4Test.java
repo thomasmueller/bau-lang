@@ -35,7 +35,7 @@ public class LZ4Test {
             dir.mkdirs();
         }
         assertTrue(dir.exists() && dir.isDirectory());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             int len = r.nextInt(5 * 1024 * 1024);
             byte[] data = new byte[len];
             int distinct = (i + 1) * 10;

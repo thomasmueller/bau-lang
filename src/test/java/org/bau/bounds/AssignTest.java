@@ -17,7 +17,7 @@ public class AssignTest {
                     new Parser("""
                             type Value
                                 x int
-                            fun Value test(other Value)
+                            fun Value.test(other Value)
                                 this = other
                             """).parse().format());
         } catch (IllegalStateException e) {

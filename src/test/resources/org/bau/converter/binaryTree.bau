@@ -23,7 +23,7 @@ type Tree
     left Tree?
     right Tree?
 
-fun Tree nodeCount() int
+fun Tree.nodeCount() int
     result := 1
     # not-null conditions can only be on variable currently
     # (it is safer: fields values could change)

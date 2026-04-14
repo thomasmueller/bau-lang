@@ -20,7 +20,7 @@ public class ModuleTest {
                 type MemoryInput: Input
                     pos int
                     mem i8[]
-                fun MemoryInput read() int
+                fun MemoryInput.read() int
                     result : mem[pos]
                     pos += 1
                     return result
@@ -30,7 +30,7 @@ public class ModuleTest {
                     Input
                 type NullFile : Input
                     size int
-                fun NullFile read() int
+                fun NullFile.read() int
                     return 0
                 fun main()
                     x : NullFile()

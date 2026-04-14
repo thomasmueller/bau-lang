@@ -7,13 +7,13 @@ type HashMap(K, V)
     hashes int[]
 
 fun newHashMap(K type, V type) HashMap(K, V)
-    result : HashMap(K, V)()
+    result : HashMap(K, V)
     result.keys = K[4]
     result.values = V[4]
     result.hashes = int[4]
     return result
 
-fun HashMap(K, V) put(hash int, key K, value V)
+fun HashMap(K, V).put(hash int, key K, value V)
     if size * 2 >= keys.len
         kn : K[keys.len * 2]
         vn : V[keys.len * 2]
@@ -40,7 +40,7 @@ fun HashMap(K, V) put(hash int, key K, value V)
             return
         p = (p + 1) & (keys.len - 1)
 
-fun HashMap(K, V) get(hash int, key K) V?
+fun HashMap(K, V).get(hash int, key K) V?
     p := hash & (keys.len - 1)
     loop
         if hashes[p] == 0
@@ -49,7 +49,7 @@ fun HashMap(K, V) get(hash int, key K) V?
             return values[p]
         p = (p + 1) & (keys.len - 1)
 
-fun HashMap(K, V) remove(hash int, key K) int
+fun HashMap(K, V).remove(hash int, key K) int
     p := hash & (keys.len - 1)
     loop
         if hashes[p] == 0
