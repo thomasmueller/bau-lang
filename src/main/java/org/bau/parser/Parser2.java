@@ -18,7 +18,6 @@ import org.bau.parser.expr.NumberValue;
 import org.bau.parser.expr.Operation;
 import org.bau.parser.expr.Parentheses;
 import org.bau.parser.expr.StringLiteral;
-import org.bau.parser.expr.TernaryExpression;
 import org.bau.parser.expr.Variable;
 import org.bau.parser.stmt.Assignment;
 import org.bau.parser.stmt.Break;
@@ -46,7 +45,6 @@ public class Parser2 {
     private String lastComment;
     private int lastPos;
     private int indent;
-    private DataType exceptionType;
     // solver for array bound checks etc
     private Solver solver;
     // depth of blocks (indentation depth)
@@ -54,13 +52,11 @@ public class Parser2 {
     // the block id is is incremented for each if / elif / else block
     private Program program;
     private boolean isGlobalScope;
-    private int nextConstantId;
     private String module;
     // the stack starting position of the current loop (of the scope)
     private int stackPosLoop;
     // the stack starting position of the function
     // (after the parameters)
-    private int stackPosFunction;
     private FunctionDefinition currentFunctionDefinition;
     private final int posOffset;
     private int fileId;
@@ -90,9 +86,6 @@ public class Parser2 {
         readSpaces();
         Program program = parseProgram();
         return program.checkErrors();
-    }
-    private void syntaxError(String message, Exception e) {
-        program.syntaxError(fileId, lastPos + posOffset, message);
     }
     private void syntaxError(String message) {
         syntaxError(message, lastPos);
@@ -161,11 +154,9 @@ public class Parser2 {
         if (!match("module")) {
             return false;
         }
-        String id = readIdentifier();
-        String name = id;
+        readIdentifier();
         while (matchOp(".")) {
-            id = readIdentifier();
-            name += "." + id;
+            readIdentifier();
         }
         return true;
     }
@@ -179,11 +170,6 @@ public class Parser2 {
             id = readIdentifier();
             name += "." + id;
         }
-        boolean alreadyImported = false;
-        SourceFile f = program.getSourceFile(name);
-        if (f != null && f.isImported()) {
-            alreadyImported = true;
-        }
         int oldIndent = indent;
         readEndOfStatement();
         ArrayList<String> entries = new ArrayList<>();
@@ -195,9 +181,6 @@ public class Parser2 {
             }
         }
         program.addImport(module, name, id, entries);
-        for (String e : entries) {
-            Variable v = program.getGlobalVariable(name, e);
-        }
         return true;
     }
     private boolean parseTraitDefinition(String targetModule) {
@@ -269,11 +252,6 @@ public class Parser2 {
             while (true) {
                 String t = readIdentifier();
                 parameters.add(t);
-                String m = targetModule;
-                if (DataType.isGenericTypeName(t)) {
-                    m = "";
-                }
-                DataType type = DataType.newUndefined(new FullName(m, t));
                 template = true;
                 if (matchOp(")")) {
                     break;
@@ -405,22 +383,22 @@ public class Parser2 {
         return true;
     }
     private DataType readTypeInThisModule() {
-        String typeName = readIdentifier();
+        readIdentifier();
         if (matchOp("[")) {
             if (!matchOp("]")) {
                 syntaxError("Expected ']', got '" + token + "' when reading type");
             }
         }
         if (matchOp("(")) {
-            typeName += "(";
+            // typeName += "(";
             while(true) {
-                String param = readIdentifier();
-                typeName += param;
+                readIdentifier();
+                // typeName += param;
                 if (matchOp(")")) {
-                    typeName += ")";
+                    // typeName += ")";
                     break;
                 } else if (matchOp(",")) {
-                    typeName += ",";
+                    // typeName += ",";
                 }
             }
         }
@@ -431,7 +409,7 @@ public class Parser2 {
         if (!match("fun")) {
             return false;
         }
-        String comment = lastComment;
+        // String comment = lastComment;
         int defIndent = indent;
         isGlobalScope = false;
         int open = 0;
@@ -488,7 +466,6 @@ public class Parser2 {
         DataType ct = null;
         // stack position is before the "this" parameter
         // (which also may need to be incremented, if the function returns "this")
-        Variable thisVar = null;
         if (matchOp("(")) {
             matchOp("\n");
             name = methodName;
@@ -499,9 +476,6 @@ public class Parser2 {
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
         def.setLocation(program, module, fileId, location);
         def.callType = ct;
-        if (thisVar != null ) {
-            def.parameters.add(thisVar);
-        }
         currentFunctionDefinition = def;
         template = parseFunctionDeclaration(template, targetModule, def);
         for (Variable var : def.parameters) {
@@ -563,11 +537,7 @@ public class Parser2 {
                     template = true;
                     type = DataType.TYPE_TYPE;
                     templateTypes.add(name);
-                    String m = targetModule;
-                    if (DataType.isGenericTypeName(name)) {
-                        m = "";
-                    }
-                    DataType t = DataType.newUndefined(new FullName(m, name));
+                    // DataType t = DataType.newUndefined(new FullName(m, name));
                     // we change the variable name, because the name is already a type
                     Variable var = new Variable("_" + name, type);
                     def.parameters.add(var);
@@ -682,23 +652,23 @@ public class Parser2 {
                 return newType;
             }
         }
-        boolean borrow = false;
         if (matchOp("&")) {
-            borrow = true;
         }
         String name = readIdentifier();
         while (matchOp(".")) {
             name += "." + readIdentifier();
         }
         String m;
-        m = program.getImportModule(module, name);
-        if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
-            m = module;
-        }
+        m = program.getModulePath(module, name);
+        // m = program.getStaticImportModule(module, name);
+        // if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
+        //     m = module;
+        // }
+        m = "";
         DataType t = DataType.newUndefined(new FullName(m, name));
         if (matchOp("(")) {
             while(true) {
-                String param = readIdentifier();
+                readIdentifier();
                 if (matchOp(")")) {
                     break;
                 } else if (matchOp(",")) {
@@ -722,23 +692,6 @@ public class Parser2 {
             }
         }
         return t;
-    }
-    private ArrayList<DataType> parseTypeParameters(DataType t, boolean templatesOk) {
-        String name = t.name();
-        if (!matchOp("(")) {
-            syntaxError("Type '" + name + "' is a template; need to specify the parameters");
-        }
-        matchOp("\n");
-        ArrayList<DataType> params = new ArrayList<>();
-        for (int i = 0; i < t.parameters.size(); i++) {
-            DataType t2 = readType(templatesOk);
-            params.add(t2);
-            matchOp(",");
-        }
-        if (!matchOp(")")) {
-            syntaxError("Type '" + name + "' is a template; need to specify " + t.parameters.size() + " parameters");
-        }
-        return params;
     }
     private void parseStatement(ArrayList<Statement> target) {
         try {
@@ -843,7 +796,6 @@ public class Parser2 {
                     if (upperBound.canThrowException() != null) {
                         syntaxError("May not throw an exception here");
                     }
-                    String rangeTypeName = "0.." + upperBound.format();
                 }
                 for (String identifier : identifierList) {
                     Assignment s = new Assignment();
@@ -917,7 +869,8 @@ public class Parser2 {
                     return;
                 }
                 if (m == null || m.isEmpty()) {
-                    m = program.getImportModule(module, identifier);
+                    m = program.getModulePath(module, identifier);
+                    // m = program.getStaticImportModule(module, name);
                 }
                 Call call = new Call();
                 call.statement = true;
@@ -1175,153 +1128,19 @@ public class Parser2 {
         }
         syntaxError("Expected a statement, got '" + token + "'");
     }
-    private boolean needBoundsCheck(Expression base, Expression arrayIndex) {
-        Solver.Rule r = new Solver.Rule();
-        r.left = Operation.toSolverExpr(arrayIndex);
-        r.type = ">=";
-        r.right = Solver.number(0);
-        boolean largerEqualZero;
-        if (!r.isComplete()) {
-            largerEqualZero = false;
-        } else {
-            largerEqualZero = solver.isTrue(r);
-        }
-        r = new Solver.Rule();
-        r.left = Operation.toSolverExpr(arrayIndex);
-        r.type = "<";
-        FieldAccess f = new FieldAccess(base, "len", false, DataType.INT_TYPE);
-        r.right = Operation.toSolverExpr(f);
-        boolean smallerLen;
-        if (!r.isComplete()) {
-            smallerLen = false;
-        } else {
-            smallerLen = solver.isTrue(r);
-        }
-        boolean newResult = !largerEqualZero || !smallerLen;
-        return newResult;
-    }
     private void readEndOfStatement() {
         lastComment = null;
         if (token != null && !matchOp(";") && !matchOp("\n")) {
             syntaxError("Expected end of statement, got '" + token + "'");
         }
     }
-    private TernaryExpression expandMacro(Call call, FunctionDefinition def,
-            DataType type, ArrayList<Variable> params,
-            ArrayList<Expression> args) {
-        TernaryExpression ternary = new TernaryExpression();
-        ternary.type = type;
-        If ifStatement = null;
-        // replace all local variables, except for "it"
-        // (hygienic macros)
-        List<Variable> localVars = call.def.getDeclaredVariables();
-        Variable itVar = null;
-        for(Variable v : localVars) {
-            if (v.name().equals("it")) {
-                itVar = v;
-            }
-        }
-        if(itVar != null) {
-            localVars.remove(itVar);
-        }
-        ArrayList<Statement> list = def.list;
-        if (localVars.size() != 0) {
-            ArrayList<Variable> v2 = new ArrayList<>();
-            for (Variable old : localVars) {
-                Variable var = new Variable("_" + old.name(), old.type());
-                v2.add(var);
-            }
-            for (int j = 0; j < localVars.size(); j++) {
-                for (int i = 0; i < list.size(); i++) {
-                    Statement s = list.get(i);
-                    s = s.replace(localVars.get(j), v2.get(j));
-                    list.set(i, s);
-                }
-            }
-        }
-        if (list.size() == 2 && list.get(0) instanceof If) {
-            ifStatement = (If) list.get(0);
-            // the second block is the phi block
-        } else {
-            ifStatement = new If();
-            ifStatement.condition = NumberValue.valueOf(1);
-            ifStatement.thenList = list;
-        }
-        Expression condition = ifStatement.condition;
-        ternary.condition = replaceAll(condition, params, args);
-        if (def.callType != null) {
-            Assignment setThis = new Assignment();
-            // cannot use def.callType because it might be generic
-            DataType ct = call.args.get(0).type();
-            if (def.itType == null && ct.isArray()) {
-                def.itType = ct.baseType();
-            }
-            setThis.leftValue = new Variable("this", ct);
-            setThis.initial = true;
-            setThis.isConstant = true;
-            setThis.value = call.args.get(0);
-            ternary.ifTrueStatements.add(setThis);
-        }
-        List<Statement> ifTrue = ifStatement.thenList;
-        for (int i = 0; i < ifTrue.size(); i++) {
-            Statement s2 = ifTrue.get(i);
-            if (s2 instanceof Return) {
-                Return r = (Return) s2;
-                ternary.ifTrue = replaceAll(r.expr, params, args);
-                break;
-            }
-            s2 = replaceAll(s2, params, args);
-            ternary.ifTrueStatements.add(s2);
-        }
-        if (ifStatement.elseList != null) {
-            List<Statement> ifFalse = ifStatement.elseList;
-            for (int i = 0; i < ifFalse.size(); i++) {
-                Statement s2 = ifFalse.get(i);
-                if (s2 instanceof Return) {
-                    Return r = (Return) s2;
-                    ternary.ifFalse = replaceAll(r.expr, params, args);
-                    break;
-                }
-                s2 = replaceAll(s2, params, args);
-                ternary.ifFalseStatements.add(s2);
-            }
-        }
-        return ternary;
-    }
-    private static Expression replaceAll(Expression expr, ArrayList<Variable> params, ArrayList<Expression> args) {
-        ArrayList<Variable> newParams = new ArrayList<>();
-        for (Variable p : params) {
-            Variable v2 = new Variable("_" + p.name(), p.type());
-            newParams.add(v2);
-        }
-        for (int i = 0; i < params.size(); i++) {
-            expr = expr.replace(params.get(i), newParams.get(i));
-        }
-        for (int i = 0; i < newParams.size(); i++) {
-            expr = expr.replace(newParams.get(i), args.get(i));
-        }
-        return expr;
-    }
-    private static Statement replaceAll(Statement stat, ArrayList<Variable> params, ArrayList<Expression> args) {
-        ArrayList<Variable> newParams = new ArrayList<>();
-        for (Variable p : params) {
-            Variable v2 = new Variable("_" + p.name(), p.type());
-            newParams.add(v2);
-        }
-        for (int i = 0; i < params.size(); i++) {
-            stat = stat.replace(params.get(i), newParams.get(i));
-        }
-        for (int i = 0; i < newParams.size(); i++) {
-            stat = stat.replace(newParams.get(i), args.get(i));
-        }
-        return stat;
-    }
     private Expression parseCall(DataType type, String module, String identifier, Call call, boolean nonMacroCall) {
-        int callStart = lastPos - identifier.length();
-        int posOffset = lastPos;
+        // int callStart = lastPos - identifier.length();
+        // int posOffset = lastPos;
         if (type != null && (type.module() != null && !type.module().isEmpty())) {
             module = type.module();
         }
+        module = "";
         FunctionDefinition template = program.getFunctionTemplate(type, module, identifier);
         if (template == null) {
             template = program.getFunctionTemplate(type, "", identifier);
@@ -1344,11 +1163,11 @@ public class Parser2 {
         int pi = call.args.size(); // including 'this'
         int paramIndex = 0; // excluding 'this'
         if (template != null && template.macro) {
-            DataType itType = DataType.INT_TYPE;
-            if (template.itType != null) {
-                itType = template.itType;
-            }
-            Variable it = new Variable("it", itType);
+            // DataType itType = DataType.INT_TYPE;
+            // if (template.itType != null) {
+            //     itType = template.itType;
+            // }
+            // Variable it = new Variable("it", itType);
         }
         HashSet<String> templateTypes = new HashSet<>();
         while (true) {
@@ -1429,10 +1248,6 @@ public class Parser2 {
             paramIndex++;
         }
         if (template != null) {
-            String fullName = identifier;
-            for (String t : templateParams) {
-                fullName += "_" + t.replace('.', '_').replace("[]", "_array");
-            }
         } else {
         }
         // verify parameters with range restrictions
@@ -1734,9 +1549,8 @@ public class Parser2 {
         if (!matchOp(":=")) {
             syntaxError("Expected ':=', got '" + token + "' in 'for' statement");
         }
-        Call call = new Call();
-        Expression expr;
-            expr = parseExpressionPrimary();
+        // Call call = new Call();
+        Expression expr = parseExpressionPrimary();
         forStatement.generator = expr;
         boolean sameLine;
         if (matchOp("\n")) {
@@ -1911,7 +1725,8 @@ public class Parser2 {
             }
             String m = null;
             read();
-            m = program.getImportModule(module, n);
+            m = program.getModulePath(module, n);
+            // m = program.getStaticImportModule(module, name);
             if (m == null || m.isEmpty()) {
                 m = module;
                 // if there is no variable with this name, and
@@ -2045,7 +1860,7 @@ public class Parser2 {
             name = readIdentifier();
         }
         String m = module;
-        String m2 = program.getImport(module, name);
+        String m2 = program.getModulePath(module, name);
         if (m2 != null && !m2.isEmpty()) {
             m = m2;
         }

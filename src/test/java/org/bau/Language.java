@@ -5,9 +5,7 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-"list : List(int, 4)" instead of "list : List(int)(4)"
-
-change import system: not use fully qualified names; use aliases instead
+dependency management, specially versioning
 
 example code / prime numbers:
 https://news.ycombinator.com/item?id=47690609
@@ -23,12 +21,6 @@ https://buttondown.com/jaffray/archive/floyds-sampling-algorithm/
 
 selection algorithm:
 quickselect / https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm
-
-fast way to parse what is the module name
-(currently require that the module name is at the top)
-
-require "import" also for fully qualified modules?
-maybe it is not needed
 
 language server: collect line and column numbers for
     - done: type definitions

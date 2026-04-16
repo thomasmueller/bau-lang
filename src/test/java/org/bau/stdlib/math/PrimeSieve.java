@@ -42,4 +42,63 @@ public class PrimeSieve {
         return true;
     }
 
+    static int countTrailingZeros(long n) {
+        if (n == 0)
+            return 64;
+        return Long.numberOfTrailingZeros(n);
+    }
+
+    // https://www.jeremykun.com/2026/04/07/deterministic-miller-rabin/
+    public static boolean isPrime32(long n) {
+        long bases[] = { 2, 3, 5, 7 };
+        if (n < 2) {
+            return false;
+        }
+        if (n < 4) {
+            return true;
+        }
+        if ((n & 1) == 0) {
+            return false;
+        }
+        long d = n - 1;
+        int s = countTrailingZeros(d);
+        d = d >> s;
+        for (long a : bases) {
+            if (n <= a) {
+                break;
+            }
+            long x = modularExponentiation(a, d, n);
+            if (x == 1 || x == n - 1) {
+                continue;
+            }
+            boolean composite = true;
+            for (long r = 1; r < s; ++r) {
+                // Doesn't overflow because it is at most n < 32 bits
+                x = (x * x) % n;
+                if (x == n - 1) {
+                    composite = false;
+                    break;
+                }
+            }
+            if (composite)
+                return false;
+        }
+        return true;
+    }
+
+    private static long modularExponentiation(long base, long exponent, long modulus) {
+        long res = 1;
+        long b = base % modulus;
+        long e = exponent;
+        while (e > 0) {
+            if ((e & 1) != 0) {
+                // Doesn't overflow because we assume 32-bit integer inputs
+                res = (res * b) % modulus;
+            }
+            b = (b * b) % modulus;
+            e >>= 1;
+        }
+        return res;
+    }
+
 }

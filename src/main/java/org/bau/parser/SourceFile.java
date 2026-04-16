@@ -16,7 +16,7 @@ public class SourceFile {
     // map from module identifier to full module name
     private HashMap<String, String> imports = new HashMap<>();
     // map from type / method / constant identifier to module identifier
-    private HashMap<String, String> importEntries = new HashMap<>();
+    private HashMap<String, String> importedSymbols = new HashMap<>();
     private TreeMap<Integer, Object> elements = new TreeMap<>();
     private TreeMap<Integer, String> errors = new TreeMap<>();
     private boolean imported;
@@ -55,23 +55,27 @@ public class SourceFile {
         return sourceCode;
     }
 
-    public void addImport(String name, String as, ArrayList<String> entries) {
-        imports.put(as, name);
-        for (String e : entries) {
-            importEntries.put(e, name);
+    // eg. import com.acme.collections: acmeCollections { List; sort }
+    // modulePath: com.acme.collection
+    // moduleAlias: acmeCollections (or collections if not set)
+    // importedSymbolList: List, sort
+    public void addImport(String modulePath, String moduleAlias, ArrayList<String> symbolList) {
+        imports.put(moduleAlias, modulePath);
+        for (String e : symbolList) {
+            importedSymbols.put(e, modulePath);
         }
     }
 
-    public String getImportModule(String identifier) {
-        String m = importEntries.get(identifier);
+    public String getModulePathForSymbol(String identifier) {
+        String m = importedSymbols.get(identifier);
         if (m == null) {
-            m = "";
+            m = module;
         }
         return m;
     }
 
-    public String getImport(String as) {
-        return imports.get(as);
+    public String getModulePath(String moduleAlias) {
+        return imports.get(moduleAlias);
     }
 
     public boolean isImported() {

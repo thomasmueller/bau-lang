@@ -122,9 +122,9 @@ public class Parser {
     public Program parse() {
         try {
             Parser2 p2 = new Parser2(text);
-            Program prog2 = p2.parse();
+            p2.parse();
         } catch (Throwable e) {
-            // e.printStackTrace(System.out);
+            e.printStackTrace(System.out);
         }
 
         readSpaces();
@@ -183,6 +183,7 @@ public class Parser {
     }
 
     private void syntaxError(String message, Exception e) {
+        // e.printStackTrace(System.out);
         program.syntaxError(fileId, lastPos + posOffset, message);
     }
 
@@ -278,6 +279,9 @@ public class Parser {
         while (matchOp(".")) {
             id = readIdentifier();
             name += "." + id;
+        }
+        if (matchOp(":")) {
+            id = readIdentifier();
         }
         boolean alreadyImported = false;
         SourceFile f = program.getSourceFile(name);
@@ -1062,11 +1066,22 @@ public class Parser {
             borrow = true;
         }
         String name = readIdentifier();
-        while (matchOp(".")) {
-            name += "." + readIdentifier();
-        }
         String m;
-        m = program.getImportModule(module, name);
+        if (DataType.isGenericTypeName(name)) {
+            m = "";
+        } else {
+            if (matchOp(".")) {
+                String moduleAlias = name;
+                m = program.getModulePath(module, moduleAlias);
+                if (m == null) {
+                    syntaxError("Module '" + moduleAlias + "' not found");
+                    m = "";
+                }
+                name = readIdentifier();
+            } else {
+                m = program.getModulePathForSymbol(module, name);
+            }
+        }
         if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
             m = module;
         }
@@ -1135,7 +1150,14 @@ public class Parser {
             String code = t.template;
             ArrayList<String> with = new ArrayList<>();
             for (int i = 0; i < t.parameters.size(); i++) {
-                with.add(params.get(i).getFullName().getFullName());
+                FullName n = params.get(i).getFullName();
+                String m2 = n.module.replace('.', '_');
+                program.addImport(module, n.module, m2, new ArrayList<>());
+                String n2 = n.name;
+                if (!m2.isEmpty()) {
+                    n2 = m2 + "." + n2;
+                }
+                with.add(n2);
             }
             code = Templates.convertTemplate(code, t.parameters, with, program);
             code = "type " + typeId + "\n" + code;
@@ -1232,13 +1254,12 @@ public class Parser {
                 if (functionContext.getVariable(null, identifier1) == null &&
                         functionContext.getType(m, identifier1) == null &&
                         (thisVar == null || thisVar.type().getFieldDataType(identifier1) == null)) {
-                    while (matchOp(".")) {
-                        m = (m == module || m.equals(module)) ? identifier1 : m + "." + identifier1;
+                    if (matchOp(".")) {
+                        String moduleAlias = identifier1;
+                        m = program.getModulePath(module, moduleAlias);
                         identifier1 = readIdentifier();
-                    }
-                    String m2 = program.getImport(module, m);
-                    if (m2 != null && !m2.isEmpty()) {
-                        m = m2;
+                    } else {
+                        m = program.getModulePathForSymbol(module, identifier1);
                     }
                 }
                 identifierList.add(identifier1);
@@ -1299,7 +1320,8 @@ public class Parser {
                     if (targetType.isNullable() && targetType.equals(type.orNull())) {
                         type = targetType;
                     } else {
-                        syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
                 }
                 for (String identifier : identifierList) {
@@ -1363,7 +1385,8 @@ public class Parser {
                 if (targetType != null && !targetType.equals(expr.type())) {
                     Expression e = program.cast(expr, false, targetType);
                     if (e == null) {
-                        syntaxError("The type of the variable is different than the type of the expression, and there is no matching convert method");
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
                     expr = e;
                 }
@@ -1418,7 +1441,7 @@ public class Parser {
                     return;
                 }
                 if (m == null || m.isEmpty()) {
-                    m = program.getImportModule(module, identifier);
+                    m = program.getModulePathForSymbol(module, identifier);
                 }
                 Call call = new Call();
                 call.statement = true;
@@ -1465,10 +1488,12 @@ public class Parser {
                     expr = new NullValue(targetType);
                 }
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, false, targetType);
-                    if (expr == null) {
-                        syntaxError("The type of the variable is different than the type of the expression");
+                    Expression e = program.cast(expr, false, targetType);
+                    if (e == null) {
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
+                    expr = e;
                 }
                 s.value = expr;
                 boolean global = isGlobalScope;
@@ -1597,10 +1622,12 @@ public class Parser {
                 Expression expr = parseExpression();
                 expr = expr.writeStatements(this, false, target);
                 if (targetType != null && !targetType.equals(expr.type())) {
-                    expr = program.cast(expr, false, targetType);
-                    if (expr == null) {
-                        syntaxError("The type of the variable is different than the type of the expression");
+                    Expression e = program.cast(expr, false, targetType);
+                    if (e == null) {
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
+                    expr = e;
                 }
                 s.value = expr;
                 // this possibly updates the reference,
@@ -1633,7 +1660,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1650,7 +1678,8 @@ public class Parser {
                 s.type = s.value.type();
                 if (targetType != null) {
                     if (!targetType.equals(s.value.type())) {
-                        syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
                     if (!targetType.isFloatingPoint()) {
                         verifyNotZero(expr);
@@ -1671,7 +1700,8 @@ public class Parser {
                 s.type = s.value.type();
                 if (targetType != null) {
                     if (!targetType.equals(s.value.type())) {
-                        syntaxError("The type of the variable is different than the type of the expression");
+                        syntaxError("The type of the variable is different than the type of the expression; " +
+                                "target type " + targetType.format() + " expression type " + expr.type().format());
                     }
                     if (!targetType.isFloatingPoint()) {
                         verifyNotZero(expr);
@@ -1691,7 +1721,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1707,7 +1738,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1723,7 +1755,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1739,7 +1772,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1755,7 +1789,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1771,7 +1806,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -1787,7 +1823,8 @@ public class Parser {
                 s.value = expr;
                 s.type = s.value.type();
                 if (targetType != null && !targetType.equals(s.value.type())) {
-                    syntaxError("The type of the variable is different than the type of the expression");
+                    syntaxError("The type of the variable is different than the type of the expression; " +
+                            "target type " + targetType.format() + " expression type " + expr.type().format());
                 }
                 convertToExpandedForm(s);
                 verifyBounds(s);
@@ -2139,7 +2176,14 @@ public class Parser {
                     pName = pName.substring(1);
                 }
                 templateNames.add(pName);
-                templateParams.add(t.getFullName().getFullName());
+                FullName fn = t.getFullName();
+                String mn = fn.module.replace('.', '_');
+                program.addImport(module, fn.module, mn, new ArrayList<>());
+                String name = fn.name;
+                if (!mn.isEmpty()) {
+                    name = mn + "." + name;
+                }
+                templateParams.add(name);
                 // we add a dummy value for each type parameter,
                 // to simplify the parser a bit
                 Expression p = NumberValue.ZERO;
@@ -2165,7 +2209,14 @@ public class Parser {
                                 // generics on ranges are not supported
                                 pt = DataType.INT_TYPE;
                             }
-                            templateParams.add(pt.getFullName().getFullName());
+                            FullName fn = pt.getFullName();
+                            String mn = fn.module.replace('.', '_');
+                            program.addImport(module, fn.module, mn, new ArrayList<>());
+                            String name = fn.name;
+                            if (!mn.isEmpty()) {
+                                name = mn + "." + name;
+                            }
+                            templateParams.add(name);
                             if (t.isArray()) {
                                 // also replace the non-array version
                                 t = t.baseType();
@@ -3362,7 +3413,7 @@ public class Parser {
                 read();
             } else {
                 read();
-                m = program.getImportModule(module, n);
+                m = program.getModulePathForSymbol(module, n);
                 if (m == null || m.isEmpty()) {
                     m = module;
                     // if there is no variable with this name, and
@@ -3372,16 +3423,19 @@ public class Parser {
                     if (functionContext.getVariable(null, n) == null &&
                             functionContext.getType(m, n) == null &&
                             (thisVar == null || thisVar.type().getFieldDataType(n) == null)) {
-                        while (matchOp(".")) {
-                            m = m == module ? n : m + "." + n;
+                        if (matchOp(".")) {
+                            m = program.getModulePath(module, n);
                             n = readIdentifier();
-                        }
-                        String m2 = program.getImport(module, m);
-                        if (m2 != null) {
-                            m = m2;
+                        } else {
+                            m = program.getModulePathForSymbol(module, n);
                         }
                     }
                 }
+            }
+            String m2 = program.getModulePath(module, n);
+            if (m2 != null && matchOp(".")) {
+                m = m2;
+                n = readIdentifier();
             }
             DataType dataType = functionContext.getType(m, n);
             if (dataType != null && dataType.enumValues != null) {
@@ -3715,19 +3769,12 @@ public class Parser {
 
     private FullName readIdentifierWithPossibleModule() {
         String name = readIdentifier();
-        String module = "";
-        while (matchOp(".")) {
-            if (module.isEmpty()) {
-                module = name;
-            } else {
-                module = module + "." + name;
-            }
+        String m;
+        if (matchOp(".")) {
+            m = program.getModulePath(module, name);
             name = readIdentifier();
-        }
-        String m = module;
-        String m2 = program.getImport(module, name);
-        if (m2 != null && !m2.isEmpty()) {
-            m = m2;
+        } else {
+            m = program.getModulePathForSymbol(module, name);
         }
         return new FullName(m, name);
     }

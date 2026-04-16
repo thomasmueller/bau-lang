@@ -4,7 +4,7 @@ public class Utils {
 
     public static void assertTrue(boolean b) {
         if (!b) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Assertion failed");
         }
     }
 

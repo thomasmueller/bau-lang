@@ -1170,16 +1170,16 @@ public class Program {
         return ticksExecuted;
     }
 
-    public void addImport(String module, String name, String as, ArrayList<String> entries) {
-        getSourceFile(module).addImport(name, as, entries);
+    public void addImport(String targetModule, String modulePath, String moduleAlias, ArrayList<String> symbolList) {
+        getSourceFile(targetModule).addImport(modulePath, moduleAlias, symbolList);
     }
 
-    public String getImportModule(String module, String identifier) {
-        return getSourceFile(module).getImportModule(identifier);
+    public String getModulePathForSymbol(String targetModule, String symbol) {
+        return getSourceFile(targetModule).getModulePathForSymbol(symbol);
     }
 
-    public String getImport(String module, String as) {
-        return getSourceFile(module).getImport(as);
+    public String getModulePath(String module, String moduleAlias) {
+        return getSourceFile(module).getModulePath(moduleAlias);
     }
 
     public void addIncludeC(String file) {

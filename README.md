@@ -5,6 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-04-16: Syntax changed for module imports: module alias instead of fully qualified names.
 * 2026-04-14: Syntax changed for constructors on generic types: now the type is just a regular parameter (simplifying the grammar).
 * 2026-04-13: Syntax changed for member functions: now there is a dot after the type. Example: `fun Node.count() int` instead of `fun Node count() int`.
 * 2026-04-04: <a href="docsrc/macros.md#implementing-for-loop-functions">Improved `for` loops</a> to allow iterating over entries, or entries + index.
@@ -532,21 +533,25 @@ Unlike in other languages, there is no explicit
 ### Modules and Import
 
 `import` allows using types and functions from a module.
-The last part of the module name is the identifier.
-The module identifier can be omitted
-if the type, function, or constant is listed after `import`.
-The full module name can be used as well.
+The last part of the module name is the module identifier (for example `Math` below),
+which is used to access all types, functions, or constants in this module.
+The module identifier maybe be renamed (`AcmeMath` below) to resolve conflicts.
+Symbols of a module may be listed explicitly (`random`);
+the module identifier may then be omitted on usage:
 
+    import com.acme.Math: AcmeMath
+    import org.bau.Math
     import org.bau.Utils
         random
-    import org.bau.Math
-    println(random())
-    println(Utils.getNanoTime())
+
     println(Math.PI)
-    println(org.bau.Math.PI)
+    println(Utils.getNanoTime())
+    println(random())
+    println(Math.sqrt(2))
+    println(AcmeMath.sqrt(2))
 
 `module` defines a module. 
-The name needs to match the file path, here `org/bau/Math.bau`:
+The module name must match the file path, here `org/bau/Math.bau`:
 
     module org.bau.Math
     PI : 3.14159265358979323846
