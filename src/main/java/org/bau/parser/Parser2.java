@@ -121,9 +121,6 @@ public class Parser2 {
                 } else if (parseImport()) {
                     mainStatements = true;
                     // ok
-                } else if (parseModule()) {
-                    mainStatements = true;
-                    // ok
                 } else if (parseEnumDefinition()) {
                     mainStatements = true;
                     // ok
@@ -150,25 +147,20 @@ public class Parser2 {
         }
         return program;
     }
-    private boolean parseModule() {
-        if (!match("module")) {
-            return false;
-        }
-        readIdentifier();
-        while (matchOp(".")) {
-            readIdentifier();
-        }
-        return true;
-    }
     private boolean parseImport() {
         if (!match("import")) {
             return false;
         }
-        String id = readIdentifier();
-        String name = id;
+        // String id =
+        readIdentifier();
+        // String name = id;
         while (matchOp(".")) {
-            id = readIdentifier();
-            name += "." + id;
+            // id =
+            readIdentifier();
+            // name += "." + id;
+        }
+        if (matchOp(":")) {
+            readIdentifier();
         }
         int oldIndent = indent;
         readEndOfStatement();
@@ -180,7 +172,7 @@ public class Parser2 {
                 entries.add(entry);
             }
         }
-        program.addImport(module, name, id, entries);
+        // program.addImport(module, name, id, entries);
         return true;
     }
     private boolean parseTraitDefinition(String targetModule) {

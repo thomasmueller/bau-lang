@@ -1,4 +1,4 @@
-module org.bau.os.Signal
+# module org.bau.os.Signal
 
 enum signalId
     SIGHUP: 1

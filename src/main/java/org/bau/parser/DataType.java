@@ -609,6 +609,10 @@ public class DataType {
     public DataType resolve(Program program) {
         if (memoryType == MemoryType.UNDEFINED) {
             DataType t2 = program.getType(module(), name());
+            if (t2 == null) {
+                program.syntaxError(fileId, location, "Unknown type: '" + name() + "'");
+                return DataType.INT_TYPE;
+            }
             if (isNullable) {
                 return t2.orNull();
             } else if (isArray()) {

@@ -5,7 +5,16 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-dependency management, specially versioning
+public vs private
+Declaration     "-" means
+type            module-private
+function        module-private
+method          type-private
+field           type-private
+
+document what things are case sensitive
+
+dependency management, specially: versioning
 
 example code / prime numbers:
 https://news.ycombinator.com/item?id=47690609

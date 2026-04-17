@@ -1,4 +1,4 @@
-module org.bau.os.Sleep
+# module org.bau.os.Sleep
 
 fun sleep(millis int)
     if millis < 0

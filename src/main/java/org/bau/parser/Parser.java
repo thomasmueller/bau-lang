@@ -124,7 +124,7 @@ public class Parser {
             Parser2 p2 = new Parser2(text);
             p2.parse();
         } catch (Throwable e) {
-            e.printStackTrace(System.out);
+            // e.printStackTrace(System.out);
         }
 
         readSpaces();
@@ -223,9 +223,6 @@ public class Parser {
                 } else if (parseImport()) {
                     mainStatements = true;
                     // ok
-                } else if (parseModule()) {
-                    mainStatements = true;
-                    // ok
                 } else if (parseEnumDefinition()) {
                     mainStatements = true;
                     // ok
@@ -254,22 +251,6 @@ public class Parser {
         return program;
     }
 
-    private boolean parseModule() {
-        if (!match("module")) {
-            return false;
-        }
-        String id = readIdentifier();
-        String name = id;
-        while (matchOp(".")) {
-            id = readIdentifier();
-            name += "." + id;
-        }
-        if (!name.equals(module)) {
-            syntaxError("The module name '" + name + "' doesn't match the expected '" + module + "'");
-        }
-        return true;
-    }
-
     private boolean parseImport() {
         if (!match("import")) {
             return false;
@@ -295,8 +276,14 @@ public class Parser {
             if (!matchOp("\n")) {
                 String entry = readIdentifier();
                 readEndOfStatement();
+                if (!module.equals(program.getModulePathForSymbol(module, entry))) {
+                    syntaxError("Duplicate import for symbol '" + entry + "'");
+                }
                 entries.add(entry);
             }
+        }
+        if (program.getModulePath(module, id) != null) {
+            syntaxError("Duplicate import for module alias '" + id + "'; need to use an alias");
         }
         program.addImport(module, name, id, entries);
         if (!alreadyImported) {

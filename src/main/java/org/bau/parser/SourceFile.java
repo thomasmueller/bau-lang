@@ -135,6 +135,9 @@ public class SourceFile {
 
     public void syntaxError(int location, String message) {
         location = Math.min(location, sourceCode.length() - 1);
+        if (location < 0) {
+            location = 0;
+        }
         int lineStart = location;
         while (lineStart > 0 && sourceCode.charAt(lineStart - 1) != '\n') {
             lineStart--;

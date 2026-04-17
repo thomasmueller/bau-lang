@@ -1,5 +1,6 @@
 # Changes
 
+* 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 * 2026-03-20: Equality tests now use `==` instead of `=` for clarity.
 * 2026-03-20: Work-in-progress: <a href="docsrc/linq.md">support for LINQ</a>.
 * 2026-03-20: Support for map/filter (list comprehension) on generic types.

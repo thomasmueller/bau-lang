@@ -1,4 +1,4 @@
-module org.bau.Exception
+# module org.bau.Exception
 
 # An exception
 type exception

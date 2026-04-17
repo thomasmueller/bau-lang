@@ -1,4 +1,4 @@
-module org.bau.compress.Lz4
+# module org.bau.compress.Lz4
 
 BLOCK_SIZE : 4 * 1024 * 1024
 

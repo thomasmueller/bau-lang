@@ -1,4 +1,4 @@
-module org.bau.Locale
+# module org.bau.Locale
 
 type locale
     decimalPointChar int

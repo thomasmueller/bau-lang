@@ -1,4 +1,4 @@
-module org.bau.compress.Sr3
+# module org.bau.compress.Sr3
 
 import org.bau.File
     openFile

@@ -48,7 +48,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(type|enum|fun|import|module|const|macro|throws|trait)\b</string>
+			<string>\b(type|enum|fun|import|const|macro|throws|trait)\b</string>
 			<key>name</key>
 			<string>keyword.other.bau</string>
 		</dict>

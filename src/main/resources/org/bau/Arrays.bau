@@ -1,4 +1,4 @@
-module org.bau.Arrays
+# module org.bau.Arrays
 
 fun reverse(buff T[], first 0..buff.len, last 0..buff.len)
     loop first < last

@@ -1,4 +1,4 @@
-module org.bau.Debug
+# module org.bau.Debug
 
 fun debug(x T) macro T
     source : x.source

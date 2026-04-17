@@ -31,7 +31,7 @@
 			"name": "keyword.control.flow.bau"
 		},
 		{
-			"match": "\\b(type|enum|fun|import|module|const|macro|throws|trait)\\b",
+			"match": "\\b(type|enum|fun|import|const|macro|throws|trait)\\b",
 			"name": "keyword.other.bau"
 		},
 		{

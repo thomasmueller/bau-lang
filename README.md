@@ -5,12 +5,11 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* 2026-04-16: Syntax changed for module imports: module alias instead of fully qualified names.
+* 2026-04-17: Syntax changed for module imports: module alias instead of fully qualified names, and `module` keyword is gone.
 * 2026-04-14: Syntax changed for constructors on generic types: now the type is just a regular parameter (simplifying the grammar).
 * 2026-04-13: Syntax changed for member functions: now there is a dot after the type. Example: `fun Node.count() int` instead of `fun Node count() int`.
 * 2026-04-04: <a href="docsrc/macros.md#implementing-for-loop-functions">Improved `for` loops</a> to allow iterating over entries, or entries + index.
 * 2026-03-28: First complete <a href="docsrc/linq.md">LINQ (Language Integrated Query)</a> example using SQLite.
-* 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 
 For older changes see <a href="docsrc/changes.md">Change Log</a>
 
@@ -70,7 +69,7 @@ Built-in types and misc
 * `int` `i32` `i16` `i8`, `float` `f32`
 * `#` comment, `##` block comment
 * `fun` `type` `enum` `const` `macro`
-* `import` `module` `null`
+* `import` `null`
 * `()` `[]` `.` `..` `,` `'` `` ` `` `?`
 
 ### Constants, Variables
@@ -550,11 +549,9 @@ the module identifier may then be omitted on usage:
     println(Math.sqrt(2))
     println(AcmeMath.sqrt(2))
 
-`module` defines a module. 
-The module name must match the file path, here `org/bau/Math.bau`:
-
-    module org.bau.Math
-    PI : 3.14159265358979323846
+The module name must match the file path.
+For example, the module `com.acme.Math` refers to a file named `Math.bau`
+in the directory `com/acme`
 
 ### Custom Loops
 

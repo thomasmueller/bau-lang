@@ -1,4 +1,4 @@
-module org.bau.HashMap
+# module org.bau.HashMap
 
 type HashMap(K, V)
     size int

@@ -1,4 +1,5 @@
-module org.bau.Assert
+# module org.bau.Assert
+
 import org.bau.Env
 
 fun assert(x int) macro

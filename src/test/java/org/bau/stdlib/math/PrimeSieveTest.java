@@ -31,30 +31,25 @@ public class PrimeSieveTest {
         return sum;
     }
 
-    // @Test
+    @Test
     public void testLarger() {
-        int largeN = 1_000_000_000;
+        long largeN = Integer.MAX_VALUE;
         PrimeSieve sieve = PrimeSieve.generate((int) Math.sqrt(largeN));
-        long start = System.nanoTime();
-        long sum = 0;
-        for (int i = 1; i < largeN; i++) {
-            if (i % 100_000_000 == 0) {
-                long time = (System.nanoTime() - start) / i;
-                System.out.println(i + " " + time + " ns/op sum=" + sum);
+        // long start = System.nanoTime();
+        // long sum = 0;
+        for (long i = 1; i <= largeN; i += 1_000_000) {
+            if (i % 100_000_000 == 1) {
+                // long time = (System.nanoTime() - start) / i;
+                // System.out.println(i + " " + time + " ns/op sum=" + sum);
             }
-            // boolean expected = sieve.isPrime(i);
+            boolean expected = sieve.isPrime(i);
             boolean got = PrimeSieve.isPrime32(i);
-//            assertEquals(expected, got);
-            if (got) {
-                sum += i;
-            }
-//            assertEquals(expected, got);
-
-            // 100000000 84 ns/op sum=279209790387276
-            // 200000000 113 ns/op sum=1075207199997334
-//            if (expected) {
-//                sum += i;
-//            }
+            assertEquals(expected, got);
+            assertEquals(expected, got);
+            // if (expected) {
+            //     sum += i;
+            // }
         }
+        System.out.println("done");
     }
 }

@@ -321,7 +321,7 @@ public class BauLanguageServer {
             //     "params": {
             //         "textDocument": {
             //             "languageId": "bau",
-            //             "text": "module ..."
+            //             "text": "..."
             //             "uri": "file:///Users/mueller/data/bau/demo.bau",
             //             "version": 1
             //         }
@@ -454,6 +454,7 @@ public class BauLanguageServer {
     }
 
     private void compile(String uri, String text) {
+        // TODO module is no longer in the file
         int moduleStart = text.indexOf("module ");
         String module = "";
         if (moduleStart >= 0) {
