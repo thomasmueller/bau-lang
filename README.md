@@ -371,12 +371,15 @@ Types can have fields and functions:
     s : Square()
     a : s.area()
 
-`int` and other types that start with lowercase are copied when assigned
-(sometimes called `structs` in other languages);
-types that start with uppercase are referenced 
-(sometimes called `classes` in other languages).
+Types that start with lowercase are copied when assigned.
+They are called "value types" 
+(in other languages sometimes called struct types).
+One such example is `int`.
 
-If a type has a `close()` function, then it is called
+Types that start with uppercase are referenced when assigned.
+They are called "reference types" 
+(in other languages sometimes called object types, or classes).
+If a reference type has a `close()` function, then it is called
 before the memory is freed.
 
 For each type, a constructor is automatically added
@@ -472,7 +475,7 @@ Division by zero is not possible at runtime.
 
 ### Memory Management
 
-Objects are reference counted by default.
+Reference types are reference counted by default.
 To avoid cycles, explicitly set fields to `null`
 (there is no garbage collection).
 
