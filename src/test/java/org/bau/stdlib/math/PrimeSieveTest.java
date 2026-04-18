@@ -50,6 +50,5 @@ public class PrimeSieveTest {
             //     sum += i;
             // }
         }
-        System.out.println("done");
     }
 }
