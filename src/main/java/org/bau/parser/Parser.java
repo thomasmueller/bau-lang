@@ -120,11 +120,14 @@ public class Parser {
     }
 
     public Program parse() {
-        try {
-            Parser2 p2 = new Parser2(text);
-            p2.parse();
-        } catch (Throwable e) {
-            // e.printStackTrace(System.out);
+        Program prog2 = null;
+        if (module.isEmpty()) {
+            try {
+                Parser2 p2 = new Parser2(text);
+                prog2 = p2.parse();
+            } catch (Throwable e) {
+                e.printStackTrace(System.out);
+            }
         }
 
         readSpaces();
@@ -179,7 +182,15 @@ public class Parser {
                 }
             }
         }
-        return program.checkErrors();
+        Program prog = program.checkErrors();
+
+        if (module.isEmpty() && prog2 != null) {
+            SourceFile sf = prog.getSourceFile("");
+            SourceFile sf2 = prog2.getSourceFile("");
+            sf.copyElements(sf2);
+        }
+
+        return prog;
     }
 
     private void syntaxError(String message, Exception e) {

@@ -22,6 +22,8 @@ public class SourceFile {
     private boolean imported;
     private int errorCount;
 
+    private ArrayList<Import> importStatements = new ArrayList<>();
+
     SourceFile(int fileId, String module, String sourceCode) {
         Utils.assertTrue(module != null);
         this.fileId = fileId;
@@ -53,6 +55,10 @@ public class SourceFile {
 
     public String format() {
         return sourceCode;
+    }
+
+    public void addImportStatement(Import importStmt) {
+        importStatements.add(importStmt);
     }
 
     // eg. import com.acme.collections: acmeCollections { List; sort }
@@ -169,6 +175,14 @@ public class SourceFile {
             buff.append("\n");
         }
         return buff.toString();
+    }
+
+    public void copyElements(SourceFile source) {
+        for (Entry<Integer, Object> e : source.elements.entrySet()) {
+            if (elements.get(e.getKey()) == null) {
+                elements.put(e.getKey(), e.getValue());
+            }
+        }
     }
 
 }

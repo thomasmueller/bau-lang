@@ -94,6 +94,10 @@ public class DataType {
                 token.toUpperCase().equals(token);
     }
 
+    public static MemoryType getMemoryTypeFromName(String name) {
+        return name.charAt(0) > 'Z' ? MemoryType.COPY : MemoryType.REF_COUNT;
+    }
+
     public static DataType newUndefined(FullName fullName) {
         DataType result = newNonArray(fullName, 0, MemoryType.UNDEFINED);
         return result;

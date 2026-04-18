@@ -5,6 +5,41 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+Easy to resolve friction:
+  - Bit operation precedence differs from all other languages.
+    &, |, ^ have higher precedence than comparisons in Bau,
+    opposite to C, Java, Go, Rust, and Swift.
+    While arguably more mathematically correct,
+    this is a source of subtle bugs
+    when porting or mixing knowledge from other languages.
+
+collection comments while parsing, to allow formatting the source code
+
+Non-ignorable return values (e.g. "read(...)")
+
+Easy as Python:
+  - No closures or higher-order functions (deliberate omission)
+  - No string interpolation (deliberate omission)
+  - The : vs := distinction, while logical, is a new mental model
+  - Ownership/borrowing syntax adds complexity when needed for performance
+
+Missing Features:
+  - Multithreading
+  - Weak / Unowned references (or automatic reference cycle detection)
+  - Closures
+  - Coroutines/async (for I/O-bound workloads; web servers, file processing)
+
+Advantages
+ 1. Unique safety-at-compile-time trifecta: null, division-by-zero, and bounds are all prevented before running. No other compared language does all three by default.
+ 2. True "runs everywhere": Transpiling to C means embedded systems, servers, bare-metal, WebAssembly — wherever a C compiler exists. Java needs a JVM, Swift is Apple-centric, Go's runtime adds overhead.
+ 3. Predictable, deterministic performance: ARC + optional TmMalloc gives microsecond-level worst-case latency. Relevant for games, real-time systems, audio DSP — anywhere GC pauses (25ms for Go, 14ms for Java) are unacceptable.
+ 4. Macros that are actually usable: Unlike C macros (text substitution) or Rust macros (syntactically complex), Bau macros look like regular functions and have access to AST, source code, and variable values. The LINQ implementation is
+  built entirely from macros — a compelling demonstration.
+ 5. Conciseness Python developers will find comfortable: The benchmark-backed syntactic metrics are a rare honest self-evaluation. The indentation model, optional commas, and and/or/not keywords are genuinely learner-friendly.
+ 6. No separate boolean type: reduces the type surface area without real loss; comparisons yield int (1/0), consistent with C tradition.
+
+
+
 public vs private
 Declaration     "-" means
 type            module-private

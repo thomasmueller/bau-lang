@@ -1432,6 +1432,10 @@ public class Program {
         } else if (obj instanceof FunctionDefinition) {
             FunctionDefinition def = (FunctionDefinition) obj;
             result = "Function **" + def.toHeaderString().trim() + "**\n";
+        } else if (obj instanceof Import) {
+            Import def = (Import) obj;
+            result = "Import **" + def.format() + "**\n";
+
         } else {
             result = null;
         }

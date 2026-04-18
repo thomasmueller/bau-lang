@@ -45,11 +45,6 @@ public class Parser2 {
     private String lastComment;
     private int lastPos;
     private int indent;
-    // solver for array bound checks etc
-    private Solver solver;
-    // depth of blocks (indentation depth)
-    private int depth;
-    // the block id is is incremented for each if / elif / else block
     private Program program;
     private boolean isGlobalScope;
     private String module;
@@ -60,16 +55,17 @@ public class Parser2 {
     private FunctionDefinition currentFunctionDefinition;
     private final int posOffset;
     private int fileId;
-    String text;
-    TokenType type;
-    String token;
-    int pos;
-    public boolean isImport;
-    public Parser2(Map<String, String> modules, String text) {
-        this(new Program(modules), "", text, 0);
-    }
+    private String text;
+    private TokenType type;
+    private String token;
+    private int pos;
+    private boolean isImport;
+    private boolean hasExplicitMainFunction;
     public Parser2(String text) {
         this(new Program(Map.of()), "", text, 0);
+    }
+    public Parser2(Map<String, String> modules, String text) {
+        this(new Program(modules), "", text, 0);
     }
     public Parser2(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
@@ -80,7 +76,6 @@ public class Parser2 {
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.posOffset = posOffset;
-        this.solver = new Solver(program.getSolver());
     }
     public Program parse() {
         readSpaces();
@@ -109,13 +104,13 @@ public class Parser2 {
                 if (type == TokenType.END) {
                     break;
                 }
-                if (parseFunctionDefinition(module)) {
+                if (parseFunctionDefinition()) {
                     mainStatements = true;
                     // ok
-                } else if (parseTypeDefinition(module)) {
+                } else if (parseTypeDefinition()) {
                     mainStatements = true;
                     // ok
-                } else if (parseTraitDefinition(module)) {
+                } else if (parseTraitDefinition()) {
                     mainStatements = true;
                     // ok
                 } else if (parseImport()) {
@@ -125,8 +120,8 @@ public class Parser2 {
                     mainStatements = true;
                     // ok
                 } else {
-                    if (mainStatements && (module == null || module.isEmpty()) && program.getFunctionIfExists(null, "", "main", 0) == null) {
-                        // there is no main yet: we thread the statements as a main function
+                    if (mainStatements && module.isEmpty() && !hasExplicitMainFunction) {
+                        // there is no main yet: we treat the statements as a main function
                         pos = lastPos;
                         String mainCode = parseBlock(-1);
                         FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
@@ -151,43 +146,116 @@ public class Parser2 {
         if (!match("import")) {
             return false;
         }
-        // String id =
-        readIdentifier();
-        // String name = id;
+        String id = readIdentifier();
+        int location = lastPos - id.length();
+        String name = id;
         while (matchOp(".")) {
-            // id =
-            readIdentifier();
-            // name += "." + id;
+            id = readIdentifier();
+            name += "." + id;
         }
         if (matchOp(":")) {
-            readIdentifier();
+            id = readIdentifier();
         }
+        Import importStmt = new Import(name, id);
+        importStmt.setLocation(program, module, fileId, location);
         int oldIndent = indent;
         readEndOfStatement();
-        ArrayList<String> entries = new ArrayList<>();
+        ArrayList<String> symbolList = new ArrayList<>();
         while (indent > oldIndent) {
             if (!matchOp("\n")) {
                 String entry = readIdentifier();
+                int locationSymbol = lastPos - entry.length();
+                importStmt.addSymbol(entry, locationSymbol);
                 readEndOfStatement();
-                entries.add(entry);
             }
         }
-        // program.addImport(module, name, id, entries);
+        program.getSourceFile(module).addImportStatement(importStmt);
+        program.getSourceFile(module).addImport(id, name, symbolList);
         return true;
     }
-    private boolean parseTraitDefinition(String targetModule) {
+    private boolean parseTypeDefinition() {
+        if (!match("type")) {
+            return false;
+        }
+        int defIndent = indent;
+        String comment = lastComment;
+        lastComment = null;
+        String name = readIdentifier();
+        if (name.length() < 2) {
+            syntaxError("Type name '" + name + "' is too short, needs to be at least 2 characters");
+        }
+        int location = lastPos - name.length();
+        ArrayList<String> parameters = new ArrayList<>();
+        if (matchOp("(")) {
+            matchOp("\n");
+            while (true) {
+                String t = readIdentifier();
+                if (!DataType.isGenericTypeName(t)) {
+                    syntaxError("Only generic type parameters are supported, got '" + t + "'");
+                }
+                parameters.add(t);
+                if (matchOp(")")) {
+                    break;
+                }
+                if (!matchOp(",")) {
+                    break;
+                }
+            }
+        }
+        boolean owned = match("owned");
+        ArrayList<FullName> traitNames = new ArrayList<>();
+        if (matchOp(":")) {
+            while (true) {
+                FullName n = readIdentifierWithPossibleModule();
+                traitNames.add(n);
+                if (!matchOp(",")) {
+                    break;
+                }
+            }
+        }
+        readEndOfStatement();
+        MemoryType memoryType = DataType.getMemoryTypeFromName(name);
+        if (owned) {
+            if (memoryType == MemoryType.COPY) {
+                syntaxError("Value types can not be owned");
+            }
+            memoryType = MemoryType.OWNER;
+        }
+        DataType type = DataType.newRegularType(new FullName(module, name), 0, memoryType);
+        type.setLocation(program, module, fileId, location);
+        ArrayList<Variable> fields = new ArrayList<>();
+        while (indent > defIndent) {
+            if (!matchOp("\n")) {
+                String fieldName = readIdentifier();
+                DataType fieldType = readType(false);
+                readEndOfStatement();
+                Variable var = new Variable(fieldName, fieldType);
+                fields.add(var);
+            }
+        }
+        type.addFields(fields);
+        if (!parameters.isEmpty()) {
+            type.parameters = parameters;
+        }
+        type.traitNames.addAll(traitNames);
+        program.addType(type);
+        program.addComment("type " + type.format(), comment);
+        return true;
+    }
+    private boolean parseTraitDefinition() {
         if (!match("trait")) {
             return false;
         }
         int defIndent = indent;
         String comment = lastComment;
+        lastComment = null;
         String name = readIdentifier();
         int location = lastPos - name.length();
         boolean owned = match("owned");
         MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
-        DataType type = DataType.newTraitType(new FullName(targetModule, name), memoryType);
+        DataType type = DataType.newTraitType(new FullName(module, name), memoryType);
         type.setLocation(program, module, fileId, location);
-        FullName traitName = new FullName(targetModule, name);
+        FullName traitName = new FullName(module, name);
         type.setTraitDefinition(new Trait(traitName));
         if (matchOp(":")) {
             while (true) {
@@ -210,7 +278,7 @@ public class Parser2 {
                 Variable var = new Variable("this", type);
                 var.setConstantValue(null);
                 def.parameters.add(var);
-                boolean template = parseFunctionDeclaration(false, targetModule, def);
+                boolean template = parseFunctionDeclaration(false, def);
                 if (template) {
                     syntaxError("Template are not supported in traits");
                 }
@@ -220,103 +288,6 @@ public class Parser2 {
         }
         program.addType(type);
         return true;
-    }
-    /**
-     * @param targetModule the module of the function
-     * (eg when parsing a List<String>, the target module is the module of List, not String)
-     * @return
-     */
-    private boolean parseTypeDefinition(String targetModule) {
-        if (!match("type")) {
-            return false;
-        }
-        int defIndent = indent;
-        String comment = lastComment;
-        String name = readIdentifier();
-        if (name.length() < 2) {
-            syntaxError("Type name '" + name + "' is too short, needs to be at least 2 characters");
-        }
-        int location = lastPos - name.length();
-        boolean template = false;
-        ArrayList<String> parameters = new ArrayList<>();
-        if (matchOp("(")) {
-            matchOp("\n");
-            while (true) {
-                String t = readIdentifier();
-                parameters.add(t);
-                template = true;
-                if (matchOp(")")) {
-                    break;
-                }
-                if (!matchOp(",")) {
-                    break;
-                }
-            }
-        }
-        boolean owned = match("owned");
-        int sizeOf = 0;
-        ArrayList<FullName> traitNames = new ArrayList<>();
-        if (matchOp(":")) {
-            while (true) {
-                FullName n = readIdentifierWithPossibleModule();
-                traitNames.add(n);
-                if (!matchOp(",")) {
-                    break;
-                }
-            }
-        }
-        readEndOfStatement();
-        if (template) {
-            parseTypeTemplate(defIndent, name, parameters, comment, location);
-            return true;
-        }
-        MemoryType memoryType = name.charAt(0) > 'Z' ? MemoryType.COPY : MemoryType.REF_COUNT;
-        if (owned) {
-            if (memoryType == MemoryType.COPY) {
-                syntaxError("Value types can not be owned");
-            }
-            memoryType = MemoryType.OWNER;
-        }
-        DataType type = DataType.newRegularType(new FullName(targetModule, name), sizeOf, memoryType);
-        type.setLocation(program, module, fileId, location);
-        // need to add it first, because one of the fields could be of this type
-        program.addType(type);
-        String title = "type " + type.format();
-        if (memoryType == MemoryType.OWNER) {
-            title += " owned";
-        }
-        program.addComment(title, comment);
-        lastComment = null;
-        ArrayList<Variable> fields = new ArrayList<>();
-        while (indent > defIndent) {
-            if (!matchOp("\n")) {
-                String fieldName = readIdentifier();
-                DataType fieldType = readType(false);
-                readEndOfStatement();
-                sizeOf += fieldType.sizeOf();
-                Variable var = new Variable(fieldName, fieldType);
-                fields.add(var);
-            }
-        }
-        type.addFields(fields);
-        if (!parameters.isEmpty()) {
-            type.parameters = parameters;
-        }
-        type.traitNames.addAll(traitNames);
-        return true;
-    }
-    private void parseTypeTemplate(int defIndent, String name, ArrayList<String> parameters, String comment, int location) {
-        int lastPos = pos;
-        String code = parseBlock(defIndent);
-        DataType type = DataType.newUndefined(new FullName(module, name));
-        type.setLocation(program, module, fileId, location);
-        type.parameters = parameters;
-        type.posOffset = lastPos;
-        type.template = code;
-        lastComment = null;
-        program.addComment("type " + type.format(), comment);
-        lastComment = null;
-        program.addType(type);
     }
     private String parseBlock(int defIndent) {
         int pos = lastPos;
@@ -343,6 +314,7 @@ public class Parser2 {
             return false;
         }
         String comment = lastComment;
+        lastComment = null;
         int defIndent = indent;
         String id = readIdentifier();
         if (id.length() < 2) {
@@ -371,7 +343,6 @@ public class Parser2 {
         type.enumExpressions = entries;
         program.addType(type);
         program.addComment("enum " + type.format(), comment);
-        lastComment = null;
         return true;
     }
     private DataType readTypeInThisModule() {
@@ -396,17 +367,18 @@ public class Parser2 {
         }
         return DataType.UNKNOWN;
     }
-    private boolean parseFunctionDefinition(String targetModule) {
+    private boolean parseFunctionDefinition() {
         int startParse = lastPos;
         if (!match("fun")) {
             return false;
         }
-        // String comment = lastComment;
+        String comment = lastComment;
+        lastComment = null;
         int defIndent = indent;
         isGlobalScope = false;
         int open = 0;
         boolean functionOnType = false;
-        String methodName = "?";
+        String methodName = "";
         String lastIdentifier = null;
         while(true) {
             if (matchOp("(")) {
@@ -436,7 +408,11 @@ public class Parser2 {
                 break;
             }
         }
+        if (module.isEmpty() && methodName.equals("main")) {
+            hasExplicitMainFunction = true;
+        }
         DataType callType = DataType.UNKNOWN;
+        int location = -1;
         if (functionOnType) {
             pos = startParse;
             read();
@@ -451,33 +427,22 @@ public class Parser2 {
             match("fun");
         }
         methodName = readIdentifier();
-        int location = -1;
-        boolean template = false; // DataType.isGenericTypeName(token);
-        String module = targetModule;
+        location = lastPos - methodName.length();
+        boolean template = DataType.isGenericTypeName(token);
         String name;
-        DataType ct = null;
-        // stack position is before the "this" parameter
-        // (which also may need to be incremented, if the function returns "this")
         if (matchOp("(")) {
             matchOp("\n");
             name = methodName;
         } else {
             syntaxError("Expected '(', got '" + token + "' when reading a function definition");
-            name = "x";
+            name = "";
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
+        def.callType = callType;
         def.setLocation(program, module, fileId, location);
-        def.callType = ct;
         currentFunctionDefinition = def;
-        template = parseFunctionDeclaration(template, targetModule, def);
-        for (Variable var : def.parameters) {
-            if (var.name().equals("this") && var.isConstant()) {
-                // "this" is not null (if it is constant, which allows "this" to be a parameter for other functions)
-            } else if (var.type().memoryType() == MemoryType.OWNER) {
-                // not null, until used
-            }
-        }
-        startBlock(false, null);
+        template = parseFunctionDeclaration(template, def);
+        startBlock();
         while (true) {
             if (indent <= defIndent || type == TokenType.END) {
                 break;
@@ -485,21 +450,16 @@ public class Parser2 {
             parseStatement(def.list);
         }
         if (def.exceptionType != null && def.returnType == null) {
+            // TODO should not do that here
             def.list.add(new Return(null));
         }
         endBlock();
-        if (depth != 0) {
-            throw new IllegalStateException();
-        }
-        solver.clear();
         currentFunctionDefinition = null;
-        if (def.macro) {
-            Templates.checkMacroFunction(def);
-            program.addFunctionTemplate(callType, module, def.getFullName().name, def);
-        }
+        // program.addFunction(def);
+        program.addComment("fun " + def.format(), comment);
         return true;
     }
-    private boolean parseFunctionDeclaration(boolean template, String targetModule, FunctionDefinition def) {
+    private boolean parseFunctionDeclaration(boolean template, FunctionDefinition def) {
         boolean varArgs = false;
         DataType itType = null;
         if (!matchOp(")")) {
@@ -540,9 +500,6 @@ public class Parser2 {
                         type = type.arrayType();
                     }
                     Variable var = new Variable(name, type);
-                    if (type.isRange()) {
-                        setRangeBounds(var);
-                    }
                     if (type.memoryType() == MemoryType.OWNER) {
                         if (varArgs) {
                             syntaxError("Owned var-args are not supported");
@@ -587,8 +544,6 @@ public class Parser2 {
                 if (match("throws")) {
                     def.exceptionType = readType(false);
                 }
-            }
-            if (def.exceptionType != null) {
             }
             readEndOfStatement();
         }
@@ -647,20 +602,15 @@ public class Parser2 {
         if (matchOp("&")) {
         }
         String name = readIdentifier();
-        while (matchOp(".")) {
-            name += "." + readIdentifier();
+        String moduleName = module;
+        if (matchOp(".")) {
+            moduleName = name;
+            name += readIdentifier();
         }
-        String m;
-        m = program.getModulePath(module, name);
-        // m = program.getStaticImportModule(module, name);
-        // if (m.isEmpty() && !DataType.isGenericTypeName(name)) {
-        //     m = module;
-        // }
-        m = "";
-        DataType t = DataType.newUndefined(new FullName(m, name));
+        DataType t = DataType.newUndefined(new FullName(moduleName, name));
         if (matchOp("(")) {
             while(true) {
-                readIdentifier();
+                readType(true, true);
                 if (matchOp(")")) {
                     break;
                 } else if (matchOp(",")) {
@@ -678,7 +628,6 @@ public class Parser2 {
                 syntaxError("Arrays can't be null (but they can be empty)");
             } else if (t.isCopyType()) {
                 // ignore, to support templates
-                // syntaxError("Numbers and value types can't be be null (but the value can be zero)");
             } else {
                 t = t.orNull();
             }
@@ -1257,7 +1206,6 @@ public class Parser2 {
                 syntaxError("The function does not return an expression of type " + currentFunctionDefinition.returnType.format());
             }
             target.add(b);
-            negateLastBlockCondition();
             return;
         }
         // if it is not a simple value  (e.g. string1 + string2)
@@ -1266,7 +1214,6 @@ public class Parser2 {
         if (currentFunctionDefinition.returnType == null) {
             syntaxError("The function declared to not return a value");
         }
-        negateLastBlockCondition();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
             return;
@@ -1309,7 +1256,6 @@ public class Parser2 {
         Throw t = new Throw();
         if (matchOp("\n") || matchOp(";")) {
             target.add(t);
-            negateLastBlockCondition();
             return;
         }
         t.expr = parseExpression(target);
@@ -1319,7 +1265,6 @@ public class Parser2 {
         // declared in the function
         if (matchOp("\n") || matchOp(";")) {
             target.add(t);
-            negateLastBlockCondition();
             return;
         }
         syntaxError("Expected end of statement, got '" + token + "' in 'throw' statement");
@@ -1328,7 +1273,6 @@ public class Parser2 {
         Break b = new Break();
         if (matchOp("\n") || matchOp(";")) {
             target.add(b);
-            negateLastBlockCondition();
             return;
         }
         b.condition = parseCondition(target);
@@ -1342,7 +1286,6 @@ public class Parser2 {
         Continue c = new Continue();
         if (matchOp("\n") || matchOp(";")) {
             target.add(c);
-            negateLastBlockCondition();
             return;
         }
         c.condition = parseCondition(target);
@@ -1407,7 +1350,7 @@ public class Parser2 {
                 if (!first) {
                     endBlock();
                 }
-                startBlock(false, condition);
+                startBlock();
                 if (!first) {
                     If elseIf = new If();
                     ArrayList<Statement> list = new ArrayList<>();
@@ -1424,7 +1367,7 @@ public class Parser2 {
                     syntaxError("Expected end of statement, got '" + token + "' in 'switch' statement");
                 }
                 endBlock();
-                startBlock(false, null);
+                startBlock();
                 first = false;
                 elsePart = true;
             } else {
@@ -1452,7 +1395,7 @@ public class Parser2 {
         If ifStatement = new If();
         If topIfStatement = ifStatement;
         Expression condition = parseCondition(target);
-        startBlock(false, condition);
+        startBlock();
         ifStatement.condition = condition;
         boolean elsePart = false;
         while (true) {
@@ -1500,10 +1443,10 @@ public class Parser2 {
                 ifStatement.elseList = list;
                 ifStatement.elseAutoClose = List.of();
                 ifStatement = elseIf;
-                startBlock(false, condition);
+                startBlock();
             } else if (match("else")) {
                 endBlock();
-                startBlock(false, null);
+                startBlock();
                 elsePart = true;
             } else {
                 break;
@@ -1512,23 +1455,6 @@ public class Parser2 {
         endBlock();
         target.add(topIfStatement);
         target.add(new PhiBlock());
-    }
-    private void setRangeBounds(Variable var) {
-        DataType type = var.type();
-        if (type.isRange()) {
-            Solver.Rule r = Solver.rule(Solver.variable(var.name()), ">=", Solver.number(0));
-            if (!var.global()) {
-                r.depth = depth;
-            }
-            r.always = true;
-            solver.addRule(r);
-            r = Solver.rule(Solver.variable(var.name()), "<", Operation.toSolverExpr(type.maxValue));
-            if (!var.global()) {
-                r.depth = depth;
-            }
-            r.always = true;
-            solver.addRule(r);
-        }
     }
     private void parseFor(ArrayList<Statement> target) {
         if (currentFunctionDefinition != null && currentFunctionDefinition.macro) {
@@ -1568,16 +1494,9 @@ public class Parser2 {
         endBlock();
         endBlock();
     }
-    private void startBlock(boolean loop, Expression condition) {
-        depth++;
-    }
-    private void negateLastBlockCondition() {
-        // for example, after: "if x = 0 { throw }" we know that x will not be 0
-        solver.reversRulesOfDepth(depth);
+    private void startBlock() {
     }
     private void endBlock() {
-        depth--;
-        solver.removeDeeperRules(depth);
     }
     private void parseLoop(ArrayList<Statement> target) {
         int loopIndent = indent;
@@ -1587,7 +1506,7 @@ public class Parser2 {
         } else {
             loop.condition = parseCondition(loop.list);
         }
-        startBlock(true, loop.condition);
+        startBlock();
         if (!loop.list.isEmpty()) {
             // we need to make it an endless loop with a break condition
             Break b = new Break();
@@ -1843,20 +1762,11 @@ public class Parser2 {
     private FullName readIdentifierWithPossibleModule() {
         String name = readIdentifier();
         String module = "";
-        while (matchOp(".")) {
-            if (module.isEmpty()) {
-                module = name;
-            } else {
-                module = module + "." + name;
-            }
+        if (matchOp(".")) {
+            module = name;
             name = readIdentifier();
         }
-        String m = module;
-        String m2 = program.getModulePath(module, name);
-        if (m2 != null && !m2.isEmpty()) {
-            m = m2;
-        }
-        return new FullName(m, name);
+        return new FullName(module, name);
     }
     private String readIdentifier() {
         if (type != TokenType.IDENTIFIER) {
@@ -1888,7 +1798,7 @@ public class Parser2 {
         }
         read();
     }
-    void read() {
+    private void read() {
         token = null;
         lastPos = pos;
         while (true) {
