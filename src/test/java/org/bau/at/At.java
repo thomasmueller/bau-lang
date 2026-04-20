@@ -27,11 +27,9 @@ public class At {
         while (!"".equals(token)) {
             if (match("+", "fun")) {
                 String n = token;
-                inOperator = true;
-                functions.put(n, new Expr(Expr.BLOCK, null, null));
+                functions.put(n, new Expr(Expr.LIST, null, null));
                 Expr c = parseExpr(0);
                 c.list.add(parseExpr(0));
-                inOperator = false;
                 functions.put(n, c);
             } else {
                 program.add(parseExpr(0));
@@ -101,7 +99,7 @@ public class At {
                 e.list.add(parseExpr(0));
             }
             return e;
-        } else if (match("=", "return")) {
+        } else if (match("!", "return")) {
             Expr e = new Expr(Expr.RETURN, null, null);
             e.list.add(parseExpr(0));
             return e;
@@ -110,18 +108,11 @@ public class At {
             e.list.add(new Expr(Expr.LITERAL, null, valueOf(0)));
             e.list.add(parsePrimary());
             return e;
-        } else if (match("(", "(")) {
+        } else if (match("(", "{")) {
             Expr e = new Expr(Expr.LIST, null, null);
-            while (!match(")", ")") && pos < code.length()) {
+            while (!match(")", "}") && pos < code.length()) {
                 e.list.add(parseExpr(0));
-                match(",", ",");
-            }
-            return e;
-        } else if (match("{", "{")) {
-            Expr e = new Expr(Expr.BLOCK, null, null);
-            while (!match("}", "}") && pos < code.length()) {
-                e.list.add(parseExpr(0));
-                match(";", ";");
+                match(",", ";");
             }
             return e;
         } else if (match("0", "\'")) {
@@ -253,8 +244,8 @@ public class At {
     }
 
     static class Expr {
-        final static int BLOCK = 1, CALL = 2, IF = 3, LITERAL = 4, REPEAT = 5, LOOP = 6, OPERATION = 7, VARIABLE = 8,
-                RETURN = 9, LIST = 10;
+        final static int CALL = 1, IF = 2, LITERAL = 3, REPEAT = 4, LOOP = 5, OPERATION = 6, VARIABLE = 7,
+                RETURN = 8, LIST = 9;
 
         int type;
         String name;
@@ -309,17 +300,10 @@ public class At {
             } else {
                 result = call(expr.name, expr.list);
             }
-        } else if (expr.type == Expr.BLOCK) {
-            for (Expr e : expr.list) {
-                result = run(e);
-                if (returnValue != null) {
-                    break;
-                }
-            }
         } else if (expr.type == Expr.LIST) {
             result = new ArrayList<>();
             for (Expr e : expr.list) {
-                result.addAll(run(e));
+                result = run(e);
                 if (returnValue != null) {
                     break;
                 }
@@ -398,6 +382,16 @@ public class At {
     private double operator(String op, boolean precedence, double l, double r) {
         if (functions.containsKey(op) && !inOperator) {
             if (precedence) {
+                Expr m = functions.get(op);
+                if (!m.list.isEmpty()) {
+                    m = m.list.get(m.list.size() - 1);
+                    if (!m.list.isEmpty()) {
+                        ArrayList<Double> v = m.list.get(0).value;
+                        if (v != null && !v.isEmpty()) {
+                            return v.get(0);
+                        }
+                    }
+                }
                 return 40;
             }
             inOperator = true;
@@ -419,20 +413,8 @@ public class At {
         } else if ("=".equals(op)) {
             res = (l == r) ? 1 : 0;
             power = 30;
-        } else if ("<>".equals(op)) {
-            res = (l != r) ? 1 : 0;
-            power = 30;
-        } else if (">".equals(op)) {
-            res = (l > r) ? 1 : 0;
-            power = 30;
         } else if ("<".equals(op)) {
             res = (l < r) ? 1 : 0;
-            power = 30;
-        } else if (">=".equals(op)) {
-            res = (l >= r) ? 1 : 0;
-            power = 30;
-        } else if ("<=".equals(op)) {
-            res = (l <= r) ? 1 : 0;
             power = 30;
         } else if ("+".equals(op)) {
             res = l + r;
@@ -445,9 +427,6 @@ public class At {
             power = 50;
         } else if ("/".equals(op)) {
             res = l / r;
-            power = 50;
-        } else if ("%".equals(op)) {
-            res = l % r;
             power = 50;
         }
         if (precedence) {

@@ -3401,7 +3401,7 @@ public class Parser {
                 return new NullValue(null);
             }
             Variable thisVar = functionContext.getVariable(null, "this");
-            String m = null;
+            String m = module;
             if ("ord".equals(n)
                     || "appendValue".equals(n)
                     || "convertIntToI8Array".equals(n)
@@ -3427,6 +3427,9 @@ public class Parser {
                         } else {
                             m = program.getModulePathForSymbol(module, n);
                         }
+                    }
+                    if (m == null) {
+                        m = module;
                     }
                 }
             }

@@ -23,12 +23,21 @@ fun main()
     at := newAt()
     result : at.run(``
         'Math Library, partially minified';
-        POS_INFINITY:1/0;NEG_INFINITY:-1/0;NOT_A_NUMBER:0/0;
-        PI:3.14159265358979323846;E:2.71828182845904523536;
-        LOG10:2.30258509299404568402;LOG2:0.69314718055994530942;
-        fun abs(x)       {?x>=0{=x};=-x}
-        fun isNaN(x)     {=x<>x}
-        fun isNegZero(x) {=(x=0)&(1/x=NEG_INFINITY)}
+        POS_INFINITY:1/0;
+        NEG_INFINITY:-1/0;
+        NOT_A_NUMBER:0/0;
+        PI   :3.14159265358979323846;
+        E    :2.71828182845904523536;
+        LOG10:2.30258509299404568402;
+        LOG2 :0.69314718055994530942;
+        fun >(a,b)       (30,b<a)
+        fun >=(a,b)      (30,a=b|b<a)
+        fun <=(a,b)      (30,a=b|a<b)
+        fun <>(a,b)      (30,a<b|b<a)
+        fun %(a,b)       (50,a-((a/b)|0)*b)
+        fun abs(x)       (?0<x(x):-x)
+        fun isNaN(x)     (1-(x=x))
+        fun isNegZero(x) {(x=0)&(1/x=NEG_INFINITY)}
         fun min(a,b)     { if isNaN(a) { return a } 
                    if a = b & a = 0 & isNegZero(b) { return b }
                    if a <= b {return a }
@@ -62,9 +71,9 @@ fun main()
                    i : 2; while i < 30 {sign:-sign; term : term * base; 
                    result:result+sign*term/i; i:i+1}
                    return result }
-        fun sqrt(x)      {=exp(log(x)/2)}
-        fun log10(x)     {=log(x)/LOG10}
-        fun e(x,n)       {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};=x} 
+        fun sqrt(x)      {!exp(log(x)/2)}
+        fun log10(x)     {!log(x)/LOG10}
+        fun e(x,n)       {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};!x} 
         fun pow(x,y)     { if x > 0 & y > 0 { return exp(y * log(x)) }
                    if y = 0.0 { return 1.0 }
                    if isNaN(x) | isNaN(y) { return NOT_A_NUMBER }
@@ -99,10 +108,10 @@ fun main()
                      p : p * x * x; approx : approx + sign * p / n;
                      sign : -sign; n:n+1
                    } return approx; }
-        fun cos(x) {=sin(x+PI/2)}
-        fun tan(x) {=sin(x)/cos(x)}
-        fun asin(x) {=atan(x/sqrt(1-x*x))}
-        fun acos(x) {=PI/2-asin(x)}
+        fun cos(x) {!sin(x+PI/2)}
+        fun tan(x) {!sin(x)/cos(x)}
+        fun asin(x) {!atan(x/sqrt(1-x*x))}
+        fun acos(x) {!PI/2-asin(x)}
         
         print('pow(2, 10) ' pow(2, 10));
         print('sqrt(2) ' sqrt(2));
@@ -116,16 +125,15 @@ fun main()
     println(result.data)
 
 # Expression types
-BLOCK: 1
-CALL: 2
-IF: 3
-LITERAL: 4
-REPEAT: 5
-LOOP: 6
-OPERATION: 7
-VARIABLE: 8
-RETURN: 9
-LIST: 10
+CALL: 1
+IF: 2
+LITERAL: 3
+REPEAT: 4
+LOOP: 5
+OPERATION: 6
+VARIABLE: 7
+RETURN: 8
+LIST: 9
 
 type Value
     list List(float)
@@ -180,11 +188,6 @@ fun newAt() At
     returnValue := valueOf(0)
     return At(global, local, functions, stack, out, code, token, value, returnValue)
 
-##
-fun At.set(name string, value Value)
-    global.put(hashCode(name.data), name, value)
-##
-
 fun At.get(map HashMap(string, Value), name string) Value?
     return map.get(hashCode(name.data), name)
 
@@ -209,11 +212,9 @@ fun At.run(programCode i8[]) string
     loop token.len() > 0
         if match('+', 'fun')
             n : token
-            inOperator = 1
-            setFunction(n, newExpr(BLOCK, '', valueOf(0)))
+            setFunction(n, newExpr(LIST, '', valueOf(0)))
             c := parseExpr(0)
             c.list.add(parseExpr(0))
-            inOperator = 0
             setFunction(n, c)
         else
             program.add(parseExpr(0))
@@ -275,7 +276,7 @@ fun At.parsePrimary() Expr
         if match(':', 'else')
             e.list.add(parseExpr(0))
         return e
-    elif match('=', 'return')
+    elif match('!', 'return')
         e := newExpr(RETURN, '', valueOf(0))
         e.list.add(parseExpr(0))
         return e
@@ -284,17 +285,11 @@ fun At.parsePrimary() Expr
         e.list.add(newExpr(LITERAL, '', valueOf(0)))
         e.list.add(parsePrimary())
         return e
-    elif match('(', '(')
+    elif match('(', '{')
         e := newExpr(LIST, '', valueOf(0))
-        loop not match(')', ')') and pos < code.data.len
+        loop not match(')', '}') and pos < code.data.len
             e.list.add(parseExpr(0))
-            match(',', ',')
-        return e
-    elif match('{', '{')
-        e := newExpr(BLOCK, '', valueOf(0))
-        loop match('}', '}') == 0 and pos < code.data.len
-            e.list.add(parseExpr(0))
-            match(';', ';')
+            match(',', ';')
         return e
     elif match('0', '\'')
         return newExpr(LITERAL, '', v)
@@ -446,22 +441,11 @@ fun At.runExpr(expr Expr) Value
             out.append('\n')
         else
             result = call(expr.name, expr.list.array)
-    elif expr.exprType == BLOCK
-        for i := until(expr.list.len())
-            result = runExpr(expr.list.get(i))
-            break hasReturnValue
     elif expr.exprType == LIST
-        totalLen := 0
-        for i := until(expr.list.len())
-            break hasReturnValue
-            r : runExpr(expr.list.get(i))
-            totalLen += r.list.size
         result = Value(newList(float))
         for i := until(expr.list.len())
             break hasReturnValue
-            r : runExpr(expr.list.get(i))
-            for j := until(r.list.len())
-                result.list.add(r.list.get(j))
+            result = runExpr(expr.list.get(i))
         if result.list.size == 0
             result = valueOf(0)
     elif expr.exprType == OPERATION
@@ -532,7 +516,14 @@ fun At.call(name string, argList Expr[]) Value
 fun At.operator(op string, precedence int, l float, r float) float
     if hasFunction(op) and not inOperator
         if precedence
-            return 40
+            m : getFunction(op)
+            if m <> null
+                a : m.get(m.len() - 1)
+                if a <> null
+                    b : a.list.get(0)
+                    if b <> null
+                        return b.value.get(0)
+            return float(40)
         inOperator = 1
         list : Expr[2]
         list[0] = newExpr(LITERAL, '', valueOf(l))
@@ -549,28 +540,10 @@ fun At.operator(op string, precedence int, l float, r float) float
         res = float(int(l) | int(r))
         power = 20
     elif op.equals(str('='))
-        if l == r
-            res = 1
-        power = 30
-    elif op.equals(str('<>'))
-        if l <> r
-            res = 1
-        power = 30
-    elif op.equals(str('>'))
-        if l > r
-            res = 1
+        res = l == r
         power = 30
     elif op.equals(str('<'))
-        if l < r
-            res = 1
-        power = 30
-    elif op.equals(str('>='))
-        if l >= r
-            res = 1
-        power = 30
-    elif op.equals(str('<='))
-        if l <= r
-            res = 1
+        res = l < r
         power = 30
     elif op.equals(str('+'))
         res = l + r
@@ -583,9 +556,6 @@ fun At.operator(op string, precedence int, l float, r float) float
         power = 50
     elif op.equals(str('/'))
         res = l / r
-        power = 50
-    elif op.equals(str('%'))
-        res = l % r
         power = 50
     if precedence
         return float(power)

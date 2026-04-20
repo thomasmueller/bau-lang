@@ -780,11 +780,11 @@ i8_array* string_1023;
 i8_array* string_1024;
 i8_array* string_1025;
 i8_array* string_1026;
-i8_array* string_1027;
-i8_array* string_1028;
 i8_array* string_1029;
 i8_array* string_1030;
 i8_array* string_1031;
+i8_array* string_1032;
+i8_array* string_1033;
 i8_array* string_1034;
 i8_array* string_1035;
 i8_array* string_1036;
@@ -796,13 +796,10 @@ i8_array* string_1041;
 i8_array* string_1042;
 i8_array* string_1043;
 i8_array* string_1044;
-i8_array* string_1045;
 i8_array* string_1046;
-i8_array* string_1047;
 i8_array* string_1049;
-i8_array* string_1052;
-i8_array* string_1053;
-i8_array* string_1054;
+i8_array* string_1050;
+i8_array* string_1051;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -815,7 +812,6 @@ double PI;
 double E;
 double LOG10;
 double LOG2;
-int64_t BLOCK;
 int64_t CALL;
 int64_t IF;
 int64_t LITERAL;
@@ -946,148 +942,114 @@ double At_operator_5(At* this, org_bau_String_string op, int64_t precedence, dou
     }
     if (_t1) {
         if (precedence) {
-            return 40;
+            org_bau_List_List_Expr* m = At_getFunction_2(this, op);
+            if (m != NULL) {
+                int64_t _t3 = org_bau_List_List_Expr_len_1(m);
+                Expr* a = org_bau_List_List_Expr_get_2(m, _t3 - 1);
+                if (a != NULL) {
+                    Expr* b = org_bau_List_List_Expr_get_2(a->list, 0);
+                    if (b != NULL) {
+                        double _t4 = Value_get_2(b->value, 0);
+                        _decUseStack(b, Expr);
+                        _decUseStack(a, Expr);
+                        _decUseStack(m, org_bau_List_List_Expr);
+                        return _t4;
+                    }
+                    _decUseStack(b, Expr);
+                }
+                _decUseStack(a, Expr);
+            }
+            _decUseStack(m, org_bau_List_List_Expr);
+            return 40.0;
         }
         this->inOperator = 1;
-        Expr_array* _t3 = Expr_array_new(2);
-        _incUseStack(_t3);
-        Expr_array* list = _t3;
-        Value* _t4 = valueOf_1(l);
-        Expr* _t5 = newExpr_3(4, string_1009, _t4);
+        Expr_array* _t5 = Expr_array_new(2);
         _incUseStack(_t5);
-        _decUse(list->data[0], Expr);
-        list->data[0] = _t5;
-        Value* _t6 = valueOf_1(r);
-        Expr* _t7 = newExpr_3(4, string_1009, _t6);
+        Expr_array* list = _t5;
+        Value* _t6 = valueOf_1(l);
+        Expr* _t7 = newExpr_3(3, string_1009, _t6);
         _incUseStack(_t7);
+        _decUse(list->data[0], Expr);
+        list->data[0] = _t7;
+        Value* _t8 = valueOf_1(r);
+        Expr* _t9 = newExpr_3(3, string_1009, _t8);
+        _incUseStack(_t9);
         _decUse(list->data[1], Expr);
-        list->data[1] = _t7;
+        list->data[1] = _t9;
         Value* result = At_call_3(this, op, list);
         this->inOperator = 0;
-        double _t8 = Value_get_2(result, 0);
+        double _t10 = Value_get_2(result, 0);
         _decUseStack(result, Value);
+        _decUseStack(_t9, Expr);
+        _decUseStack(_t8, Value);
         _decUseStack(_t7, Expr);
         _decUseStack(_t6, Value);
-        _decUseStack(_t5, Expr);
-        _decUseStack(_t4, Value);
         _decUseStack(list, Expr_array);
-        _decUseStack(_t3, Expr_array);
-        return _t8;
+        _decUseStack(_t5, Expr_array);
+        return _t10;
     }
     double res = 0.0;
     int64_t power = -1;
-    org_bau_String_string _t9 = org_bau_String_str_1(string_1019);
-    int64_t _t10 = org_bau_String_string_equals_2(op, _t9);
-    if (_t10) {
-        int64_t _t11 = int_1(l);
-        int64_t _t12 = int_1(r);
-        double _t13 = float_1(_t11 & _t12);
-        res = _t13;
+    org_bau_String_string _t11 = org_bau_String_str_1(string_1019);
+    int64_t _t12 = org_bau_String_string_equals_2(op, _t11);
+    if (_t12) {
+        int64_t _t13 = int_1(l);
+        int64_t _t14 = int_1(r);
+        double _t15 = float_1(_t13 & _t14);
+        res = _t15;
         power = 20;
     } else {
-        org_bau_String_string _t14 = org_bau_String_str_1(string_1020);
-        int64_t _t15 = org_bau_String_string_equals_2(op, _t14);
-        if (_t15) {
-            int64_t _t16 = int_1(l);
-            int64_t _t17 = int_1(r);
-            double _t18 = float_1(_t16 | _t17);
-            res = _t18;
+        org_bau_String_string _t16 = org_bau_String_str_1(string_1020);
+        int64_t _t17 = org_bau_String_string_equals_2(op, _t16);
+        if (_t17) {
+            int64_t _t18 = int_1(l);
+            int64_t _t19 = int_1(r);
+            double _t20 = float_1(_t18 | _t19);
+            res = _t20;
             power = 20;
-            org_bau_String_string_free(&_t14);
+            org_bau_String_string_free(&_t16);
         } else {
-            org_bau_String_string _t19 = org_bau_String_str_1(string_1021);
-            int64_t _t20 = org_bau_String_string_equals_2(op, _t19);
-            if (_t20) {
-                if (l == r) {
-                    res = 1;
-                }
+            org_bau_String_string _t21 = org_bau_String_str_1(string_1021);
+            int64_t _t22 = org_bau_String_string_equals_2(op, _t21);
+            if (_t22) {
+                res = l == r;
                 power = 30;
-                org_bau_String_string_free(&_t19);
+                org_bau_String_string_free(&_t21);
             } else {
-                org_bau_String_string _t21 = org_bau_String_str_1(string_1022);
-                int64_t _t22 = org_bau_String_string_equals_2(op, _t21);
-                if (_t22) {
-                    if (l != r) {
-                        res = 1;
-                    }
+                org_bau_String_string _t23 = org_bau_String_str_1(string_1022);
+                int64_t _t24 = org_bau_String_string_equals_2(op, _t23);
+                if (_t24) {
+                    res = l < r;
                     power = 30;
-                    org_bau_String_string_free(&_t21);
+                    org_bau_String_string_free(&_t23);
                 } else {
-                    org_bau_String_string _t23 = org_bau_String_str_1(string_1023);
-                    int64_t _t24 = org_bau_String_string_equals_2(op, _t23);
-                    if (_t24) {
-                        if (l > r) {
-                            res = 1;
-                        }
-                        power = 30;
-                        org_bau_String_string_free(&_t23);
+                    org_bau_String_string _t25 = org_bau_String_str_1(string_1023);
+                    int64_t _t26 = org_bau_String_string_equals_2(op, _t25);
+                    if (_t26) {
+                        res = l + r;
+                        power = 40;
+                        org_bau_String_string_free(&_t25);
                     } else {
-                        org_bau_String_string _t25 = org_bau_String_str_1(string_1024);
-                        int64_t _t26 = org_bau_String_string_equals_2(op, _t25);
-                        if (_t26) {
-                            if (l < r) {
-                                res = 1;
-                            }
-                            power = 30;
-                            org_bau_String_string_free(&_t25);
+                        org_bau_String_string _t27 = org_bau_String_str_1(string_1000);
+                        int64_t _t28 = org_bau_String_string_equals_2(op, _t27);
+                        if (_t28) {
+                            res = l - r;
+                            power = 40;
+                            org_bau_String_string_free(&_t27);
                         } else {
-                            org_bau_String_string _t27 = org_bau_String_str_1(string_1025);
-                            int64_t _t28 = org_bau_String_string_equals_2(op, _t27);
-                            if (_t28) {
-                                if (l >= r) {
-                                    res = 1;
-                                }
-                                power = 30;
-                                org_bau_String_string_free(&_t27);
+                            org_bau_String_string _t29 = org_bau_String_str_1(string_1024);
+                            int64_t _t30 = org_bau_String_string_equals_2(op, _t29);
+                            if (_t30) {
+                                res = l * r;
+                                power = 50;
+                                org_bau_String_string_free(&_t29);
                             } else {
-                                org_bau_String_string _t29 = org_bau_String_str_1(string_1026);
-                                int64_t _t30 = org_bau_String_string_equals_2(op, _t29);
-                                if (_t30) {
-                                    if (l <= r) {
-                                        res = 1;
-                                    }
-                                    power = 30;
-                                    org_bau_String_string_free(&_t29);
-                                } else {
-                                    org_bau_String_string _t31 = org_bau_String_str_1(string_1027);
-                                    int64_t _t32 = org_bau_String_string_equals_2(op, _t31);
-                                    if (_t32) {
-                                        res = l + r;
-                                        power = 40;
-                                        org_bau_String_string_free(&_t31);
-                                    } else {
-                                        org_bau_String_string _t33 = org_bau_String_str_1(string_1000);
-                                        int64_t _t34 = org_bau_String_string_equals_2(op, _t33);
-                                        if (_t34) {
-                                            res = l - r;
-                                            power = 40;
-                                            org_bau_String_string_free(&_t33);
-                                        } else {
-                                            org_bau_String_string _t35 = org_bau_String_str_1(string_1028);
-                                            int64_t _t36 = org_bau_String_string_equals_2(op, _t35);
-                                            if (_t36) {
-                                                res = l * r;
-                                                power = 50;
-                                                org_bau_String_string_free(&_t35);
-                                            } else {
-                                                org_bau_String_string _t37 = org_bau_String_str_1(string_1029);
-                                                int64_t _t38 = org_bau_String_string_equals_2(op, _t37);
-                                                if (_t38) {
-                                                    res = l / r;
-                                                    power = 50;
-                                                    org_bau_String_string_free(&_t37);
-                                                } else {
-                                                    org_bau_String_string _t39 = org_bau_String_str_1(string_1030);
-                                                    int64_t _t40 = org_bau_String_string_equals_2(op, _t39);
-                                                    if (_t40) {
-                                                        res = imod_2(l, r);
-                                                        power = 50;
-                                                        org_bau_String_string_free(&_t39);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                org_bau_String_string _t31 = org_bau_String_str_1(string_1025);
+                                int64_t _t32 = org_bau_String_string_equals_2(op, _t31);
+                                if (_t32) {
+                                    res = l / r;
+                                    power = 50;
+                                    org_bau_String_string_free(&_t31);
                                 }
                             }
                         }
@@ -1097,11 +1059,11 @@ double At_operator_5(At* this, org_bau_String_string op, int64_t precedence, dou
         }
     }
     if (precedence) {
-        double _t41 = float_1(power);
-        org_bau_String_string_free(&_t9);
-        return _t41;
+        double _t33 = float_1(power);
+        org_bau_String_string_free(&_t11);
+        return _t33;
     }
-    org_bau_String_string_free(&_t9);
+    org_bau_String_string_free(&_t11);
     return res;
 }
 Expr* At_parseExpr_2(At* this, int64_t min) {
@@ -1112,12 +1074,12 @@ Expr* At_parseExpr_2(At* this, int64_t min) {
             return prim;
         }
         Value* _t0 = valueOf_1(0);
-        Expr* op = newExpr_3(7, this->token.data, _t0);
+        Expr* op = newExpr_3(6, this->token.data, _t0);
         org_bau_List_List_Expr_add_2(op->list, prim);
         int64_t right = 1;
         int64_t _t1 = org_bau_String_string_charAt_2(this->token, 0);
         if (_t1 == 58) {
-            int64_t _t2 = op->list->array->data[idx_2(0, _arrayLen(op->list->array))]->exprType != 8;
+            int64_t _t2 = op->list->array->data[idx_2(0, _arrayLen(op->list->array))]->exprType != 7;
             if (_t2) {
                 int64_t _t3 = org_bau_String_string_charAt_2(op->list->array->data[idx_2(0, _arrayLen(op->list->array))]->name, 0) != 46;
                 _t2 = _t3;
@@ -1169,15 +1131,15 @@ Expr* At_parsePrimary_1(At* this) {
     Value* v = this->value;
     if (_arrayLen(this->token.data) == 0) {
         Value* _t0 = valueOf_1(0);
-        Expr* _t1 = newExpr_3(4, string_1009, _t0);
+        Expr* _t1 = newExpr_3(3, string_1009, _t0);
         _decUseStack(_t0, Value);
         _decUseStack(v, Value);
         return _t1;
     } else {
-        int64_t _t2 = At_match_3(this, string_1034, string_1035);
+        int64_t _t2 = At_match_3(this, string_1029, string_1030);
         if (_t2) {
             Value* _t3 = valueOf_1(0);
-            Expr* e = newExpr_3(6, string_1009, _t3);
+            Expr* e = newExpr_3(5, string_1009, _t3);
             Expr* _t4 = At_parseExpr_2(this, 0);
             org_bau_List_List_Expr_add_2(e->list, _t4);
             Expr* _t5 = At_parseExpr_2(this, 0);
@@ -1188,10 +1150,10 @@ Expr* At_parsePrimary_1(At* this) {
             _decUseStack(v, Value);
             return e;
         } else {
-            int64_t _t6 = At_match_3(this, string_1028, string_1036);
+            int64_t _t6 = At_match_3(this, string_1024, string_1031);
             if (_t6) {
                 Value* _t7 = valueOf_1(0);
-                Expr* e = newExpr_3(5, string_1009, _t7);
+                Expr* e = newExpr_3(4, string_1009, _t7);
                 Expr* _t8 = At_parseExpr_2(this, 0);
                 org_bau_List_List_Expr_add_2(e->list, _t8);
                 Expr* _t9 = At_parseExpr_2(this, 0);
@@ -1202,15 +1164,15 @@ Expr* At_parsePrimary_1(At* this) {
                 _decUseStack(v, Value);
                 return e;
             } else {
-                int64_t _t10 = At_match_3(this, string_1037, string_1038);
+                int64_t _t10 = At_match_3(this, string_1032, string_1033);
                 if (_t10) {
                     Value* _t11 = valueOf_1(0);
-                    Expr* e = newExpr_3(3, string_1009, _t11);
+                    Expr* e = newExpr_3(2, string_1009, _t11);
                     Expr* _t12 = At_parseExpr_2(this, 0);
                     org_bau_List_List_Expr_add_2(e->list, _t12);
                     Expr* _t13 = At_parseExpr_2(this, 0);
                     org_bau_List_List_Expr_add_2(e->list, _t13);
-                    int64_t _t14 = At_match_3(this, string_1031, string_1039);
+                    int64_t _t14 = At_match_3(this, string_1026, string_1034);
                     if (_t14) {
                         Expr* _t15 = At_parseExpr_2(this, 0);
                         org_bau_List_List_Expr_add_2(e->list, _t15);
@@ -1222,10 +1184,10 @@ Expr* At_parsePrimary_1(At* this) {
                     _decUseStack(v, Value);
                     return e;
                 } else {
-                    int64_t _t16 = At_match_3(this, string_1021, string_1040);
+                    int64_t _t16 = At_match_3(this, string_1035, string_1036);
                     if (_t16) {
                         Value* _t17 = valueOf_1(0);
-                        Expr* e = newExpr_3(9, string_1009, _t17);
+                        Expr* e = newExpr_3(8, string_1009, _t17);
                         Expr* _t18 = At_parseExpr_2(this, 0);
                         org_bau_List_List_Expr_add_2(e->list, _t18);
                         _decUseStack(_t18, Expr);
@@ -1236,9 +1198,9 @@ Expr* At_parsePrimary_1(At* this) {
                         int64_t _t19 = At_match_3(this, string_1000, string_1000);
                         if (_t19) {
                             Value* _t20 = valueOf_1(0);
-                            Expr* e = newExpr_3(7, string_1000, _t20);
+                            Expr* e = newExpr_3(6, string_1000, _t20);
                             Value* _t21 = valueOf_1(0);
-                            Expr* _t22 = newExpr_3(4, string_1009, _t21);
+                            Expr* _t22 = newExpr_3(3, string_1009, _t21);
                             org_bau_List_List_Expr_add_2(e->list, _t22);
                             Expr* _t23 = At_parsePrimary_1(this);
                             org_bau_List_List_Expr_add_2(e->list, _t23);
@@ -1249,12 +1211,12 @@ Expr* At_parsePrimary_1(At* this) {
                             _decUseStack(v, Value);
                             return e;
                         } else {
-                            int64_t _t24 = At_match_3(this, string_1041, string_1041);
+                            int64_t _t24 = At_match_3(this, string_1037, string_1038);
                             if (_t24) {
                                 Value* _t25 = valueOf_1(0);
-                                Expr* e = newExpr_3(10, string_1009, _t25);
+                                Expr* e = newExpr_3(9, string_1009, _t25);
                                 while (1 == 1) {
-                                    int64_t _t26 = At_match_3(this, string_1042, string_1042);
+                                    int64_t _t26 = At_match_3(this, string_1039, string_1040);
                                     int64_t _t27 = !(_t26);
                                     if (_t27) {
                                         int64_t _t28 = this->pos < _arrayLen(this->code.data);
@@ -1265,7 +1227,7 @@ Expr* At_parsePrimary_1(At* this) {
                                     }
                                     Expr* _t29 = At_parseExpr_2(this, 0);
                                     org_bau_List_List_Expr_add_2(e->list, _t29);
-                                    int64_t _t30 = At_match_3(this, string_1008, string_1008);
+                                    int64_t _t30 = At_match_3(this, string_1008, string_1041);
                                     ;
                                     _decUseStack(_t29, Expr);
                                 }
@@ -1273,36 +1235,11 @@ Expr* At_parsePrimary_1(At* this) {
                                 _decUseStack(v, Value);
                                 return e;
                             } else {
-                                int64_t _t31 = At_match_3(this, string_1043, string_1043);
+                                int64_t _t31 = At_match_3(this, string_1001, string_1042);
                                 if (_t31) {
-                                    Value* _t32 = valueOf_1(0);
-                                    Expr* e = newExpr_3(1, string_1009, _t32);
-                                    while (1 == 1) {
-                                        int64_t _t33 = At_match_3(this, string_1044, string_1044);
-                                        int64_t _t34 = _t33 == 0;
-                                        if (_t34) {
-                                            int64_t _t35 = this->pos < _arrayLen(this->code.data);
-                                            _t34 = _t35;
-                                        }
-                                        if (!(_t34)) {
-                                            break;
-                                        }
-                                        Expr* _t36 = At_parseExpr_2(this, 0);
-                                        org_bau_List_List_Expr_add_2(e->list, _t36);
-                                        int64_t _t37 = At_match_3(this, string_1045, string_1045);
-                                        ;
-                                        _decUseStack(_t36, Expr);
-                                    }
-                                    _decUseStack(_t32, Value);
+                                    Expr* _t32 = newExpr_3(3, string_1009, v);
                                     _decUseStack(v, Value);
-                                    return e;
-                                } else {
-                                    int64_t _t38 = At_match_3(this, string_1001, string_1046);
-                                    if (_t38) {
-                                        Expr* _t39 = newExpr_3(4, string_1009, v);
-                                        _decUseStack(v, Value);
-                                        return _t39;
-                                    }
+                                    return _t32;
                                 }
                             }
                         }
@@ -1313,57 +1250,57 @@ Expr* At_parsePrimary_1(At* this) {
     }
     org_bau_String_string_copy(&this->token);
     org_bau_String_string id = this->token;
-    int64_t _t40 = At_match_3(this, string_1023, string_1047);
-    if (_t40) {
-        org_bau_String_string _t41 = org_bau_String_str_1(string_1023);
-        org_bau_String_string_copy(&_t41);
+    int64_t _t33 = At_match_3(this, string_1043, string_1044);
+    if (_t33) {
+        org_bau_String_string _t34 = org_bau_String_str_1(string_1043);
+        org_bau_String_string_copy(&_t34);
         org_bau_String_string_free(&id);
-        id = _t41;
-        org_bau_String_string_free(&_t41);
+        id = _t34;
+        org_bau_String_string_free(&_t34);
     } else {
         At_read_1(this);
     }
-    int64_t _t42 = At_hasFunction_2(this, id);
-    int64_t _t43 = _t42;
-    if (!(_t43)) {
-        int64_t _t44 = org_bau_String_string_charAt_2(id, 0) == 62;
-        _t43 = _t44;
+    int64_t _t35 = At_hasFunction_2(this, id);
+    int64_t _t36 = _t35;
+    if (!(_t36)) {
+        int64_t _t37 = org_bau_String_string_charAt_2(id, 0) == 62;
+        _t36 = _t37;
     }
-    int64_t _t45 = (_t43);
-    if (_t45) {
-        int64_t _t46 = At_match_3(this, string_1041, string_1041);
-        _t45 = _t46;
+    int64_t _t38 = (_t36);
+    if (_t38) {
+        int64_t _t39 = At_match_3(this, string_1037, string_1037);
+        _t38 = _t39;
     }
-    if (_t45) {
-        Value* _t47 = valueOf_1(0);
-        Expr* e = newExpr_3(2, id.data, _t47);
+    if (_t38) {
+        Value* _t40 = valueOf_1(0);
+        Expr* e = newExpr_3(1, id.data, _t40);
         while (1 == 1) {
-            int64_t _t48 = At_match_3(this, string_1042, string_1042);
-            int64_t _t49 = (!(_t48));
-            if (_t49) {
-                int64_t _t50 = this->pos < org_bau_String_string_len_1(this->code);
-                _t49 = _t50;
+            int64_t _t41 = At_match_3(this, string_1039, string_1039);
+            int64_t _t42 = (!(_t41));
+            if (_t42) {
+                int64_t _t43 = this->pos < org_bau_String_string_len_1(this->code);
+                _t42 = _t43;
             }
-            if (!(_t49)) {
+            if (!(_t42)) {
                 break;
             }
-            Expr* _t51 = At_parseExpr_2(this, 0);
-            org_bau_List_List_Expr_add_2(e->list, _t51);
-            int64_t _t52 = At_match_3(this, string_1008, string_1008);
+            Expr* _t44 = At_parseExpr_2(this, 0);
+            org_bau_List_List_Expr_add_2(e->list, _t44);
+            int64_t _t45 = At_match_3(this, string_1008, string_1008);
             ;
-            _decUseStack(_t51, Expr);
+            _decUseStack(_t44, Expr);
         }
-        _decUseStack(_t47, Value);
+        _decUseStack(_t40, Value);
         org_bau_String_string_free(&id);
         _decUseStack(v, Value);
         return e;
     }
-    Value* _t53 = valueOf_1(0);
-    Expr* _t54 = newExpr_3(8, id.data, _t53);
-    _decUseStack(_t53, Value);
+    Value* _t46 = valueOf_1(0);
+    Expr* _t47 = newExpr_3(7, id.data, _t46);
+    _decUseStack(_t46, Value);
     org_bau_String_string_free(&id);
     _decUseStack(v, Value);
-    return _t54;
+    return _t47;
 }
 void At_put_4(At* this, org_bau_HashMap_HashMap_org_bau_String_string_Value* map, org_bau_String_string name, Value* value) {
     int64_t _t0 = org_bau_HashMap_hashCode_1(name.data);
@@ -1522,7 +1459,7 @@ void At_read_1(At* this) {
                     this->pos += 1;
                 }
                 org_bau_List_List_float_add_2(this->value->list, 0.0);
-                org_bau_String_string _t39 = org_bau_String_str_1(string_1046);
+                org_bau_String_string _t39 = org_bau_String_str_1(string_1042);
                 org_bau_String_string_copy(&_t39);
                 this->token = _t39;
                 org_bau_String_string_free(&_t39);
@@ -1575,18 +1512,16 @@ org_bau_String_string At_run_2(At* this, i8_array* programCode) {
         if (!(( _t1 > 0 ))) {
             break;
         }
-        int64_t _t2 = At_match_3(this, string_1027, string_1053);
+        int64_t _t2 = At_match_3(this, string_1023, string_1050);
         if (_t2) {
             org_bau_String_string_copy(&this->token);
             org_bau_String_string n = this->token;
-            this->inOperator = 1;
             Value* _t3 = valueOf_1(0);
-            Expr* _t4 = newExpr_3(1, string_1009, _t3);
+            Expr* _t4 = newExpr_3(9, string_1009, _t3);
             At_setFunction_3(this, n, _t4);
             Expr* c = At_parseExpr_2(this, 0);
             Expr* _t5 = At_parseExpr_2(this, 0);
             org_bau_List_List_Expr_add_2(c->list, _t5);
-            this->inOperator = 0;
             At_setFunction_3(this, n, c);
             _decUseStack(_t5, Expr);
             _decUseStack(c, Expr);
@@ -1598,7 +1533,7 @@ org_bau_String_string At_run_2(At* this, i8_array* programCode) {
             org_bau_List_List_Expr_add_2(program, _t6);
             _decUseStack(_t6, Expr);
         }
-        int64_t _t7 = At_match_3(this, string_1008, string_1045);
+        int64_t _t7 = At_match_3(this, string_1008, string_1041);
         ;
     }
     org_bau_String_StringBuilder* _t8 = org_bau_String_StringBuilder_0();
@@ -1655,12 +1590,12 @@ Value* At_runExpr_2(At* this, Expr* expr) {
     if (expr == NULL) {
         return result;
     }
-    if (expr->exprType == 4) {
+    if (expr->exprType == 3) {
         _incUseStack(expr->value);
         _decUseStack(result, Value);
         result = expr->value;
     } else {
-        if (expr->exprType == 8) {
+        if (expr->exprType == 7) {
             _incUseStack(this->global);
             org_bau_HashMap_HashMap_org_bau_String_string_Value* map = this->global;
             int64_t _t0 = org_bau_String_string_charAt_2(expr->name, 0);
@@ -1684,7 +1619,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
             _decUseStack(r, Value);
             _decUseStack(map, org_bau_HashMap_HashMap_org_bau_String_string_Value);
         } else {
-            if (expr->exprType == 3) {
+            if (expr->exprType == 2) {
                 Expr* _t2 = org_bau_List_List_Expr_get_2(expr->list, 0);
                 Value* cond = At_runExpr_2(this, _t2);
                 double _t3 = Value_get_2(cond, 0);
@@ -1712,7 +1647,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                 _decUseStack(cond, Value);
                 _decUseStack(_t2, Expr);
             } else {
-                if (expr->exprType == 5) {
+                if (expr->exprType == 4) {
                     Expr* _t10 = org_bau_List_List_Expr_get_2(expr->list, 0);
                     Value* _t11 = At_runExpr_2(this, _t10);
                     double _t12 = org_bau_List_List_float_get_2(_t11->list, 0);
@@ -1730,7 +1665,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                                     break;
                                 }
                                 this->counter -= 1;
-                                org_bau_String_string _t15 = org_bau_String_str_1(string_1052);
+                                org_bau_String_string _t15 = org_bau_String_str_1(string_1049);
                                 double _t16 = float_1(i);
                                 Value* _t17 = valueOf_1(_t16);
                                 At_put_4(this, this->local, _t15, _t17);
@@ -1758,7 +1693,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                     _decUseStack(_t11, Value);
                     _decUseStack(_t10, Expr);
                 } else {
-                    if (expr->exprType == 6) {
+                    if (expr->exprType == 5) {
                         while (1) {
                             Expr* _t20 = org_bau_List_List_Expr_get_2(expr->list, 0);
                             Value* _t21 = At_runExpr_2(this, _t20);
@@ -1791,7 +1726,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                             _decUseStack(_t20, Expr);
                         }
                     } else {
-                        if (expr->exprType == 9) {
+                        if (expr->exprType == 8) {
                             Expr* _t28 = org_bau_List_List_Expr_get_2(expr->list, 0);
                             Value* _t29 = At_runExpr_2(this, _t28);
                             _incUseStack(_t29);
@@ -1804,7 +1739,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                             _decUseStack(_t29, Value);
                             _decUseStack(_t28, Expr);
                         } else {
-                            if (expr->exprType == 2) {
+                            if (expr->exprType == 1) {
                                 int64_t _t30 = org_bau_String_string_charAt_2(expr->name, 0);
                                 if (_t30 == 62) {
                                     if (org_bau_List_List_Expr_len_1(expr->list) > 0) {
@@ -1829,7 +1764,7 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                                             break;
                                         }
                                     }
-                                    org_bau_String_StringBuilder_append_2(this->out, string_1049);
+                                    org_bau_String_StringBuilder_append_2(this->out, string_1046);
                                 } else {
                                     Value* _t34 = At_call_3(this, expr->name, expr->list->array);
                                     _incUseStack(_t34);
@@ -1838,255 +1773,192 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                                     _decUseStack(_t34, Value);
                                 }
                             } else {
-                                if (expr->exprType == 1) {
+                                if (expr->exprType == 9) {
+                                    org_bau_List_List_float* _t35 = org_bau_List_newList_float_1(0);
+                                    Value* _t36 = Value_1(_t35);
+                                    _incUseStack(_t36);
+                                    _decUseStack(result, Value);
+                                    result = _t36;
                                     if (org_bau_List_List_Expr_len_1(expr->list) > 0) {
                                         while (1 == 1) {
                                             int64_t i = 0;
                                             while (1) {
-                                                Expr* _t35 = org_bau_List_List_Expr_get_2(expr->list, i);
-                                                Value* _t36 = At_runExpr_2(this, _t35);
-                                                _incUseStack(_t36);
-                                                _decUseStack(result, Value);
-                                                result = _t36;
                                                 if (this->hasReturnValue) {
-                                                    _decUseStack(_t36, Value);
-                                                    _decUseStack(_t35, Expr);
                                                     break;
                                                 }
+                                                Expr* _t37 = org_bau_List_List_Expr_get_2(expr->list, i);
+                                                Value* _t38 = At_runExpr_2(this, _t37);
+                                                _incUseStack(_t38);
+                                                _decUseStack(result, Value);
+                                                result = _t38;
                                                 if (( i + 1 ) >= org_bau_List_List_Expr_len_1(expr->list)) {
-                                                    _decUseStack(_t36, Value);
-                                                    _decUseStack(_t35, Expr);
+                                                    _decUseStack(_t38, Value);
+                                                    _decUseStack(_t37, Expr);
                                                     break;
                                                 }
                                                 i = i + 1;
-                                                _decUseStack(_t36, Value);
-                                                _decUseStack(_t35, Expr);
+                                                _decUseStack(_t38, Value);
+                                                _decUseStack(_t37, Expr);
                                             }
                                             break;
                                         }
                                     }
-                                } else {
-                                    if (expr->exprType == 10) {
-                                        int64_t totalLen = 0;
-                                        if (org_bau_List_List_Expr_len_1(expr->list) > 0) {
-                                            while (1 == 1) {
-                                                int64_t i = 0;
-                                                while (1) {
-                                                    if (this->hasReturnValue) {
-                                                        break;
-                                                    }
-                                                    Expr* _t37 = org_bau_List_List_Expr_get_2(expr->list, i);
-                                                    Value* r = At_runExpr_2(this, _t37);
-                                                    totalLen = totalLen + r->list->size;
-                                                    if (( i + 1 ) >= org_bau_List_List_Expr_len_1(expr->list)) {
-                                                        _decUseStack(r, Value);
-                                                        _decUseStack(_t37, Expr);
-                                                        break;
-                                                    }
-                                                    i = i + 1;
-                                                    _decUseStack(r, Value);
-                                                    _decUseStack(_t37, Expr);
-                                                }
-                                                break;
-                                            }
-                                        }
-                                        org_bau_List_List_float* _t38 = org_bau_List_newList_float_1(0);
-                                        Value* _t39 = Value_1(_t38);
+                                    if (result->list->size == 0) {
+                                        Value* _t39 = valueOf_1(0);
                                         _incUseStack(_t39);
                                         _decUseStack(result, Value);
                                         result = _t39;
-                                        if (org_bau_List_List_Expr_len_1(expr->list) > 0) {
-                                            while (1 == 1) {
-                                                int64_t i = 0;
-                                                while (1) {
-                                                    if (this->hasReturnValue) {
-                                                        break;
-                                                    }
-                                                    Expr* _t40 = org_bau_List_List_Expr_get_2(expr->list, i);
-                                                    Value* r = At_runExpr_2(this, _t40);
-                                                    if (org_bau_List_List_float_len_1(r->list) > 0) {
-                                                        while (1 == 1) {
-                                                            int64_t j = 0;
-                                                            while (1) {
-                                                                double _t41 = org_bau_List_List_float_get_2(r->list, j);
-                                                                org_bau_List_List_float_add_2(result->list, _t41);
-                                                                if (( j + 1 ) >= org_bau_List_List_float_len_1(r->list)) {
-                                                                    break;
-                                                                }
-                                                                j = j + 1;
-                                                            }
+                                        _decUseStack(_t39, Value);
+                                    }
+                                    _decUseStack(_t36, Value);
+                                    _decUseStack(_t35, org_bau_List_List_float);
+                                } else {
+                                    if (expr->exprType == 6) {
+                                        Expr* left = org_bau_List_List_Expr_get_2(expr->list, 0);
+                                        Expr* right = org_bau_List_List_Expr_get_2(expr->list, 1);
+                                        if (!(left)) {
+                                            Value* _t40 = valueOf_1(0);
+                                            _decUseStack(right, Expr);
+                                            _decUseStack(left, Expr);
+                                            _decUseStack(result, Value);
+                                            return _t40;
+                                        }
+                                        if (!(right)) {
+                                            Value* _t41 = valueOf_1(0);
+                                            _decUseStack(right, Expr);
+                                            _decUseStack(left, Expr);
+                                            _decUseStack(result, Value);
+                                            return _t41;
+                                        }
+                                        int64_t _t42 = org_bau_String_string_charAt_2(expr->name, 0);
+                                        if (_t42 == 58) {
+                                            org_bau_String_string name = org_bau_String_str_1(string_1009);
+                                            Expr* arrayIndex = NULL;
+                                            if (left->exprType == 7) {
+                                                org_bau_String_string_copy(&left->name);
+                                                org_bau_String_string_free(&name);
+                                                name = left->name;
+                                            } else {
+                                                int64_t _t43 = left->exprType == 6;
+                                                if (_t43) {
+                                                    int64_t _t44 = org_bau_String_string_charAt_2(left->name, 0) == 46;
+                                                    _t43 = _t44;
+                                                }
+                                                if (_t43) {
+                                                    Expr* _t45 = org_bau_List_List_Expr_get_2(left->list, 0);
+                                                    org_bau_String_string_copy(&_t45->name);
+                                                    org_bau_String_string_free(&name);
+                                                    name = _t45->name;
+                                                    Expr* _t46 = org_bau_List_List_Expr_get_2(left->list, 1);
+                                                    _incUseStack(_t46);
+                                                    _decUseStack(arrayIndex, Expr);
+                                                    arrayIndex = _t46;
+                                                    _decUseStack(_t46, Expr);
+                                                    _decUseStack(_t45, Expr);
+                                                }
+                                            }
+                                            _incUseStack(this->global);
+                                            org_bau_HashMap_HashMap_org_bau_String_string_Value* map = this->global;
+                                            int64_t _t47 = org_bau_String_string_len_1(name);
+                                            int64_t _t48 = _t47 > 0;
+                                            if (_t48) {
+                                                int64_t _t49 = org_bau_String_string_charAt_2(name, 0) > 90;
+                                                _t48 = _t49;
+                                            }
+                                            if (_t48) {
+                                                _incUseStack(this->local);
+                                                _decUseStack(map, org_bau_HashMap_HashMap_org_bau_String_string_Value);
+                                                map = this->local;
+                                            }
+                                            Value* v = At_runExpr_2(this, right);
+                                            if (arrayIndex != NULL) {
+                                                Value* o = valueOf_1(0);
+                                                Value* n = At_get_3(this, map, name);
+                                                if (n != NULL) {
+                                                    _incUseStack(n);
+                                                    _decUseStack(o, Value);
+                                                    o = n;
+                                                }
+                                                At_put_4(this, map, name, o);
+                                                Value* _t50 = At_runExpr_2(this, arrayIndex);
+                                                double _t51 = Value_get_2(_t50, 0);
+                                                int64_t index = int_1(_t51);
+                                                if (index >= 0) {
+                                                    while (1 == 1) {
+                                                        int64_t _t52 = Value_len_1(o);
+                                                        if (!(( _t52 <= index ))) {
                                                             break;
                                                         }
+                                                        Value_add_2(o, 0.0);
                                                     }
-                                                    if (( i + 1 ) >= org_bau_List_List_Expr_len_1(expr->list)) {
-                                                        _decUseStack(r, Value);
-                                                        _decUseStack(_t40, Expr);
-                                                        break;
-                                                    }
-                                                    i = i + 1;
-                                                    _decUseStack(r, Value);
-                                                    _decUseStack(_t40, Expr);
+                                                    double _t53 = Value_get_2(v, 0);
+                                                    Value_set_3(o, index, _t53);
                                                 }
-                                                break;
+                                                _decUseStack(_t50, Value);
+                                                _decUseStack(n, Value);
+                                                _decUseStack(o, Value);
+                                            } else {
+                                                At_put_4(this, map, name, v);
                                             }
-                                        }
-                                        if (result->list->size == 0) {
-                                            Value* _t42 = valueOf_1(0);
-                                            _incUseStack(_t42);
+                                            _decUseStack(map, org_bau_HashMap_HashMap_org_bau_String_string_Value);
+                                            _decUseStack(arrayIndex, Expr);
+                                            org_bau_String_string_free(&name);
+                                            _decUseStack(right, Expr);
+                                            _decUseStack(left, Expr);
                                             _decUseStack(result, Value);
-                                            result = _t42;
-                                            _decUseStack(_t42, Value);
+                                            return v;
                                         }
-                                        _decUseStack(_t39, Value);
-                                        _decUseStack(_t38, org_bau_List_List_float);
-                                    } else {
-                                        if (expr->exprType == 7) {
-                                            Expr* left = org_bau_List_List_Expr_get_2(expr->list, 0);
-                                            Expr* right = org_bau_List_List_Expr_get_2(expr->list, 1);
-                                            if (!(left)) {
-                                                Value* _t43 = valueOf_1(0);
-                                                _decUseStack(right, Expr);
-                                                _decUseStack(left, Expr);
-                                                _decUseStack(result, Value);
-                                                return _t43;
+                                        Value* lo = At_runExpr_2(this, left);
+                                        Value* _t54 = At_runExpr_2(this, right);
+                                        double r = Value_get_2(_t54, 0);
+                                        int64_t _t55 = org_bau_String_string_charAt_2(expr->name, 0);
+                                        if (_t55 == 46) {
+                                            int64_t _t56 = r < 0;
+                                            if (!(_t56)) {
+                                                int64_t _t57 = r >= float_1(Value_len_1(lo));
+                                                _t56 = _t57;
                                             }
-                                            if (!(right)) {
-                                                Value* _t44 = valueOf_1(0);
-                                                _decUseStack(right, Expr);
-                                                _decUseStack(left, Expr);
-                                                _decUseStack(result, Value);
-                                                return _t44;
-                                            }
-                                            int64_t _t45 = org_bau_String_string_charAt_2(expr->name, 0);
-                                            if (_t45 == 58) {
-                                                org_bau_String_string name = org_bau_String_str_1(string_1009);
-                                                Expr* arrayIndex = NULL;
-                                                if (left->exprType == 8) {
-                                                    org_bau_String_string_copy(&left->name);
-                                                    org_bau_String_string_free(&name);
-                                                    name = left->name;
-                                                } else {
-                                                    int64_t _t46 = left->exprType == 7;
-                                                    if (_t46) {
-                                                        int64_t _t47 = org_bau_String_string_charAt_2(left->name, 0) == 46;
-                                                        _t46 = _t47;
-                                                    }
-                                                    if (_t46) {
-                                                        Expr* _t48 = org_bau_List_List_Expr_get_2(left->list, 0);
-                                                        org_bau_String_string_copy(&_t48->name);
-                                                        org_bau_String_string_free(&name);
-                                                        name = _t48->name;
-                                                        Expr* _t49 = org_bau_List_List_Expr_get_2(left->list, 1);
-                                                        _incUseStack(_t49);
-                                                        _decUseStack(arrayIndex, Expr);
-                                                        arrayIndex = _t49;
-                                                        _decUseStack(_t49, Expr);
-                                                        _decUseStack(_t48, Expr);
-                                                    }
-                                                }
-                                                _incUseStack(this->global);
-                                                org_bau_HashMap_HashMap_org_bau_String_string_Value* map = this->global;
-                                                int64_t _t50 = org_bau_String_string_len_1(name);
-                                                int64_t _t51 = _t50 > 0;
-                                                if (_t51) {
-                                                    int64_t _t52 = org_bau_String_string_charAt_2(name, 0) > 90;
-                                                    _t51 = _t52;
-                                                }
-                                                if (_t51) {
-                                                    _incUseStack(this->local);
-                                                    _decUseStack(map, org_bau_HashMap_HashMap_org_bau_String_string_Value);
-                                                    map = this->local;
-                                                }
-                                                Value* v = At_runExpr_2(this, right);
-                                                if (arrayIndex != NULL) {
-                                                    Value* o = valueOf_1(0);
-                                                    Value* n = At_get_3(this, map, name);
-                                                    if (n != NULL) {
-                                                        _incUseStack(n);
-                                                        _decUseStack(o, Value);
-                                                        o = n;
-                                                    }
-                                                    At_put_4(this, map, name, o);
-                                                    Value* _t53 = At_runExpr_2(this, arrayIndex);
-                                                    double _t54 = Value_get_2(_t53, 0);
-                                                    int64_t index = int_1(_t54);
-                                                    if (index >= 0) {
-                                                        while (1 == 1) {
-                                                            int64_t _t55 = Value_len_1(o);
-                                                            if (!(( _t55 <= index ))) {
-                                                                break;
-                                                            }
-                                                            Value_add_2(o, 0.0);
-                                                        }
-                                                        double _t56 = Value_get_2(v, 0);
-                                                        Value_set_3(o, index, _t56);
-                                                    }
-                                                    _decUseStack(_t53, Value);
-                                                    _decUseStack(n, Value);
-                                                    _decUseStack(o, Value);
-                                                } else {
-                                                    At_put_4(this, map, name, v);
-                                                }
-                                                _decUseStack(map, org_bau_HashMap_HashMap_org_bau_String_string_Value);
-                                                _decUseStack(arrayIndex, Expr);
-                                                org_bau_String_string_free(&name);
-                                                _decUseStack(right, Expr);
-                                                _decUseStack(left, Expr);
-                                                _decUseStack(result, Value);
-                                                return v;
-                                            }
-                                            Value* lo = At_runExpr_2(this, left);
-                                            Value* _t57 = At_runExpr_2(this, right);
-                                            double r = Value_get_2(_t57, 0);
-                                            int64_t _t58 = org_bau_String_string_charAt_2(expr->name, 0);
-                                            if (_t58 == 46) {
-                                                int64_t _t59 = r < 0;
-                                                if (!(_t59)) {
-                                                    int64_t _t60 = r >= float_1(Value_len_1(lo));
-                                                    _t59 = _t60;
-                                                }
-                                                if (_t59) {
-                                                    if (r == -1) {
-                                                        int64_t _t61 = Value_len_1(lo);
-                                                        double _t62 = float_1(_t61);
-                                                        Value* _t63 = valueOf_1(_t62);
-                                                        _decUseStack(_t57, Value);
-                                                        _decUseStack(lo, Value);
-                                                        _decUseStack(right, Expr);
-                                                        _decUseStack(left, Expr);
-                                                        _decUseStack(result, Value);
-                                                        return _t63;
-                                                    }
-                                                    Value* _t64 = valueOf_1(0);
-                                                    _decUseStack(_t57, Value);
+                                            if (_t56) {
+                                                if (r == -1) {
+                                                    int64_t _t58 = Value_len_1(lo);
+                                                    double _t59 = float_1(_t58);
+                                                    Value* _t60 = valueOf_1(_t59);
+                                                    _decUseStack(_t54, Value);
                                                     _decUseStack(lo, Value);
                                                     _decUseStack(right, Expr);
                                                     _decUseStack(left, Expr);
                                                     _decUseStack(result, Value);
-                                                    return _t64;
+                                                    return _t60;
                                                 }
-                                                int64_t _t65 = int_1(r);
-                                                double _t66 = Value_get_2(lo, _t65);
-                                                Value* _t67 = valueOf_1(_t66);
-                                                _decUseStack(_t57, Value);
+                                                Value* _t61 = valueOf_1(0);
+                                                _decUseStack(_t54, Value);
                                                 _decUseStack(lo, Value);
                                                 _decUseStack(right, Expr);
                                                 _decUseStack(left, Expr);
                                                 _decUseStack(result, Value);
-                                                return _t67;
+                                                return _t61;
                                             }
-                                            double _t68 = Value_get_2(lo, 0);
-                                            double _t69 = At_operator_5(this, expr->name, 0, _t68, r);
-                                            Value* _t70 = valueOf_1(_t69);
-                                            _incUseStack(_t70);
-                                            _decUseStack(result, Value);
-                                            result = _t70;
-                                            _decUseStack(_t70, Value);
-                                            _decUseStack(_t57, Value);
+                                            int64_t _t62 = int_1(r);
+                                            double _t63 = Value_get_2(lo, _t62);
+                                            Value* _t64 = valueOf_1(_t63);
+                                            _decUseStack(_t54, Value);
                                             _decUseStack(lo, Value);
                                             _decUseStack(right, Expr);
                                             _decUseStack(left, Expr);
+                                            _decUseStack(result, Value);
+                                            return _t64;
                                         }
+                                        double _t65 = Value_get_2(lo, 0);
+                                        double _t66 = At_operator_5(this, expr->name, 0, _t65, r);
+                                        Value* _t67 = valueOf_1(_t66);
+                                        _incUseStack(_t67);
+                                        _decUseStack(result, Value);
+                                        result = _t67;
+                                        _decUseStack(_t67, Value);
+                                        _decUseStack(_t54, Value);
+                                        _decUseStack(lo, Value);
+                                        _decUseStack(right, Expr);
+                                        _decUseStack(left, Expr);
                                     }
                                 }
                             }
@@ -3115,34 +2987,31 @@ int main(int _argc, char *_argv[]) {
     string_1019 = str_const("&", 1);
     string_1020 = str_const("|", 1);
     string_1021 = str_const("=", 1);
-    string_1022 = str_const("<>", 2);
-    string_1023 = str_const(">", 1);
-    string_1024 = str_const("<", 1);
-    string_1025 = str_const(">=", 2);
-    string_1026 = str_const("<=", 2);
-    string_1027 = str_const("+", 1);
-    string_1028 = str_const("*", 1);
-    string_1029 = str_const("/", 1);
-    string_1030 = str_const("%", 1);
-    string_1031 = str_const(":", 1);
-    string_1034 = str_const("@", 1);
-    string_1035 = str_const("while", 5);
-    string_1036 = str_const("repeat", 6);
-    string_1037 = str_const("?", 1);
-    string_1038 = str_const("if", 2);
-    string_1039 = str_const("else", 4);
-    string_1040 = str_const("return", 6);
-    string_1041 = str_const("(", 1);
-    string_1042 = str_const(")", 1);
-    string_1043 = str_const("{", 1);
-    string_1044 = str_const("}", 1);
-    string_1045 = str_const(";", 1);
-    string_1046 = str_const("\'", 1);
-    string_1047 = str_const("print", 5);
-    string_1049 = str_const("\n", 1);
-    string_1052 = str_const("_", 1);
-    string_1053 = str_const("fun", 3);
-    string_1054 = str_const("\'Math Library, partially minified\';\nPOS_INFINITY:1/0;NEG_INFINITY:-1/0;NOT_A_NUMBER:0/0;\nPI:3.14159265358979323846;E:2.71828182845904523536;\nLOG10:2.30258509299404568402;LOG2:0.69314718055994530942;\nfun abs(x)       {?x>=0{=x};=-x}\nfun isNaN(x)     {=x<>x}\nfun isNegZero(x) {=(x=0)&(1/x=NEG_INFINITY)}\nfun min(a,b)     { if isNaN(a) { return a } \n           if a = b & a = 0 & isNegZero(b) { return b }\n           if a <= b {return a }\n           return b }\nfun max(a,b)     {\xc2\xa0if isNaN(a) {\xc2\xa0return a } \n           if a = b & a = 0 & isNegZero(a) { return b }\n           if a >= b {\xc2\xa0return a }\n           return b }\nfun floor(x)     {\xc2\xa0if isNaN(x) | x = 0 { return x }\n           i : x | 0; d : i;\n           if d = x | x >= 0 { return d } \n           return d - 1 }\nfun ceil(x)      {\xc2\xa0return -floor(-x) }\nfun round(x)     {\xc2\xa0if isNaN(x) { return 0 }\n           return (x + 0.5) | 0 }\nfun signum(x)    {\xc2\xa0if x = 0.0 | isNaN(x) { return x }\n           if x >= 0 {\xc2\xa0return 1 }\n           return -1 }\nfun exp(x)       {\xc2\xa0if isNaN(x) | x = POS_INFINITY { return x }\n           if x < 0 { return 1 / exp(-x) }\n           if x > 2 { r : exp(x / 2);  return r * r }\n           approx : 1.0; term : 1.0; \n           i : 1; while i < 22 { term:term*x/i ; approx:approx+term; i:i+1 }\n           return approx }\nfun log(x)       { if x = 0 {\xc2\xa0return NEG_INFINITY }\n           if x = POS_INFINITY { return x }\n           if x <= 0 | isNaN(x) { return NOT_A_NUMBER }\n           if x < 0.7 { return log(2 * x) - LOG2 }\n           if x >= 1.5 { return log(x / 2) + LOG2 }\n           base:x-1; sign:1; term:base; result:term;\n           i : 2; while i < 30 {sign:-sign; term : term * base; \n           result:result+sign*term/i; i:i+1}\n           return result }\nfun sqrt(x)      {=exp(log(x)/2)}\nfun log10(x)     {=log(x)/LOG10}\nfun e(x,n)       {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};=x} \nfun pow(x,y)     { if x > 0 & y > 0 { return exp(y * log(x)) }\n           if y = 0.0 { return 1.0 }\n           if isNaN(x) | isNaN(y) { return NOT_A_NUMBER }\n           absX : abs(x); if y = NEG_INFINITY {\n             if absX > 1.0 { return 0.0 }\n             if absX = 1.0 { return NOT_A_NUMBER }\n             return POS_INFINITY }\n           yy : y | 0; odd : (yy = y) & ((yy & 1) = 1);\n           if isNegZero(x) & yy = y { if odd { return -pow(-x, y) } return pow(-x, y) }\n           if x >= 0 { return exp(y * log(x)) }\n           if odd { return -pow(-x, y) }\n           if x = NEG_INFINITY { if y < 0 { return 0.0 } return POS_INFINITY }\n           if yy = y { return pow(-x, y) }\n           if abs(y) > e(1,19) { if y > 0 { return pow(-x, y) } \n           if x = -1 { return 1 } if absX > 1 { return 0 } return POS_INFINITY }\n           return NOT_A_NUMBER }\nfun sin(x)       { if x = POS_INFINITY { return NOT_A_NUMBER }\n           if abs(x) < e(1,-8) { return x }\n           if x < 0 {return -sin(-x) }\n           if x > PI * 2 { x : x - floor(x / (PI * 2)) * (PI * 2) }\n           if x > PI { return -sin(x - PI) }\n           if x > PI / 2 { x : PI - x }\n           approx : 0.0; sign : 1; p : x; n : 2;\n           while n < 24 {\n             approx : approx + sign * p;\n             p : p * x * x / (n * (n + 1)); sign : -sign; n:n+2;\n           } return approx; }\nfun atan(x)      { x : min(max(e(-1,16), x), e(1,16));\n           if abs(x) >= 0.4 { return 2 * atan(x / (1 + sqrt(1 + x * x))) }\n           approx : x; sign : -1; p : x;\n           n:3; while n < 32 {\n             p : p * x * x; approx : approx + sign * p / n;\n             sign : -sign; n:n+1\n           } return approx; }\nfun cos(x) {=sin(x+PI/2)}\nfun tan(x) {=sin(x)/cos(x)}\nfun asin(x) {=atan(x/sqrt(1-x*x))}\nfun acos(x) {=PI/2-asin(x)}\n\nprint(\'pow(2, 10) \' pow(2, 10));\nprint(\'sqrt(2) \' sqrt(2));\nprint(\'sin(0.5) \' sin(0.5));\nprint(\'cos(0.5) \' cos(0.5));\nprint(\'tan(0.5) \' tan(0.5));\nprint(\'asin(0.5) \' asin(0.5));\nprint(\'acos(0.5) \' acos(0.5));\nprint(\'atan(0.5) \' atan(0.5));", 3938);
+    string_1022 = str_const("<", 1);
+    string_1023 = str_const("+", 1);
+    string_1024 = str_const("*", 1);
+    string_1025 = str_const("/", 1);
+    string_1026 = str_const(":", 1);
+    string_1029 = str_const("@", 1);
+    string_1030 = str_const("while", 5);
+    string_1031 = str_const("repeat", 6);
+    string_1032 = str_const("?", 1);
+    string_1033 = str_const("if", 2);
+    string_1034 = str_const("else", 4);
+    string_1035 = str_const("!", 1);
+    string_1036 = str_const("return", 6);
+    string_1037 = str_const("(", 1);
+    string_1038 = str_const("{", 1);
+    string_1039 = str_const(")", 1);
+    string_1040 = str_const("}", 1);
+    string_1041 = str_const(";", 1);
+    string_1042 = str_const("\'", 1);
+    string_1043 = str_const(">", 1);
+    string_1044 = str_const("print", 5);
+    string_1046 = str_const("\n", 1);
+    string_1049 = str_const("_", 1);
+    string_1050 = str_const("fun", 3);
+    string_1051 = str_const("\'Math Library, partially minified\';\nPOS_INFINITY:1/0;\nNEG_INFINITY:-1/0;\nNOT_A_NUMBER:0/0;\nPI   :3.14159265358979323846;\nE    :2.71828182845904523536;\nLOG10:2.30258509299404568402;\nLOG2 :0.69314718055994530942;\nfun >(a,b)       (30,b<a)\nfun >=(a,b)      (30,a=b|b<a)\nfun <=(a,b)      (30,a=b|a<b)\nfun <>(a,b)      (30,a<b|b<a)\nfun %(a,b)       (50,a-((a/b)|0)*b)\nfun abs(x)       (?0<x(x):-x)\nfun isNaN(x)     (1-(x=x))\nfun isNegZero(x) {(x=0)&(1/x=NEG_INFINITY)}\nfun min(a,b)     { if isNaN(a) { return a } \n           if a = b & a = 0 & isNegZero(b) { return b }\n           if a <= b {return a }\n           return b }\nfun max(a,b)     {\xc2\xa0if isNaN(a) {\xc2\xa0return a } \n           if a = b & a = 0 & isNegZero(a) { return b }\n           if a >= b {\xc2\xa0return a }\n           return b }\nfun floor(x)     {\xc2\xa0if isNaN(x) | x = 0 { return x }\n           i : x | 0; d : i;\n           if d = x | x >= 0 { return d } \n           return d - 1 }\nfun ceil(x)      {\xc2\xa0return -floor(-x) }\nfun round(x)     {\xc2\xa0if isNaN(x) { return 0 }\n           return (x + 0.5) | 0 }\nfun signum(x)    {\xc2\xa0if x = 0.0 | isNaN(x) { return x }\n           if x >= 0 {\xc2\xa0return 1 }\n           return -1 }\nfun exp(x)       {\xc2\xa0if isNaN(x) | x = POS_INFINITY { return x }\n           if x < 0 { return 1 / exp(-x) }\n           if x > 2 { r : exp(x / 2);  return r * r }\n           approx : 1.0; term : 1.0; \n           i : 1; while i < 22 { term:term*x/i ; approx:approx+term; i:i+1 }\n           return approx }\nfun log(x)       { if x = 0 {\xc2\xa0return NEG_INFINITY }\n           if x = POS_INFINITY { return x }\n           if x <= 0 | isNaN(x) { return NOT_A_NUMBER }\n           if x < 0.7 { return log(2 * x) - LOG2 }\n           if x >= 1.5 { return log(x / 2) + LOG2 }\n           base:x-1; sign:1; term:base; result:term;\n           i : 2; while i < 30 {sign:-sign; term : term * base; \n           result:result+sign*term/i; i:i+1}\n           return result }\nfun sqrt(x)      {!exp(log(x)/2)}\nfun log10(x)     {!log(x)/LOG10}\nfun e(x,n)       {@n>0{x:x*10;n:n-1};@n<0{x:x/10;n:n+1};!x} \nfun pow(x,y)     { if x > 0 & y > 0 { return exp(y * log(x)) }\n           if y = 0.0 { return 1.0 }\n           if isNaN(x) | isNaN(y) { return NOT_A_NUMBER }\n           absX : abs(x); if y = NEG_INFINITY {\n             if absX > 1.0 { return 0.0 }\n             if absX = 1.0 { return NOT_A_NUMBER }\n             return POS_INFINITY }\n           yy : y | 0; odd : (yy = y) & ((yy & 1) = 1);\n           if isNegZero(x) & yy = y { if odd { return -pow(-x, y) } return pow(-x, y) }\n           if x >= 0 { return exp(y * log(x)) }\n           if odd { return -pow(-x, y) }\n           if x = NEG_INFINITY { if y < 0 { return 0.0 } return POS_INFINITY }\n           if yy = y { return pow(-x, y) }\n           if abs(y) > e(1,19) { if y > 0 { return pow(-x, y) } \n           if x = -1 { return 1 } if absX > 1 { return 0 } return POS_INFINITY }\n           return NOT_A_NUMBER }\nfun sin(x)       { if x = POS_INFINITY { return NOT_A_NUMBER }\n           if abs(x) < e(1,-8) { return x }\n           if x < 0 {return -sin(-x) }\n           if x > PI * 2 { x : x - floor(x / (PI * 2)) * (PI * 2) }\n           if x > PI { return -sin(x - PI) }\n           if x > PI / 2 { x : PI - x }\n           approx : 0.0; sign : 1; p : x; n : 2;\n           while n < 24 {\n             approx : approx + sign * p;\n             p : p * x * x / (n * (n + 1)); sign : -sign; n:n+2;\n           } return approx; }\nfun atan(x)      { x : min(max(e(-1,16), x), e(1,16));\n           if abs(x) >= 0.4 { return 2 * atan(x / (1 + sqrt(1 + x * x))) }\n           approx : x; sign : -1; p : x;\n           n:3; while n < 32 {\n             p : p * x * x; approx : approx + sign * p / n;\n             sign : -sign; n:n+1\n           } return approx; }\nfun cos(x) {!sin(x+PI/2)}\nfun tan(x) {!sin(x)/cos(x)}\nfun asin(x) {!atan(x/sqrt(1-x*x))}\nfun acos(x) {!PI/2-asin(x)}\n\nprint(\'pow(2, 10) \' pow(2, 10));\nprint(\'sqrt(2) \' sqrt(2));\nprint(\'sin(0.5) \' sin(0.5));\nprint(\'cos(0.5) \' cos(0.5));\nprint(\'tan(0.5) \' tan(0.5));\nprint(\'asin(0.5) \' asin(0.5));\nprint(\'acos(0.5) \' acos(0.5));\nprint(\'atan(0.5) \' atan(0.5));", 4100);
     _main();
     return 0;
 }
@@ -3159,18 +3028,17 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    BLOCK = 1;
-    CALL = 2;
-    IF = 3;
-    LITERAL = 4;
-    REPEAT = 5;
-    LOOP = 6;
-    OPERATION = 7;
-    VARIABLE = 8;
-    RETURN = 9;
-    LIST = 10;
+    CALL = 1;
+    IF = 2;
+    LITERAL = 3;
+    REPEAT = 4;
+    LOOP = 5;
+    OPERATION = 6;
+    VARIABLE = 7;
+    RETURN = 8;
+    LIST = 9;
     At* at = newAt_0();
-    org_bau_String_string result = At_run_2(at, string_1054);
+    org_bau_String_string result = At_run_2(at, string_1051);
     printf("%.*s\n", _arrayLen(result.data), result.data->data);
     org_bau_String_string_free(&result);
     _decUseStack(at, At);

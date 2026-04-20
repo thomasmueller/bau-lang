@@ -5,6 +5,8 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-04-19: Improved <a href="https://thomasmueller.github.io/bau-lang/at.html">experimental tiny language "At" with separate playground.</a>: operator overloading supports operator precedence; unified "list" and "block";
+shorter implementation; less built-in operations.
 * 2026-04-17: Syntax changed for module imports: module alias instead of fully qualified names, and `module` keyword is gone.
 * 2026-04-14: Syntax changed for constructors on generic types: now the type is just a regular parameter (simplifying the grammar).
 * 2026-04-13: Syntax changed for member functions: now there is a dot after the type. Example: `fun Node.count() int` instead of `fun Node count() int`.
