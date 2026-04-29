@@ -171,7 +171,6 @@ type At
     token string
     value Value
     pos int
-    returnValue Value
     hasReturnValue int
     counter int
     inOperator int
@@ -185,8 +184,7 @@ fun newAt() At
     code : string()
     token : string()
     value : valueOf(0)
-    returnValue := valueOf(0)
-    return At(global, local, functions, stack, out, code, token, value, returnValue)
+    return At(global, local, functions, stack, out, code, token, value)
 
 fun At.get(map HashMap(string, Value), name string) Value?
     return map.get(hashCode(name.data), name)
@@ -432,7 +430,7 @@ fun At.runExpr(expr Expr) Value
             result = runExpr(expr.list.get(1))
     elif expr.exprType == RETURN
         result = runExpr(expr.list.get(0))
-        returnValue = result
+        value = result
         hasReturnValue = 1
     elif expr.exprType == CALL
         if expr.name.charAt(0) == ord('>')
@@ -504,7 +502,7 @@ fun At.call(name string, argList Expr[]) Value
     local = newLocal
     result := runExpr(m.array[m.size - 1])
     if hasReturnValue
-        result = returnValue
+        result = value
         hasReturnValue = 0
     if stack.size > 0
         l : stack.array[stack.size - 1]

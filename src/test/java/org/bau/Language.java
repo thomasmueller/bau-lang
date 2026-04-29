@@ -17,6 +17,9 @@ collection comments while parsing, to allow formatting the source code
 
 Non-ignorable return values (e.g. "read(...)")
 
+LINQ etc.
+https://tobega.blogspot.com/2026/04/rising-above-mechanics-of-computation.html
+
 Easy as Python:
   - No closures or higher-order functions (deliberate omission)
   - No string interpolation (deliberate omission)
@@ -39,6 +42,7 @@ Advantages
  6. No separate boolean type: reduces the type surface area without real loss; comparisons yield int (1/0), consistent with C tradition.
 
 
+more benchmarks: https://zef-lang.dev/implementation (DeltaBlue, N-Body, Splay, OS scheduler (Richards)
 
 public vs private
 Declaration     "-" means

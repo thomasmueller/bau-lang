@@ -19,6 +19,7 @@ public class SourceFile {
     private HashMap<String, String> importedSymbols = new HashMap<>();
     private TreeMap<Integer, Object> elements = new TreeMap<>();
     private TreeMap<Integer, String> errors = new TreeMap<>();
+    private HashMap<String, FunctionDefinition> functions = new HashMap<>();
     private boolean imported;
     private int errorCount;
 
@@ -183,6 +184,14 @@ public class SourceFile {
                 elements.put(e.getKey(), e.getValue());
             }
         }
+    }
+
+    public FunctionDefinition getFunctionDefinition(String id) {
+        return functions.get(id);
+    }
+
+    public void addFunctionDefinition(String id, FunctionDefinition def) {
+        functions.put(id, def);
     }
 
 }

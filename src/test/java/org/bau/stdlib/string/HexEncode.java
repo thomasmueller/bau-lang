@@ -28,7 +28,7 @@ public class HexEncode {
         return buff;
     }
 
-    static int nibble(char hexChar) {
+    static int nibble1(char hexChar) {
         // if (hexChar >= '0' && hexChar <= '9') {
         //     return hexChar - '0';
         // }
@@ -40,11 +40,16 @@ public class HexEncode {
 
         // convert 'A'... to 'a'...
         int lowerCase = hexChar | ((hexChar >> 1) & 0x20);
-        // 0xf if <= '9'
+        // -1 if <= '9'
         int maskDigit = ((lowerCase - '9' - 1) >> 8);
-        // 0xf if >= 'a'
+        // -1 if >= 'a'
         int maskLetter = (('a' - lowerCase - 1) >> 8);
         return lowerCase - (maskDigit & '0') - (maskLetter & ('a' - 10));
+    }
+
+    static int nibble(char x) {
+        int y = x | ((x >> 1) & 32);
+        return y - (((y - 58) >> 8) & 48) - (((96 - y) >> 8) & 87);
     }
 
     public static String convertBytesToHex(byte[] value) {

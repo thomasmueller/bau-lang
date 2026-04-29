@@ -459,7 +459,6 @@ struct At {
     org_bau_String_string token;
     Value* value;
     int64_t pos;
-    Value* returnValue;
     int64_t hasReturnValue;
     int64_t counter;
     int64_t inOperator;
@@ -528,7 +527,7 @@ org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* org_bau_L
 int __argc;
 char **__argv;
 /* functions */
-At* At_9(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value, Value* returnValue);
+At* At_8(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value);
 Value* At_call_3(At* this, org_bau_String_string name, Expr_array* argList);
 Value* At_get_3(At* this, org_bau_HashMap_HashMap_org_bau_String_string_Value* map, org_bau_String_string name);
 org_bau_List_List_Expr* At_getFunction_2(At* this, org_bau_String_string name);
@@ -718,7 +717,6 @@ void At_free_0(At* x) {
     org_bau_String_string_free(&x->code);
     org_bau_String_string_free(&x->token);
     _decUse(x->value, Value);
-    _decUse(x->returnValue, Value);
     _free(x); _traceFree(x);
 }
 void At_free(At* x) {
@@ -821,7 +819,7 @@ int64_t OPERATION;
 int64_t VARIABLE;
 int64_t RETURN;
 int64_t LIST;
-At* At_9(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value, Value* returnValue) {
+At* At_8(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_HashMap_HashMap_org_bau_String_string_Value* local, org_bau_HashMap_HashMap_org_bau_String_string_Expr* functions, org_bau_List_List_org_bau_HashMap_HashMap_org_bau_String_string_Value* stack, org_bau_String_StringBuilder* out, org_bau_String_string code, org_bau_String_string token, Value* value) {
     At* _t97 = At_new();
     _incUseStack(global);
     _t97->global = global;
@@ -840,8 +838,6 @@ At* At_9(org_bau_HashMap_HashMap_org_bau_String_string_Value* global, org_bau_Ha
     _incUseStack(value);
     _t97->value = value;
     _t97->pos = 0;
-    _incUseStack(returnValue);
-    _t97->returnValue = returnValue;
     _t97->hasReturnValue = 0;
     _t97->counter = 0;
     _t97->inOperator = 0;
@@ -880,9 +876,9 @@ Value* At_call_3(At* this, org_bau_String_string name, Expr_array* argList) {
     this->local = newLocal;
     Value* result = At_runExpr_2(this, m->array->data[idx_2(m->size - 1, _arrayLen(m->array))]);
     if (this->hasReturnValue) {
-        _incUseStack(this->returnValue);
+        _incUseStack(this->value);
         _decUseStack(result, Value);
-        result = this->returnValue;
+        result = this->value;
         this->hasReturnValue = 0;
     }
     if (this->stack->size > 0) {
@@ -1733,8 +1729,8 @@ Value* At_runExpr_2(At* this, Expr* expr) {
                             _decUseStack(result, Value);
                             result = _t29;
                             _incUseStack(result);
-                            _decUse(this->returnValue, Value);
-                            this->returnValue = result;
+                            _decUse(this->value, Value);
+                            this->value = result;
                             this->hasReturnValue = 1;
                             _decUseStack(_t29, Value);
                             _decUseStack(_t28, Expr);
@@ -2083,9 +2079,7 @@ At* newAt_0() {
     org_bau_String_string code = org_bau_String_string_0();
     org_bau_String_string token = org_bau_String_string_0();
     Value* value = valueOf_1(0);
-    Value* returnValue = valueOf_1(0);
-    At* _t0 = At_9(global, local, functions, stack, out, code, token, value, returnValue);
-    _decUseStack(returnValue, Value);
+    At* _t0 = At_8(global, local, functions, stack, out, code, token, value);
     _decUseStack(value, Value);
     org_bau_String_string_free(&token);
     org_bau_String_string_free(&code);
