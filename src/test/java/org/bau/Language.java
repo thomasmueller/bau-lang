@@ -5,6 +5,9 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+cloc like tool:
+- language; blank lines, comment lines (excluding comments in strings), code lines
+
 Easy to resolve friction:
   - Bit operation precedence differs from all other languages.
     &, |, ^ have higher precedence than comparisons in Bau,

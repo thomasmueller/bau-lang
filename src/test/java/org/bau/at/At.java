@@ -5,15 +5,16 @@ import java.util.HashMap;
 
 public class At {
 
-    private final HashMap<String, Expr> functions = new HashMap<>();
     private final HashMap<String, ArrayList<Double>> global = new HashMap<>();
+    private final HashMap<String, Expr> functions = new HashMap<>();
     private final ArrayList<HashMap<String, ArrayList<Double>>> stack = new ArrayList<>();
-    private HashMap<String, ArrayList<Double>> local = new HashMap<>();
     private StringBuilder out = new StringBuilder();
+    private HashMap<String, ArrayList<Double>> local = new HashMap<>();
     private String code;
     private String token;
     private ArrayList<Double> value;
     private int pos;
+    private ArrayList<Double> returnValue;
     private long counter;
     private boolean inOperator;
 
@@ -37,7 +38,6 @@ public class At {
         }
         out = new StringBuilder();
         ArrayList<Double> result = null;
-        value = null;
         for (Expr e : program) {
             result = run(e);
         }
@@ -280,17 +280,17 @@ public class At {
             }
         } else if (expr.type == Expr.REPEAT) {
             long c = run(expr.list.get(0)).get(0).longValue();
-            for (int i = 0; i < c && value == null && counter-- > 0; i++) {
+            for (int i = 0; i < c && returnValue == null && counter-- > 0; i++) {
                 local.put("_", valueOf(i));
                 result = run(expr.list.get(1));
             }
         } else if (expr.type == Expr.LOOP) {
-            while (run(expr.list.get(0)).get(0).longValue() != 0 && value == null && counter-- > 0) {
+            while (run(expr.list.get(0)).get(0).longValue() != 0 && returnValue == null && counter-- > 0) {
                 result = run(expr.list.get(1));
             }
         } else if (expr.type == Expr.RETURN) {
             result = run(expr.list.get(0));
-            value = result;
+            returnValue = result;
         } else if (expr.type == Expr.CALL) {
             if (expr.name.equals(">")) {
                 for (Expr e : expr.list) {
@@ -304,7 +304,7 @@ public class At {
             result = new ArrayList<>();
             for (Expr e : expr.list) {
                 result = run(e);
-                if (value != null) {
+                if (returnValue != null) {
                     break;
                 }
             }
@@ -371,9 +371,9 @@ public class At {
         stack.add(local);
         local = newLocal;
         ArrayList<Double> result = run(m.list.get(m.list.size() - 1));
-        if (value != null) {
-            result = value;
-            value = null;
+        if (returnValue != null) {
+            result = returnValue;
+            returnValue = null;
         }
         local = stack.removeLast();
         return result;

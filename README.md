@@ -5,7 +5,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
-* 2026-04-29: New C-like language named "self" that is able to compile itself to WASM. Source code (source.c) is currently 288 lines. Work in progress.
+* 2026-05-01: <a href="docsrc/nanocc.md">NanoCC</a>: A tiny (250 lines) self-compiling compiler for a minimal C-like language. It can compile itself to WASM.
 * 2026-04-19: Improved <a href="https://thomasmueller.github.io/bau-lang/at.html">experimental tiny language "At" with separate playground.</a>: operator overloading supports operator precedence; unified "list" and "block";
 shorter implementation; less built-in operations.
 * 2026-04-17: Syntax changed for module imports: module alias instead of fully qualified names, and `module` keyword is gone.
