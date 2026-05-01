@@ -206,15 +206,13 @@ Here the full source code:
             *stack = token; stack=stack+1; i=i+1;
         } else { if (token == '*') { // memory access via pointer
             i=i+1; token = *i; i=i+1;
+            *o = 0x2001; o=o+1;
+            *o = (token << 8) | 0x01; o=o+1;
             if (*i == '=') { // memory write
-                *o = 0x2001; o=o+1;
-                *o = (token << 8) | 0x01; o=o+1;
                 *o = 0xa786034204; o=o+1;
                 *stack = '*'; stack=stack+1;
                 i=i+1;
             } else { // memory read
-                *o = 0x2001; o=o+1;
-                *o = (token << 8) | 0x01; o=o+1;
                 *o = 0x000329a786034207; o=o+1;
                 wasValue = 1;
             }
@@ -264,9 +262,9 @@ Here the full source code:
                     *o = 0x7c01; o=o+1;
                 } else { if (op == '-') { // for negative numbers, use 0 - x
                     *o = 0x7d01; o=o+1;
-                } else { if (op == '|') { // bitwise 'and' is also logical
+                } else { if (op == '|') { // bitwise 'or' is also logical
                     *o = 0x8401; o=o+1;
-                } else { if (op == '&') { // bitwise 'or' is also logical
+                } else { if (op == '&') { // bitwise 'and' is also logical
                     *o = 0x8301; o=o+1;
                 } else { if (op == '<<') {
                     *o = 0x8601; o=o+1;
@@ -321,7 +319,3 @@ Here the full source code:
             }
         }
     }
-
-}
-
-
