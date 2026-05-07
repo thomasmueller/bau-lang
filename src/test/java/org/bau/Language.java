@@ -8,6 +8,10 @@ https://github.com/NicoNex/tau
 cloc like tool:
 - language; blank lines, comment lines (excluding comments in strings), code lines
 
+maybe support u8 (unsigned 8-bit int), and name it "byte"
+
+for (tm_)malloc(count * sizeof(...)) verify there is no overflow
+
 Easy to resolve friction:
   - Bit operation precedence differs from all other languages.
     &, |, ^ have higher precedence than comparisons in Bau,

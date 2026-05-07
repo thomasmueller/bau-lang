@@ -54,11 +54,12 @@
 * String interpolation is not supported to simplify the language. 
   Instead, use an arrays of strings. As commas are optional, this is short.
 * Unsigned integer are intentionally not supported to simplify learning and
-  using the language, to avoid surprising behavior and edge cases,
-  and to reduce security issues and error-handling pitfalls.
-  Unsigned types sound simple on the surface, but they are not,
-  and they can cause issues that are hard to protect against
-  and are hard to solve.
+  using the language, to avoid surprising behavior and edge cases.
+  Unsigned integer are specially tricky if combined with type inference, as in this language.
+  Mixing signed and unsigned values can result in unexpected behavior,
+  and unsigned arithmetic can mask errors by turning invalid states into large valid-looking values.
+  Some example are: `int n = 100; for (unsigned i = n - 1; i >= 0; i--) { printf("%d\n", i); }` and
+  `int a = -1; unsigned int b = 1; if (a < b) printf("a is less than b\n"); else printf("b is less than a\n");`. 
   When needed, unsigned behavior is available through explicit operations
   (eg. unsigned division).
   This design does not affect performance or memory usage.

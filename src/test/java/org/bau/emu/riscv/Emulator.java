@@ -2,6 +2,71 @@ package org.bau.emu.riscv;
 
 /*
 
+interpreter:
++, >>1, &, ^
+x OR y = (x XOR y) + (x AND y)
+a - b = a + (~b + 1)
+ADD, AND, SUB, SHR1, XOR, JZ, JMP
+
+10 print "hello"
+20 x = input
+
+https://github.com/nanochess/bootBASIC
+
+qemu-system-x86_64 -fda basic.img
+-serial stdio
+
+https://www.mztn.org/rvtl/rvtl64.html
+goto a: #=a
+a=?, ? a
+
+var=expr        Assign expr value to var (a-z)
+  print expr      Print expression value, new line
+  print expr;     Print expression value, continue
+  print "hello"   Print string, new line
+  print "hello";  Print string, continue
+  input var       Input value into variable (a-z)
+  goto expr       Goto to indicated line in program
+  if expr1 goto expr2
+              If expr1 is non-zero then go to line,
+              else go to following line.
+if c-5 goto 20
+5+6*(10/2)
+The rnd function (without arguments) returns a value between 0 and 255.
+Sample program (counting 1 to 10):
+10 a=1
+20 print a
+30 a=a+1
+40 if a-11 goto 20
+---
+10 print "choose ";
+20 print "a number ";
+30 print "(1-6)"
+40 input a
+50 b=rnd
+60 b=b-b/6*6
+70 b=b+1
+80 if a-b goto 110
+90 print "good"
+100 goto 120
+110 print "miss"
+120 print b
+
+10 input x
+20 x=x-1
+20 print y
+30 m(10)=m(10)+1
+30 m(x)=10
+30 *x=10   // ??
+40 x=x+1:y=y-1:m(x)=m(y)
+50 if x>10 goto 30
+run
+list
+
+
+
+
+
 Important compiler features
 if, else, while, maybe return
 +, -, <<, >>, ==, !=, <=, |, &, []
