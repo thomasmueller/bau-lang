@@ -312,7 +312,7 @@ i8_array* hex_2(int64_t x, int64_t len) {
     return data;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 int64_t shiftRight_int_2(int64_t a, int64_t b) {

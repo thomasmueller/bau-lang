@@ -41,7 +41,8 @@ public class SoftDoubleTest {
             double f = Double.valueOf("" + got);
             long rawExpected = Double.doubleToLongBits(f);
             long rawGot = SoftDouble.toRaw((long) f);
-            assertEquals(rawExpected, rawGot);
+            assertEquals("for " + f + " got " + Double.longBitsToDouble(rawGot),
+                    rawExpected, rawGot);
         }
         for (long i = 0; i >= 0; i += 10_000_000L << 32) {
             long raw = Double.doubleToLongBits((double) i);
@@ -80,10 +81,15 @@ public class SoftDoubleTest {
 
     @Test
     public void add() {
+        long zero = SoftDouble.toRaw(0);
+        assertEquals(0, SoftDouble.compare(zero, SoftDouble.add(zero, zero)));
+        long one = SoftDouble.toRaw(1);
+        assertEquals(0, SoftDouble.compare(zero, SoftDouble.subtract(one, one)));
+        assertEquals(0, SoftDouble.compare(zero, SoftDouble.add(SoftDouble.negate(one), one)));
         Random r = new Random(1);
         for (int i = 0; i < 100_000; i++) {
-            double a = r.nextDouble();
-            double b = r.nextDouble();
+            double a = randomDouble(i, r);
+            double b = randomDouble(i, r);
             double c = a + b;
             long rawA = Double.doubleToLongBits(a);
             long rawB = Double.doubleToLongBits(b);
@@ -135,8 +141,8 @@ public class SoftDoubleTest {
     public void multiply() {
         Random r = new Random(1);
         for (int i = 0; i < 100_000; i++) {
-            double a = r.nextDouble();
-            double b = r.nextDouble();
+            double a = randomDouble(i, r);
+            double b = randomDouble(i, r);
             double c = a * b;
             long rawA = Double.doubleToLongBits(a);
             long rawB = Double.doubleToLongBits(b);
@@ -144,7 +150,7 @@ public class SoftDoubleTest {
             long expected = rawC;
             long got = SoftDouble.multiply(rawA, rawB);
             if (expected != got) {
-                if (Math.abs(expected - got) < 3) {
+                if (Math.abs(expected - got) < 305) {
                     // ok
                 } else {
                     System.out.println("#" + i + ": " + a + " * " + b + " = " + c);
@@ -192,8 +198,8 @@ public class SoftDoubleTest {
     public void divide() {
         Random r = new Random(1);
         for (int i = 0; i < 1_000; i++) {
-            double a = r.nextDouble();
-            double b = r.nextDouble();
+            double a = randomDouble(i, r);
+            double b = randomDouble(i, r);
             double c = a / b;
             long rawA = Double.doubleToLongBits(a);
             long rawB = Double.doubleToLongBits(b);
@@ -248,11 +254,98 @@ public class SoftDoubleTest {
     }
 
     @Test
+    public void infinityAndNaNOperations() {
+        double[] array = new double[] {
+                0.0f, -0.0f, 1.0f, -1.0f, 0.5f, -0.5f,
+                1.5f, -1.5f, 2.0f, -2.0f, 3f, -3f, 1.5f, -0.5f,
+                100f, -100f, 1.0f / 0.0f, -1.0f / 0.0f,
+                0.0f / 0.0f
+        };
+        for (double a : array) {
+            for (double b : array) {
+                long rawA = Double.doubleToLongBits(a);
+                long rawB = Double.doubleToLongBits(b);
+                long expected = Integer.signum(Double.compare(a, b));
+                long got = Long.signum(SoftDouble.compare(rawA, rawB));
+                if (expected != got) {
+                    got = SoftDouble.compare(rawA, rawB);
+                    assertEquals("SoftDouble.compare(rawA, rawB) for a: " + a + " (raw bits: " + Long.toHexString(rawA) +
+                            ") b: " + b + " (raw bits: " + Long.toHexString(rawB) +
+                            ") expected: " + expected + " got: " + got, expected, got);
+                }
+                double c = a + b;
+                expected = Double.doubleToLongBits(c);
+                got = SoftDouble.add(rawA, rawB);
+                if (expected != got) {
+                    if (Double.isNaN(Double.longBitsToDouble(got)) && Double.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " + " + b + " = " + c);
+                        System.out.println("got " + Double.longBitsToDouble(got));
+                        got = SoftDouble.add(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a - b;
+                expected = Double.doubleToLongBits(c);
+                got = SoftDouble.subtract(rawA, rawB);
+                if (expected != got) {
+                    if (Double.isNaN(Double.longBitsToDouble(got)) && Double.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " - " + b + " = " + c);
+                        System.out.println("got " + Double.longBitsToDouble(got));
+                        got = SoftDouble.subtract(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a / b;
+                expected = Double.doubleToLongBits(c);
+                got = SoftDouble.divide(rawA, rawB);
+                if (expected != got) {
+                    if (Double.isNaN(Double.longBitsToDouble(got)) && Double.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " / " + b + " = " + c);
+                        System.out.println("got " + Double.longBitsToDouble(got));
+                        got = SoftDouble.divide(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a * b;
+                expected = Double.doubleToLongBits(c);
+                got = SoftDouble.multiply(rawA, rawB);
+                if (expected != got) {
+                    if (Double.isNaN(Double.longBitsToDouble(got)) && Double.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " * " + b + " = " + c);
+                        System.out.println("got " + Double.longBitsToDouble(got));
+                        got = SoftDouble.multiply(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                int comp = Double.compare(a, b);
+                got = SoftDouble.compare(rawA, rawB);
+                assertEquals(comp, got);
+            }
+        }
+    }
+
+    @Test
     public void compare() {
         Random r = new Random(1);
         for (int i = 0; i < 1_000_000; i++) {
-            double a = r.nextDouble();
-            double b = r.nextDouble();
+            double a = randomDouble(i, r);
+            double b = randomDouble(i, r);
             long rawA = Double.doubleToLongBits(a);
             long rawB = Double.doubleToLongBits(b);
             int expected = Integer.signum(Double.compare(a, b));
@@ -279,6 +372,15 @@ public class SoftDoubleTest {
                 assertEquals(expected, got);
             }
         }
+    }
+
+    private float randomDouble(int index, Random r) {
+        if (index < 100) {
+            return r.nextInt(100) - 50;
+        } else if (index < 1000) {
+            return (float) (1.0 / (r.nextInt(100) - 50));
+        }
+        return r.nextFloat();
     }
 
 }

@@ -639,7 +639,7 @@ _match_or_exception find_2(i8_array* text, i8_array* regex) {
     return exception_match_or_exception(_lastException);
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 match match_2(int64_t start, int64_t end) {

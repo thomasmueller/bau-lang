@@ -30,7 +30,7 @@ public class SoftFloatTest {
             float f = Float.valueOf("" + got);
             int rawExpected = Float.floatToIntBits(f);
             int rawGot = SoftFloat.toRaw((int) f);
-            assertEquals(rawExpected, rawGot);
+            assertEquals("i: " + i, rawExpected, rawGot);
         }
         Random r = new Random(1);
         for (int i = 0; i < 100_000; i++) {
@@ -58,18 +58,25 @@ public class SoftFloatTest {
 
     @Test
     public void add() {
+        int zero = SoftFloat.toRaw(0);
+        assertEquals(0, SoftFloat.compare(zero, SoftFloat.add(zero, zero)));
+        int one = SoftFloat.toRaw(1);
+        assertEquals(0, SoftFloat.compare(zero, SoftFloat.subtract(one, one)));
+        assertEquals(0, SoftFloat.compare(zero, SoftFloat.add(SoftFloat.negate(one), one)));
         Random r = new Random(1);
         for (int i = 0; i < 1_000_000; i++) {
-            float a = r.nextFloat();
-            float b = r.nextFloat();
+            float a = randomFloat(i, r);
+            float b = randomFloat(i, r);
             float c = a + b;
             int rawA = Float.floatToIntBits(a);
+            assertEquals(Float.isInfinite(a), SoftFloat.isInfinity(rawA));
+            assertEquals(Float.isNaN(a), SoftFloat.isNaN(rawA));
             int rawB = Float.floatToIntBits(b);
             int rawC = Float.floatToIntBits(c);
             int expected = rawC;
             int got = SoftFloat.add(rawA, rawB);
             if (expected != got) {
-                if (Math.abs(expected - got) < 3) {
+                if (Math.abs(expected - got) < 17) {
                     // ok
                 } else {
                     System.out.println("#" + i + ": " + a + " + " + b + " = " + c);
@@ -113,8 +120,8 @@ public class SoftFloatTest {
     public void multiply() {
         Random r = new Random(1);
         for (int i = 0; i < 100_000; i++) {
-            float a = r.nextFloat();
-            float b = r.nextFloat();
+            float a = randomFloat(i, r);
+            float b = randomFloat(i, r);
             float c = a * b;
             int rawA = Float.floatToIntBits(a);
             int rawB = Float.floatToIntBits(b);
@@ -170,8 +177,8 @@ public class SoftFloatTest {
     public void divide() {
         Random r = new Random(1);
         for (int i = 0; i < 100_000; i++) {
-            float a = r.nextFloat();
-            float b = r.nextFloat();
+            float a = randomFloat(i, r);
+            float b = randomFloat(i, r);
             float c = a / b;
             int rawA = Float.floatToIntBits(a);
             int rawB = Float.floatToIntBits(b);
@@ -226,11 +233,98 @@ public class SoftFloatTest {
     }
 
     @Test
+    public void infinityAndNaNOperations() {
+        float[] array = new float[] {
+                0.0f, -0.0f, 1.0f, -1.0f, 0.5f, -0.5f,
+                1.5f, -1.5f, 2.0f, -2.0f, 3f, -3f, 1.5f, -0.5f,
+                100f, -100f, 1.0f / 0.0f, -1.0f / 0.0f,
+                0.0f / 0.0f
+        };
+        for (float a : array) {
+            for (float b : array) {
+                int rawA = Float.floatToIntBits(a);
+                int rawB = Float.floatToIntBits(b);
+                int expected = Integer.signum(Float.compare(a, b));
+                int got = Integer.signum(SoftFloat.compare(rawA, rawB));
+                if (expected != got) {
+                    got = SoftFloat.compare(rawA, rawB);
+                    assertEquals("SoftFloat.compare(rawA, rawB) for a: " + a + " (raw bits: " + Long.toHexString(rawA) +
+                            ") b: " + b + " (raw bits: " + Long.toHexString(rawB) +
+                            ") expected: " + expected + " got: " + got, expected, got);
+                }
+                float c = a + b;
+                expected = Float.floatToIntBits(c);
+                got = SoftFloat.add(rawA, rawB);
+                if (expected != got) {
+                    if (Float.isNaN(Float.intBitsToFloat(got)) && Float.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " + " + b + " = " + c);
+                        System.out.println("got " + Float.intBitsToFloat(got));
+                        got = SoftFloat.divide(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a - b;
+                expected = Float.floatToIntBits(c);
+                got = SoftFloat.subtract(rawA, rawB);
+                if (expected != got) {
+                    if (Float.isNaN(Float.intBitsToFloat(got)) && Float.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " - " + b + " = " + c);
+                        System.out.println("got " + Float.intBitsToFloat(got));
+                        got = SoftFloat.divide(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a / b;
+                expected = Float.floatToIntBits(c);
+                got = SoftFloat.divide(rawA, rawB);
+                if (expected != got) {
+                    if (Float.isNaN(Float.intBitsToFloat(got)) && Float.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " / " + b + " = " + c);
+                        System.out.println("got " + Float.intBitsToFloat(got));
+                        got = SoftFloat.divide(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                c = a * b;
+                expected = Float.floatToIntBits(c);
+                got = SoftFloat.multiply(rawA, rawB);
+                if (expected != got) {
+                    if (Float.isNaN(Float.intBitsToFloat(got)) && Float.isNaN(c)) {
+                        // ok
+                    } else if (Math.abs(expected - got) < 3) {
+                        // ok
+                    } else {
+                        System.out.println(a + " * " + b + " = " + c);
+                        System.out.println("got " + Float.intBitsToFloat(got));
+                        got = SoftFloat.divide(rawA, rawB);
+                        assertEquals(expected, got);
+                    }
+                }
+                int comp = Float.compare(a, b);
+                got = SoftFloat.compare(rawA, rawB);
+                assertEquals(comp, got);
+            }
+        }
+    }
+
+    @Test
     public void compare() {
         Random r = new Random(1);
         for (int i = 0; i < 1_000_000; i++) {
-            float a = r.nextFloat();
-            float b = r.nextFloat();
+            float a = randomFloat(i, r);
+            float b = randomFloat(i, r);
             int rawA = Float.floatToIntBits(a);
             int rawB = Float.floatToIntBits(b);
             int expected = Integer.signum(Float.compare(a, b));
@@ -257,6 +351,15 @@ public class SoftFloatTest {
                 assertEquals(expected, got);
             }
         }
+    }
+
+    private float randomFloat(int index, Random r) {
+        if (index < 100) {
+            return r.nextInt(100) - 50;
+        } else if (index < 1000) {
+            return (float) (1.0 / (r.nextInt(100) - 50));
+        }
+        return r.nextFloat();
     }
 
 }

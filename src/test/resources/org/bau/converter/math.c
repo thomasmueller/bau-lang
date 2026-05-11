@@ -384,7 +384,7 @@ int64_t idiv_2(int64_t a, int64_t b) {
     return a > 0 ? LLONG_MAX : LLONG_MIN;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 int64_t imod_2(int64_t a, int64_t b) {

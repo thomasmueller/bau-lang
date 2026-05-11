@@ -308,7 +308,7 @@ void org_bau_List_List_int_free(org_bau_List_List_int* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_int_free_0);
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 org_bau_List_List_int* org_bau_List_List_int_0() {

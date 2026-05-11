@@ -39,7 +39,6 @@ fn main() {
                 byte_acc = 0
                 bit_num = 0
             } else if x == w - 1 {
-                // pad remaining bits
                 byte_acc <<= u8(8 - w % 8)
                 print(byte_acc.ascii_str())
                 byte_acc = 0

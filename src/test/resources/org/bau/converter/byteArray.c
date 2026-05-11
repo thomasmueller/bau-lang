@@ -287,7 +287,7 @@ void i8_array_free(i8_array* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 int32_t readI32Le_2(i8_array* d, int32_t pos) {

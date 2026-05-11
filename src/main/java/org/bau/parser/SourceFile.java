@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 //context for formatting and for line numbers
 public class SourceFile {
@@ -19,9 +20,14 @@ public class SourceFile {
     private HashMap<String, String> importedSymbols = new HashMap<>();
     private TreeMap<Integer, Object> elements = new TreeMap<>();
     private TreeMap<Integer, String> errors = new TreeMap<>();
-    private HashMap<String, FunctionDefinition> functions = new HashMap<>();
+    private TreeMap<String, FunctionDefinition> functions = new TreeMap<>();
+    private TreeMap<String, DataType> dataTypes = new TreeMap<>();
+    // includes from C "native" calls
+    private TreeSet<String> includes = new TreeSet<>();
     private boolean imported;
     private int errorCount;
+    // pairs of objects and comments
+    private ArrayList<String> comments = new ArrayList<>();
 
     private ArrayList<Import> importStatements = new ArrayList<>();
 
@@ -192,6 +198,26 @@ public class SourceFile {
 
     public void addFunctionDefinition(String id, FunctionDefinition def) {
         functions.put(id, def);
+    }
+
+    public DataType getType(FullName fullName) {
+        return dataTypes.get(fullName.getFullName());
+    }
+
+    public void addType(DataType type) {
+        String key = type.getFullName().getFullName();
+        dataTypes.put(key, type);
+    }
+
+    public void addIncludeC(String file) {
+        includes.add(file);
+    }
+
+    public void addComment(String object, String comment) {
+        if (comment != null) {
+            comments.add(object);
+            comments.add(comment);
+        }
     }
 
 }

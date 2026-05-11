@@ -435,7 +435,7 @@ Point* Point_0() {
     return _t0;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 Point* newPoint_2(int64_t x, int64_t y) {

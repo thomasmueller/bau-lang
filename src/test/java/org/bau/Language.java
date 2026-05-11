@@ -5,12 +5,13 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-cloc like tool:
-- language; blank lines, comment lines (excluding comments in strings), code lines
-
 maybe support u8 (unsigned 8-bit int), and name it "byte"
 
-for (tm_)malloc(count * sizeof(...)) verify there is no overflow
+use _calloc here:
+buff.append(Statement.indent("result->data = _malloc(sizeof(" + t.baseType().toC() + ") * len);\n"));
+buff.append(Statement.indent("memset(result->data, 0, sizeof(" + t.baseType().toC() + ") * len);\n"));
+malloc: (tm_)malloc(count * sizeof(...)) verify there is no overflow
+(calloc uses two parameters, but sets the memory to zero, which we might not need)
 
 Easy to resolve friction:
   - Bit operation precedence differs from all other languages.
@@ -47,7 +48,6 @@ Advantages
   built entirely from macros — a compelling demonstration.
  5. Conciseness Python developers will find comfortable: The benchmark-backed syntactic metrics are a rare honest self-evaluation. The indentation model, optional commas, and and/or/not keywords are genuinely learner-friendly.
  6. No separate boolean type: reduces the type surface area without real loss; comparisons yield int (1/0), consistent with C tradition.
-
 
 more benchmarks: https://zef-lang.dev/implementation (DeltaBlue, N-Body, Splay, OS scheduler (Richards)
 

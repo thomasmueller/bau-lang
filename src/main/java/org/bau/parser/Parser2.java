@@ -64,14 +64,16 @@ public class Parser2 {
     public Parser2(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
         program.addSourceFile(module, text);
-        this.fileId = program.getSourceFile(module).getFileId();
         this.program = program;
+        this.fileId = getSourceFile().getFileId();
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.posOffset = posOffset;
     }
-
+    private SourceFile getSourceFile() {
+        return program.getSourceFile(module);
+    }
     public Program parse() {
         readSpaces();
         Program program = parseProgram();
@@ -82,7 +84,7 @@ public class Parser2 {
         syntaxError(message, lastPos);
     }
     private void syntaxError(String message, int at) {
-        program.syntaxError(fileId, at + posOffset, message);
+        getSourceFile().syntaxError(at + posOffset, message);
         pos = lastPos;
         while (pos < text.length() && text.charAt(pos) != '\n') {
             pos++;
@@ -122,7 +124,7 @@ public class Parser2 {
                         String mainCode = parseBlock(-1);
                         FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
                         def.code = Statement.indent(mainCode);
-                        program.addFunction(def);
+                        getSourceFile().addFunctionDefinition(mainCode, def);
                     } else {
                         isGlobalScope = true;
                         parseStatement(program.initList);
@@ -165,8 +167,8 @@ public class Parser2 {
                 readEndOfStatement();
             }
         }
-        program.getSourceFile(module).addImportStatement(importStmt);
-        program.getSourceFile(module).addImport(id, name, symbolList);
+        getSourceFile().addImportStatement(importStmt);
+        getSourceFile().addImport(id, name, symbolList);
         return true;
     }
     private Comment readLastComment() {
@@ -238,10 +240,11 @@ public class Parser2 {
             type.parameters = parameters;
         }
         type.traitNames.addAll(traitNames);
-        program.addType(type);
-        int todoAddToSourceFile;
-
-        program.addComment("type " + type.format(), comment.getText());
+        if (getSourceFile().getType(type.getFullName())!= null) {
+            syntaxError("Duplicate type '" + type.getFullName().getFullName() + "'");
+        }
+        getSourceFile().addType(type);
+        getSourceFile().addComment("type " + type.format(), comment.getText());
         return true;
     }
     private boolean parseTraitDefinition() {
@@ -283,13 +286,18 @@ public class Parser2 {
                     syntaxError("Template are not supported in traits");
                 }
                 type.getTraitDefinition().functions.add(def);
-                program.addFunction(def);
+                String id = def.getFunctionId();
+                if (getSourceFile().getFunctionDefinition(id) != null) {
+                    syntaxError("Duplicate function '" + def.toHeaderString() + "'");
+                }
+                getSourceFile().addFunctionDefinition(id, def);
             }
         }
-        program.addType(type);
-        int todoAddToSourceFile;
-
-        program.addComment("trait " + type.format(), comment.getText());
+        if (getSourceFile().getType(type.getFullName())!= null) {
+            syntaxError("Duplicate type '" + type.getFullName().getFullName() + "'");
+        }
+        getSourceFile().addType(type);
+        getSourceFile().addComment("trait " + type.format(), comment.getText());
         return true;
     }
     private String parseBlock(int defIndent) {
@@ -344,9 +352,12 @@ public class Parser2 {
         DataType type = DataType.newEnumType(new FullName(module, id));
         type.setLocation(program, module, fileId, location);
         type.enumExpressions = entries;
-        int todoAddToSourceFile;
-        program.addType(type);
-        program.addComment("enum " + type.format(), comment.getText());
+
+        if (getSourceFile().getType(type.getFullName())!= null) {
+            syntaxError("Duplicate type '" + type.getFullName().getFullName() + "'");
+        }
+        getSourceFile().addType(type);
+        getSourceFile().addComment("enum " + type.format(), comment.getText());
         return true;
     }
     private DataType readTypeInThisModule() {
@@ -454,11 +465,11 @@ public class Parser2 {
         }
         currentFunctionDefinition = null;
         String id = def.getFunctionId();
-        if (program.getSourceFile(module).getFunctionDefinition(id) != null) {
+        if (getSourceFile().getFunctionDefinition(id) != null) {
             syntaxError("Duplicate function '" + def.toHeaderString() + "'");
         }
-        program.getSourceFile(module).addFunctionDefinition(id, def);
-        program.addComment("fun " + def.format(), comment.getText());
+        getSourceFile().addFunctionDefinition(id, def);
+        getSourceFile().addComment("fun " + def.format(), comment.getText());
         return true;
     }
     private boolean parseFunctionDeclarationArguments(boolean template, FunctionDefinition def) {
@@ -776,7 +787,7 @@ public class Parser2 {
                         }
                         String include = s.substring(0, index);
                         include = include.substring("#include ".length());
-                        program.addIncludeC(include);
+                        getSourceFile().addIncludeC(include);
                         s = s.substring(index + 1).trim();
                     }
                     readEndOfStatement();
@@ -1038,10 +1049,6 @@ public class Parser2 {
             module = type.module();
         }
         module = "";
-        FunctionDefinition template = program.getFunctionTemplate(type, module, identifier);
-        if (template == null) {
-            template = program.getFunctionTemplate(type, "", identifier);
-        }
         boolean lastWasComma = false;
         int paramIndex = 0; // excluding 'this'
         while (true) {

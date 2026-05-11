@@ -26,7 +26,7 @@ public class Hash {
                         ((data[i + 3] & 0xff) << 24);
                 h = (h + x) * 0x9e3779b185ebca87L;
                 int n = i + 4;
-                if (n >= data.length) {
+                if (n >= data.length - 3) {
                     break;
                 }
                 i = n;

@@ -141,7 +141,7 @@ public class Std {
         f.returnType = i64;
         if (ARRAY_BOUND_CHECK) {
             // when printing to stderr, it's harder to find where it happens
-            f.cCode = "if (x >= 0 && x < len) return x;\n"
+            f.cCode = "if ((size_t) x < (size_t) len) return x;\n"
                     + "return arrayOutOfBounds(x, len);\n";
         } else {
             f.cCode = "return x;\n";

@@ -341,7 +341,7 @@ void List_int_add_2(List_int* this, int64_t x) {
     this->size += 1;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 void test_0() {

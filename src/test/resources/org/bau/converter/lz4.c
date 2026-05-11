@@ -437,7 +437,7 @@ int32_t i32_1(int64_t x) {
     return x;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 i8_array* org_bau_Env_arg_1(int64_t index) {

@@ -47,13 +47,15 @@ return                            : ip=stack[--sp]
 
 https://github.com/nanochess/bootBASIC
 
+microfloat?
+only support uppercase?
 10 print "Hello" (replace line)
 10 (erase line)
 print "Hello, world!" (interactive mode)
 new (erase program)
 run
 list
-system (or exit)
+exit
 var=expr assign
 print expr      Print expression value, new line
 print expr;     Print expression value, continue
@@ -79,7 +81,7 @@ a=[b]   // read from memory
 b+=c    // add a variable to another
 b-=d    // subtract
 d*=e    // multiply
-f>=s    // right shift (or r=, or >>=, or /=)
+f>=s    // shift (positive or negative)
 h&=i    // bitwise and
 j^=k    // bitwise xor
 ?a=b:10 // conditional jump (or if a = b goto 10)

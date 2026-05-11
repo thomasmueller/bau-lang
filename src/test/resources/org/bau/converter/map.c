@@ -755,7 +755,7 @@ int64_t hashCode_1(i8_array* data) {
     return _r0;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 int64_t int_equals_2(int64_t this, int64_t other) {

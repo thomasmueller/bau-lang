@@ -509,7 +509,7 @@ int64_t get_1(Reader* r) {
     return _t0;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 void put_2(Writer* w, int64_t x) {

@@ -525,7 +525,7 @@ void flush_0() {
     outPos = outPos + 8;
 }
 int64_t idx_2(int64_t x, int64_t len) {
-    if (x >= 0 && x < len) return x;
+    if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
 }
 void initRead_0() {

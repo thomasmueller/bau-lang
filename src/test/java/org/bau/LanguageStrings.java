@@ -31,12 +31,12 @@ Swift:
 - Use a backslash (\) to omits the following line break.
 
 Golang `
-"It is therefor the string literal of choice to write regular expression patterns as they usually 
-contain non-standard escape sequences that would make the Go compiler complain of not double-escaped. 
+"It is therefor the string literal of choice to write regular expression patterns as they usually
+contain non-standard escape sequences that would make the Go compiler complain of not double-escaped.
 It keeps the patterns clean and relatively readable."
 
 
-What about: 
+What about:
 - ` (at least one, but as many as you want) starts and ends a raw string
 - raw strings can span multiple lines.
 - if there are only spaces on the same line, then the text start on the next line, and indentation is removed up to the end of the string
@@ -54,10 +54,7 @@ a = """
   This is the second line. This is backslash n: \n it is ignored: C:\data
   """
 
-
-
-
- */
+*/
 public class LanguageStrings {
 
 }
