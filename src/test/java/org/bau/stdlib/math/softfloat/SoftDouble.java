@@ -8,19 +8,12 @@ public class SoftDouble {
     private static final long NAN = 0x7ff8000000000000L;
 
     public static long toRaw(long value) {
-        if (value == 0) {
-            return 0;
-        }
         long sign = value & (1L << 63);
         int exponent = 1075;
         if (sign != 0) {
-            if (value == Long.MIN_VALUE) {
-                value = 1;
-                exponent += 63;
-            } else {
-                value = -value;
-            }
-        } else if (value == Long.MAX_VALUE) {
+            value = -value;
+        }
+        if (value == Long.MIN_VALUE || value == Long.MAX_VALUE) {
             value = 1;
             exponent += 63;
         }
@@ -64,32 +57,21 @@ public class SoftDouble {
         } else if (isInfinity(b) || isZero(a)) {
             return b;
         }
-        long shift = exponent(a) - exponent(b);
-        long mantissaA = mantissa(a);
-        long mantissaB = mantissa(b);
-        long exponent;
-        if (shift >= 0) {
-            if (shift > 63) {
-                return a;
-            }
-            exponent = exponent(a);
-            mantissaB >>>= shift;
-        } else {
-            if (-shift > 63) {
-                return b;
-            }
-            exponent = exponent(b);
-            mantissaA >>>= -shift;
+        long exponent = exponent(a);
+        long shift = exponent - exponent(b);
+        if (shift < 0) {
+            return add(b, a);
         }
-        long mantissa;
-        long sign = sign(a);
-        if (sign == sign(b)) {
-            mantissa = mantissaA + mantissaB;
+        long sign = sign(a), mantissa = mantissa(a);
+        long signB = sign(b);
+        long mantissaB = (mantissa(b) >>> (shift & 63)) & ((shift - 64) >> 63);
+        if (sign == signB) {
+            mantissa += mantissaB;
         } else {
-            mantissa = mantissaA - mantissaB;
+            mantissa -= mantissaB;
             if (mantissa < 0) {
                 mantissa = -mantissa;
-                sign = sign(b);
+                sign = signB;
             }
         }
         return normalize(sign, exponent, mantissa);
@@ -106,14 +88,11 @@ public class SoftDouble {
         } else if (isZero(a) || isZero(b)) {
             return 0;
         }
-        long exponent = exponent(a) + exponent(b) - 1023;
-        long mantissaA = mantissa(a);
-        long mantissaB = mantissa(b);
-        Int128 ma = new Int128(mantissaA, 0);
-        Int128 mb = new Int128(mantissaB, 0);
-        Int128 m = ma.multiply(mb).shiftRight(42);
-        long mm = m.longValue() >>> 10;
-        return normalize(sign(a) ^ sign(b), exponent, mm);
+        Int128 ma = new Int128(mantissa(a), 0);
+        Int128 mb = new Int128(mantissa(b), 0);
+        long mm = ma.multiply(mb).shiftRight(42).longValue() >>> 10;
+        return normalize(sign(a) ^ sign(b),
+                exponent(a) + exponent(b) - 1023, mm);
     }
 
     public static long divide(long a, long b) {
@@ -128,14 +107,11 @@ public class SoftDouble {
         } else if (isZero(a)) {
             return a;
         }
-        long exponent = exponent(a) - exponent(b) + 1023;
-        long mantissaA = mantissa(a) << 0;
-        long mantissaB = mantissa(b) << 2;
-        Int128 ma = new Int128(0, mantissaA);
-        Int128 mb = new Int128(mantissaB, 0);
-        Int128 m = ma.divide(mb);
-        long mm = m.longValue() >>> 10;
-        return normalize(sign(a) ^ sign(b), exponent, mm);
+        Int128 ma = new Int128(0, mantissa(a));
+        Int128 mb = new Int128(mantissa(b) << 2, 0);
+        long mm = ma.divide(mb).longValue() >>> 10;
+        return normalize(sign(a) ^ sign(b),
+                exponent(a) - exponent(b) + 1023, mm);
     }
 
     private static long normalize(long sign, long exponent, long mantissa) {
@@ -176,12 +152,8 @@ public class SoftDouble {
     }
 
     public static long compare(long a, long b) {
-        long r = (b >>> 63) - (a >>> 63);
-        if (r != 0) {
-            return r;
-        }
-        long ax = (a < 0) ? ~a : a ^ 0x8000000000000000L;
-        long bx = (b < 0) ? ~b : b ^ 0x8000000000000000L;
+        long ax = a ^ ((a >> 63) >>> 1);
+        long bx = b ^ ((b >> 63) >>> 1);
         return Long.compare(ax, bx);
     }
 

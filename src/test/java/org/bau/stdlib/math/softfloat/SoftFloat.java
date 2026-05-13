@@ -6,19 +6,12 @@ public class SoftFloat {
     private static final int NAN = 0x7fc00000;
 
     public static int toRaw(int value) {
-        if (value == 0) {
-            return 0;
-        }
         int sign = value & (1 << 31);
         int exponent = 150;
         if (sign != 0) {
-            if (value == Integer.MIN_VALUE) {
-                value = 1;
-                exponent += 31;
-            } else {
-                value = -value;
-            }
-        } else if (value == Integer.MAX_VALUE) {
+            value = -value;
+        }
+        if (value == Integer.MIN_VALUE || value == Integer.MAX_VALUE) {
             value = 1;
             exponent += 31;
         }
@@ -62,32 +55,21 @@ public class SoftFloat {
         } else if (isInfinity(b) || isZero(a)) {
             return b;
         }
-        int shift = exponent(a) - exponent(b);
-        int mantissaA = mantissa(a);
-        int mantissaB = mantissa(b);
-        int exponent;
-        if (shift >= 0) {
-            if (shift > 31) {
-                return a;
-            }
-            exponent = exponent(a);
-            mantissaB >>>= shift;
-        } else {
-            if (-shift > 31) {
-                return b;
-            }
-            exponent = exponent(b);
-            mantissaA >>>= -shift;
+        int exponent = exponent(a);
+        int shift = exponent - exponent(b);
+        if (shift < 0) {
+            return add(b, a);
         }
-        int mantissa;
-        int sign = sign(a);
-        if (sign == sign(b)) {
-            mantissa = mantissaA + mantissaB;
+        int sign = sign(a), mantissa = mantissa(a);
+        int signB = sign(b);
+        int mantissaB = (mantissa(b) >>> (shift & 31)) & ((shift - 32) >> 31);
+        if (sign == signB) {
+            mantissa += mantissaB;
         } else {
-            mantissa = mantissaA - mantissaB;
+            mantissa -= mantissaB;
             if (mantissa < 0) {
                 mantissa = -mantissa;
-                sign = sign(b);
+                sign = signB;
             }
         }
         return normalize(sign, exponent, mantissa);
@@ -104,11 +86,9 @@ public class SoftFloat {
         } else if (isZero(a) || isZero(b)) {
             return 0;
         }
-        int exponent = exponent(a) + exponent(b) - 150;
-        int mantissaA = mantissa(a);
-        int mantissaB = mantissa(b);
-        long mantissa = (long) mantissaA * (long) mantissaB;
-        return normalize(sign(a) ^ sign(b), exponent, mantissa);
+        return normalize(sign(a) ^ sign(b),
+                exponent(a) + exponent(b) - 150,
+                (long) mantissa(a) * (long) mantissa(b));
     }
 
     public static int divide(int a, int b) {
@@ -123,11 +103,9 @@ public class SoftFloat {
         } else if (isZero(a)) {
             return a;
         }
-        int mantissaA = mantissa(a);
-        int mantissaB = mantissa(b);
-        int exponent = exponent(a) - exponent(b) + 118;
-        long mantissa = ((long) mantissaA << 32) / (long) mantissaB;
-        return normalize(sign(a) ^ sign(b), exponent, mantissa);
+        return normalize(sign(a) ^ sign(b),
+                exponent(a) - exponent(b) + 118,
+                ((long) mantissa(a) << 32) / (long) mantissa(b));
     }
 
     private static int normalize(int sign, int exponent, long mantissa) {
@@ -168,12 +146,8 @@ public class SoftFloat {
     }
 
     public static int compare(int a, int b) {
-        int r = (b >>> 31) - (a >>> 31);
-        if (r != 0) {
-            return r;
-        }
-        int ax = (a < 0) ? ~a : a ^ 0x80000000;
-        int bx = (b < 0) ? ~b : b ^ 0x80000000;
+        int ax = a ^ ((a >> 31) >>> 1);
+        int bx = b ^ ((b >> 31) >>> 1);
         return Integer.compare(ax, bx);
     }
 

@@ -32,6 +32,8 @@ public class SoftDoubleTest {
                 assertEquals("i:" + i, expected, got);
             }
         }
+        assertEquals(Long.MIN_VALUE, SoftDouble.longValue(SoftDouble.toRaw(Long.MIN_VALUE)));
+        assertEquals(Long.MAX_VALUE, SoftDouble.longValue(SoftDouble.toRaw(Long.MAX_VALUE)));
         for (long i = Long.MIN_VALUE; i < 0; i += 10_000_000L << 32) {
             long raw = Double.doubleToLongBits((double) i);
             double d = Double.longBitsToDouble(raw);
@@ -256,14 +258,14 @@ public class SoftDoubleTest {
     @Test
     public void infinityAndNaNOperations() {
         double[] array = new double[] {
-                0.0f, -0.0f, 1.0f, -1.0f, 0.5f, -0.5f,
-                1.5f, -1.5f, 2.0f, -2.0f, 3f, -3f, 1.5f, -0.5f,
-                100f, -100f, 1.0f / 0.0f, -1.0f / 0.0f,
-                0.0f / 0.0f
+                0.0, -0.0, 1.0, -1.0, 0.5, -0.5,
+                1.5, -1.5, 2.0, -2.0, 3,0, -3, 1.5, -0.5,
+                100, -100, 1.0 / 0.0, -1.0 / 0.0,
+                0.0 / 0.0
         };
         for (double a : array) {
+            long rawA = Double.doubleToLongBits(a);
             for (double b : array) {
-                long rawA = Double.doubleToLongBits(a);
                 long rawB = Double.doubleToLongBits(b);
                 long expected = Integer.signum(Double.compare(a, b));
                 long got = Long.signum(SoftDouble.compare(rawA, rawB));
