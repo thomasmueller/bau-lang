@@ -12,6 +12,28 @@ import org.junit.Test;
 
 public class NumberToStringTest {
 
+    public static void main(String... args) {
+        Random r = new Random(42);
+        int[] array = new int[10000000];
+        for (int i = 0; i < array.length;) {
+            array[i++] = r.nextInt(100);
+            array[i++] = r.nextInt(4000) - 2000;
+            array[i++] = r.nextInt(100000);
+            array[i++] = r.nextInt(10000000);
+            array[i++] = r.nextInt();
+        }
+        for (int test = 0; test < 10; test++) {
+            int dummy = 0;
+            long start = System.nanoTime();
+            for (int i = 0; i < array.length; i++) {
+                String s = NumberToString.convertIntToI8Array(array[i]);
+                dummy += s.hashCode() + s.length();
+            }
+            long time = (System.nanoTime() - start) / array.length;
+            System.out.println(time + " ns/key " + dummy);
+        }
+    }
+
     @Test
     public void doubleTest() {
         assertEquals(Double.toString(Double.NEGATIVE_INFINITY), NumberToString.convertDoubleToString(Double.NEGATIVE_INFINITY));
@@ -134,6 +156,25 @@ public class NumberToStringTest {
             return 1;
         }
         return Math.abs(1.0 * diff / expected);
+    }
+
+    @Test
+    public void intTest() {
+        Random r = new Random(1);
+        for (int i = 0; i < 100_000; i++) {
+            for (int max = 10; max > 0; max *= 10) {
+                int x = r.nextInt(max);
+                String expected = Integer.toString(x);
+                String got = NumberToString.convertIntToI8Array(x);
+                assertEquals(expected, got);
+            }
+        }
+        String expected = Integer.toString(Integer.MIN_VALUE);
+        String got = NumberToString.convertLongToString(Integer.MIN_VALUE);
+        assertEquals(expected, got);
+        expected = Long.toString(Integer.MAX_VALUE);
+        got = NumberToString.convertLongToString(Integer.MAX_VALUE);
+        assertEquals(expected, got);
     }
 
     @Test
