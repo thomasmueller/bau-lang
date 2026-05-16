@@ -75,6 +75,7 @@ public class Parser {
     private FunctionContext functionContext;
     private boolean isGlobalScope;
     private int nextConstantId;
+    private SourceFile sourceFile;
     private String module;
     // the stack starting position of the current loop (of the scope)
     private int stackPosLoop;
@@ -85,7 +86,6 @@ public class Parser {
     private Loop currentLoop;
     private boolean scanPhase = true;
     private final int posOffset;
-    private int fileId;
 
     String text;
     TokenType type;
@@ -104,8 +104,7 @@ public class Parser {
 
     public Parser(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
-        program.addSourceFile(module, text);
-        this.fileId = program.getSourceFile(module).getFileId();
+        sourceFile = program.addSourceFile(module, text);
         this.program = program;
         this.functionContext = new FunctionContext(program, new FullName(module, "main"));
         this.module = module;
@@ -195,7 +194,7 @@ public class Parser {
 
     private void syntaxError(String message, Exception e) {
         // e.printStackTrace(System.out);
-        program.syntaxError(fileId, lastPos + posOffset, message);
+        program.syntaxError(module, lastPos + posOffset, message);
     }
 
     private void syntaxError(String message) {
@@ -203,7 +202,7 @@ public class Parser {
     }
 
     private void syntaxError(String message, int at) {
-        program.syntaxError(fileId, at + posOffset, message);
+        program.syntaxError(module, at + posOffset, message);
         pos = lastPos;
         while (pos < text.length() && text.charAt(pos) != '\n') {
             pos++;
@@ -337,7 +336,7 @@ public class Parser {
         boolean owned = match("owned");
         MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
         DataType type = DataType.newTraitType(new FullName(targetModule, name), memoryType);
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         FullName traitName = new FullName(targetModule, name);
         type.setTraitDefinition(new Trait(traitName));
         if (matchOp(":")) {
@@ -445,7 +444,7 @@ public class Parser {
             memoryType = MemoryType.OWNER;
         }
         DataType type = DataType.newRegularType(new FullName(targetModule, name), sizeOf, memoryType);
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         // need to add it first, because one of the fields could be of this type
         program.addType(type);
         String title = "type " + type.format();
@@ -536,7 +535,7 @@ public class Parser {
         int lastPos = pos;
         String code = parseBlock(defIndent);
         DataType type = DataType.newUndefined(new FullName(module, name));
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         type.parameters = parameters;
         type.posOffset = lastPos;
         type.template = code;
@@ -611,7 +610,7 @@ public class Parser {
             }
         }
         DataType type = DataType.newEnumType(new FullName(module, id));
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         type.enumValues = entries;
         program.addType(type);
         program.addComment("enum " + type.format(), comment);
@@ -717,7 +716,7 @@ public class Parser {
             functionContext.addVariable(thisVar);
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
-        def.setLocation(program, module, fileId, location);
+        def.setLocation(sourceFile, location);
         def.callType = ct;
         if (thisVar != null ) {
             def.parameters.add(thisVar);

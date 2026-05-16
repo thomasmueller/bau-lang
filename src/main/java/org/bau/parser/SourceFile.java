@@ -220,4 +220,8 @@ public class SourceFile {
         }
     }
 
+    public String getModule() {
+        return module;
+    }
+
 }

@@ -1375,13 +1375,14 @@ public class Program {
         return functions.get(functionId);
     }
 
-    public void addSourceFile(String module, String sourceCode) {
+    public SourceFile addSourceFile(String module, String sourceCode) {
         SourceFile f = modules.get(module);
         if (f == null) {
             int id = modules.size();
             f = new SourceFile(id, module, sourceCode);
             modules.put(module, f);
         }
+        return f;
     }
 
     public String formatModule(String module) {
@@ -1391,15 +1392,6 @@ public class Program {
 
     public SourceFile getSourceFile(String module) {
         return modules.get(module);
-    }
-
-    public SourceFile getSourceFile(int fileId) {
-        for (SourceFile f : modules.values()) {
-            if (f.getFileId() == fileId) {
-                return f;
-            }
-        }
-        return null;
     }
 
     public String format() {
@@ -1447,8 +1439,8 @@ public class Program {
         getSourceFile(module).setLocation(location, obj);
     }
 
-    public void syntaxError(int fileId, int location, String message) {
-        getSourceFile(fileId).syntaxError(location, message);
+    public void syntaxError(String module, int location, String message) {
+        getSourceFile(module).syntaxError(location, message);
     }
 
     public Program checkErrors() {

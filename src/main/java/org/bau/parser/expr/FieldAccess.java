@@ -27,7 +27,8 @@ public class FieldAccess implements Expression, LeftValue {
     final String fieldName;
     private DataType type;
     private boolean leftValue;
-    public int fileId, location;
+    private String module;
+    public int location;
 
     public FieldAccess(Expression base, String fieldName, boolean leftValue, DataType type) {
         this.base = base;
@@ -37,8 +38,8 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void setLocation(int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(String module, int location) {
+        this.module = module;
         this.location = location;
     }
 
@@ -319,7 +320,7 @@ public class FieldAccess implements Expression, LeftValue {
                 if (enumType != null && enumType.enumValues != null) {
                     Long value = enumType.enumValues.get(fieldName);
                     if (value == null) {
-                        context.getProgram().syntaxError(fileId, location, "Value '" + fieldName + "' not found for enum type '" + enumType.name() + "'");
+                        context.getProgram().syntaxError(module, location, "Value '" + fieldName + "' not found for enum type '" + enumType.name() + "'");
                     }
                     Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
                     return expr;

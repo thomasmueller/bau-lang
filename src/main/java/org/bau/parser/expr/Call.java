@@ -32,11 +32,12 @@ public class Call implements Statement, Expression, LeftValue {
     public boolean statement;
     public ArrayList<Expression> args = new ArrayList<>();
     public FunctionDefinition def;
-    public int fileId, location;
+    public String module;
+    public int location;
 
     @Override
-    public void setLocation(int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(String module, int location) {
+        this.module = module;
         this.location = location;
     }
 

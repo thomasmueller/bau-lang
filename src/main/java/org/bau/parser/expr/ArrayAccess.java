@@ -24,7 +24,8 @@ public class ArrayAccess implements Expression, LeftValue {
     private Expression base;
     private Expression arrayIndex;
     private final boolean checkBounds;
-    public int fileId, location;
+    public String module;
+    public int location;
 
     public ArrayAccess(Expression base, Expression arrayIndex, boolean checkBounds) {
         this.base = base;
@@ -33,8 +34,8 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     @Override
-    public void setLocation(int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(String module, int location) {
+        this.module = module;
         this.location = location;
     }
 

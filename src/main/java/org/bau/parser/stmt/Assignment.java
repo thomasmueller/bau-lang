@@ -41,7 +41,8 @@ public class Assignment implements Statement {
     public String modify;
     public Expression value;
     public boolean isGlobalScope;
-    public int fileId, location;
+    public String module;
+    public int location;
 
     @Override
     public Assignment replace(Variable old, Expression with) {
@@ -60,8 +61,8 @@ public class Assignment implements Statement {
         return c;
     }
 
-    public void setLocation(int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(String module, int location) {
+        this.module = module;
         this.location = location;
     }
 
@@ -406,7 +407,7 @@ public class Assignment implements Statement {
     public void resolveTypesForStatement(FunctionContext context) {
         Expression expr = leftValue.resolveTypes(context);
         if (!(expr instanceof LeftValue)) {
-            context.getProgram().syntaxError(fileId, location, "Expected a left value (for an assignment), got " + expr);
+            context.getProgram().syntaxError(module, location, "Expected a left value (for an assignment), got " + expr);
         } else {
             leftValue = (LeftValue) expr;
         }

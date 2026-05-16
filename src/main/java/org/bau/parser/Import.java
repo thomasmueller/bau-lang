@@ -8,7 +8,7 @@ public class Import {
 
     private final String moduleName;
     private final String moduleIdentifier;
-    private int fileId;
+    private String module;
     private ArrayList<Variable> symbols = new ArrayList<>();
 
     public Import(String name, String id) {
@@ -16,14 +16,14 @@ public class Import {
         this.moduleIdentifier = id;
     }
 
-    public void setLocation(Program program, String module, int fileId, int location) {
-        this.fileId = fileId;
-        program.setLocation(module, location, this);
+    public void setLocation(SourceFile sourceFile, int location) {
+        this.module = sourceFile.getModule();
+        sourceFile.setLocation(location, this);
     }
 
     public void addSymbol(String entry, int location) {
         Variable var = new Variable(entry, DataType.UNKNOWN);
-        var.setLocation(fileId, location);
+        var.setLocation(module, location);
         symbols.add(var);
     }
 

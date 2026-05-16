@@ -59,7 +59,7 @@ public class DataType {
     private Trait traitDefinition;
 
     public int posOffset;
-    public int fileId, location;
+    public int location;
 
     public List<Variable> fields = new ArrayList<>();
 
@@ -141,10 +141,9 @@ public class DataType {
         return r;
     }
 
-    public void setLocation(Program program, String module, int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(SourceFile sourceFile, int location) {
         this.location = location;
-        program.setLocation(module, location, this);
+        sourceFile.setLocation(location, this);
     }
 
     public int hashCode() {
@@ -560,6 +559,10 @@ public class DataType {
         return result;
     }
 
+    private String getModule() {
+        return fullName.module;
+    }
+
     public void resolveTypes(FunctionContext context) {
         if (resolveTypes) {
             return;
@@ -572,7 +575,7 @@ public class DataType {
                 Variable v = (Variable) e;
                 fields.set(i, v);
             } else {
-                context.getProgram().syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+                context.getProgram().syntaxError(getModule(), var.location, "Expected a variable, got " + e.format());
             }
         }
         Program program = context.getProgram();
@@ -584,7 +587,7 @@ public class DataType {
                 if (required != null) {
                     Trait tr = required.getTraitDefinition();
                     if (tr == null) {
-                        program.syntaxError(fileId, location, "Type '" + name() + "' is not a trait");
+                        program.syntaxError(getModule(), location, "Type '" + name() + "' is not a trait");
                     }
                     for (FunctionDefinition def : tr.functions) {
                         FunctionDefinition d2 = new FunctionDefinition(def.getFullName(), def.posOffset);
@@ -614,7 +617,7 @@ public class DataType {
         if (memoryType == MemoryType.UNDEFINED) {
             DataType t2 = program.getType(module(), name());
             if (t2 == null) {
-                program.syntaxError(fileId, location, "Unknown type: '" + name() + "'");
+                program.syntaxError(getModule(), location, "Unknown type: '" + name() + "'");
                 return DataType.INT_TYPE;
             }
             if (isNullable) {

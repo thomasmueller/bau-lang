@@ -46,10 +46,10 @@ public class Parser2 {
     private int indent;
     private Program program;
     private boolean isGlobalScope;
+    private SourceFile sourceFile;
     private String module;
     private FunctionDefinition currentFunctionDefinition;
     private final int posOffset;
-    private int fileId;
     private String text;
     private TokenType type;
     private String token;
@@ -63,16 +63,15 @@ public class Parser2 {
     }
     public Parser2(Program program, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
-        program.addSourceFile(module, text);
+        sourceFile = program.addSourceFile(module, text);
         this.program = program;
-        this.fileId = getSourceFile().getFileId();
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.posOffset = posOffset;
     }
     private SourceFile getSourceFile() {
-        return program.getSourceFile(module);
+        return sourceFile;
     }
     public Program parse() {
         readSpaces();
@@ -155,7 +154,7 @@ public class Parser2 {
             id = readIdentifier();
         }
         Import importStmt = new Import(name, id);
-        importStmt.setLocation(program, module, fileId, location);
+        importStmt.setLocation(sourceFile, location);
         int oldIndent = indent;
         readEndOfStatement();
         ArrayList<String> symbolList = new ArrayList<>();
@@ -224,7 +223,7 @@ public class Parser2 {
             memoryType = MemoryType.OWNER;
         }
         DataType type = DataType.newRegularType(new FullName(module, name), 0, memoryType);
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         ArrayList<Variable> fields = new ArrayList<>();
         while (indent > defIndent) {
             if (!matchOp("\n")) {
@@ -259,7 +258,7 @@ public class Parser2 {
         boolean owned = match("owned");
         MemoryType memoryType = owned ? MemoryType.OWNER : MemoryType.REF_COUNT;
         DataType type = DataType.newTraitType(new FullName(module, name), memoryType);
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         FullName traitName = new FullName(module, name);
         type.setTraitDefinition(new Trait(traitName));
         if (matchOp(":")) {
@@ -350,7 +349,7 @@ public class Parser2 {
             }
         }
         DataType type = DataType.newEnumType(new FullName(module, id));
-        type.setLocation(program, module, fileId, location);
+        type.setLocation(sourceFile, location);
         type.enumExpressions = entries;
 
         if (getSourceFile().getType(type.getFullName())!= null) {
@@ -454,7 +453,7 @@ public class Parser2 {
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
         def.callType = callType;
-        def.setLocation(program, module, fileId, location);
+        def.setLocation(sourceFile, location);
         currentFunctionDefinition = def;
         template = parseFunctionDeclarationArguments(template, def);
         while (true) {

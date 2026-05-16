@@ -26,6 +26,6 @@ public interface LeftValue extends Expression {
 
     Expression resolveTypes(FunctionContext context);
 
-    void setLocation(int fileId, int location);
+    void setLocation(String module, int location);
 
 }

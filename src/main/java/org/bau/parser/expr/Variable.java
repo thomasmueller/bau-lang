@@ -29,7 +29,7 @@ public class Variable implements Expression, LeftValue {
     public final static boolean SSA_FORM = true;
     public final static boolean DEBUG_VERSIONS = false;
 
-    private final String module;
+    public final String module;
     private final String name;
     private DataType type;
     private final boolean global;
@@ -39,7 +39,7 @@ public class Variable implements Expression, LeftValue {
     private Value constantValue;
     private boolean isInternal;
     private boolean used;
-    public int fileId, location;
+    public int location;
 
     public int reassignCount;
     public boolean skipIncrementDecrementRefCount;
@@ -49,8 +49,10 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
-    public void setLocation(int fileId, int location) {
-        this.fileId = fileId;
+    public void setLocation(String module, int location) {
+        if (!module.equals(this.module)) {
+            throw new IllegalStateException();
+        }
         this.location = location;
     }
 
@@ -469,10 +471,10 @@ public class Variable implements Expression, LeftValue {
             if (def != null) {
                 // function pointer
                 if (def.exceptionType != null) {
-                    context.getProgram().syntaxError(fileId, location, "Function throws an exception; this is not supported");
+                    context.getProgram().syntaxError(module, location, "Function throws an exception; this is not supported");
                 }
                 if (def.varArgs) {
-                    context.getProgram().syntaxError(fileId, location, "Function has a variable number of arguments; this is not supported");
+                    context.getProgram().syntaxError(module, location, "Function has a variable number of arguments; this is not supported");
                 }
                 FunctionPointer fp = new FunctionPointer(def);
                 return fp;

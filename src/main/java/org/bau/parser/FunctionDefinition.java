@@ -50,8 +50,8 @@ public class FunctionDefinition {
         this.posOffset = posOffset;
     }
 
-    public void setLocation(Program program, String module, int fileId, int location) {
-        program.setLocation(module, location, this);
+    public void setLocation(SourceFile sourceFile, int location) {
+        sourceFile.setLocation(location, this);
     }
 
     public String getFunctionId() {
@@ -507,7 +507,7 @@ public class FunctionDefinition {
                 Variable v = (Variable) e;
                 parameters.set(i, v);
             } else {
-                program.syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+                program.syntaxError(fullName.module, var.location, "Expected a variable, got " + e.format());
             }
         }
     }

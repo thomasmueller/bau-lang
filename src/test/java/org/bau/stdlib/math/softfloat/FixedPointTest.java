@@ -192,7 +192,7 @@ public class FixedPointTest {
                 }
                 sumSq += diff * diff;
             }
-            System.out.println("fun " + function + " sumSq " + sumSq);
+            // System.out.println("fun " + function + " sumSq " + sumSq);
             assertTrue("sumSq " + sumSq, sumSq < 400_000L);
         }
     }

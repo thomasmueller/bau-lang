@@ -148,7 +148,7 @@ public class Catch implements Statement {
         context.resolveTypes(autoClose);
         Expression e = var.resolveTypes(context);
         if (!(e instanceof Variable)) {
-            context.getProgram().syntaxError(var.fileId, var.location, "Expected a variable, got " + e.format());
+            context.getProgram().syntaxError(var.module, var.location, "Expected a variable, got " + e.format());
         } else {
             var = (Variable) e;
         }
