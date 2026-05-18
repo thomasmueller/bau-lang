@@ -55,6 +55,7 @@ public class Parser2 {
     private String token;
     private int pos;
     private boolean hasExplicitMainFunction;
+    private ArrayList<Statement> init = new ArrayList<>();
     public Parser2(String text) {
         this(new Program(Map.of()), "", text, 0);
     }
@@ -126,7 +127,7 @@ public class Parser2 {
                         getSourceFile().addFunctionDefinition(mainCode, def);
                     } else {
                         isGlobalScope = true;
-                        parseStatement(program.initList);
+                        parseStatement(init);
                     }
                 }
             } catch (IllegalStateException e) {
@@ -841,7 +842,7 @@ public class Parser2 {
                 Variable v = new Variable(module, identifier, global, targetType);
                 s.leftValue = v;
                 if (global) {
-                    program.addGlobalVariable(v);
+                    sourceFile.addGlobalVariable(v);
                 }
                 target.add(s);
                 return;
@@ -1047,6 +1048,7 @@ public class Parser2 {
         if (type != null && (type.module() != null && !type.module().isEmpty())) {
             module = type.module();
         }
+        call.name = identifier;
         module = "";
         boolean lastWasComma = false;
         int paramIndex = 0; // excluding 'this'
@@ -1448,11 +1450,7 @@ public class Parser2 {
         } else if (type == TokenType.STRING) {
             String n = token;
             read();
-            DataType type = DataType.I8_TYPE.arrayType();
-            Expression expr = program.getStringLiteral(n);
-            if (expr == null) {
-                expr = StringLiteral.buildStringLiteral(n, type, program);
-            }
+            Expression expr = StringLiteral.newStringLiteral(n);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }

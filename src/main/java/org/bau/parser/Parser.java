@@ -125,7 +125,8 @@ public class Parser {
                 Parser2 p2 = new Parser2(text);
                 prog2 = p2.parse();
             } catch (Throwable e) {
-                e.printStackTrace(System.out);
+                int test;
+                // e.printStackTrace(System.out);
             }
         }
 

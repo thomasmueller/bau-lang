@@ -31,12 +31,18 @@ public class StringLiteral implements Expression {
         return n;
     }
 
+    public static StringLiteral newStringLiteral(String value) {
+        return new StringLiteral(value, null, null);
+    }
+
     private StringLiteral(String value, DataType type, Program program) {
         this.value = value;
         this.type = type;
-        this.reference = program.addStringConstant(value, this);
-        byte[] data = value.getBytes(StandardCharsets.UTF_8);
-        this.array = new ValueI8Array(data);
+        if (program != null) {
+            this.reference = program.addStringConstant(value, this);
+            byte[] data = value.getBytes(StandardCharsets.UTF_8);
+            this.array = new ValueI8Array(data);
+        }
     }
 
     @Override

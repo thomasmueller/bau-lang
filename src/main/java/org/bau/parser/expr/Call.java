@@ -33,6 +33,7 @@ public class Call implements Statement, Expression, LeftValue {
     public ArrayList<Expression> args = new ArrayList<>();
     public FunctionDefinition def;
     public String module;
+    public String name;
     public int location;
 
     @Override
@@ -361,7 +362,11 @@ public class Call implements Statement, Expression, LeftValue {
 
     public String format() {
         StringBuilder buff = new StringBuilder();
-        buff.append(def.getFullName().name);
+        if (def != null) {
+            buff.append(def.getFullName().name);
+        } else {
+            buff.append(name);
+        }
         buff.append('(');
         for (int i = 0; i < args.size(); i++) {
             if (i > 0) {

@@ -2,9 +2,12 @@ package org.bau.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import org.bau.parser.expr.Variable;
 
 //context for formatting and for line numbers
 public class SourceFile {
@@ -28,8 +31,9 @@ public class SourceFile {
     private int errorCount;
     // pairs of objects and comments
     private ArrayList<String> comments = new ArrayList<>();
-
     private ArrayList<Import> importStatements = new ArrayList<>();
+    // global variables (or constants) in modules
+    private LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
 
     SourceFile(int fileId, String module, String sourceCode) {
         Utils.assertTrue(module != null);
@@ -218,6 +222,15 @@ public class SourceFile {
             comments.add(object);
             comments.add(comment);
         }
+    }
+
+    public void addGlobalVariable(Variable var) {
+        String module = var.module();
+        if (!this.module.equals(module)) {
+            throw new IllegalArgumentException();
+        }
+        String id = Variable.getGlobalVariableId(module, var.name());
+        globalVariables.put(id, var);
     }
 
     public String getModule() {

@@ -46,6 +46,21 @@ public class TestSort {
     }
 
     @Test
+    public void smallArrays() {
+        for (int s = 0; s < 20; s++) {
+            array = new Long[s];
+            for (int i = 0; i < 2; i++) {
+                log("");
+                test(Arrays.class, true);
+                test(MergeSort.class, true);
+                test(IntroSort.class, false);
+                test(ShellSort.class, false);
+                test(HeapSort.class, false);
+            }
+        }
+    }
+
+    @Test
     public void test() {
         array = new Long[size];
         for (int i = 0; i < 2; i++) {

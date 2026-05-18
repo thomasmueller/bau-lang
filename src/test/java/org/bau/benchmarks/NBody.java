@@ -12,12 +12,12 @@ Output:
 
 */
 
-public final class NBody {
+public class NBody {
 
     public static void main(String[] args) {
         int n = 50000000; // Integer.parseInt(args[0]);
         nbody(n);
-     }
+    }
 
     static void nbody(int n) {
         var bodies = new Body[]{
