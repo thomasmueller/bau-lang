@@ -1426,7 +1426,7 @@ public class Program {
             result = "Function **" + def.toHeaderString().trim() + "**\n";
         } else if (obj instanceof Import) {
             Import def = (Import) obj;
-            result = "Import **" + def.format() + "**\n";
+            result = "Import **" + def.formatSource() + "**\n";
 
         } else {
             result = null;

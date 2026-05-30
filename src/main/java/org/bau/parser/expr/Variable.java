@@ -15,6 +15,7 @@ import org.bau.parser.Program;
 import org.bau.parser.Solver;
 import org.bau.parser.Utils;
 import org.bau.parser.Solver.Rule;
+import org.bau.parser.stmt.Comment;
 import org.bau.parser.stmt.Free;
 import org.bau.parser.stmt.Statement;
 import org.bau.parser.stmt.Statement.StatementResult;
@@ -43,6 +44,7 @@ public class Variable implements Expression, LeftValue {
 
     public int reassignCount;
     public boolean skipIncrementDecrementRefCount;
+    private String comments;
 
     public Variable(String name, DataType type) {
         this("", name, false, type);
@@ -486,6 +488,13 @@ public class Variable implements Expression, LeftValue {
 
     public String toString() {
         return format();
+    }
+
+    public void addComment(String comment) {
+        if (comments != null) {
+            comment = comments + "\n" + comment;
+        }
+        comments = comment;
     }
 
 }

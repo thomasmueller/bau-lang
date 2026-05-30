@@ -124,9 +124,14 @@ public class Parser {
             try {
                 Parser2 p2 = new Parser2(text);
                 prog2 = p2.parse();
+                int test;
+                String debug = prog2.getSourceFile("").debug();
+                System.out.println("-----------------");
+                System.out.println(debug);
+                System.out.println("-----------------");
             } catch (Throwable e) {
                 int test;
-                // e.printStackTrace(System.out);
+                e.printStackTrace(System.out);
             }
         }
 
@@ -232,6 +237,7 @@ public class Parser {
                     mainStatements = true;
                     // ok
                 } else if (parseImport()) {
+                    int separateLoopAtBeginning;
                     mainStatements = true;
                     // ok
                 } else if (parseEnumDefinition()) {

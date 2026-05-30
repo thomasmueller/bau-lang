@@ -5,7 +5,25 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+In Java, all import statements must be at the header of the file -
+what about other programming languages?
+
 maybe support u8 (unsigned 8-bit int), and name it "byte"
+
+document restricted truthiness (eg. only references and integers)
+
+maybe support multi-line strings in the same way as in Ring:
+https://ring-lang.github.io/doc1.27/getting_started.html
+
+variable integer length encoding (like LEB128): bijou64
+https://news.ycombinator.com/item?id=48323992
+https://www.inkandswitch.com/tangents/bijou64/
+
+https://zef-lang.dev/implementation
+- Richards (OS scheduler)
+- DeltaBlue (constraint solver)
+- N-Body (physics simulation)
+- Splay (binary tree test)
 
 use _calloc here:
 buff.append(Statement.indent("result->data = _malloc(sizeof(" + t.baseType().toC() + ") * len);\n"));

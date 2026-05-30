@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.bau.parser.expr.Expression;
 import org.bau.parser.expr.New;
@@ -13,7 +14,7 @@ import org.bau.parser.expr.Variable;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueNull;
 
-public class DataType {
+public class DataType implements Section {
 
     public static final String I8 = "i8";
     public static final String I16 = "i16";
@@ -63,7 +64,7 @@ public class DataType {
 
     public List<Variable> fields = new ArrayList<>();
 
-    public LinkedHashMap<String, Expression> enumExpressions;
+    public LinkedHashMap<Variable, Expression> enumExpressions;
     public LinkedHashMap<String, Long> enumValues;
 
     public FunctionDefinition autoClose;
@@ -83,6 +84,8 @@ public class DataType {
     public ArrayList<DataType> traitTypes = new ArrayList<>();
     public HashSet<DataType> implementingTypes = new HashSet<>();
     private boolean resolveTypes;
+
+    private String comments;
 
     public static boolean isGenericTypeName(String token) {
         while (token.endsWith("[]")) {
@@ -288,6 +291,52 @@ public class DataType {
             throw new IllegalStateException("Is already an array");
         }
         return arrayType;
+    }
+
+    public String formatSource() {
+        StringBuilder buff = new StringBuilder();
+        if (traitDefinition != null) {
+            buff.append("trait ");
+        } else if (enumExpressions != null) {
+            buff.append("enum ");
+        } else {
+            buff.append("type ");
+        }
+        buff.append(format());
+        if (traitDefinition != null) {
+            if (!traitDefinition.requiredTraitNames.isEmpty()) {
+                buff.append(": ");
+                for (int i = 0; i < traitDefinition.requiredTraitNames.size(); i++) {
+                    if (i > 0) {
+                        buff.append(", ");
+                    }
+                    buff.append(traitDefinition.requiredTraitNames.get(i).getFullName());
+                }
+            }
+            buff.append("\n");
+            for (FunctionDefinition def : traitDefinition.functions) {
+                if (!def.callType.equals(this)) {
+                    // inherited
+                    continue;
+                }
+                buff.append("    " + def.format());
+                buff.append("\n");
+            }
+        } else if (enumExpressions != null) {
+            buff.append("\n");
+            for (Entry<Variable, Expression> e : enumExpressions.entrySet()) {
+                buff.append("    " + e.getKey().name());
+                buff.append(": " + e.getValue().format());
+                buff.append("\n");
+            }
+        } else {
+            buff.append("\n");
+            for (Variable v : fields) {
+                buff.append("    " + v.format() + " " + v.type().format());
+            }
+        }
+        buff.append("\n");
+        return buff.toString();
     }
 
     public String format() {
@@ -628,6 +677,13 @@ public class DataType {
             return t2;
         }
         return this;
+    }
+
+    public void addComment(String comment) {
+        if (comments != null) {
+            comment = comments + "\n" + comment;
+        }
+        comments = comment;
     }
 
 }

@@ -327,24 +327,6 @@ public class FieldAccess implements Expression, LeftValue {
                 }
             }
         }
-
-//          DataType enumType = functionContext.getType(m, n);
-//          read();
-//          if (matchOp(".")) {
-//              syntaxError("Expected '.' after reading enum type '" + enumType.name() + "'");
-//          }
-//          String val = readIdentifier();
-//          Long value = enumType.enumValues.get(val);
-//          if (value == null) {
-//              syntaxError("Value '" + val + "' not found for enum type '" + enumType.name() + "'");
-//          }
-//          Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
-//          return expr;
-//
-//
-//            int test;
-//            System.out.println("??");
-//        }
         base = base.resolveTypes(context);
         type = type.resolve(context.getProgram());
         return this;

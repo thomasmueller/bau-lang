@@ -192,7 +192,6 @@ Strings starting with `'`
 may contain `\n` newline, `\r` return, `\t` tab, 
 `\'` single quote,  `\\` backslash, `\x00` byte. 
 UTF-8 is used.
-``
 Raw strings don't have escapes 
 and start and end with one or more `` ` ``.
 Multi-line ones begin on the next line 
@@ -539,6 +538,7 @@ Unlike in other languages, there is no explicit
 ### Modules and Import
 
 `import` allows using types and functions from a module.
+Import statements need to be at the start of the file.
 The last part of the module name is the module identifier (for example `Math` below),
 which is used to access all types, functions, or constants in this module.
 The module identifier maybe be renamed (`AcmeMath` below) to resolve conflicts.

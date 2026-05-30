@@ -1,6 +1,7 @@
 package org.bau.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
@@ -8,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.bau.parser.expr.Variable;
+import org.bau.parser.stmt.Comment;
 
 //context for formatting and for line numbers
 public class SourceFile {
@@ -21,6 +23,7 @@ public class SourceFile {
     private HashMap<String, String> imports = new HashMap<>();
     // map from type / method / constant identifier to module identifier
     private HashMap<String, String> importedSymbols = new HashMap<>();
+    private TreeMap<Integer, Section> sections = new TreeMap<>();
     private TreeMap<Integer, Object> elements = new TreeMap<>();
     private TreeMap<Integer, String> errors = new TreeMap<>();
     private TreeMap<String, FunctionDefinition> functions = new TreeMap<>();
@@ -29,8 +32,7 @@ public class SourceFile {
     private TreeSet<String> includes = new TreeSet<>();
     private boolean imported;
     private int errorCount;
-    // pairs of objects and comments
-    private ArrayList<String> comments = new ArrayList<>();
+    private Comment headerComment;
     private ArrayList<Import> importStatements = new ArrayList<>();
     // global variables (or constants) in modules
     private LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
@@ -62,10 +64,6 @@ public class SourceFile {
 
     public int getFileId() {
         return fileId;
-    }
-
-    public String format() {
-        return sourceCode;
     }
 
     public void addImportStatement(Import importStmt) {
@@ -217,13 +215,6 @@ public class SourceFile {
         includes.add(file);
     }
 
-    public void addComment(String object, String comment) {
-        if (comment != null) {
-            comments.add(object);
-            comments.add(comment);
-        }
-    }
-
     public void addGlobalVariable(Variable var) {
         String module = var.module();
         if (!this.module.equals(module)) {
@@ -235,6 +226,69 @@ public class SourceFile {
 
     public String getModule() {
         return module;
+    }
+
+    public void addHeaderComment(Comment comment) {
+        if (headerComment == null) {
+            headerComment = comment;
+        } else {
+            headerComment.add(comment);
+        }
+    }
+
+    public void addSection(int pos, Section section) {
+        sections.put(pos, section);
+    }
+
+    public String format() {
+        StringBuilder buff = new StringBuilder();
+        if (headerComment != null) {
+            buff.append(headerComment.format());
+        }
+        int todo;
+        //     private ArrayList<Import> importStatements = new ArrayList<>();
+
+        HashMap<String, String> moduleNameToId = new HashMap<>();
+        ArrayList<String> importModules = new ArrayList<>();
+        for (Entry<String, String> e : imports.entrySet()) {
+            moduleNameToId.put(e.getValue(), e.getKey());
+            importModules.add(e.getValue());
+        }
+        Collections.sort(importModules);
+        for (String m : importModules) {
+            buff.append("import " + m);
+            String last = m.substring(m.lastIndexOf('.') + 1);
+            String alias = moduleNameToId.get(m);
+            if (!last.equals(alias)) {
+                buff.append(": " + alias);
+            }
+            buff.append("\n");
+            ArrayList<String> symbols = new ArrayList<>();
+            for (Entry<String, String> e : importedSymbols.entrySet()) {
+                if (e.getValue().equals(alias)) {
+                    symbols.add(e.getKey());
+                }
+            }
+            Collections.sort(symbols);
+            for (String s : symbols) {
+                buff.append("    " + s + "\n");
+            }
+        }
+
+        // private TreeMap<String, DataType> dataTypes = new TreeMap<>();
+
+        return buff.toString();
+    }
+
+    public String debug() {
+        StringBuilder buff = new StringBuilder();
+        for (Entry<Integer, Section> e : sections.entrySet()) {
+            int start = e.getKey();
+            Section section = e.getValue();
+            // buff.append(start).append(" " + section.getClass().getName() + "\n");
+            buff.append(section.formatSource() + "\n\n");
+        }
+        return buff.toString();
     }
 
 }

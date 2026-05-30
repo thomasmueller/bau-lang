@@ -9,7 +9,7 @@ import org.bau.parser.expr.Variable;
 import org.bau.parser.stmt.Free;
 import org.bau.parser.stmt.Statement;
 
-public class FunctionDefinition {
+public class FunctionDefinition implements Section {
 
     private boolean used;
     private String catchLabel;
@@ -44,6 +44,7 @@ public class FunctionDefinition {
     public boolean isConstructor;
     public boolean isFunctionPointer;
     int traitFunctionId;
+    private String comments;
 
     public FunctionDefinition(FullName fullName, int posOffset) {
         this.fullName = fullName;
@@ -363,6 +364,15 @@ public class FunctionDefinition {
         return buff.toString();
     }
 
+    public String formatSource() {
+        StringBuilder buff = new StringBuilder();
+        buff.append(toHeaderString().trim()).append("\n");
+        for (Statement s : list) {
+            buff.append(Statement.indent(s.format()));
+        }
+        return buff.toString();
+    }
+
     public String format() {
         StringBuilder buff = new StringBuilder();
         buff.append(toHeaderString().trim());
@@ -510,6 +520,13 @@ public class FunctionDefinition {
                 program.syntaxError(fullName.module, var.location, "Expected a variable, got " + e.format());
             }
         }
+    }
+
+    public void addComment(String comment) {
+        if (comments != null) {
+            comment = comments + "\n" + comment;
+        }
+        comments = comment;
     }
 
 }

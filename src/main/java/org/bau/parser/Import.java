@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.bau.parser.expr.Variable;
 
-public class Import {
+public class Import implements Section {
 
     private final String moduleName;
     private final String moduleIdentifier;
@@ -27,7 +27,7 @@ public class Import {
         symbols.add(var);
     }
 
-    public String format() {
+    public String formatSource() {
         StringBuilder buff = new StringBuilder();
         buff.append("import ");
         buff.append(moduleName);
