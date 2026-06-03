@@ -12,6 +12,9 @@ maybe support u8 (unsigned 8-bit int), and name it "byte"
 
 document restricted truthiness (eg. only references and integers)
 
+Behavior-Oriented Concurrency (BoC)
+https://marioskogias.github.io/docs/boc.pdf
+
 maybe support multi-line strings in the same way as in Ring:
 https://ring-lang.github.io/doc1.27/getting_started.html
 

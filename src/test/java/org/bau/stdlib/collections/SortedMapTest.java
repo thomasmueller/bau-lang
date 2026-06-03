@@ -35,7 +35,24 @@ public class SortedMapTest {
         list.remove(3);
     }
 
+    @Test
+    public void nextKey() {
+        int test;
+        SplayTree<Integer, String> list = new SplayTree<>();
+        list.put(1, "Hello");
+        list.put(2, "World");
+        assertEquals(1, list.getNextKey(null).intValue());
+        assertEquals(2, list.getNextKey(1).intValue());
+        // assertEquals(null, list.getNextKey(2));
+    }
+
     private static void log(Object... args) {
+        if ("size".equals(args[0])) {
+            return;
+        }
+        if ("get ".equals(args[0])) {
+            return;
+        }
         // System.out.println("    " + Arrays.toString(args));
     }
 
@@ -72,6 +89,12 @@ public class SortedMapTest {
     @Test
     public void randomSkipList3() {
         SkipList3<Integer, Long> myMap = new SkipList3<>();
+        randomOps(myMap);
+    }
+
+    @Test
+    public void randomSplayTree() {
+        SplayTree<Integer, Long> myMap = new SplayTree<>();
         randomOps(myMap);
     }
 
@@ -142,7 +165,7 @@ public class SortedMapTest {
                                 }
                                 continue nextSeed;
                             }
-                            assertEquals(exp, got);
+                            assertEquals("get " + key, exp, got);
                         }
                     }
                 }
@@ -167,29 +190,32 @@ public class SortedMapTest {
 
         // Profiler prof = new Profiler().startCollecting();
 
-        // time: 268 ms 317012287
+        // time: 258 ms 317012287
         // ConcurrentSkipListMap<Integer, Long> map = new ConcurrentSkipListMap<>();
 
-        // time: 261 ms 317012287
+        // time: 245 ms 317012287
         // SkipList<Integer, Long> map = new SkipList<>();
 
-        // time: 231 ms 317012287
+        // time: 227 ms 317012287
         // SkipList2<Integer, Long> map = new SkipList2<>();
 
-        // time: 246 ms 317012287
+        // time: 240 ms 317012287
         // SkipList3<Integer, Long> map = new SkipList3<>();
 
-        // time: 165 ms 317012287
+        // time: 151 ms 317012287
         // TreeMap<Integer, Long> map = new TreeMap<>();
 
-        // time: 166 ms 317012287
+        // time: 157 ms 317012287
         // AVLTree<Integer, Long> map = new AVLTree<>();
 
-        // time: 187 ms 317012287
+        // time: 167 ms 317012287
         // ScapegoatTree<Integer, Long> map = new ScapegoatTree<>();
 
-        // time: 217 ms 317012287
+        // time: 195 ms 317012287
         Treap<Integer, Long> map = new Treap<>();
+
+        // time: 335 ms 317012287
+        // SplayTree<Integer, Long> map = new SplayTree<>();
 
         for (int i = 0; i < 1_000_000; i++) {
             int key = random.nextInt(1_000_000);
@@ -211,7 +237,7 @@ public class SortedMapTest {
         }
         long time = System.currentTimeMillis() - start;
         assertTrue(dummy >= 0);
-        // System.out.println("time: " + time + " ms " + dummy);
+        System.out.println("time: " + time + " ms " + dummy);
 
 //        System.out.println(prof.getTop(10));
 

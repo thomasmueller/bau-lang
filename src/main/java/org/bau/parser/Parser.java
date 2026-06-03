@@ -120,15 +120,20 @@ public class Parser {
 
     public Program parse() {
         Program prog2 = null;
-        if (module.isEmpty()) {
+        if (module.isEmpty() && scanPhase) {
             try {
-                Parser2 p2 = new Parser2(text);
+                // Parser2 p2 = new Parser2(text);
+                Program prg2 = new Program(Map.of());
+                SourceFile sf2 = sourceFile.copy();
+                Parser2 p2 = new Parser2(prg2, sf2, "", text, 0);
+
+
                 prog2 = p2.parse();
                 int test;
-                String debug = prog2.getSourceFile("").debug();
-                System.out.println("-----------------");
-                System.out.println(debug);
-                System.out.println("-----------------");
+                String debug = sf2.debug();
+//                System.out.println("-----------------");
+//                System.out.println(debug);
+//                System.out.println("-----------------");
             } catch (Throwable e) {
                 int test;
                 e.printStackTrace(System.out);
@@ -188,13 +193,11 @@ public class Parser {
             }
         }
         Program prog = program.checkErrors();
-
         if (module.isEmpty() && prog2 != null) {
             SourceFile sf = prog.getSourceFile("");
-            SourceFile sf2 = prog2.getSourceFile("");
+            SourceFile sf2 = sourceFile;
             sf.copyElements(sf2);
         }
-
         return prog;
     }
 

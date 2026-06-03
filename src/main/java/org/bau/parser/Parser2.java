@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
 import org.bau.parser.expr.ArrayAccess;
 import org.bau.parser.expr.Borrow;
 import org.bau.parser.expr.Call;
@@ -58,22 +58,15 @@ public class Parser2 {
     private boolean hasExplicitMainFunction;
     private ArrayList<Statement> init = new ArrayList<>();
 
-    public Parser2(String text) {
-        this(new Program(Map.of()), "", text, 0);
-    }
-
-    public Parser2(Map<String, String> modules, String text) {
-        this(new Program(modules), "", text, 0);
-    }
-
-    public Parser2(Program program, String module, String text, int posOffset) {
+    public Parser2(Program program, SourceFile sourceFile, String module, String text, int posOffset) {
         Utils.assertTrue(module != null);
-        sourceFile = program.addSourceFile(module, text);
+        this.sourceFile = sourceFile;
         this.program = program;
         this.module = module;
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.posOffset = posOffset;
+
     }
 
     private SourceFile getSourceFile() {
@@ -120,7 +113,6 @@ public class Parser2 {
                 }
             }
         }
-        boolean mainStatements = false;
         int firstPos = -1;
         while (true) {
             try {
@@ -131,16 +123,12 @@ public class Parser2 {
                     break;
                 }
                 if (parseFunctionDefinition()) {
-                    mainStatements = true;
                     // ok
                 } else if (parseTypeDefinition()) {
-                    mainStatements = true;
                     // ok
                 } else if (parseTraitDefinition()) {
-                    mainStatements = true;
                     // ok
                 } else if (parseEnumDefinition()) {
-                    mainStatements = true;
                     // ok
                 } else {
                     isGlobalScope = true;
@@ -338,28 +326,6 @@ public class Parser2 {
         type.addComment(comment.getText());
         getSourceFile().addSection(startParse, type);
         return true;
-    }
-
-    private String parseBlock(int defIndent) {
-        int test;
-        int pos = lastPos;
-        while (text.charAt(pos) != '\n') {
-            pos--;
-        }
-        pos++;
-        if (pos >= text.length()) {
-            return "";
-        }
-        while (true) {
-            if (type == TokenType.OPERATOR && "\n".equals(token)) {
-                readSpaces();
-            }
-            if (type == TokenType.END || indent <= defIndent) {
-                break;
-            }
-            read();
-        }
-        return text.substring(pos, lastPos);
     }
 
     private boolean parseEnumDefinition() {
@@ -1312,8 +1278,10 @@ public class Parser2 {
                 parseStatement(list);
             }
             if (elsePart) {
+                ifStatement.elseList = list;
                 break;
             }
+            ifStatement.thenList = list;
             switchIndent = indent;
         }
         target.add(topIfStatement);

@@ -108,7 +108,7 @@ printing the AST of the parameter expression, and sort entries:
     fun convertIntToI8Array(x int) i8[]
         return Int.intToString(x)
     
-    fun T[] sort(by(T) U) macro
+    fun T[].sort(by(T) U) macro
         a : this
         println('sorting by: ' by.source)
         println('AST form  : ' by.ast)
@@ -165,11 +165,11 @@ The following syntax might be useful for folding / aggregation:
         x.data = data
         return x
     
-    fun intAggregator init(value int) intAggregator
+    fun intAggregator.init(value int) intAggregator
         init = value
         return this
     
-    fun intAggregator aggregate(operation(intPair) int) macro int
+    fun intAggregator.aggregate(operation(intPair) int) macro int
         i := 0
         agg := init
         loop i < data.len

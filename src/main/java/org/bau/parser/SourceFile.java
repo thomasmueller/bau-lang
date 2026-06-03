@@ -291,4 +291,8 @@ public class SourceFile {
         return buff.toString();
     }
 
+    public SourceFile copy() {
+        return new SourceFile(this.fileId, this.module, this.sourceCode);
+    }
+
 }

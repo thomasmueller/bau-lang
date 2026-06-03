@@ -92,7 +92,7 @@ public class DataType implements Section {
             token = token.substring(0, token.length() - 2);
         }
         return token != null && !token.isEmpty() &&
-                token.length() <= 2 &&
+                token.length() == 1 &&
                 token.charAt(0) >= 'A' && token.charAt(0) <= 'Z' &&
                 token.toUpperCase().equals(token);
     }
@@ -326,7 +326,9 @@ public class DataType implements Section {
             buff.append("\n");
             for (Entry<Variable, Expression> e : enumExpressions.entrySet()) {
                 buff.append("    " + e.getKey().name());
-                buff.append(": " + e.getValue().format());
+                if (e.getValue() != null) {
+                    buff.append(": " + e.getValue().format());
+                }
                 buff.append("\n");
             }
         } else {
