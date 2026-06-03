@@ -1,5 +1,9 @@
 # module org.bau.Int
 
+import org.bau.Std
+    ord
+    convertIntToI8Array
+    convertFloatToI8Array
 import org.bau.Utils
     when
 import org.bau.Exception
