@@ -59,6 +59,11 @@ public class BTree implements SortedMap<String, String> {
 
     }
 
+    @Override
+    public String higherKey(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     /**
      * Put a value.
@@ -417,4 +422,5 @@ public class BTree implements SortedMap<String, String> {
         }
 
     }
+
 }

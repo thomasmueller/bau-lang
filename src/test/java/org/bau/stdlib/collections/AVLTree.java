@@ -9,6 +9,7 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         return key.compareTo(node.key);
     }
 
+    @Override
     public V get(K key) {
         TreeNode<K, V> n = findFirstNode(key);
         if (n != null && compare(n, key) == 0) {
@@ -17,6 +18,33 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         return null;
     }
 
+    @Override
+    public K higherKey(K key) {
+        if (root == null) {
+            return null;
+        }
+        if (key == null) {
+            TreeNode<K, V> n = root;
+            while (n.left != null) {
+                n = n.left;
+            }
+            return n.key;
+        }
+        TreeNode<K, V> n = root;
+        TreeNode<K, V> candidate = null;
+        while (n != null) {
+            int cmp = key.compareTo(n.key);
+            if (cmp < 0) {
+                candidate = n;
+                n = n.left;
+            } else {
+                n = n.right;
+            }
+        }
+        return candidate == null ? null : candidate.key;
+    }
+
+    @Override
     public void put(K key, V value) {
         TreeNode<K, V> n = root, x = n;
         boolean isLeft = true;
@@ -82,6 +110,7 @@ public class AVLTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         return result;
     }
 
+    @Override
     public void remove(K key) {
         TreeNode<K, V> x = findFirstNode(key);
         if (x == null || compare(x, key) != 0) {

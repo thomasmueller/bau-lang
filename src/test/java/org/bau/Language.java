@@ -5,6 +5,17 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+test case:
+import org.bau.Int
+
+Parser2-based formatter
+
+add linq.md to test cases
+
+create a documentation page on "why not Hindley-Milner"?
+see https://www.reddit.com/r/ProgrammingLanguages/comments/1tvgaz4/recent_improvements_to_the_type_checker_swift/
+https://forums.swift.org/t/recent-improvements-to-the-type-checker/87048
+
 In Java, all import statements must be at the header of the file -
 what about other programming languages?
 
@@ -22,11 +33,8 @@ variable integer length encoding (like LEB128): bijou64
 https://news.ycombinator.com/item?id=48323992
 https://www.inkandswitch.com/tangents/bijou64/
 
-https://zef-lang.dev/implementation
-- Richards (OS scheduler)
-- DeltaBlue (constraint solver)
-- N-Body (physics simulation)
-- Splay (binary tree test)
+branchless quicksort
+https://news.ycombinator.com/item?id=48375445
 
 use _calloc here:
 buff.append(Statement.indent("result->data = _malloc(sizeof(" + t.baseType().toC() + ") * len);\n"));

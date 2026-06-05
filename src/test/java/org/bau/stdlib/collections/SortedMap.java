@@ -12,4 +12,6 @@ public interface SortedMap<K, V> {
 
     void remove(K key);
 
+    K higherKey(K key);
+
 }

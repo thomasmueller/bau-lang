@@ -88,6 +88,29 @@ public class ScapegoatTree<K extends Comparable<K>, V> implements SortedMap<K, V
     }
 
     @Override
+    public K higherKey(K key) {
+        if (root == null) {
+            return null;
+        }
+        if (key == null) {
+            return minimum(root).key;
+        }
+        Node<K, V> curr = root;
+        Node<K, V> candidate = null;
+        while (curr != null) {
+            int cmp = key.compareTo(curr.key);
+
+            if (cmp < 0) {
+                candidate = curr;
+                curr = curr.left;
+            } else {
+                curr = curr.right;
+            }
+        }
+        return candidate == null ? null : candidate.key;
+    }
+
+    @Override
     public void remove(K key) {
         Node<K, V> node = findNode(key);
         if (node == null)

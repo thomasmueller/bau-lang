@@ -41,6 +41,32 @@ public class Treap<K extends Comparable<K>, V> implements SortedMap<K, V> {
     }
 
     @Override
+    public K higherKey(K key) {
+        if (root == null) {
+            return null;
+        }
+        if (key == null) {
+            Node<K, V> n = root;
+            while (n.left != null) {
+                n = n.left;
+            }
+            return n.key;
+        }
+        Node<K, V> n = root;
+        Node<K, V> candidate = null;
+        while (n != null) {
+            int cmp = key.compareTo(n.key);
+            if (cmp < 0) {
+                candidate = n;
+                n = n.left;
+            } else {
+                n = n.right;
+            }
+        }
+        return candidate == null ? null : candidate.key;
+    }
+
+    @Override
     public void remove(K key) {
         if (key == null) {
             return;

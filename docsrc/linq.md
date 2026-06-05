@@ -179,3 +179,47 @@ The following syntax might be useful for folding / aggregation:
             agg = operation
             i += 1
         return agg
+
+## Filter Map Sum
+
+    fun main()
+        println(rangeArray(1, 5).filter(it < 3).map(it * 10).sum())
+        println(rangeArray(1, 5).filter(it < 3).map(it * 0.5).sum())
+        println(rangeArray(2, 12).map(it * 0.1).filter(it < 1).map(it * it).sum())
+    
+    fun rangeArray(from T, to T) T[]
+        result : T[to - from]
+        for i := range(from, to)
+            result[i - from] = i
+        return result
+    
+    fun T[].filter(condition(T) int) macro T[]
+        temp : T[this.len]
+        i, j := 0
+        loop i < this.len
+            it : this[i]
+            if condition
+                temp[j] = it
+                j += 1
+            i += 1
+        result : T[j]
+        loop j > 0
+            j -= 1
+            result[j] = temp[j]
+        return result
+    
+    fun T[].map(expression(T) U) macro U[]
+        result : U[this.len]
+        i := 0
+        loop i < this.len
+            it : this[i]
+            x : expression
+            result[i] = x
+            i += 1
+        return result
+    
+    fun T[].sum() T
+        result := T(0)
+        for i := until(this.len)
+            result += this[i]
+        return result

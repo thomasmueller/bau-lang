@@ -58,6 +58,7 @@ public class SkipList2<K extends Comparable<K>, V> implements SortedMap<K, V> {
         this.capacity *= 2;
     }
 
+    @Override
     public void put(K key, V value) {
         if (size > capacity) {
             rebuild();
@@ -70,6 +71,7 @@ public class SkipList2<K extends Comparable<K>, V> implements SortedMap<K, V> {
         }
     }
 
+    @Override
     public void remove(K key) {
         if (replace(key, null)) {
             size--;
@@ -118,12 +120,27 @@ public class SkipList2<K extends Comparable<K>, V> implements SortedMap<K, V> {
         return node.next[i].key.compareTo(key);
     }
 
+    @Override
     public V get(K key) {
         Node<K, V> n = findFirst(key);
         if (n != null && n.key.compareTo(key) == 0) {
             return n.value;
         }
         return null;
+    }
+
+    @Override
+    public K higherKey(K key) {
+        Node<K, V> n;
+        if (key == null) {
+            n = head.next[0];
+        } else {
+            n = findFirst(key);
+            if (n != null && n.key.compareTo(key) == 0) {
+                n = n.next[0];
+            }
+        }
+        return n == null ? null : n.key;
     }
 
     public SkipListIterator iterate(K key) {

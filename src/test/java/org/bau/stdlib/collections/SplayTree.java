@@ -17,22 +17,34 @@ public class SplayTree<K extends Comparable<K>, V> implements SortedMap<K, V> {
         return null;
     }
 
-    public K getNextKey(K key) {
-        int test;
+    public K higherKey(K key) {
         if (root == null) {
             return null;
         }
+        if (key == null) {
+            Node<K, V> n = root;
+            while (n.left != null) {
+                n = n.left;
+            }
+            splay(n.key);
+            return n.key;
+        }
+        Node<K, V> candidate = null;
         Node<K, V> n = root;
-        if (key != null) {
-            splay(key);
-            if (n.key.compareTo(key) > 0) {
-                return n.key;
+        while (n != null) {
+            int cmp = key.compareTo(n.key);
+            if (cmp < 0) {
+                candidate = n;
+                n = n.left;
+            } else {
+                n = n.right;
             }
         }
-        while (n.left != null) {
-            n = n.left;
+        if (candidate != null) {
+            splay(candidate.key);
+            return candidate.key;
         }
-        return n.key;
+        return null;
     }
 
     @Override

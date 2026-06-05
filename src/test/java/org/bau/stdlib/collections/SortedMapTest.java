@@ -36,14 +36,13 @@ public class SortedMapTest {
     }
 
     @Test
-    public void nextKey() {
-        int test;
+    public void higherKey() {
         SplayTree<Integer, String> list = new SplayTree<>();
         list.put(1, "Hello");
         list.put(2, "World");
-        assertEquals(1, list.getNextKey(null).intValue());
-        assertEquals(2, list.getNextKey(1).intValue());
-        // assertEquals(null, list.getNextKey(2));
+        assertEquals(1, list.higherKey(null).intValue());
+        assertEquals(2, list.higherKey(1).intValue());
+        assertEquals(null, list.higherKey(2));
     }
 
     private static void log(Object... args) {
@@ -151,6 +150,14 @@ public class SortedMapTest {
                     map.remove(key);
                     break;
                 default:
+                    Integer ke = map.higherKey(key);
+                    Integer kg = myMap.higherKey(key);
+                    log("higherKey ", key, "=", ke, " got ", kg);
+                    if (ke == null || kg == null) {
+                        assertTrue(ke == null && kg == null);
+                    } else {
+                        assertEquals("higherKey " + key, ke, kg);
+                    }
                     exp = map.get(key);
                     got = myMap.get(key);
                     log("get ", key, "=", exp, " got ", got);

@@ -66,7 +66,6 @@ public class Parser2 {
         // add a newline to simplify end detection
         this.text = text + "\n";
         this.posOffset = posOffset;
-
     }
 
     private SourceFile getSourceFile() {
