@@ -5,7 +5,7 @@ import sys
 
 def main():
     global acc, den, num
-    n = 10000
+    n = 10_000
     if len(sys.argv) > 1:
         n = int(sys.argv[1])
     acc, den, num = 0, 1, 1

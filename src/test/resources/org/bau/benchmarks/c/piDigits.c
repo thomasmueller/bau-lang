@@ -1,7 +1,6 @@
 // The Computer Language Benchmarks Game
 // https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <gmp.h>

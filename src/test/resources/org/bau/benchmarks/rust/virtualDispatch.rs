@@ -2,6 +2,7 @@ use std::time::Instant;
 use std::env;
 
 pub fn main() {
+    println!("Rust");
     let args: Vec<String> = env::args().collect();
     let size : usize = if args.len() > 1 {
         args[1].parse().unwrap()

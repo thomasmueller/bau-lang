@@ -907,7 +907,8 @@ public class Parser2 {
                         if ("len".equals(f) && left.type().isArray()) {
                             type = DataType.I32_TYPE;
                         } else {
-                            type = left.type().getFieldDataType(f);
+                            // type = left.type().getFieldDataType(f);
+                            type = DataType.I32_TYPE;
                         }
                         if (type == null) {
                             type = DataType.UNKNOWN;

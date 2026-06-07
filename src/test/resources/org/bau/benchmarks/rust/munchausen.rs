@@ -3,6 +3,7 @@
 const LIMIT: i32 = 440_000_000;
 
 fn main() {
+    println!("Rust");
     let cache = get_cache();
     for n in 0 .. LIMIT {
         if is_munchausen(n, &cache) {

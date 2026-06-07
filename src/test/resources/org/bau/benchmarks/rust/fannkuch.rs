@@ -4,6 +4,7 @@
 use std::env;
 
 fn main() {
+    println!("Rust");
     let args: Vec<String> = env::args().collect();
     let n: usize = if args.len() > 1 {
         args[1].parse().unwrap()

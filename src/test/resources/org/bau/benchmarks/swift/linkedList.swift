@@ -23,6 +23,7 @@ func createLinkedList(_ len: Int) -> Node {
     return head
 }
 
+print("Swift")
 print("Starting stress test...")
 let x = createLinkedList(50_000_000)
 let count = 1_000_000

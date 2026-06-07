@@ -36,7 +36,6 @@ fn getCache() [10]u64 {
     while (i <= 9) : (i += 1) {
         result[i] = powInt(i, i);
     }
-
     return result;
 }
 

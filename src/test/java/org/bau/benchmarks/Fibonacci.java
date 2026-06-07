@@ -3,6 +3,7 @@ package org.bau.benchmarks;
 public class Fibonacci {
 
     public static void main(String[] args) {
+        System.out.println("Java");
         for (int test = 0; test < 5; test++) {
             long start = System.currentTimeMillis();
             for (int i = 0; i < 10; i++) {

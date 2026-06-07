@@ -41,7 +41,7 @@ public class SyntaxStats {
     public static void main(String... args) throws IOException {
         String[] languages = { "Python:py", "Bau:bau", "Nim:nim", "Swift:swift",
                 "Vlang:v", "Kotlin:kt", "Go:go", "C:c", "Java:java", "Rust:rs", "Zig:zig" };
-        String[] files = { "BinaryTrees", "Fannkuch", "Mandelbrot", "Munchausen", "PiDigits" };
+        String[] files = { "BinaryTrees", "Fannkuch", "NBody", "Mandelbrot", "Munchausen", "PiDigits" };
 
         LinkedHashMap<String, Stats> stats = new LinkedHashMap<>();
         for (String file : files) {
@@ -87,11 +87,7 @@ public class SyntaxStats {
                 boolean identifierStart = false;
                 boolean identifier = false;
                 String[] lines = new String(fileData).split("\n");
-                for(String line : lines) {
-                    String trimmed = line.trim();
-                    if ("runtime.GOMAXPROCS(1)".equals(trimmed)) {
-                        continue;
-                    }
+                for (String line : lines) {
                     line += "\n";
                     byte[] lineData = line.getBytes(StandardCharsets.UTF_8);
                     for (int i = 0; i < lineData.length; i++) {

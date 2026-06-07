@@ -1,8 +1,5 @@
-/* The Computer Language Benchmarks Game
- * https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
- *
- * Contributed by Sebastien Loisel
- */
+// The Computer Language Benchmarks Game
+// https://salsa.debian.org/benchmarksgame-team/benchmarksgame/
 
 #include <stdio.h> 
 #include <stdlib.h>

@@ -40,6 +40,7 @@ func count(_ depth: Int) -> Int {
 }
 
 func main() {
+    print("Swift")
     var n = 10
     if CommandLine.arguments.count > 1, let arg = Int(CommandLine.arguments[1]) {
         n = arg

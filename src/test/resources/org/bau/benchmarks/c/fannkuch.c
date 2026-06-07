@@ -5,7 +5,6 @@
 #include <stdlib.h>
 
 int fannkuch(int n) {
-    printf("C\n");
     int perm1[n];
     for (int i = 0; i < n; i++)
         perm1[i] = i;
@@ -63,6 +62,7 @@ int fannkuch(int n) {
 }
 
 int main(int argc, char *argv[]) {
+    printf("C\n");
     int n = argc > 1 ? atoi(argv[1]) : 4;
     printf("Pfannkuchen(%d) = %d\n", n, fannkuch(n));
     return 0;

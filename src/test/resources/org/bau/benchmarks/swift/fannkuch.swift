@@ -61,6 +61,7 @@ func fannkuch(_ n: Int) -> Int {
 }
 
 func main() {
+    print("Swift")
     let n = CommandLine.arguments.count > 1 ? Int(CommandLine.arguments[1]) ?? 4 : 4
     let result = fannkuch(n)
     print("Pfannkuchen(\(n)) = \(result)")

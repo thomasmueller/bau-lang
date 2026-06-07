@@ -1,6 +1,6 @@
 # https://github.com/jabbalaci/SpeedTests
 
-import math
+import math, std/strformat
 
 func get_cache(): array[10, int] =
     result[0] = 0

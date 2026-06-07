@@ -37,6 +37,7 @@ impl Drop for Node {
 }
 
 fn main() {
+    println!("Rust");
     println!("Starting stress test...");
     let x = create_linked_list(5000);
     let count: usize = 1_000_000;

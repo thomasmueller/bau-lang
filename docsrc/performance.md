@@ -30,6 +30,7 @@ which results in simple code and high productivity.
 | SpeedTest    |  1.3 |  1.2 |  1.9 |  2.7 |  1.6 | 10.2 |  1.2 |  1.4 |  1.3 |  1.2 |
 | Pi Digits    |  1.3 |  0.4 |  0.6 |  1.9 | 24.0 |  1.4 |  1.0 |  5.0 |  3.2 |  3.1 |
 | Mandelbrot   |  1.8 |  1.8 |  1.8 |  2.1 |  1.9 |  9.8 |  2.0 |  9.8 |  1.8 |  9.4 |
+| NBody        |  1.5 |  1.4 |  1.5 |  1.9 |  1.6 | 10.4 |  1.7 |  1.7 |  1.6 |  1.5 |
 
 (Runtime in seconds. Lower is better. 
 Measured on an Apple MacBook Pro M4.)
@@ -142,6 +143,14 @@ Only 8'000 by 8'000 pixels are calculated, versus 16'000 by 16'000 as in the ori
 to speed up running the test; however the relative performance is unaffected.
 It is mostly testing floating point performance.
 
+#### NBody
+
+This test models the
+<a href="https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html">orbit of planets</a>.
+Unlike in the original test, the number of planets is dynamic.
+With a hardcoded array length, Rust is faster than C due to more aggressive loop unrolling
+(other languages are not affected).
+
 ## Building and Running the Tests
 
 Download and build the latest version:
@@ -171,6 +180,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
     for i in {1..3}; do time ./virtualDispatch; done
     for i in {1..3}; do time ./virtualDispatchOwned; done
     java -jar bau.jar -useTmMalloc true -O3 *.bau
@@ -185,11 +195,13 @@ Compiling and Running the C, Java, and Bau versions:
     gcc -O3 munchausen.c -o munchausen
     gcc -O3 piDigits.c -o piDigits -I/opt/homebrew/include -L/opt/homebrew/lib -lgmp
     gcc -O3 mandelbrot.c -o mandelbrot
+    gcc -O3 nbody.c -o nbody
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits 10000 > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
 
     echo "== Go ============"
     cp ../src/test/resources/org/bau/benchmarks/go/* .
@@ -198,6 +210,7 @@ Compiling and Running the C, Java, and Bau versions:
     go build -ldflags="-s -w" munchausen.go
     go build -ldflags="-s -w" piDigits.go
     go build -ldflags="-s -w" mandelbrot.go
+    go build -ldflags="-s -w" nbody.go
     go build -ldflags="-s -w" linkedList.go
     go build -ldflags="-s -w" virtualDispatch.go
     for i in {1..3}; do time GOMAXPROCS=1 ./binaryTrees 20; done
@@ -205,6 +218,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time GOMAXPROCS=1 ./munchausen; done
     for i in {1..3}; do time GOMAXPROCS=1 ./piDigits > out.txt; done
     for i in {1..3}; do time GOMAXPROCS=1 ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time GOMAXPROCS=1 ./nbody; done
     for i in {1..3}; do time GOMAXPROCS=1 ./linkedList; done
     for i in {1..3}; do time GOMAXPROCS=1 ./virtualDispatch; done
 
@@ -215,11 +229,13 @@ Compiling and Running the C, Java, and Bau versions:
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Munchausen
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.PiDigits 10000 | grep Run
     time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.Mandelbrot 8000 | grep -a Run
+    time java -Xmx100m org.bau.benchmarks.Loop org.bau.benchmarks.NBody | grep -a Run
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.BinaryTrees 20; done
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Fannkuch 11; done
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Munchausen; done
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.PiDigits 10000 > out.txt; done
     for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.Mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time java -Xmx100m org.bau.benchmarks.NBody; done
     for i in {1..3}; do time java -Xmx2g org.bau.benchmarks.LinkedList; done
     
     echo "== Nim ============"
@@ -230,11 +246,13 @@ Compiling and Running the C, Java, and Bau versions:
     nim c -d:release munchausen.nim
     nim c -d:release piDigits.nim
     nim c -d:release mandelbrot.nim
+    nim c -d:release nbody.nim
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits 10000 > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
     
     echo "== Python via PyPy ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
@@ -243,6 +261,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time pypy3.10 munchausen.py; done
     for i in {1..3}; do time pypy3.10 piDigits.py 10000 > out.txt; done
     for i in {1..3}; do time pypy3.10 mandelbrot.py 8000 > out.tiff; done
+    for i in {1..3}; do time pypy3.10 nbody.py; done
     for i in {1..3}; do time pypy3.10 linkedList.py; done
     
     echo "== Rust ============"
@@ -257,6 +276,7 @@ Compiling and Running the C, Java, and Bau versions:
     rustc -C opt-level=3 fannkuch.rs
     rustc -C opt-level=3 munchausen.rs
     rustc -C opt-level=3 mandelbrot.rs
+    rustc -C opt-level=3 nbody.rs
     rustc -C opt-level=3 linkedList.rs
     rustc -C opt-level=3 virtualDispatch.rs
     for i in {1..3}; do time ./binaryTrees 20; done
@@ -264,6 +284,7 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./rust/target/release/pi_digits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
     for i in {1..3}; do time ./linkedList; done
     for i in {1..3}; do time ./virtualDispatch; done
 
@@ -279,11 +300,13 @@ Compiling and Running the C, Java, and Bau versions:
     swiftc -O fannkuch.swift -o fannkuch
     swiftc -O munchausen.swift -o munchausen
     swiftc -O mandelbrot.swift -o mandelbrot
+    swiftc -O nbody.swift -o nbody
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits 10000 > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
 
     echo "== Vlang ============"
     cp ../src/test/resources/org/bau/benchmarks/vlang/* .
@@ -292,11 +315,13 @@ Compiling and Running the C, Java, and Bau versions:
     v -prod -force-bounds-checking munchausen.v
     v -prod -force-bounds-checking -enable-globals piDigits.v
     v -prod -force-bounds-checking mandelbrot.v
+    v -prod -force-bounds-checking nbody.v
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
 
     echo "== Zig ============"
     cp ../src/test/resources/org/bau/benchmarks/zig/* .
@@ -305,11 +330,13 @@ Compiling and Running the C, Java, and Bau versions:
     zig build-exe -O ReleaseSafe munchausen.zig
     zig build-exe -O ReleaseSafe piDigits.zig
     zig build-exe -O ReleaseSafe mandelbrot.zig
+    zig build-exe -O ReleaseSafe nbody.zig
     for i in {1..3}; do time ./binaryTrees 20; done
     for i in {1..3}; do time ./fannkuch 11; done
     for i in {1..3}; do time ./munchausen; done
     for i in {1..3}; do time ./piDigits > out.txt; done
     for i in {1..3}; do time ./mandelbrot 8000 > out.tiff; done
+    for i in {1..3}; do time ./nbody; done
 
     echo "== Python (CPython) ============"
     cp ../src/test/resources/org/bau/benchmarks/python/* .
@@ -318,5 +345,6 @@ Compiling and Running the C, Java, and Bau versions:
     for i in {1..3}; do time python3 piDigits.py 10000 > out.txt; done
     for i in {1..3}; do time python3 munchausen.py; done
     for i in {1..3}; do time python3 mandelbrot.py 8000 > out.tiff; done
+    for i in {1..3}; do time python3 nbody.py; done
     
     cd ..

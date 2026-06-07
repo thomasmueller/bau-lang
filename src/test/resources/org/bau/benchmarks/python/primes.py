@@ -5,8 +5,8 @@ import platform
 import socket
 import sys
 
-UPPER_BOUND = 5000000
-PREFIX = 32338
+UPPER_BOUND = 5_000_000
+PREFIX = 32_338
 
 class Node:
     def __init__(self):
