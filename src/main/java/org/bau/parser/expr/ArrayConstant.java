@@ -62,7 +62,7 @@ public class ArrayConstant implements Expression {
         for (int i = 0; i < data.len().intValue(); i++) {
             buff.append(", ");
             Value v = data.get(i);
-            NumberValue nv = new NumberValue(v, type, false);
+            NumberValue nv = new NumberValue(v.toString(), v, type, false);
             buff.append(nv.format());
         }
         buff.append(")");

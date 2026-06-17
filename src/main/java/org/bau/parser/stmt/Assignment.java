@@ -26,7 +26,6 @@ import org.bau.parser.expr.Variable;
 import org.bau.runtime.Memory;
 import org.bau.runtime.Value;
 import org.bau.runtime.Value.ValueException;
-import org.bau.runtime.Value.ValueInt;
 import org.bau.runtime.Value.ValuePanic;
 
 public class Assignment implements Statement {
@@ -211,7 +210,8 @@ public class Assignment implements Statement {
             // first, use "%" or "/" by "0", and then
             // replace the last '0' with the right expression
             // TODO this is a hack
-            Operation op = Operation.buildAndOptimize(leftValue, modify, new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false));
+            Operation op = Operation.buildAndOptimize(leftValue, modify,
+                    NumberValue.valueOf(0));
             String ops = op.toC();
             int index = ops.lastIndexOf('0');
             ops = ops.substring(0, index) + result + ops.substring(index + 1);
@@ -285,7 +285,7 @@ public class Assignment implements Statement {
                 }
             } else if (value instanceof StringLiteral) {
                 StringLiteral n = (StringLiteral) value;
-                NumberValue len = new NumberValue(n.array.len(), DataType.INT_TYPE, false);
+                NumberValue len = NumberValue.valueOf(n.array.len().intValue());
                 v.setConstantLength(len);
                 FieldAccess f = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f, "==", len);
@@ -296,7 +296,7 @@ public class Assignment implements Statement {
                 }
             } else if (value instanceof ArrayConstant) {
                 ArrayConstant n = (ArrayConstant) value;
-                NumberValue len = new NumberValue(n.len(), DataType.INT_TYPE, false);
+                NumberValue len = NumberValue.valueOf(n.len().intValue());
                 v.setConstantLength(len);
                 FieldAccess f = new FieldAccess(v, "len", false, DataType.INT_TYPE);
                 Solver.Rule r = Operation.toRule(f, "==", len);
@@ -405,17 +405,20 @@ public class Assignment implements Statement {
 
     @Override
     public void resolveTypesForStatement(FunctionContext context) {
-        Expression expr = leftValue.resolveTypes(context);
-        if (!(expr instanceof LeftValue)) {
-            context.getProgram().syntaxError(module, location, "Expected a left value (for an assignment), got " + expr);
-        } else {
-            leftValue = (LeftValue) expr;
+        if (value != null) {
+            value = value.resolveTypes(context);
         }
         if (type != null) {
             type = type.resolve(context.getProgram());
         }
-        if (value != null) {
-            value = value.resolveTypes(context);
+        Expression expr = leftValue.resolveTypes(context, value);
+        if (type == DataType.UNKNOWN) {
+            type = leftValue.type();
+        }
+        if (!(expr instanceof LeftValue)) {
+            context.getProgram().syntaxError(module, location, "Expected a left value (for an assignment), got " + expr);
+        } else {
+            leftValue = (LeftValue) expr;
         }
     }
 

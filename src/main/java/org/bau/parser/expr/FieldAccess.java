@@ -311,19 +311,32 @@ public class FieldAccess implements Expression, LeftValue {
     }
 
     @Override
+    public LeftValue resolveTypes(FunctionContext context, Expression from) {
+        Expression expr = resolveTypes(context);
+        if (!(expr instanceof LeftValue)) {
+            context.getProgram().syntaxError(module, location, "Can not assign to expression '" + expr.format() + "'");
+            return this;
+        }
+        return (LeftValue) expr;
+    }
+
+    @Override
     public Expression resolveTypes(FunctionContext context) {
         if (type == DataType.UNKNOWN) {
             if (base instanceof Variable) {
                 Variable v = (Variable) base;
                 String m = context.getModule();
+                String m2 = context.getProgram().getModulePathForSymbol(m, v.name());
+                if (m2 != null) {
+                    m = m2;
+                }
                 DataType enumType = context.getType(m, v.name());
                 if (enumType != null && enumType.enumValues != null) {
                     Long value = enumType.enumValues.get(fieldName);
                     if (value == null) {
                         context.getProgram().syntaxError(module, location, "Value '" + fieldName + "' not found for enum type '" + enumType.name() + "'");
                     }
-                    Expression expr = new NumberValue(new Value.ValueInt(value), enumType, false);
-                    return expr;
+                    return NumberValue.valueOf(value);
                 }
             }
         }

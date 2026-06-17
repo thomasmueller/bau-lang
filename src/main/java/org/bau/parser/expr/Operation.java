@@ -41,7 +41,7 @@ public class Operation implements Expression {
                 if (l == ValueNull.INSTANCE) {
                     left = new NullValue(right.type());
                 } else {
-                    left = new NumberValue(l, left.type(), false);
+                    left = new NumberValue(l.toString(), l, left.type(), false);
                 }
             }
         }
@@ -50,7 +50,7 @@ public class Operation implements Expression {
             if (r == ValueNull.INSTANCE) {
                 right = new NullValue(right.type());
             } else {
-                right = new NumberValue(r, right.type(), false);
+                right = new NumberValue(r.toString(), r, right.type(), false);
             }
         }
         return new Operation(left, operator, right);
@@ -454,7 +454,7 @@ public class Operation implements Expression {
 
     public String format() {
         if (left == null) {
-            return operator + " " + addBracketsIfNeeded(right);
+            return operator + addBracketsIfNeeded(right);
         }
         return addBracketsIfNeeded(left) + " " + operator + " " + addBracketsIfNeeded(right);
     }

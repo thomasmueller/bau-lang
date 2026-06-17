@@ -113,7 +113,7 @@ public class TernaryExpression implements Expression {
             result = null;
         } else {
             Expression init = type.isNumber() ?
-                    new NumberValue(Value.ValueInt.ZERO, type, false) :
+                    new NumberValue("0", Value.ValueInt.ZERO, type, false) :
                     new NullValue(type);
             result = parser.assignTempVariable(target, init, type);
         }

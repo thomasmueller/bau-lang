@@ -575,7 +575,7 @@ int64_t offsetX;
 int64_t foundX;
 int64_t foundY;
 org_bau_String_string findText;
-unknown mode;
+int64_t mode;
 org_bau_os_Terminal_windowSize currentWindowSize;
 fileContent currentFile;
 void down_0() {
@@ -605,10 +605,10 @@ void find_0() {
             break;
         }
         int64_t _t0 = key;
-        if ((((_t0 == keyCode.CTRL_C) || (_t0 == keyCode.CTRL_Q)) || (_t0 == keyCode.ESC)) || (_t0 == keyCode.ENTER)) {
+        if ((((_t0 == 3) || (_t0 == 17)) || (_t0 == 27)) || (_t0 == 13)) {
             break;
         } else {
-            if (((_t0 == keyCode.BACKSPACE) || (_t0 == keyCode.CTRL_H)) || (_t0 == keyCode.DEL_KEY)) {
+            if (((_t0 == 127) || (_t0 == 8)) || (_t0 == 1004)) {
                 if (_arrayLen(findText.data) > 0) {
                     i8_array* _t1 = i8_array_new(_arrayLen(findText.data) - 1);
                     _incUseStack(_t1);
@@ -638,7 +638,7 @@ void find_0() {
                     _decUseStack(_t1, i8_array);
                 }
             } else {
-                if (_t0 == keyCode.ARROW_DOWN) {
+                if (_t0 == 1003) {
                     foundX = 10;
                     foundY = 10;
                 } else {
@@ -1378,7 +1378,7 @@ void org_bau_os_Terminal_enableRawMode_1(void  (*refreshScreen_0)()) {
             raw.c_cc[VMIN] = 0;
             raw.c_cc[VTIME] = 1;
             if (tcsetattr(0, TCSAFLUSH, &raw) < 0) return;
-    org_bau_os_Signal_signal_2(signalId.SIGWINCH, org_bau_os_Terminal_windowSizeChanged_1);
+    org_bau_os_Signal_signal_2(28, org_bau_os_Terminal_windowSizeChanged_1);
     org_bau_os_Terminal_windowSizeChanged_1(0);
     _decUseStack(_t0, i8_array);
     org_bau_os_Terminal_termIos_free(&n);
@@ -1427,11 +1427,11 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         }
         if (e0 == 79) {
             if (e1 == 72) {
-                unknown _r0 = 1005;
+                int64_t _r0 = 1005;
                 return _r0;
             } else {
                 if (e1 == 70) {
-                    unknown _r1 = 1006;
+                    int64_t _r1 = 1006;
                     return _r1;
                 }
             }
@@ -1452,15 +1452,15 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
             }
             int64_t _t2 = e1;
             if (_t2 == 51) {
-                unknown _r2 = 1004;
+                int64_t _r2 = 1004;
                 return _r2;
             } else {
                 if (_t2 == 53) {
-                    unknown _r3 = 1007;
+                    int64_t _r3 = 1007;
                     return _r3;
                 } else {
                     if (_t2 == 54) {
-                        unknown _r4 = 1008;
+                        int64_t _r4 = 1008;
                         return _r4;
                     }
                 }
@@ -1469,27 +1469,27 @@ int64_t org_bau_os_Terminal_readEditorKey_0() {
         }
         int64_t _t3 = e1;
         if (_t3 == 65) {
-            unknown _r5 = 1002;
+            int64_t _r5 = 1002;
             return _r5;
         } else {
             if (_t3 == 66) {
-                unknown _r6 = 1003;
+                int64_t _r6 = 1003;
                 return _r6;
             } else {
                 if (_t3 == 67) {
-                    unknown _r7 = 1001;
+                    int64_t _r7 = 1001;
                     return _r7;
                 } else {
                     if (_t3 == 68) {
-                        unknown _r8 = 1000;
+                        int64_t _r8 = 1000;
                         return _r8;
                     } else {
                         if (_t3 == 70) {
-                            unknown _r9 = 1006;
+                            int64_t _r9 = 1006;
                             return _r9;
                         } else {
                             if (_t3 == 72) {
-                                unknown _r10 = 1005;
+                                int64_t _r10 = 1005;
                                 return _r10;
                             }
                         }
@@ -1929,7 +1929,7 @@ void _main() {
             continue;
         }
         int64_t _t37 = key;
-        if ((_t37 == keyCode.CTRL_C) || (_t37 == keyCode.CTRL_Q)) {
+        if ((_t37 == 3) || (_t37 == 17)) {
             if (!(currentFile.modified)) {
                 break;
             }
@@ -1937,21 +1937,21 @@ void _main() {
             refreshScreen_0();
             int64_t _t38 = org_bau_os_Terminal_readEditorKey_0();
             key = _t38;
-            if (key == keyCode.CTRL_Q) {
+            if (key == 17) {
                 break;
             }
             mode = 0;
         } else {
-            if (_t37 == keyCode.ENTER) {
+            if (_t37 == 13) {
                 insertNewline_0();
             } else {
-                if (_t37 == keyCode.CTRL_S) {
+                if (_t37 == 19) {
                     save_0();
                 } else {
-                    if (_t37 == keyCode.CTRL_F) {
+                    if (_t37 == 6) {
                         find_0();
                     } else {
-                        if (((_t37 == keyCode.BACKSPACE) || (_t37 == keyCode.CTRL_H)) || (_t37 == keyCode.DEL_KEY)) {
+                        if (((_t37 == 127) || (_t37 == 8)) || (_t37 == 1004)) {
                             removeByte_0();
                             if (cursorX > 1) {
                                 cursorX = cursorX - 1;
@@ -1961,7 +1961,7 @@ void _main() {
                                 }
                             }
                         } else {
-                            if (_t37 == keyCode.PAGE_UP) {
+                            if (_t37 == 1007) {
                                 if (currentWindowSize.rows > 0) {
                                     while (1 == 1) {
                                         int64_t i = 0;
@@ -1976,7 +1976,7 @@ void _main() {
                                     }
                                 }
                             } else {
-                                if (_t37 == keyCode.PAGE_DOWN) {
+                                if (_t37 == 1008) {
                                     if (currentWindowSize.rows > 0) {
                                         while (1 == 1) {
                                             int64_t i = 0;
@@ -1991,13 +1991,13 @@ void _main() {
                                         }
                                     }
                                 } else {
-                                    if (_t37 == keyCode.ARROW_UP) {
+                                    if (_t37 == 1002) {
                                         up_0();
                                     } else {
-                                        if (_t37 == keyCode.ARROW_DOWN) {
+                                        if (_t37 == 1003) {
                                             down_0();
                                         } else {
-                                            if (_t37 == keyCode.ARROW_LEFT) {
+                                            if (_t37 == 1000) {
                                                 if (cursorX > 1) {
                                                     cursorX = cursorX - 1;
                                                 } else {
@@ -2030,7 +2030,7 @@ void _main() {
                                                     }
                                                 }
                                             } else {
-                                                if (_t37 == keyCode.ARROW_RIGHT) {
+                                                if (_t37 == 1001) {
                                                     int64_t x = ( cursorX + offsetX ) - 1;
                                                     int64_t y = ( cursorY + offsetY ) - 2;
                                                     org_bau_String_string_copy(&lines->array->data[idx_2(y, _arrayLen(lines->array))]);

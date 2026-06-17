@@ -161,7 +161,7 @@ public class DataType implements Section {
             return false;
         }
         // function pointer types are not equal
-        return this.format().equals(other.format());
+        return format().equals(other.format());
     }
 
     public Expression nullExpression() {
@@ -303,6 +303,9 @@ public class DataType implements Section {
             buff.append("type ");
         }
         buff.append(format());
+        if (memoryType == MemoryType.OWNER) {
+            buff.append(" owned");
+        }
         if (traitDefinition != null) {
             if (!traitDefinition.requiredTraitNames.isEmpty()) {
                 buff.append(": ");
@@ -334,7 +337,7 @@ public class DataType implements Section {
         } else {
             buff.append("\n");
             for (Variable v : fields) {
-                buff.append("    " + v.format() + " " + v.type().format());
+                buff.append("    " + v.format() + " " + v.type().format()).append("\n");
             }
         }
         buff.append("\n");

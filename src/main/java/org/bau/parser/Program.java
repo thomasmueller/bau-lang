@@ -78,7 +78,10 @@ public class Program {
 
     private long ticksExecuted;
 
+    // initialization statements from various modules
+    // (eg. initialize a global seed for PRNG in a module)
     ArrayList<Statement> initList = new ArrayList<>();
+
     ArrayList<Statement> mainList = new ArrayList<>();
 
     HashSet<DataType> usedTypes = new HashSet<>();
@@ -321,7 +324,7 @@ public class Program {
                     long maxValue = (1L << (target.sizeOf() * 8 - 1)) - 1;
                     if (x >= minValue && x <= maxValue) {
                         // small value
-                        return new NumberValue(v, target, nv.hex);
+                        return new NumberValue(v.toString(), v, target, nv.hex);
                     }
                 }
             }
@@ -445,6 +448,10 @@ public class Program {
 
     public String toC() {
         resolveTypes();
+        if (!initList.isEmpty()) {
+            int test;
+            System.out.println("INIT LIST: " + initList);
+        }
         for (Statement s : initList) {
             s.used(this);
         }

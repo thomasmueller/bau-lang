@@ -851,7 +851,7 @@ public class Parser2 {
                 s.initial = true;
                 Expression expr;
                 if (targetType.isNumber()) {
-                    expr = new NumberValue(Value.ValueInt.ZERO, targetType, false);
+                    expr = new NumberValue("0", Value.ValueInt.ZERO, targetType, false);
                 } else {
                     targetType = targetType.orNull();
                     expr = new NullValue(targetType);
@@ -885,7 +885,7 @@ public class Parser2 {
                     if (matchOp("(")) {
                         matchOp("\n");
                         Call call = new Call();
-                        call.args.add(left);
+                        call.on = left;
                         Expression expr = parseCall(left.type(), m, f, call, true);
                         if (expr instanceof Call) {
                             call = (Call) expr;
@@ -895,11 +895,13 @@ public class Parser2 {
                             } else {
                                 readEndOfStatement();
                                 call.statement = true;
+                                target.add(call);
                                 return;
                             }
                         } else {
                             // eg calling a macro that doesn't return anything
                             readEndOfStatement();
+                            int todoAddToTarget;
                             return;
                         }
                     } else {
@@ -1382,13 +1384,14 @@ public class Parser2 {
             }
             parseStatement(forStatement.list);
         }
+        target.add(forStatement);
     }
 
     private void parseLoop(ArrayList<Statement> target) {
         int loopIndent = indent;
         Loop loop = new Loop();
         if (type == TokenType.OPERATOR && ("\n".equals(token) || "{".equals(token))) {
-            loop.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+            loop.condition = NumberValue.valueOf(1);
         } else {
             loop.condition = parseCondition();
         }
@@ -1442,7 +1445,7 @@ public class Parser2 {
         matchOp("(");
         matchOp("\n");
         Call call = new Call();
-        call.args.add(expr);
+        call.on = expr;
         String m = "";
         return parseCall(expr.type(), m, f, call, true);
     }
@@ -1472,7 +1475,7 @@ public class Parser2 {
             String n = token;
             read();
             long v = NumberValue.parseUnsignedHexLong(n.substring(2));
-            Expression expr = new NumberValue(new Value.ValueInt(v), DataType.INT_TYPE, true);
+            Expression expr = new NumberValue(n, new Value.ValueInt(v), DataType.INT_TYPE, true);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -1481,7 +1484,7 @@ public class Parser2 {
             String n = token;
             read();
             double v = Double.parseDouble(n);
-            Expression expr = new NumberValue(new Value.ValueFloat(v), DataType.FLOAT_TYPE, false);
+            Expression expr = new NumberValue("" + v, new Value.ValueFloat(v), DataType.FLOAT_TYPE, false);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -1542,7 +1545,7 @@ public class Parser2 {
                 if (matchOp("(")) {
                     matchOp("\n");
                     Call call = new Call();
-                    call.args.add(v);
+                    call.on = v;
                     v = parseCall(vt, module, f, call, true);
                 } else {
                     DataType type = DataType.UNKNOWN;

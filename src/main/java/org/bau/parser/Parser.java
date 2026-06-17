@@ -74,6 +74,7 @@ public class Parser {
     private Program program;
     private FunctionContext functionContext;
     private boolean isGlobalScope;
+    private boolean isGlobalScopeHasAction;
     private int nextConstantId;
     private SourceFile sourceFile;
     private String module;
@@ -120,7 +121,9 @@ public class Parser {
 
     public Program parse() {
         Program prog2 = null;
-        if (module.isEmpty() && scanPhase) {
+        String cCode = null;
+        String debug = null;
+        if (module.isEmpty() && scanPhase && posOffset == 0) {
             try {
                 // Parser2 p2 = new Parser2(text);
                 Program prg2 = new Program(Map.of());
@@ -130,10 +133,15 @@ public class Parser {
 
                 prog2 = p2.parse();
                 int test;
-                String debug = sf2.debug();
-//                System.out.println("-----------------");
+                debug = sf2.formatSource();
+                System.out.println("-----------------");
 //                System.out.println(debug);
-//                System.out.println("-----------------");
+//
+//                Parser p3 = new Parser(new Program(Map.of()), "", debug, -1);
+//                Program p3p = p3.parse();
+//                cCode = p3p.toC();
+
+                System.out.println("-----------------");
             } catch (Throwable e) {
                 int test;
                 e.printStackTrace(System.out);
@@ -198,6 +206,15 @@ public class Parser {
             SourceFile sf2 = sourceFile;
             sf.copyElements(sf2);
         }
+        if (cCode != null) {
+            String cCode2 = prog.toC();
+            if (!cCode.endsWith(cCode2)) {
+                System.out.println("\n?? got ------------------ \n" + cCode);
+                System.out.println("\n------------- expected \n" + cCode2);
+                System.out.println("\n------------- debug \n" + debug);
+                System.out.println("");
+            }
+        }
         return prog;
     }
 
@@ -247,7 +264,10 @@ public class Parser {
                     mainStatements = true;
                     // ok
                 } else {
-                    if (mainStatements && (module == null || module.isEmpty()) && program.getFunctionIfExists(null, "", "main", 0) == null) {
+                    if (!module.isEmpty()) {
+                        isGlobalScope = true;
+                        parseStatement(program.initList);
+                    } else if (mainStatements && program.getFunctionIfExists(null, "", "main", 0) == null) {
                         // there is no main yet: we thread the statements as a main function
                         pos = lastPos;
                         String mainCode = parseBlock(-1);
@@ -1273,6 +1293,11 @@ public class Parser {
                 if (!matchOp(",")) {
                     break;
                 }
+                if (isGlobalScope) {
+                    if (isGlobalScopeHasAction) {
+                        syntaxError("Variable declarations at top level need to be before actions");
+                    }
+                }
             }
             DataType targetType = null;
             if (type == TokenType.IDENTIFIER) {
@@ -1489,7 +1514,7 @@ public class Parser {
                 s.initial = true;
                 Expression expr;
                 if (targetType.isNumber()) {
-                    expr = new NumberValue(Value.ValueInt.ZERO, targetType, false);
+                    expr = new NumberValue("0", Value.ValueInt.ZERO, targetType, false);
                 } else {
                     targetType = targetType.orNull();
                     expr = new NullValue(targetType);
@@ -3234,7 +3259,7 @@ public class Parser {
         Loop loop = new Loop();
         currentLoop = loop;
         if (type == TokenType.OPERATOR && ("\n".equals(token) || "{".equals(token))) {
-            loop.condition = new NumberValue(new Value.ValueInt(1), DataType.INT_TYPE, false);
+            loop.condition = NumberValue.valueOf(1);
         } else {
             loop.condition = parseCondition(loop.list);
         }
@@ -3329,7 +3354,7 @@ public class Parser {
         if (expr.type().isNumber() && !(expr instanceof NumberValue)) {
             Value v = eval(expr, true);
             if (v != null) {
-                return new NumberValue(v, expr.type(), false);
+                return new NumberValue(v.toString(), v, expr.type(), false);
             }
         }
         return expr;
@@ -3373,7 +3398,7 @@ public class Parser {
             String n = token;
             read();
             long v = NumberValue.parseUnsignedHexLong(n.substring(2));
-            Expression expr = new NumberValue(new Value.ValueInt(v), DataType.INT_TYPE, true);
+            Expression expr = new NumberValue(n, new Value.ValueInt(v), DataType.INT_TYPE, true);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -3382,7 +3407,7 @@ public class Parser {
             String n = token;
             read();
             double v = Double.parseDouble(n);
-            Expression expr = new NumberValue(new Value.ValueFloat(v), DataType.FLOAT_TYPE, false);
+            Expression expr = new NumberValue("" + v, new Value.ValueFloat(v), DataType.FLOAT_TYPE, false);
             if (matchOp(".")) {
                 expr = parseFunctionOnLiteral(expr);
             }
@@ -3572,7 +3597,7 @@ public class Parser {
                     } else if (val instanceof ValueRef) {
                         // the memory is no longer available
                     } else {
-                        return new NumberValue(val, expr.type(), false);
+                        return new NumberValue(val.toString(), val, expr.type(), false);
                     }
                 }
                 return parsePossibleDot(expr);

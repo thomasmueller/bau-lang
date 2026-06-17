@@ -27,8 +27,7 @@ public class StringLiteral implements Expression {
         if (n != null) {
             return n;
         }
-        n = new StringLiteral(value, type, program);
-        return n;
+        return new StringLiteral(value, type, program);
     }
 
     public static StringLiteral newStringLiteral(String value) {

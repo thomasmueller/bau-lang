@@ -30,7 +30,12 @@ public class Call implements Statement, Expression, LeftValue {
     private String catchLabel;
 
     public boolean statement;
+
+    // the object on which the method is called, eg. "16" in case of "16.sqrt()"
+    public Expression on;
+
     public ArrayList<Expression> args = new ArrayList<>();
+
     public FunctionDefinition def;
     public String module;
     public String name;
@@ -362,6 +367,9 @@ public class Call implements Statement, Expression, LeftValue {
 
     public String format() {
         StringBuilder buff = new StringBuilder();
+        if (on != null) {
+            buff.append(on.format()).append(".");
+        }
         if (def != null) {
             buff.append(def.getFullName().name);
         } else {
@@ -510,6 +518,11 @@ public class Call implements Statement, Expression, LeftValue {
             buff.append(a.toAST());
         }
         return buff.toString();
+    }
+
+    @Override
+    public LeftValue resolveTypes(FunctionContext context, Expression from) {
+        return resolveTypes(context);
     }
 
     @Override

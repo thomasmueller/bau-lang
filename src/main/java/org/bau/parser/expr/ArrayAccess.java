@@ -145,7 +145,12 @@ public class ArrayAccess implements Expression, LeftValue {
     }
 
     public String format() {
-        return base.format() + "[" + arrayIndex.format() + "]";
+        StringBuilder buff = new StringBuilder();
+        buff.append(base.format() + "[" + arrayIndex.format() + "]");
+        if (!checkBounds) {
+            buff.append("!");
+        }
+        return buff.toString();
     }
 
     @Override
@@ -283,6 +288,16 @@ public class ArrayAccess implements Expression, LeftValue {
     @Override
     public String toAST() {
         return "\"array\"," + base.toAST() + "," + arrayIndex.toAST();
+    }
+
+    @Override
+    public LeftValue resolveTypes(FunctionContext context, Expression from) {
+        Expression expr = resolveTypes(context);
+        if (!(expr instanceof LeftValue)) {
+            context.getProgram().syntaxError(module, location, "Can not assign to expression '" + expr.format() + "'");
+            return this;
+        }
+        return (LeftValue) expr;
     }
 
     @Override

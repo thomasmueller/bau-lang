@@ -280,13 +280,13 @@ public class SourceFile {
         return buff.toString();
     }
 
-    public String debug() {
+    public String formatSource() {
         StringBuilder buff = new StringBuilder();
         for (Entry<Integer, Section> e : sections.entrySet()) {
             int start = e.getKey();
             Section section = e.getValue();
             // buff.append(start).append(" " + section.getClass().getName() + "\n");
-            buff.append(section.formatSource() + "\n\n");
+            buff.append(section.formatSource() + "\n");
         }
         return buff.toString();
     }

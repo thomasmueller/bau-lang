@@ -13,9 +13,8 @@ import org.bau.parser.MemoryType;
 import org.bau.parser.Parser;
 import org.bau.parser.Program;
 import org.bau.parser.Solver;
-import org.bau.parser.Utils;
 import org.bau.parser.Solver.Rule;
-import org.bau.parser.stmt.Comment;
+import org.bau.parser.Utils;
 import org.bau.parser.stmt.Free;
 import org.bau.parser.stmt.Statement;
 import org.bau.parser.stmt.Statement.StatementResult;
@@ -262,7 +261,7 @@ public class Variable implements Expression, LeftValue {
     @Override
     public Expression simplify() {
         if (isConstant && constantValue != null) {
-            return new NumberValue(constantValue, type(), false);
+            return new NumberValue(constantValue.toString(), constantValue, type(), false);
         }
         return this;
     }
@@ -466,20 +465,44 @@ public class Variable implements Expression, LeftValue {
     }
 
     @Override
+    public LeftValue resolveTypes(FunctionContext context, Expression from) {
+        if (type == DataType.UNKNOWN) {
+            // assign to a expression
+            type = from.type();
+            if (context.getVariable(context.getModule(), name) == null) {
+                context.addVariable(this);
+            }
+        }
+        Expression expr = resolveTypes(context);
+        if (!(expr instanceof LeftValue)) {
+            context.getProgram().syntaxError(module, location, "Can not assign to expression '" + expr.format() + "'");
+            return this;
+        }
+        return (LeftValue) expr;
+    }
+
+    @Override
     public Expression resolveTypes(FunctionContext context) {
         if (type == DataType.UNKNOWN) {
             String m = context.getModule();
-            FunctionDefinition def = context.getFunctionIfExists(m, name);
-            if (def != null) {
-                // function pointer
-                if (def.exceptionType != null) {
-                    context.getProgram().syntaxError(module, location, "Function throws an exception; this is not supported");
+            Variable cv = context.getVariable(module, name);
+            if (cv != null) {
+                // local or global variable
+                type = cv.type;
+            } else {
+                // maybe a function pointer
+                FunctionDefinition def = context.getFunctionIfExists(m, name);
+                if (def != null) {
+                    // function pointer
+                    if (def.exceptionType != null) {
+                        context.getProgram().syntaxError(module, location, "Function throws an exception; this is not supported");
+                    }
+                    if (def.varArgs) {
+                        context.getProgram().syntaxError(module, location, "Function has a variable number of arguments; this is not supported");
+                    }
+                    FunctionPointer fp = new FunctionPointer(def);
+                    return fp;
                 }
-                if (def.varArgs) {
-                    context.getProgram().syntaxError(module, location, "Function has a variable number of arguments; this is not supported");
-                }
-                FunctionPointer fp = new FunctionPointer(def);
-                return fp;
             }
         }
         type = type.resolve(context.getProgram());

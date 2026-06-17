@@ -43,10 +43,8 @@ fun buildTree(depth int) Tree
 
 fun Tree.nodeCount() int
     result := 1
-    l : left
-    if l
-        result += l.nodeCount()
-    r : right
-    if r
-        result += r.nodeCount()
+    if left
+        result += left.nodeCount()
+    if right
+        result += right.nodeCount()
     return result

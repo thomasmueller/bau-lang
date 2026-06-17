@@ -5,10 +5,17 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
-test case:
-import org.bau.Int
+barrier mechanism: implement, check advantages & disadvantages, check if other languages support it
 
 Parser2-based formatter
+
+ray tracer: https://news.ycombinator.com/item?id=48538833
+
+"nil" instead of "null" ? (shorter; Nim uses it)
+
+branchless binary search, branchless binary trees / splay tree
+
+benchmarks: JSON parsing (my impl but native string), Hash table, Regex, Sorting, String processing.
 
 add linq.md to test cases
 

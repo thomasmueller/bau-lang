@@ -15,20 +15,22 @@ import org.bau.runtime.Value.ValueInt;
 
 public class NumberValue implements Expression {
 
-    public static final NumberValue ZERO = new NumberValue(ValueInt.ZERO, DataType.INT_TYPE, false);
+    public static final NumberValue ZERO = new NumberValue("0", ValueInt.ZERO, DataType.INT_TYPE, false);
 
     public boolean hex;
+    private final String text;
     Value value;
     private DataType type;
 
-    public NumberValue(Value value, DataType type, boolean hex) {
+    public NumberValue(String text, Value value, DataType type, boolean hex) {
+        this.text = text;
         this.value = value;
         this.type = type;
         this.hex = hex;
     }
 
     public static NumberValue valueOf(long value) {
-        return new NumberValue(new Value.ValueInt(value), DataType.INT_TYPE, false);
+        return new NumberValue("" + value, new Value.ValueInt(value), DataType.INT_TYPE, false);
     }
 
     @Override
@@ -82,10 +84,7 @@ public class NumberValue implements Expression {
     }
 
     public String format() {
-        if (hex) {
-            return "0x" + Long.toHexString(value.longValue());
-        }
-        return value.toString();
+        return text;
     }
 
     @Override

@@ -138,7 +138,7 @@ public class If implements Statement {
         StringBuilder buff = new StringBuilder();
         buff.append("if ");
         buff.append(condition.format()).append("\n");
-        for(Statement s : thenList) {
+        for (Statement s : thenList) {
             buff.append(Statement.indent(s.format()));
         }
         if (elseList != null) {

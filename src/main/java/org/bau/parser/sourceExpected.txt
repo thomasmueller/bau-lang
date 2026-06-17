@@ -1,0 +1,118 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdint.h>
+#include <string.h>
+/* builtin */
+static inline int _ctzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_ctzll(x);
+#else
+    if (!x) return 64; int c = 0; while (!(x & 1)) { x >>= 1; c++; } return c;
+#endif
+}
+static inline int _clzll(uint64_t x) {
+#if defined(__GNUC__) || defined(__clang__)
+    return __builtin_clzll(x);
+#else
+    if (!x) return 64; int c = 0; uint64_t m = (uint64_t)1 << 63; while (!(x & m)) { m >>= 1; c++; } return c;
+#endif
+}
+#define _malloc(a)      malloc(a)
+#define _free(a)        free(a)
+#define REF_COUNT_INC
+#define REF_COUNT_STACK_INC
+#define PRINT(...)
+#define _end()
+#define _traceMalloc(a)
+#define _traceFree(a)
+#define _incUse(a)            {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("++  %p line %d, from %d\n", a, __LINE__, (a)?(a)->_refCount:0);if(a)(a)->_refCount++;}}
+#define _decUse(a, type)      {REF_COUNT_INC; if(a && (a)->_refCount < INT32_MAX){PRINT("--  %p line %d, from %d\n", a, __LINE__, (a)->_refCount);if((a)&&--((a)->_refCount) == 0)type##_free(a);}}
+#define _incUseStack(a)       _incUse(a)
+#define _decUseStack(a, type) _decUse(a, type)
+#define _arrayLen(a) (a==0?0:*((int32_t*)a))
+int64_t arrayOutOfBounds(int64_t x, int64_t len) {
+    fprintf(stdout, "Array index %lld is out of bounds for the array length %lld\n", x, len);
+    exit(1);
+}
+typedef struct _ToBeFreed _ToBeFreed;
+struct _ToBeFreed { void* obj; void (*free)(void*); };
+#define FREE_STACK_MAX_RECURSION 2048
+#define FREE_STACK_ARRAY_SIZE 1024
+_ToBeFreed _toBeFreedStack[FREE_STACK_ARRAY_SIZE];
+int _freeStackDraining = 0, _freeStackArrayPos = 0;
+void _registerAndMaybeDrain(void* x, void (*free)(void*)) {
+    if (_freeStackDraining < FREE_STACK_MAX_RECURSION || _freeStackArrayPos >= FREE_STACK_ARRAY_SIZE) {
+        _freeStackDraining++; free(x); _freeStackDraining--; return; }
+    _toBeFreedStack[_freeStackArrayPos].obj = x;
+    _toBeFreedStack[_freeStackArrayPos].free = free;
+    if (_freeStackDraining == FREE_STACK_MAX_RECURSION) {
+        _freeStackDraining = FREE_STACK_MAX_RECURSION + 1;
+        while(_freeStackArrayPos > 0) {
+            _freeStackArrayPos--; void* n = _toBeFreedStack[_freeStackArrayPos].obj;
+            void (*free)(void*) = _toBeFreedStack[_freeStackArrayPos].free;
+            free(n);
+        } _freeStackDraining = FREE_STACK_MAX_RECURSION; } }
+/* types */
+typedef struct i8_array i8_array;
+struct i8_array;
+struct i8_array {
+    int32_t len;
+    int32_t _refCount;
+    int8_t* data;
+};
+i8_array* i8_array_new(uint64_t len) {
+    if (len < 0 || len >= (1L << 31)) arrayOutOfBounds(len, 1L << 31);
+    i8_array* result = _malloc(sizeof(i8_array));
+    _traceMalloc(result);
+    result->len = len;
+    result->data = _malloc(sizeof(int8_t) * len);
+    memset(result->data, 0, sizeof(int8_t) * len);
+    _traceMalloc(result->data);
+    result->_refCount = 1;
+    return result;
+}
+/* exception types */
+/* global */
+int __argc;
+char **__argv;
+/* functions */
+void i8_array_free(i8_array* x);
+void i8_array_free_0(i8_array* x) {
+    _free(x->data); _traceFree(x->data);
+    _free(x); _traceFree(x);
+}
+void i8_array_free(i8_array* x) {
+    _registerAndMaybeDrain(x, (void(*)(void*))i8_array_free_0);
+}
+i8_array* str_const(char* data, uint32_t len) {
+    i8_array* result = _malloc(sizeof(i8_array));
+    result->len = len;
+    result->_refCount = INT32_MAX;
+    result->data = _malloc(sizeof(char) * len);
+    memcpy(result->data, data, sizeof(char) * len);
+    return result;
+}
+i8_array* string_1000;
+i8_array* string_1001;
+int64_t a;
+void _main();
+int main(int _argc, char *_argv[]) {
+    __argc = _argc;
+    __argv = _argv;
+    string_1000 = str_const("hello ", 6);
+    string_1001 = str_const("end", 3);
+    _main();
+    return 0;
+}
+void _main() {
+    a = 1;
+    while (1) {
+        if (a > 10) {
+            break;
+        }
+        printf("hello %lld\n", (long long)a);
+    }
+    printf("end\n");
+    _end();
+}

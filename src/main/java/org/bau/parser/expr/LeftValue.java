@@ -24,7 +24,8 @@ public interface LeftValue extends Expression {
         // ignore
     }
 
-    Expression resolveTypes(FunctionContext context);
+    // for assignments: from is the value
+    Expression resolveTypes(FunctionContext context, Expression from);
 
     void setLocation(String module, int location);
 
