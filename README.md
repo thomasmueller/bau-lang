@@ -1,6 +1,7 @@
 # The Bau Programming Language
 
-Simplicity, speed, and safety - redefined.
+Bau is an open-source programming language
+that is simple, concise, fast, and memory save.
 Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>.
 
 ## News
@@ -13,8 +14,6 @@ shorter implementation; less built-in operations.
 * 2026-04-17: Syntax changed for module imports: module alias instead of fully qualified names, and `module` keyword is gone.
 * 2026-04-14: Syntax changed for constructors on generic types: now the type is just a regular parameter (simplifying the grammar).
 * 2026-04-13: Syntax changed for member functions: now there is a dot after the type. Example: `fun Node.count() int` instead of `fun Node count() int`.
-* 2026-04-04: <a href="docsrc/macros.md#implementing-for-loop-functions">Improved `for` loops</a> to allow iterating over entries, or entries + index.
-* 2026-03-28: First complete <a href="docsrc/linq.md">LINQ (Language Integrated Query)</a> example using SQLite.
 
 For older changes see <a href="docsrc/changes.md">Change Log</a>
 

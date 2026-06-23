@@ -43,7 +43,7 @@ for i := range(1, 10)
     case 2, 3
         println('2 or 3')
     else  
-        println('other') 
+        println('other')
 `
     },
     {
@@ -154,7 +154,7 @@ for i := range(2_999_999_999, 3_000_000_002)
     {
         value: 'macros',
         label: 'Macros',
-        code: `fun when(cond int, a T, b T) macro T
+        code: `fun macro when(cond int, a T, b T) T
     if cond
         return a
     else
@@ -172,7 +172,9 @@ for i := until(2)
     {
         value: 'sort',
         label: 'Sort with Templates',
-        code: `fun insertionSort(a T[])
+        code: `import org.bau.Utils
+
+fun insertionSort(a T[])
     for i := range(1, a.len)
         t := a[i]
         j := i - 1
@@ -181,7 +183,6 @@ for i := until(2)
             j -= 1
         a[j + 1] = t
 
-import org.bau.Utils
 x : int[10]
 for i := until(x.len)
     x[i] = Utils.random()

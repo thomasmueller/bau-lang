@@ -1,5 +1,7 @@
 # Changes
 
+* 2026-04-04: <a href="docsrc/macros.md#implementing-for-loop-functions">Improved `for` loops</a> to allow iterating over entries, or entries + index.
+* 2026-03-28: First complete <a href="docsrc/linq.md">LINQ (Language Integrated Query)</a> example using SQLite.
 * 2026-03-25: Improved <a href="docsrc/macros.md">macro</a> features: `ast`, `values`, `line`.
 * 2026-03-20: Equality tests now use `==` instead of `=` for clarity.
 * 2026-03-20: Work-in-progress: <a href="docsrc/linq.md">support for LINQ</a>.
