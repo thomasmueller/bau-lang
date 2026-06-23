@@ -378,10 +378,10 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("stretch tree of depth ", 22);
+    string_1000 = str_const(" trees of depth ", 16);
     string_1001 = str_const("; check: ", 9);
-    string_1002 = str_const(" trees of depth ", 16);
-    string_1003 = str_const("long lived tree of depth ", 25);
+    string_1002 = str_const("long lived tree of depth ", 25);
+    string_1003 = str_const("stretch tree of depth ", 22);
     _main();
     return 0;
 }

@@ -1,5 +1,3 @@
-ticks := 0
-
 fun fibonacciRecursive(n int) int
     ticks += 1
     if n < 2 
@@ -26,6 +24,8 @@ fun fibonacciConst(n int) const int
         r0 = r
         r = r1 + r0
     return r
+
+ticks := 0
 
 ticks = 0
 println('fibonacci(20) recursive: ' fibonacciRecursive(20) ', ticks: ' ticks)

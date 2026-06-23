@@ -452,6 +452,12 @@ public class Parser2 {
             read();
             match("fun");
         }
+        boolean macro = false, forLoop = false;
+        if (match("macro")) {
+            macro = true;
+        } else if (match("for")) {
+            forLoop = true;
+        }
         methodName = readIdentifier();
         location = lastPos - methodName.length();
         boolean template = DataType.isGenericTypeName(token);
@@ -464,6 +470,8 @@ public class Parser2 {
             name = "";
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
+        def.macro = macro;
+        def.forLoop = forLoop;
         def.callType = callType;
         def.setLocation(sourceFile, location);
         currentFunctionDefinition = def;
@@ -547,9 +555,6 @@ public class Parser2 {
         def.varArgs = varArgs;
         if (match("const")) {
             def.constExpr = true;
-        }
-        if (match("macro")) {
-            def.macro = true;
         }
         if (itType != null && !def.macro) {
             syntaxError("Types on 'it' parameters are only allowed in macros");

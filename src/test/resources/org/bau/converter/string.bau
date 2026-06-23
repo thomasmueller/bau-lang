@@ -6,12 +6,12 @@ fun str(s i8[]) string
     x.data = s
     return x
 
-x : string[3]
-x[0] = str('hello')
-x[1] = str('world')
-x[2] = str('!')
+y : string[3]
+y[0] = str('hello')
+y[1] = str('world')
+y[2] = str('!')
 
-println(x[0].data ' ' x[1].data ' ' x[2].data)
+println(y[0].data ' ' y[1].data ' ' y[2].data)
 
 ## Expected
 hello world !

@@ -1,7 +1,7 @@
 import org.bau.BigInt
     newBigInt
 
-fun assert(x int) macro
+fun macro assert(x int)
     if not x
         println('assertion failed: ' x.source)
     # continue

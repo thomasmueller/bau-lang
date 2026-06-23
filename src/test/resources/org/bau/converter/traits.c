@@ -307,8 +307,8 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1000 = str_const("testAbc", 7);
-    string_1001 = str_const("test", 4);
-    string_1002 = str_const("main", 4);
+    string_1001 = str_const("main", 4);
+    string_1002 = str_const("test", 4);
     _main();
     return 0;
 }

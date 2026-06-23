@@ -295,7 +295,7 @@ and the comma separated field names using `T.fieldTypes`.
 with the implementation,
 and so parameters are only evaluated when needed:
 
-    fun when(cond int, a T, b T) macro T
+    fun macro when(cond int, a T, b T) T
         if cond
             return a
         else
@@ -309,7 +309,7 @@ The source code of the first parameter is available using `.source`.
 The AST (abstract syntax tree) is available using `.ast`,
 and the bound values using `.values`.
 
-    fun assert(x int) macro
+    fun macro assert(x int)
         if not x
             println('assertion failed: ' x.source)
 
@@ -325,7 +325,7 @@ It is replaced at compile time:
             list[i] = i + start
         return list
     
-    fun int[].map(value int) macro int[]
+    fun macro int[].map(value int) int[]
         result : int[this.len]
         i := 0
         while i < this.len
@@ -574,7 +574,7 @@ The `return _` statement is replaced during compilation with the loop body.
         for x := evenRange(0, 30)
             println('even: ' x)
 
-    fun evenRange(from int, to int) int
+    fun for evenRange(from int, to int) int
         _ := from
         loop _ < to
             return _

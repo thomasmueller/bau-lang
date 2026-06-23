@@ -3,10 +3,11 @@ fun factorial(x int) int
         return 1
     return x * factorial(x - 1)
 
-i := 0
-loop i <= 10
-    println('Factorial of ' i ' = ' factorial(i))
-    i += 1   
+fun main()
+    i := 0
+    loop i <= 10
+        println('Factorial of ' i ' = ' factorial(i))
+        i += 1   
 
 ## Expected
 Factorial of 0 = 1

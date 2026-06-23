@@ -153,7 +153,7 @@ public class Std {
         if (program.getFunctionIfExists(null, "", "range", 2) != null) {
             return;
         }
-        String type = "fun range(start int, lessThan int) int\n"
+        String type = "fun for range(start int, lessThan int) int\n"
                 + "    _ := start\n"
                 + "    loop _ < lessThan\n"
                 + "        return _\n"
@@ -167,7 +167,7 @@ public class Std {
         if (program.getFunctionIfExists(null, "", "until", 1) != null) {
             return;
         }
-        String type = "fun until(lessThan int) 0..lessThan\n"
+        String type = "fun for until(lessThan int) 0..lessThan\n"
                 + "    if lessThan > 0\n"
                 + "        _ := 0..lessThan\n"
                 + "        loop\n"

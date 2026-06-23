@@ -12,7 +12,7 @@ fun test(p int, data i8[]) int
         p = 1
     return p
 
-fun range(from int, to int) int
+fun for range(from int, to int) int
     _ := from
     loop _ < to
         return _

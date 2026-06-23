@@ -64,11 +64,11 @@ To avoid cycles, explicitly set fields to `null`.
 Where speed is critical, use single ownership,
 by adding `+` to the type, and borrow with `&`.
 
-    type Tree
-        left Tree+?
-        right Tree+?
+    type Tree owned
+        left Tree?
+        right Tree?
 
-    fun Tree+ nodeCount() int
+    fun Tree.nodeCount() int
         result := 1
         l : &left
         if l

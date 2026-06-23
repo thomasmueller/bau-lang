@@ -1,6 +1,6 @@
 # module org.bau.Utils
 
-fun when(condition int, a T, b T) const macro T
+fun macro when(condition int, a T, b T) const T
     if condition
         return a
     else

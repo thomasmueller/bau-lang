@@ -305,11 +305,11 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("day ", 4);
-    string_1001 = str_const("...is sunday", 12);
-    string_1002 = str_const("...is monday", 12);
-    string_1003 = str_const("...is tuesday or wednesday", 26);
-    string_1004 = str_const("...is some other day", 20);
+    string_1000 = str_const("...is sunday", 12);
+    string_1001 = str_const("...is monday", 12);
+    string_1002 = str_const("...is tuesday or wednesday", 26);
+    string_1003 = str_const("...is some other day", 20);
+    string_1004 = str_const("day ", 4);
     _main();
     return 0;
 }

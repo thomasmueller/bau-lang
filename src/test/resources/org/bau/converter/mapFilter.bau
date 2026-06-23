@@ -19,7 +19,7 @@ fun List(T).add(x T)
 fun List(T).get(x int) T?
     return array[x]
 
-fun List(T).filter(condition(T) int) macro List(T)
+fun macro List(T).filter(condition(T) int) List(T)
     result : newList(T)
     i := 0
     while i < this.size
@@ -29,7 +29,7 @@ fun List(T).filter(condition(T) int) macro List(T)
         i += 1
     return result
 
-fun List(T).map(value T) macro List(T)
+fun macro List(T).map(value T) List(T)
     result : newList(T)
     i := 0
     while i < this.size
@@ -50,7 +50,7 @@ fun intRange(start int, end int) int[]
         list[i] = i + start
     return list
 
-fun int[].mapInt(value int) macro int[]
+fun macro int[].mapInt(value int) int[]
     result : int[this.len]
     i := 0
     while i < this.len
@@ -59,7 +59,7 @@ fun int[].mapInt(value int) macro int[]
         i += 1
     return result
 
-fun int[].filterInt(condition int) macro int[]
+fun macro int[].filterInt(condition int) int[]
     temp : int[this.len]
     j := 0
     i := 0

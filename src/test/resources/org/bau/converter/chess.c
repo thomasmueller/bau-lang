@@ -411,12 +411,8 @@ i8_array* str_const(char* data, uint32_t len) {
     return result;
 }
 i8_array* string_1019;
-i8_array* string_1055;
-i8_array* string_1056;
-i8_array* string_1057;
-i8_array* string_1058;
-i8_array* string_1059;
-i8_array* string_1060;
+i8_array* string_1052;
+i8_array* string_1054;
 i8_array* string_1061;
 i8_array* string_1062;
 i8_array* string_1063;
@@ -425,7 +421,11 @@ i8_array* string_1065;
 i8_array* string_1066;
 i8_array* string_1067;
 i8_array* string_1068;
-i8_array* string_1077;
+i8_array* string_1069;
+i8_array* string_1070;
+i8_array* string_1071;
+i8_array* string_1072;
+i8_array* string_1073;
 int64_t randomSeed;
 int64_t MIN_INT;
 int64_t MAX_INT;
@@ -1336,15 +1336,15 @@ void refreshScreen_0() {
     _incUseStack(_t0);
     _decUse(buff->data, i8_array);
     buff->data = _t0;
-    org_bau_String_StringBuilder_append_2(buff, string_1055);
-    org_bau_String_StringBuilder_append_2(buff, string_1056);
+    org_bau_String_StringBuilder_append_2(buff, string_1061);
+    org_bau_String_StringBuilder_append_2(buff, string_1062);
     if (8 > 0) {
         while (1 == 1) {
             int64_t y = 0;
             while (1) {
                 i8_array* _t1 = org_bau_Int_intToString_1(8 - y);
                 org_bau_String_StringBuilder_append_2(buff, _t1);
-                org_bau_String_StringBuilder_append_2(buff, string_1057);
+                org_bau_String_StringBuilder_append_2(buff, string_1054);
                 if (8 > 0) {
                     while (1 == 1) {
                         int64_t x = 0;
@@ -1353,21 +1353,21 @@ void refreshScreen_0() {
                             int64_t allowed = (b & 16) != 0;
                             b = b & -17;
                             if (allowed) {
-                                org_bau_String_StringBuilder_append_2(buff, string_1058);
+                                org_bau_String_StringBuilder_append_2(buff, string_1063);
                             } else {
                                 if (( imod_2((x + y), 2) ) == 1) {
-                                    org_bau_String_StringBuilder_append_2(buff, string_1059);
+                                    org_bau_String_StringBuilder_append_2(buff, string_1064);
                                 }
                             }
                             int64_t _t2 = isBlack_1(b);
                             if (_t2) {
-                                org_bau_String_StringBuilder_append_2(buff, string_1060);
+                                org_bau_String_StringBuilder_append_2(buff, string_1065);
                             } else {
-                                org_bau_String_StringBuilder_append_2(buff, string_1061);
+                                org_bau_String_StringBuilder_append_2(buff, string_1066);
                             }
-                            org_bau_String_StringBuilder_append_2(buff, string_1057);
+                            org_bau_String_StringBuilder_append_2(buff, string_1054);
                             if (b == 0) {
-                                org_bau_String_StringBuilder_append_2(buff, string_1057);
+                                org_bau_String_StringBuilder_append_2(buff, string_1054);
                             } else {
                                 i8_array* _t3 = i8_array_new(3);
                                 _incUseStack(_t3);
@@ -1379,8 +1379,8 @@ void refreshScreen_0() {
                                 _decUseStack(b2, i8_array);
                                 _decUseStack(_t3, i8_array);
                             }
-                            org_bau_String_StringBuilder_append_2(buff, string_1057);
-                            org_bau_String_StringBuilder_append_2(buff, string_1062);
+                            org_bau_String_StringBuilder_append_2(buff, string_1054);
+                            org_bau_String_StringBuilder_append_2(buff, string_1067);
                             if (( x + 1 ) >= 8) {
                                 break;
                             }
@@ -1389,7 +1389,7 @@ void refreshScreen_0() {
                         break;
                     }
                 }
-                org_bau_String_StringBuilder_append_2(buff, string_1063);
+                org_bau_String_StringBuilder_append_2(buff, string_1068);
                 if (( y + 1 ) >= 8) {
                     _decUseStack(_t1, i8_array);
                     break;
@@ -1400,17 +1400,17 @@ void refreshScreen_0() {
             break;
         }
     }
-    org_bau_String_StringBuilder_append_2(buff, string_1064);
-    org_bau_String_StringBuilder_append_2(buff, string_1065);
-    org_bau_String_StringBuilder_append_2(buff, string_1066);
+    org_bau_String_StringBuilder_append_2(buff, string_1069);
+    org_bau_String_StringBuilder_append_2(buff, string_1070);
+    org_bau_String_StringBuilder_append_2(buff, string_1071);
     i8_array* _t4 = org_bau_Int_intToString_1(yy + 2);
     org_bau_String_StringBuilder_append_2(buff, _t4);
-    org_bau_String_StringBuilder_append_2(buff, string_1067);
+    org_bau_String_StringBuilder_append_2(buff, string_1072);
     i8_array* _t5 = org_bau_Int_intToString_1(( 1 + ( 3 * xx ) ) + 3);
     org_bau_String_StringBuilder_append_2(buff, _t5);
     org_bau_String_StringBuilder_append_2(buff, string_1019);
     if (showCursor) {
-        org_bau_String_StringBuilder_append_2(buff, string_1068);
+        org_bau_String_StringBuilder_append_2(buff, string_1073);
     }
     org_bau_os_Terminal_writeToTerminal_2(buff->data, buff->len);
     _decUseStack(_t5, i8_array);
@@ -1551,21 +1551,21 @@ int main(int _argc, char *_argv[]) {
     __argc = _argc;
     __argv = _argv;
     string_1019 = str_const("H", 1);
-    string_1055 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
-    string_1056 = str_const("   a  b  c  d  e  f  g  h  \x0d\n", 29);
-    string_1057 = str_const(" ", 1);
-    string_1058 = str_const("\x1b[30;100m", 9);
-    string_1059 = str_const("\x1b[30;107m", 9);
-    string_1060 = str_const("\x1b[31m", 5);
-    string_1061 = str_const("\x1b[94m", 5);
-    string_1062 = str_const("\x1b[0m", 4);
-    string_1063 = str_const(" \x0d\n", 3);
-    string_1064 = str_const("  arrows:select space:move\x0d\n", 28);
-    string_1065 = str_const("  u:undo  s:switch  q:quit", 26);
-    string_1066 = str_const("\x1b[", 2);
-    string_1067 = str_const(";", 1);
-    string_1068 = str_const("\x1b[?25h", 6);
-    string_1077 = str_const("Not a terminal", 14);
+    string_1052 = str_const("Not a terminal", 14);
+    string_1054 = str_const(" ", 1);
+    string_1061 = str_const("\x1b[?25l\x1b[H\x1b[0m", 13);
+    string_1062 = str_const("   a  b  c  d  e  f  g  h  \x0d\n", 29);
+    string_1063 = str_const("\x1b[30;100m", 9);
+    string_1064 = str_const("\x1b[30;107m", 9);
+    string_1065 = str_const("\x1b[31m", 5);
+    string_1066 = str_const("\x1b[94m", 5);
+    string_1067 = str_const("\x1b[0m", 4);
+    string_1068 = str_const(" \x0d\n", 3);
+    string_1069 = str_const("  arrows:select space:move\x0d\n", 28);
+    string_1070 = str_const("  u:undo  s:switch  q:quit", 26);
+    string_1071 = str_const("\x1b[", 2);
+    string_1072 = str_const(";", 1);
+    string_1073 = str_const("\x1b[?25h", 6);
     _main();
     return 0;
 }
@@ -1593,14 +1593,14 @@ void _main() {
     KNIGHT = 5;
     PAWN = 6;
     BLACK = 6;
-    int_array* _t24 = int_array_new(64);
-    _incUseStack(_t24);
-    board = _t24;
+    int_array* _t0 = int_array_new(64);
+    _incUseStack(_t0);
+    board = _t0;
     castlingFlags = 0;
     pawnMoved2 = 0;
     turn = 0;
-    int64_t _t25 = org_bau_os_Terminal_isTerminal_0();
-    if (!(_t25)) {
+    int64_t _t24 = org_bau_os_Terminal_isTerminal_0();
+    if (!(_t24)) {
         printf("Not a terminal\n");
         return;
     }
@@ -1615,19 +1615,19 @@ void _main() {
         if (key == 0) {
             continue;
         }
-        int64_t _t26 = key;
-        if (_t26 == 113) {
+        int64_t _t25 = key;
+        if (_t25 == 113) {
             break;
         } else {
-            if (_t26 == 32) {
+            if (_t25 == 32) {
                 if (state == 0) {
                     int64_t p = xx + ( 8 * yy );
-                    int64_t _t27 = board->data[idx_2(p, _arrayLen(board))] == 0;
-                    if (!(_t27)) {
-                        int64_t _t28 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
-                        _t27 = _t28;
+                    int64_t _t26 = board->data[idx_2(p, _arrayLen(board))] == 0;
+                    if (!(_t26)) {
+                        int64_t _t27 = isBlack_1(board->data[idx_2(p, _arrayLen(board))]) != blackTurn;
+                        _t26 = _t27;
                     }
-                    if (_t27) {
+                    if (_t26) {
                         continue;
                     }
                     from = p;
@@ -1657,14 +1657,14 @@ void _main() {
                             }
                         }
                         if (allowed) {
-                            int64_t _t29 = move_2(from, p);
-                            lastWhite = _t29;
+                            int64_t _t28 = move_2(from, p);
+                            lastWhite = _t28;
                             showCursor = 0;
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
                                 lastBlack = move;
-                                int64_t _t30 = move_1(move);
+                                int64_t _t29 = move_1(move);
                                 ;
                             }
                         }
@@ -1674,25 +1674,25 @@ void _main() {
                     }
                 }
             } else {
-                if (_t26 == 99) {
+                if (_t25 == 99) {
                     int64_t p = xx + ( 8 * yy );
                     if (state == 0) {
                         from = p;
                         state = 1;
                     } else {
-                        int64_t _t31 = move_2(from, p);
-                        lastWhite = _t31;
+                        int64_t _t30 = move_2(from, p);
+                        lastWhite = _t30;
                         refreshScreen_0();
                         state = 0;
                     }
                 } else {
-                    if (_t26 == 117) {
-                        int64_t _t32 = lastBlack != 0;
-                        if (_t32) {
-                            int64_t _t33 = lastWhite != 0;
-                            _t32 = _t33;
+                    if (_t25 == 117) {
+                        int64_t _t31 = lastBlack != 0;
+                        if (_t31) {
+                            int64_t _t32 = lastWhite != 0;
+                            _t31 = _t32;
                         }
-                        if (_t32) {
+                        if (_t31) {
                             undo_1(lastBlack);
                             undo_1(lastWhite);
                             refreshScreen_0();
@@ -1700,34 +1700,34 @@ void _main() {
                         lastBlack = 0;
                         lastWhite = 0;
                     } else {
-                        if (_t26 == 115) {
+                        if (_t25 == 115) {
                             blackTurn = !(blackTurn);
                             showCursor = 0;
                             refreshScreen_0();
                             int64_t move = negamax_5(1, 5, !(blackTurn), -9223372036854775807, 9223372036854775807);
                             if (move != 0) {
-                                int64_t _t34 = move_1(move);
+                                int64_t _t33 = move_1(move);
                                 ;
                             }
                             showCursor = 1;
                             refreshScreen_0();
                             state = 0;
                         } else {
-                            if (_t26 == 1001) {
-                                int64_t _t35 = org_bau_Int_min_2(7, xx + 1);
-                                xx = _t35;
+                            if (_t25 == 1001) {
+                                int64_t _t34 = org_bau_Int_min_2(7, xx + 1);
+                                xx = _t34;
                             } else {
-                                if (_t26 == 1000) {
-                                    int64_t _t36 = org_bau_Int_max_2(0, xx - 1);
-                                    xx = _t36;
+                                if (_t25 == 1000) {
+                                    int64_t _t35 = org_bau_Int_max_2(0, xx - 1);
+                                    xx = _t35;
                                 } else {
-                                    if (_t26 == 1002) {
-                                        int64_t _t37 = org_bau_Int_max_2(0, yy - 1);
-                                        yy = _t37;
+                                    if (_t25 == 1002) {
+                                        int64_t _t36 = org_bau_Int_max_2(0, yy - 1);
+                                        yy = _t36;
                                     } else {
-                                        if (_t26 == 1003) {
-                                            int64_t _t38 = org_bau_Int_min_2(7, yy + 1);
-                                            yy = _t38;
+                                        if (_t25 == 1003) {
+                                            int64_t _t37 = org_bau_Int_min_2(7, yy + 1);
+                                            yy = _t37;
                                         }
                                     }
                                 }
@@ -1739,7 +1739,7 @@ void _main() {
         }
     }
     org_bau_os_Terminal_termIos_free(&oldTermIos);
-    _decUseStack(_t24, int_array);
+    _decUseStack(_t0, int_array);
     _decUseStack(board, int_array);
     _end();
 }
@@ -1780,5 +1780,8 @@ Insert an entry to the list at the given index
 
 fun List(T) get(x int) T?
 Insert an entry to the list at the given index
+
+fun refreshScreen()
+board
 
 */

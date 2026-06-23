@@ -108,7 +108,7 @@ printing the AST of the parameter expression, and sort entries:
     fun convertIntToI8Array(x int) i8[]
         return Int.intToString(x)
     
-    fun T[].sort(by(T) U) macro
+    fun macro T[].sort(by(T) U)
         a : this
         println('sorting by: ' by.source)
         println('AST form  : ' by.ast)
@@ -139,10 +139,10 @@ printing the AST of the parameter expression, and sort entries:
 The following syntax might be useful for folding / aggregation:
 
     fun main()
-        sum : for(rangeArray(1, 20)).
+        sum : in(rangeArray(1, 20)).
             init(0).aggregate(it.agg + it.value)
         println('sum: ' sum)
-        prod : for(rangeArray(1, 20)).
+        prod : in(rangeArray(1, 20)).
             init(1).aggregate(it.agg * it.value)
         println('product: ' prod)
     
@@ -160,7 +160,7 @@ The following syntax might be useful for folding / aggregation:
         data int[]
         init int
     
-    fun for(data int[]) intAggregator
+    fun in(data int[]) intAggregator
         x : intAggregator()
         x.data = data
         return x
@@ -169,7 +169,7 @@ The following syntax might be useful for folding / aggregation:
         init = value
         return this
     
-    fun intAggregator.aggregate(operation(intPair) int) macro int
+    fun macro intAggregator.aggregate(operation(intPair) int) int
         i := 0
         agg := init
         loop i < data.len
@@ -193,7 +193,7 @@ The following syntax might be useful for folding / aggregation:
             result[i - from] = i
         return result
     
-    fun T[].filter(condition(T) int) macro T[]
+    fun macro T[].filter(condition(T) int) T[]
         temp : T[this.len]
         i, j := 0
         loop i < this.len
@@ -208,7 +208,7 @@ The following syntax might be useful for folding / aggregation:
             result[j] = temp[j]
         return result
     
-    fun T[].map(expression(T) U) macro U[]
+    fun macro T[].map(expression(T) U) U[]
         result : U[this.len]
         i := 0
         loop i < this.len

@@ -535,10 +535,10 @@ int main(int _argc, char *_argv[]) {
     string_1000 = str_const("not writing to pos=", 19);
     string_1001 = str_const("writing to pos=", 15);
     string_1002 = str_const("reading", 7);
-    string_1003 = str_const("writing", 7);
-    string_1004 = str_const("start", 5);
-    string_1005 = str_const("write 10", 8);
-    string_1006 = str_const("read ", 5);
+    string_1003 = str_const("start", 5);
+    string_1004 = str_const("write 10", 8);
+    string_1005 = str_const("read ", 5);
+    string_1006 = str_const("writing", 7);
     _main();
     return 0;
 }

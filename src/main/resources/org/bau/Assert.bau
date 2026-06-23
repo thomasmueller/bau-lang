@@ -2,7 +2,7 @@
 
 import org.bau.Env
 
-fun assert(x int) macro
+fun macro assert(x int)
     if not x
         source : x.source
         line : x.line

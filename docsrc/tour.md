@@ -9,10 +9,10 @@
 
 ## Import, Functions
 
-    import org.bau.Utils
-
+    import org.bau.DateTime
+    
     fun printTime()
-        println(Utils.getNanoTime())
+        println(DateTime.getNanoTime())
   
     printTime()
 
@@ -38,20 +38,22 @@
 
 ### Data Types
 
-    a := 10_000_000
-    b := i8(110)
-    c := i16(65000)
-    d : 'text'
-    e := 3.1416
-    f := 0..10
-    println(a ' ' b)
+    fun main()
+        a := 10_000_000
+        b := i8(110)
+        c := i16(65000)
+        d : 'text'
+        e := 3.1416
+        f := 0..10
+        println(a ' ' b)
 
 ### Type Conversion
 
     a := 10_000_000
     b := 3
-    println(a / b)
-    println(float(a) / b)
+    if b <> 0
+        println(a / b)
+        println(float(a) / b)
     
 ### Constants
 
@@ -163,14 +165,14 @@
 
 ### Macros and Ternary Condition
 
-    fun if(cond int, a T, b T) macro T
+    fun macro when(cond int, a T, b T) T
         if cond
             return a
         else
             return b
 
     for i := until(3)
-        println(i ':', if(i, '>0', 'zero'))
+        println(i ':', when(i, '>0', 'zero'))
 
 ## Custom For Loops
 
@@ -178,7 +180,7 @@
         for x := primesUntil(30)
             println('prime: ' x)
     
-    fun primesUntil(until int) int
+    fun for primesUntil(until int) int
         _ := 2
         while
             _ += 1 + (_ & 1)
@@ -192,8 +194,9 @@
             return 0
         i := 3
         while i * i <= x
-            if x % i == 0
-                return 0
+            if i <> 0
+                if x % i == 0
+                    return 0
             i += 2
         return 1
 

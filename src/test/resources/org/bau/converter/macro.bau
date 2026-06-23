@@ -6,12 +6,12 @@ fun exit(code int)
     # recursive call causes stack overflow
     exit(code)
 
-fun assert(condition int, message i8[]) macro
+fun macro assert(condition int, message i8[])
     if not condition
         println(message)
         exit(1)
 
-fun when(cond int, a T, b T) macro T
+fun macro when(cond int, a T, b T) T
     if cond
         return a
     else

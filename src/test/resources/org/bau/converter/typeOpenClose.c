@@ -319,6 +319,7 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
+int64_t i;
 File* File_0() {
     File* _t0 = File_new();
     _t0->fp = 0;
@@ -341,15 +342,15 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("closing ", 8);
-    string_1001 = str_const("use ", 4);
-    string_1002 = str_const("opening ", 8);
-    string_1003 = str_const("opened ", 7);
+    string_1000 = str_const("opened ", 7);
+    string_1001 = str_const("closing ", 8);
+    string_1002 = str_const("use ", 4);
+    string_1003 = str_const("opening ", 8);
     _main();
     return 0;
 }
 void _main() {
-    int64_t i = 0;
+    i = 0;
     while (i < 10) {
         File* f = openFile_1(i);
         printf("opened %lld\n", (long long)i);

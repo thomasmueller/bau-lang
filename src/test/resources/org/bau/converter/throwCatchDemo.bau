@@ -7,10 +7,11 @@ fun square(x int) int throws exception
         throw newException('Too large')
     return x * x
 
-x := square(3_000_000_001);
-println(x)
-catch e
-    println(e.message)
+fun main()
+    x := square(3_000_000_001);
+    println(x)
+    catch e
+        println(e.message)
 
 ## Expected
 Too large

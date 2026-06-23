@@ -161,7 +161,7 @@ fun convertTextToI8Array(t text) i8[]
 fun convertTextToInt(t text) int
     return Int.parseInt(t.data)
 
-fun newInstance(T type, data i8[]) macro T
+fun macro newInstance(T type, data i8[]) T
     r T: Record()
     return r # this will call the conversion method
 
@@ -265,12 +265,12 @@ fun Sqlite.insert(x T)
     sql : buff.toString().data
     this.execute(sql)
 
-fun Query(T).where(condition(T) int) macro Query(T)
+fun macro Query(T).where(condition(T) int) Query(T)
     this.condition = text()
     this.condition.data = condition.source
     return this
 
-fun Query(T).orderBy(column(T) U) macro Query(T)
+fun macro Query(T).orderBy(column(T) U) Query(T)
     this.orderBy = text()
     this.orderBy.data = column.source
     return this

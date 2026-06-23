@@ -336,13 +336,14 @@ i8_array* string_1000;
 i8_array* string_1001;
 i8_array* string_1002;
 i8_array* string_1003;
+int64_t i;
 _int64_t_or_exception factorial_1(int64_t x) {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
     _int64_t_or_exception _x1;
     do {
     if (x > 20) {
-        org_bau_Exception_exception _t0 = org_bau_Exception_newException_1(string_1000);
+        org_bau_Exception_exception _t0 = org_bau_Exception_newException_1(string_1003);
         _x0 = exception_int64_t_or_exception(_t0); _lastException = _x0.exception; goto catch0;
         org_bau_Exception_exception_free(&_t0);
     }
@@ -374,23 +375,23 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("Value too large", 15);
-    string_1001 = str_const("Factorial of ", 13);
-    string_1002 = str_const(" is ", 4);
-    string_1003 = str_const(" resulted in ", 13);
+    string_1000 = str_const("Factorial of ", 13);
+    string_1001 = str_const(" is ", 4);
+    string_1002 = str_const(" resulted in ", 13);
+    string_1003 = str_const("Value too large", 15);
     _main();
     return 0;
 }
 void _main() {
     org_bau_Exception_exception _lastException;
     _int64_t_or_exception _x0;
-    int64_t i = 0;
+    i = 0;
     while (i <= 30) {
         do { do {
         _x0 = factorial_1(i);
         if (_x0.exception.exceptionType != -1) { _lastException = _x0.exception; goto catch0; }
-        int64_t _t2 = _x0.result;
-        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t2);
+        int64_t _t0 = _x0.result;
+        printf("Factorial of %lld is %lld\n", (long long)i, (long long)_t0);
         goto skip0;
         } while(0);
         catch0:;

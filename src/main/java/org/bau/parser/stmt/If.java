@@ -173,7 +173,7 @@ public class If implements Statement {
     public BasicBlock linkBasicBlocks(FunctionContext functionContext, BasicBlock current, BasicBlock breakTarget,
             BasicBlock continueTarget) {
         functionContext.linkBasicBlocks(this, current);
-        if (thenList.isEmpty() && elseList.isEmpty()) {
+        if (thenList.isEmpty() && (elseList == null || elseList.isEmpty())) {
             return current;
         }
         BasicBlock after = functionContext.newBasicBlock();

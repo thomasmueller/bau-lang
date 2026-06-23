@@ -295,9 +295,9 @@ i8_array* str_const(char* data, uint32_t len) {
 }
 i8_array* string_1000;
 i8_array* string_1001;
-i8_array* string_1002;
+i8_array* string_1018;
 i8_array* string_1019;
-i8_array* string_1020;
+i8_array* string_1024;
 i8_array* string_1025;
 i8_array* string_1026;
 void exit_1(int64_t code) {
@@ -314,13 +314,13 @@ int main(int _argc, char *_argv[]) {
     tmmalloc_init();
     __argc = _argc;
     __argv = _argv;
-    string_1000 = str_const("expensive calculation with param: ", 34);
-    string_1001 = str_const("not zero", 8);
-    string_1002 = str_const("zero", 4);
-    string_1019 = str_const(": ", 2);
-    string_1020 = str_const("assertion failed", 16);
-    string_1025 = str_const("next", 4);
-    string_1026 = str_const("end", 3);
+    string_1000 = str_const("not zero", 8);
+    string_1001 = str_const("zero", 4);
+    string_1018 = str_const(": ", 2);
+    string_1019 = str_const("assertion failed", 16);
+    string_1024 = str_const("next", 4);
+    string_1025 = str_const("end", 3);
+    string_1026 = str_const("expensive calculation with param: ", 34);
     _main();
     return 0;
 }
@@ -329,16 +329,16 @@ void _main() {
         while (1 == 1) {
             int64_t i = 0;
             while (1) {
-                i8_array* _t9 = NULL;
+                i8_array* _t0 = NULL;
                 if (i) {
-                    _decUseStack(_t9, i8_array);
-                    _t9 = expensiveCalc_1(string_1001);
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1000);
                 } else {
-                    _decUseStack(_t9, i8_array);
-                    _t9 = expensiveCalc_1(string_1002);
+                    _decUseStack(_t0, i8_array);
+                    _t0 = expensiveCalc_1(string_1001);
                 }
-                _incUseStack(_t9);
-                i8_array* x = _t9;
+                _incUseStack(_t0);
+                i8_array* x = _t0;
                 printf("%lld: %.*s\n", (long long)i, _arrayLen(x), x->data);
                 if (!(( i < 1 ))) {
                     printf("assertion failed\n");
@@ -348,12 +348,12 @@ void _main() {
                 printf("next\n");
                 if (( i + 1 ) >= 2) {
                     _decUseStack(x, i8_array);
-                    _decUseStack(_t9, i8_array);
+                    _decUseStack(_t0, i8_array);
                     break;
                 }
                 i = i + 1;
                 _decUseStack(x, i8_array);
-                _decUseStack(_t9, i8_array);
+                _decUseStack(_t0, i8_array);
             }
             break;
         }

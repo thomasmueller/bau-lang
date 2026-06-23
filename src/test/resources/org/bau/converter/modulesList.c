@@ -307,6 +307,7 @@ void org_bau_List_List_int_free_0(org_bau_List_List_int* x) {
 void org_bau_List_List_int_free(org_bau_List_List_int* x) {
     _registerAndMaybeDrain(x, (void(*)(void*))org_bau_List_List_int_free_0);
 }
+org_bau_List_List_int* list;
 int64_t idx_2(int64_t x, int64_t len) {
     if ((size_t) x < (size_t) len) return x;
     return arrayOutOfBounds(x, len);
@@ -362,7 +363,7 @@ int main(int _argc, char *_argv[]) {
     return 0;
 }
 void _main() {
-    org_bau_List_List_int* list = org_bau_List_newList_int_1(0);
+    list = org_bau_List_newList_int_1(0);
     org_bau_List_List_int_add_2(list, 100);
     org_bau_List_List_int_add_2(list, 80);
     printf("%lld\n", (long long)list->size);

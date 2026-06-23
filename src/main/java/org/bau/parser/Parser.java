@@ -88,6 +88,8 @@ public class Parser {
     private boolean scanPhase = true;
     private final int posOffset;
 
+    String initCode = "";
+
     String text;
     TokenType type;
     String token;
@@ -134,14 +136,14 @@ public class Parser {
                 prog2 = p2.parse();
                 int test;
                 debug = sf2.formatSource();
-                System.out.println("-----------------");
+                // System.out.println("-----------------");
 //                System.out.println(debug);
 //
 //                Parser p3 = new Parser(new Program(Map.of()), "", debug, -1);
 //                Program p3p = p3.parse();
 //                cCode = p3p.toC();
 
-                System.out.println("-----------------");
+               //  System.out.println("-----------------");
             } catch (Throwable e) {
                 int test;
                 e.printStackTrace(System.out);
@@ -155,16 +157,8 @@ public class Parser {
             ArrayList<FunctionDefinition> functions = new ArrayList<>();
             functions.addAll(program.getFunctions());
             if (module == null || module.isEmpty()) {
-                FunctionDefinition main = program.getFunctionIfExists(null, "", "main", 0);
-                if (main != null) {
-                    // move "main" to the end, so a range function is parsed first
-                    // (this is only needed if we support custom range functions)
-                    functions.remove(main);
-                    functions.add(main);
-                    if (main.returnType != null) {
-                        syntaxError("The 'main' method may not return a value; use org.bau.Env.exit instead");
-                    }
-                }
+                // macros first, then _init (for global variables), then all others
+                functions.sort(new FunctionComparator());
             }
             for (FunctionDefinition def : functions) {
                 // the function could be compiled in the meantime (constants)
@@ -172,9 +166,13 @@ public class Parser {
                 if (def.code != null) {
                     String f = def.format();
                     Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
+                    if (module.isEmpty() && def.getFullName().name.equals("_init")) {
+                        // variables are global
+                        p.isGlobalScope = true;
+                    }
                     functionContext.reset(def.getFullName());
                     p.functionContext = functionContext;
-                    p.scanPhase = false;
+                    p.setScanPhase(false);
                     p.parse();
                 }
             }
@@ -187,7 +185,7 @@ public class Parser {
                     Parser p = new Parser(program, def.getFullName().module, f, def.posOffset);
                     functionContext.reset(def.getFullName());
                     p.functionContext = functionContext;
-                    p.scanPhase = false;
+                    p.setScanPhase(false);
                     p.parse();
                 }
             }
@@ -197,6 +195,24 @@ public class Parser {
                     program.removeFunction(main);
                     program.mainList.addAll(main.list);
                     program.autoClose = main.autoClose;
+                }
+            }
+            if (module == null || module.isEmpty()) {
+                FunctionDefinition init = program.getFunctionIfExists(null, "", "_init", 0);
+                if (init != null) {
+                    program.removeFunction(init);
+                    ArrayList<Statement> list = init.list;
+                    boolean toMain = false;
+                    for (Statement s : list) {
+                        if (isAction(s)) {
+                            toMain = true;
+                        }
+                        if (toMain) {
+                            program.mainList.add(s);
+                        } else {
+                            program.initList.add(s);
+                        }
+                    }
                 }
             }
         }
@@ -216,6 +232,31 @@ public class Parser {
             }
         }
         return prog;
+    }
+
+    private static class FunctionComparator implements Comparator<FunctionDefinition> {
+
+        @Override
+        public int compare(FunctionDefinition o1, FunctionDefinition o2) {
+            int t1 = type(o1);
+            int t2 = type(o2);
+            if (t1 != t2) {
+                return Integer.compare(t1, t2);
+            }
+            return o1.getFunctionId().compareTo(o2.getFunctionId());
+        }
+
+        private static int type(FunctionDefinition f) {
+            if (f.forLoop) {
+                return 0;
+            } else if (f.macro) {
+                return 1;
+            } else if (f.getFullName().module.equals("") && f.getFullName().name.equals("_init")) {
+                return 2;
+            }
+            return 3;
+        }
+
     }
 
     private void syntaxError(String message, Exception e) {
@@ -238,7 +279,7 @@ public class Parser {
     }
 
     private Program parseProgram() {
-        boolean mainStatements = false;
+        boolean hasAction = false;
         while (true) {
             try {
                 while (matchOp(";") || matchOp("\n")) {
@@ -248,36 +289,52 @@ public class Parser {
                     break;
                 }
                 if (parseFunctionDefinition(module)) {
-                    mainStatements = true;
                     // ok
                 } else if (parseTypeDefinition(module)) {
-                    mainStatements = true;
                     // ok
                 } else if (parseTraitDefinition(module)) {
-                    mainStatements = true;
                     // ok
                 } else if (parseImport()) {
                     int separateLoopAtBeginning;
-                    mainStatements = true;
                     // ok
                 } else if (parseEnumDefinition()) {
-                    mainStatements = true;
                     // ok
                 } else {
                     if (!module.isEmpty()) {
                         isGlobalScope = true;
                         parseStatement(program.initList);
-                    } else if (mainStatements && program.getFunctionIfExists(null, "", "main", 0) == null) {
-                        // there is no main yet: we thread the statements as a main function
+                    } else if (scanPhase) {
                         pos = lastPos;
-                        String mainCode = parseBlock(-1);
-                        FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
-                        def.code = Statement.indent(mainCode);
-                        program.addFunction(def);
+                        initCode += parseBlock(-1);
                     } else {
                         isGlobalScope = true;
-                        parseStatement(program.initList);
+                        ArrayList<Statement> list = new ArrayList<>();
+                        parseStatement(list);
+                        if (!module.isEmpty()) {
+                            if (hasAction(list)) {
+                                syntaxError("Only the unnamed module may have top-level actions");
+                            }
+                        } else {
+                            if (hasAction(list)) {
+                                hasAction = true;
+                            }
+                            if (hasAction) {
+                                program.mainList.addAll(list);
+                            } else {
+                                program.initList.addAll(list);
+                            }
+                        }
                     }
+
+                    // there is no main yet: we thread the statements as a main function
+//                                            FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
+//                                            def.code = Statement.indent(mainCode);
+//                                            program.addFunction(def);
+
+
+
+
+
                 }
             } catch (IllegalStateException e) {
                 if (e.getMessage() == null) {
@@ -287,8 +344,69 @@ public class Parser {
                 }
             }
         }
+        if (scanPhase && !initCode.isEmpty()) {
+            FunctionDefinition init = new FunctionDefinition(new FullName("", "_init"), pos);
+            init.code = Statement.indent(initCode);
+            program.addFunction(init);
+
+//            if (program.getFunctionIfExists(null, "", "main", 0) != null) {
+//                syntaxError("Only the unnamed module may have top-level actions");
+//            }
+
+//            ArrayList<Statement> list = new ArrayList<>();
+//            parseStatement(list);
+//            if (!module.isEmpty()) {
+//                if (hasAction(list)) {
+//                    syntaxError("Only the unnamed module may have top-level actions");
+//                }
+//            } else {
+//                if (hasAction(list)) {
+//                    hasAction = true;
+//                }
+//                if (hasAction) {
+//                    program.mainList.addAll(list);
+//                } else {
+//                    program.initList.addAll(list);
+//                }
+//            }
+//
+//            FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
+//          def.code = Statement.indent(mainCode);
+//          program.addFunction(def);
+
+//            Parser p = new Parser(program, module, initCode, 0);
+//            p.setScanPhase(false);
+//            p.read();
+//            p.parseProgram();
+        }
         program.autoClose = autoClose(0, null);
         return program;
+    }
+
+    private static boolean isAction(Statement s) {
+        if (s instanceof Assignment) {
+            Assignment a = (Assignment) s;
+            if (a.initial) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean hasAction(ArrayList<Statement> list) {
+        // possibly switch to action mode
+        // (eg. "for" loops have assignment and a loop, so we need to check all statements)
+        for (Statement s : list) {
+            if (s instanceof Assignment) {
+                Assignment a = (Assignment) s;
+                if (!a.initial) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean parseImport() {
@@ -577,7 +695,7 @@ public class Parser {
 
     private String parseBlock(int defIndent) {
         int pos = lastPos;
-        while (text.charAt(pos) != '\n') {
+        while (pos >= 0 && text.charAt(pos) != '\n') {
             pos--;
         }
         pos++;
@@ -590,6 +708,12 @@ public class Parser {
             }
             if (type == TokenType.END || indent <= defIndent) {
                 break;
+            }
+            if (defIndent < 0 && indent == 0 && lastPos > 0 && text.charAt(lastPos - 1) =='\n') {
+                // special case: parse the global block
+                if ("type".equals(token) || "fun".equals(token) || "enum".equals(token) || "import".equals(token)) {
+                    break;
+                }
             }
             read();
         }
@@ -653,6 +777,12 @@ public class Parser {
         if (!match("fun")) {
             return false;
         }
+        boolean macro = false, forLoop = false;
+        if (match("macro")) {
+            macro = true;
+        } else if (match("for")) {
+            forLoop = true;
+        }
         if (functionContext.getStackPos() != 0) {
             // TODO currently we do parse functions while parsing functions...
             // throw new IllegalStateException();
@@ -660,7 +790,7 @@ public class Parser {
         String comment = lastComment;
         currentLoop = null;
         int defIndent = indent;
-        isGlobalScope = false;
+        //isGlobalScope = false;
         int stackPos = functionContext.getStackPos();
         DataType callType;
         String id = null;
@@ -704,7 +834,7 @@ public class Parser {
             if (!matchOp(".")) {
                 syntaxError("Expected '.' after the type, got '" + token + "'");
             }
-            parseTypeFunctionTemplate(defIndent, callType);
+            parseTypeFunctionTemplate(defIndent, callType, macro);
             return true;
         }
         if (callType != null) {
@@ -746,6 +876,8 @@ public class Parser {
             functionContext.addVariable(thisVar);
         }
         FunctionDefinition def = new FunctionDefinition(new FullName(module, name), startParse);
+        def.macro = macro;
+        def.forLoop = forLoop;
         def.setLocation(sourceFile, location);
         def.callType = ct;
         if (thisVar != null ) {
@@ -947,9 +1079,6 @@ public class Parser {
         if (match("const")) {
             def.constExpr = true;
         }
-        if (match("macro")) {
-            def.macro = true;
-        }
         if (itType != null && !def.macro) {
             syntaxError("Types on 'it' parameters are only allowed in macros");
         }
@@ -986,7 +1115,7 @@ public class Parser {
         return template;
     }
 
-    private void parseTypeFunctionTemplate(int defIndent, DataType t) {
+    private void parseTypeFunctionTemplate(int defIndent, DataType t, boolean macro) {
         String comment = lastComment;
         int start = lastPos;
         // read to end of the line
@@ -1000,7 +1129,11 @@ public class Parser {
         String functionName = text.substring(start, lastPos).trim();
         String code = parseBlock(defIndent);
         StringBuilder buff = new StringBuilder();
-        buff.append("fun ").append(t.name());
+        buff.append("fun ");
+        if (macro) {
+            buff.append("macro ");
+        }
+        buff.append(t.name());
         for (String p : t.parameters) {
             buff.append("_@@").append(p + "_").append("@@");
         }
@@ -1190,7 +1323,7 @@ public class Parser {
             code = "type " + typeId + "\n" + code;
             try {
                 Parser p = new Parser(program, module, code, t.posOffset);
-                p.scanPhase = false;
+                p.setScanPhase(false);
                 p.read();
                 p.parseTypeDefinition(t.module());
                 while (p.type != TokenType.END) {
@@ -2162,7 +2295,7 @@ public class Parser {
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code, template.posOffset);
-                    p.scanPhase = false;
+                    p.setScanPhase(false);
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, template.getFullName().name, template.parameters.size());
@@ -2294,7 +2427,7 @@ public class Parser {
                 code = header.trim() + "\n" + code;
                 try {
                     Parser p = new Parser(program, module, code, template.posOffset);
-                    p.scanPhase = false;
+                    p.setScanPhase(false);
                     p.read();
                     p.parseFunctionDefinition(module);
                     call.def = functionContext.getFunctionIfExists(type, currentFunctionDefinition, module, fullName, call.args.size());
@@ -3030,7 +3163,6 @@ public class Parser {
         functionContext.addVariable(var);
         ArrayList<Statement> loopFunctionList = new ArrayList<>();
         loopFunctionList.addAll(functionDef.list);
-
         List<Variable> localVars = functionDef.getDeclaredVariables();
         Variable itVar = null;
         for (Variable v : localVars) {
@@ -3058,10 +3190,6 @@ public class Parser {
                 }
             }
         }
-
-
-
-
         Loop loop = new Loop();
         int i = 0;
         Variable old = new Variable("_", call.def.returnType);
@@ -3123,6 +3251,10 @@ public class Parser {
         currentLoop = loop;
         startBlock(true, loop.condition);
         int j = 0;
+if (whileLoop == null) {
+    System.out.println();
+    ; int test;
+}
         for (; j < whileLoop.size(); j++) {
             Statement s = whileLoop.get(j);
             if (s instanceof Return) {
@@ -3567,7 +3699,7 @@ public class Parser {
                         if (def.code != null) {
                             try {
                                 Parser p = new Parser(program, def.getFullName().module, def.format(), def.posOffset);
-                                p.scanPhase = false;
+                                p.setScanPhase(false);
                                 p.read();
                                 p.parseFunctionDefinition(def.getFullName().module);
                             } catch (IllegalStateException e) {

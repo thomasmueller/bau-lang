@@ -35,6 +35,7 @@ public class FunctionDefinition implements Section {
     public boolean varArgs;
     public boolean constExpr;
     public boolean macro;
+    public boolean forLoop;
     public String template;
     public String header;
     public String code;
@@ -321,6 +322,11 @@ public class FunctionDefinition implements Section {
             buff.append("\n##\n");
         }
         buff.append("fun ");
+        if (macro) {
+            buff.append("macro ");
+        } else if (forLoop) {
+            buff.append("for ");
+        }
         if (callType != null) {
             buff.append(callType.format()).append('.');
         }
@@ -349,9 +355,6 @@ public class FunctionDefinition implements Section {
         buff.append(")");
         if (constExpr) {
             buff.append(" const");
-        }
-        if (macro) {
-            buff.append(" macro");
         }
         if (returnType != null) {
             buff.append(' ');

@@ -352,6 +352,9 @@ double PI;
 double E;
 double LOG10;
 double LOG2;
+int64_t a;
+int64_t b;
+org_bau_DateTime_dateTime c;
 int64_t int_1(int64_t x) {
     return x;
 }
@@ -563,27 +566,26 @@ void _main() {
     E = 2.718281828459045;
     LOG10 = 2.302585092994046;
     LOG2 = 0.6931471805599453;
-    int64_t a = org_bau_DateTime_getNanoTime_0();
+    a = org_bau_DateTime_getNanoTime_0();
     printf("%lld\n", (long long)a);
-    int64_t b = org_bau_DateTime_getNanoTime_0();
+    b = org_bau_DateTime_getNanoTime_0();
     printf("%lld\n", (long long)a);
-    org_bau_DateTime_dateTime c = org_bau_DateTime_getDateTime_0();
+    c = org_bau_DateTime_getDateTime_0();
     printf("%d-%lld-%lld %lld:%lld:%lld.%lld\n", c.year, (long long)c.month, (long long)c.day, (long long)c.hour, (long long)c.minute, (long long)c.second, (long long)c.millis);
-    int64_t _t45 = org_bau_DateTime_getNanoTime_0();
-    org_bau_Utils_setRandomSeed_1(_t45);
-    int64_t _t46 = org_bau_Utils_random_0();
-    printf("%lld\n", (long long)_t46);
+    int64_t _t0 = org_bau_DateTime_getNanoTime_0();
+    org_bau_Utils_setRandomSeed_1(_t0);
+    int64_t _t1 = org_bau_Utils_random_0();
+    printf("%lld\n", (long long)_t1);
     printf("%.9f\n", 3.141592653589793);
     while (1 == 1) {
         int64_t i = 2;
         while (i < 4) {
-            double _t47 = org_bau_Math_sqrt_1(i);
-            printf("%.9f\n", _t47);
+            double _t2 = org_bau_Math_sqrt_1(i);
+            printf("%.9f\n", _t2);
             i = i + 1;
         }
         break;
     }
-    org_bau_DateTime_dateTime_free(&c);
     _end();
 }
 /*

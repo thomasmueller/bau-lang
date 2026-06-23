@@ -30,8 +30,8 @@ The following will print `0`, `1`, `2`, `3`, and `4`:
 
     for i := until(5)
         println('i: ' i)
-    for i := range(0, 5)
-        println('i: ' i)
+    for j := range(0, 5)
+        println('j: ' j)
 
 ### When (Ternary Expression)
 
@@ -77,7 +77,7 @@ The `debug` macro prints the expression value, source code, and variable values 
 Macros can be used to generate SQL queries,
 and access databases in a type-safe way. 
 
-    import org.bau.db.Sqlite3
+     import org.bau.db.Sqlite3
         Sqlite
         Record
         text
@@ -134,7 +134,7 @@ For this purpose, a `pair` type can be used:
         for p := pairs(array)
             println('index-value-pairs #' p.i ' = ' p.value)
 
-    fun elements(array T[]) T
+    fun for elements(array T[]) T
         if array.len
             i := 0..array.len
             loop
@@ -148,12 +148,12 @@ For this purpose, a `pair` type can be used:
         value T
     
     fun newPair(value T, index int) pair(T)
-        result : pair(T)()
+        result : pair(T)
         result.value = value
         result.i = index
         return result
     
-    fun pairs(array T[]) pair(T)
+    fun for pairs(array T[]) pair(T)
         if array.len
             i := 0..array.len
             loop
@@ -167,7 +167,7 @@ For this purpose, a `pair` type can be used:
 Macros are implemented like regular functions, by adding `macro`.
 Generic types are supported. Example:
 
-    fun when(condition int, a T, b T) const macro T
+    fun macro when(condition int, a T, b T) const T
         if condition
             return a
         else
@@ -186,7 +186,9 @@ In a macro, additional fields are available for each parameter:
 
 Example:
 
-    fun assert(x int) macro
+    import org.bau.Env
+    
+    fun macro assert(x int)
         if not x
             source : x.source
             line : x.line
@@ -205,7 +207,7 @@ When calling a macro, a variable named `it` is available, if the macro defines t
 This is useful to eg. iterate over elements. 
 As an example, if a function or operation should be applied to each element of an array:
 
-    fun int[] mapInt(value int) macro int[]
+    fun macro int[].mapInt(value int) int[]
         result : int[this.len]
         i := 0
         while i < this.len
@@ -226,7 +228,7 @@ if it is different from the type of the variable (`value` for the case above):
 
     import org.bau.Math
 
-    fun int[] mapIntToFloat(value(int) float) macro float[]
+    fun macro int[].mapIntToFloat(value(int) float) float[]
         result : float[this.len]
         i := 0
         while i < this.len

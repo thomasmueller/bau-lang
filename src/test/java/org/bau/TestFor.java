@@ -13,15 +13,15 @@ public class TestFor {
         try {
             new Parser("""
     fun test()
-      a := 1
-      break
+        a := 1
+        break
     test()
                     """).parse();
             fail();
         } catch (IllegalStateException e) {
             assertEquals("'break' statement outside of a loop at line 3:\n"
-                    + "  break\n"
-                    + "       ^\n", e.getMessage());
+                    + "    break\n"
+                    + "         ^\n", e.getMessage());
         }
     }
 
@@ -36,13 +36,13 @@ loop 1 == 1
     break
                 """,
                 new Parser("""
-fun range(from int, to int) int
-  _ := from
-  loop _ < to
-    return _
-    _ += 1
+fun for range(from int, to int) int
+    _ := from
+    loop _ < to
+        return _
+        _ += 1
 for a := range(0, 10)
-  println(a)
+    println(a)
                         """).parse().format());
     }
 

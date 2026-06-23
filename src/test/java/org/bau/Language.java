@@ -1495,5 +1495,4 @@ https://github.com/madler/zlib/blob/develop/contrib/puff/puff.c
 
  */
 public class Language {
-
 }

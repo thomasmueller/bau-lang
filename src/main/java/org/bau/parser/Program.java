@@ -448,10 +448,6 @@ public class Program {
 
     public String toC() {
         resolveTypes();
-        if (!initList.isEmpty()) {
-            int test;
-            System.out.println("INIT LIST: " + initList);
-        }
         for (Statement s : initList) {
             s.used(this);
         }

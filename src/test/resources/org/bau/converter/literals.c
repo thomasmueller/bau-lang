@@ -322,9 +322,6 @@ void _main() {
     _incUseStack(string_1002);
     F = string_1002;
     G = -1.23E-45;
-    _decUseStack(F, i8_array);
-    _decUseStack(E, i8_array);
-    _decUseStack(D, i8_array);
     _decUseStack(D, i8_array);
     _decUseStack(E, i8_array);
     _decUseStack(F, i8_array);

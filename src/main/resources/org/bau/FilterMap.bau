@@ -13,7 +13,7 @@ fun FilterMap(T).in(list List(T)) FilterMap(T)
     this.list = list
     return this
 
-fun FilterMap(T).where(condition(T) int) macro FilterMap(T)
+fun macro FilterMap(T).where(condition(T) int) FilterMap(T)
     result : List(T)
     result.array = T[list.size]
     i := 0
@@ -25,7 +25,7 @@ fun FilterMap(T).where(condition(T) int) macro FilterMap(T)
     this.list = result        
     return this
 
-fun FilterMap(T).map(expression(T) U) macro FilterMap(U)
+fun macro FilterMap(T).map(expression(T) U) FilterMap(U)
     result : List(U)
     result.array = U[list.size]
     i := 0

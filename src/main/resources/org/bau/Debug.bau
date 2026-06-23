@@ -1,6 +1,6 @@
 # module org.bau.Debug
 
-fun debug(x T) macro T
+fun macro debug(x T) T
     source : x.source
     line : x.line
     values : x.values
