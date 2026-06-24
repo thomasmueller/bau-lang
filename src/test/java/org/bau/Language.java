@@ -5,6 +5,9 @@ package org.bau;
 Name: Lei, Kuona, Mya, Pha, Tau (Anouk), Atlas, Soma (Anouk2), Twelve, Ro
 https://github.com/NicoNex/tau
 
+ModuleTest.circularImport
+disallow circular imports at compile time?
+
 barrier mechanism: implement, check advantages & disadvantages, check if other languages support it
 
 Parser2-based formatter

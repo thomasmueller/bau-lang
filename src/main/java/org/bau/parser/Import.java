@@ -8,7 +8,6 @@ public class Import implements Section {
 
     private final String moduleName;
     private final String moduleIdentifier;
-    private String module;
     private ArrayList<Variable> symbols = new ArrayList<>();
 
     public Import(String name, String id) {
@@ -17,14 +16,17 @@ public class Import implements Section {
     }
 
     public void setLocation(SourceFile sourceFile, int location) {
-        this.module = sourceFile.getModule();
         sourceFile.setLocation(location, this);
     }
 
     public void addSymbol(String entry, int location) {
-        Variable var = new Variable(entry, DataType.UNKNOWN);
-        var.setLocation(module, location);
+        Variable var = new Variable(moduleName, entry, false, DataType.UNKNOWN);
+        var.setLocation(moduleName, location);
         symbols.add(var);
+    }
+
+    public String getModuleName() {
+        return moduleName;
     }
 
     public String formatSource() {

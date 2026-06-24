@@ -31,6 +31,7 @@ import org.bau.parser.expr.Variable;
 import org.bau.parser.stmt.Assignment;
 import org.bau.parser.stmt.Break;
 import org.bau.parser.stmt.Catch;
+import org.bau.parser.stmt.Comment;
 import org.bau.parser.stmt.Continue;
 import org.bau.parser.stmt.Free;
 import org.bau.parser.stmt.If;
@@ -201,18 +202,7 @@ public class Parser {
                 FunctionDefinition init = program.getFunctionIfExists(null, "", "_init", 0);
                 if (init != null) {
                     program.removeFunction(init);
-                    ArrayList<Statement> list = init.list;
-                    boolean toMain = false;
-                    for (Statement s : list) {
-                        if (isAction(s)) {
-                            toMain = true;
-                        }
-                        if (toMain) {
-                            program.mainList.add(s);
-                        } else {
-                            program.initList.add(s);
-                        }
-                    }
+                    program.initList.addAll(init.list);
                 }
             }
         }
@@ -305,15 +295,19 @@ public class Parser {
                         parseStatement(program.initList);
                     } else if (scanPhase) {
                         pos = lastPos;
+                        if (initCode.trim().length() > 0) {
+                            syntaxError("Only one init block is allowed");
+                        }
                         initCode += parseBlock(-1);
                     } else {
                         isGlobalScope = true;
                         ArrayList<Statement> list = new ArrayList<>();
                         parseStatement(list);
                         if (!module.isEmpty()) {
-                            if (hasAction(list)) {
-                                syntaxError("Only the unnamed module may have top-level actions");
-                            }
+                            program.initList.addAll(list);
+//                            if (hasAction(list)) {
+//                                syntaxError("Only the unnamed module may have top-level actions");
+//                            }
                         } else {
                             if (hasAction(list)) {
                                 hasAction = true;
@@ -410,10 +404,12 @@ public class Parser {
     }
 
     private boolean parseImport() {
+        int startParse = lastPos;
         if (!match("import")) {
             return false;
         }
         String id = readIdentifier();
+        int location = lastPos - id.length();
         String name = id;
         while (matchOp(".")) {
             id = readIdentifier();
@@ -429,10 +425,14 @@ public class Parser {
         }
         int oldIndent = indent;
         readEndOfStatement();
+        Import importStmt = new Import(name, id);
+        importStmt.setLocation(sourceFile, location);
         ArrayList<String> entries = new ArrayList<>();
         while (indent > oldIndent) {
             if (!matchOp("\n")) {
                 String entry = readIdentifier();
+                int locationSymbol = lastPos - entry.length();
+                importStmt.addSymbol(entry, locationSymbol);
                 readEndOfStatement();
                 if (!module.equals(program.getModulePathForSymbol(module, entry))) {
                     syntaxError("Duplicate import for symbol '" + entry + "'");
@@ -440,6 +440,7 @@ public class Parser {
                 entries.add(entry);
             }
         }
+        program.getSourceFile(module).addImportStatement(importStmt, program);
         if (program.getModulePath(module, id) != null) {
             syntaxError("Duplicate import for module alias '" + id + "'; need to use an alias");
         }

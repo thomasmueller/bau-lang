@@ -184,7 +184,7 @@ public class Parser2 {
                 readEndOfStatement();
             }
         }
-        getSourceFile().addImportStatement(importStmt);
+        getSourceFile().addImportStatement(importStmt, program);
         getSourceFile().addImport(name, id, symbolList);
         getSourceFile().addSection(startParse, importStmt);
         return true;

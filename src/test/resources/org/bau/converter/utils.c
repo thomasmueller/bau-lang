@@ -586,6 +586,7 @@ void _main() {
         }
         break;
     }
+    org_bau_DateTime_dateTime_free(&c);
     _end();
 }
 /*

@@ -3,7 +3,10 @@ package org.bau.parser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -33,6 +36,7 @@ public class SourceFile {
     private boolean imported;
     private int errorCount;
     private Comment headerComment;
+    private ArrayList<String> importedModules = new ArrayList<>();
     private ArrayList<Import> importStatements = new ArrayList<>();
     // global variables (or constants) in modules
     private LinkedHashMap<String, Variable> globalVariables = new LinkedHashMap<>();
@@ -66,8 +70,40 @@ public class SourceFile {
         return fileId;
     }
 
-    public void addImportStatement(Import importStmt) {
+    public List<String> getImportedModules() {
+        return importedModules;
+    }
+
+    public void addImportStatement(Import importStmt, Program program) {
+        String module = importStmt.getModuleName();
+        if (canReachImport(program, module, this.module, new HashSet<>())) {
+            syntaxError(0, "Import cycle detected when importing " + module + " in " + this.module);
+        }
+        if (!importedModules.contains(importStmt.getModuleName())) {
+            importedModules.add(importStmt.getModuleName());
+        }
         importStatements.add(importStmt);
+    }
+
+    private boolean canReachImport(Program program, String currentModule, String goal, Set<String> visited) {
+        if (currentModule.equals(goal)) {
+            return true;
+        }
+        if (visited.contains(currentModule)) {
+            return false;
+        }
+        visited.add(currentModule);
+        SourceFile sf = program.getSourceFile(currentModule);
+        if (sf == null) {
+            return false;
+        }
+        List<String> imports = sf.getImportedModules();
+        for (String neighbor : imports) {
+            if (canReachImport(program, neighbor, goal, visited)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // eg. import com.acme.collections: acmeCollections { List; sort }

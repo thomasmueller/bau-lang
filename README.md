@@ -1,11 +1,12 @@
 # The Bau Programming Language
 
 Bau is an open-source programming language
-that is simple, concise, fast, and memory save.
+that is simple, concise, fast, and memory safe.
 Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>.
 
 ## News
 
+* 2026-06-24: Modules can have initialization code. Cycles in the imports are detected and disallowed.
 * 2026-06-07: Additional benchmark algorithm NBody.
 * 2026-05-08: Slightly faster array bounds checks (where needed).
 * 2026-05-01: <a href="docsrc/nanocc.md">NanoCC</a>: A tiny (250 lines) self-compiling compiler for a minimal C-like language. It can compile itself to WASM.
@@ -514,27 +515,6 @@ and borrow with `&`.
             result += r.nodeCount()
         return result
 
-### Exceptions
-
-`throw` throws an exception. `catch` is needed,
-or the function needs `throws`.
-Custom exception types are allowed.
-Unlike in other languages, there is no explicit 
-`try`: the scope of `catch` is the preceding block.
-
-    import org.bau.Exception
-        exception
-
-    fun square(x int) int throws exception
-        if x > 3_000_000_000
-            throw exception('Too big')
-        return x * x
-    
-    x := square(3_000_000_001)
-    println(x)
-    catch e
-        println(e.message)
-
 ### Modules and Import
 
 `import` allows using types and functions from a module.
@@ -558,7 +538,29 @@ the module identifier may then be omitted on usage:
 
 The module name must match the file path.
 For example, the module `com.acme.Math` refers to a file named `Math.bau`
-in the directory `com/acme`
+in the directory `com/acme`.
+Cycles in the imported file are not allows, to simplify initialization.
+
+### Exceptions
+
+`throw` throws an exception. `catch` is needed,
+or the function needs `throws`.
+Custom exception types are allowed.
+Unlike in other languages, there is no explicit 
+`try`: the scope of `catch` is the preceding block.
+
+    import org.bau.Exception
+        exception
+
+    fun square(x int) int throws exception
+        if x > 3_000_000_000
+            throw exception('Too big')
+        return x * x
+    
+    x := square(3_000_000_001)
+    println(x)
+    catch e
+        println(e.message)
 
 ### Custom Loops
 

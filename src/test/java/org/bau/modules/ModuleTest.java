@@ -13,6 +13,65 @@ import org.junit.Test;
 public class ModuleTest {
 
     @Test
+    public void circularImport() {
+        try {
+            HashMap<String, String> modules = new HashMap<>();
+            modules.put("com.acme.Math", """
+                    import com.acme.Utils
+                    println('Math init')
+                    fun square(x float) float
+                        println('square of')
+                        Utils.log(x)
+                        return x * x
+                    """);
+            modules.put("com.acme.Utils", """
+                    import com.acme.Math
+                    println('Utils init')
+                    fun log(x float)
+                        println(x)
+                    """);
+            new Parser(modules, """
+                    import com.acme.Math
+                    fun main()
+                        println(Math.square(2))
+                    """).parse();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage(), e.getMessage().indexOf("Import cycle detected") >= 0);
+        }
+    }
+
+    @Test
+    public void initThenMain() {
+        HashMap<String, String> modules = new HashMap<>();
+        Program prog = new Parser(modules, """
+                println('Hello')
+                fun main()
+                    println('World')
+                """).parse();
+        String s = prog.run();
+        assertEquals("Hello\nWorld\n", s);
+        // verify that conversion works (this is not really a test)
+        prog.toC();
+    }
+
+    @Test
+    public void twoInitBlocks() {
+        try {
+            HashMap<String, String> modules = new HashMap<>();
+            new Parser(modules, """
+                    println('Hello')
+                    fun main()
+                        println('World')
+                    println('End')
+                    """).parse();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage(), e.getMessage().startsWith("Only one init block is allowed"));
+        }
+    }
+
+    @Test
     public void illegalModuleImports() {
         try {
             HashMap<String, String> modules = new HashMap<>();

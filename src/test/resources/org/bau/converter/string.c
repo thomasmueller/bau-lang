@@ -386,5 +386,7 @@ void _main() {
     _decUseStack(_t0, string_array);
     _decUseStack(y, string_array);
     string_free(&_t1);
+    string_free(&_t2);
+    string_free(&_t3);
     _end();
 }

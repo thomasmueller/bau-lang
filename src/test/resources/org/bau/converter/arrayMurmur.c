@@ -441,6 +441,10 @@ void _main() {
     i8_array* _t9 = hex_2(_t8, 8);
     printf("%.*s\n", _arrayLen(_t9), _t9->data);
     _decUseStack(_t1, i8_array);
+    _decUseStack(_t3, i8_array);
+    _decUseStack(_t5, i8_array);
+    _decUseStack(_t7, i8_array);
+    _decUseStack(_t9, i8_array);
     _end();
 }
 /*
