@@ -77,7 +77,7 @@ prevented. It is the task of the developer to prevent them where needed.
 To avoid cycles, explicitly set fields to <code>null</code>.</p>
 <h2 id="ownership">Ownership</h2>
 <p>Where speed is critical, use single ownership, by adding
-<code>+</code> to the type, and borrow with <code>&amp;</code>.</p>
+<code>owned</code> to the type, and borrow with <code>&amp;</code>.</p>
 <pre><code>type Tree owned
     left Tree?
     right Tree?

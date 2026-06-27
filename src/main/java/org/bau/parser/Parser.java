@@ -269,6 +269,25 @@ public class Parser {
     }
 
     private Program parseProgram() {
+        while (true) {
+            try {
+                while (matchOp("\n")) {
+                    // ignore
+                }
+                if (type == TokenType.END) {
+                    break;
+                }
+                if (!parseImport()) {
+                    break;
+                }
+            } catch (IllegalStateException e) {
+                if (e.getMessage() == null) {
+                    // exception already processed - ignore and continue
+                } else {
+                    throw e;
+                }
+            }
+        }
         boolean hasAction = false;
         while (true) {
             try {
@@ -283,10 +302,7 @@ public class Parser {
                 } else if (parseTypeDefinition(module)) {
                     // ok
                 } else if (parseTraitDefinition(module)) {
-                    // ok
-                } else if (parseImport()) {
-                    int separateLoopAtBeginning;
-                    // ok
+                    // ok                    // ok
                 } else if (parseEnumDefinition()) {
                     // ok
                 } else {
@@ -305,9 +321,6 @@ public class Parser {
                         parseStatement(list);
                         if (!module.isEmpty()) {
                             program.initList.addAll(list);
-//                            if (hasAction(list)) {
-//                                syntaxError("Only the unnamed module may have top-level actions");
-//                            }
                         } else {
                             if (hasAction(list)) {
                                 hasAction = true;
@@ -319,16 +332,6 @@ public class Parser {
                             }
                         }
                     }
-
-                    // there is no main yet: we thread the statements as a main function
-//                                            FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
-//                                            def.code = Statement.indent(mainCode);
-//                                            program.addFunction(def);
-
-
-
-
-
                 }
             } catch (IllegalStateException e) {
                 if (e.getMessage() == null) {
@@ -342,49 +345,9 @@ public class Parser {
             FunctionDefinition init = new FunctionDefinition(new FullName("", "_init"), pos);
             init.code = Statement.indent(initCode);
             program.addFunction(init);
-
-//            if (program.getFunctionIfExists(null, "", "main", 0) != null) {
-//                syntaxError("Only the unnamed module may have top-level actions");
-//            }
-
-//            ArrayList<Statement> list = new ArrayList<>();
-//            parseStatement(list);
-//            if (!module.isEmpty()) {
-//                if (hasAction(list)) {
-//                    syntaxError("Only the unnamed module may have top-level actions");
-//                }
-//            } else {
-//                if (hasAction(list)) {
-//                    hasAction = true;
-//                }
-//                if (hasAction) {
-//                    program.mainList.addAll(list);
-//                } else {
-//                    program.initList.addAll(list);
-//                }
-//            }
-//
-//            FunctionDefinition def = new FunctionDefinition(new FullName("", "main"), pos);
-//          def.code = Statement.indent(mainCode);
-//          program.addFunction(def);
-
-//            Parser p = new Parser(program, module, initCode, 0);
-//            p.setScanPhase(false);
-//            p.read();
-//            p.parseProgram();
         }
         program.autoClose = autoClose(0, null);
         return program;
-    }
-
-    private static boolean isAction(Statement s) {
-        if (s instanceof Assignment) {
-            Assignment a = (Assignment) s;
-            if (a.initial) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private boolean hasAction(ArrayList<Statement> list) {
@@ -404,7 +367,6 @@ public class Parser {
     }
 
     private boolean parseImport() {
-        int startParse = lastPos;
         if (!match("import")) {
             return false;
         }

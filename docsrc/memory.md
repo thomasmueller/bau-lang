@@ -62,7 +62,7 @@ To avoid cycles, explicitly set fields to `null`.
 ## Ownership
 
 Where speed is critical, use single ownership,
-by adding `+` to the type, and borrow with `&`.
+by adding `owned` to the type, and borrow with `&`.
 
     type Tree owned
         left Tree?
