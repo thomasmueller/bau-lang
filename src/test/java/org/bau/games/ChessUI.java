@@ -7,6 +7,8 @@ import org.jline.terminal.TerminalBuilder;
 
 public class ChessUI {
 
+    // java -cp target/test-classes:$HOME/.m2/repository/org/jline/jline/3.30.6/jline-3.30.6.jar org.bau.games.ChessUI
+
     public static void main(String... args) throws IOException {
         System.out.println("Chess");
         Terminal terminal = TerminalBuilder.builder().system(true).build();

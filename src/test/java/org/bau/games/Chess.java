@@ -9,6 +9,8 @@ public class Chess {
     int pawnMoved2;
     int turn;
 
+    boolean blackTurn;
+
     void init() {
         board[0] = board[7] = ROOK;
         board[1] = board[6] = KNIGHT;
@@ -21,6 +23,15 @@ public class Chess {
             board[i + 8] = PAWN + BLACK;
             board[i + 48] = PAWN;
         }
+    }
+
+    int findKing(boolean black) {
+        for (int i = 0; i < 64; i++) {
+            if (board[i] == KING + (black ? BLACK : 0)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     long negamax(boolean top, int depth, boolean black, long alpha, long beta) {
@@ -49,11 +60,17 @@ public class Chess {
                         continue;
                     }
                     long move = move(i, target);
-                    long score = -negamax(false, depth - 1, !black, -beta, -alpha);
-                    if (score > best) {
-                        bestMove = move;
-                        best = score;
-                        alpha = Math.max(alpha, score);
+
+                    // skip attacked king
+                    int kingPos = findKing(black);
+                    if (!isFieldAttacked(black, kingPos)) {
+                        long score = -negamax(false, depth - 1, !black, -beta, -alpha);
+                        if (score > best || bestMove == 0) {
+                            bestMove = move;
+                            best = score;
+                            alpha = Math.max(alpha, score);
+                        }
+
                     }
                     undo(move);
                     if (!top && best >= beta) {
@@ -61,6 +78,12 @@ public class Chess {
                     }
                 }
             }
+        }
+        if (bestMove == 0) {
+            if (isFieldAttacked(black, findKing(black))) {
+                return -1000000000;
+            }
+            return 0;
         }
         if (top) {
             return bestMove;
@@ -92,10 +115,12 @@ public class Chess {
                 sc = 10000000;
                 break;
             case QUEEN:
-                sc = 1000;
+                sc = Long.bitCount(getPossibleMoves(i, false));
+                sc += 1000;
                 break;
             case ROOK:
-                sc = 500;
+                sc = Long.bitCount(getPossibleMoves(i, false));
+                sc += 500;
                 break;
             case KNIGHT:
                 sc = Long.bitCount(getPossibleMoves(i, false));
@@ -168,9 +193,9 @@ public class Chess {
             if (pawnMoved2 / 8 == from / 8) {
                 // en passant
                 if (pawnMoved2 == from - 1) {
-                    result |= 1L << (from - 1);
+                    result |= 1L << (from - 1 + dir * 8);
                 } else if (pawnMoved2 == from + 1) {
-                    result |= 1L << (from + 1);
+                    result |= 1L << (from + 1 + dir * 8);
                 }
             }
             long capture = slide(from, maxDist, 1, dir);
@@ -245,6 +270,10 @@ public class Chess {
     }
 
     long move(int source, int target) {
+        return move(source, target, QUEEN);
+    }
+
+    long move(int source, int target, int promote) {
         turn++;
         long captured = board[target];
         long oldCastlingFlags = castlingFlags;
@@ -265,7 +294,7 @@ public class Chess {
             }
             if (target <= 7 || target >= 56) {
                 // promotion
-                board[target] = QUEEN + (isBlack ? BLACK : 0);
+                board[target] = promote + (isBlack ? BLACK : 0);
             }
             if (Math.abs(source - target) == 16) {
                 pawnMoved2 = target;

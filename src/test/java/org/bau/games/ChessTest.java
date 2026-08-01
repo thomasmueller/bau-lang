@@ -1,6 +1,7 @@
 package org.bau.games;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.bau.perf.Profiler;
 import org.junit.Test;
@@ -66,6 +67,31 @@ public class ChessTest {
     }
 
     @Test
+    public void noNullMove() {
+        Chess c = new Chess();
+        initBoard(c, ".......k ......pp ..p..... P....... P.....n. ...rqb.. ..P.N... ..R.K... ");
+        long move = c.negamax(true, 3, true, -Long.MAX_VALUE, Long.MAX_VALUE);
+        assertTrue(move != 0);
+    }
+
+    static void initBoard(Chess c, String b) {
+        for(int i=0, j=0; i<b.length(); i++) {
+            char ch = b.charAt(i);
+            if (ch == ' ') {
+                continue;
+            }
+            int p = 0;
+            if (ch < 'a') {
+                ch += 'a' - 'A';
+            } else {
+                p += Chess.BLACK;
+            }
+            p += " kqrbnp".indexOf("" + ch);
+            c.board[j++] = p;
+        }
+    }
+
+    @Test
     public void evaluate() {
         Chess c = new Chess();
         c.init();
@@ -75,7 +101,7 @@ public class ChessTest {
         c.board[1] = 0;
         assertEquals(822, c.evaluateBoard(false));
         c.board[2] = 0;
-        assertEquals(1152, c.evaluateBoard(false));
+        assertEquals(1149, c.evaluateBoard(false));
         c.board[3] = 0;
         assertEquals(2152, c.evaluateBoard(false));
         c.board[4] = 0;
@@ -92,11 +118,13 @@ public class ChessTest {
         c.board[6 * 8 + 4] = Chess.ROOK + Chess.BLACK;
         long move = c.negamax(true, 2, false, Long.MIN_VALUE, Long.MAX_VALUE);
         c.move(move);
-        assertEquals(" A:-------- B:P------- C:-------- D:-------- E:-------- F:-------- G:----k--- H:-------- castling:12 pawnMoved2:0", toString(c));
+        assertEquals(" A:-------- B:P------- C:-------- D:-------- E:-------- F:-------- G:----k--- H:-------- castling:12 pawnMoved2:0",
+                toString(c));
         c.undo(move);
         move = c.negamax(true, 3, false, Long.MIN_VALUE, Long.MAX_VALUE);
         c.move(move);
-        assertEquals(" A:-------- B:P------- C:-------- D:-------- E:-------- F:-------- G:----k--- H:-------- castling:12 pawnMoved2:0", toString(c));
+        assertEquals(" A:-------- B:P------- C:-------- D:-------- E:-------- F:-------- G:----k--- H:-------- castling:12 pawnMoved2:0",
+                toString(c));
     }
 
     @Test
@@ -117,7 +145,18 @@ public class ChessTest {
         c.move(6 * 8 + 7, 4 * 8 + 7);
         // print(c);
         long pawn = c.getPossibleMoves(4 * 8 + 6, false);
-        assertEquals("--------/--------/--------/--------/-------x/------x-/--------/--------/", ChessTest.toStringPossibleMove(pawn));
+        assertEquals("--------/--------/--------/--------/--------/------xx/--------/--------/", ChessTest.toStringPossibleMove(pawn));
+    }
+
+    @Test
+    public void enPassant2() {
+        Chess c = new Chess();
+        c.init();
+        c.move(1 * 8 + 3, 4 * 8 + 3);
+        c.move(6 * 8 + 4, 4 * 8 + 4);
+        // print(c);
+        long pawn = c.getPossibleMoves(4 * 8 + 3, false);
+        assertEquals("--------/--------/--------/--------/--------/---xx---/--------/--------/", ChessTest.toStringPossibleMove(pawn));
     }
 
     @Test
