@@ -74,23 +74,6 @@ public class ChessTest {
         assertTrue(move != 0);
     }
 
-    static void initBoard(Chess c, String b) {
-        for(int i=0, j=0; i<b.length(); i++) {
-            char ch = b.charAt(i);
-            if (ch == ' ') {
-                continue;
-            }
-            int p = 0;
-            if (ch < 'a') {
-                ch += 'a' - 'A';
-            } else {
-                p += Chess.BLACK;
-            }
-            p += " kqrbnp".indexOf("" + ch);
-            c.board[j++] = p;
-        }
-    }
-
     @Test
     public void evaluate() {
         Chess c = new Chess();
@@ -305,6 +288,174 @@ public class ChessTest {
         return buff.toString();
     }
 
+    @Test
+    public void testPerft() {
+        // https://joeyrobert.org/chessprogramming-wiki/Perft%20Results.html
+        // Position 2 (Kiwipete)
+        String fen = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
+        Chess chess = initBoardFromFen(fen);
+        assertEquals(48, countNodes(chess));
+        assertEquals(8, countCaptures(chess));
+        // Position 3
+        fen = "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -";
+        chess = initBoardFromFen(fen);
+        assertEquals(14, countNodes(chess));
+        assertEquals(1, countCaptures(chess));
+        // Position 4
+        fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+        chess = initBoardFromFen(fen);
+        assertEquals(6, countNodes(chess));
+        assertEquals(0, countCaptures(chess));
+        // Position 5
+        fen = "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8";
+        chess = initBoardFromFen(fen);
+        // 3 less, because we always promote to queen
+        assertEquals(41, countNodes(chess));
+    }
+
+    public static int countCaptures(Chess chess) {
+        int count = 0;
+        for (int i = 0; i < 64; i++) {
+            if (chess.board[i] == 0) {
+                continue;
+            }
+            if (Chess.isBlack(chess.board[i]) != chess.blackTurn) {
+                continue;
+            }
+            long moves = chess.getPossibleMoves(i, true);
+            // remove those where the king would be in check
+            for (int j = 0; j < 64; j++) {
+                if (((moves >>> j) & 1) == 0) {
+                    continue;
+                }
+                long move = chess.move(i, j);
+                int kingPos = chess.findKing(chess.blackTurn);
+                if (chess.isFieldAttacked(chess.blackTurn, kingPos)) {
+                    moves &= ~(1L << j);
+                }
+                chess.undo(move);
+            }
+            for (int j = 0; j < 64; j++) {
+                if (((moves >> j) & 1) == 1) {
+                    if (chess.board[j] != 0 && Chess.isBlack(chess.board[j]) != chess.blackTurn) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    public static int countNodes(Chess chess) {
+        int count = 0;
+        for (int i = 0; i < 64; i++) {
+            if (chess.board[i] == 0) {
+                continue;
+            }
+            if (Chess.isBlack(chess.board[i]) != chess.blackTurn) {
+                continue;
+            }
+            long moves = chess.getPossibleMoves(i, false);
+            if (moves == 0) {
+                continue;
+            }
+            // remove those where the king would be in check
+            for (int j = 0; j < 64; j++) {
+                if (((moves >>> j) & 1) == 0) {
+                    continue;
+                }
+                long move = chess.move(i, j);
+                int kingPos = chess.findKing(chess.blackTurn);
+                if (chess.isFieldAttacked(chess.blackTurn, kingPos)) {
+                    moves &= ~(1L << j);
+                }
+                chess.undo(move);
+            }
+            if (moves != 0) {
+                // System.out.println("from " + ChessUCI.field(i) + ": " + Long.bitCount(moves) + ": " + ChessTest.toStringPossibleMove(moves));
+                count += Long.bitCount(moves);
+            }
+        }
+        return count;
+    }
+
+    // set the board from a FEN notation
+    // see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+    public static Chess initBoardFromFen(String fen) {
+        Chess chess = new Chess();
+        int i = 0;
+        int x = 0, y = 0;
+        for (; i < fen.length(); i++) {
+            char c = fen.charAt(i);
+            if (c == ' ') {
+                break;
+            } else if (c >= '1' && c <= '8') {
+                x += c - '0';
+            } else if (c == '/') {
+                y++;
+                x = 0;
+            } else {
+                int p = piece(c);
+                chess.board[x + 8 * y] = p;
+                x++;
+            }
+        }
+        String[] parts = fen.split(" ");
+        String turn = parts[1];
+        if ("b".equals(turn)) {
+            chess.blackTurn = true;
+        } else if ("w".equals(turn)) {
+            chess.blackTurn = false;
+        } else {
+            throw new IllegalArgumentException("Invalid turn: " + fen);
+        }
+        String castling = parts[2];
+        chess.castlingFlags = 0xf;
+        if (castling.equals("-")) {
+            // none
+        } else {
+            for(char c : castling.toCharArray()) {
+                if (c == 'k') {
+                    chess.castlingFlags ^= 1 << 1;
+                } else if (c == 'K') {
+                    chess.castlingFlags ^= 1 << 3;
+                } else if (c == 'q') {
+                    chess.castlingFlags ^= 1 << 0;
+                } else if (c == 'Q') {
+                    chess.castlingFlags ^= 1 << 2;
+                } else {
+                    throw new IllegalArgumentException("Unsupported castling; only KQkq and -: " + fen);
+                }
+            }
+        }
+        String enPassant = parts[3];
+        if (!enPassant.equals("-")) {
+            throw new IllegalArgumentException("Unsupported en passant; only -: " + fen);
+        }
+        return chess;
+    }
+
+    static int piece(char ch) {
+        int p = 0;
+        if (ch < 'a') {
+            ch += 'a' - 'A';
+        } else {
+            p += Chess.BLACK;
+        }
+        p += " kqrbnp".indexOf("" + ch);
+        return p;
+    }
+
+    static void initBoard(Chess c, String b) {
+        for (int i = 0, j = 0; i < b.length(); i++) {
+            char ch = b.charAt(i);
+            if (ch == ' ') {
+                continue;
+            }
+            int p = piece(ch);
+            c.board[j++] = p;
+        }
+    }
 
     public static String toString(Chess c) {
         StringBuilder buff = new StringBuilder();

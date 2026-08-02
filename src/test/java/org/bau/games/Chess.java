@@ -79,14 +79,14 @@ public class Chess {
                 }
             }
         }
+        if (top) {
+            return bestMove;
+        }
         if (bestMove == 0) {
             if (isFieldAttacked(black, findKing(black))) {
                 return -1000000000;
             }
             return 0;
-        }
-        if (top) {
-            return bestMove;
         }
         return best;
     }
