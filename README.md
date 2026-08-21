@@ -6,6 +6,7 @@ Try it in the <a href="https://thomasmueller.github.io/bau-lang/">Playground</a>
 
 ## News
 
+* 2026-08-21: <a href="https://thomasmueller.github.io/bau-lang/chess.html">Chess ported to Javascript</a>.
 * 2026-06-24: Modules can have initialization code. Cycles in the imports are detected and disallowed.
 * 2026-06-07: Additional benchmark algorithm NBody.
 * 2026-05-08: Slightly faster array bounds checks (where needed).
@@ -21,7 +22,6 @@ For older changes see <a href="docsrc/changes.md">Change Log</a>
 ## Highlights
 
 * Easy to learn and use. Memory-safe.
-* <a href="docs/chess.html">Chess ported to Javascript</a>.
 * <a href="docsrc/conciseSyntax.md">Concise syntax inspired by Python</a>.
 * <a href="docsrc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * <a href="docsrc/memory.md">Memory management</a> using reference counting by default. Low memory usage; no GC pauses.

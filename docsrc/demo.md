@@ -6,7 +6,7 @@ that show how the code in this programming language looks like:
 ## Terminal Programs
 
 * <a href="../src/test/resources/org/bau/converter/chess.bau">Chess engine</a>
-  (a version of this <a href="docs/chess.html">chess engine ported to Javascipt, to play in a browser</a>)
+  (a version of this <a href="https://thomasmueller.github.io/bau-lang/chess.html">chess engine ported to Javascipt, to play in a browser</a>)
 * <a href="../src/test/resources/org/bau/converter/blockGame.bau">Falling block game</a>
 * <a href="../src/test/resources/org/bau/converter/textEditor.bau">Text editor</a>
 
