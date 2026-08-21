@@ -21,6 +21,7 @@ For older changes see <a href="docsrc/changes.md">Change Log</a>
 ## Highlights
 
 * Easy to learn and use. Memory-safe.
+* <a href="docs/chess.html">Chess ported to Javascript</a>.
 * <a href="docsrc/conciseSyntax.md">Concise syntax inspired by Python</a>.
 * <a href="docsrc/performance.md">High performance</a>. As fast as Rust where needed, using single ownership and borrowing.
 * <a href="docsrc/memory.md">Memory management</a> using reference counting by default. Low memory usage; no GC pauses.

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess</title>
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    background: #2b2b2b;
+    color: #eee;
+    font-family: system-ui, sans-serif;
+  }
+  h1 { margin: 4px 0; font-size: 1.4em; }
+  #status { min-height: 1.4em; font-size: 1.1em; }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: min(90vw, 520px);
+    height: min(90vw, 520px);
+    border: 3px solid #111;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .sq {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: min(9vw, 52px);
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+  }
+  .light { background: #eed8b6; }
+  .dark  { background: #8b5a3c; }
+  .white-piece { color: #fff; text-shadow: 0 0 2px #000, 0 0 4px #000; }
+  .black-piece { color: #111; text-shadow: 0 0 2px #888; }
+  .selected { outline: 4px solid #4da3ff; outline-offset: -4px; }
+  .last-move { box-shadow: inset 0 0 0 999px rgba(255, 235, 59, 0.35); }
+  .check-sq { box-shadow: inset 0 0 0 999px rgba(255, 0, 0, 0.45); }
+  .sq.target::after {
+    content: '';
+    position: absolute;
+    width: 28%;
+    height: 28%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.35);
+  }
+  .sq.target.has-piece::after {
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: inset 0 0 0 5px rgba(0, 0, 0, 0.4);
+  }
+  #controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  button, select {
+    font-size: 1em;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #444;
+    color: #eee;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.5; cursor: default; }
+  button:hover:not(:disabled), select:hover { background: #555; }
+</style>
+</head>
+<body>
+  <h1>Chess</h1>
+  <div id="status">White to move</div>
+  <div id="board"></div>
+  <div id="controls">
+    <button id="newGameBtn">New Game</button>
+    <button id="undoBtn">Undo</button>
+    <label>Difficulty
+      <select id="difficulty">
+        <option value="2">Easy</option>
+        <option value="3" selected>Medium</option>
+        <option value="4">Hard</option>
+      </select>
+    </label>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const KING = 1, QUEEN = 2, ROOK = 3, BISHOP = 4, KNIGHT = 5, PAWN = 6, BLACK = 6;
+
+  function isBlack(p) { return p > 6; }
+  function getPiece(p) { return p > 6 ? p - 6 : p; }
+  function popcount(x) { let c = 0n; while (x !== 0n) { x &= (x - 1n); c++; } return Number(c); }
+  function ntz(x) { let n = 0; while ((x & 1n) === 0n) { x >>= 1n; n++; } return n; }
+
+  class Chess {
+    init() {
+      this.board = new Array(64).fill(0);
+      this.castlingFlags = 0;
+      this.pawnMoved2 = 0;
+      this.turn = 0;
+      this.board[0] = this.board[7] = ROOK;
+      this.board[1] = this.board[6] = KNIGHT;
+      this.board[2] = this.board[5] = BISHOP;
+      this.board[3] = QUEEN;
+      this.board[4] = KING;
+      for (let i = 0; i < 8; i++) {
+        this.board[i + 56] = this.board[i];
+        this.board[i] += BLACK;
+        this.board[i + 8] = PAWN + BLACK;
+        this.board[i + 48] = PAWN;
+      }
+    }
+
+    findKing(black) {
+      for (let i = 0; i < 64; i++) {
+        if (this.board[i] === KING + (black ? BLACK : 0)) return i;
+      }
+      return -1;
+    }
+
+    negamax(top, depth, black, alpha, beta) {
+      let best = -Infinity;
+      let bestMove = 0n;
+      if (depth <= 0) {
+        best = this.evaluateBoard(black);
+        if (best >= beta || depth < -1) return best;
+      }
+      for (let phase = 0; phase <= 1; phase++) {
+        if (depth <= 0 && phase === 1) return best;
+        for (let i = 0; i < 64; i++) {
+          if (this.board[i] === 0 || isBlack(this.board[i]) !== black) continue;
+          let moves = this.getPossibleMoves(i, phase === 0);
+          while (moves !== 0n) {
+            const target = ntz(moves);
+            moves ^= (1n << BigInt(target));
+            const capture = this.board[target] !== 0;
+            if (capture !== (phase === 0)) continue;
+            const move = this.move(i, target);
+            const kingPos = this.findKing(black);
+            if (!this.isFieldAttacked(black, kingPos)) {
+              const score = -this.negamax(false, depth - 1, !black, -beta, -alpha);
+              if (score > best || bestMove === 0n) {
+                bestMove = move;
+                best = score;
+                alpha = Math.max(alpha, score);
+              }
+            }
+            this.undo(move);
+            if (!top && best >= beta) break;
+          }
+        }
+      }
+      if (top) return bestMove;
+      if (bestMove === 0n) {
+        if (this.isFieldAttacked(black, this.findKing(black))) return -1000000000;
+        return 0;
+      }
+      return best;
+    }
+
+    isFieldAttacked(black, pos) {
+      for (let i = 0; i < 64; i++) {
+        const b = this.board[i];
+        if (b === 0 || isBlack(b) === black) continue;
+        const moves = this.getPossibleMoves(i, true);
+        if (((moves >> BigInt(pos)) & 1n) === 1n) return true;
+      }
+      return false;
+    }
+
+    evaluateBoard(black) {
+      let sum = 0;
+      for (let i = 0; i < 64; i++) {
+        const b = this.board[i];
+        let sc = 0;
+        switch (getPiece(b)) {
+          case KING: sc = 10000000; break;
+          case QUEEN: sc = popcount(this.getPossibleMoves(i, false)); sc += 1000; break;
+          case ROOK: sc = popcount(this.getPossibleMoves(i, false)); sc += 500; break;
+          case KNIGHT: sc = popcount(this.getPossibleMoves(i, false)); sc += 320; break;
+          case BISHOP: sc = popcount(this.getPossibleMoves(i, false)); sc += 330; break;
+          case PAWN:
+            sc = 100;
+            if (this.turn > 40) sc += 1 << (isBlack(b) ? Math.floor(i / 8) - 1 : 6 - Math.floor(i / 8));
+            break;
+        }
+        if (isBlack(b) !== black) sc = -sc;
+        sum += sc;
+      }
+      return sum;
+    }
+
+    getPossibleMoves(from, attacksOnly) {
+      const b = this.board[from];
+      const p = getPiece(b);
+      const black = isBlack(b);
+      let maxDist = 1;
+      let result = 0n;
+      if (p === QUEEN || p === ROOK || p === BISHOP) maxDist = 7;
+      if (p === KING || p === QUEEN || p === BISHOP) {
+        result |= this.slide(from, maxDist, 1, 1);
+        result |= this.slide(from, maxDist, -1, -1);
+        result |= this.slide(from, maxDist, 1, -1);
+        result |= this.slide(from, maxDist, -1, 1);
+      }
+      if (p === KING || p === QUEEN || p === ROOK) {
+        result |= this.slide(from, maxDist, 1, 0);
+        result |= this.slide(from, maxDist, -1, 0);
+        result |= this.slide(from, maxDist, 0, 1);
+        result |= this.slide(from, maxDist, 0, -1);
+      }
+      if (p === KNIGHT) {
+        result |= this.slide(from, maxDist, 1, 2);
+        result |= this.slide(from, maxDist, 2, 1);
+        result |= this.slide(from, maxDist, -1, -2);
+        result |= this.slide(from, maxDist, -2, -1);
+        result |= this.slide(from, maxDist, 1, -2);
+        result |= this.slide(from, maxDist, 2, -1);
+        result |= this.slide(from, maxDist, -1, 2);
+        result |= this.slide(from, maxDist, -2, 1);
+      } else if (p === PAWN) {
+        const dir = black ? 1 : -1;
+        let dist = 1;
+        if (!attacksOnly) {
+          if (dir === 1 && Math.floor(from / 8) === 1 && this.board[from + 16] === 0) dist = 2;
+          if (dir === -1 && Math.floor(from / 8) === 6 && this.board[from - 16] === 0) dist = 2;
+          result |= this.slide(from, dist, 0, dir);
+          if (result !== 0n && this.board[from + dir * 8] !== 0) result = 0n;
+        }
+        if (Math.floor(this.pawnMoved2 / 8) === Math.floor(from / 8)) {
+          if (this.pawnMoved2 === from - 1) result |= 1n << BigInt(from - 1 + dir * 8);
+          else if (this.pawnMoved2 === from + 1) result |= 1n << BigInt(from + 1 + dir * 8);
+        }
+        let capture = this.slide(from, maxDist, 1, dir);
+        if (capture !== 0n && this.board[from + 1 + dir * 8] !== 0) result |= capture;
+        capture = this.slide(from, maxDist, -1, dir);
+        if (capture !== 0n && this.board[from - 1 + dir * 8] !== 0) result |= capture;
+      } else if (p === KING && !attacksOnly) {
+        const r = this.castlingFlags >>> (black ? 0 : 2);
+        if ((r & 3) !== 3 && !this.isFieldAttacked(black, from)) {
+          if ((r & 1) === 0 && !this.isFieldAttacked(black, from - 1)) {
+            let rook = this.slide(from - 4, 8, 1, 0);
+            rook >>= BigInt(from - 3);
+            if ((rook & 7n) === 7n) result |= 1n << BigInt(from - 2);
+          }
+          if ((r & 2) === 0 && !this.isFieldAttacked(black, from + 1)) {
+            let rook = this.slide(from + 3, 8, -1, 0);
+            rook >>= BigInt(from + 1);
+            if ((rook & 3n) === 3n) result |= 1n << BigInt(from + 2);
+          }
+        }
+      }
+      return result;
+    }
+
+    slide(from, maxDist, xo, yo) {
+      let x = from & 7;
+      let y = Math.floor(from / 8);
+      const black = isBlack(this.board[from]);
+      let result = 0n;
+      for (let i = 1; ; i++) {
+        x += xo; y += yo;
+        if (i > maxDist || x < 0 || x > 7 || y < 0 || y > 7) break;
+        const p = x + y * 8;
+        const b = this.board[p];
+        if (b !== 0) {
+          if (isBlack(b) !== black) result |= 1n << BigInt(p);
+          break;
+        }
+        result |= 1n << BigInt(p);
+      }
+      return result;
+    }
+
+    updateCastlingRights(pos) {
+      const p = this.board[pos];
+      if (getPiece(p) === ROOK) {
+        if ((pos & 7) === 0 || (pos & 7) === 7) {
+          const which = (pos & 7) === 0 ? 1 : 2;
+          this.castlingFlags |= which << (isBlack(p) ? 0 : 2);
+        }
+      }
+    }
+
+    move(...args) {
+      if (args.length === 1) {
+        const mv = args[0];
+        const source = Number((mv >> 16n) & 0xffn);
+        const target = Number((mv >> 8n) & 0xffn);
+        return this.move(source, target);
+      }
+      const [source, target, promote = QUEEN] = args;
+      this.turn++;
+      const captured = this.board[target];
+      const oldCastlingFlags = this.castlingFlags;
+      this.updateCastlingRights(source);
+      this.updateCastlingRights(target);
+      const piece = this.board[source];
+      this.board[target] = this.board[source];
+      const p = getPiece(piece);
+      const black = isBlack(this.board[source]);
+      this.board[source] = 0;
+      const oldPawnMoved = this.pawnMoved2;
+      this.pawnMoved2 = 0;
+      if (p === PAWN) {
+        const shift = (target & 7) - (source & 7);
+        if (shift !== 0 && captured === 0) {
+          this.board[source + shift] = 0;
+        }
+        if (target <= 7 || target >= 56) {
+          this.board[target] = promote + (black ? BLACK : 0);
+        }
+        if (Math.abs(source - target) === 16) this.pawnMoved2 = target;
+      } else if (p === KING) {
+        this.castlingFlags |= 3 << (black ? 0 : 2);
+        if (Math.abs((source & 7) - (target & 7)) > 1) {
+          if (target > source) { this.board[target - 1] = this.board[target + 1]; this.board[target + 1] = 0; }
+          else { this.board[target + 1] = this.board[target - 2]; this.board[target - 2] = 0; }
+        }
+      }
+      return (BigInt(piece) << 40n) | (BigInt(oldPawnMoved) << 32n) | (BigInt(captured) << 24n) | (BigInt(source) << 16n) | (BigInt(target) << 8n) | BigInt(oldCastlingFlags);
+    }
+
+    undo(move) {
+      this.turn--;
+      const piece = Number((move >> 40n) & 0xffn);
+      this.pawnMoved2 = Number((move >> 32n) & 0xffn);
+      const captured = Number((move >> 24n) & 0xffn);
+      const source = Number((move >> 16n) & 0xffn);
+      const target = Number((move >> 8n) & 0xffn);
+      this.castlingFlags = Number(move & 0xffn);
+      this.board[target] = captured;
+      this.board[source] = piece;
+      if (getPiece(piece) === KING) {
+        if (Math.abs((source & 7) - (target & 7)) > 1) {
+          if (target > source) { this.board[target + 1] = this.board[target - 1]; this.board[target - 1] = 0; }
+          else { this.board[target - 2] = this.board[target + 1]; this.board[target + 1] = 0; }
+        }
+      } else if (getPiece(piece) === PAWN) {
+        const shift = (target & 7) - (source & 7);
+        if (shift !== 0 && captured === 0) {
+          this.board[source + shift] = PAWN + (isBlack(piece) ? 0 : BLACK);
+        }
+      }
+    }
+  }
+
+  function legalTargetsFor(chess, from) {
+    const black = isBlack(chess.board[from]);
+    const targets = [];
+    let moves = chess.getPossibleMoves(from, false);
+    while (moves !== 0n) {
+      const target = ntz(moves);
+      moves ^= (1n << BigInt(target));
+      const mv = chess.move(from, target);
+      const safe = !chess.isFieldAttacked(black, chess.findKing(black));
+      chess.undo(mv);
+      if (safe) targets.push(target);
+    }
+    return targets;
+  }
+
+  function hasAnyLegalMove(chess, black) {
+    for (let i = 0; i < 64; i++) {
+      if (chess.board[i] === 0 || isBlack(chess.board[i]) !== black) continue;
+      if (legalTargetsFor(chess, i).length > 0) return true;
+    }
+    return false;
+  }
+
+  // ---------- UI ----------
+
+  const PIECE_CHAR = (b) => b === 0 ? '' : String.fromCodePoint(0x2654 + b - 1);
+
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const newGameBtn = document.getElementById('newGameBtn');
+  const undoBtn = document.getElementById('undoBtn');
+  const difficultySel = document.getElementById('difficulty');
+
+  const squares = [];
+  for (let i = 0; i < 64; i++) {
+    const x = i & 7, y = Math.floor(i / 8);
+    const div = document.createElement('div');
+    div.className = 'sq ' + ((x + y) % 2 === 0 ? 'light' : 'dark');
+    div.dataset.index = i;
+    div.addEventListener('click', () => onSquareClick(i));
+    boardEl.appendChild(div);
+    squares.push(div);
+  }
+
+  let chess = new Chess();
+  chess.init();
+  let selected = null;
+  let legalTargets = [];
+  let history = []; // {white, black}
+  let lastMoveFrom = -1, lastMoveTo = -1;
+  let gameOver = false;
+  let thinking = false;
+
+  function render() {
+    for (let i = 0; i < 64; i++) {
+      const el = squares[i];
+      const b = chess.board[i];
+      el.textContent = PIECE_CHAR(b);
+      el.classList.toggle('white-piece', b !== 0 && !isBlack(b));
+      el.classList.toggle('black-piece', b !== 0 && isBlack(b));
+      el.classList.toggle('selected', i === selected);
+      el.classList.toggle('last-move', i === lastMoveFrom || i === lastMoveTo);
+      el.classList.toggle('target', legalTargets.includes(i));
+      el.classList.toggle('has-piece', legalTargets.includes(i) && b !== 0);
+    }
+    const kingPos = chess.findKing(false);
+    squares.forEach((el, i) => el.classList.toggle('check-sq', false));
+    if (kingPos >= 0 && chess.isFieldAttacked(false, kingPos)) {
+      squares[kingPos].classList.add('check-sq');
+    }
+    const blackKingPos = chess.findKing(true);
+    if (blackKingPos >= 0 && chess.isFieldAttacked(true, blackKingPos)) {
+      squares[blackKingPos].classList.add('check-sq');
+    }
+    undoBtn.disabled = history.length === 0 || thinking;
+    newGameBtn.disabled = thinking;
+  }
+
+  function setStatus(text) {
+    statusEl.textContent = text;
+  }
+
+  function onSquareClick(idx) {
+    if (thinking || gameOver) return;
+    const piece = chess.board[idx];
+    if (selected === null) {
+      if (piece !== 0 && !isBlack(piece)) {
+        selected = idx;
+        legalTargets = legalTargetsFor(chess, idx);
+        render();
+      }
+      return;
+    }
+    if (legalTargets.includes(idx)) {
+      playerMove(selected, idx);
+      return;
+    }
+    if (piece !== 0 && !isBlack(piece)) {
+      selected = idx;
+      legalTargets = legalTargetsFor(chess, idx);
+      render();
+    } else {
+      selected = null;
+      legalTargets = [];
+      render();
+    }
+  }
+
+  function playerMove(from, to) {
+    const whiteMove = chess.move(from, to);
+    lastMoveFrom = from;
+    lastMoveTo = to;
+    selected = null;
+    legalTargets = [];
+    render();
+
+    if (!hasAnyLegalMove(chess, true)) {
+      history.push({ white: whiteMove, black: null });
+      gameOver = true;
+      const inCheck = chess.isFieldAttacked(true, chess.findKing(true));
+      setStatus(inCheck ? 'Checkmate — White wins!' : 'Stalemate — draw.');
+      render();
+      return;
+    }
+
+    const inCheck = chess.isFieldAttacked(true, chess.findKing(true));
+    setStatus(inCheck ? 'Black is in check. Thinking...' : 'Thinking...');
+    thinking = true;
+    render();
+
+    setTimeout(() => {
+      const depth = parseInt(difficultySel.value, 10);
+      const best = chess.negamax(true, depth, true, -Infinity, Infinity);
+      let blackMove = null;
+      if (best !== 0n) {
+        blackMove = chess.move(best);
+        const target = Number((best >> 8n) & 0xffn);
+        const source = Number((best >> 16n) & 0xffn);
+        lastMoveFrom = source;
+        lastMoveTo = target;
+      }
+      history.push({ white: whiteMove, black: blackMove });
+      thinking = false;
+
+      if (!hasAnyLegalMove(chess, false)) {
+        gameOver = true;
+        const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
+        setStatus(whiteInCheck ? 'Checkmate — Black wins!' : 'Stalemate — draw.');
+      } else {
+        const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
+        setStatus(whiteInCheck ? 'White is in check.' : 'White to move.');
+      }
+      render();
+    }, 30);
+  }
+
+  function newGame() {
+    chess = new Chess();
+    chess.init();
+    selected = null;
+    legalTargets = [];
+    history = [];
+    lastMoveFrom = -1;
+    lastMoveTo = -1;
+    gameOver = false;
+    thinking = false;
+    setStatus('White to move.');
+    render();
+  }
+
+  function undo() {
+    if (thinking || history.length === 0) return;
+    const round = history.pop();
+    if (round.black !== null) chess.undo(round.black);
+    chess.undo(round.white);
+    selected = null;
+    legalTargets = [];
+    gameOver = false;
+    lastMoveFrom = -1;
+    lastMoveTo = -1;
+    const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
+    setStatus(whiteInCheck ? 'White is in check.' : 'White to move.');
+    render();
+  }
+
+  newGameBtn.addEventListener('click', newGame);
+  undoBtn.addEventListener('click', undo);
+  render();
+})();
+</script>
+</body>
+</html>
