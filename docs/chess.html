@@ -22,8 +22,8 @@
   #status { min-height: 1.4em; font-size: 1.1em; }
   #board {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
     width: min(90vw, 520px);
     height: min(90vw, 520px);
     border: 3px solid #111;
