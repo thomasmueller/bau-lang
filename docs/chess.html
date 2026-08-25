@@ -41,7 +41,7 @@
   .light { background: #eed8b6; }
   .dark  { background: #8b5a3c; }
   .white-piece { color: #fff; text-shadow: 0 0 2px #000, 0 0 4px #000; }
-  .black-piece { color: #111; text-shadow: 0 0 2px #888; }
+  .black-piece { color: #000; text-shadow: 0 0 2px #ccc, 0 0 4px #ccc; }
   .selected { outline: 4px solid #4da3ff; outline-offset: -4px; }
   .last-move { box-shadow: inset 0 0 0 999px rgba(255, 235, 59, 0.35); }
   .check-sq { box-shadow: inset 0 0 0 999px rgba(255, 0, 0, 0.45); }
@@ -379,7 +379,7 @@
 
   // ---------- UI ----------
 
-  const PIECE_CHAR = (b) => b === 0 ? '' : String.fromCodePoint(0x2654 + b - 1);
+  const PIECE_CHAR = (b) => b === 0 ? '' : String.fromCodePoint(0x2659 + getPiece(b));
 
   const boardEl = document.getElementById('board');
   const statusEl = document.getElementById('status');
@@ -474,7 +474,7 @@
       history.push({ white: whiteMove, black: null });
       gameOver = true;
       const inCheck = chess.isFieldAttacked(true, chess.findKing(true));
-      setStatus(inCheck ? 'Checkmate — White wins!' : 'Stalemate — draw.');
+      setStatus(inCheck ? 'Checkmate — White wins!' : 'Stalemate — draw');
       render();
       return;
     }
@@ -501,10 +501,10 @@
       if (!hasAnyLegalMove(chess, false)) {
         gameOver = true;
         const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
-        setStatus(whiteInCheck ? 'Checkmate — Black wins!' : 'Stalemate — draw.');
+        setStatus(whiteInCheck ? 'Checkmate — Black wins!' : 'Stalemate — draw');
       } else {
         const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
-        setStatus(whiteInCheck ? 'White is in check.' : 'White to move.');
+        setStatus(whiteInCheck ? 'White is in check' : 'White to move');
       }
       render();
     }, 30);
@@ -520,7 +520,7 @@
     lastMoveTo = -1;
     gameOver = false;
     thinking = false;
-    setStatus('White to move.');
+    setStatus('White to move');
     render();
   }
 
@@ -535,7 +535,7 @@
     lastMoveFrom = -1;
     lastMoveTo = -1;
     const whiteInCheck = chess.isFieldAttacked(false, chess.findKing(false));
-    setStatus(whiteInCheck ? 'White is in check.' : 'White to move.');
+    setStatus(whiteInCheck ? 'White is in check' : 'White to move');
     render();
   }
 
